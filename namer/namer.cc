@@ -1063,7 +1063,8 @@ private:
         return symbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
+                                       bool willDeleteOldDefs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
         if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
@@ -1095,17 +1096,21 @@ private:
             singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
         }
 
-        // Reset resultType to nullptr for idempotency on the fast path--it will always be
-        // re-entered in resolver.
-        symbol.data(ctx)->resultType = nullptr;
-        singletonClass.data(ctx)->resultType = nullptr;
-        // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
-        // singletonClass to reset the <AttachedClass> type template to what it used to be.
-        // Is there a better way to accomplish this? (This is largely the same as the bad locs problem above;
-        // we can probably be more principled about what state calling `singletonClass` sets up/resets.)
-        auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
-        auto tp = singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
-        tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+        // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.
+        // Ideally, we would be able to make finalizeSymbols fast/incremental enough to run on all edits.
+        if (willDeleteOldDefs) {
+            // Reset resultType to nullptr for idempotency on the fast path--it will always be
+            // re-entered in resolver.
+            symbol.data(ctx)->resultType = nullptr;
+            singletonClass.data(ctx)->resultType = nullptr;
+            // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
+            // singletonClass to reset the <AttachedClass> type template to what it used to be.
+            // Is there a better way to accomplish this? (This is largely the same as the bad locs problem above;
+            // we can probably be more principled about what state calling `singletonClass` sets up/resets.)
+            auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+            auto tp = singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
+            tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+        }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later
         if (symbol == core::Symbols::root()) {
@@ -1507,13 +1512,13 @@ public:
     SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
         : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx) {
+    SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs) {
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());
 
         for (const auto &klass : foundDefs.klasses()) {
             state.definedClasses.emplace_back(
-                insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state, klass));
+                insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state, klass, willDeleteOldDefs));
         }
 
         return state;
@@ -2200,6 +2205,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     uint32_t count = 0;
     uint32_t foundMethods = 0;
     UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
+    auto willDeleteOldDefs = !oldFoundHashesForFiles.empty();
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
         foundMethods += fileFoundDefinitions.names->methods().size();
         count++;
@@ -2217,8 +2223,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
-        auto state = symbolDefiner.enterClassDefinitions(ctx);
-        if (!oldFoundHashesForFiles.empty()) {
+        auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs);
+        if (willDeleteOldDefs) {
             symbolDefiner.deleteOldDefinitions(ctx, state);
         }
         incrementalDefinitions[fref] = move(state);
