@@ -752,6 +752,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
+    bool ranIncremantalNamer = false;
     {
         // namer
         for (auto &tree : trees) {
@@ -765,6 +766,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // Here, to complement those tests, we just run Namer::run (not Namer::runIncremental)
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
+            ENFORCE(!ranIncremantalNamer);
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
             tree = testSerialize(*gs, move(vTmp[0]));
 
@@ -774,7 +776,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = move(resolver::Resolver::runIncremental(*gs, move(trees)).result());
+    trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
