@@ -13,7 +13,16 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
     if (opts.cacheDir.empty()) {
         return nullptr;
     }
-    auto flavor = opts.lspExperimentalFastPathEnabled ? "experimentalfastpath" : "normalfastpath";
+
+    std::string flavor;
+    if (opts.print.isAutogenPrintingSubclassesOrAutoloaderOnly()) {
+        flavor = "autogenemptymethodbodies";
+    } else if (opts.lspExperimentalFastPathEnabled) {
+        flavor = "experimentalfastpath";
+    } else {
+        flavor = "normalfastpath";
+    }
+
     return make_unique<OwnedKeyValueStore>(make_unique<KeyValueStore>(logger, sorbet_full_version_string, opts.cacheDir,
                                                                       move(flavor), opts.maxCacheSizeBytes));
 }

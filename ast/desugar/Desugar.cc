@@ -317,8 +317,18 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
-    ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
-    desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
+
+    bool removeBody = dctx.ctx.state.autogenPrintingSubclassesOrAutoloaderOnly;
+    ExpressionPtr desugaredBody;
+    if (removeBody) {
+        // For performance reasons, we remove method bodies in autogen when only generating
+        // autoloader files or subclass lists. In this configuration, passing method bodies
+        // is not required for correctness.
+        desugaredBody = MK::EmptyTree();
+    } else {
+        desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
+        desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
+    }
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     cast_tree<MethodDef>(mdef)->flags.isSelfMethod = isSelf;
