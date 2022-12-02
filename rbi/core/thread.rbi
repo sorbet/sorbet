@@ -1479,6 +1479,11 @@ end
 # consumer.join
 # ```
 class Thread::Queue < Object
+  # Creates a new queue instance, optionally using the contents of an enumerable for its initial state.
+  # https://ruby-doc.org/core-3.1.0/Thread/Queue.html#method-c-new
+  sig {params(enumerable: T::Enumerable[T.untyped]).void}
+  def initialize(enumerable=T.unsafe(nil)); end
+
   # Alias for:
   # [`push`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-push)
   sig {params(obj: T.untyped).returns(T.untyped)}
