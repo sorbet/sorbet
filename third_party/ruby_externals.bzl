@@ -47,6 +47,8 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
             "@com_stripe_ruby_typer//third_party/ruby:dtoa.patch",
             "@com_stripe_ruby_typer//third_party/ruby:penelope_procc.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-fix-malloc-increase-calculation.patch",  # https://github.com/ruby/ruby/pull/4860
+            "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by.patch",  # https://github.com/ruby/ruby/pull/6791
         ],
     )
 
