@@ -76,7 +76,7 @@
 class Vector
   include ::Enumerable
 
-  Elem = type_member(:out)
+  Elem = type_member {{ fixed: T.untyped }}
 
   # [`Vector.new`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-new)
   # is private; use Vector[] or
@@ -321,7 +321,7 @@ end
 class Matrix
   include ::Enumerable
 
-  Elem = type_member(:out)
+  Elem = type_member {{ fixed: T.untyped }}
 
   # Yields all elements of the matrix, starting with those of the first row, or
   # returns an
