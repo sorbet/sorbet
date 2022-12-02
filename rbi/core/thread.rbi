@@ -1481,7 +1481,7 @@ end
 class Thread::Queue < Object
   # Creates a new queue instance, optionally using the contents of an enumerable for its initial state.
   # https://ruby-doc.org/core-3.1.0/Thread/Queue.html#method-c-new
-  sig {params(enumerable: Enumerable).void}
+  sig {params(enumerable: T::Enumerable[T.untyped]).void}
   def initialize(enumerable=T.unsafe(nil)); end
 
   # Alias for:
