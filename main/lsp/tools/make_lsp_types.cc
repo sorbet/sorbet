@@ -99,6 +99,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "std::unique_ptr<Position> copy() const;",
                        "std::string showRaw() const;",
                        "std::optional<core::Loc> toLoc(const core::GlobalState &gs, core::FileRef fref) const;",
+                       "static std::unique_ptr<Position> fromLoc(const core::GlobalState &gs, core::Loc loc);",
                    });
 
     auto Range =
@@ -113,6 +114,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "static std::unique_ptr<Range> fromLoc(const core::GlobalState &gs, core::Loc loc);",
                        "std::optional<core::Loc> toLoc(const core::GlobalState &gs, core::FileRef file) const;",
                        "int cmp(const Range &b) const;",
+                       "std::string showRaw() const;",
                        "std::unique_ptr<Range> copy() const;",
                        "bool contains(const Range &b) const;",
                        "bool contains(const Position &b) const;",
@@ -468,6 +470,19 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                },
                                                classTypes);
 
+    auto InlayHintResolveSupport = makeObject("InlayHintResolveSupport",
+                                              {
+                                                  makeField("properties", makeArray(JSONString)),
+                                              },
+                                              classTypes);
+
+    auto InlayHintClientCapabilities = makeObject("InlayHintClientCapabilities",
+                                                  {
+                                                      makeField("dynamicRegistration", makeOptional(JSONBool)),
+                                                      makeField("resolveSupport", makeOptional(InlayHintResolveSupport)),
+                                                  },
+                                                  classTypes);
+
     auto TextDocumentClientCapabilities =
         makeObject("TextDocumentClientCapabilities",
                    {
@@ -491,6 +506,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("rename", makeOptional(RenameCapabilities)),
                        makeField("publishDiagnostics", makeOptional(PublishDiagnosticsCapabilities)),
                        makeField("foldingRange", makeOptional(FoldingRangeCapabilities)),
+                       makeField("inlayHint", makeOptional(DynamicRegistrationOption)),
                    },
                    classTypes);
 
@@ -602,6 +618,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        },
                                        classTypes);
 
+    auto InlayHintOptions = makeObject("InlayHintOptions",
+                                       {
+                                           makeField("workDoneProgress", makeOptional(JSONBool)),
+                                           makeField("resolveProvider", makeOptional(JSONBool)),
+                                       },
+                                       classTypes);
+
     auto ServerCapabilities = makeObject(
         "ServerCapabilities",
         {
@@ -617,6 +640,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             makeField("documentSymbolProvider", makeOptional(JSONBool)),
             makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
             makeField("codeActionProvider", makeOptional(makeVariant({JSONBool, CodeActionOptions}))),
+            makeField("inlayHintProvider", makeOptional(InlayHintOptions)),
             makeField("codeLensProvider", makeOptional(CodeLensOptions)),
             makeField("documentFormattingProvider", makeOptional(JSONBool)),
             makeField("documentRangeFormattingProvider", makeOptional(JSONBool)),
@@ -1250,6 +1274,34 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                    },
                                    classTypes);
 
+    auto InlayHintParams = makeObject("InlayHintParams",
+                                      {
+                                          makeField("textDocument", TextDocumentIdentifier),
+                                          makeField("range", Range),
+                                      },
+                                      classTypes);
+
+    auto InlayHintKind = makeIntEnum("InlayHintKind",
+                                     {
+                                         {"Type", 1},
+                                         {"Parameter", 2},
+                                     },
+                                     enumTypes);
+
+    auto InlayHint = makeObject("InlayHint",
+                                {
+                                    makeField("position", Position),
+                                    // TODO(froydnj): also allow InlayHintLabelPart[] here
+                                    makeField("label", JSONString),
+                                    makeField("kind", makeOptional(InlayHintKind)),
+                                    makeField("textEdits", makeOptional(makeArray(TextEdit))),
+                                    makeField("tooltip", makeOptional(makeVariant({JSONString, MarkupContent}))),
+                                    makeField("paddingLeft", makeOptional(JSONBool)),
+                                    makeField("paddingRight", makeOptional(JSONBool)),
+                                    // TODO(froydnj): implement data and possibly lazy resolution
+                                },
+                                classTypes);
+
     auto InitializeResult = makeObject("InitializeResult",
                                        {
                                            makeField("capabilities", ServerCapabilities),
@@ -1403,6 +1455,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/documentSymbol",
                                      "textDocument/formatting",
                                      "textDocument/hover",
+                                     "textDocument/inlayHint",
                                      "textDocument/prepareRename",
                                      "textDocument/publishDiagnostics",
                                      "textDocument/references",
@@ -1425,6 +1478,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/definition", TextDocumentPositionParams},
                                                 {"textDocument/typeDefinition", TextDocumentPositionParams},
                                                 {"textDocument/hover", TextDocumentPositionParams},
+                                                {"textDocument/inlayHint", InlayHintParams},
                                                 {"textDocument/completion", CompletionParams},
                                                 {"textDocument/prepareRename", TextDocumentPositionParams},
                                                 {"textDocument/references", ReferenceParams},
@@ -1462,6 +1516,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"textDocument/definition", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/typeDefinition", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/hover", makeVariant({JSONNull, Hover})},
+            {"textDocument/inlayHint", makeVariant({JSONNull, makeArray(InlayHint)})},
             // CompletionItem[] | CompletionList | null
             // Sorbet only sends CompletionList.
             {"textDocument/completion", CompletionList},

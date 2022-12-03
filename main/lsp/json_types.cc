@@ -151,6 +151,10 @@ bool Range::contains(const Position &p) const {
     return endCmp >= 0;
 }
 
+string Range::showRaw() const {
+    return fmt::format("Range{.start={}, .end={}}", this->start->showRaw(), this->end->showRaw());
+}
+
 int Location::cmp(const Location &b) const {
     const int uriCmp = uri.compare(b.uri);
     if (uriCmp != 0) {
@@ -195,6 +199,17 @@ optional<core::Loc> Position::toLoc(const core::GlobalState &gs, const core::Fil
     } else {
         return nullopt;
     }
+}
+
+std::unique_ptr<Position> Position::fromLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (!loc.exists()) {
+        return nullptr;
+    }
+
+    ENFORCE(loc.empty());
+    auto pair = loc.position(gs);
+    // All LSP numbers are zero-based, ours are 1-based.
+    return make_unique<Position>(pair.first.line - 1, pair.first.column - 1);
 }
 
 unique_ptr<DiagnosticRelatedInformation> DiagnosticRelatedInformation::copy() const {
