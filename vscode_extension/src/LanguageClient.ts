@@ -1,6 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
 import {
-  workspace,
   commands,
   OutputChannel,
   window as vscodeWindow,
@@ -273,7 +272,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
     ] = this._sorbetExtensionConfig.activeLspConfig!.command;
     this._outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
     this._sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
+      cwd: this._sorbetExtensionConfig.activeLspConfig!.cwd,
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯
