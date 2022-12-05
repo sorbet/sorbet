@@ -21,6 +21,8 @@ suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argumen
     suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     suggest_t_must.rb:6: Replaced with `T.must(foo)`
      6 |"hi" + foo
@@ -61,6 +63,8 @@ suggest_t_must.rb:20: Expected `Integer` but found `T.nilable(Integer)` for fiel
     suggest_t_must.rb:20:
     20 |    @result = xs[i]
                       ^^^^^
+  Note:
+    `NilClass` is not a subtype of `Integer`
   Autocorrect: Done
     suggest_t_must.rb:20: Replaced with `T.must(xs[i])`
     20 |    @result = xs[i]

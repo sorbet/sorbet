@@ -9,6 +9,8 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
     suggest_t_unsafe.rb:25:
     25 |  takes_string_kw(str: nilable_string)
                                ^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     suggest_t_unsafe.rb:25: Replaced with `T.unsafe(nilable_string)`
     25 |  takes_string_kw(str: nilable_string)
@@ -37,6 +39,8 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
     suggest_t_unsafe.rb:7:
      7 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     suggest_t_unsafe.rb:10: Replaced with `T.unsafe(foo)`
     10 |"hi" + foo
@@ -125,6 +129,8 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
     suggest_t_unsafe.rb:25:
     25 |  takes_string_kw(str: nilable_string)
                                ^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     suggest_t_unsafe.rb:25: Replaced with `custom_wrapper(nilable_string)`
     25 |  takes_string_kw(str: nilable_string)
@@ -153,6 +159,8 @@ suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argu
     suggest_t_unsafe.rb:7:
      7 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     suggest_t_unsafe.rb:10: Replaced with `custom_wrapper(foo)`
     10 |"hi" + foo

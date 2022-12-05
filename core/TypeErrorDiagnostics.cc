@@ -1,6 +1,10 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "absl/strings/str_join.h"
 
+#include "common/typecase.h"
+
+#include <algorithm>
+
 using namespace std;
 
 namespace sorbet::core {
@@ -31,6 +35,67 @@ namespace {
         gotStr, expectedStr, expectedStr, gotStr);
     return true;
 }
+
+void flattenAndType(vector<TypePtr> &results, const AndType &type) {
+    typecase(
+        type.left, [&results](const AndType &type) { flattenAndType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const AndType &type) { flattenAndType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+}
+
+void flattenOrType(vector<TypePtr> &results, const OrType &type) {
+    typecase(
+        type.left, [&results](const OrType &type) { flattenOrType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const OrType &type) { flattenOrType(results, type); },
+        [&results](const TypePtr &def) { results.emplace_back(def); });
+}
+
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const OrType &composite,
+                                      const TypePtr &expected) {
+    vector<TypePtr> parts;
+    flattenOrType(parts, composite);
+
+    const auto numParts = parts.size();
+    auto it = std::remove_if(parts.begin(), parts.end(),
+                             [&](auto &part) -> bool { return core::Types::isSubType(gs, part, expected); });
+    parts.erase(it, parts.end());
+
+    // All the types are not subtypes, maybe the user doesn't need any help here?
+    if (parts.size() == numParts) {
+        return;
+    }
+
+    for (auto &part : parts) {
+        e.addErrorNote("`{}` is not a subtype of `{}`", part.show(gs), expected.show(gs));
+    }
+}
+
+void explainCompositeSubtypingFailure(const GlobalState &gs, ErrorBuilder &e, const TypePtr &got,
+                                      const AndType &expected) {
+    vector<TypePtr> parts;
+    flattenAndType(parts, expected);
+
+    const auto numParts = parts.size();
+    auto it = std::remove_if(parts.begin(), parts.end(),
+                             [&](auto &part) -> bool { return core::Types::isSubType(gs, got, part); });
+    parts.erase(it, parts.end());
+
+    // All the types are not subtypes, maybe the user doesn't need any help here?
+    if (parts.size() == numParts) {
+        return;
+    }
+
+    for (auto &part : parts) {
+        e.addErrorNote("`{}` is not a subtype of `{}`", got.show(gs), part.show(gs));
+    }
+}
+
 } // namespace
 
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
@@ -50,6 +115,44 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
             "    If you really mean to use types as values, use `{}` to hide the type syntax from the type checker.\n"
             "    Otherwise, you're likely using the type system in a way it wasn't meant to be used.",
             "T::Utils.coerce");
+        return;
+    }
+
+    if (isa_type<AppliedType>(got) && isa_type<AppliedType>(expected)) {
+        auto &gotRef = cast_type_nonnull<AppliedType>(got);
+        auto &expectedRef = cast_type_nonnull<AppliedType>(expected);
+        if (gotRef.klass != expectedRef.klass) {
+            return;
+        }
+        // We could extend this to multiple args, but the common cases are `T::Set`
+        // and `T::Array`, so go with the simple code for now.
+        if (gotRef.targs.size() != expectedRef.targs.size() || gotRef.targs.size() != 1) {
+            return;
+        }
+
+        auto &innerGot = gotRef.targs[0];
+        auto &innerExpected = expectedRef.targs[0];
+
+        if (!isa_type<OrType>(innerGot)) {
+            return;
+        }
+
+        // The idea here is that we got Container[T.any(...)] and we expected
+        // Container[$TYPE].  We suspect the `T.any(...)` actually has a number
+        // of components, but only a few of them may be wrong; let's try to show
+        // the user exactly which ones are incorrect.
+        //
+        // TODO: should we just limit this to `T.class_of`-style types?
+        explainCompositeSubtypingFailure(gs, e, cast_type_nonnull<OrType>(innerGot), innerExpected);
+        return;
+    }
+
+    if (isa_type<OrType>(got)) {
+        explainCompositeSubtypingFailure(gs, e, cast_type_nonnull<OrType>(got), expected);
+        return;
+    }
+    if (isa_type<AndType>(expected)) {
+        explainCompositeSubtypingFailure(gs, e, got, cast_type_nonnull<AndType>(expected));
         return;
     }
 

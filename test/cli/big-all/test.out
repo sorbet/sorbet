@@ -1,0 +1,10 @@
+big-all.rb:8: Argument does not have asserted type `T.all(Class, IFoo)` https://srb.help/7007
+     8 |T.let(Foo.new, T.all(Class, IFoo))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `Foo` originating from:
+    big-all.rb:8:
+     8 |T.let(Foo.new, T.all(Class, IFoo))
+              ^^^^^^^
+  Note:
+    `Foo` is not a subtype of `Class`
+Errors: 1

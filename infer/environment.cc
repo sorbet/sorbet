@@ -1546,6 +1546,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                            core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, castType, ty.type);
                         }
                     }
                 } else if (!bind.value.isSynthetic()) {

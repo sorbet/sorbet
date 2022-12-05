@@ -12,6 +12,8 @@ autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for arg
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
                           ^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_csend.rb:16: Replaced with `T.must(maybe_a&.foo)`
     16 |use_string(maybe_a&.foo)
@@ -53,6 +55,8 @@ autocorrect_csend.rb:16: Expected `String` but found `T.nilable(String)` for arg
     autocorrect_csend.rb:16:
     16 |use_string(maybe_a&.foo)
                           ^
+  Note:
+    `NilClass` is not a subtype of `String`
   Autocorrect: Done
     autocorrect_csend.rb:16: Replaced with `T.unsafe(maybe_a&.foo)`
     16 |use_string(maybe_a&.foo)
