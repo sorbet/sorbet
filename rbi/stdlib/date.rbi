@@ -933,8 +933,8 @@ class Date
   # ```ruby
   # Date.today   #=> #<Date: 2011-06-11 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(Date)}
-  def self.today(*arg0); end
+  sig {params(start: T.any(Integer, Float)).returns(Date)}
+  def self.today(start=Date::ITALY); end
 
   # Parses the given representation of date and time, and creates a date object.
   # This method does not function as a validator.
@@ -947,8 +947,8 @@ class Date
   # Date.parse('20010203')            #=> #<Date: 2001-02-03 ...>
   # Date.parse('3rd Feb 2001')        #=> #<Date: 2001-02-03 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.attached_class)}
-  def self.parse(*arg0); end
+  sig {params(string: String, comp: T::Boolean, state: T.any(Integer, Float)).returns(T.attached_class)}
+  def self.parse(string='-4712-01-01', comp=true, state=Date::ITALY); end
 
   # Creates a date object denoting the given chronological Julian day number.
   #
@@ -960,8 +960,8 @@ class Date
   #
   # See also
   # [`::new`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-new).
-  sig {params(arg0: T.untyped).returns(T.attached_class)}
-  def self.jd(*arg0); end
+  sig {params(jd: T.any(Integer, Float), start: T.any(Integer, Float)).returns(T.attached_class)}
+  def self.jd(jd=0, start=Date::ITALY); end
 
   # Just returns true. It's nonsense, but is for symmetry.
   #
@@ -971,8 +971,8 @@ class Date
   #
   # See also
   # [`::jd`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-jd).
-  sig {params(arg0: T.untyped).returns(T::Boolean)}
-  def self.valid_jd?(*arg0); end
+  sig {params(jd: T.any(Integer, Float), start: T.any(Integer, Float)).returns(T::Boolean)}
+  def self.valid_jd?(jd, start=Date::ITALY); end
 
   # Returns true if the given ordinal date is valid, and false if not.
   #
@@ -984,8 +984,8 @@ class Date
   # See also [`::jd`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-jd)
   # and
   # [`::ordinal`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-ordinal).
-  sig {params(arg0: T.untyped).returns(T::Boolean)}
-  def self.valid_ordinal?(*arg0); end
+  sig {params(year: T.any(Integer, Float), yday: T.any(Integer, Float), start: T.any(Integer, Float)).returns(T::Boolean)}
+  def self.valid_ordinal?(year, yday, start=Date::ITALY); end
 
   # Returns true if the given calendar date is valid, and false if not. Valid in
   # this context is whether the arguments passed to this method would be
@@ -1001,8 +1001,8 @@ class Date
   # See also [`::jd`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-jd)
   # and
   # [`::civil`](https://docs.ruby-lang.org/en/2.7.0/Date.html#method-c-civil).
-  sig {params(arg0: T.untyped).returns(T::Boolean)}
-  def self.valid_civil?(*arg0); end
+  sig {params(year: T.any(Integer, Float), month: T.any(Integer, Float), mday: T.any(Integer, Float), start: T.any(Integer, Float)).returns(T::Boolean)}
+  def self.valid_civil?(year, month, mday, start=Date::ITALY); end
 
   # Returns true if the given calendar date is valid, and false if not. Valid in
   # this context is whether the arguments passed to this method would be
