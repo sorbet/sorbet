@@ -76,4 +76,49 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  class NestedStruct < T::Struct
+    const :data, T::Hash[Symbol, String]
+    const :sensitive, T.nilable(String), sensitivity: ['reason']
+    const :custom, T.nilable(String), inspect: proc {|value, opts| "Inspected '#{value}' (opts: #{opts})" unless value.nil?}
+    const :nested, T.nilable(NestedStruct)
+  end
+
+  describe "inspection" do
+    def make_struct
+      NestedStruct.new(
+        data: {
+          one: "one",
+          two: "two",
+        },
+        custom: "something",
+        nested: NestedStruct.new(data: {three: "three"}, sensitive: "something sensitive")
+      )
+    end
+
+    it "inspects in a single line" do
+      struct = make_struct
+      expected_result = "<Opus::Types::Test::StructValidationTest::NestedStruct " \
+      "custom=\"Inspected 'something' (opts: {:multiline=>false})\" data={:one=>\"one\", :two=>\"two\"} " \
+      "nested=<Opus::Types::Test::StructValidationTest::NestedStruct custom=nil data={:three=>\"three\"} " \
+      "nested=nil sensitive=<REDACTED reason>> sensitive=nil>"
+      assert_equal(expected_result, struct.inspect)
+    end
+
+    it "pretty inspects" do
+      struct = make_struct
+      expected_result = <<~INSPECT
+        <Opus::Types::Test::StructValidationTest::NestedStruct
+         custom="Inspected 'something' (opts: {:multiline=>true})"
+         data={:one=>"one", :two=>"two"}
+         nested=<Opus::Types::Test::StructValidationTest::NestedStruct
+          custom=nil
+          data={:three=>"three"}
+          nested=nil
+          sensitive=<REDACTED reason>>
+         sensitive=nil>
+      INSPECT
+      assert_equal(expected_result, struct.pretty_inspect)
+    end
+  end
 end
