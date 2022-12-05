@@ -40,9 +40,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$7
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=3](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
-    cls: Class = Solve<<block-pre-call-temp>$7, new>
-    <returnMethodTemp>$2: Class = cls
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Class
+    cls: T.class_of(A) = Solve<<block-pre-call-temp>$7, new>
+    <returnMethodTemp>$2: T.class_of(A) = cls
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.class_of(A)
     <unconditional> -> bb1
 
 # backedges
