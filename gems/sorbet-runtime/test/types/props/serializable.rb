@@ -148,20 +148,20 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects' do
       obj = a_serializable
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob">', str)
     end
 
     it 'inspects with extra props' do
       obj = a_serializable
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
     end
 
     it 'inspects frozen structs' do
       obj = a_serializable.freeze
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob">', str)
     end
   end
 
