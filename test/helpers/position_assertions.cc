@@ -1363,6 +1363,14 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
     REQUIRE_NE(completionItem->textEdit, nullopt);
     auto &textEdit = completionItem->textEdit.value();
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText);
+    // TODO(jez) This is wrong, it doesn't account that the edited file will be somewhere else.
+    // if (completionItem->additionalTextEdits.has_value()) {
+    //     for (const auto &additionalTextEdit : completionItem->additionalTextEdits.value()) {
+    //         auto editedAgain =
+    //             applyEdit(actualEditedFileContents, *file, *additionalTextEdit->range, textEdit->newText);
+    //         actualEditedFileContents = move(editedAgain);
+    //     }
+    // }
 
     {
         CHECK_EQ_DIFF(expectedEditedFileContents, actualEditedFileContents,

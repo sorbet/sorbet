@@ -439,6 +439,31 @@ unique_ptr<CompletionItem> getCompletionItemForKeyword(const core::GlobalState &
     return item;
 }
 
+namespace {
+// TODO(jez) Not sure if this is the fastest or most direct way to do this
+core::ClassOrModuleRef asPackageSpecNamespace(const core::GlobalState &gs, core::ClassOrModuleRef what) {
+    ENFORCE(what != core::Symbols::root());
+    if (what == core::Symbols::root()) {
+        // We should be preserving this invariant--if it fails in prod, let's not bring down the server.
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto whatOwner = what.data(gs)->owner;
+    auto whatName = what.data(gs)->name;
+    if (whatOwner == core::Symbols::root()) {
+        return core::Symbols::PackageSpecRegistry().data(gs)->findMember(gs, whatName).asClassOrModuleRef();
+    }
+
+    auto packageSpecNamespace = asPackageSpecNamespace(gs, whatOwner); // recurse
+    if (!packageSpecNamespace.exists()) {
+        return packageSpecNamespace;
+    }
+
+    return packageSpecNamespace.data(gs)->findMember(gs, whatName).asClassOrModuleRef();
+}
+
+} // namespace
+
 unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState &gs, const LSPConfiguration &config,
                                                         const core::SymbolRef maybeAlias, const core::Loc queryLoc,
                                                         string_view prefix, size_t sortIdx) {
@@ -500,6 +525,34 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     auto whatFile = what.loc(gs).file();
     if (whatFile.exists()) {
         documentation = findDocumentation(whatFile.data(gs).source(), what.loc(gs).beginPos());
+    }
+
+    // TODO(jez) This will be slow and none of this is dependent on the current edit.
+    // We can pre-compute a lot of this.
+    if (config.opts.stripePackages && queryLoc.file().exists() && whatFile.exists()) {
+        auto queryPackageName = gs.packageDB().getPackageNameForFile(queryLoc.file());
+        auto whatPackageName = gs.packageDB().getPackageNameForFile(whatFile);
+        if (queryPackageName.exists() && whatPackageName.exists() && queryPackageName != whatPackageName) {
+            const auto &queryPackage = gs.packageDB().getPackageInfo(queryPackageName);
+            if (!queryPackage.importsPackage(whatPackageName) &&
+                // Only want to add the additionalTextEdit if we're sure this is the relevant package.
+                // It wouldn't make sense to import Opus::MainPkg if the final constant is Opus::MainPkg::SubPkg::A
+                !asPackageSpecNamespace(gs, what.asClassOrModuleRef()).exists()) {
+                const auto &whatPackage = gs.packageDB().getPackageInfo(whatPackageName);
+                bool isTestImport = whatFile.data(gs).isPackagedTest();
+                if (auto suggestion = queryPackage.addImport(gs, whatPackage, isTestImport)) {
+                    vector<unique_ptr<TextEdit>> additionalTextEdits;
+                    // TODO(jez) This is wrong--additionalTextEdits takes a Range, which implicitly
+                    // assumes its editing the file the completion request was sent from. We can't
+                    // use additionalTextEdits to edit another file entirely.
+                    for (auto &edit : suggestion->edits) {
+                        additionalTextEdits.emplace_back(
+                            make_unique<TextEdit>(Range::fromLoc(gs, edit.loc), move(edit.replacement)));
+                    }
+                    item->additionalTextEdits = move(additionalTextEdits);
+                }
+            }
+        }
     }
 
     auto prettyType = prettyTypeForConstant(gs, what);
