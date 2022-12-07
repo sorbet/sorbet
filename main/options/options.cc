@@ -158,10 +158,6 @@ bool Printers::isAutogen() const {
     return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled;
 }
 
-bool Printers::isAutogenPrintingSubclassesOrAutoloaderOnly() const {
-    return isAutogen() && !(Autogen.enabled || AutogenMsgPack.enabled);
-}
-
 struct StopAfterOptions {
     string option;
     Phase flag;

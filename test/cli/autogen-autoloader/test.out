@@ -5,6 +5,7 @@ No errors! Great job.
 # typed: true
 
 require 'in_class'
+require 'in_method'
 require 'my_gem'
 
 class Foo::Bar::Jazz < Foo::Bar::Quuz
@@ -17,6 +18,7 @@ Opus::Require.for_autoload(Foo::Bar::Jazz, "test/cli/autogen-autoloader/example1
 # typed: true
 
 require 'in_class'
+require 'in_method'
 require 'my_gem'
 
 class Foo::Bar::Quuz
@@ -29,6 +31,7 @@ Opus::Require.for_autoload(Foo::Bar::Quuz, "test/cli/autogen-autoloader/example1
 # typed: true
 
 require 'in_class'
+require 'in_method'
 require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/example1.rb", [Foo, :Dabba])
@@ -68,6 +71,7 @@ Opus::Require.for_autoload(Foo::Errors::MyError2, "test/cli/autogen-autoloader/e
 # typed: true
 
 require 'in_class'
+require 'in_method'
 require 'my_gem'
 
 Opus::Require.for_autoload(nil, "test/cli/autogen-autoloader/example1.rb", [Foo, :TOP_LEVEL_CONST])
