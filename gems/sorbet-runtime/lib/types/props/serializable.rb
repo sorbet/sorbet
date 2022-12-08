@@ -338,14 +338,21 @@ module T::Props::Serializable::DecoratorMethods
     end
   end
 
-  # overrides T::Props::PrettyPrintable
-  private def inspect_instance_components(instance, multiline:, indent:)
+  # adds to the default result of T::Props::PrettyPrintable
+  def pretty_print_extra(instance, pp)
+    # This is to maintain backwards compatibility with Stripe's codebase, where only the single line (through `inspect`)
+    # version is expected to add anything extra
+    return if !pp.is_a?(PP::SingleLine)
     if (extra_props = extra_props(instance)) && !extra_props.empty?
-      pretty_kvs = extra_props.map {|k, v| [k.to_sym, v.inspect]}
-      extra = join_props_with_pretty_values(pretty_kvs, multiline: false)
-      super + ["@_extra_props=<#{extra}>"]
-    else
-      super
+      pp.breakable
+      pp.text("@_extra_props=")
+      pp.group(1, "<", ">") do
+        extra_props.each_with_index do |(prop, value), i|
+          pp.breakable unless i.zero?
+          pp.text("#{prop}=")
+          value.pretty_print(pp)
+        end
+      end
     end
   end
 end

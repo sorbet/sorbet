@@ -20,6 +20,25 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :foo, T.nilable(T::Hash[T.any(String, Symbol), Object])
   end
 
+  module ExtraProperties
+    include T::Props::Plugin
+    module DecoratorMethods
+      extend T::Sig
+
+      sig {params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void}
+      def pretty_print_extra(instance, pp)
+        super(instance, pp)
+        pp.breakable
+        pp.text("extra=true")
+      end
+    end
+  end
+
+  class MySerializableWithCustomExtraProps
+    include T::Props::Serializable
+    include ExtraProperties
+  end
+
   def a_serializable
     m = MySerializable.new
     m.name = "Bob"
@@ -148,20 +167,52 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects' do
       obj = a_serializable
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob">', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
     end
 
     it 'inspects with extra props' do
       obj = a_serializable
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
+    end
+
+    it 'inspects with custom extra props' do
+      obj = MySerializableWithCustomExtraProps.new
+      obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
+      str = obj.inspect
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializableWithCustomExtraProps @_extra_props=<not_a_prop="but_here_anyway"> extra=true>', str)
     end
 
     it 'inspects frozen structs' do
       obj = a_serializable.freeze
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"}, name="Bob">', str)
+      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+    end
+  end
+
+  describe '.pretty_inspect' do
+    it 'excludes extra props' do
+      obj = a_serializable
+      obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
+      expected_result = <<~INSPECT
+        <Opus::Types::Test::Props::SerializableTest::MySerializable
+         foo={"age"=>7, "color"=>"red"}
+         name="Bob">
+      INSPECT
+      str = obj.pretty_inspect
+      assert_equal(expected_result, str)
+    end
+
+    it 'inspects with custom extra props' do
+      obj = MySerializableWithCustomExtraProps.new
+      obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
+      expected_result = <<~INSPECT
+        <Opus::Types::Test::Props::SerializableTest::MySerializableWithCustomExtraProps
+         extra=true>
+      INSPECT
+      str = obj.pretty_inspect
+      assert_equal(expected_result, str)
     end
   end
 
