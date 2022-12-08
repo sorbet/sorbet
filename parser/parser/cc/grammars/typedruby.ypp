@@ -36,7 +36,6 @@ using namespace std::string_literals;
 %define api.namespace {ruby_parser::bison::TYPEDRUBY}
 %define api.prefix {TYPEDRUBY}
 %define api.value.type { union parser_value }
-// TODO(jez) Does this degrade parser performance?
 %define api.location.type { location }
 %define api.token.constructor false
 %define parse.error verbose
