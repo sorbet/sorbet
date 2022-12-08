@@ -358,17 +358,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C BadUsages><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C A> = <emptyTree>::<C Struct>.new()
+    <emptyTree>::<C A> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(), <todo sym>, <emptyTree>::<C Struct>)
 
-    <emptyTree>::<C B> = <emptyTree>::<C Struct>.new(:giberish, 1)
+    <emptyTree>::<C B> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:giberish, 1), <todo sym>, <emptyTree>::<C Struct>)
 
-    <emptyTree>::<C C> = <emptyTree>::<C Struct>.new(:keyword_init, true)
+    <emptyTree>::<C C> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:keyword_init, true), <todo sym>, <emptyTree>::<C Struct>)
 
     local = true
 
-    <emptyTree>::<C D> = <emptyTree>::<C Struct>.new(:keyword_init, local)
+    <emptyTree>::<C D> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:keyword_init, local), <todo sym>, <emptyTree>::<C Struct>)
 
-    <emptyTree>::<C E> = <emptyTree>::<C Struct>.new(:a, :keyword_init, local)
+    <emptyTree>::<C E> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:a, :keyword_init, local), <todo sym>, <emptyTree>::<C Struct>)
   end
 
   class <emptyTree>::<C Main><<C <todo sym>>> < (::<todo sym>)
@@ -450,7 +450,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of initialize>
     end
 
-    <emptyTree>::<C Baz> = ::<root>::<C Foo>::<C Struct>.new()
+    <emptyTree>::<C Baz> = <cast:<assume type>>(::<root>::<C Foo>::<C Struct>.new(), <todo sym>, ::<root>::<C Foo>::<C Struct>)
 
     <emptyTree>::<C Foo>.new().a()
 
