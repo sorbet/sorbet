@@ -1,0 +1,4 @@
+__package.rb:6: Unable to resolve constant `ProjectWithLongDiscernableName` https://srb.help/5002
+     6 |  export ProjectWithLongDiscernableName::Foo::Example
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1

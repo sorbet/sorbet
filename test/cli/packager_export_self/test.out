@@ -5,13 +5,6 @@ test/cli/packager_export_self/__package.rb:3: Invalid expression in package: Arg
 test/cli/packager_export_self/__package.rb:3: Unable to resolve constant `Opus` https://srb.help/5002
      3 |  export_for_test Opus::Deploy
                           ^^^^
-  Did you mean `Opus`? Use `-a` to autocorrect
-    test/cli/packager_export_self/__package.rb:3: Replace with `Opus`
-     3 |  export_for_test Opus::Deploy
-                          ^^^^
-    test/cli/packager_export_self/__package.rb:2: `Opus` defined here
-     2 |class Opus::Deploy < PackageSpec
-              ^^^^
 
 test/cli/packager_export_self/__package.rb:3: Method `export_for_test` does not exist on `T.class_of(Opus::Deploy)` https://srb.help/7003
      3 |  export_for_test Opus::Deploy
