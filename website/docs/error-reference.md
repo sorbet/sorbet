@@ -3913,10 +3913,10 @@ have to assume anything.
 
 (Sorbet works this way in general for performance—Sorbet can be much faster if
 it doesn't have to go back and re-do a lot of work it has already done when it
-encounters a broken assumption. There is more information on this in [Why does
-Sorbet sometimes need type annotations?](why-type-annotations.md). A few type
-annotations can go a long way to ensuring that Sorbet can type check large
-codebases quickly.)
+encounters a broken assumption. There is more information on this in
+[Why does Sorbet sometimes need type annotations?](why-type-annotations.md). A
+few type annotations can go a long way to ensuring that Sorbet can type check
+large codebases quickly.)
 
 <!-- -->
 
