@@ -8,6 +8,7 @@
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
 #include "rewriter/Concern.h"
+#include "rewriter/ConstantTLet.h"
 #include "rewriter/DSLBuilder.h"
 #include "rewriter/DefDelegator.h"
 #include "rewriter/Delegate.h"
@@ -84,6 +85,9 @@ public:
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
+
+                    // This has to come after the `Class.new` rewriter, because they would otherwise overlap.
+                    ConstantTLet::run(ctx, &assign);
                 },
 
                 [&](ast::Send &send) {
