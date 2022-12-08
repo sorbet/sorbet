@@ -1764,6 +1764,8 @@ void GlobalState::mangleRenameForOverload(MethodRef what, NameRef origName) {
 // similar to mangleRenameMethod, so it's nice to have the implementation in the same file). But in
 // spirit, this is a private Namer helper function.
 void GlobalState::deleteMethodSymbol(MethodRef what) {
+    ENFORCE(!symbolTableFrozen);
+
     const auto &whatData = what.data(*this);
     auto owner = whatData->owner;
     auto &ownerMembers = owner.data(*this)->members();
@@ -1782,6 +1784,8 @@ void GlobalState::deleteMethodSymbol(MethodRef what) {
 //
 // NOTE: This method does double duty, deleting both static-field and field symbols.
 void GlobalState::deleteFieldSymbol(FieldRef what) {
+    ENFORCE(!symbolTableFrozen);
+
     const auto &whatData = what.data(*this);
     auto owner = whatData->owner;
     auto &ownerMembers = owner.data(*this)->members();
@@ -1794,6 +1798,8 @@ void GlobalState::deleteFieldSymbol(FieldRef what) {
 
 // Before using this method, double check the disclaimer on GlobalState::deleteMethodSymbol above.
 void GlobalState::deleteTypeMemberSymbol(TypeMemberRef what) {
+    ENFORCE(!symbolTableFrozen);
+
     const auto &whatData = what.data(*this);
     // Should always be a class or module for type members, but we use core::TypeParameter to model both
     // `type_members` and `type_parameters` (which are owned by `Method` symbols).
