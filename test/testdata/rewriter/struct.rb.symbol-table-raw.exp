@@ -33,11 +33,11 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U AccidentallyStruct>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=43:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U BadUsages>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
-    static-field <C <U BadUsages>>::<C <U A>> @ Loc {file=test/testdata/rewriter/struct.rb start=79:3 end=79:4}
-    static-field <C <U BadUsages>>::<C <U B>> @ Loc {file=test/testdata/rewriter/struct.rb start=80:3 end=80:4}
-    static-field <C <U BadUsages>>::<C <U C>> @ Loc {file=test/testdata/rewriter/struct.rb start=82:3 end=82:4}
-    static-field <C <U BadUsages>>::<C <U D>> @ Loc {file=test/testdata/rewriter/struct.rb start=85:3 end=85:4}
-    static-field <C <U BadUsages>>::<C <U E>> @ Loc {file=test/testdata/rewriter/struct.rb start=87:3 end=87:4}
+    static-field <C <U BadUsages>>::<C <U A>> -> AppliedType {       klass = <C <U Struct>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/struct.rb start=79:3 end=79:4}
+    static-field <C <U BadUsages>>::<C <U B>> -> AppliedType {       klass = <C <U Struct>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/struct.rb start=80:3 end=80:4}
+    static-field <C <U BadUsages>>::<C <U C>> -> AppliedType {       klass = <C <U Struct>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/struct.rb start=82:3 end=82:4}
+    static-field <C <U BadUsages>>::<C <U D>> -> AppliedType {       klass = <C <U Struct>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/struct.rb start=85:3 end=85:4}
+    static-field <C <U BadUsages>>::<C <U E>> -> AppliedType {       klass = <C <U Struct>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/struct.rb start=87:3 end=87:4}
   class <S <C <U BadUsages>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
     type-member(+) <S <C <U BadUsages>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U BadUsages>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=BadUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=78:16}
     method <S <C <U BadUsages>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=78:1 end=88:4}
@@ -67,7 +67,7 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U FullyQualifiedStructUsages>>::<C <U Bar>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:25}
       method <C <U FullyQualifiedStructUsages>>::<S <C <U Bar>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=117:3 end=117:25}
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
-    static-field <C <U FullyQualifiedStructUsages>>::<C <U Baz>> @ Loc {file=test/testdata/rewriter/struct.rb start=118:3 end=118:6}
+    static-field <C <U FullyQualifiedStructUsages>>::<C <U Baz>> -> Foo::Struct @ Loc {file=test/testdata/rewriter/struct.rb start=118:3 end=118:6}
     class <C <U FullyQualifiedStructUsages>>::<C <U Foo>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:23}
       type-member(=) <C <U FullyQualifiedStructUsages>>::<C <U Foo>>::<C <U Elem>> -> LambdaParam(<C <U FullyQualifiedStructUsages>>::<C <U Foo>>::<C <U Elem>>, fixed=T.untyped) @ Loc {file=test/testdata/rewriter/struct.rb start=116:3 end=116:23}
       method <C <U FullyQualifiedStructUsages>>::<C <U Foo>>#<U a> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=116:21 end=116:22}

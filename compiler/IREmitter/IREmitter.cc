@@ -780,14 +780,16 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     // These instructions only exist in the CFG for the purpose of type checking.
                     // The Ruby VM already checks that self is a valid type when calling `.bind()`
                     // on an UnboundMethod object.
-                    auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
+                    auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable() ||
+                                        i.cast == core::Names::assumeType();
 
                     if (!skipTypeTest) {
                         IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
                                                        fmt::format("T.{}", i.cast.shortName(cs)));
                     }
 
-                    if (i.cast == core::Names::let() || i.cast == core::Names::cast()) {
+                    if (i.cast == core::Names::let() || i.cast == core::Names::cast() ||
+                        i.cast == core::Names::assumeType()) {
                         Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyRegionId);
                     } else if (i.cast == core::Names::assertType()) {
                         Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,

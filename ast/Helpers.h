@@ -374,6 +374,11 @@ public:
                                                std::move(type));
     }
 
+    static ExpressionPtr AssumeType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return ast::make_expression<ast::Cast>(loc, core::Types::todo(), std::move(value), core::Names::assumeType(),
+                                               std::move(type));
+    }
+
     static ExpressionPtr ClassOf(core::LocOffsets loc, ExpressionPtr value) {
         return Send1(loc, T(loc), core::Names::classOf(), loc, std::move(value));
     }

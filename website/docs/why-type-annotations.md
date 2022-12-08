@@ -33,6 +33,11 @@ annotations (which would be a cycle). Keep in mind that Sorbet respects
 overloaded and redefined methods, so even simple expressions like these do not
 always have well-known result types.
 
+(**Note**: Newer versions of Sorbet will attempt to assume that the type of
+`A = MyClass.new` is in fact `MyClass`, and require an explicit annotation
+_only_ when that assumption turns out to be incorrect, for example due to an
+override.)
+
 ## ... for instance variables?
 
 Sorbet always requires type annotations for instance and class variables, with a

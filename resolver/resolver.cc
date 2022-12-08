@@ -2124,7 +2124,8 @@ class ResolveTypeMembersAndFieldsWalk {
                     return;
                 }
 
-                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
+                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet() &&
+                    cast.cast != core::Names::assumeType()) {
                     if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
@@ -2809,10 +2810,24 @@ public:
     }
 
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto *cast = ast::cast_tree<ast::Cast>(tree);
+        if (cast->cast == core::Names::assumeType()) {
+            // This cast was not written by the user. Before we attempt to parse it as a type, let's
+            // make sure that it's even possible to be valid.
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
+            ENFORCE(cnst != nullptr, "Rewriter should always use const for typeExpr, which should now be resolved");
+            if (!cnst->symbol.isClassOrModule()) {
+                // The rewriter was over-eager in attempting to infer type `A` for `A.new` because
+                // `A` was not a class. Get rid of the cast, replace it with the original arg.
+                tree = move(cast->arg);
+                return;
+            }
+        }
+
         ResolveCastItem item;
         item.file = ctx.file;
         item.owner = ctx.owner;
-        item.cast = ast::cast_tree<ast::Cast>(tree);
+        item.cast = cast;
         item.inFieldAssign = this->inFieldAssign.back();
         if (!tryResolveSimpleClassCastItem(ctx.state, item)) {
             todoResolveCastItems_.emplace_back(move(item));
@@ -2845,6 +2860,7 @@ public:
                 case core::Names::let().rawId():
                 case core::Names::bind().rawId():
                 case core::Names::uncheckedLet().rawId():
+                case core::Names::assumeType().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
                     if (send.numPosArgs() < 2) {
