@@ -217,8 +217,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
-    auto shouldRunIncrementalNamer =
-        config->opts.lspExperimentalFastPathEnabled && !result.changedSymbolNameHashes.empty();
+    auto shouldRunIncrementalNamer = !result.changedSymbolNameHashes.empty();
     for (auto [fref, idx] : result.changedFiles) {
         if (shouldRunIncrementalNamer) {
             // Only set oldFoundHashesForFiles if we're processing a real edit.

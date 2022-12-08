@@ -26,7 +26,6 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
 
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
-    gs.lspExperimentalFastPathEnabled = options.lspExperimentalFastPathEnabled;
 
     // Ensure LSP is enabled.
     options.runLSP = true;
@@ -181,9 +180,6 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::DocumentFormat:
             opts->lspDocumentFormatRubyfmtEnabled = true;
-            break;
-        case LSPExperimentalFeature::ExperimentalFastPath:
-            opts->lspExperimentalFastPathEnabled = true;
             break;
     }
 }

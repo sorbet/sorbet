@@ -274,10 +274,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     fmt::format_to(std::back_inserter(all_prints), "Print: [{}]",
                    fmt::map_join(
-                       print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                       print_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
     fmt::format_to(std::back_inserter(all_stop_after), "Stop After: [{}]",
                    fmt::map_join(
-                       stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                       stop_after_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
@@ -346,9 +346,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-lsp-fast-path",
-                                    "Enable experimental LSP feature: a faster fast path using symbol deletions",
-                                    cxxopts::value<bool>()->default_value("true"));
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
 
@@ -792,8 +789,6 @@ void readOptions(Options &opts,
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
-
-        opts.lspExperimentalFastPathEnabled = raw["enable-experimental-lsp-fast-path"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();

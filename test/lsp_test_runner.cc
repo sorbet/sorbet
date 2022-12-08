@@ -565,7 +565,6 @@ TEST_CASE("LSPTest") {
         }
         opts->disableWatchman = true;
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
-        opts->lspExperimentalFastPathEnabled = true;
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
         // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
