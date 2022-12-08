@@ -3897,6 +3897,27 @@ arr = T::Array[NilClass].new
 T.unsafe(arr).dig(0, 0)
 ```
 
+## 7045
+
+Sorbet sometimes assumes an expression has a certain type, even when it has no
+guarantee that it's correct in that assumption, because in over 99.9% of cases
+the assumption is correct and allows for omitting an explicit type annotation.
+
+It makes these unconfirmed assumptions early in the course of type checking, at
+a point where it hasn't collected enough information to know what the right type
+is, and records a note to itself to check those assumptions before finishing.
+
+When one of those assumptions is broken, it reports this error. In every case,
+the fix is to provide the correct, explicit annotation so that Sorbet does not
+have to assume anything.
+
+(Sorbet works this way in general for performance—Sorbet can be much faster if
+it doesn't have to go back and re-do a lot of work it has already done when it
+encounters a broken assumption. There is more information on this in [Why does
+Sorbet sometimes need type annotations?](why-type-annotations.md). A few type
+annotations can go a long way to ensuring that Sorbet can type check large
+codebases quickly.)
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

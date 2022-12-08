@@ -1543,9 +1543,22 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
-                            e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
-                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                        if (c.cast == core::Names::assumeType()) {
+                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                                e.setHeader("Assumed expression had type `{}` but found `{}`", castType.show(ctx),
+                                            ty.type.show(ctx));
+                                e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                e.addErrorNote("Please add an explicit type annotation to correct this assumption");
+                                if (bind.loc.exists() && c.valueLoc.exists()) {
+                                    e.replaceWith("Add explicit annotation", ctx.locAt(bind.loc), "T.let({}, {})",
+                                                  ctx.locAt(c.valueLoc).source(ctx).value(), ty.type.show(ctx));
+                                }
+                            }
+                        } else {
+                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                                e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
+                                e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                            }
                         }
                     }
                 } else if (!bind.value.isSynthetic()) {

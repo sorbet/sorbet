@@ -17,11 +17,11 @@ namespace sorbet::rewriter {
  * checked for correctness.
  *
  */
-class ConstantTLet final {
+class ConstantAssumeType final {
 public:
     static void run(core::MutableContext ctx, ast::Assign *asgn);
 
-    ConstantTLet() = delete;
+    ConstantAssumeType() = delete;
 };
 
 } // namespace sorbet::rewriter

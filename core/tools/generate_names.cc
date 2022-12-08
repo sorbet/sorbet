@@ -148,6 +148,7 @@ NameDef names[] = {
     {"let"},
     {"uncheckedLet", "<unchecked_let>"},
     {"syntheticBind", "<synthetic bind>"},
+    {"assumeType", "<assume type>"},
     {"unsafe"},
     {"must"},
     {"mustBecause", "must_because"},
