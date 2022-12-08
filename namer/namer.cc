@@ -1525,12 +1525,12 @@ public:
     }
 
     void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
-        // We have to defer defining "deletable" symbols until this (second) phase of incremental
+        // We have to defer defining non-class constant symbols until this (second) phase of incremental
         // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
         // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
         // chance to process _all_ files.
 
-        for (auto ref : foundDefs.deletableDefinitions()) {
+        for (auto ref : foundDefs.nonClassConstants()) {
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);

@@ -210,7 +210,7 @@ CheckSize(FoundField, 20, 4);
 class FoundDefinitions final {
     // Contains references to items in _staticFields and _typeMembers.
     // Used so there is a consistent definition & redefinition ordering.
-    std::vector<FoundDefinitionRef> _deletableDefinitions;
+    std::vector<FoundDefinitionRef> _nonClassConstants;
     // Contains all classes defined in the file.
     std::vector<FoundClass> _klasses;
     // Contains all methods defined in the file.
@@ -224,7 +224,7 @@ class FoundDefinitions final {
     // Contains all class and instance variables defined in the file.
     std::vector<FoundField> _fields;
 
-    FoundDefinitionRef addDefinition(FoundDefinitionRef ref) {
+    FoundDefinitionRef addNonClassConstant(FoundDefinitionRef ref) {
         DEBUG_ONLY(switch (ref.kind()) {
             case FoundDefinitionRef::Kind::StaticField:
             case FoundDefinitionRef::Kind::TypeMember:
@@ -236,7 +236,7 @@ class FoundDefinitions final {
             case FoundDefinitionRef::Kind::Symbol:
                 ENFORCE(false, "Attempted to give unexpected FoundDefinitionRef kind to addDefinition");
         });
-        _deletableDefinitions.emplace_back(ref);
+        _nonClassConstants.emplace_back(ref);
         return ref;
     }
 
@@ -261,13 +261,13 @@ public:
     FoundDefinitionRef addStaticField(FoundStaticField &&staticField) {
         const uint32_t idx = _staticFields.size();
         _staticFields.emplace_back(std::move(staticField));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::StaticField, idx));
+        return addNonClassConstant(FoundDefinitionRef(FoundDefinitionRef::Kind::StaticField, idx));
     }
 
     FoundDefinitionRef addTypeMember(FoundTypeMember &&typeMember) {
         const uint32_t idx = _typeMembers.size();
         _typeMembers.emplace_back(std::move(typeMember));
-        return addDefinition(FoundDefinitionRef(FoundDefinitionRef::Kind::TypeMember, idx));
+        return addNonClassConstant(FoundDefinitionRef(FoundDefinitionRef::Kind::TypeMember, idx));
     }
 
     FoundDefinitionRef addField(FoundField &&field) {
@@ -284,9 +284,9 @@ public:
         _modifiers.emplace_back(std::move(mod));
     }
 
-    // See documentation on _deletableDefinitions
-    const std::vector<FoundDefinitionRef> &deletableDefinitions() const {
-        return _deletableDefinitions;
+    // See documentation on _nonClassConstants
+    const std::vector<FoundDefinitionRef> &nonClassConstants() const {
+        return _nonClassConstants;
     }
 
     // See documentation on _klasses
