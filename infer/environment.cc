@@ -1537,14 +1537,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 if (c.cast != core::Names::cast()) {
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncorrectlyAssumedType)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (c.cast == core::Names::assumeType()) {
-                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncorrectlyAssumedType)) {
                                 e.setHeader("Assumed expression had type `{}` but found `{}`", castType.show(ctx),
                                             ty.type.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
