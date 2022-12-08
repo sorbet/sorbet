@@ -29,7 +29,6 @@ void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
     }
 
     if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv))) {
-        // TODO(jez) No real reason to preclude ConstantLit here except laziness
         return;
     }
 
