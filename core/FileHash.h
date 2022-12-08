@@ -246,8 +246,6 @@ struct LocalSymbolTableHashes {
     uint32_t hierarchyHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the classes and modules contained in the file.
     uint32_t classModuleHash = HASH_STATE_NOT_COMPUTED;
-    // A fingerprint for the type argument symbols contained in the file.
-    uint32_t typeArgumentHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the type member symbols contained in the file.
     uint32_t typeMemberHash = HASH_STATE_NOT_COMPUTED;
     // A fingerprint for the fields contained in the file.
@@ -287,7 +285,6 @@ struct LocalSymbolTableHashes {
         LocalSymbolTableHashes ret;
         ret.hierarchyHash = HASH_STATE_INVALID_PARSE;
         ret.classModuleHash = HASH_STATE_INVALID_PARSE;
-        ret.typeArgumentHash = HASH_STATE_INVALID_PARSE;
         ret.typeMemberHash = HASH_STATE_INVALID_PARSE;
         ret.fieldHash = HASH_STATE_INVALID_PARSE;
         ret.staticFieldHash = HASH_STATE_INVALID_PARSE;
@@ -300,7 +297,6 @@ struct LocalSymbolTableHashes {
         DEBUG_ONLY(
             if (hierarchyHash == HASH_STATE_INVALID_PARSE) {
                 ENFORCE(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE(typeArgumentHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(staticFieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
@@ -308,7 +304,6 @@ struct LocalSymbolTableHashes {
                 ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             } else {
                 ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE(typeArgumentHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
                 ENFORCE(staticFieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);

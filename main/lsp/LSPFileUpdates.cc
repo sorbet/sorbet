@@ -50,37 +50,6 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     return copy;
 }
 
-namespace {
-
-// In debug builds, asserts that we have not accidentally taken the fast path after a change to the set of
-// methods in a file.
-bool validateIdenticalFingerprints(const std::vector<core::SymbolHash> &a, const std::vector<core::SymbolHash> &b) {
-    if (a.size() != b.size()) {
-        return false;
-    }
-
-    core::SymbolHash previousHash; // Initializes to <0, 0>.
-    auto bIt = b.begin();
-    for (const auto &methodA : a) {
-        const auto &methodB = *bIt;
-        if (methodA.nameHash != methodB.nameHash) {
-            return false;
-        }
-
-        // Enforce that hashes are sorted in ascending order.
-        if (methodA < previousHash) {
-            return false;
-        }
-
-        previousHash = methodA;
-        bIt++;
-    }
-
-    return true;
-}
-
-} // namespace
-
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                                          const vector<shared_ptr<core::File>> &updatedFiles,
@@ -123,12 +92,6 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         const auto &newLocalSymbolTableHashes = updatedFile->getFileHash()->localSymbolTableHashes;
         const auto &oldRetypecheckableSymbolHashes = oldLocalSymbolTableHashes.retypecheckableSymbolHashes;
         const auto &newRetypecheckableSymbolHashes = newLocalSymbolTableHashes.retypecheckableSymbolHashes;
-
-        if (!config.opts.lspExperimentalFastPathEnabled) {
-            // Both oldHash and newHash should have the same methods, since this is the fast path!
-            ENFORCE(validateIdenticalFingerprints(oldRetypecheckableSymbolHashes, newRetypecheckableSymbolHashes),
-                    "definitionHash should have failed");
-        }
 
         // Find which hashes changed. Note: retypecheckableSymbolHashes are pre-sorted, so set_difference should work.
         // This will insert two entries into `retypecheckableSymbolHashes` for each changed method, but they

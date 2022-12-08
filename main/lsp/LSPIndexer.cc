@@ -132,8 +132,6 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
             // Also record some information about what might have changed.
             const bool classesDiffer =
                 newHash.localSymbolTableHashes.classModuleHash != oldHash.localSymbolTableHashes.classModuleHash;
-            const bool typeArgumentsDiffer =
-                newHash.localSymbolTableHashes.typeArgumentHash != oldHash.localSymbolTableHashes.typeArgumentHash;
             const bool typeMembersDiffer =
                 newHash.localSymbolTableHashes.typeMemberHash != oldHash.localSymbolTableHashes.typeMemberHash;
             const bool fieldsDiffer =
@@ -144,14 +142,10 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
                 newHash.localSymbolTableHashes.classAliasHash != oldHash.localSymbolTableHashes.classAliasHash;
             const bool methodsDiffer =
                 newHash.localSymbolTableHashes.methodHash != oldHash.localSymbolTableHashes.methodHash;
-            const uint32_t differCount = int(classesDiffer) + int(typeArgumentsDiffer) + int(typeMembersDiffer) +
-                                         int(fieldsDiffer) + int(staticFieldsDiffer) + int(classAliasesDiffer) +
-                                         int(methodsDiffer);
+            const uint32_t differCount = int(classesDiffer) + int(typeMembersDiffer) + int(fieldsDiffer) +
+                                         int(staticFieldsDiffer) + int(classAliasesDiffer) + int(methodsDiffer);
             if (classesDiffer) {
                 prodCategoryCounterInc("lsp.slow_path_changed_def", "classmodule");
-            }
-            if (typeArgumentsDiffer) {
-                prodCategoryCounterInc("lsp.slow_path_changed_def", "typeargument");
             }
             if (typeMembersDiffer) {
                 prodCategoryCounterInc("lsp.slow_path_changed_def", "typemember");
@@ -171,8 +165,6 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
             if (differCount == 1) {
                 if (classesDiffer) {
                     prodCategoryCounterInc("lsp.slow_path_changed_def", "onlyclassmodule");
-                } else if (typeArgumentsDiffer) {
-                    prodCategoryCounterInc("lsp.slow_path_changed_def", "onlytypeargument");
                 } else if (typeMembersDiffer) {
                     prodCategoryCounterInc("lsp.slow_path_changed_def", "onlytypemembers");
                 } else if (fieldsDiffer) {

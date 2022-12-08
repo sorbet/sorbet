@@ -45,26 +45,12 @@ protected:
                bool disableFastPath);
 
 public:
-    enum class LSPExperimentalFeature {
-        DocumentSymbol = 6,
-        SignatureHelp = 7,
-        DocumentHighlight = 9,
-        DocumentFormat = 10,
-        ExperimentalFastPath = 11,
-    };
-
     // N.B.: Sorbet assumes we 'own' this object; keep it alive to avoid memory errors.
     const std::shared_ptr<options::Options> opts;
 
     virtual ~LSPWrapper();
 
     const LSPConfiguration &config() const;
-
-    /**
-     * Enable an experimental LSP feature.
-     * Note: Use this method *before* the client performs initialization with the server.
-     */
-    void enableExperimentalFeature(LSPExperimentalFeature feature);
 
     /**
      * Enable all experimental LSP features.
