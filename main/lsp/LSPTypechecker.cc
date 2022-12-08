@@ -249,9 +249,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         // Only need to re-run packager if we're going to delete constants and have to re-define
         // their visibility, which only happens if we're running incrementalNamer.
         if (shouldRunIncrementalNamer) {
-            // TODO(jez) Using `gs` to access package information here assumes that edits to
-            // __package.rb files don't take the fast path. We'll want (or maybe need) to revisit this
-            // when we start making edits to `__package.rb` take fast paths.
+            // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
+            // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
+            // making edits to `__package.rb` take fast paths.
             if (!(fref.data(*gs).isPackage())) {
                 auto pkgName = gs->packageDB().getPackageNameForFile(fref);
                 if (pkgName.exists()) {

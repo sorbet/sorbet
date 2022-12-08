@@ -1050,7 +1050,7 @@ string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, co
                                 string_view separator) {
     bool includeOwner = owner.exists() && owner != Symbols::root();
     string ownerStr = includeOwner ? owner.toStringFullName(gs) : "";
-    return absl::StrCat(ownerStr, includeOwner ? separator : "", name.showRaw(gs)); // TODO(jez) includeOwner required?
+    return absl::StrCat(ownerStr, includeOwner ? separator : "", name.showRaw(gs));
 }
 } // namespace
 

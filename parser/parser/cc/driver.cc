@@ -104,8 +104,8 @@ bool base_driver::rewind_if_different_line(token_t token1, token_t token2) {
     return true;
 }
 
-// TODO(jez) This can quite easily get out of hand performance-wise. The major selling point of
-// LR parsers is that they admit linear-time implementations.
+// This can quite easily get out of hand performance-wise. The major selling point of LR parsers is
+// that they admit linear-time implementations.
 //
 // For the time being (read: until we start seeing performance problems in practice), introducing
 // arbitrary-size backtracking like this method does is probably fine, because

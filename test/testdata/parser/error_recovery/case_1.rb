@@ -20,8 +20,6 @@ class A
     puts 'after'
   end
 
-  # TODO(jez) cool autocompletion opportunity here would be to automatically
-  # fill in all the when cases if `x` is an enum type.
   def test3
     puts 'before'
     case x # error: Hint: this "case" token might not be properly closed

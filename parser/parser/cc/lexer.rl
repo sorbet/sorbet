@@ -214,7 +214,6 @@ int lexer::compare_indent_level(token_t left, token_t right) {
 
         if (leftChar != rightChar) {
             // mismatched indent. give up and say equal
-            // TODO(jez) Might want to handle this case better
             return 0;
         }
 
