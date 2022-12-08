@@ -265,13 +265,17 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         for (auto req : left.kw.required) {
             auto corresponding =
                 absl::c_find_if(right.kw.required, [&](const auto &r) { return r.get().name == req.get().name; });
-            if (corresponding == right.kw.required.end()) {
+
+            auto hasCorrespondingRequired = corresponding != right.kw.required.end();
+            if (!hasCorrespondingRequired) {
                 corresponding =
                     absl::c_find_if(right.kw.optional, [&](const auto &r) { return r.get().name == req.get().name; });
             }
 
+            auto hasCorrespondingOptional = corresponding != right.kw.optional.end();
+
             // if there is a corresponding parameter, make sure it has the right type
-            if (corresponding != right.kw.required.end() && corresponding != right.kw.optional.end()) {
+            if (hasCorrespondingRequired || hasCorrespondingOptional) {
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
                                   core::Polarity::Negative)) {
                     if (auto e =
