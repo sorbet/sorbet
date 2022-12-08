@@ -736,12 +736,19 @@ private:
                     if (suggested.size() > 3) {
                         suggested.resize(3);
                     }
-                    if (!suggested.empty()) {
-                        for (auto suggestion : suggested) {
-                            const auto replacement = suggestion.symbol.show(ctx);
-                            e.didYouMean(replacement, ctx.locAt(job.out->loc));
-                            e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
+                    for (auto suggestion : suggested) {
+                        const auto replacement = suggestion.symbol.show(ctx);
+                        auto replaceLoc = ctx.locAt(job.out->loc);
+                        if (replaceLoc.source(ctx) == replacement) {
+                            // The replacement is the same as the original.
+                            // This can happen for a number of reasons, usually due to things
+                            // where one of the names has an unprintable name from a rewriter.
+                            // It's confusing to see those bad did you mean and they don't
+                            // provide value.
+                            continue;
                         }
+                        e.didYouMean(replacement, replaceLoc);
+                        e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
                     }
                 }
             }
