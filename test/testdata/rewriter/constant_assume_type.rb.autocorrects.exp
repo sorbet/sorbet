@@ -56,4 +56,11 @@ G2 = String.new
 H1 = 0 + 0
 H2 = T.let('', String)
 
+class SomethingThatHasNew
+  def new; end
+end
+NotAClass = SomethingThatHasNew.new
+
+I = NotAClass.new
+T.reveal_type(I) # error: `T.untyped`
 # ------------------------------

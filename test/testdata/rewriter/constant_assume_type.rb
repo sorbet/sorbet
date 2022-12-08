@@ -60,7 +60,5 @@ class SomethingThatHasNew
 end
 NotAClass = SomethingThatHasNew.new
 
-# TODO(jez) This is a terrible error message--it doesn't give the user any idea
-# what the problem is, and clobbers the error message that *would* have told
-# them. We have to fix this before we can land it.
 I = NotAClass.new
+T.reveal_type(I) # error: `T.untyped`
