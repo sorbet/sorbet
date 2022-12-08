@@ -160,28 +160,10 @@ unique_ptr<LSPMessage> MultiThreadedLSPWrapper::read(int timeoutMs) {
 }
 
 void LSPWrapper::enableAllExperimentalFeatures() {
-    enableExperimentalFeature(LSPExperimentalFeature::DocumentHighlight);
-    enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
-    enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
-    enableExperimentalFeature(LSPExperimentalFeature::DocumentFormat);
-    enableExperimentalFeature(LSPExperimentalFeature::ExperimentalFastPath);
-}
-
-void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
-    switch (feature) {
-        case LSPExperimentalFeature::DocumentHighlight:
-            opts->lspDocumentHighlightEnabled = true;
-            break;
-        case LSPExperimentalFeature::DocumentSymbol:
-            opts->lspDocumentSymbolEnabled = true;
-            break;
-        case LSPExperimentalFeature::SignatureHelp:
-            opts->lspSignatureHelpEnabled = true;
-            break;
-        case LSPExperimentalFeature::DocumentFormat:
-            opts->lspDocumentFormatRubyfmtEnabled = true;
-            break;
-    }
+    opts->lspDocumentHighlightEnabled = true;
+    opts->lspDocumentSymbolEnabled = true;
+    opts->lspSignatureHelpEnabled = true;
+    opts->lspDocumentFormatRubyfmtEnabled = true;
 }
 
 int LSPWrapper::getTypecheckCount() {
