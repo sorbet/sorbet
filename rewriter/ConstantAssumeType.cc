@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
-    if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::True) {
+    if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
         // Only do this transformation in files that are typed: true or higher, so that we know that
         // if this assumption about the type is wrong, that it will get checked down the line.
         return;
@@ -28,7 +28,7 @@ void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
         return;
     }
 
-    if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) && ast::isa_tree<ast::ConstantLit>(send->recv))) {
+    if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv))) {
         // TODO(jez) No real reason to preclude ConstantLit here except laziness
         return;
     }

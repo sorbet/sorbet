@@ -1537,7 +1537,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 if (c.cast != core::Names::cast()) {
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncorrectlyAssumedType)) {
                             e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");

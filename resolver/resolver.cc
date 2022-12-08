@@ -2117,7 +2117,8 @@ class ResolveTypeMembersAndFieldsWalk {
                     return;
                 }
 
-                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
+                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet() &&
+                    cast.cast != core::Names::assumeType()) {
                     if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
@@ -2838,6 +2839,7 @@ public:
                 case core::Names::let().rawId():
                 case core::Names::bind().rawId():
                 case core::Names::uncheckedLet().rawId():
+                case core::Names::assumeType().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
                     if (send.numPosArgs() < 2) {
