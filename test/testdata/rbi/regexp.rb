@@ -18,7 +18,7 @@ if maybe_match
 
   b3 = maybe_match.begin("nope")
   T.reveal_type(b3) # error: type: `Integer`
-  e3 = maybe_match.begin("nope")
+  e3 = maybe_match.end("nope")
   T.reveal_type(e3) # error: type: `Integer`
 end
 
