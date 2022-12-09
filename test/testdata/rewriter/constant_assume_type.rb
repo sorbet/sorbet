@@ -36,6 +36,15 @@ class GenericClassWithFixed
   Elem = type_member {{fixed: Integer}}
 end
 
+module ModuleWithCustomNew
+  extend T::Sig
+
+  sig {returns(Integer)}
+  def self.new
+    0
+  end
+end
+
 A = NormalClass.new
 T.reveal_type(A) # error: `NormalClass`
 
@@ -80,3 +89,6 @@ T.reveal_type(J) # error: `T.untyped`
 
 K = GenericClassWithFixed.new
 T.reveal_type(K) # error: `GenericClassWithFixed`
+
+L = ModuleWithCustomNew.new
+T.reveal_type(L) # error: `T.untyped`
