@@ -135,7 +135,7 @@ class MatchData < Object
   # ```
   sig do
     params(
-        n: Integer,
+        n: T.any(Integer, Symbol, String),
     )
     .returns(Integer)
   end
@@ -168,7 +168,7 @@ class MatchData < Object
   # ```
   sig do
     params(
-        n: Integer,
+        n: T.any(Integer, Symbol, String),
     )
     .returns(Integer)
   end
