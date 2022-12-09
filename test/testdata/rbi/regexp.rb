@@ -3,6 +3,25 @@
 maybe_match = /foo/.match('foo')
 T.reveal_type(maybe_match) # error: type: `T.nilable(MatchData)`
 
+if maybe_match
+  b1 = maybe_match.begin(0)
+  T.reveal_type(b1) # error: type: `Integer`
+  e1 = maybe_match.end(0)
+  T.reveal_type(e1) # error: type: `Integer`
+
+  # These are nonsensical because there are no capture groups in
+  # the original regexp, but Sorbet doesn't know that.
+  b2 = maybe_match.begin(:nope)
+  T.reveal_type(b2) # error: type: `Integer`
+  e2 = maybe_match.end(:nope)
+  T.reveal_type(e2) # error: type: `Integer`
+
+  b3 = maybe_match.begin("nope")
+  T.reveal_type(b3) # error: type: `Integer`
+  e3 = maybe_match.begin("nope")
+  T.reveal_type(e3) # error: type: `Integer`
+end
+
 /foo/.match('foo') do |m|
   T.reveal_type(m) # error: type: `MatchData`
 end
