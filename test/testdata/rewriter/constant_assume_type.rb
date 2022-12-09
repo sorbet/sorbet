@@ -24,6 +24,12 @@ end
 class NewIsSpecificChild < NewIsSpecific
 end
 
+class GenericClass
+  extend T::Generic
+
+  Elem = type_member
+end
+
 A = NormalClass.new
 T.reveal_type(A) # error: `NormalClass`
 
@@ -62,3 +68,6 @@ NotAClass = SomethingThatHasNew.new
 
 I = NotAClass.new
 T.reveal_type(I) # error: `T.untyped`
+
+J = GenericClass.new
+T.reveal_type(J) # error: `T.untyped`
