@@ -2816,9 +2816,11 @@ public:
             // make sure that it's even possible to be valid.
             auto *cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
             ENFORCE(cnst != nullptr, "Rewriter should always use const for typeExpr, which should now be resolved");
-            if (!cnst->symbol.isClassOrModule()) {
+            if (!cnst->symbol.isClassOrModule() || cnst->symbol.asClassOrModuleRef().data(ctx)->flags.isModule ||
+                cnst->symbol.asClassOrModuleRef().data(ctx)->typeArity(ctx) > 0) {
                 // The rewriter was over-eager in attempting to infer type `A` for `A.new` because
-                // `A` was not a class. Get rid of the cast, replace it with the original arg.
+                // `A` was not a class (or was a generic class, and thus generated the wrong annotation).
+                // Get rid of the cast, replace it with the original arg.
                 tree = move(cast->arg);
                 return;
             }
