@@ -139,9 +139,9 @@ module T::Props
       end
 
       if cls_or_args.is_a?(Hash)
-        self.prop(name, cls_or_args.merge(immutable: true))
+        self.prop(name, **cls_or_args.merge(immutable: true))
       else
-        self.prop(name, cls_or_args, args.merge(immutable: true))
+        self.prop(name, cls_or_args, **args.merge(immutable: true))
       end
     end
 
