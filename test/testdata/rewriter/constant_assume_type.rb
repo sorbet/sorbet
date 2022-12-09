@@ -30,6 +30,12 @@ class GenericClass
   Elem = type_member
 end
 
+class GenericClassWithFixed
+  extend T::Generic
+
+  Elem = type_member {{fixed: Integer}}
+end
+
 A = NormalClass.new
 T.reveal_type(A) # error: `NormalClass`
 
@@ -71,3 +77,6 @@ T.reveal_type(I) # error: `T.untyped`
 
 J = GenericClass.new
 T.reveal_type(J) # error: `T.untyped`
+
+K = GenericClassWithFixed.new
+T.reveal_type(K) # error: `GenericClassWithFixed`
