@@ -251,6 +251,8 @@ NameDef names[] = {
     {"cattrAccessor", "cattr_accessor"},
     {"cattrReader", "cattr_reader"},
     {"cattrWriter", "cattr_writer"},
+    {"threadMattrAccessor", "thread_mattr_accessor"},
+    {"threadCattrAccessor", "thread_cattr_accessor"},
     {"instanceReader", "instance_reader"},
     {"instanceWriter", "instance_writer"},
     {"instanceAccessor", "instance_accessor"},
