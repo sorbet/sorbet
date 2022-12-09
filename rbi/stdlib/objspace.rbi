@@ -168,7 +168,7 @@ class ObjectSpace::WeakMap < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out)
+  Elem = type_member {{ fixed: T.untyped }}
 
   # Retrieves a weakly referenced object with the given key
   def [](_); end
