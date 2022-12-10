@@ -39,10 +39,10 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
 }
 
 bool AutoloaderConfig::registeredForPBAL(const vector<core::NameRef> &pkgParts) const {
-    return pbalNamespaces.empty() || (absl::c_any_of(pbalNamespaces, [&pkgParts](auto &pbalNamespace) {
-               return pbalNamespace.size() <= pkgParts.size() &&
-                      std::equal(pbalNamespace.begin(), pbalNamespace.end(), pkgParts.begin());
-           }));
+    return absl::c_any_of(pbalNamespaces, [&pkgParts](auto &pbalNamespace) {
+        return pbalNamespace.size() <= pkgParts.size() &&
+               std::equal(pbalNamespace.begin(), pbalNamespace.end(), pkgParts.begin());
+    });
 }
 
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
