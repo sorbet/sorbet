@@ -364,29 +364,29 @@ void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core:
 }
 
 void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &alCfg) {
-    auto testRoot = root.findNode({core::Names::Constants::Test()});
+    /* auto testRoot = root.findNode({core::Names::Constants::Test()}); */
 
-    for (auto nr : gs.packageDB().packages()) {
-        auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility()) {
-            // Only mark strictly path-based autoload compatible packages for now to reduce
-            // computation / code generation, given this is the only current use-case for registering
-            // packages in this context in the Stripe codebase.
+    /* for (auto nr : gs.packageDB().packages()) { */
+    /*     auto &pkg = gs.packageDB().getPackageInfo(nr); */
+    /*     if (pkg.strictAutoloaderCompatibility()) { */
+    /*         // Only mark strictly path-based autoload compatible packages for now to reduce */
+    /*         // computation / code generation, given this is the only current use-case for registering */
+    /*         // packages in this context in the Stripe codebase. */
 
-            // Additionally this package must be registed for path-based autoloading.
-            // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require
-            // special registration.
-            auto &pkgFullName = pkg.fullName();
-            if (!alCfg.registeredForPBAL(pkgFullName)) {
-                continue;
-            }
+    /*         // Additionally this package must be registed for path-based autoloading. */
+    /*         // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require */
+    /*         // special registration. */
+    /*         auto &pkgFullName = pkg.fullName(); */
+    /*         if (!alCfg.registeredForPBAL(pkgFullName)) { */
+    /*             continue; */
+    /*         } */
 
-            root.markPackageNamespace(pkg.mangledName(), pkgFullName);
-            if (testRoot != nullptr) {
-                testRoot->markPackageNamespace(pkg.mangledName(), pkgFullName);
-            }
-        }
-    }
+    /*         root.markPackageNamespace(pkg.mangledName(), pkgFullName); */
+    /*         if (testRoot != nullptr) { */
+    /*             testRoot->markPackageNamespace(pkg.mangledName(), pkgFullName); */
+    /*         } */
+    /*     } */
+    /* } */
 }
 
 void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
