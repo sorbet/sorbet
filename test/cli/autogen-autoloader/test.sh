@@ -55,6 +55,7 @@ main/sorbet --silence-dev-message --stop-after=namer \
   --autogen-registry-module "Primus::Require" \
   test/cli/autogen-autoloader/inplace.rb
 
+cat strip-output/root.rb
 cat strip-output/Foo.rb
 
 echo
@@ -66,4 +67,5 @@ main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader:root-
   --autogen-root-object=MyRootObject \
   test/cli/autogen-autoloader/inplace.rb 2>&1
 
+cat root-object/root.rb
 cat root-object/Foo.rb

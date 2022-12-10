@@ -198,26 +198,30 @@ core::NameRef DefTree::name() const {
     return qname.name();
 }
 
-void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs,
-                                const AutoloaderConfig &alCfg) const {
-    core::FileRef definingFileRef = definingFile();
-
+string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
+    fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}\n", alCfg.preamble);
 
-    if (definingFileRef.exists()) {
+    core::FileRef definingFile;
+    if (!namedDefs.empty()) {
+        definingFile = file();
+    } else if (children.empty() && hasDef()) {
+        definingFile = file();
+    }
+    if (definingFile.exists()) {
         requireStatements(gs, alCfg, buf);
     }
 
     string fullName = "nil";
     string casgnArg;
     auto type = definitionType(gs);
-
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
         fullName = root() ? alCfg.rootObject
                           : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
                                             return nr.show(gs);
                                         }));
         if (!root()) {
+            fmt::format_to(std::back_inserter(buf), "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
         }
 
@@ -231,6 +235,17 @@ void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState
 
             fmt::format_to(std::back_inserter(buf), "\n{}.pbal_register_package({}, '{}')\n", alCfg.registryModule,
                            fullName, pathPrefix);
+        } else if (!children.empty()) {
+            fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
+            vector<pair<core::NameRef, string>> childNames;
+            std::transform(children.begin(), children.end(), back_inserter(childNames),
+                           [&gs](const auto &pair) { return make_pair(pair.first, pair.first.show(gs)); });
+            fast_sort(childNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second < rhs.second; });
+            for (const auto &pair : childNames) {
+                fmt::format_to(std::back_inserter(buf), "  {}: \"{}/{}\",\n", pair.second, alCfg.rootDir,
+                               children.at(pair.first)->path(gs));
+            }
+            fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
@@ -241,9 +256,9 @@ void DefTree::renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState
                                qname.name().show(gs));
     }
 
-    if (definingFileRef.exists()) {
+    if (definingFile.exists()) {
         fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
-                       alCfg.normalizePath(gs, definingFileRef), casgnArg);
+                       alCfg.normalizePath(gs, definingFile), casgnArg);
     }
 }
 
@@ -465,11 +480,8 @@ struct ModificationState {
 void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
                                                const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
-
-    if (node.mustRender(gs)) {
-        string filePath = join(path, fmt::format("{}.rb", name));
-        tasks.emplace_back(RenderAutoloadTask{move(filePath), node});
-    }
+    string filePath = join(path, fmt::format("{}.rb", name));
+    tasks.emplace_back(RenderAutoloadTask{filePath, node});
 
     // Generate autoloads for child nodes if they exist and pkgName is not present (since the latter indicates
     // path-based autoloading for the package).
@@ -484,30 +496,6 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
     }
 }
 }; // namespace
-
-core::FileRef DefTree::definingFile() const {
-    core::FileRef definingFileRef;
-
-    if (!namedDefs.empty() || (hasDef() && children.empty())) {
-        definingFileRef = file();
-    }
-
-    return definingFileRef;
-}
-
-bool DefTree::mustRender(const core::GlobalState &gs) const {
-    // Either the node has a behavior-defining file, or has a package name
-    if (definingFile().exists() || pkgName.exists()) {
-        return true;
-    }
-
-    // The node is a class node (as opposed to a module)
-    if (definitionType(gs) == Definition::Type::Class) {
-        return true;
-    }
-
-    return false;
-}
 
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
                                     const std::string &path, const DefTree &root) {
@@ -532,18 +520,6 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         }
         for (const auto &file : existingFilesSet) {
             FileOps::removeFile(file);
-
-            // Remove all empty directories along path. This prevents zeitwerk from setting up dangling autoloads.
-            std::string_view filePath = file;
-            int curDirPos = filePath.find_last_of('/');
-            while (curDirPos > 0) {
-                const auto curDir = filePath.substr(0, curDirPos);
-                if (curDir == path || !FileOps::removeEmptyDir(string(curDir))) {
-                    break;
-                }
-
-                curDirPos = filePath.find_last_of('/', curDirPos - 1);
-            }
         }
     }
 
@@ -565,9 +541,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
                 for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
                     ++n;
                     auto &task = tasks[idx];
-                    buf.clear();
-                    task.node.renderAutoloadSrc(buf, gs, alCfg);
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
+                    bool rewritten = FileOps::writeIfDifferent(task.filePath, task.node.renderAutoloadSrc(gs, alCfg));
 
                     // Initial read should be cheap, read outside mutex
                     if (rewritten && !modificationState.modified) {
