@@ -260,6 +260,8 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
         fmt::format_to(std::back_inserter(buf), "\n{}.for_autoload({}, \"{}\"{})\n", alCfg.registryModule, fullName,
                        alCfg.normalizePath(gs, definingFile), casgnArg);
     }
+
+    return to_string(buf);
 }
 
 void DefTree::requireStatements(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
