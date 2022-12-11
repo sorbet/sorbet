@@ -58,11 +58,6 @@ public:
         return false;
     }
 
-    bool strictAutoloaderCompatibility() const {
-        notImplemented();
-        return false;
-    }
-
     std::vector<std::vector<core::NameRef>> exports() const {
         return vector<vector<core::NameRef>>();
     }

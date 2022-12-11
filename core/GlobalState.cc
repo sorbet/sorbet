@@ -588,11 +588,6 @@ void GlobalState::initEmpty() {
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
     ENFORCE(method == Symbols::rootStaticInit());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::autoloader_compatibility())
-                 .arg(Names::arg0())
-                 .build();
-    ENFORCE(method == Symbols::PackageSpec_autoloader_compatibility());
-
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);

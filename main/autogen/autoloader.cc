@@ -38,13 +38,6 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
     return !nonCollapsableModuleNames.contains(module);
 }
 
-bool AutoloaderConfig::registeredForPBAL(const vector<core::NameRef> &pkgParts) const {
-    return absl::c_any_of(pbalNamespaces, [&pkgParts](auto &pbalNamespace) {
-        return pbalNamespace.size() <= pkgParts.size() &&
-               std::equal(pbalNamespace.begin(), pbalNamespace.end(), pkgParts.begin());
-    });
-}
-
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -73,13 +66,6 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
             refs.emplace_back(gs.enterNameConstant(name));
         }
         out.nonCollapsableModuleNames.emplace(refs);
-    }
-    for (auto &nameParts : cfg.pbalNamespaces) {
-        vector<core::NameRef> refs;
-        for (auto &name : nameParts) {
-            refs.emplace_back(gs.enterNameConstant(name));
-        }
-        out.pbalNamespaces.emplace(refs);
     }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
@@ -225,17 +211,7 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             predeclare(gs, fullName, buf);
         }
 
-        if (pkgName.exists()) {
-            ENFORCE(!gs.packageDB().empty());
-
-            auto &pkg = gs.packageDB().getPackageInfo(pkgName);
-
-            // First path prefix is guaranteed to be the directory location of the package
-            const string_view pathPrefix = pkg.pathPrefixes()[0];
-
-            fmt::format_to(std::back_inserter(buf), "\n{}.pbal_register_package({}, '{}')\n", alCfg.registryModule,
-                           fullName, pathPrefix);
-        } else if (!children.empty()) {
+        if (!children.empty()) {
             fmt::format_to(std::back_inserter(buf), "\n{}.autoload_map({}, {{\n", alCfg.registryModule, fullName);
             vector<pair<core::NameRef, string>> childNames;
             std::transform(children.begin(), children.end(), back_inserter(childNames),
@@ -246,6 +222,14 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
                                children.at(pair.first)->path(gs));
             }
             fmt::format_to(std::back_inserter(buf), "}})\n", fullName);
+        }
+
+        if (pkgName.exists()) {
+            ENFORCE(!gs.packageDB().empty());
+            const string_view shortName = pkgName.shortName(gs);
+            const string_view mungedName = shortName.substr(0, shortName.size() - core::PACKAGE_SUFFIX.size());
+            fmt::format_to(std::back_inserter(buf), "\n{}.register_package({}, '{}')\n", alCfg.registryModule, fullName,
+                           mungedName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias ||
                type == Definition::Type::TypeAlias) {
@@ -341,52 +325,23 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
     }
 }
 
-DefTree *DefTree::findNode(const vector<core::NameRef> &nameParts) {
+void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
     DefTree *node = this;
     for (auto nr : nameParts) {
         auto it = node->children.find(nr);
         if (it == node->children.end()) {
-            return nullptr;
+            return;
         }
         node = it->second.get();
     }
-
-    return node;
-}
-
-void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
-    DefTree *node = this->findNode(nameParts);
-    if (node == nullptr) {
-        return;
-    }
-
-    ENFORCE(!(node->pkgName.exists()), "Package name should not be already set");
+    ENFORCE(!pkgName.exists(), "Package name should not be already set");
     node->pkgName = mangledName;
 }
 
-void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &alCfg) {
-    auto testRoot = root.findNode({core::Names::Constants::Test()});
-
+void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root) {
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility()) {
-            // Only mark strictly path-based autoload compatible packages for now to reduce
-            // computation / code generation, given this is the only current use-case for registering
-            // packages in this context in the Stripe codebase.
-
-            // Additionally this package must be registed for path-based autoloading.
-            // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require
-            // special registration.
-            auto &pkgFullName = pkg.fullName();
-            if (!alCfg.registeredForPBAL(pkgFullName)) {
-                continue;
-            }
-
-            root.markPackageNamespace(pkg.mangledName(), pkgFullName);
-            if (testRoot != nullptr) {
-                testRoot->markPackageNamespace(pkg.mangledName(), pkgFullName);
-            }
-        }
+        root.markPackageNamespace(pkg.mangledName(), pkg.fullName());
     }
 }
 
@@ -485,9 +440,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
     string filePath = join(path, fmt::format("{}.rb", name));
     tasks.emplace_back(RenderAutoloadTask{filePath, node});
 
-    // Generate autoloads for child nodes if they exist and pkgName is not present (since the latter indicates
-    // path-based autoloading for the package).
-    if (!node.children.empty() && !node.pkgName.exists()) {
+    if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
         if (!node.root()) {
             FileOps::ensureDir(subdir);

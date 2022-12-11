@@ -573,23 +573,12 @@ not exist.
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
 > at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-### Import/export statements
-
 All `import` and `export` lines in a `__package.rb` file must have constant
 literals as their argument. Doing arbitrary computation of imports and exports
 is not allowed in `__package.rb` files.
 
 Also note that all `import` declarations must be unique, with no duplicated
 imports.
-
-### autoloader_compatibility declarations
-
-> See [go/pbal](http://go/pbal) for more details.
-
-`autoloader_compatibility` declarations must take a single String argument,
-specifically either `legacy` or `strict`. These declarations annotate a package
-as compatible for path-based autoloading and are used by our Ruby code loading
-pipeline.
 
 ## 3707
 

@@ -184,10 +184,6 @@ public:
         return declLoc_;
     }
 
-    bool strictAutoloaderCompatibility() const {
-        return strictAutoloaderCompatibility_;
-    }
-
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
     PackageName name;
@@ -201,9 +197,6 @@ public:
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_;
-
-    // Whether the code in this package is compatible for path-based autoloading.
-    bool strictAutoloaderCompatibility_;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -456,7 +449,7 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
 ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
-        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidImportOrExport)) {
             e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
         }
     }
@@ -966,46 +959,12 @@ struct PackageInfoFinder {
                 info->importedPackageNames.emplace_back(move(name), method2ImportType(send));
             }
         }
-
         if (send.fun == core::Names::restrict_to_service() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
             auto importArg = move(send.getPosArg(0));
             send.removePosArg(0);
             ENFORCE(send.numPosArgs() == 0);
             send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
-        }
-
-        if (send.fun == core::Names::autoloader_compatibility() && send.numPosArgs() == 1) {
-            // Parse autoloader_compatibility DSL and set strict bit on PackageInfoImpl if configured
-            auto *compatibilityAnnotationLit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
-            if (compatibilityAnnotationLit == nullptr || !compatibilityAnnotationLit->isString()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` must be a string literal", send.fun.show(ctx));
-
-                    if (compatibilityAnnotationLit != nullptr && compatibilityAnnotationLit->isSymbol()) {
-                        auto symbol = compatibilityAnnotationLit->asSymbol();
-                        if (symbol == core::Names::strict() || symbol == core::Names::legacy()) {
-                            e.replaceWith("Convert to string arg", ctx.locAt(compatibilityAnnotationLit->loc), "\"{}\"",
-                                          symbol.shortName(ctx));
-                        }
-                    }
-                }
-
-                return;
-            }
-
-            auto compatibilityAnnotation = compatibilityAnnotationLit->asString();
-            if (compatibilityAnnotation != core::Names::strict() && compatibilityAnnotation != core::Names::legacy()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` must be either 'strict' or 'legacy'", send.fun.show(ctx));
-                }
-
-                return;
-            }
-
-            if (compatibilityAnnotation == core::Names::strict()) {
-                info->strictAutoloaderCompatibility_ = true;
-            }
         }
     }
 
@@ -1112,7 +1071,6 @@ struct PackageInfoFinder {
             case core::Names::test_import().rawId():
             case core::Names::export_().rawId():
             case core::Names::restrict_to_service().rawId():
-            case core::Names::autoloader_compatibility().rawId():
                 return true;
             default:
                 return false;
