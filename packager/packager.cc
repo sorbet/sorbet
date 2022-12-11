@@ -1405,11 +1405,10 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::F
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager");
 
-    if (!gs.runningUnderAutogen) {
-        files = findPackages(gs, workers, std::move(files));
-        setPackageNameOnFiles(gs, files);
-    } else {
-        // Autogen needs to know nothing about packages. Remove the package files and quit.
+    files = findPackages(gs, workers, std::move(files));
+    setPackageNameOnFiles(gs, files);
+    if (gs.runningUnderAutogen) {
+        // Autogen only requires package metadata. Remove the package files.
         auto it = std::remove_if(files.begin(), files.end(),
                                  [&gs](auto &file) -> bool { return file.file.data(gs).isPackage(); });
         files.erase(it, files.end());

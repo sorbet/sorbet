@@ -11,6 +11,7 @@
 #include "main/autogen/cache.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
+#include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPLoop.h"
@@ -204,6 +205,17 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 const autogen::AutogenConfig &autogenCfg, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
+    // extract all the packages we can find. (This ought to be pretty fast: if it's not, then we can move this into the
+    // parallel loop below.)
+    vector<autogen::Package> packageq;
+    for (auto i = 0; i < indexed.size(); ++i) {
+        if (indexed[i].file.data(gs).isPackage()) {
+            auto &tree = indexed[i];
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
+            packageq.emplace_back(autogen::Packages::extractPackage(ctx, move(tree)));
+        }
+    }
+
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     vector<AutogenResult::Serialized> merged(indexed.size());
@@ -298,6 +310,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
     if (opts.print.AutogenAutoloader.enabled) {
+        {
+            Timer timeit(logger, "autogenMarkPackages");
+            autogen::DefTreeBuilder::markPackages(gs, root);
+        }
         {
             Timer timeit(logger, "autogenAutoloaderPrune");
             autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
