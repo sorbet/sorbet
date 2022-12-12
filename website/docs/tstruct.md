@@ -198,9 +198,9 @@ child class:
 module Common
   extend T::Helpers
   interface!
-  sig {returns(Integer)}
+  sig {abstract.returns(Integer)}
   def foo; end
-  sig {params(Integer).returns(Integer)}
+  sig {abstract.params(foo: Integer).returns(Integer)}
   def foo=(foo); end
 end
 
