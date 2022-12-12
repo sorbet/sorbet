@@ -26,14 +26,6 @@ case "$platform" in
     ;;
 esac
 
-
-if [[ "linux" == "$platform" ]]; then
-  CONFIG_OPTS="--config=release-linux"
-elif [[ "mac" == "$platform" ]]; then
-  CONFIG_OPTS="--config=release-mac"
-  command -v autoconf >/dev/null 2>&1 || brew install autoconf
-fi
-
 echo will run with $CONFIG_OPTS
 
 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
@@ -47,7 +39,7 @@ pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
 release_version="0.5.${git_commit_count}"
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
-if [[ "mac" == "$platform" ]]; then
+if [[ "darwin" == "$kernel_name" ]]; then
     # Our binary should work on almost all OSes. The oldest v8 publishes is -14
     # so I'm going with that for now.
     for i in {14..22}; do
@@ -85,7 +77,7 @@ rbenv exec gem uninstall --all --executables --ignore-dependencies minitest moch
 rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
 
-if [[ "mac" == "$platform" ]]; then
+if [[ "darwin" == "$kernel_name" ]]; then
   gem_platform="$(ruby -e "(platform = Gem::Platform.local).cpu = 'universal'; puts(platform.to_s)")"
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$gem_platform".gem
 else

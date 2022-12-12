@@ -168,15 +168,11 @@ def register_sorbet_dependencies():
         strip_prefix = "bazel-compilation-database-6b9329e37295eab431f82af5fe24219865403e0f",
     )
 
-    LLVM_BAZEL_TOOLCHAIN_TAG = "0.7.2"
-    LLVM_BAZEL_TOOLCHAIN_SHA = "f7aa8e59c9d3cafde6edb372d9bd25fb4ee7293ab20b916d867cd0baaa642529"
-
     http_archive(
         name = "com_grail_bazel_toolchain",
-        sha256 = LLVM_BAZEL_TOOLCHAIN_SHA,
-        strip_prefix = "bazel-toolchain-{tag}".format(tag = LLVM_BAZEL_TOOLCHAIN_TAG),
-        canonical_id = LLVM_BAZEL_TOOLCHAIN_TAG,
-        url = "https://github.com/grailbio/bazel-toolchain/archive/{tag}.tar.gz".format(tag = LLVM_BAZEL_TOOLCHAIN_TAG),
+        urls = _github_public_urls("radiopaedia/bazel-toolchain/archive/29883c8ee6eeab161f1fcc10900e3db5a8d86e8b.zip"),
+        sha256 = "264d0f25322697819af99e6d2269aeca464c832b219387f30d858090ec28da66",
+        strip_prefix = "bazel-toolchain-29883c8ee6eeab161f1fcc10900e3db5a8d86e8b",
     )
 
     http_archive(

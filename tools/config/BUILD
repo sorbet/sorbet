@@ -40,6 +40,13 @@ config_setting(
 )
 
 config_setting(
+    name = "x86_64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
     name = "opt",
     values = {"compilation_mode": "opt"},
 )
