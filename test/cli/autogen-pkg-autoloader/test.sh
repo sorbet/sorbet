@@ -13,6 +13,10 @@ cp -r test/cli/autogen-pkg-autoloader "$tmp/test/cli"
 cd "$tmp" || exit 1
 
 mkdir output
+dir_to_delete="output/RootPackage/Nested"
+inner_dir_to_delete="${dir_to_delete}/Inner"
+mkdir -p $inner_dir_to_delete
+touch "$inner_dir_to_delete/__file_to_delete.rb"
 
 "$cwd/main/sorbet" --silence-dev-message --stop-after=namer \
   --stripe-packages \
@@ -30,5 +34,11 @@ for file in $(find output -type f | sort | grep -v "_mtime_stamp"); do
   printf "\n--- %s\n" "$file"
   cat "$file"
 done
+
+if test -d $dir_to_delete; then
+  echo "ERROR: $dir_to_delete exists"
+else
+  echo "$dir_to_delete correctly deleted"
+fi
 
 rm -rf "$tmp"

@@ -463,12 +463,20 @@ struct ModificationState {
 // * It creates autoload rendering tasks which will occur in a later parallel phase.
 // * It creates subdirectories when needed, as they are required to write the autoloader output.
 void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vector<RenderAutoloadTask> &tasks,
-                                               const AutoloaderConfig &alCfg, string_view path, const DefTree &node) {
+                                               vector<std::string> &dirsToDelete, const AutoloaderConfig &alCfg,
+                                               string_view path, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
 
     if (node.mustRender(gs)) {
         string filePath = join(path, fmt::format("{}.rb", name));
         tasks.emplace_back(RenderAutoloadTask{move(filePath), node});
+
+        if (node.pkgName.exists()) {
+            string dirPath = join(path, name);
+            if (FileOps::dirExists(dirPath)) {
+                dirsToDelete.emplace_back(move(dirPath));
+            }
+        }
     }
 
     // Generate autoloads for child nodes if they exist and pkgName is not present (since the latter indicates
@@ -479,7 +487,7 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
             FileOps::ensureDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, subdir, *child);
+            populateAutoloadTasksAndCreateDirectories(gs, tasks, dirsToDelete, alCfg, subdir, *child);
         }
     }
 }
@@ -512,9 +520,10 @@ bool DefTree::mustRender(const core::GlobalState &gs) const {
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
                                     const std::string &path, const DefTree &root) {
     vector<RenderAutoloadTask> tasks;
+    vector<std::string> dirsToDelete;
     {
         Timer timeit(gs.tracer(), "populateAutoloadTasks");
-        populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+        populateAutoloadTasksAndCreateDirectories(gs, tasks, dirsToDelete, alCfg, path, root);
     }
 
     auto modificationState = ModificationState{false};
@@ -532,20 +541,11 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         }
         for (const auto &file : existingFilesSet) {
             FileOps::removeFile(file);
-
-            // TODO (aadi-stripe, 12/7/2022): Investigate whether dangling autoloads are an actual problem that needs
-            // to be mitigated here.
-            // Remove all empty directories along path. This prevents zeitwerk from setting up dangling autoloads.
-            /* std::string_view filePath = file; */
-            /* int curDirPos = filePath.find_last_of('/'); */
-            /* while (curDirPos > 0) { */
-            /*     const auto curDir = filePath.substr(0, curDirPos); */
-            /*     if (curDir == path || !FileOps::removeEmptyDir(string(curDir))) { */
-            /*         break; */
-            /*     } */
-
-            /*     curDirPos = filePath.find_last_of('/', curDirPos - 1); */
-            /* } */
+        }
+        for (const auto &dirToDelete : dirsToDelete) {
+            if (FileOps::dirExists(dirToDelete)) {
+                FileOps::removeEmptyDirsRecursively(dirToDelete);
+            }
         }
     }
 

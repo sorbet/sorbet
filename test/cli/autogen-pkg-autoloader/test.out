@@ -135,3 +135,4 @@ class RootPackage::Yabba::Dabba::Quuz < AWS::String
 end
 
 Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Quuz, "test/cli/autogen-pkg-autoloader/bar.rb")
+output/RootPackage/Nested correctly deleted
