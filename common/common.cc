@@ -93,7 +93,7 @@ bool sorbet::FileOps::ensureDir(const string &path) {
 void sorbet::FileOps::removeDir(const string &path) {
     auto err = rmdir(path.c_str());
     if (err) {
-        throw sorbet::CreateDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
+        throw sorbet::RemoveDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
     }
 }
 
@@ -103,10 +103,49 @@ bool sorbet::FileOps::removeEmptyDir(const string &path) {
         if (errno == ENOTEMPTY) {
             return false;
         }
-        throw sorbet::CreateDirException(fmt::format("Error in removeEmptyDir('{}'): {}", path, errno));
+        throw sorbet::RemoveDirException(fmt::format("Error in removeEmptyDir('{}'): {}", path, errno));
     }
 
     return true;
+}
+
+void sorbet::FileOps::removeEmptyDirsRecursively(const std::string &dirPath) {
+    DIR *dir;
+    struct dirent *entry;
+    auto dirPathCStr = dirPath.c_str();
+
+    if ((dir = opendir(dirPathCStr)) == nullptr) {
+        switch (errno) {
+            case ENOTDIR: {
+                throw sorbet::FileNotDirException();
+            }
+            default:
+                // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", dirPath));
+        }
+    }
+
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_DIR) {
+            const auto namelen = strlen(entry->d_name);
+            string_view nameview{entry->d_name, namelen};
+            if (nameview == "."sv || nameview == ".."sv) {
+                continue;
+            }
+
+            auto innerDirPath = fmt::format("{}/{}", dirPath, nameview);
+
+            removeEmptyDirsRecursively(std::move(innerDirPath));
+        } else {
+            throw sorbet::RemoveDirException(
+                fmt::format("Error in removeEmptyDirsRecursively('{}'), file {} exists.", dirPath, entry->d_name));
+        }
+    }
+
+    auto err = rmdir(dirPathCStr);
+    if (err) {
+        throw sorbet::RemoveDirException(fmt::format("Error in removeEmptyDirsRecursively('{}'): {}", dirPath, errno));
+    }
 }
 
 void sorbet::FileOps::removeFile(const string &path) {
