@@ -137,8 +137,6 @@ private:
 };
 
 class AutoloadWriter {
-    static void removeEmptiedDirRecursively(const std::string &dirPath, WorkerPool &workers);
-
 public:
     static void writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &,
                                const std::string &path, const DefTree &root);
