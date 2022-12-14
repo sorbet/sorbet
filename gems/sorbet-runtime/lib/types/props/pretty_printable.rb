@@ -1,18 +1,49 @@
 # frozen_string_literal: true
 # typed: true
+require 'pp'
 
 module T::Props::PrettyPrintable
   include T::Props::Plugin
 
-  # Return a string representation of this object and all of its props
-  def inspect
-    T.unsafe(T.cast(self, Object).class).decorator.inspect_instance(self)
+  # Override the PP gem with something that's similar, but gives us a hook to do redaction and customization
+  def pretty_print(pp)
+    clazz = T.unsafe(T.cast(self, Object).class).decorator
+    multiline = pp.is_a?(PP)
+    pp.group(1, "<#{clazz.inspect_class_with_decoration(self)}", ">") do
+      clazz.all_props.sort.each do |prop|
+        pp.breakable
+        val = clazz.get(self, prop)
+        rules = clazz.prop_rules(prop)
+        pp.text("#{prop}=")
+        if (custom_inspect = rules[:inspect])
+          inspected = if T::Utils.arity(custom_inspect) == 1
+            custom_inspect.call(val)
+          else
+            custom_inspect.call(val, {multiline: multiline})
+          end
+          pp.text(inspected.nil? ? "nil" : inspected)
+        elsif rules[:sensitivity] && !rules[:sensitivity].empty? && !val.nil?
+          pp.text("<REDACTED #{rules[:sensitivity].join(', ')}>")
+        else
+          val.pretty_print(pp)
+        end
+      end
+      clazz.pretty_print_extra(self, pp)
+    end
   end
 
-  # Override the PP gem with something that's similar, but gives us a hook
-  # to do redaction
+  # Return a string representation of this object and all of its props in a single line
+  def inspect
+    string = +""
+    PP.singleline_pp(self, string)
+    string
+  end
+
+  # Return a pretty string representation of this object and all of its props
   def pretty_inspect
-    T.unsafe(T.cast(self, Object).class).decorator.inspect_instance(self, multiline: true)
+    string = +""
+    PP.pp(self, string)
+    string
   end
 
   module DecoratorMethods
@@ -23,85 +54,16 @@ module T::Props::PrettyPrintable
       super || key == :inspect
     end
 
-    sig do
-      params(instance: T::Props::PrettyPrintable, multiline: T::Boolean, indent: String)
-      .returns(String)
-    end
-    def inspect_instance(instance, multiline: false, indent: '  ')
-      components =
-        inspect_instance_components(
-          instance,
-          multiline: multiline,
-          indent: indent
-        )
-          .reject(&:empty?)
-
-      # Not using #<> here as that makes pry highlight these objects
-      # as if they were all comments, whereas this makes them look
-      # like the structured thing they are.
-      if multiline
-        "#{components[0]}:\n" + T.must(components[1..-1]).join("\n")
-      else
-        "<#{components.join(' ')}>"
-      end
+    # Overridable method to specify how the first part of a `pretty_print`d object's class should look like
+    # NOTE: This is just to support Stripe's `PrettyPrintableModel` case, and not recommended to be overriden
+    sig {params(instance: T::Props::PrettyPrintable).returns(String)}
+    def inspect_class_with_decoration(instance)
+      T.unsafe(instance).class.to_s
     end
 
-    sig do
-      params(instance: T::Props::PrettyPrintable, multiline: T::Boolean, indent: String)
-      .returns(T::Array[String])
-    end
-    private def inspect_instance_components(instance, multiline:, indent:)
-      pretty_props = T.unsafe(self).all_props.map do |prop|
-        [prop, inspect_prop_value(instance, prop, multiline: multiline, indent: indent)]
-      end
-
-      joined_props = join_props_with_pretty_values(
-        pretty_props,
-        multiline: multiline,
-        indent: indent
-      )
-
-      [
-        T.unsafe(self).decorated_class.to_s,
-        joined_props,
-      ]
-    end
-
-    sig do
-      params(instance: T::Props::PrettyPrintable, prop: Symbol, multiline: T::Boolean, indent: String)
-      .returns(String)
-      .checked(:never)
-    end
-    private def inspect_prop_value(instance, prop, multiline:, indent:)
-      val = T.unsafe(self).get(instance, prop)
-      rules = T.unsafe(self).prop_rules(prop)
-      if (custom_inspect = rules[:inspect])
-        if T::Utils.arity(custom_inspect) == 1
-          custom_inspect.call(val)
-        else
-          custom_inspect.call(val, {multiline: multiline, indent: indent})
-        end
-      elsif rules[:sensitivity] && !rules[:sensitivity].empty? && !val.nil?
-        "<REDACTED #{rules[:sensitivity].join(', ')}>"
-      else
-        val.inspect
-      end
-    end
-
-    sig do
-      params(pretty_kvs: T::Array[[Symbol, String]], multiline: T::Boolean, indent: String)
-      .returns(String)
-    end
-    private def join_props_with_pretty_values(pretty_kvs, multiline:, indent: '  ')
-      pairs = pretty_kvs
-        .sort_by {|k, _v| k.to_s}
-        .map {|k, v| "#{k}=#{v}"}
-
-      if multiline
-        indent + pairs.join("\n#{indent}")
-      else
-        pairs.join(', ')
-      end
-    end
+    # Overridable method to add anything that is not a prop
+    # NOTE: This is to support cases like Serializable's `@_extra_props`, and Stripe's `PrettyPrintableModel#@_deleted`
+    sig {params(instance: T::Props::PrettyPrintable, pp: T.any(PrettyPrint, PP::SingleLine)).void}
+    def pretty_print_extra(instance, pp); end
   end
 end
