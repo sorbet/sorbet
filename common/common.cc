@@ -93,7 +93,7 @@ bool sorbet::FileOps::ensureDir(const string &path) {
 void sorbet::FileOps::removeDir(const string &path) {
     auto err = rmdir(path.c_str());
     if (err) {
-        throw sorbet::CreateDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
+        throw sorbet::RemoveDirException(fmt::format("Error in removeDir('{}'): {}", path, errno));
     }
 }
 
@@ -103,7 +103,7 @@ bool sorbet::FileOps::removeEmptyDir(const string &path) {
         if (errno == ENOTEMPTY) {
             return false;
         }
-        throw sorbet::CreateDirException(fmt::format("Error in removeEmptyDir('{}'): {}", path, errno));
+        throw sorbet::RemoveDirException(fmt::format("Error in removeEmptyDir('{}'): {}", path, errno));
     }
 
     return true;
@@ -137,14 +137,14 @@ void sorbet::FileOps::removeEmptyDirsRecursively(const std::string &dirPath) {
 
             removeEmptyDirsRecursively(std::move(innerDirPath));
         } else {
-            throw sorbet::CreateDirException(
+            throw sorbet::RemoveDirException(
                 fmt::format("Error in removeEmptyDirsRecursively('{}'), file {} exists.", dirPath, entry->d_name));
         }
     }
 
     auto err = rmdir(dirPathCStr);
     if (err) {
-        throw sorbet::CreateDirException(fmt::format("Error in removeEmptyDirsRecursively('{}'): {}", dirPath, errno));
+        throw sorbet::RemoveDirException(fmt::format("Error in removeEmptyDirsRecursively('{}'): {}", dirPath, errno));
     }
 }
 

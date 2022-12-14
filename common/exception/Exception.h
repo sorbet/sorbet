@@ -31,6 +31,11 @@ public:
     CreateDirException(const std::string &message) : SorbetException(message) {}
 };
 
+class RemoveDirException : SorbetException {
+public:
+    RemoveDirException(const std::string &message) : SorbetException(message) {}
+};
+
 class RemoveFileException : SorbetException {
 public:
     RemoveFileException(const std::string &message) : SorbetException(message) {}
