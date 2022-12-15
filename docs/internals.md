@@ -438,7 +438,7 @@ depending on the value of that variable (`whenTrue` when truthy, `whenFalse`
 when falsy).
 
 Again, the structure above is **highly** abbreviated; look at [cfg/CFG.h] and
-[cfg/Instruction.h] for more specifics.
+[cfg/Instructions.h] for more specifics.
 
 Note that while basic blocks can't have internal branches, they can still "jump"
 by calling into other methods.
@@ -713,7 +713,7 @@ See [core/Symbols.h] and [core/SymbolRef.h] for more information.
 [namer/namer.cc]: ../namer/namer.cc
 [resolver/resolver.cc]: ../resolver/resolver.cc
 [cfg/CFG.h]: ../cfg/CFG.h
-[cfg/Instruction.h]: ../cfg/Instruction.h
+[cfg/Instructions.h]: ../cfg/Instructions.h
 [core/types/]: ../core/types/
 [core/Symbols.h]: ../core/Symbols.h
 [core/SymbolRef.h]: ../core/SymbolRef.h
