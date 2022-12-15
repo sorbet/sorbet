@@ -138,7 +138,7 @@ Other types that are not built into Ruby have their <code>.clone</code> method c
 <p>Before we get ahead of ourselves, consider this code:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Example</span> &lt; T::Struct</span>
   <span class="hljs-comment"># The `[]` default is cloned on initialization,</span>
-  <span class="hljs-comment"># so it is not shared by by multiple instances.</span>
+  <span class="hljs-comment"># so it is not shared by multiple instances.</span>
   prop <span class="hljs-symbol">:vals</span>, T::Array[Integer], <span class="hljs-symbol">default:</span> []
 <span class="hljs-keyword">end</span>
 
