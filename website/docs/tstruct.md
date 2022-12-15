@@ -197,6 +197,7 @@ child class:
 ```ruby
 module Common
   extend T::Helpers
+  extend T::Sig
   interface!
   sig {abstract.returns(Integer)}
   def foo; end
