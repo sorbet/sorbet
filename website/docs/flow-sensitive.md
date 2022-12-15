@@ -126,7 +126,7 @@ because knowing that the method `foo` exists says nothing about what parameters
 that method expects, what their types are, or what the return type of that
 function is.
 
-It's possible that someday that Sorbet could support a limited form of
+It's possible that someday Sorbet could support a limited form of
 `x.respond_to?(:foo)` when one of the component types of `x` is a type which has
 a known method called `foo`. There is more information
 [in this issue](https://github.com/sorbet/sorbet/issues/3469), which details the
