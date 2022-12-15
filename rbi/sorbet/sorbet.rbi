@@ -338,6 +338,18 @@ class Sorbet::Private::Static::ENVClass
   sig {returns(T::Enumerator[Elem])}
   def select!(&blk); end
 
+  # Returns a Hash of the given ENV names and their corresponding values
+  #
+  # ```ruby
+  # ENV.slice('foo', 'baz') # => {"foo"=>"0", "baz"=>"2"}
+  # ENV.slice('baz', 'foo') # => {"baz"=>"2", "foo"=>"0"}
+  # ```
+  sig do
+    params(names: String)
+    .returns(T::Hash[String, String])
+  end
+  def slice(*names); end
+
   sig do
     returns(T::Hash[String, T.nilable(String)])
   end
