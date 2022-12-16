@@ -147,7 +147,9 @@ core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
     }
 
     if (!this->argLocs.empty()) {
-        return this->receiverLoc.join(this->argLocs.back());
+        // For sig, the arg will often be a reference to an implicit self,
+        // so the back of argLocs is a zero width loc.
+        return this->receiverLoc.join(this->funLoc).join(this->argLocs.back());
     }
 
     return this->receiverLoc.join(this->funLoc);

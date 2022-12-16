@@ -51,7 +51,9 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
     // Keep track of old receiver at this point so that we can report whether a method called
     // sig with the right arity even existed at this point.
     auto oldRecv = std::move(send->recv);
-    send->recv = ast::MK::Constant(send->loc, core::Symbols::Sorbet_Private_Static());
+    // Even though the receiver is now Sorbet::Private::Static, the loc of the old receiver
+    // is more relevant.
+    send->recv = ast::MK::Constant(oldRecv.loc(), core::Symbols::Sorbet_Private_Static());
     send->insertPosArg(0, std::move(oldRecv));
     return true;
 }
