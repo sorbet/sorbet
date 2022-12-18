@@ -40,6 +40,9 @@ if [[ "mac" == "$platform" ]]; then
         gem build sorbet-static.gemspec
         mv sorbet-static.gemspec.bak sorbet-static.gemspec
     done
+    sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin'/" sorbet-static.gemspec
+    gem build sorbet-static.gemspec
+    mv sorbet-static.gemspec.bak sorbet-static.gemspec
 else
     gem build sorbet-static.gemspec
 fi
