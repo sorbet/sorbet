@@ -589,10 +589,9 @@ Sorbet syntax would look like this:</p>
 <pre><code class="hljs css language-ruby">T.proc.params(<span class="hljs-symbol">arg0:</span> Integer).returns(String)
 </code></pre>
 <p>In fact, Sorbet uses exactly this trick. The <code>T.proc</code> syntax that Sorbet uses to
-model to model <a href="/docs/procs">procs and lambdas</a> is just syntactic sugar for
-something that looks like the <code>Fn</code> type above (there are some gotchas around
-functions that take zero parameters or more than one parameter, but the concept
-is the same).</p>
+model <a href="/docs/procs">procs and lambdas</a> is just syntactic sugar for something that
+looks like the <code>Fn</code> type above (there are some gotchas around functions that
+take zero parameters or more than one parameter, but the concept is the same).</p>
 <p>Another intuition which may help knowing which positions are input and output
 positions: treat function return types as <code>1</code> and function parameters as <code>-1</code>.
 As you pick apart a function type, multiply these numbers together. A positive
