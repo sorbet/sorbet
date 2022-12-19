@@ -638,10 +638,9 @@ T.proc.params(arg0: Integer).returns(String)
 ```
 
 In fact, Sorbet uses exactly this trick. The `T.proc` syntax that Sorbet uses to
-model to model [procs and lambdas](procs.md) is just syntactic sugar for
-something that looks like the `Fn` type above (there are some gotchas around
-functions that take zero parameters or more than one parameter, but the concept
-is the same).
+model [procs and lambdas](procs.md) is just syntactic sugar for something that
+looks like the `Fn` type above (there are some gotchas around functions that
+take zero parameters or more than one parameter, but the concept is the same).
 
 Another intuition which may help knowing which positions are input and output
 positions: treat function return types as `1` and function parameters as `-1`.
