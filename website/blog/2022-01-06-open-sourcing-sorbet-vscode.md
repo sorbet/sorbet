@@ -22,8 +22,10 @@ Today’s release includes:
 - The
   [pre-built extension](https://marketplace.visualstudio.com/items?itemName=sorbet.sorbet-vscode-extension)
   on the Visual Studio Marketplace
-- The [source code](https://github.com/sorbet/sorbet/issues/new/choose) for the
-  extension, located in the `vscode_extension/` folder of the Sorbet repo
+- The
+  [source code](https://github.com/sorbet/sorbet/tree/master/vscode_extension)
+  for the extension, located in the `vscode_extension/` folder of the Sorbet
+  repo
 - Full [installation and usage instructions](https://sorbet.org/docs/vscode) in
   the Sorbet docs
 
