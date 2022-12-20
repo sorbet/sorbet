@@ -262,7 +262,8 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        // return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        return core::Symbols::noSymbol();
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
