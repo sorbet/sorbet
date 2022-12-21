@@ -105,6 +105,7 @@ require_relative 'types/props/private/deserializer_generator'
 require_relative 'types/props/private/serializer_generator'
 require_relative 'types/props/serializable'
 require_relative 'types/props/type_validation'
+require_relative 'types/props/unknown_value'
 require_relative 'types/props/private/parser'
 require_relative 'types/props/generated_code_validation'
 
