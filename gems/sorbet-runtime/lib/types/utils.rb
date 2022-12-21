@@ -111,6 +111,22 @@ module T::Utils
     end
   end
 
+  def self.unwrap_unknown_value(type)
+    case type
+    when T::Types::Union
+      non_unknown_types = type.types.reject {|t| t == T::Props::UnknownValue}
+      return nil if type.types.length == non_unknown_types.length
+      case non_unknown_types.length
+      when 0 then nil
+      when 1 then non_unknown_types.first
+      else
+        T::Types::Union::Private::Pool.union_of_types(non_unknown_types[0], non_unknown_types[1], non_unknown_types[2..-1])
+      end
+    else
+      nil
+    end
+  end
+
   # Returns the arity of a method, unwrapping the sig if needed
   def self.arity(method)
     arity = method.arity

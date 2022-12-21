@@ -91,8 +91,22 @@ module T::Props
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
         when T::Types::Union
+          non_unknown_type = T::Utils.unwrap_unknown_value(type)
           non_nil_type = T::Utils.unwrap_nilable(type)
-          if non_nil_type
+          if non_unknown_type
+            inner = generate(non_unknown_type, mode, varname)
+            if inner.nil?
+              nil
+            else
+              <<~RUBY
+              begin
+                #{inner}
+              rescue _ # Swallow deserialize errors
+                T::Props::UnknownValue._private_construct(T::Props::Utils.deep_clone_object(#{varname}))
+              end
+              RUBY
+            end
+          elsif non_nil_type
             inner = generate(non_nil_type, mode, varname)
             if inner.nil?
               nil
