@@ -114,7 +114,7 @@ module T::Utils
   def self.unwrap_unknown_value(type)
     case type
     when T::Types::Union
-      non_unknown_types = type.types.reject {|t| t.raw_type == T::Props::UnknownValue}
+      non_unknown_types = type.types.reject {|t| t < T::Types::SimpleType && t.raw_type == T::Props::UnknownValue}
       return nil if type.types.length == non_unknown_types.length
       case non_unknown_types.length
       when 0 then nil

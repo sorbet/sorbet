@@ -1001,6 +1001,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :deprecated_enum, T.all(MyEnum, T.deprecated_enum(MyEnum.values))
   end
 
+  class UnknownValueStruct < T::Struct
+    prop :unknownable, T.any(MyEnum, T::Props::UnknownValue)
+  end
+
   describe 'enum' do
     it 'round trips' do
       s = EnumStruct.new(enum: MyEnum::FOO, deprecated_enum_of_enums: MyEnum::BAR)
@@ -1021,6 +1025,20 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       roundtripped = RedundantEnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.deprecated_enum)
+    end
+
+    it 'results in unknown with unknown enum values' do
+      s = UnknownValueStruct.new(unknownable: MyEnum::FOO)
+
+      serialized = s.serialize
+      assert_equal('foo', serialized['unknownable'])
+
+      roundtripped = UnknownValueStruct.from_hash(serialized)
+      assert_equal(MyEnum::FOO, roundtripped.unknownable)
+
+      serialized['unknownable'] = "arglebargle"
+      having_unknown = UnknownValueStruct.from_hash(serialized)
+      assert_kind_of(T::Props::UnknownValue, roundtripped.unknownable)
     end
   end
 
@@ -1126,6 +1144,20 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   class ArrayOfNilableStruct < T::Struct
     prop :prop, T::Array[T.nilable(MyEnum)]
+  end
+
+  describe 'with array of nilable enums' do
+    it 'can deserialize non-nil' do
+      assert_equal([MyEnum::FOO], ArrayOfNilableStruct.from_hash('prop' => ['foo']).prop)
+    end
+
+    it 'can deserialize nil' do
+      assert_equal([nil], ArrayOfNilableStruct.from_hash('prop' => [nil]).prop)
+    end
+  end
+
+  class UnknownValueStruct < T::Struct
+    prop :prop, T.any(T::Props::UnknownValue, T::Array[T.nilable(MyEnum)]
   end
 
   describe 'with array of nilable enums' do
