@@ -3,6 +3,9 @@
 
 module T::Props
   class UnknownValue
+    extend T::Sig
+    extend T::Helpers
+
     sig {returns(T.untyped)}
     attr_reader :serialized_value
 
