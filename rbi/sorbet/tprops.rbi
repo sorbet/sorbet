@@ -34,6 +34,9 @@ module T::Props::ClassMethods
   def validate_prop_value(prop, val); end
 end
 
+class T::Props::UnknownValue
+end
+
 module T::Props::CustomType
   def deserialize(_mongo_scalar); end
   def instance?(_value); end
