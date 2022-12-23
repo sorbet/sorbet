@@ -1041,7 +1041,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_kind_of(T::Props::UnknownValue, having_unknown.unknownable)
 
       reserialized = having_unknown.serialize
-      assert_equal('arglebargle', reserialized['unknowable'])
+      assert_equal('arglebargle', reserialized['unknownable'])
     end
   end
 
