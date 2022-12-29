@@ -9,7 +9,7 @@ def mismatched_but_for_effect(params)
   begin
     T.let(params[:contents], T::Hash[String, String])
   rescue TypeError
-    error_messages << "contents must be a hash of {path : contents}" # error: Incompatible assignment to variable declared via `let`: `T::Array[String]` is not a subtype of `NilClass`
+    error_messages << "contents must be a hash of {path : contents}"
   end
   nil
 end
@@ -30,5 +30,5 @@ params = { contents: "thing" }
 begin
   T.let(params[:contents], T::Hash[String, String])
 rescue TypeError
-  error_messages << "contents must be a hash of {path : contents}" # error: Incompatible assignment to variable declared via `let`: `T::Array[String]` is not a subtype of `NilClass`
+  error_messages << "contents must be a hash of {path : contents}"
 end

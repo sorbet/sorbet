@@ -841,8 +841,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         exceptions.pop_back();
                     }
 
-                    caseBody = walk(cctx, rescueCase->body, caseBody);
-                    unconditionalJump(caseBody, ensureBody, cctx.inWhat, a.loc);
+                    auto rescueBodyTemp = cctx.newTemporary(core::Names::statTemp());
+                    caseBody = walk(cctx.withTarget(rescueBodyTemp), rescueCase->body, caseBody);
+                    auto assignmentBlock = cctx.inWhat.freshBlock(cctx.loops, caseBody->rubyRegionId);
+                    unconditionalJump(caseBody, assignmentBlock, cctx.inWhat, a.loc);
+                    synthesizeExpr(assignmentBlock, cctx.target, a.loc, make_insn<Ident>(rescueBodyTemp));
+                    unconditionalJump(assignmentBlock, ensureBody, cctx.inWhat, a.loc);
                 }
 
                 // This magic local remembers if none of the `rescue`s match,
