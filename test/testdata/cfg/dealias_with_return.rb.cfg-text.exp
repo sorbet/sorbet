@@ -9,7 +9,7 @@ bb0[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb4(rubyRegionId=1)
 # - bb6(rubyRegionId=3)
-# - bb9(rubyRegionId=0)
+# - bb10(rubyRegionId=0)
 bb1[rubyRegionId=0, firstDead=-1]():
     <exceptionValue>$4 = <get-current-exception>
     <unconditional> -> bb1
@@ -31,8 +31,8 @@ bb4[rubyRegionId=1, firstDead=2]():
 # backedges
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](a: T.nilable(Integer), <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](a: T.nilable(Integer), <gotoDeadTemp>$12: T.nilable(TrueClass)):
+    <gotoDeadTemp>$12 -> (T.nilable(TrueClass) ? bb1 : bb10)
 
 # backedges
 # - bb3(rubyRegionId=2)
@@ -45,14 +45,14 @@ bb7[rubyRegionId=2, firstDead=-1](<magic>$6: T.class_of(<Magic>)):
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1]():
-    <gotoDeadTemp>$11: TrueClass = true
+    <gotoDeadTemp>$12: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
 # - bb6(rubyRegionId=3)
-bb9[rubyRegionId=0, firstDead=3](a: Integer(2)):
-    <statTemp>$14: Integer(3) = 3
-    <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$14: Integer(3))
+bb10[rubyRegionId=0, firstDead=3](a: Integer(2)):
+    <statTemp>$15: Integer(3) = 3
+    <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$15: Integer(3))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1
 

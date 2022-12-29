@@ -27,7 +27,7 @@ bb0[rubyRegionId=0, firstDead=-1]():
 
 # backedges
 # - bb6(rubyRegionId=3)
-# - bb24(rubyRegionId=0)
+# - bb25(rubyRegionId=0)
 bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
@@ -55,8 +55,8 @@ bb5[rubyRegionId=4, firstDead=-1](final_attempt: T.untyped, foo: T.untyped):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError), <gotoDeadTemp>$10: T.nilable(TrueClass)):
-    <gotoDeadTemp>$10 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError), <gotoDeadTemp>$11: T.nilable(TrueClass)):
+    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb10)
 
 # backedges
 # - bb3(rubyRegionId=2)
@@ -69,73 +69,73 @@ bb7[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, <mag
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped):
-    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$11: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
 # - bb6(rubyRegionId=3)
-bb9[rubyRegionId=0, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError)):
+bb10[rubyRegionId=0, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError)):
     is_successful: T::Boolean = err: T.nilable(StandardError).nil?()
-    is_successful -> (T::Boolean ? bb10 : bb11)
+    is_successful -> (T::Boolean ? bb11 : bb12)
 
 # backedges
-# - bb9(rubyRegionId=0)
-bb10[rubyRegionId=0, firstDead=-1](foo: T.untyped, err: NilClass, is_successful: TrueClass):
+# - bb10(rubyRegionId=0)
+bb11[rubyRegionId=0, firstDead=-1](foo: T.untyped, err: NilClass, is_successful: TrueClass):
     ||$2: TrueClass = is_successful
-    ||$2 -> (TrueClass ? bb13 : bb14)
+    ||$2 -> (TrueClass ? bb14 : bb15)
 
 # backedges
-# - bb9(rubyRegionId=0)
-bb11[rubyRegionId=0, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: StandardError, is_successful: FalseClass):
+# - bb10(rubyRegionId=0)
+bb12[rubyRegionId=0, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: StandardError, is_successful: FalseClass):
     ||$2: T.untyped = final_attempt
-    ||$2 -> (T.untyped ? bb13 : bb14)
+    ||$2 -> (T.untyped ? bb14 : bb15)
 
 # backedges
-# - bb10(rubyRegionId=0)
 # - bb11(rubyRegionId=0)
-bb13[rubyRegionId=0, firstDead=-1](is_successful: T::Boolean, ||$2: T.untyped):
-    <ifTemp>$14: T.untyped = ||$2
-    <ifTemp>$14 -> (T.untyped ? bb19 : bb24)
+# - bb12(rubyRegionId=0)
+bb14[rubyRegionId=0, firstDead=-1](is_successful: T::Boolean, ||$2: T.untyped):
+    <ifTemp>$15: T.untyped = ||$2
+    <ifTemp>$15 -> (T.untyped ? bb20 : bb25)
 
 # backedges
-# - bb10(rubyRegionId=0)
 # - bb11(rubyRegionId=0)
-bb14[rubyRegionId=0, firstDead=-1](foo: T.untyped, err: StandardError, is_successful: FalseClass):
-    err -> (StandardError ? bb15 : bb16)
+# - bb12(rubyRegionId=0)
+bb15[rubyRegionId=0, firstDead=-1](foo: T.untyped, err: StandardError, is_successful: FalseClass):
+    err -> (StandardError ? bb16 : bb17)
 
 # backedges
-# - bb14(rubyRegionId=0)
-bb15[rubyRegionId=0, firstDead=-1](foo: T.untyped, is_successful: FalseClass):
-    <ifTemp>$14: T.untyped = foo
-    <ifTemp>$14 -> (T.untyped ? bb19 : bb24)
-
-# backedges
-# - bb14(rubyRegionId=0)
-bb16[rubyRegionId=0, firstDead=0](err: StandardError, is_successful: FalseClass):
-    <ifTemp>$14 = err
-    <ifTemp>$14 -> (<nullptr> ? bb19 : bb24)
-
-# backedges
-# - bb13(rubyRegionId=0)
 # - bb15(rubyRegionId=0)
-# - bb16(rubyRegionId=0)
-bb19[rubyRegionId=0, firstDead=-1](is_successful: T::Boolean):
-    <ifTemp>$19: T::Boolean = is_successful: T::Boolean.!()
-    <ifTemp>$19 -> (T::Boolean ? bb21 : bb24)
+bb16[rubyRegionId=0, firstDead=-1](foo: T.untyped, is_successful: FalseClass):
+    <ifTemp>$15: T.untyped = foo
+    <ifTemp>$15 -> (T.untyped ? bb20 : bb25)
 
 # backedges
-# - bb19(rubyRegionId=0)
-bb21[rubyRegionId=0, firstDead=-1]():
+# - bb15(rubyRegionId=0)
+bb17[rubyRegionId=0, firstDead=0](err: StandardError, is_successful: FalseClass):
+    <ifTemp>$15 = err
+    <ifTemp>$15 -> (<nullptr> ? bb20 : bb25)
+
+# backedges
+# - bb14(rubyRegionId=0)
+# - bb16(rubyRegionId=0)
+# - bb17(rubyRegionId=0)
+bb20[rubyRegionId=0, firstDead=-1](is_successful: T::Boolean):
+    <ifTemp>$20: T::Boolean = is_successful: T::Boolean.!()
+    <ifTemp>$20 -> (T::Boolean ? bb22 : bb25)
+
+# backedges
+# - bb20(rubyRegionId=0)
+bb22[rubyRegionId=0, firstDead=-1]():
     <returnMethodTemp>$2: Integer(1) = 1
-    <unconditional> -> bb24
+    <unconditional> -> bb25
 
 # backedges
-# - bb13(rubyRegionId=0)
-# - bb15(rubyRegionId=0)
+# - bb14(rubyRegionId=0)
 # - bb16(rubyRegionId=0)
-# - bb19(rubyRegionId=0)
-# - bb21(rubyRegionId=0)
-bb24[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
+# - bb17(rubyRegionId=0)
+# - bb20(rubyRegionId=0)
+# - bb22(rubyRegionId=0)
+bb25[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
     <unconditional> -> bb1
 
