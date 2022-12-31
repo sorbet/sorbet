@@ -300,8 +300,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+            bool previous = gs->runningUnderAutogen;
+            gs->runningUnderAutogen = test.expectations.contains("autogen");
             rewriten = testSerialize(
                     *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            gs->runningUnderAutogen = previous;
         }
 
         handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree.toString(*gs); });
