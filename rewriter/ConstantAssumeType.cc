@@ -9,6 +9,10 @@ using namespace std;
 namespace sorbet::rewriter {
 
 void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
+    if (ctx.state.runningUnderAutogen) {
+        return;
+    }
+
     if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
         // Only do this transformation in files that are typed: true or higher, so that we know that
         // if this assumption about the type is wrong, that it will get checked down the line.
