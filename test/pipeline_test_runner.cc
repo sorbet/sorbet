@@ -294,32 +294,25 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         ast::ParsedFile localNamed;
 
-        if (!test.expectations.contains("autogen")) {
-            // Rewriter
-            ast::ParsedFile rewriten;
-            {
-                core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
+        // Rewriter
+        ast::ParsedFile rewriten;
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-                core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-                rewriten = testSerialize(
+            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+            rewriten = testSerialize(
                     *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
-            }
-
-            handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree.toString(*gs); });
-            handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree.showRaw(*gs); });
-
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
-
-            handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
-            handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
-        } else {
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-            localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
-            if (test.expectations.contains("rewrite-tree-raw") || test.expectations.contains("rewrite-tree")) {
-                FAIL_CHECK("Running Rewriter passes with autogen isn't supported");
-            }
         }
+
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree.showRaw(*gs); });
+
+        core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
+
+        handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
+
         trees.emplace_back(move(localNamed));
     }
 
