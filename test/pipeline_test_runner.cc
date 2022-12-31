@@ -302,8 +302,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             bool previous = gs->runningUnderAutogen;
             gs->runningUnderAutogen = test.expectations.contains("autogen");
-            rewriten = testSerialize(
-                    *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            rewriten =
+                testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             gs->runningUnderAutogen = previous;
         }
 
