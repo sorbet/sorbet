@@ -1,0 +1,13 @@
+--- configure.ac	2023-01-01 20:16:12
++++ configure.ac	2023-01-01 20:16:09
+@@ -495,6 +495,10 @@
+ 	if (vaddr > (sizeof(void *) << 3)) {
+ 		vaddr = sizeof(void *) << 3;
+ 	}
++	if (vaddr == 0) {
++		/* HACK: See https://github.com/jemalloc/jemalloc/issues/1997. */
++		vaddr = 48;
++	}
+ 	fprintf(f, "%u", vaddr);
+ 	fclose(f);
+ 	return 0;
