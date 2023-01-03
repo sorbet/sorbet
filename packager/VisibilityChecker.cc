@@ -192,6 +192,18 @@ class PropagateVisibility final {
                 e.addErrorLine(sym.loc(ctx), "Defined here");
             }
         }
+
+        // If sym is an enum value, it can't be exported directly. Instead, its wrapping enum class must be exported.
+        if (sym.isStaticField(ctx) && sym.owner(ctx).isClassOrModule()) {
+            auto scope = sym.owner(ctx).asClassOrModuleRef();
+            if (scope.data(ctx)->superClass() == core::Symbols::T_Enum()) {
+                if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                    e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
+                                scope.show(ctx));
+                    e.addErrorLine(sym.loc(ctx), "Defined here");
+                }
+            }
+        }
     }
 
     PropagateVisibility(const core::packages::PackageInfo &package) : package{package} {}
