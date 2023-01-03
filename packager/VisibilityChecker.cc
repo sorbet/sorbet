@@ -21,6 +21,7 @@ namespace {
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
+    const core::FileRef file;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
@@ -198,15 +199,23 @@ class PropagateVisibility final {
             auto scope = sym.owner(ctx).asClassOrModuleRef();
             if (scope.data(ctx)->superClass() == core::Symbols::T_Enum()) {
                 if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                    std::string scopeName = scope.show(ctx);
+                    std::string_view scopeNameView = std::string_view{scopeName};
                     e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
-                                scope.show(ctx));
+                                scopeNameView);
                     e.addErrorLine(sym.loc(ctx), "Defined here");
+
+                    e.addAutocorrect(core::AutocorrectSuggestion{
+                        fmt::format("Export `{}`", scopeNameView),
+                        {core::AutocorrectSuggestion::Edit{core::Loc{file, loc},
+                                                           fmt::format("export {}", std::move(scopeName))}}});
                 }
             }
         }
     }
 
-    PropagateVisibility(const core::packages::PackageInfo &package) : package{package} {}
+    PropagateVisibility(const core::packages::PackageInfo &package, const core::FileRef file)
+        : package{package}, file{file} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -299,7 +308,7 @@ public:
         const auto &package = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        PropagateVisibility pass{package};
+        PropagateVisibility pass{package, f.file};
 
         pass.exportPackageRoots(gs);
 
