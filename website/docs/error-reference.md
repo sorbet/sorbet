@@ -790,6 +790,34 @@ class A::B < PackageSpec
 end
 ```
 
+Additional signatures of error 3721 include:
+
+- A package exporting a constant only defined in .rbi files. RBI files are shims
+  to enable typechecking in places where Ruby metaprogramming prevents Sorbet
+  from statically interpreting the behavior of a class or module. Generally,
+  these files declare additional methods on classes defined in Ruby source
+  files, and should not define any new constants. However, there are some rare
+  exceptions where these files can define net-new constants. For these cases, we
+  enforce that these constants cannot be exported.
+- A package exporting an enum value:
+
+```ruby
+module MyPackage
+  class A < T::Enum
+    enums do
+      Val1 = new
+      Val2 = new
+    end
+  end
+end
+
+# -- my_package/__package.rb --
+
+class MyPackage < PackageSpec
+  export A::Val1 # not allowed, instead the full enum should be exported with `export A`
+end
+```
+
 ## 3722
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
