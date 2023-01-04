@@ -21,10 +21,10 @@ Query Query::createSymbolQuery(core::SymbolRef symbol) {
     return Query(Query::Kind::SYMBOL, core::Loc::none(), symbol, core::LocalVariable());
 }
 
-Query Query::createVarQuery(core::SymbolRef owner, core::LocalVariable variable) {
+Query Query::createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
     ENFORCE(owner.exists());
     ENFORCE(variable.exists());
-    return Query(Query::Kind::VAR, core::Loc::none(), owner, variable);
+    return Query(Query::Kind::VAR, enclosingLoc, owner, variable);
 }
 
 Query Query::createSuggestSigQuery(core::MethodRef method) {

@@ -336,7 +336,8 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         if (identResp->enclosingMethod.exists()) {
             core::NameRef localName = identResp->variable._name;
             auto references =
-                typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
+                typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
+                                                                   identResp->enclosingMethodLoc, identResp->variable),
                                   {identResp->termLoc.file()});
             std::vector<core::Loc> locations;
 

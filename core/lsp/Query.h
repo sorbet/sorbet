@@ -25,6 +25,9 @@ public:
     };
 
     Kind kind;
+    // If Kind == VAR, this is the loc of the MethodDef that encloses the variable
+    // If Kind == LOC, this is the loc to look for.
+    // Otherwise, this is meaningless.
     core::Loc loc;
     // If Kind == SYMBOL, this is the symbol that the query is looking for.
     // If Kind == SUGGEST_SIG, this is the method to suggest a sig for.
@@ -35,7 +38,7 @@ public:
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
     static Query createSymbolQuery(core::SymbolRef symbol);
-    static Query createVarQuery(core::SymbolRef owner, core::LocalVariable variable);
+    static Query createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
     static Query createSuggestSigQuery(core::MethodRef method);
 
     bool matchesSymbol(const core::SymbolRef &symbol) const;
