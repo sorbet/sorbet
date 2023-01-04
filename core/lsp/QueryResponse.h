@@ -43,7 +43,7 @@ public:
     const core::Loc enclosingMethodLoc;
     const core::TypeAndOrigins retType;
 };
-CheckSize(IdentResponse, 64, 8);
+CheckSize(IdentResponse, 72, 8);
 
 class LiteralResponse final {
 public:
