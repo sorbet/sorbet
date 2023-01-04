@@ -59,6 +59,8 @@ public:
     // For each file, set its package name.
     static void setPackageNameOnFiles(core::GlobalState &gs, const std::vector<core::FileRef> &files);
 
+    static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
+
     Packager() = delete;
 };
 } // namespace sorbet::packager
