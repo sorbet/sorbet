@@ -2,7 +2,7 @@
 
 extend T::Sig
 
-sig { params(arg0: T.untyped, arg1: T.untyped, arg2: T.untyped, arg3: T.untyped).returns(T::Array[T.untyped]) }
+sig { params(arg0: T.untyped, arg1: T.untyped, arg2: T.untyped, target: T.untyped).returns(T::Array[T.untyped]) }
 def example1(arg0, arg1 = nil, arg2:, target: nil)
 #            ^ apply-rename: [A] newName: target placeholderText: arg0
 #                  ^ apply-rename: [B] newName: target placeholderText: arg1
