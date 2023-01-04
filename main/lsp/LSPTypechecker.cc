@@ -583,15 +583,14 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
     }
     for (auto &t : indexedCopies) {
         optional<resolver::ParsedSig> signature;
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
         if (t.file == gs.lspQuery.loc.file()) {
-            auto ctx = core::Context(gs, core::Symbols::root(), t.file);
             // For a VAR query, gs.lspQuery.loc is the enclosing MethodDef's loc, which we can use
             // to find the signature before that MethodDef.
             auto queryLoc = gs.lspQuery.loc.copyWithZeroLength();
             signature = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
         }
-        LocalVarSaver localVarSaver(move(signature));
-        core::Context ctx(gs, core::Symbols::root(), t.file);
+        LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature));
         ast::TreeWalk::apply(ctx, localVarSaver, t.tree);
     }
 }

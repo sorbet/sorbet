@@ -9,11 +9,12 @@
 namespace sorbet::realmain::lsp {
 
 class LocalVarSaver {
-    std::optional<resolver::ParsedSig> signature;
     std::vector<core::Loc> enclosingMethodDefLoc;
+    std::optional<resolver::ParsedSig> signature;
 
 public:
-    LocalVarSaver(std::optional<resolver::ParsedSig> &&signature) : signature(move(signature)) {}
+    LocalVarSaver(core::Loc rootLoc, std::optional<resolver::ParsedSig> &&signature)
+        : enclosingMethodDefLoc({rootLoc}), signature(move(signature)) {}
 
     void postTransformBlock(core::Context ctx, ast::ExpressionPtr &local);
     void postTransformLocal(core::Context ctx, ast::ExpressionPtr &local);
