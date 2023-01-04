@@ -1163,9 +1163,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch && !bind.value.isSynthetic()) {
-                    core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc),
-                                                                                              i.what.data(inWhat), tp,
-                                                                                              ctx.owner.asMethodRef()));
+                    core::lsp::QueryResponse::pushQueryResponse(
+                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), i.what.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors() || !tp.origins.empty(),
@@ -1392,7 +1392,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat), tp,
-                                                      ctx.owner.asMethodRef()));
+                                                      ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
             },
             [&](cfg::Return &i) {
