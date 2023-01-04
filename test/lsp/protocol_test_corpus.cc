@@ -566,6 +566,26 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
     getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
 
+// Tests that Sorbet does not crash when attempting to format a file URI outside of the workspace.
+TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->supportsSorbetURIs = true;
+
+    // Manually invoke to customize rootURI and rootPath.
+    auto initializeResponses = sorbet::test::initializeLSP(
+        "/Users/jvilk/stripe/areallybigfoldername", "file://Users/jvilk/stripe/areallybigfoldername", *lspWrapper,
+        nextId, false, false, make_optional(move(initOptions)));
+
+    auto fileUri = "file:///Users/jvilk/Desktop/test.rb";
+    auto documentFormattingParams = make_unique<DocumentFormattingParams>(
+        make_unique<TextDocumentIdentifier>(string(fileUri)), make_unique<FormattingOptions>(0, 0));
+    auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting,
+                                                            move(documentFormattingParams))));
+    // Just assert that this doesn't crash -- it's really a no-op
+    INFO("Expected only a single response to the formatting request.");
+    REQUIRE_EQ(resp.size(), 1);
+}
+
 // Tests that Sorbet reports metrics about the request's response status for certain requests
 TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
     assertDiagnostics(initializeLSP(), {});

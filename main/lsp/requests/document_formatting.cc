@@ -75,7 +75,11 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
     string_view sourceView;
     if (maybeFileContents.has_value()) {
         sourceView = maybeFileContents.value();
-    } else {
+    } else if (sorbet::FileOps::exists(path)) {
+        // If the requested file path isn't in the workspace,
+        // we won't be able to load it, in which case
+        // we leave sourceView as empty and this becomes a no-op
+
         // In this case, the request is for a file that's
         // not open in the IDE, so we read it from disk instead
         sourceView = sorbet::FileOps::read(path);
