@@ -72,6 +72,17 @@ void LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr
                 core::lsp::QueryResponse::pushQueryResponse(
                     ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp,
                                                   methodDef.symbol, methodDefLoc));
+
+                if (this->signature.has_value()) {
+                    auto it = absl::c_find_if(this->signature->argTypes, [&](const auto &argSpec) {
+                        return argSpec.name == ctx.state.lspQuery.variable._name;
+                    });
+                    if (it != this->signature->argTypes.end()) {
+                        core::lsp::QueryResponse::pushQueryResponse(
+                            ctx, core::lsp::IdentResponse(it->nameLoc, localExp->localVariable, tp, methodDef.symbol,
+                                                          methodDefLoc));
+                    }
+                }
             }
         }
     }
