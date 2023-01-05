@@ -1,0 +1,22 @@
+my_package/__package.rb:4: Cannot export enum value `MyPackage::A::Val1`. Instead, export the entire enum `MyPackage::A` https://srb.help/3721
+     4 |  export MyPackage::A::Val1 # error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+    my_package/a.rb:6: Defined here
+     6 |      Val1 = new
+              ^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:4: Replace with `export MyPackage::A`
+     4 |  export MyPackage::A::Val1 # error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other_package/b.rb:5: `MyPackage::A::Val2` resolves but is not exported from `MyPackage` https://srb.help/3717
+     5 |    X = MyPackage::A::Val2
+                ^^^^^^^^^^^^^^^^^^
+    my_package/a.rb:7: Defined here
+     7 |      Val2 = new
+              ^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:4: Insert `export MyPackage::A`
+     4 |  export MyPackage::A::Val1 # error
+                                   ^
+Errors: 2

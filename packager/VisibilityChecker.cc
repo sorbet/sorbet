@@ -18,6 +18,18 @@ namespace sorbet::packager {
 
 namespace {
 
+static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
+        auto owner = sym.owner(gs);
+        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
+        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
+            return owner;
+        }
+    }
+
+    return core::Symbols::noSymbol();
+}
+
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
@@ -190,6 +202,22 @@ class PropagateVisibility final {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
                 e.addErrorLine(sym.loc(ctx), "Defined here");
+            }
+        }
+
+        // If sym is an enum value, it can't be exported directly. Instead, its wrapping enum class must be exported.
+        auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
+        if (enumClass.exists()) {
+            if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                std::string enumClassName = enumClass.show(ctx);
+                e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
+                            enumClassName);
+                e.addErrorLine(sym.loc(ctx), "Defined here");
+
+                e.addAutocorrect(core::AutocorrectSuggestion{
+                    fmt::format("Export `{}`", enumClassName),
+                    {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
+                                                       fmt::format("export {}", enumClassName)}}});
             }
         }
     }
@@ -377,7 +405,13 @@ public:
                 } else {
                     e.addErrorLine(definedHereLoc, "Defined here");
                 }
-                if (auto exp = pkg.addExport(ctx, lit.symbol)) {
+
+                auto symToExport = lit.symbol;
+                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                if (enumClass.exists()) {
+                    symToExport = enumClass;
+                }
+                if (auto exp = pkg.addExport(ctx, symToExport)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
                 if (!db.errorHint().empty()) {
