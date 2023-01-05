@@ -27,6 +27,7 @@
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
+#include "main/sig_finder/sig_finder.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -581,8 +582,15 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
         return;
     }
     for (auto &t : indexedCopies) {
-        LocalVarSaver localVarSaver;
-        core::Context ctx(gs, core::Symbols::root(), t.file);
+        optional<resolver::ParsedSig> signature;
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
+        if (t.file == gs.lspQuery.loc.file()) {
+            // For a VAR query, gs.lspQuery.loc is the enclosing MethodDef's loc, which we can use
+            // to find the signature before that MethodDef.
+            auto queryLoc = gs.lspQuery.loc.copyWithZeroLength();
+            signature = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
+        }
+        LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature));
         ast::TreeWalk::apply(ctx, localVarSaver, t.tree);
     }
 }

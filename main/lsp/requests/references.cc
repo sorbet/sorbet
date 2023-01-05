@@ -162,9 +162,10 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             if (fileIsTyped) {
                 auto loc = identResp->termLoc;
                 if (loc.exists()) {
-                    auto run2 = typechecker.query(
-                        core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
-                        {loc.file()});
+                    auto run2 = typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
+                                                                                   identResp->enclosingMethodLoc,
+                                                                                   identResp->variable),
+                                                  {loc.file()});
                     response->result = extractLocations(gs, run2.responses);
                 }
             } else {

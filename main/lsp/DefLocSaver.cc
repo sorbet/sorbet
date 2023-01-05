@@ -35,8 +35,8 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
                 }
                 tp.origins.emplace_back(ctx.locAt(localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx,
-                    core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, methodDef.symbol));
+                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp,
+                                                  methodDef.symbol, ctx.locAt(methodDef.loc)));
                 return;
             }
         }

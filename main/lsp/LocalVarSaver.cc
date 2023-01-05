@@ -31,7 +31,8 @@ void LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr &tr
             if (lspQueryMatch) {
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, method));
+                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, method,
+                                                  this->enclosingMethodDefLoc.back()));
             }
         }
     }
@@ -46,12 +47,18 @@ void LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr &tr
         // No need for type information; this is for a reference request.
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
-        core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::IdentResponse(ctx.locAt(local.loc), local.localVariable, tp, method));
+        core::lsp::QueryResponse::pushQueryResponse(ctx, core::lsp::IdentResponse(ctx.locAt(local.loc),
+                                                                                  local.localVariable, tp, method,
+                                                                                  this->enclosingMethodDefLoc.back()));
     }
 }
 
+void LocalVarSaver::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    this->enclosingMethodDefLoc.emplace_back(ctx.locAt(tree.loc()));
+}
+
 void LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    this->enclosingMethodDefLoc.pop_back();
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     // Check args.
@@ -60,11 +67,22 @@ void LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr
         if (auto *localExp = ast::MK::arg2Local(arg)) {
             bool lspQueryMatch = ctx.state.lspQuery.matchesVar(methodDef.symbol, localExp->localVariable);
             if (lspQueryMatch) {
-                // (Ditto)
+                auto methodDefLoc = ctx.locAt(methodDef.loc);
                 core::TypeAndOrigins tp;
                 core::lsp::QueryResponse::pushQueryResponse(
-                    ctx,
-                    core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp, methodDef.symbol));
+                    ctx, core::lsp::IdentResponse(ctx.locAt(localExp->loc), localExp->localVariable, tp,
+                                                  methodDef.symbol, methodDefLoc));
+
+                if (this->signature.has_value()) {
+                    auto it = absl::c_find_if(this->signature->argTypes, [&](const auto &argSpec) {
+                        return argSpec.name == ctx.state.lspQuery.variable._name;
+                    });
+                    if (it != this->signature->argTypes.end()) {
+                        core::lsp::QueryResponse::pushQueryResponse(
+                            ctx, core::lsp::IdentResponse(it->nameLoc, localExp->localVariable, tp, methodDef.symbol,
+                                                          methodDefLoc));
+                    }
+                }
             }
         }
     }

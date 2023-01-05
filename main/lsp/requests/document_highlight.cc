@@ -83,8 +83,10 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             auto identResp = resp->isIdent();
             auto loc = identResp->termLoc;
             if (loc.exists()) {
-                auto run2 = typechecker.query(
-                    core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable), {loc.file()});
+                auto run2 = typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
+                                                                               identResp->enclosingMethodLoc,
+                                                                               identResp->variable),
+                                              {loc.file()});
                 auto locations = extractLocations(gs, run2.responses);
                 response->result = locationsToDocumentHighlights(uri, move(locations));
             }

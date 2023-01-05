@@ -11,7 +11,7 @@ def example1(arg0, arg1 = nil, arg2:, arg3: nil)
   [arg0, arg1, arg2, arg3]
 end
 
-sig { params(args: T.untyped, kwargs: T.untyped).returns(T::Array[T.untyped]) }
+sig { params(args: T.untyped, target: T.untyped).returns(T::Array[T.untyped]) }
 def example2(*args, **target)
 #             ^ apply-rename: [E] newName: target placeholderText: args
 #                     ^ apply-rename: [F] newName: target placeholderText: kwargs
