@@ -21,6 +21,7 @@ namespace {
 static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
     if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
         auto owner = sym.owner(gs);
+        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
         if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
             return owner;
         }
@@ -32,7 +33,6 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
-    const core::FileRef file;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
@@ -206,25 +206,23 @@ class PropagateVisibility final {
         }
 
         // If sym is an enum value, it can't be exported directly. Instead, its wrapping enum class must be exported.
-        auto enumClass = packager::getEnumClassForEnumValue(ctx.state, sym);
+        auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 std::string enumClassName = enumClass.show(ctx);
-                std::string_view enumClassNameView = std::string_view{enumClassName};
                 e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
-                            enumClassNameView);
+                            enumClassName);
                 e.addErrorLine(sym.loc(ctx), "Defined here");
 
                 e.addAutocorrect(core::AutocorrectSuggestion{
-                    fmt::format("Export `{}`", enumClassNameView),
-                    {core::AutocorrectSuggestion::Edit{core::Loc{file, loc},
-                                                       fmt::format("export {}", std::move(enumClassName))}}});
+                    fmt::format("Export `{}`", enumClassName),
+                    {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
+                                                       fmt::format("export {}", enumClassName)}}});
             }
         }
     }
 
-    PropagateVisibility(const core::packages::PackageInfo &package, const core::FileRef file)
-        : package{package}, file{file} {}
+    PropagateVisibility(const core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -317,7 +315,7 @@ public:
         const auto &package = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        PropagateVisibility pass{package, f.file};
+        PropagateVisibility pass{package};
 
         pass.exportPackageRoots(gs);
 
@@ -409,7 +407,7 @@ public:
                 }
 
                 auto symToExport = lit.symbol;
-                auto enumClass = packager::getEnumClassForEnumValue(ctx.state, symToExport);
+                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
                 if (enumClass.exists()) {
                     symToExport = enumClass;
                 }
