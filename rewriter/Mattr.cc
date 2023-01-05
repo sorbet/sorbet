@@ -41,7 +41,8 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
         doReaders = true;
     } else if (send->fun == core::Names::mattrWriter() || send->fun == core::Names::cattrWriter()) {
         doWriters = true;
-    } else if (send->fun == core::Names::mattrAccessor() || send->fun == core::Names::cattrAccessor()) {
+    } else if (send->fun == core::Names::mattrAccessor() || send->fun == core::Names::cattrAccessor() ||
+               send->fun == core::Names::threadMattrAccessor() || send->fun == core::Names::threadCattrAccessor()) {
         doReaders = true;
         doWriters = true;
     } else if (classDefKind == ast::ClassDef::Kind::Class && send->fun == core::Names::classAttribute()) {
