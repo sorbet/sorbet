@@ -54,6 +54,9 @@ module T::Types
       when Enumerator::Lazy
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         true
+      when Enumerator::Chain
+        # Enumerators can be unbounded: see `[:foo, :bar].cycle`
+        true
       when Enumerator
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
         true
@@ -145,6 +148,8 @@ module T::Types
         end
       when Enumerator::Lazy
         T::Enumerator::Lazy[type_from_instances(obj)]
+      when Enumerator::Chain
+        T::Enumerator::Chain[type_from_instances(obj)]
       when Enumerator
         T::Enumerator[type_from_instances(obj)]
       when Set

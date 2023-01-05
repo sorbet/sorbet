@@ -335,6 +335,10 @@ module T::Enumerator::Lazy
   # Type syntax to specify the element type of a standard library Enumerator::Lazy
   def self.[](type); end
 end
+module T::Enumerator::Chain
+  # Type syntax to specify the element type of a standard library Enumerator::Chain
+  def self.[](type); end
+end
 
 # Type syntax for either a `true` or `false` value.
 #

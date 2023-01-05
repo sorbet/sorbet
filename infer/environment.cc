@@ -918,7 +918,10 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
         return returnType;
     }
 
-    if (!receiver.isUntyped() && receiver.derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
+    if (!receiver.isUntyped() && (receiver.derivesFrom(ctx, core::Symbols::Enumerator_Lazy()) ||
+                                  receiver.derivesFrom(ctx, core::Symbols::Enumerator_Chain()))
+
+    ) {
         return returnType;
     }
 

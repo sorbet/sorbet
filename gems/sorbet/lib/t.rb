@@ -48,6 +48,18 @@ module T
     def self.[](type); end
   end
 
+  module Enumerator
+    def self.[](type); end
+
+    module Lazy
+      def self.[](type); end
+    end
+
+    module Chain
+      def self.[](type); end
+    end
+  end
+
   module Range
     def self.[](type); end
   end

@@ -1023,3 +1023,20 @@ class Enumerator::Yielder < Object
   end
   def yield(*arg0); end
 end
+
+# [`Chain`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Chain.html)
+class Enumerator::Chain < Enumerator
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out)
+
+  sig do
+    type_parameters(:U).params(
+      arg0: T::Enumerable[T.type_parameter(:U)],
+    ).returns(
+      T::Enumerator::Chain[T.type_parameter(:U)]
+    )
+  end
+  def self.new(*arg0); end
+end

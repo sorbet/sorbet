@@ -682,7 +682,7 @@ module Opus::Types::Test
       end
     end
 
-    describe "TypedEnumerator" do
+    describe "TypedEnumeratorLazy" do
       it 'describes enumerators' do
         t = T::Enumerator::Lazy[Integer]
         assert_equal(
@@ -700,6 +700,28 @@ module Opus::Types::Test
       it 'can have its metatype instantiated' do
         assert_equal([2, 4, 6], T::Enumerator::Lazy[Integer].new([1, 2, 3]) do |yielder, value|
           yielder << value * 2
+        end.to_a)
+      end
+    end
+
+    describe "TypedEnumeratorChain" do
+      it 'describes enumerators' do
+        t = T::Enumerator::Chain[Integer]
+        assert_equal(
+          "T::Enumerator::Chain[Integer]",
+          t.describe_obj([1, 2].chain([3])))
+      end
+
+      it 'works if the type is right' do
+        type = T::Enumerator::Chain[Integer]
+        value = [1, 2].chain([3])
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'can have its metatype instantiated' do
+        assert_equal([2, 4, 6], T::Enumerator::Chain[Integer].new([1, 2], [3]).map do |value|
+          value * 2
         end.to_a)
       end
     end
@@ -914,6 +936,13 @@ module Opus::Types::Test
       it 'does not check lazy enumerables (for now)' do
         type = T::Enumerable[Integer]
         value = ["bad"].lazy
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'does not check chain enumerables (for now)' do
+        type = T::Enumerable[Integer]
+        value = ["bad"].chain([])
         msg = check_error_message_for_obj(type, value)
         assert_nil(msg)
       end

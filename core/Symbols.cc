@@ -136,7 +136,7 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
         bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
                                ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
                                ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator() ||
-                               ref == core::Symbols::Enumerator_Lazy();
+                               ref == core::Symbols::Enumerator_Lazy() || ref == core::Symbols::Enumerator_Chain();
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
@@ -582,7 +582,7 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
            *this == Symbols::T_Range() || *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
-           *this == Symbols::T_Enumerator_Lazy();
+           *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
 }
 
 ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
@@ -596,6 +596,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Enumerator();
     } else if (*this == Symbols::T_Enumerator_Lazy()) {
         return Symbols::Enumerator_Lazy();
+    } else if (*this == Symbols::T_Enumerator_Chain()) {
+        return Symbols::Enumerator_Chain();
     } else if (*this == Symbols::T_Range()) {
         return Symbols::Range();
     } else if (*this == Symbols::T_Set()) {
@@ -616,6 +618,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Enumerator();
     } else if (*this == Symbols::Enumerator_Lazy()) {
         return Symbols::T_Enumerator_Lazy();
+    } else if (*this == Symbols::Enumerator_Chain()) {
+        return Symbols::T_Enumerator_Chain();
     } else if (*this == Symbols::Range()) {
         return Symbols::T_Range();
     } else if (*this == Symbols::Set()) {
@@ -630,7 +634,7 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
 bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
     return *this == Symbols::Hash() || *this == Symbols::Array() || *this == Symbols::Set() ||
            *this == Symbols::Range() || *this == Symbols::Enumerable() || *this == Symbols::Enumerator() ||
-           *this == Symbols::Enumerator_Lazy();
+           *this == Symbols::Enumerator_Lazy() || *this == Symbols::Enumerator_Chain();
 }
 
 namespace {

@@ -490,6 +490,8 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::T_Enumerator());
     klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Lazy());
     ENFORCE(klass == Symbols::T_Enumerator_Lazy());
+    klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Chain());
+    ENFORCE(klass == Symbols::T_Enumerator_Chain());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     ENFORCE(klass == Symbols::T_Struct());
@@ -508,6 +510,10 @@ void GlobalState::initEmpty() {
     // Enumerator::Lazy
     klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
     ENFORCE(klass == Symbols::Enumerator_Lazy());
+
+    // Enumerator::Chain
+    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
+    ENFORCE(klass == Symbols::Enumerator_Chain());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
     ENFORCE(klass == Symbols::T_Private());
