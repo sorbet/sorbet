@@ -209,7 +209,85 @@ public:
 
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
+            addAncestor(ctx, klass, exp);
         }
+
+        if (!klass.ancestors.empty()) {
+            /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
+            for (auto &anc : klass.ancestors) {
+                if (!isValidAncestor(anc)) {
+                    if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
+                        e.setHeader("Superclasses must only contain constant literals");
+                    }
+                    anc = ast::MK::EmptyTree();
+                }
+            }
+        }
+    }
+
+    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::ExpressionPtr &node) {
+        auto send = ast::cast_tree<ast::Send>(node);
+        if (send == nullptr) {
+            ENFORCE(node.get() != nullptr);
+            return;
+        }
+
+        ast::ClassDef::ANCESTORS_store *dest;
+        if (send->fun == core::Names::include()) {
+            dest = &klass.ancestors;
+        } else if (send->fun == core::Names::extend()) {
+            dest = &klass.singletonAncestors;
+        } else {
+            return;
+        }
+        if (!send->recv.isSelfReference()) {
+            // ignore `something.include`
+            return;
+        }
+
+        const auto numPosArgs = send->numPosArgs();
+        if (numPosArgs == 0) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
+                e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
+            }
+            return;
+        }
+
+        if (send->hasBlock()) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
+                e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
+            }
+            return;
+        }
+
+        for (auto i = numPosArgs - 1; i >= 0; --i) {
+            // Reverse order is intentional: that's how Ruby does it.
+            auto &arg = send->getPosArg(i);
+            if (ast::isa_tree<ast::EmptyTree>(arg)) {
+                continue;
+            }
+            if (arg.isSelfReference()) {
+                dest->emplace_back(arg.deepCopy());
+                continue;
+            }
+            if (isValidAncestor(arg)) {
+                dest->emplace_back(arg.deepCopy());
+            } else {
+                if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
+                    e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
+                }
+            }
+        }
+    }
+
+    bool isValidAncestor(ast::ExpressionPtr &exp) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+            return true;
+        }
+        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
+            return isValidAncestor(lit->scope);
+        }
+        return false;
     }
 
     void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
@@ -1652,71 +1730,6 @@ class TreeSymbolizer {
         return localExpr;
     }
 
-    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::ExpressionPtr &node) {
-        auto send = ast::cast_tree<ast::Send>(node);
-        if (send == nullptr) {
-            ENFORCE(node.get() != nullptr);
-            return;
-        }
-
-        ast::ClassDef::ANCESTORS_store *dest;
-        if (send->fun == core::Names::include()) {
-            dest = &klass.ancestors;
-        } else if (send->fun == core::Names::extend()) {
-            dest = &klass.singletonAncestors;
-        } else {
-            return;
-        }
-        if (!send->recv.isSelfReference()) {
-            // ignore `something.include`
-            return;
-        }
-
-        const auto numPosArgs = send->numPosArgs();
-        if (numPosArgs == 0) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
-            }
-            return;
-        }
-
-        if (send->hasBlock()) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
-            }
-            return;
-        }
-
-        for (auto i = numPosArgs - 1; i >= 0; --i) {
-            // Reverse order is intentional: that's how Ruby does it.
-            auto &arg = send->getPosArg(i);
-            if (ast::isa_tree<ast::EmptyTree>(arg)) {
-                continue;
-            }
-            if (arg.isSelfReference()) {
-                dest->emplace_back(arg.deepCopy());
-                continue;
-            }
-            if (isValidAncestor(arg)) {
-                dest->emplace_back(arg.deepCopy());
-            } else {
-                if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
-                    e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
-                }
-            }
-        }
-    }
-
-    bool isValidAncestor(ast::ExpressionPtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
-            return true;
-        }
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope);
-        }
-        return false;
-    }
-
 public:
     TreeSymbolizer() {}
 
@@ -1769,21 +1782,6 @@ public:
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
 
-        for (auto &exp : klass.rhs) {
-            addAncestor(ctx, klass, exp);
-        }
-
-        if (!klass.ancestors.empty()) {
-            /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
-            for (auto &anc : klass.ancestors) {
-                if (!isValidAncestor(anc)) {
-                    if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
-                        e.setHeader("Superclasses must only contain constant literals");
-                    }
-                    anc = ast::MK::EmptyTree();
-                }
-            }
-        }
         auto loc = klass.declLoc;
         ast::InsSeq::STATS_store retSeqs;
         retSeqs.emplace_back(std::move(tree));
