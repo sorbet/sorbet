@@ -3460,9 +3460,7 @@ private:
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
 
-                // TODO(#4095) Raise error if `bind` used for non-`&blk` arg
-                if (!isBlkArg && (spec->rebind == core::Symbols::MagicBindToAttachedClass() ||
-                                  spec->rebind == core::Symbols::MagicBindToSelfType())) {
+                if (!isBlkArg && spec->rebind.exists()) {
                     if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::BindNonBlockParameter)) {
                         e.setHeader("Using `{}` is not permitted here", "bind");
                         e.addErrorNote("Only block arguments can use `{}`", "bind");
