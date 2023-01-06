@@ -1038,12 +1038,9 @@ struct PackageInfoFinder {
         if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
-                if (!name.has_value()) {
-                    ENFORCE(!isMutableContext);
-                    return;
-                }
+                ENFORCE(name.mangledName.exists());
 
-                if (name.value().mangledName == info->name.mangledName) {
+                if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
                         e.setHeader("Useless `{}`, because {} cannot import itself, ", "visible_to",
                                     info->name.toString(ctx));
@@ -1055,7 +1052,7 @@ struct PackageInfoFinder {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->visibleTo_.emplace_back(move(name.value()));
+                info->visibleTo_.emplace_back(move(name));
             }
         }
     }
