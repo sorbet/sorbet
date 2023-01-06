@@ -817,11 +817,12 @@ public:
                     "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
                     fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 if (packageForNamespace.exists()) {
-                    auto &namespaceParts = ctx.state.packageDB().getPackageInfo(packageForNamespace).fullName();
+                    auto &packageInfo = ctx.state.packageDB().getPackageInfo(packageForNamespace);
                     const auto &constantName = namespaces.currentConstantName();
-                    e.addErrorNote("Attempting to define class or method behavior in `{}`, which is in package namespace `{}`",
-                                   fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }),
-                                   fmt::map_join(namespaceParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    e.addErrorLine(
+                        ctx.locAt(constantName.back().second), "Attempting to define class or method behavior in `{}`",
+                        fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
+                    e.addErrorLine(packageInfo.declLoc(), "Enclosing package declared here");
                 }
             }
         }
