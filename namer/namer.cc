@@ -223,6 +223,13 @@ public:
                 }
             }
         }
+
+        auto &foundClass = klassName.klass(*foundDefs);
+        if (foundClass.name != core::Names::Constants::Root() && !ctx.file.data(ctx).isRBI() &&
+            ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
+            // TODO(dmitry) This won't find errors in fast-incremental mode.
+            foundClass.definesBehavior = true;
+        }
     }
 
     void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::ExpressionPtr &node) {
@@ -680,6 +687,9 @@ public:
         }
     }
 };
+
+using BehaviorLocs = InlinedVector<core::Loc, 1>;
+using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
 
 /**
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
@@ -1142,7 +1152,7 @@ private:
     }
 
     core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
-                                       bool willDeleteOldDefs) {
+                                       bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
         if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
@@ -1168,6 +1178,10 @@ private:
         // project) locs!
         if (symbol != core::Symbols::root() && !isUnknown) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+            if (klass.definesBehavior) {
+                auto &behaviorLocs = classBehaviorLocs[symbol];
+                behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
+            }
         }
         auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
         if (symbol != core::Symbols::root() && !isUnknown) {
@@ -1590,13 +1604,14 @@ public:
     SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
         : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
-    SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs) {
+    SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
+                                               ClassBehaviorLocsMap &classBehaviorLocs) {
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());
 
         for (const auto &klass : foundDefs.klasses()) {
-            state.definedClasses.emplace_back(
-                insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state, klass, willDeleteOldDefs));
+            state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state,
+                                                          klass, willDeleteOldDefs, classBehaviorLocs));
         }
 
         return state;
@@ -1660,9 +1675,6 @@ public:
         }
     }
 };
-
-using BehaviorLocs = InlinedVector<core::Loc, 1>;
-using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
 
 /**
  * Inserts newly created symbols (from SymbolDefiner) into a tree.
@@ -1791,13 +1803,6 @@ public:
         if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
             shouldLeaveAncestorForIDE(klass.ancestors.front())) {
             retSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.ancestors.front().deepCopy()));
-        }
-
-        if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
-            ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
-            // TODO(dmitry) This won't find errors in fast-incremental mode.
-            auto &locs = classBehaviorLocs[klass.symbol];
-            locs.emplace_back(ctx.locAt(klass.declLoc));
         }
 
         tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
@@ -2087,8 +2092,6 @@ public:
             }
         }
     }
-
-    ClassBehaviorLocsMap classBehaviorLocs;
 };
 
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
@@ -2192,6 +2195,37 @@ void populateFoundDefHashes(core::Context ctx, core::FoundDefinitions &foundDefs
     }
 }
 
+void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap &classBehaviorLocs) {
+    vector<pair<core::ClassOrModuleRef, BehaviorLocs>> conflicts;
+    for (auto &[ref, locs] : classBehaviorLocs) {
+        if (locs.size() < 2) {
+            continue;
+        }
+        fast_sort(locs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() < rhs.file(); });
+        // In rare cases we see multiple defs in same file. Ignore them.
+        auto last = unique(locs.begin(), locs.end(),
+                           [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() == rhs.file(); });
+        locs.erase(last, locs.end());
+        if (locs.size() < 2) {
+            continue;
+        }
+        conflicts.emplace_back(make_pair(ref, std::move(locs)));
+    }
+    classBehaviorLocs.clear();
+
+    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.id() < rhs.first.id(); });
+    for (const auto &[ref, locs] : conflicts) {
+        core::Loc mainLoc = locs[0];
+        core::Context ctx(gs, core::Symbols::root(), mainLoc.file());
+        if (auto e = ctx.beginError(mainLoc.offsets(), core::errors::Namer::MultipleBehaviorDefs)) {
+            e.setHeader("`{}` has behavior defined in multiple files", ref.show(ctx));
+            for (auto it = locs.begin() + 1; it != locs.end(); ++it) {
+                e.addErrorLine(*it, "Previous definition");
+            }
+        }
+    }
+}
+
 ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFinderResult> allFoundDefinitions,
                                           WorkerPool &workers,
                                           UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
@@ -2202,6 +2236,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
     uint32_t foundMethods = 0;
+    ClassBehaviorLocsMap classBehaviorLocs;
     UnorderedMap<core::FileRef, SymbolDefiner::State> incrementalDefinitions;
     auto willDeleteOldDefs = !oldFoundHashesForFiles.empty();
     for (auto &fileFoundDefinitions : allFoundDefinitions) {
@@ -2221,7 +2256,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         auto oldFoundHashes =
             frefIt == oldFoundHashesForFiles.end() ? optional<core::FoundDefHashes>() : std::move(frefIt->second);
         SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
-        auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs);
+        auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
             symbolDefiner.deleteOldDefinitions(ctx, state);
         }
@@ -2231,6 +2266,8 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
             populateFoundDefHashes(ctx, *fileFoundDefinitions.names, *foundHashesOut);
         }
     }
+
+    findConflictingClassDefs(gs, classBehaviorLocs);
     ENFORCE(incrementalDefinitions.size() == allFoundDefinitions.size());
     prodCounterAdd("types.input.foundmethods.total", foundMethods);
     count = 0;
@@ -2256,54 +2293,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
 
 struct SymbolizeTreesResult {
     vector<ast::ParsedFile> trees;
-    ClassBehaviorLocsMap classBehaviorLocs;
 };
-
-void mergeClassBehaviorLocs(const core::GlobalState &gs, ClassBehaviorLocsMap &merged,
-                            ClassBehaviorLocsMap &threadRes) {
-    Timer timeit(gs.tracer(), "naming.symbolizeTreesMergeClass");
-    if (merged.empty()) {
-        swap(merged, threadRes);
-        return;
-    }
-    for (auto [ref, threadLocs] : threadRes) {
-        auto &mergedLocs = merged[ref];
-        mergedLocs.insert(mergedLocs.end(), make_move_iterator(threadLocs.begin()),
-                          make_move_iterator(threadLocs.end()));
-    }
-    threadRes.clear();
-}
-
-void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap &map) {
-    vector<pair<core::ClassOrModuleRef, BehaviorLocs>> conflicts;
-    for (auto &[ref, locs] : map) {
-        if (locs.size() < 2) {
-            continue;
-        }
-        fast_sort(locs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() < rhs.file(); });
-        // In rare cases we see multiple defs in same file. Ignore them.
-        auto last = unique(locs.begin(), locs.end(),
-                           [](const auto &lhs, const auto &rhs) -> bool { return lhs.file() == rhs.file(); });
-        locs.erase(last, locs.end());
-        if (locs.size() < 2) {
-            continue;
-        }
-        conflicts.emplace_back(make_pair(ref, std::move(locs)));
-    }
-    map.clear();
-
-    fast_sort(conflicts, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.id() < rhs.first.id(); });
-    for (const auto &[ref, locs] : conflicts) {
-        core::Loc mainLoc = locs[0];
-        core::Context ctx(gs, core::Symbols::root(), mainLoc.file());
-        if (auto e = ctx.beginError(mainLoc.offsets(), core::errors::Namer::MultipleBehaviorDefs)) {
-            e.setHeader("`{}` has behavior defined in multiple files", ref.show(ctx));
-            for (auto it = locs.begin() + 1; it != locs.end(); ++it) {
-                e.addErrorLine(*it, "Previous definition");
-            }
-        }
-    }
-}
 
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
@@ -2328,14 +2318,12 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             }
         }
         if (!output.trees.empty()) {
-            output.classBehaviorLocs = std::move(inserter.classBehaviorLocs);
             resultq->push(move(output), output.trees.size());
         }
     });
     trees.clear();
 
     {
-        ClassBehaviorLocsMap classBehaviorLocs;
         SymbolizeTreesResult threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
@@ -2343,10 +2331,8 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                              make_move_iterator(threadResult.trees.end()));
-                mergeClassBehaviorLocs(gs, classBehaviorLocs, threadResult.classBehaviorLocs);
             }
         }
-        findConflictingClassDefs(gs, classBehaviorLocs);
     }
     fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return trees;
