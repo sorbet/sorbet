@@ -107,6 +107,7 @@ struct FoundClass final {
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
+    bool definesBehavior = false;
 
     enum class Kind : uint8_t {
         Unknown,

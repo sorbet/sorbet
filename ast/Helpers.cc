@@ -28,7 +28,9 @@ bool definesBehavior(const ExpressionPtr &expr) {
         },
 
         [&](const ast::Assign &asgn) {
-            if (ast::isa_tree<ast::ConstantLit>(asgn.lhs)) {
+            // this check can fire before the namer converts lhs constants in assignments from UnresolvedConstantLit ->
+            // ConstantLit, so we have to allow for both types.
+            if (ast::isa_tree<ast::ConstantLit>(asgn.lhs) || ast::isa_tree<ast::UnresolvedConstantLit>(asgn.lhs)) {
                 result = false;
             } else {
                 result = true;
