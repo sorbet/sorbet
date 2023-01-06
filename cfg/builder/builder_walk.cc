@@ -193,6 +193,8 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
+    vars.reserve(h.keys.size() * 2);
+    locs.reserve(h.keys.size() * 2);
     for (int i = 0; i < h.keys.size(); i++) {
         LocalRef keyTmp = cctx.newTemporary(core::Names::hashTemp());
         LocalRef valTmp = cctx.newTemporary(core::Names::hashTemp());
@@ -495,6 +497,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 InlinedVector<LocalRef, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
+                size_t totalArgs = s.numNonBlockArgs() + int(s.hasBlock());
+                args.reserve(totalArgs);
+                argLocs.reserve(totalArgs);
                 const auto posEnd = s.numPosArgs();
                 for (auto argIdx = 0; argIdx < posEnd; ++argIdx) {
                     auto &exp = s.getPosArg(argIdx);
@@ -865,6 +870,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Array &a) {
                 InlinedVector<LocalRef, 2> vars;
                 InlinedVector<core::LocOffsets, 2> locs;
+                vars.reserve(a.elems.size());
+                locs.reserve(a.elems.size());
                 for (auto &elem : a.elems) {
                     LocalRef tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem, current);
