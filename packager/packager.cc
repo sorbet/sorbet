@@ -805,7 +805,9 @@ public:
                     fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 if (packageForNamespace.exists()) {
                     auto &namespaceParts = ctx.state.packageDB().getPackageInfo(packageForNamespace).fullName();
-                    e.addErrorNote("Attempting to define class or method behavior in package namespace `{}`",
+                    const auto &constantName = namespaces.currentConstantName();
+                    e.addErrorNote("Attempting to define class or method behavior in `{}`, which is in package namespace `{}`",
+                                   fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.show(ctx); }),
                                    fmt::map_join(namespaceParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 }
             }
