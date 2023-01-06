@@ -61,7 +61,11 @@ class PropagateVisibility final {
     }
 
     void exportParentNamespace(core::GlobalState &gs, core::ClassOrModuleRef owner) {
-        while (owner.exists() && !owner.data(gs)->flags.isExported && this->definedByThisPackage(gs, owner)) {
+        // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
+        // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
+        // as that violates the private-by-default paradigm.
+        while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
+               this->definedByThisPackage(gs, owner)) {
             owner.data(gs)->flags.isExported = true;
             owner = owner.data(gs)->owner;
         }

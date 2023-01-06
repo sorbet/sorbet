@@ -73,8 +73,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Opus>::<C Util>::<C Nesting>::<C Public>.public_method()
 
-    <emptyTree>::<C Opus>::<C Util>::<C Nesting>.nesting_method()
-
     <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
 
     <emptyTree>::<C Test>::<C Opus>::<C TestImported>::<C TITestClass>
@@ -96,8 +94,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C Test>::<C Opus>::<C Util>::<C TestUtil>
 
     <emptyTree>::<C Opus>::<C Util>::<C Nesting>::<C Public>.public_method()
-
-    <emptyTree>::<C Opus>::<C Util>::<C Nesting>.nesting_method()
 
     <emptyTree>::<C Opus>::<C TestImported>::<C TIClass>
 
@@ -189,8 +185,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Test>::<C Opus>::<C Util><<C <todo sym>>> < ()
     class <emptyTree>::<C TestUtil><<C <todo sym>>> < (::<todo sym>)
     end
-
-    <emptyTree>::<C Opus>::<C Util>::<C Nesting>.nesting_method()
 
     <emptyTree>::<C Opus>::<C Util>::<C Nesting>::<C Public>.public_method()
   end
