@@ -1032,6 +1032,8 @@ struct PackageInfoFinder {
 
             if (compatibilityAnnotation == core::Names::strict()) {
                 info->strictAutoloaderCompatibility_ = true;
+            }
+        }
 
         if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {

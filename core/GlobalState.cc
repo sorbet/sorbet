@@ -577,9 +577,6 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visible_to()).arg(Names::arg0()).build();
-    ENFORCE(method == Symbols::PackageSpec_visible_to());
-
     klass = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(klass == Symbols::Encoding());
 
@@ -601,6 +598,9 @@ void GlobalState::initEmpty() {
                  .arg(Names::arg0())
                  .build();
     ENFORCE(method == Symbols::PackageSpec_autoloader_compatibility());
+
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visible_to()).arg(Names::arg0()).build();
+    ENFORCE(method == Symbols::PackageSpec_visible_to());
 
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());

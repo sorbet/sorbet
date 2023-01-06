@@ -1004,10 +1004,6 @@ public:
         return MethodRef::fromRaw(9);
     }
 
-    static MethodRef PackageSpec_visible_to() {
-        return MethodRef::fromRaw(10);
-    }
-
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(86);
     }
@@ -1017,10 +1013,14 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(11);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef todoMethod() {
+        return MethodRef::fromRaw(11);
+    }
+
+    static MethodRef rootStaticInit() {
         return MethodRef::fromRaw(12);
     }
 
@@ -1028,7 +1028,7 @@ public:
         return MethodRef::fromRaw(13);
     }
 
-    static MethodRef rootStaticInit() {
+    static MethodRef PackageSpec_visible_to() {
         return MethodRef::fromRaw(14);
     }
 
