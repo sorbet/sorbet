@@ -76,6 +76,9 @@ public:
     void operator()(std::string *out, core::NameRef name) const {
         out->append(name.shortName(gs));
     }
+    void operator()(std::string *out, pair<core::NameRef, core::LocOffsets> p) const {
+        out->append(p.first.shortName(gs));
+    }
 };
 
 struct PackageName {
@@ -504,8 +507,10 @@ class PackageNamespaces final {
 
     vector<Bound> bounds;
     vector<core::NameRef> nameParts;
+    vector<core::LocOffsets> namePartsLocs;
     vector<pair<core::NameRef, uint16_t>> curPkg;
     core::NameRef foundTestNS = core::NameRef::noName();
+    core::LocOffsets foundTestNSLoc;
 
     static constexpr uint16_t SKIP_BOUND_VAL = 0;
 
@@ -517,18 +522,20 @@ public:
     }
 
     int depth() const {
+        ENFORCE(nameParts.size() == namePartsLocs.size());
         return nameParts.size();
     }
 
-    const vector<core::NameRef> currentConstantName() const {
-        if (!foundTestNS.exists()) {
-            return nameParts;
+    const vector<pair<core::NameRef, core::LocOffsets>> currentConstantName() const {
+        vector<pair<core::NameRef, core::LocOffsets>> res;
+
+        if (foundTestNS.exists()) {
+            res.emplace_back(foundTestNS, foundTestNSLoc);
         }
 
-        auto res = vector<core::NameRef>{};
-        res.emplace_back(foundTestNS);
-        for (const auto nm : nameParts) {
-            res.emplace_back(nm);
+        ENFORCE(nameParts.size() == namePartsLocs.size());
+        for (size_t i = 0; i < nameParts.size(); ++i) {
+            res.emplace_back(nameParts[i], namePartsLocs[i]);
         }
         return res;
     }
@@ -550,7 +557,7 @@ public:
         return false;
     }
 
-    void pushName(core::Context ctx, core::NameRef name) {
+    void pushName(core::Context ctx, core::NameRef name, core::LocOffsets loc) {
         if (skips > 0) {
             skips++;
             return;
@@ -560,12 +567,14 @@ public:
         if (isTestFile && boundsEmpty && !foundTestNS.exists()) {
             if (isPrimaryTestNamespace(name)) {
                 foundTestNS = name;
+                foundTestNSLoc = loc;
                 return;
             } else if (!isTestNamespace(ctx, name)) {
                 // Inside a test file, but not inside a test namespace. Set bounds such that
                 // begin == end, stopping any subsequent search.
                 bounds.emplace_back(begin, end);
                 nameParts.emplace_back(name);
+                namePartsLocs.emplace_back(loc);
                 begin = end = 0;
                 return;
             }
@@ -582,6 +591,7 @@ public:
 
         bounds.emplace_back(begin, end);
         nameParts.emplace_back(name);
+        namePartsLocs.emplace_back(loc);
 
         auto lb = std::lower_bound(packages.begin() + begin, packages.begin() + end, nameParts,
                                    [ctx](auto pkgNr, auto &nameParts) -> bool {
@@ -617,6 +627,7 @@ public:
         if (isTestFile && bounds.size() == 0 && foundTestNS.exists()) {
             ENFORCE(nameParts.empty());
             foundTestNS = core::NameRef::noName();
+            foundTestNSLoc = core::LocOffsets::none();
             return;
         }
 
@@ -638,12 +649,14 @@ public:
         end = bounds.back().second;
         bounds.pop_back();
         nameParts.pop_back();
+        namePartsLocs.pop_back();
     }
 
     ~PackageNamespaces() {
         // Book-keeping sanity checks
         ENFORCE(bounds.empty());
         ENFORCE(nameParts.empty());
+        ENFORCE(namePartsLocs.empty());
         ENFORCE(begin == 0);
         ENFORCE(end = packages.size());
         ENFORCE(curPkg.empty());
@@ -665,7 +678,7 @@ class EnforcePackagePrefix final {
     int errorDepth = 0;
     int rootConsts = 0;
     bool useTestNamespace = false;
-    vector<core::NameRef> tmpNameParts;
+    vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg, bool isTestFile)
@@ -807,7 +820,7 @@ public:
                     auto &namespaceParts = ctx.state.packageDB().getPackageInfo(packageForNamespace).fullName();
                     const auto &constantName = namespaces.currentConstantName();
                     e.addErrorNote("Attempting to define class or method behavior in `{}`, which is in package namespace `{}`",
-                                   fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.show(ctx); }),
+                                   fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }),
                                    fmt::map_join(namespaceParts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 }
             }
@@ -819,7 +832,7 @@ private:
         ENFORCE(tmpNameParts.empty());
         auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
-            tmpNameParts.emplace_back(lit->cnst);
+            tmpNameParts.emplace_back(lit->cnst, lit->loc);
             auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
@@ -830,12 +843,12 @@ private:
         }
         if (rootConsts == 0) {
             for (auto it = tmpNameParts.rbegin(); it != tmpNameParts.rend(); ++it) {
-                namespaces.pushName(ctx, *it);
+                namespaces.pushName(ctx, it->first, it->second);
             }
         }
 
         if (prevDepth == 0 && isTestFile && namespaces.depth() > 0) {
-            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back()) ||
+            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first) ||
                                !isSecondaryTestNamespace(ctx, pkg.name.fullName.parts[0]);
         }
 
