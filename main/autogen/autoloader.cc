@@ -549,28 +549,27 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         inputq->push(i, 1);
     }
 
-    workers.multiplexJob(
-        "runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
-            int n = 0;
-            bool anyFilesModified = false;
-            {
-                Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
-                int idx = 0;
-                fmt::memory_buffer buf;
+    workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
+        int n = 0;
+        bool anyFilesModified = false;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
+            int idx = 0;
+            fmt::memory_buffer buf;
 
-                for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
-                    ++n;
-                    auto &task = tasks[idx];
-                    buf.clear();
-                    task.node.renderAutoloadSrc(buf, gs, alCfg);
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
+            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+                ++n;
+                auto &task = tasks[idx];
+                buf.clear();
+                task.node.renderAutoloadSrc(buf, gs, alCfg);
+                bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
 
-                    anyFilesModified = anyFilesModified || rewritten;
-                }
+                anyFilesModified = anyFilesModified || rewritten;
             }
+        }
 
-            outputq->push(make_pair(getAndClearThreadCounters(), anyFilesModified), n);
-        });
+        outputq->push(make_pair(getAndClearThreadCounters(), anyFilesModified), n);
+    });
 
     bool modified = false;
     pair<CounterState, bool> out;
