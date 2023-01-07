@@ -1,0 +1,7 @@
+# typed: false
+# stripe-mode: true
+# exclude-from-file-update: true
+
+module Foo
+   def meth; end # Defines behavior
+end
