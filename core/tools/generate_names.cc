@@ -451,6 +451,7 @@ NameDef names[] = {
     {"autoloader_compatibility"},
     {"legacy"},
     {"strict"},
+    {"exportAll", "export_all!"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 

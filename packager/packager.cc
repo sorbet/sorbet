@@ -188,6 +188,10 @@ public:
         return strictAutoloaderCompatibility_;
     }
 
+    bool exportAll() const {
+        return exportAll_;
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
     PackageName name;
@@ -203,7 +207,9 @@ public:
     vector<Export> exports_;
 
     // Whether the code in this package is compatible for path-based autoloading.
-    bool strictAutoloaderCompatibility_;
+    bool strictAutoloaderCompatibility_ : 1;
+    // Whether this package should just export everything
+    bool exportAll_ : 1;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -975,6 +981,10 @@ struct PackageInfoFinder {
             send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
         }
 
+        if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
+            info->exportAll_ = true;
+        }
+
         if (send.fun == core::Names::autoloader_compatibility() && send.numPosArgs() == 1) {
             // Parse autoloader_compatibility DSL and set strict bit on PackageInfoImpl if configured
             auto *compatibilityAnnotationLit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
@@ -1072,6 +1082,18 @@ struct PackageInfoFinder {
             return;
         }
 
+        if (info->exportAll()) {
+            // we're only here because exports exist, which means if
+            // `exportAll` is set then we've got conflicting
+            // information about export; flag the exports as wrong
+            for (auto it = exported.begin(); it != exported.end(); ++it) {
+                if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
+                    e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
+                                info->name.toString(ctx), "export_all!");
+                }
+            }
+        }
+
         fast_sort(exported, Export::lexCmp);
         vector<size_t> dupInds;
         for (auto it = exported.begin(); it != exported.end(); ++it) {
@@ -1113,6 +1135,7 @@ struct PackageInfoFinder {
             case core::Names::export_().rawId():
             case core::Names::restrict_to_service().rawId():
             case core::Names::autoloader_compatibility().rawId():
+            case core::Names::exportAll().rawId():
                 return true;
             default:
                 return false;

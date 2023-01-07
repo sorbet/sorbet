@@ -599,6 +599,9 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::PackageSpec_autoloader_compatibility());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
+    ENFORCE(method == Symbols::PackageSpec_export_all());
+
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);

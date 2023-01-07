@@ -387,9 +387,10 @@ public:
             return;
         }
 
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
         bool isExported = false;
         if (lit.symbol.isClassOrModule()) {
-            isExported = lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+            isExported = pkg.exportAll() || lit.symbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (lit.symbol.isFieldOrStaticField()) {
             isExported = lit.symbol.asFieldRef().data(ctx)->flags.isExported;
         }
@@ -397,7 +398,6 @@ public:
         // Did we use a constant that wasn't exported?
         if (!isExported) {
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
                 auto definedHereLoc = lit.symbol.loc(ctx);
                 if (definedHereLoc.file().data(ctx).isRBI()) {
@@ -430,7 +430,6 @@ public:
         if (!importType.has_value()) {
             // We failed to import the package that defines the symbol
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
                 bool isTestImport = otherFile.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
@@ -453,7 +452,6 @@ public:
             // We used a symbol from a `test_import` in a non-test context
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 if (auto exp = this->package.addImport(ctx, pkg, false)) {
                     e.addAutocorrect(std::move(exp.value()));
                 }
