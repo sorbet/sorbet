@@ -1,0 +1,10 @@
+# typed: false
+# assert-slow-path: true
+
+module Baz
+end
+
+module Foo # error: `Foo` has behavior defined in multiple files
+  def meth1; end
+end
+

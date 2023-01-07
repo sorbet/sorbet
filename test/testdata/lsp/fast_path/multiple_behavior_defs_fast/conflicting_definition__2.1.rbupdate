@@ -1,0 +1,7 @@
+# typed: false
+# assert-fast-path: conflicting_definition__2.rb
+
+module Foo
+  def meth2; end
+end
+
