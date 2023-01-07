@@ -1,6 +1,8 @@
 # typed: false
 # assert-fast-path: conflicting_definition__2.rb
 
+# Introducing a behavior def problem here will not be reported on the fast path
+
 module Foo
   def meth2; end
 end
