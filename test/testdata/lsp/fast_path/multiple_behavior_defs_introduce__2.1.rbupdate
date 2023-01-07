@@ -1,5 +1,5 @@
 # typed: false
-# assert-fast-path: conflicting_definition__2.rb
+# assert-fast-path: multiple_behavior_defs_introduce__2.rb
 
 # Introducing a behavior def problem here will not be reported on the fast path
 

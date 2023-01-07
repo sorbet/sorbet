@@ -1,6 +1,6 @@
 # typed: false
 # stripe-mode: true
-# assert-fast-path: conflicting_definition__2.rb
+# assert-fast-path: multiple_behavior_defs_fix__2.rb
 # exclude-from-file-update: true
 
 # This error does not go away on the fast path, even though it should.
