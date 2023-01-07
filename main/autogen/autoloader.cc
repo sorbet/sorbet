@@ -455,10 +455,6 @@ struct RenderAutoloadTask {
     const DefTree &node;
 };
 
-struct ModificationState {
-    bool modified;
-};
-
 // This function has two duties:
 // * It creates autoload rendering tasks which will occur in a later parallel phase.
 // * It creates subdirectories when needed, as they are required to write the autoloader output.
@@ -526,9 +522,6 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         populateAutoloadTasksAndCreateDirectories(gs, tasks, dirsToDelete, alCfg, path, root);
     }
 
-    auto modificationState = ModificationState{false};
-    std::mutex modificationMutex;
-
     if (FileOps::exists(path)) {
         Timer timeit(gs.tracer(), "removeExistingFiles");
 
@@ -551,52 +544,46 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
 
     // Parallelize writing the files.
     auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
-    auto outputq = make_shared<BlockingBoundedQueue<CounterState>>(tasks.size());
+    auto outputq = make_shared<BlockingBoundedQueue<pair<CounterState, bool>>>(tasks.size());
     for (int i = 0; i < tasks.size(); ++i) {
         inputq->push(i, 1);
     }
 
-    workers.multiplexJob(
-        "runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq, &modificationState, &modificationMutex]() {
-            int n = 0;
-            {
-                Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
-                int idx = 0;
-                fmt::memory_buffer buf;
+    workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
+        int n = 0;
+        bool anyFilesModified = false;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsWorker");
+            int idx = 0;
+            fmt::memory_buffer buf;
 
-                for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
-                    ++n;
-                    auto &task = tasks[idx];
-                    buf.clear();
-                    task.node.renderAutoloadSrc(buf, gs, alCfg);
-                    bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
+            for (auto result = inputq->try_pop(idx); !result.done(); result = inputq->try_pop(idx)) {
+                ++n;
+                auto &task = tasks[idx];
+                buf.clear();
+                task.node.renderAutoloadSrc(buf, gs, alCfg);
+                bool rewritten = FileOps::writeIfDifferent(task.filePath, string_view{&buf.data()[0], buf.size()});
 
-                    // Initial read should be cheap, read outside mutex
-                    if (rewritten && !modificationState.modified) {
-                        modificationMutex.lock();
-                        // Re-test inside mutex
-                        if (!modificationState.modified) {
-                            modificationState.modified = true;
-                        }
-                        modificationMutex.unlock();
-                    }
-                }
+                anyFilesModified = anyFilesModified || rewritten;
             }
+        }
 
-            outputq->push(getAndClearThreadCounters(), n);
-        });
+        outputq->push(make_pair(getAndClearThreadCounters(), anyFilesModified), n);
+    });
 
-    CounterState out;
+    bool modified = false;
+    pair<CounterState, bool> out;
     for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
          res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
         if (!res.gotItem()) {
             continue;
         }
-        counterConsume(move(out));
+        counterConsume(move(out.first));
+        modified = modified || out.second;
     }
 
     const std::string mtimeFile = join(path, "_mtime_stamp");
-    if (!FileOps::exists(mtimeFile) || modificationState.modified) {
+    if (!FileOps::exists(mtimeFile) || modified) {
         FileOps::write(mtimeFile, to_string(std::time(0)));
     }
 }
