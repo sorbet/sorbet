@@ -604,6 +604,9 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visible_to()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_visible_to());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
+    ENFORCE(method == Symbols::PackageSpec_export_all());
+
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);

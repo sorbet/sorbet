@@ -453,6 +453,7 @@ NameDef names[] = {
     {"legacy"},
     {"strict"},
     {"visible_to"},
+    {"exportAll", "export_all!"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
