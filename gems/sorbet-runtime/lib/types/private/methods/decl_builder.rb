@@ -42,16 +42,16 @@ module T::Private::Methods
         some_or_only = params.any? ? "some" : "only"
         raise BuilderError.new(<<~MSG)
           'params' was called with #{some_or_only} positional arguments, but it needs to be called with keyword arguments.
-          the keyword arguments' keys must match the name and order of your method's parameters.
+          The keyword arguments' keys must match the name and order of the method's parameters.
         MSG
       end
 
       if params.empty?
         raise BuilderError.new(<<~MSG)
           'params' was called without any arguments, but it needs to be called with keyword arguments.
-          the keyword arguments' keys must match the name and order of your method's parameters.
+          The keyword arguments' keys must match the name and order of the method's parameters.
 
-          If your method has no parameters, then you should omit 'params' entirely.
+          Omit 'params' entirely for methods with no parameters.
         MSG
       end
 
