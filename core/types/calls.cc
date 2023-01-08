@@ -1453,6 +1453,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     TypePtr &resultType = result.returnType;
 
+    if (args.name == core::Names::eqeq() && args.args.size() == 1) {
+        // TODO(jez) Using `fullType` will report identical errors twice...
+        auto left = Types::dropSubtypesOf(gs, args.fullType.type, Symbols::NilClass());
+        auto right = Types::dropSubtypesOf(gs, args.args[0]->type, Symbols::NilClass());
+
+        if (!Types::isSubTypeUnderConstraint(gs, *constr, left, right, UntypedMode::AlwaysCompatible) ||
+            !Types::isSubTypeUnderConstraint(gs, *constr, right, left, UntypedMode::AlwaysCompatible)) {
+            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+                e.setHeader("`{}` and `{}` do not overlap so comparison is always false", args.fullType.type.show(gs),
+                            args.args[0]->type.show(gs));
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+            }
+            // TODO(jez) Also set resultType to FalseClass?
+        }
+    }
+
     auto *intrinsic = method.data(gs)->getIntrinsic();
     if (intrinsic != nullptr) {
         intrinsic->apply(gs, args, result);
