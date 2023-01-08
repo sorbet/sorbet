@@ -4061,6 +4061,25 @@ public:
     }
 } Array_zip;
 
+class Symbol_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        if (args.fullType.type == Types::Symbol() && args.args[0]->type == Types::String()) {
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+                e.setHeader("Comparison between `{}` and `{}` is always false", "Symbol", "String");
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+            }
+        }
+    }
+} Symbol_eqeq;
+
 class Kernel_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4317,6 +4336,8 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::plus(), &Array_plus},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
+
+    {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
