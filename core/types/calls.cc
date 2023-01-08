@@ -4068,6 +4068,7 @@ public:
             return;
         }
 
+        // TODO(jez) handle `nil`?
         if (args.fullType.type == Types::Symbol() && args.args[0]->type == Types::String()) {
             auto funLoc = args.funLoc();
             auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
@@ -4075,6 +4076,7 @@ public:
                 e.setHeader("Comparison between `{}` and `{}` is always false", "Symbol", "String");
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                // TODO(jez) Add autocorrect tack on `.to_sym`
             }
         }
     }
@@ -4087,6 +4089,7 @@ public:
             return;
         }
 
+        // TODO(jez) handle `nil`?
         if (args.fullType.type == Types::String() && args.args[0]->type == Types::Symbol()) {
             auto funLoc = args.funLoc();
             auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
@@ -4094,6 +4097,7 @@ public:
                 e.setHeader("Comparison between `{}` and `{}` is always false", "String", "Symbol");
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                // TODO(jez) Add autocorrect tack on `.to_sym`
             }
         }
     }
