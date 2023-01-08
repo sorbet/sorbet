@@ -1437,7 +1437,7 @@ class Array < Object
   # ```
   sig do
     params(
-        arg0: Elem,
+        arg0: T.nilable(Elem),
     )
     .returns(T::Boolean)
   end
