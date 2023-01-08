@@ -4103,6 +4103,27 @@ public:
     }
 } String_eqeq;
 
+class BasicObject_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.suppressErrors || args.args.size() != 1) {
+            return;
+        }
+
+        auto intersection = Types::all(gs, args.fullType.type, args.args[0]->type);
+
+        if (intersection.isBottom()) {
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+                e.setHeader("No common type in equality comparison");
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+            }
+        }
+    }
+} BasicObject_eqeq;
+
 class Kernel_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4362,6 +4383,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
     {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},
+    {Symbols::BasicObject(), Intrinsic::Kind::Instance, Names::eqeq(), &BasicObject_eqeq},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
