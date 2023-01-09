@@ -5,23 +5,44 @@ nested/nested.rb:5: File belongs to package `Root::Nested` but defines a constan
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:40: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+nested/nested.rb:40: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
     40 |  sig {returns(NilClass)}
           ^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Attempting to define class or method behavior in package namespace `Root`
+    nested/nested.rb:36: Defining behavior in `Root` instead:
+    36 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:41: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+nested/nested.rb:41: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
     41 |  def self.method
           ^^^^^^^^^^^^^^^
-  Note:
-    Attempting to define class or method behavior in package namespace `Root`
+    nested/nested.rb:36: Defining behavior in `Root` instead:
+    36 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:37: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested` https://srb.help/3713
+nested/nested.rb:37: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
     37 |  extend T::Sig
           ^^^^^^^^^^^^^
-  Note:
-    Attempting to define class or method behavior in package namespace `Root`
+    nested/nested.rb:36: Defining behavior in `Root` instead:
+    36 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
 nested/nested.rb:38: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     38 |  NOT_IN_PACKAGE = T.let(1, Integer)

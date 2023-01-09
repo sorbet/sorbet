@@ -3,7 +3,7 @@
 
 module Outer
   def self.bad
-# ^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Outer::Inner`
+# ^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
   end
 
 
@@ -13,5 +13,5 @@ module Outer
   end
 
   include Inner::Mixin
-# ^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Outer::Inner`
+# ^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
 end
