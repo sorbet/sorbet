@@ -29,6 +29,7 @@ module Opus::Foo
 
   # util/__package.rb exposed via export_for_test, cannot access from here:
   Opus::Util::Nesting.nesting_method
+# ^^^^^^^^^^^^^^^^^^^ error: `Opus::Util::Nesting` resolves but is not exported from `Opus::Util`
 
 
   # via test_import Opus::TestImported

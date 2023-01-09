@@ -2265,7 +2265,13 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
 
 uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) const {
     uint32_t result = _hash(name.shortName(gs));
-    result = mix(result, this->flags.serialize());
+
+    // Bit of a hack to ensure that the isBehaviorDefining flag is not serialized.
+    // We do not want behavior changes to trigger the slow path.
+    auto flagsCopy = this->flags;
+    flagsCopy.isBehaviorDefining = false;
+    result = mix(result, std::move(flagsCopy).serialize());
+
     result = mix(result, this->owner.id());
     result = mix(result, this->superClass_.id());
     // argumentsOrMixins, typeParams, typeAliases

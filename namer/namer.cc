@@ -1181,6 +1181,7 @@ private:
             if (klass.definesBehavior) {
                 auto &behaviorLocs = classBehaviorLocs[symbol];
                 behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
+                symbol.data(ctx)->flags.isBehaviorDefining = true;
             }
         }
         auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
