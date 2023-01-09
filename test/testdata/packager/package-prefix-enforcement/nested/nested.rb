@@ -41,7 +41,7 @@ module Root
 end
 
   class Root::Stringy < String
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
 end
 
 class Root::Nested::Stringy < String
@@ -49,14 +49,14 @@ end
 
 module Root
   extend T::Sig
-# ^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
   sig {returns(NilClass)}
-# ^^^^^^^^^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
   def self.method
-# ^^^^^^^^^^^^^^^ error: Class or method behavior may not be defined outside of the enclosing package namespace `Root::Nested`
+# ^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
     nil
   end
 end
