@@ -694,8 +694,8 @@ void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, sha
     try {
         containedFiles = opts.fs->listFilesInDir(fileNormalized, opts.allowedExtensions, workerPool, true,
                                                  opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
-    } catch (sorbet::FileNotFoundException e) {
-        logger->error(e.what());
+    } catch (sorbet::FileNotFoundException &e) {
+        logger->error("{}", e.what());
         throw EarlyReturnWithCode(1);
     } catch (sorbet::FileNotDirException) {
         logger->error("Path `{}` is not a directory", dir);
