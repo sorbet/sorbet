@@ -36,8 +36,8 @@ cc_binary(
         "//rewriter",
         "//test/helpers",
         "@cxxopts",
-        "@doctest",
-        "@doctest//:doctest_custom_main",
+        "@doctest//doctest",
+        "@doctest//doctest:custom_main",
     ],
 )
 
@@ -58,8 +58,8 @@ cc_binary(
         "//payload",
         "//test/helpers",
         "@cxxopts",
-        "@doctest",
-        "@doctest//:doctest_custom_main",
+        "@doctest//doctest",
+        "@doctest//doctest:custom_main",
     ],
 )
 
@@ -92,8 +92,8 @@ cc_binary(
         "//rewriter",
         "//test/helpers",
         "@cxxopts",
-        "@doctest",
-        "@doctest//:doctest_custom_main",
+        "@doctest//doctest",
+        "@doctest//doctest:custom_main",
     ],
 )
 
@@ -140,8 +140,8 @@ cc_test(
         "//parser",
         "//payload",
         "@cxxopts",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -163,8 +163,8 @@ cc_test(
         "//local_vars",
         "//packager",
         "//parser",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -183,8 +183,8 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 

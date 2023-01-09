@@ -45,7 +45,7 @@ cc_test(
         "//namer",
         "//resolver",
         "//rewriter",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )

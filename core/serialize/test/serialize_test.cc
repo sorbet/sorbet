@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 // has to go first as it violates our requirements
 #include "core/serialize/pickler.h"
 #include "core/serialize/serialize.h"

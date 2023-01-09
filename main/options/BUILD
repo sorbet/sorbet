@@ -35,7 +35,7 @@ cc_test(
     deps = [
         "//core",
         "//main/options",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )

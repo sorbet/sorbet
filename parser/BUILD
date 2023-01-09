@@ -83,7 +83,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":parser",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )

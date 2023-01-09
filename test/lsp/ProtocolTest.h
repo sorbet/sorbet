@@ -1,7 +1,7 @@
 #ifndef TEST_LSP_PROTOCOLTEST_H
 #define TEST_LSP_PROTOCOLTEST_H
 
-#include "doctest.h"
+#include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "common/Counters.h"
 #include "common/Counters_impl.h"

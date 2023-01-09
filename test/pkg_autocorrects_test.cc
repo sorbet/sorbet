@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"

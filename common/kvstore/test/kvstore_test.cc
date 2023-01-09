@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 // has to go first as it violates our requirements
 #include "spdlog/spdlog.h"
 // has to go above stdout_sinks.h; this comment prevents reordering.
