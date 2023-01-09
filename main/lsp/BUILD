@@ -143,8 +143,8 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -161,8 +161,8 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -179,8 +179,8 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -197,8 +197,8 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )
 
@@ -215,7 +215,7 @@ cc_test(
         "lsp",
         "//payload",
         "//test/helpers",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )

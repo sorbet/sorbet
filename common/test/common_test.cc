@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 // violates our requirements, thus has to go first
 #include "common/FileOps.h"
 #include "common/Levenstein.h"

@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "test/helpers/CounterStateDatabase.h"
 

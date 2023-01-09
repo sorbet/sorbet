@@ -41,7 +41,7 @@ cc_test(
         "//local_vars",
         "//parser",
         "//rewriter",
-        "@doctest",
-        "@doctest//:doctest_main",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
     ],
 )

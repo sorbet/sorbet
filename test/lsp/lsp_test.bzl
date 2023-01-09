@@ -74,7 +74,7 @@ def protocol_tests(cc_files):
                 "//main/lsp",
                 "//payload",
                 "//test/helpers",
-                "@doctest",
-                "@doctest//:doctest_main",
+                "@doctest//doctest",
+                "@doctest//doctest:main",
             ],
         )

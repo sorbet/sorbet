@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 #include <cxxopts.hpp>
 // has to go first as it violates our requirements
 

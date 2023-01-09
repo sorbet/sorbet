@@ -16,10 +16,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "doctest",
-        urls = _github_public_urls("doctest/doctest/archive/2.4.1.zip"),
-        sha256 = "d8d304db5a2e6d42e290b23a08a68db05478755e64db57b067cd805738e2c56f",
-        build_file = "@com_stripe_ruby_typer//third_party:doctest.BUILD",
-        strip_prefix = "doctest-2.4.1",
+        urls = _github_public_urls("doctest/doctest/archive/v2.4.9.zip"),
+        sha256 = "88a552f832ef3e4e7b733f9ab4eff5d73d7c37e75bebfef4a3339bf52713350d",
+        strip_prefix = "doctest-2.4.9",
     )
 
     http_archive(

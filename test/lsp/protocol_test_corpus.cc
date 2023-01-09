@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "ProtocolTest.h"
 #include "absl/strings/match.h"

@@ -15,7 +15,7 @@ cc_library(
     deps = [
         "//core",
         "//main/lsp",
-        "@doctest",
+        "@doctest//doctest",
         "@dtl",
     ],
 )
