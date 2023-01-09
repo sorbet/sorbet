@@ -813,16 +813,17 @@ public:
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader(
-                    "Class or method behavior may not be defined outside of the enclosing package namespace `{}`",
-                    fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.setHeader("This file must only define behavior in enclosing package `{}`",
+                            fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                const auto &constantName = namespaces.currentConstantName();
+                e.addErrorLine(ctx.locAt(constantName.back().second), "Defining behavior in `{}` instead:",
+                               fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here",
+                               fmt::map_join(pkgName, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 if (packageForNamespace.exists()) {
                     auto &packageInfo = ctx.state.packageDB().getPackageInfo(packageForNamespace);
-                    const auto &constantName = namespaces.currentConstantName();
-                    e.addErrorLine(
-                        ctx.locAt(constantName.back().second), "Attempting to define class or method behavior in `{}`",
-                        fmt::map_join(constantName, "::", [&](const auto &nr) { return nr.first.show(ctx); }));
-                    e.addErrorLine(packageInfo.declLoc(), "Enclosing package declared here");
+                    e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here",
+                                   constantName.back().first.show(ctx));
                 }
             }
         }
