@@ -71,7 +71,7 @@ module Opus::Types::Test
         'params' was called without any arguments, but it needs to be called with keyword arguments.
         The keyword arguments' keys must match the name and order of the method's parameters.
 
-        If your method has no parameters, then you should omit 'params' entirely.
+        Omit 'params' entirely for methods with no parameters.
       MSG
     end
 
