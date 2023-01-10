@@ -45,10 +45,21 @@ def example1(x)
     p(x)
   end
 
+  if x.str == x.maybe_sym
+    #      ^^ error: Comparison between `String` and `T.nilable(Symbol)` is always false
+    p(x)
+  end
+
   if x.maybe_sym == x.str
     #            ^^ error: Comparison between `T.nilable(Symbol)` and `String` is always false
     p(x)
   end
+
+  if x.maybe_str == x.sym
+    #            ^^ error: Comparison between `T.nilable(String)` and `Symbol` is always false
+    p(x)
+  end
+
 
   if x.maybe_sym == x.maybe_str
     p(x)
@@ -66,11 +77,23 @@ def example1(x)
     p(x)
   end
 
+  if x.str == x.str_or_sym
+    p(x)
+  end
+
   if x.str_or_sym == x.str_or_sym
     p(x)
   end
 
   if x.int_or_sym == x.str_or_sym
+    p(x)
+  end
+
+  if x.str_or_int == x.maybe_sym
+    p(x)
+  end
+
+  if x.str_or_int == x.str_or_sym
     p(x)
   end
 

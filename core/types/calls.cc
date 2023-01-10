@@ -4078,7 +4078,7 @@ public:
                             args.args[0]->type.show(gs));
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                if (args.args[0]->type == Types::String()) {
+                if (args.args[0]->type == Types::String() && args.argLoc(0).exists()) {
                     e.replaceWith("Convert arg to Symbol", args.argLoc(0).copyEndWithZeroLength(), ".to_sym");
                 }
             }
@@ -4093,15 +4093,22 @@ public:
             return;
         }
 
-        // TODO(jez) handle `nil`?
-        if (args.fullType.type == Types::String() && args.args[0]->type == Types::Symbol()) {
+        auto isOnlyString =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
+
+        if (isOnlyString &&
+            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
+            Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             auto funLoc = args.funLoc();
             auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
             if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
-                e.setHeader("Comparison between `{}` and `{}` is always false", "String", "Symbol");
+                e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
+                            args.args[0]->type.show(gs));
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                // TODO(jez) Add autocorrect tack on `.to_sym`
+                if (args.args[0]->type == Types::Symbol() && args.receiverLoc().exists()) {
+                    e.replaceWith("Convert arg to Symbol", args.receiverLoc().copyEndWithZeroLength(), ".to_sym");
+                }
             }
         }
     }
