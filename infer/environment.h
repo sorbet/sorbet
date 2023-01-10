@@ -152,6 +152,10 @@ class Environment {
         core::TypeAndOrigins typeAndOrigins;
         TestedKnowledge knowledge;
         bool knownTruthy;
+
+        VariableState() = default;
+        VariableState(core::TypePtr type, core::Loc loc)
+            : typeAndOrigins(std::move(type), loc) {}
     };
     // TODO(jvilk): Use vectors.
     UnorderedMap<cfg::LocalRef, VariableState> _vars;

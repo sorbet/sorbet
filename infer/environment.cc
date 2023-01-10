@@ -721,18 +721,24 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             return;
         }
 
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
-        tp.origins.emplace_back(loc);
-        if (tp.type.isUntyped()) {
-            tp.type = core::Types::falsyTypes();
+        auto fnd = _vars.find(cond);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
+        core::TypePtr type;
+        if (taoType.isUntyped()) {
+            type = core::Types::falsyTypes();
         } else {
-            tp.type = core::Types::all(ctx, tp.type, core::Types::falsyTypes());
-            if (tp.type.isBottom()) {
+            type = core::Types::all(ctx, taoType, core::Types::falsyTypes());
+            if (type.isBottom()) {
                 isDead = true;
                 return;
             }
         }
-        setTypeAndOrigin(cond, tp);
+        if (fnd == _vars.end()) {
+            _vars.try_emplace(cond, std::move(type), loc);
+        } else {
+            fnd->second.typeAndOrigins.type = move(type);
+            fnd->second.typeAndOrigins.origins.emplace_back(loc);
+        }
     } else {
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
         tp.origins.emplace_back(loc);
