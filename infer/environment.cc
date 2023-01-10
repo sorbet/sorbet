@@ -792,13 +792,18 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
-        tp.origins.emplace_back(loc);
+        auto fnd = _vars.find(typeTested.first);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
 
-        if (!tp.type.isUntyped()) {
-            tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
-            setTypeAndOrigin(typeTested.first, tp);
-            if (tp.type.isBottom()) {
+        if (!taoType.isUntyped()) {
+            auto type = core::Types::approximateSubtract(ctx, taoType, typeTested.second);
+            if (fnd == _vars.end()) {
+                fnd = _vars.try_emplace(typeTested.first, std::move(type), loc).first;
+            } else {
+                fnd->second.typeAndOrigins.type = std::move(type);
+                fnd->second.typeAndOrigins.origins.emplace_back(loc);
+            }
+            if (fnd->second.typeAndOrigins.type.isBottom()) {
                 isDead = true;
                 return;
             }
