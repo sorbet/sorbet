@@ -4068,15 +4068,19 @@ public:
             return;
         }
 
-        // TODO(jez) handle `nil`?
-        if (args.fullType.type == Types::Symbol() && args.args[0]->type == Types::String()) {
+        auto isOnlySymbol =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
+        if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             auto funLoc = args.funLoc();
             auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
             if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
-                e.setHeader("Comparison between `{}` and `{}` is always false", "Symbol", "String");
+                e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
+                            args.args[0]->type.show(gs));
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                // TODO(jez) Add autocorrect tack on `.to_sym`
+                if (args.args[0]->type == Types::String()) {
+                    e.replaceWith("Convert arg to Symbol", args.argLoc(0).copyEndWithZeroLength(), ".to_sym");
+                }
             }
         }
     }
@@ -4102,27 +4106,6 @@ public:
         }
     }
 } String_eqeq;
-
-class BasicObject_eqeq : public IntrinsicMethod {
-public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.suppressErrors || args.args.size() != 1) {
-            return;
-        }
-
-        auto intersection = Types::all(gs, args.fullType.type, args.args[0]->type);
-
-        if (intersection.isBottom()) {
-            auto funLoc = args.funLoc();
-            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
-                e.setHeader("No common type in equality comparison");
-                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-            }
-        }
-    }
-} BasicObject_eqeq;
 
 class Kernel_proc : public IntrinsicMethod {
 public:
@@ -4383,7 +4366,6 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
     {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},
-    {Symbols::BasicObject(), Intrinsic::Kind::Instance, Names::eqeq(), &BasicObject_eqeq},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
