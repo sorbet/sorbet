@@ -3945,6 +3945,25 @@ To fix this error, provide an explicit annotation (or simply accept the
 For more information, read
 [Why does Sorbet sometimes need type annotations?](why-type-annotations.md).
 
+## 7046
+
+For a limited number of types, Sorbet checks whether it looks like a call to
+`==` is out of place. Currently, Sorbet only does these checks when the left
+operand of `==` is:
+
+- `Symbol`
+- `String`
+
+Sorbet is unable to apply these checks for all types, because `==` can be
+overridden in arbitrary ways, including to allow for implicit conversion between
+types unrelated types. This means that Sorbet will sometimes miss reporting this
+error in places where we would like it to, and can't be changed to report an
+error without breaking valid code.
+
+To fix this error, ensure that the left and right operands' types match before
+doing the comparison. For example try converting `String`s to `Symbol`s with
+`to_sym` (or vice versa with `to_s`).
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

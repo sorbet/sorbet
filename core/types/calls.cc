@@ -4068,6 +4068,8 @@ public:
             return;
         }
 
+        // NOTE:
+        // If you update this, please update error-reference to mention which types this check applies to
         auto isOnlySymbol =
             Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
         if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
@@ -4096,6 +4098,8 @@ public:
         auto isOnlyString =
             Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
 
+        // NOTE:
+        // If you update this, please update error-reference to mention which types this check applies to
         if (isOnlyString &&
             Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
             Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
