@@ -1129,7 +1129,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // by desugar and redacting the `SendResponse` so LSP features work
                 // more like developers expect.
                 const bool isDesugarTripleEqSend = send.fun == core::Names::tripleEq() && send.funLoc.empty();
-                // Something like `X = Foo` will be rewritten to `X = Magic.<suggest-constant-type>(Foo)`
+                // Something like `X = Foo` will be rewritten to `X = Magic.<suggest-constant-type>(Foo)` if `Foo` fails to resolve.
                 // We don't want to report a send response for the <suggest-constant-type> call here.
                 const bool isSuggestConstantType = send.fun == core::Names::suggestConstantType();
                 if (lspQueryMatch && !isDesugarTripleEqSend && !isSuggestConstantType) {
