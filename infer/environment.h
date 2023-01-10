@@ -156,6 +156,8 @@ class Environment {
         VariableState() = default;
         VariableState(core::TypePtr type, core::Loc loc)
             : typeAndOrigins(std::move(type), loc) {}
+        VariableState(const core::TypeAndOrigins &typeAndOrigins)
+            : typeAndOrigins(typeAndOrigins) {}
     };
     // TODO(jvilk): Use vectors.
     UnorderedMap<cfg::LocalRef, VariableState> _vars;
