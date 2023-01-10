@@ -32,15 +32,29 @@ module T::Private::Methods
       )
     end
 
-    def params(**params)
+    def params(*unused_positional_params, **params)
       check_live!
       if !decl.params.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .params twice")
       end
 
-      if params.empty?
-        raise BuilderError.new("params expects keyword arguments")
+      if unused_positional_params.any?
+        some_or_only = params.any? ? "some" : "only"
+        raise BuilderError.new(<<~MSG)
+          'params' was called with #{some_or_only} positional arguments, but it needs to be called with keyword arguments.
+          The keyword arguments' keys must match the name and order of the method's parameters.
+        MSG
       end
+
+      if params.empty?
+        raise BuilderError.new(<<~MSG)
+          'params' was called without any arguments, but it needs to be called with keyword arguments.
+          The keyword arguments' keys must match the name and order of the method's parameters.
+
+          Omit 'params' entirely for methods with no parameters.
+        MSG
+      end
+
       decl.params = params
 
       self

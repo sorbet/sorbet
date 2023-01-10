@@ -31,6 +31,20 @@ module Opus::Types::Test
       assert_equal(true, builder.decl.finalized)
     end
 
+    it 'requires params not have any positional args' do
+      ex = assert_raises do
+        Class.new do
+          extend T::Sig
+          sig {params(Integer, s: String).void}
+          def self.foo(s); end; foo
+        end
+      end
+      assert_includes(ex.message, <<~MSG.chomp)
+        'params' was called with some positional arguments, but it needs to be called with keyword arguments.
+        The keyword arguments' keys must match the name and order of the method's parameters.
+      MSG
+    end
+
     it 'requires params be keyword args' do
       ex = assert_raises do
         Class.new do
@@ -39,7 +53,10 @@ module Opus::Types::Test
           def self.foo; end; foo
         end
       end
-      assert_includes(ex.message, "wrong number of arguments (given 1, expected 0)")
+      assert_includes(ex.message, <<~MSG.chomp)
+        'params' was called with only positional arguments, but it needs to be called with keyword arguments.
+        The keyword arguments' keys must match the name and order of the method's parameters.
+      MSG
     end
 
     it 'requires params have an arg' do
@@ -50,7 +67,12 @@ module Opus::Types::Test
           def self.foo; end; foo
         end
       end
-      assert_includes(ex.message, "params expects keyword arguments")
+      assert_includes(ex.message, <<~MSG.chomp)
+        'params' was called without any arguments, but it needs to be called with keyword arguments.
+        The keyword arguments' keys must match the name and order of the method's parameters.
+
+        Omit 'params' entirely for methods with no parameters.
+      MSG
     end
 
     describe 'modes' do
