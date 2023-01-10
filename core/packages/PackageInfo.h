@@ -15,6 +15,7 @@ class Context;
 } // namespace sorbet::core
 
 namespace sorbet::core::packages {
+
 enum class ImportType {
     Normal,
     Test,
@@ -33,6 +34,8 @@ public:
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
     std::string show(const core::GlobalState &gs) const;
+    core::ClassOrModuleRef getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
+                                                             core::SymbolRef suggestionScope) const;
 
     virtual std::optional<ImportType> importsPackage(core::NameRef mangledName) const = 0;
 

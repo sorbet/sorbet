@@ -57,4 +57,40 @@ string PackageInfo::show(const core::GlobalState &gs) const {
                          "::", [&](string *out, core::NameRef name) { absl::StrAppend(out, name.show(gs)); });
 }
 
+core::ClassOrModuleRef getTestSym(const core::GlobalState &gs) {
+    return core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test()).asClassOrModuleRef();
+}
+
+core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const core::SymbolRef sym) {
+    auto testSym = getTestSym(gs);
+    if (!testSym.exists()) {
+        return core::Symbols::root();
+    }
+
+    if (sym.isUnderNamespace(gs, testSym)) {
+        return testSym;
+    }
+
+    return core::Symbols::root();
+}
+
+// Given a package named Project::MyPackage, returns the class/module ref corresponding to
+// the symbol Project::MyPackage or Test::Project::MyPackage, depending on whether the suggestion scope
+// is a primary namespace constant or a test namespace constant. See packager/packager.cc for further explanation of
+// test namespaces.
+core::ClassOrModuleRef PackageInfo::getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
+                                                                      const core::SymbolRef suggestionScope) const {
+    auto parentSym = getParentNamespaceSym(gs, suggestionScope);
+    auto curSym = parentSym;
+
+    for (const auto part : fullName()) {
+        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
+        if (!curSym.exists()) {
+            return curSym;
+        }
+    }
+
+    return curSym;
+}
+
 } // namespace sorbet::core::packages

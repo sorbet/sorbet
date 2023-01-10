@@ -1,0 +1,37 @@
+example/__package.rb:4: Unable to resolve constant `A` https://srb.help/5002
+     4 |  export Some::Example::A
+                 ^^^^^^^^^^^^^^^^
+  Did you mean `Some::Example::B`? Use `-a` to autocorrect
+    example/__package.rb:4: Replace with `Some::Example::B`
+     4 |  export Some::Example::A
+                 ^^^^^^^^^^^^^^^^
+    example/b.rb:4: `Some::Example::B` defined here
+     4 |  class B
+          ^^^^^^^
+
+example/__package.rb:5: Unable to resolve constant `A` https://srb.help/5002
+     5 |  export Test::Some::Example::A
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `Test::Some::Example::B`? Use `-a` to autocorrect
+    example/__package.rb:5: Replace with `Test::Some::Example::B`
+     5 |  export Test::Some::Example::A
+                 ^^^^^^^^^^^^^^^^^^^^^^
+    example/test/b.rb:4: `Test::Some::Example::B` defined here
+     4 |  class B
+          ^^^^^^^
+
+example/__package.rb:6: Unable to resolve constant `Exmpl` https://srb.help/5002
+     6 |  export Some::Exmpl
+                 ^^^^^^^^^^^
+  Did you mean `Some::Example`? Use `-a` to autocorrect
+    example/__package.rb:6: Replace with `Some::Example`
+     6 |  export Some::Exmpl
+                 ^^^^^^^^^^^
+    example/b.rb:3: `Some::Example` defined here
+     3 |module Some::Example
+        ^^^^^^^^^^^^^^^^^^^^
+
+example/__package.rb:7: Unable to resolve constant `So` https://srb.help/5002
+     7 |  export So
+                 ^^
+Errors: 4

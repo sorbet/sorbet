@@ -564,6 +564,12 @@ public:
         return show(gs, {});
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
+
+    /*
+     * Returns true if symbol is under the namespace of otherClass. Foo::Bar::A is under its own namespace, also is
+     * under the namespace of Foo::Bar and Foo.
+     */
+    bool isUnderNamespace(const GlobalState &gs, core::ClassOrModuleRef otherClass) const;
 };
 CheckSize(SymbolRef, 4, 4);
 

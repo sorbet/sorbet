@@ -731,8 +731,34 @@ private:
                 if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
                     suggestScope.isClassOrModule()) {
                     suggestionCount++;
+
                     auto suggested =
                         suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+
+                    if (ctx.file.data(ctx).isPackage() &&
+                        !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
+                        // In case the file is a __package.rb file, and the scope is not a PackageSpec-scoped symbol,
+                        // the resolution error must be in an export statement. In this case, suggestions must be
+                        // restricted to within the current package only. They must not cross package boundaries as
+                        // out-of-package suggestions would be inherently invalid.
+
+                        // TODO (aadi-stripe) Find a less brittle way of ascertaining whether the error comes from an
+                        // export statement. Currently (1/9/23) this happens to work because export statements are the
+                        // only part of the packager DSL that do not prepend PackageSpec to the relevant constant.
+
+                        // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
+                        // isn't handled until the VisibilityChecker pass.
+                        const auto pkgRootSymbol = ctx.state.packageDB()
+                                                       .getPackageForFile(ctx.state, ctx.file)
+                                                       .getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
+
+                        auto it = std::remove_if(suggested.begin(), suggested.end(),
+                                                 [&pkgRootSymbol, &gs](auto &suggestion) -> bool {
+                                                     return !suggestion.symbol.isUnderNamespace(gs, pkgRootSymbol);
+                                                 });
+                        suggested.erase(it, suggested.end());
+                    }
+
                     if (suggested.size() > 3) {
                         suggested.resize(3);
                     }
