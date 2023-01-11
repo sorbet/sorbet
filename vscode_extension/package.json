@@ -300,7 +300,7 @@
     "async": "^2.6.4",
     "elegant-spinner": "^2.0.0",
     "lodash": "^4.17.21",
-    "minimatch": "^3.0.3",
+    "minimatch": "^3.0.5",
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
