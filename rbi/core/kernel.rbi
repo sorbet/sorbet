@@ -1913,10 +1913,9 @@ module Kernel
   # #<S name="dave", state="TX">
   # ```
   sig do
-    params(
-        arg0: BasicObject,
-    )
-    .returns(NilClass)
+    type_parameters(:T)
+      .params(arg0: T.type_parameter(:T))
+      .returns(T.type_parameter(:T))
   end
   def p(*arg0); end
 
