@@ -44,7 +44,7 @@ defined # error: does not exist
 d # error: does not exist
 #^ completion: def, defined?, do, ...
 
-# `else` is more common--be sureit comes before `ensure`
+# `else` is more common--be sure it comes before `ensure`
 els # error: does not exist
 #  ^ completion: else, elsif
 
