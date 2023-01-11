@@ -795,6 +795,28 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     return res;
 }
 
+bool SymbolRef::isUnderNamespace(const GlobalState &gs, ClassOrModuleRef otherClass) const {
+    if (isClassOrModule() && otherClass == asClassOrModuleRef()) {
+        return true;
+    }
+
+    // if we are checking for nesting under root itself, which is always true
+    if (otherClass == core::Symbols::root()) {
+        return true;
+    }
+
+    auto curOwner = owner(gs).asClassOrModuleRef();
+    while (curOwner != core::Symbols::root()) {
+        if (curOwner == otherClass) {
+            return true;
+        }
+
+        curOwner = curOwner.data(gs)->owner;
+    }
+
+    return false;
+}
+
 vector<ClassOrModule::FuzzySearchResult>
 ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
     // Performance of this method is bad, to say the least.
@@ -804,6 +826,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     //   - best candidate per every outer scope if it's better than all the candidates in inner scope
     //   - globally best candidate in ALL scopes.
     vector<ClassOrModule::FuzzySearchResult> result;
+
     FuzzySearchResult best;
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();

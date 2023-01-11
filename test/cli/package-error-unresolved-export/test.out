@@ -5,13 +5,6 @@ __package.rb:7: Unable to resolve constant `WildlyMisspelled` https://srb.help/5
 __package.rb:8: Unable to resolve constant `NameWithTipo` https://srb.help/5002
      8 |  export Foo::BasePkg::NameWithTipo
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean `Foo::Other::NameWithTipo`? Use `-a` to autocorrect
-    __package.rb:8: Replace with `Foo::Other::NameWithTipo`
-     8 |  export Foo::BasePkg::NameWithTipo
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/other.rb:4: `Foo::Other::NameWithTipo` defined here
-     4 |  class NameWithTipo; end
-          ^^^^^^^^^^^^^^^^^^
   Did you mean `Foo::BasePkg::NameWithTypo`? Use `-a` to autocorrect
     __package.rb:8: Replace with `Foo::BasePkg::NameWithTypo`
      8 |  export Foo::BasePkg::NameWithTipo
