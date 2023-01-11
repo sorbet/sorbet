@@ -1566,6 +1566,20 @@ class Array < Object
   end
   def intersection(*arrays); end
 
+
+  # Returns `true` if the array and `other_ary` have at least one element in
+  # common, otherwise returns `false`:
+  #
+  # ```ruby
+  # a = [ 1, 2, 3 ]
+  # b = [ 3, 4, 5 ]
+  # c = [ 5, 6, 7 ]
+  # a.intersect?(b)   #=> true
+  # a.intersect?(c)   #=> false
+  # ```
+  sig { params(other_ary: T.untyped).returns(T::Boolean) }
+  def intersect(other_ary); end
+
   # Returns a string created by converting each element of the array to a
   # string, separated by the given `separator`. If the `separator` is `nil`, it
   # uses current `$,`. If both the `separator` and `$,` are `nil`, it uses an
