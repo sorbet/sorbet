@@ -36,7 +36,7 @@ def example1(x)
   end
 
   if x.str == x.sym
-    #      ^^ error: Comparison between `Symbol` and `String` is always false
+    #      ^^ error: Comparison between `String` and `Symbol` is always false
     p(x)
   end
 
