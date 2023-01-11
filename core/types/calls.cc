@@ -2801,9 +2801,9 @@ public:
         auto argLocExists = true;
         if (!loc.exists()) {
             // This might be because our argument was an EmptyTree (`begin; end`). Fall back to
-            // using the loc of the whole send.
+            // using the loc of the receiver, which we constructed with an appropriate loc.
             argLocExists = false;
-            loc = args.callLoc();
+            loc = args.receiverLoc();
         }
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",

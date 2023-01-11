@@ -2170,7 +2170,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     // In that case, use the assign's loc instead.
                     loc = job.asgn->loc;
                 }
-                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Magic(loc), core::Names::suggestConstantType(),
+                job.asgn->rhs = ast::MK::Send1(loc.copyWithZeroLength(), ast::MK::Magic(loc), core::Names::suggestConstantType(),
                                                loc.copyWithZeroLength(), move(rhs));
             }
         }
