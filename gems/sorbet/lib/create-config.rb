@@ -24,6 +24,7 @@ class Sorbet::Private::CreateConfig
     File.open(SORBET_CONFIG_FILE, 'w') do |f|
       f.puts('--dir')
       f.puts('.')
+      f.puts('--ignore=/tmp/')
       f.puts('--ignore=/vendor/bundle')
     end
   end
