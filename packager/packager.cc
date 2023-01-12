@@ -208,6 +208,10 @@ public:
     // Whether the code in this package is compatible for path-based autoloading.
     bool strictAutoloaderCompatibility_;
 
+    // The other packages to which this package is visible. If this vector is empty, then it means
+    // the package is fully public and can be imported by anything.
+    vector<PackageName> visibleTo_;
+
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
@@ -351,6 +355,13 @@ public:
             if (i.type == ImportType::Test) {
                 rv.emplace_back(i.name.fullName.parts);
             }
+        }
+        return rv;
+    }
+    vector<vector<core::NameRef>> visibleTo() const {
+        vector<vector<core::NameRef>> rv;
+        for (auto &v : visibleTo_) {
+            rv.emplace_back(v.fullName.parts);
         }
         return rv;
     }
@@ -1024,6 +1035,27 @@ struct PackageInfoFinder {
                 info->strictAutoloaderCompatibility_ = true;
             }
         }
+
+        if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
+            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+                auto name = getPackageName(ctx, target);
+                ENFORCE(name.mangledName.exists());
+
+                if (name.mangledName == info->name.mangledName) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
+                        e.setHeader("Useless `{}`, because {} cannot import itself, ", "visible_to",
+                                    info->name.toString(ctx));
+                    }
+                }
+
+                auto importArg = move(send.getPosArg(0));
+                send.removePosArg(0);
+                ENFORCE(send.numPosArgs() == 0);
+                send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+
+                info->visibleTo_.emplace_back(move(name));
+            }
+        }
     }
 
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -1130,6 +1162,7 @@ struct PackageInfoFinder {
             case core::Names::export_().rawId():
             case core::Names::restrict_to_service().rawId():
             case core::Names::autoloader_compatibility().rawId():
+            case core::Names::visible_to().rawId():
                 return true;
             default:
                 return false;
@@ -1283,6 +1316,34 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
         return file;
+    }
+
+    auto &pkgInfo = PackageInfoImpl::from(absPkg);
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+
+        // this might mean the other package doesn't exist, but that
+        // should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
+
+        const auto &visibleTo = otherPkg.visibleTo();
+        if (visibleTo.empty()) {
+            continue;
+        }
+
+        bool allowed =
+            absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
+
+        if (!allowed) {
+            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+                e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            otherPkg.show(ctx), absPkg.show(ctx));
+                e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                               "visible_to", otherPkg.show(ctx));
+            }
+        }
     }
 
     // Sanity check: __package.rb files _must_ be typed: strict

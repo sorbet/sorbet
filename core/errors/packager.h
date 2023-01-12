@@ -27,5 +27,6 @@ constexpr ErrorClass MissingImport{3718, StrictLevel::False};
 constexpr ErrorClass UsedTestOnlyName{3720, StrictLevel::False};
 constexpr ErrorClass InvalidExport{3721, StrictLevel::False};
 // constexpr ErrorClass ExportingTypeAlias{3722, StrictLevel::False};
+constexpr ErrorClass ImportNotVisible{3723, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
