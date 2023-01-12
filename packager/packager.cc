@@ -208,7 +208,8 @@ public:
     // Whether the code in this package is compatible for path-based autoloading.
     bool strictAutoloaderCompatibility_;
 
-    // The other packages to which this package is visible.
+    // The other packages to which this package is visible. If this vector is empty, then it means
+    // the package is fully public and can be imported by anything.
     vector<PackageName> visibleTo_;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
@@ -1314,7 +1315,6 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     if (!absPkg.exists()) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
-
         return file;
     }
 
@@ -1338,7 +1338,7 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
         if (!allowed) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
                 e.setHeader(
-                    "Package `{}` includes explicit visibility modifiers and does not allow imports from `{}`",
+                    "Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
                     otherPkg.show(ctx), absPkg.show(ctx));
                 e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
                                "visible_to", otherPkg.show(ctx));
