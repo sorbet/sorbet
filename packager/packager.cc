@@ -1333,13 +1333,13 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
             continue;
         }
 
-        bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
+        bool allowed =
+            absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
 
         if (!allowed) {
             if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                e.setHeader(
-                    "Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                    otherPkg.show(ctx), absPkg.show(ctx));
+                e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            otherPkg.show(ctx), absPkg.show(ctx));
                 e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
                                "visible_to", otherPkg.show(ctx));
             }
