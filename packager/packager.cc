@@ -1328,7 +1328,10 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
             continue;
         }
 
-        if (!otherPkg.visibleTo().empty()) {
+        const auto &visibleTo = otherPkg.visibleTo();
+        if (visibleTo.empty()) {
+            continue;
+        }
             bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
 
             if (!allowed) {
