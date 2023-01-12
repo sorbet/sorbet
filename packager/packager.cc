@@ -1329,12 +1329,7 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
         }
 
         if (!otherPkg.visibleTo().empty()) {
-            bool allowed = false;
-            for (auto &other : otherPkg.visibleTo()) {
-                if (other == absPkg.fullName()) {
-                    allowed = true;
-                }
-            }
+            bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
 
             if (!allowed) {
                 if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
