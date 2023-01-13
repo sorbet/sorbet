@@ -1,0 +1,598 @@
+diff --git bootstraptest/test_eval.rb bootstraptest/test_eval.rb
+index fa04323b7f..8f313f70c7 100644
+--- bootstraptest/test_eval.rb
++++ bootstraptest/test_eval.rb
+@@ -116,6 +116,33 @@ assert_equal %q{1}, %q{
+     Const
+   }
+ }
++assert_equal %q{1}, %q{
++  class TrueClass
++    Const = 1
++  end
++  true.instance_eval %{
++    Const
++  }
++}
++assert_equal %q{[:Const]}, %q{
++  mod = Module.new
++  mod.instance_eval %{
++    Const = 1
++  }
++  raise if defined?(Module::Const)
++  mod.singleton_class.constants
++}
++assert_equal %q{can't define singleton}, %q{
++  begin
++    123.instance_eval %{
++      Const = 1
++    }
++    "bad"
++  rescue TypeError => e
++    raise "bad" if defined?(Integer::Const)
++    e.message
++  end
++}
+ assert_equal %q{top}, %q{
+   Const = :top
+   class C
+diff --git eval_intern.h eval_intern.h
+index aa07ce30ed..98883bfa21 100644
+--- eval_intern.h
++++ eval_intern.h
+@@ -189,11 +189,28 @@ rb_ec_tag_jump(const rb_execution_context_t *ec, enum ruby_tag_type st)
+ 
+ #define CREF_FL_PUSHED_BY_EVAL IMEMO_FL_USER1
+ #define CREF_FL_OMOD_SHARED    IMEMO_FL_USER2
++#define CREF_FL_SINGLETON      IMEMO_FL_USER3
++
++static inline int CREF_SINGLETON(const rb_cref_t *cref);
+ 
+ static inline VALUE
+ CREF_CLASS(const rb_cref_t *cref)
+ {
+-    return cref->klass;
++    if (CREF_SINGLETON(cref)) {
++        return CLASS_OF(cref->klass_or_self);
++    } else {
++        return cref->klass_or_self;
++    }
++}
++
++static inline VALUE
++CREF_CLASS_FOR_DEFINITION(const rb_cref_t *cref)
++{
++    if (CREF_SINGLETON(cref)) {
++        return rb_singleton_class(cref->klass_or_self);
++    } else {
++        return cref->klass_or_self;
++    }
+ }
+ 
+ static inline rb_cref_t *
+@@ -232,6 +249,18 @@ CREF_PUSHED_BY_EVAL_SET(rb_cref_t *cref)
+     cref->flags |= CREF_FL_PUSHED_BY_EVAL;
+ }
+ 
++static inline int
++CREF_SINGLETON(const rb_cref_t *cref)
++{
++    return cref->flags & CREF_FL_SINGLETON;
++}
++
++static inline void
++CREF_SINGLETON_SET(rb_cref_t *cref)
++{
++    cref->flags |= CREF_FL_SINGLETON;
++}
++
+ static inline int
+ CREF_OMOD_SHARED(const rb_cref_t *cref)
+ {
+diff --git gc.c gc.c
+index 73faf46b12..4430964e3a 100644
+--- gc.c
++++ gc.c
+@@ -5255,7 +5255,7 @@ gc_mark_imemo(rb_objspace_t *objspace, VALUE obj)
+ 	}
+ 	return;
+       case imemo_cref:
+-	gc_mark(objspace, RANY(obj)->as.imemo.cref.klass);
++	gc_mark(objspace, RANY(obj)->as.imemo.cref.klass_or_self);
+ 	gc_mark(objspace, (VALUE)RANY(obj)->as.imemo.cref.next);
+ 	gc_mark(objspace, RANY(obj)->as.imemo.cref.refinements);
+ 	return;
+@@ -8059,7 +8059,7 @@ gc_ref_update_imemo(rb_objspace_t *objspace, VALUE obj)
+         }
+         break;
+       case imemo_cref:
+-        UPDATE_IF_MOVED(objspace, RANY(obj)->as.imemo.cref.klass);
++        UPDATE_IF_MOVED(objspace, RANY(obj)->as.imemo.cref.klass_or_self);
+         TYPED_UPDATE_IF_MOVED(objspace, struct rb_cref_struct *, RANY(obj)->as.imemo.cref.next);
+         UPDATE_IF_MOVED(objspace, RANY(obj)->as.imemo.cref.refinements);
+         break;
+diff --git insns.def insns.def
+index 71b9f44072..eeac590f82 100644
+--- insns.def
++++ insns.def
+@@ -351,6 +351,7 @@ putspecialobject
+ (rb_num_t value_type)
+ ()
+ (VALUE val)
++// attr bool leaf = (value_type == VM_SPECIAL_OBJECT_VMCORE); /* others may raise when allocating singleton */
+ {
+     enum vm_special_object_type type;
+ 
+@@ -739,7 +740,7 @@ defineclass
+     /* enter scope */
+     vm_push_frame(ec, class_iseq, VM_FRAME_MAGIC_CLASS | VM_ENV_FLAG_LOCAL, klass,
+ 		  GET_BLOCK_HANDLER(),
+-		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE),
++		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE, FALSE),
+ 		  class_iseq->body->iseq_encoded, GET_SP(),
+ 		  class_iseq->body->local_table_size,
+ 		  class_iseq->body->stack_max);
+diff --git method.h method.h
+index b26caaa92d..abf44179ed 100644
+--- method.h
++++ method.h
+@@ -41,7 +41,7 @@ typedef struct rb_scope_visi_struct {
+ typedef struct rb_cref_struct {
+     VALUE flags;
+     VALUE refinements;
+-    VALUE klass;
++    VALUE klass_or_self;
+     struct rb_cref_struct * next;
+     const rb_scope_visibility_t scope_visi;
+ } rb_cref_t;
+diff --git test/ruby/test_eval.rb test/ruby/test_eval.rb
+index 3d6116edbc..948ff6fe76 100644
+--- test/ruby/test_eval.rb
++++ test/ruby/test_eval.rb
+@@ -219,6 +219,12 @@ class TestEval < Test::Unit::TestCase
+     end
+   end
+ 
++  def test_instance_exec_cvar
++    [Object.new, [], 7, :sym, true, false, nil].each do |obj|
++      assert_equal(13, obj.instance_exec{@@cvar})
++    end
++  end
++
+   def test_instance_eval_method
+     bug2788 = '[ruby-core:28324]'
+     [Object.new, [], nil, true, false].each do |o|
+@@ -253,6 +259,70 @@ class TestEval < Test::Unit::TestCase
+     assert_equal(2, bar)
+   end
+ 
++  def test_instance_exec_block_basic
++    forall_TYPE do |o|
++      assert_equal nil,   o.instance_exec { nil }
++      assert_equal true,  o.instance_exec { true }
++      assert_equal false, o.instance_exec { false }
++      assert_equal o,     o.instance_exec { self }
++      assert_equal 1,     o.instance_exec { 1 }
++      assert_equal :sym,  o.instance_exec { :sym }
++
++      assert_equal 11,    o.instance_exec { 11 }
++      assert_equal 12,    o.instance_exec { @ivar } unless o.frozen?
++      assert_equal 13,    o.instance_exec { @@cvar }
++      assert_equal 14,    o.instance_exec { $gvar__eval }
++      assert_equal 15,    o.instance_exec { Const }
++      assert_equal 16,    o.instance_exec { 7 + 9 }
++      assert_equal 17,    o.instance_exec { 17.to_i }
++      assert_equal "18",  o.instance_exec { "18" }
++      assert_equal "19",  o.instance_exec { "1#{9}" }
++
++      1.times {
++        assert_equal 12,  o.instance_exec { @ivar } unless o.frozen?
++        assert_equal 13,  o.instance_exec { @@cvar }
++        assert_equal 14,  o.instance_exec { $gvar__eval }
++        assert_equal 15,  o.instance_exec { Const }
++      }
++    end
++  end
++
++  def test_instance_exec_method_definition
++    klass = Class.new
++    o = klass.new
++
++    o.instance_exec do
++      def foo
++        :foo_result
++      end
++    end
++
++    assert_respond_to o, :foo
++    refute_respond_to klass, :foo
++    refute_respond_to klass.new, :foo
++
++    assert_equal :foo_result, o.foo
++  end
++
++  def test_instance_exec_eval_method_definition
++    klass = Class.new
++    o = klass.new
++
++    o.instance_exec do
++      eval %{
++        def foo
++          :foo_result
++        end
++      }
++    end
++
++    assert_respond_to o, :foo
++    refute_respond_to klass, :foo
++    refute_respond_to klass.new, :foo
++
++    assert_equal :foo_result, o.foo
++  end
++
+   #
+   # From ruby/test/ruby/test_eval.rb
+   #
+diff --git test/ruby/test_undef.rb test/ruby/test_undef.rb
+index e0add7c3ab..074b92be55 100644
+--- test/ruby/test_undef.rb
++++ test/ruby/test_undef.rb
+@@ -35,4 +35,20 @@ class TestUndef < Test::Unit::TestCase
+       end
+     end
+   end
++
++  def test_singleton_undef
++    klass = Class.new do
++      def foo
++        :ok
++      end
++    end
++
++    klass.new.foo
++
++    klass.new.instance_eval do
++      undef foo
++    end
++
++    klass.new.foo
++  end
+ end
+diff --git vm.c vm.c
+index fc144be5b6..cba272c350 100644
+--- vm.c
++++ vm.c
+@@ -210,7 +210,7 @@ vm_passed_block_handler(rb_execution_context_t *ec)
+ }
+ 
+ static rb_cref_t *
+-vm_cref_new0(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_t *prev_cref, int pushed_by_eval, int use_prev_prev)
++vm_cref_new0(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_t *prev_cref, int pushed_by_eval, int use_prev_prev, int singleton)
+ {
+     VALUE refinements = Qnil;
+     int omod_shared = FALSE;
+@@ -235,24 +235,27 @@ vm_cref_new0(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_
+ 	}
+     }
+ 
++    VM_ASSERT(singleton || klass);
++
+     cref = (rb_cref_t *)rb_imemo_new(imemo_cref, klass, (VALUE)(use_prev_prev ? CREF_NEXT(prev_cref) : prev_cref), scope_visi.value, refinements);
+ 
+     if (pushed_by_eval) CREF_PUSHED_BY_EVAL_SET(cref);
+     if (omod_shared) CREF_OMOD_SHARED_SET(cref);
++    if (singleton) CREF_SINGLETON_SET(cref);
+ 
+     return cref;
+ }
+ 
+ static rb_cref_t *
+-vm_cref_new(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_t *prev_cref, int pushed_by_eval)
++vm_cref_new(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_t *prev_cref, int pushed_by_eval, int singleton)
+ {
+-    return vm_cref_new0(klass, visi, module_func, prev_cref, pushed_by_eval, FALSE);
++    return vm_cref_new0(klass, visi, module_func, prev_cref, pushed_by_eval, FALSE, singleton);
+ }
+ 
+ static rb_cref_t *
+ vm_cref_new_use_prev(VALUE klass, rb_method_visibility_t visi, int module_func, rb_cref_t *prev_cref, int pushed_by_eval)
+ {
+-    return vm_cref_new0(klass, visi, module_func, prev_cref, pushed_by_eval, TRUE);
++    return vm_cref_new0(klass, visi, module_func, prev_cref, pushed_by_eval, TRUE, FALSE);
+ }
+ 
+ static int
+@@ -264,18 +267,18 @@ ref_delete_symkey(VALUE key, VALUE value, VALUE unused)
+ static rb_cref_t *
+ vm_cref_dup(const rb_cref_t *cref)
+ {
+-    VALUE klass = CREF_CLASS(cref);
+     const rb_scope_visibility_t *visi = CREF_SCOPE_VISI(cref);
+     rb_cref_t *next_cref = CREF_NEXT(cref), *new_cref;
+     int pushed_by_eval = CREF_PUSHED_BY_EVAL(cref);
++    int singleton = CREF_SINGLETON(cref);
+ 
+-    new_cref = vm_cref_new(klass, visi->method_visi, visi->module_func, next_cref, pushed_by_eval);
++    new_cref = vm_cref_new(cref->klass_or_self, visi->method_visi, visi->module_func, next_cref, pushed_by_eval, singleton);
+ 
+     if (!NIL_P(CREF_REFINEMENTS(cref))) {
+         VALUE ref = rb_hash_dup(CREF_REFINEMENTS(cref));
+         rb_hash_foreach(ref, ref_delete_symkey, Qnil);
+         CREF_REFINEMENTS_SET(new_cref, ref);
+-	CREF_OMOD_SHARED_UNSET(new_cref);
++        CREF_OMOD_SHARED_UNSET(new_cref);
+     }
+ 
+     return new_cref;
+@@ -284,11 +287,11 @@ vm_cref_dup(const rb_cref_t *cref)
+ static rb_cref_t *
+ vm_cref_new_toplevel(rb_execution_context_t *ec)
+ {
+-    rb_cref_t *cref = vm_cref_new(rb_cObject, METHOD_VISI_PRIVATE /* toplevel visibility is private */, FALSE, NULL, FALSE);
++    rb_cref_t *cref = vm_cref_new(rb_cObject, METHOD_VISI_PRIVATE /* toplevel visibility is private */, FALSE, NULL, FALSE, FALSE);
+     VALUE top_wrapper = rb_ec_thread_ptr(ec)->top_wrapper;
+ 
+     if (top_wrapper) {
+-	cref = vm_cref_new(top_wrapper, METHOD_VISI_PRIVATE, FALSE, cref, FALSE);
++	cref = vm_cref_new(top_wrapper, METHOD_VISI_PRIVATE, FALSE, cref, FALSE, FALSE);
+     }
+ 
+     return cref;
+@@ -3266,7 +3269,7 @@ Init_VM(void)
+ 	th->ec->cfp->self = th->top_self;
+ 
+ 	VM_ENV_FLAGS_UNSET(th->ec->cfp->ep, VM_FRAME_FLAG_CFRAME);
+-	VM_STACK_ENV_WRITE(th->ec->cfp->ep, VM_ENV_DATA_INDEX_ME_CREF, (VALUE)vm_cref_new(rb_cObject, METHOD_VISI_PRIVATE, FALSE, NULL, FALSE));
++	VM_STACK_ENV_WRITE(th->ec->cfp->ep, VM_ENV_DATA_INDEX_ME_CREF, (VALUE)vm_cref_new(rb_cObject, METHOD_VISI_PRIVATE, FALSE, NULL, FALSE, FALSE));
+ 
+ 	/*
+ 	 * The Binding of the top level scope
+diff --git vm_eval.c vm_eval.c
+index 76e56fac8a..b880975474 100644
+--- vm_eval.c
++++ vm_eval.c
+@@ -1750,7 +1750,7 @@ eval_string_wrap_protect(VALUE data)
+ {
+     const struct eval_string_wrap_arg *const arg = (struct eval_string_wrap_arg*)data;
+     rb_cref_t *cref = rb_vm_cref_new_toplevel();
+-    cref->klass = arg->klass;
++    cref->klass_or_self = arg->klass;
+     return eval_string_with_cref(arg->top_self, rb_str_new_cstr(arg->str), cref, rb_str_new_cstr("eval"), 1);
+ }
+ 
+@@ -1830,7 +1830,7 @@ rb_eval_cmd(VALUE cmd, VALUE arg, int _level)
+ /* block eval under the class/module context */
+ 
+ static VALUE
+-yield_under(VALUE under, VALUE self, int argc, const VALUE *argv, int kw_splat)
++yield_under(VALUE self, int singleton, int argc, const VALUE *argv, int kw_splat)
+ {
+     rb_execution_context_t *ec = GET_EC();
+     rb_control_frame_t *cfp = ec->cfp;
+@@ -1875,7 +1875,8 @@ yield_under(VALUE under, VALUE self, int argc, const VALUE *argv, int kw_splat)
+ 	VM_FORCE_WRITE_SPECIAL_CONST(&VM_CF_LEP(ec->cfp)[VM_ENV_DATA_INDEX_SPECVAL], new_block_handler);
+     }
+ 
+-    cref = vm_cref_push(ec, under, ep, TRUE);
++    VM_ASSERT(singleton || RB_TYPE_P(self, T_MODULE) || RB_TYPE_P(self, T_CLASS));
++    cref = vm_cref_push(ec, self, ep, TRUE, singleton);
+     ret = vm_yield_with_cref(ec, argc, argv, kw_splat, cref, is_lambda);
+     rb_free_tmp_buffer(&v);
+     return ret;
+@@ -1895,7 +1896,7 @@ rb_yield_refine_block(VALUE refinement, VALUE refinements)
+ 	struct rb_captured_block new_captured = *captured;
+ 	VALUE new_block_handler = VM_BH_FROM_ISEQ_BLOCK(&new_captured);
+ 	const VALUE *ep = captured->ep;
+-	rb_cref_t *cref = vm_cref_push(ec, refinement, ep, TRUE);
++	rb_cref_t *cref = vm_cref_push(ec, refinement, ep, TRUE, FALSE);
+ 	CREF_REFINEMENTS_SET(cref, refinements);
+ 	VM_FORCE_WRITE_SPECIAL_CONST(&VM_CF_LEP(ec->cfp)[VM_ENV_DATA_INDEX_SPECVAL], new_block_handler);
+ 	new_captured.self = refinement;
+@@ -1905,19 +1906,20 @@ rb_yield_refine_block(VALUE refinement, VALUE refinements)
+ 
+ /* string eval under the class/module context */
+ static VALUE
+-eval_under(VALUE under, VALUE self, VALUE src, VALUE file, int line)
++eval_under(VALUE self, int singleton, VALUE src, VALUE file, int line)
+ {
+-    rb_cref_t *cref = vm_cref_push(GET_EC(), under, NULL, SPECIAL_CONST_P(self) && !NIL_P(under));
++    rb_cref_t *cref = vm_cref_push(GET_EC(), self, NULL, FALSE, singleton);
+     SafeStringValue(src);
++
+     return eval_string_with_cref(self, src, cref, file, line);
+ }
+ 
+ static VALUE
+-specific_eval(int argc, const VALUE *argv, VALUE klass, VALUE self, int kw_splat)
++specific_eval(int argc, const VALUE *argv, VALUE self, int singleton, int kw_splat)
+ {
+     if (rb_block_given_p()) {
+ 	rb_check_arity(argc, 0, 0);
+-        return yield_under(klass, self, 1, &self, kw_splat);
++        return yield_under(self, singleton, 1, &self, kw_splat);
+     }
+     else {
+ 	VALUE file = Qundef;
+@@ -1933,23 +1935,7 @@ specific_eval(int argc, const VALUE *argv, VALUE klass, VALUE self, int kw_splat
+ 	    file = argv[1];
+ 	    if (!NIL_P(file)) StringValue(file);
+ 	}
+-	return eval_under(klass, self, code, file, line);
+-    }
+-}
+-
+-static VALUE
+-singleton_class_for_eval(VALUE self)
+-{
+-    if (SPECIAL_CONST_P(self)) {
+-	return rb_special_singleton_class(self);
+-    }
+-    switch (BUILTIN_TYPE(self)) {
+-      case T_FLOAT: case T_BIGNUM: case T_SYMBOL:
+-	return Qnil;
+-      case T_STRING:
+-	if (FL_TEST_RAW(self, RSTRING_FSTR)) return Qnil;
+-      default:
+-	return rb_singleton_class(self);
++	return eval_under(self, singleton, code, file, line);
+     }
+ }
+ 
+@@ -1989,15 +1975,13 @@ singleton_class_for_eval(VALUE self)
+ static VALUE
+ rb_obj_instance_eval_internal(int argc, const VALUE *argv, VALUE self)
+ {
+-    VALUE klass = singleton_class_for_eval(self);
+-    return specific_eval(argc, argv, klass, self, RB_PASS_CALLED_KEYWORDS);
++    return specific_eval(argc, argv, self, TRUE, RB_PASS_CALLED_KEYWORDS);
+ }
+ 
+ VALUE
+ rb_obj_instance_eval(int argc, const VALUE *argv, VALUE self)
+ {
+-    VALUE klass = singleton_class_for_eval(self);
+-    return specific_eval(argc, argv, klass, self, RB_NO_KEYWORDS);
++    return specific_eval(argc, argv, self, TRUE, RB_NO_KEYWORDS);
+ }
+ 
+ /*
+@@ -2021,15 +2005,13 @@ rb_obj_instance_eval(int argc, const VALUE *argv, VALUE self)
+ static VALUE
+ rb_obj_instance_exec_internal(int argc, const VALUE *argv, VALUE self)
+ {
+-    VALUE klass = singleton_class_for_eval(self);
+-    return yield_under(klass, self, argc, argv, RB_PASS_CALLED_KEYWORDS);
++    return yield_under(self, TRUE, argc, argv, RB_PASS_CALLED_KEYWORDS);
+ }
+ 
+ VALUE
+ rb_obj_instance_exec(int argc, const VALUE *argv, VALUE self)
+ {
+-    VALUE klass = singleton_class_for_eval(self);
+-    return yield_under(klass, self, argc, argv, RB_NO_KEYWORDS);
++    return yield_under(self, TRUE, argc, argv, RB_NO_KEYWORDS);
+ }
+ 
+ /*
+@@ -2062,13 +2044,13 @@ rb_obj_instance_exec(int argc, const VALUE *argv, VALUE self)
+ static VALUE
+ rb_mod_module_eval_internal(int argc, const VALUE *argv, VALUE mod)
+ {
+-    return specific_eval(argc, argv, mod, mod, RB_PASS_CALLED_KEYWORDS);
++    return specific_eval(argc, argv, mod, FALSE, RB_PASS_CALLED_KEYWORDS);
+ }
+ 
+ VALUE
+ rb_mod_module_eval(int argc, const VALUE *argv, VALUE mod)
+ {
+-    return specific_eval(argc, argv, mod, mod, RB_NO_KEYWORDS);
++    return specific_eval(argc, argv, mod, FALSE, RB_NO_KEYWORDS);
+ }
+ 
+ /*
+@@ -2096,13 +2078,13 @@ rb_mod_module_eval(int argc, const VALUE *argv, VALUE mod)
+ static VALUE
+ rb_mod_module_exec_internal(int argc, const VALUE *argv, VALUE mod)
+ {
+-    return yield_under(mod, mod, argc, argv, RB_PASS_CALLED_KEYWORDS);
++    return yield_under(mod, FALSE, argc, argv, RB_PASS_CALLED_KEYWORDS);
+ }
+ 
+ VALUE
+ rb_mod_module_exec(int argc, const VALUE *argv, VALUE mod)
+ {
+-    return yield_under(mod, mod, argc, argv, RB_NO_KEYWORDS);
++    return yield_under(mod, FALSE, argc, argv, RB_NO_KEYWORDS);
+ }
+ 
+ /*
+diff --git vm_insnhelper.c vm_insnhelper.c
+index c0d9092a67..646293afdd 100644
+--- vm_insnhelper.c
++++ vm_insnhelper.c
+@@ -817,7 +817,7 @@ rb_vm_rewrite_cref(rb_cref_t *cref, VALUE old_klass, VALUE new_klass, rb_cref_t
+ }
+ 
+ static rb_cref_t *
+-vm_cref_push(const rb_execution_context_t *ec, VALUE klass, const VALUE *ep, int pushed_by_eval)
++vm_cref_push(const rb_execution_context_t *ec, VALUE klass, const VALUE *ep, int pushed_by_eval, int singleton)
+ {
+     rb_cref_t *prev_cref = NULL;
+ 
+@@ -832,40 +832,30 @@ vm_cref_push(const rb_execution_context_t *ec, VALUE klass, const VALUE *ep, int
+ 	}
+     }
+ 
+-    return vm_cref_new(klass, METHOD_VISI_PUBLIC, FALSE, prev_cref, pushed_by_eval);
++    return vm_cref_new(klass, METHOD_VISI_PUBLIC, FALSE, prev_cref, pushed_by_eval, singleton);
+ }
+ 
+ static inline VALUE
+ vm_get_cbase(const VALUE *ep)
+ {
+     const rb_cref_t *cref = vm_get_cref(ep);
+-    VALUE klass = Qundef;
+ 
+-    while (cref) {
+-	if ((klass = CREF_CLASS(cref)) != 0) {
+-	    break;
+-	}
+-	cref = CREF_NEXT(cref);
+-    }
+-
+-    return klass;
++    return CREF_CLASS_FOR_DEFINITION(cref);
+ }
+ 
+ static inline VALUE
+ vm_get_const_base(const VALUE *ep)
+ {
+     const rb_cref_t *cref = vm_get_cref(ep);
+-    VALUE klass = Qundef;
+ 
+     while (cref) {
+-	if (!CREF_PUSHED_BY_EVAL(cref) &&
+-	    (klass = CREF_CLASS(cref)) != 0) {
+-	    break;
+-	}
+-	cref = CREF_NEXT(cref);
++        if (!CREF_PUSHED_BY_EVAL(cref)) {
++            return CREF_CLASS_FOR_DEFINITION(cref);
++        }
++        cref = CREF_NEXT(cref);
+     }
+ 
+-    return klass;
++    return Qundef;
+ }
+ 
+ static inline void
+@@ -979,7 +969,7 @@ vm_get_cvar_base(const rb_cref_t *cref, rb_control_frame_t *cfp)
+ 
+     while (CREF_NEXT(cref) &&
+ 	   (NIL_P(CREF_CLASS(cref)) || FL_TEST(CREF_CLASS(cref), FL_SINGLETON) ||
+-	    CREF_PUSHED_BY_EVAL(cref))) {
++	    CREF_PUSHED_BY_EVAL(cref) || CREF_SINGLETON(cref))) {
+ 	cref = CREF_NEXT(cref);
+     }
+     if (!CREF_NEXT(cref)) {
+@@ -3938,14 +3928,14 @@ vm_define_method(const rb_execution_context_t *ec, VALUE obj, ID id, VALUE iseqv
+     rb_method_visibility_t visi;
+     rb_cref_t *cref = vm_ec_cref(ec);
+ 
+-    if (!is_singleton) {
+-        klass = CREF_CLASS(cref);
+-        visi = vm_scope_visibility_get(ec);
+-    }
+-    else { /* singleton */
++    if (is_singleton) {
+         klass = rb_singleton_class(obj); /* class and frozen checked in this API */
+         visi = METHOD_VISI_PUBLIC;
+     }
++    else {
++        klass = CREF_CLASS_FOR_DEFINITION(cref);
++        visi = vm_scope_visibility_get(ec);
++    }
+ 
+     if (NIL_P(klass)) {
+         rb_raise(rb_eTypeError, "no class/module to add method");
