@@ -117,6 +117,11 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
+  # Fetch the directory name of the file that defines the `T::Private` constant and
+  # add a trailing slash to allow us to match it as a directory prefix.
+  SORBET_RUNTIME_LIB_PATH = File.dirname(T.const_source_location(:Private).first) + File::SEPARATOR
+  private_constant :SORBET_RUNTIME_LIB_PATH
+
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
@@ -158,7 +163,7 @@ module T::Private::Methods
 
         definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
         is_redefined = target == ancestor
-        caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/})}
+        caller_loc = caller_locations&.find {|l| !l.to_s.start_with?(SORBET_RUNTIME_LIB_PATH)}
         extra_info = "\n"
         if caller_loc
           extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
