@@ -111,27 +111,27 @@ index 73faf46b12..4430964e3a 100644
          TYPED_UPDATE_IF_MOVED(objspace, struct rb_cref_struct *, RANY(obj)->as.imemo.cref.next);
          UPDATE_IF_MOVED(objspace, RANY(obj)->as.imemo.cref.refinements);
          break;
-diff --git insns.def insns.def
-index 71b9f44072..eeac590f82 100644
---- insns.def
-+++ insns.def
-@@ -351,6 +351,7 @@ putspecialobject
- (rb_num_t value_type)
- ()
- (VALUE val)
-+// attr bool leaf = (value_type == VM_SPECIAL_OBJECT_VMCORE); /* others may raise when allocating singleton */
+diff --git insns_info.inc insns_info.inc
+index aa881de368..fe93565a4e 100644
+--- insns_info.inc
++++ insns_info.inc
+@@ -2936,7 +2936,7 @@ attr_handles_sp_putspecialobject(MAYBE_UNUSED(rb_num_t value_type))
+ bool
+ attr_leaf_putspecialobject(MAYBE_UNUSED(rb_num_t value_type))
  {
-     enum vm_special_object_type type;
+-    return true;
++    return (value_type == VM_SPECIAL_OBJECT_VMCORE);
+ }
  
-@@ -739,7 +740,7 @@ defineclass
-     /* enter scope */
-     vm_push_frame(ec, class_iseq, VM_FRAME_MAGIC_CLASS | VM_ENV_FLAG_LOCAL, klass,
- 		  GET_BLOCK_HANDLER(),
--		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE),
-+		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE, FALSE),
- 		  class_iseq->body->iseq_encoded, GET_SP(),
- 		  class_iseq->body->local_table_size,
- 		  class_iseq->body->stack_max);
+ /* attr const char* name @ putspecialobject(value_type)()(val) */
+@@ -9049,6 +9049,7 @@ insn_may_depend_on_sp_or_pc(int insn, const VALUE *opes)
+       case BIN(setconstant):
+       case BIN(getglobal):
+       case BIN(setglobal):
++      case BIN(putspecialobject):
+       case BIN(concatstrings):
+       case BIN(toregexp):
+       case BIN(expandarray):
 diff --git method.h method.h
 index b26caaa92d..abf44179ed 100644
 --- method.h
@@ -145,6 +145,34 @@ index b26caaa92d..abf44179ed 100644
      struct rb_cref_struct * next;
      const rb_scope_visibility_t scope_visi;
  } rb_cref_t;
+diff --git mjit_compile.inc mjit_compile.inc
+index b7b5f17699..9762fad4e3 100644
+--- mjit_compile.inc
++++ mjit_compile.inc
+@@ -832,7 +832,7 @@ switch (insn) {
+ 
+         fprintf(f, "    value_type = (rb_num_t)0x%"PRIxVALUE";", operands[0]);
+         fprintf(f, "\n");
+-        if (body->catch_except_p || FALSE) {
++        if (body->catch_except_p || TRUE) {
+             fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
+             pc_moved_p = TRUE;
+         }
+@@ -848,6 +848,14 @@ switch (insn) {
+         fprintf(f, "        val = vm_get_special_object(GET_EP(), type);\n");
+         fprintf(f, "    }\n");
+         fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_putspecialobject(value_type) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_putspecialobject(value_type));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
+         b->stack_size += attr_sp_inc_putspecialobject(value_type);
+     }
+     fprintf(f, "}\n");
 diff --git test/ruby/test_eval.rb test/ruby/test_eval.rb
 index 3d6116edbc..948ff6fe76 100644
 --- test/ruby/test_eval.rb
@@ -347,6 +375,19 @@ index fc144be5b6..cba272c350 100644
  
  	/*
  	 * The Binding of the top level scope
+diff --git vm.inc vm.inc
+index c4a7845fb6..315c37bf87 100644
+--- vm.inc
++++ vm.inc
+@@ -2077,7 +2077,7 @@ INSN_ENTRY(defineclass)
+     /* enter scope */
+     vm_push_frame(ec, class_iseq, VM_FRAME_MAGIC_CLASS | VM_ENV_FLAG_LOCAL, klass,
+ 		  GET_BLOCK_HANDLER(),
+-		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE),
++		  (VALUE)vm_cref_push(ec, klass, NULL, FALSE, FALSE),
+ 		  class_iseq->body->iseq_encoded, GET_SP(),
+ 		  class_iseq->body->local_table_size,
+ 		  class_iseq->body->stack_max);
 diff --git vm_eval.c vm_eval.c
 index 76e56fac8a..b880975474 100644
 --- vm_eval.c
