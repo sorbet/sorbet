@@ -65,9 +65,16 @@ T.assert_type!(obj.object_id, Integer)
 obj = T.let("foo", String)
 T.assert_type!(obj.itself, String)
 
-y = loop do
-end
-puts y # error: This code is unreachable
+
+# These types are deliberately wrong, because `Kernel#p` is difficult to type
+# in an RBI.  See the comments in kernel.rbi.
+p_result = Kernel.p 1
+T.reveal_type(p_result) # error: Revealed type: `NilClass`
+p_result = p "string"
+T.reveal_type(p_result) # error: Revealed type: `NilClass`
+# This should actually be typed as an array.
+p_result = p 1, 2
+T.reveal_type(p_result) # error: Revealed type: `NilClass`
 
 class CustomError < StandardError
   def initialize(cause, team)
@@ -87,3 +94,7 @@ end
 def fail_class_message
   fail StandardError, "message"
 end
+
+y = loop do
+end
+puts y # error: This code is unreachable
