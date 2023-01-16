@@ -389,5 +389,39 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'default_checked_level=' do
+      before do
+        @orig_has_read_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@has_read_default_checked_level)
+        @orig_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@default_checked_level)
+
+        # Within these specs pretend we haven't yet read this value
+        T::Private::RuntimeLevels.instance_variable_set(:@has_read_default_checked_level, false)
+      end
+
+      after do
+        T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, @orig_default_checked_level)
+        T::Private::RuntimeLevels.instance_variable_set(:@has_read_default_checked_level, @orig_has_read_default_checked_level)
+      end
+
+      it 'fails when given the wrong typed level' do
+        ex = assert_raises do
+          T::Configuration.default_checked_level = :foo
+        end
+        assert_includes(ex.message, "Invalid `checked` level 'foo'. Use one of: [:always, :tests, :never, :compiled].")
+      end
+
+      it 'fails when default_checked_level has already been read' do
+        T::Configuration.default_checked_level = :never
+        T::Configuration.default_checked_level = :tests
+
+        assert_equal(T::Private::RuntimeLevels.default_checked_level, :tests)
+
+        ex = assert_raises do
+          T::Configuration.default_checked_level = :never
+        end
+        assert_includes(ex.message, "Set the default checked level earlier. There are already some methods whose sig blocks have evaluated which would not be affected by the new default.")
+      end
+    end
   end
 end
