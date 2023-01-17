@@ -26,12 +26,12 @@ module Opus::Types::Test
 
       describe 'when SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS env variable is set' do
         before do
-          @orig_SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS = ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS']
+          @orig_sorbet_runtime_enable_checking_in_tests = ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS']
           ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = '1'
         end
 
         after do
-          ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = @orig_SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS
+          ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = @orig_sorbet_runtime_enable_checking_in_tests
         end
 
         it 'updates check_tests' do
@@ -66,12 +66,12 @@ module Opus::Types::Test
 
       describe 'when SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL env variable is set' do
         before do
-          @orig_SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL = ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL']
+          @orig_sorbet_runtime_default_checked_level = ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL']
           ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = 'never'
         end
 
         after do
-          ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = @orig_SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL
+          ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = @orig_sorbet_runtime_default_checked_level
         end
 
         it 'updates default_typed_level' do
