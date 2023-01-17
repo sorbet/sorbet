@@ -25,6 +25,23 @@ module SorbetBenchmarks
       prop :prop10, T::Hash[String, Subdoc], default: {}
     end
 
+    class ExampleWithoutTypecheck < T::Struct
+      class Subdoc < T::Struct
+        prop :prop, String, checked: :never
+      end
+
+      prop :prop1, T.nilable(Integer), checked: :never
+      prop :prop2, Integer, default: 0, checked: :never
+      prop :prop3, Integer, checked: :never
+      prop :prop4, T::Array[Integer], checked: :never
+      prop :prop5, T::Array[Integer], default: [], checked: :never
+      prop :prop6, T::Hash[String, Integer], checked: :never
+      prop :prop7, T::Hash[String, Integer], default: {}, checked: :never
+      prop :prop8, T.nilable(Subdoc), checked: :never
+      prop :prop9, T::Array[Subdoc], default: [], checked: :never
+      prop :prop10, T::Hash[String, Subdoc], default: {}, checked: :never
+    end
+
     def self.run
       input = {
         prop3: 0,
@@ -70,6 +87,19 @@ module SorbetBenchmarks
       end
 
       puts "T::Props.new, all props set (μs/iter):"
+      puts result
+
+      100_000.times do
+        ExampleWithoutTypecheck.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExampleWithoutTypecheck.new(input)
+        end
+      end
+
+      puts "T::Props.new, all props set, checked(:never) (μs/iter):"
       puts result
     end
   end
