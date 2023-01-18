@@ -129,13 +129,16 @@ private:
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
+
     shared_ptr<Nesting> nesting_;
+    int loadScopeDepth_;
 
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
         bool possibleGenericType = false;
+        bool loadTimeScope = false;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -295,10 +298,33 @@ private:
         return !checker.seenUnresolved;
     }
 
+    // Find load-time out-of-order references.
+    // Algorithm:
+    // if current scope is definitely load-time, and
+    //   resolved symbol is only defined in the current file, and
+    //   if the definition is after the reference loc,
+    //  then report an error.
+    static void checkReferenceOrder(core::Context ctx, bool loadTimeScope, core::SymbolRef resolutionResult,
+                                    const ast::UnresolvedConstantLit &c) {
+        if (loadTimeScope && !ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
+            resolutionResult.locs(ctx).size() == 1 && resolutionResult.loc(ctx).file() == ctx.file) {
+            auto &defLoc = resolutionResult.loc(ctx).offsets();
+            auto &refLoc = c.loc;
+            if (defLoc.beginPos() >= refLoc.endPos()) {
+                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::OutOfOrderConstantAccess)) {
+                    e.setHeader("`{}` referenced before it is declared", resolutionResult.show(ctx));
+                }
+            }
+        }
+    }
+
     static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
+                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed,
+                                           bool loadTimeScope) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
+
+            checkReferenceOrder(ctx, loadTimeScope, result, c);
             return result;
         }
         if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
@@ -329,6 +355,9 @@ private:
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
+
+            checkReferenceOrder(ctx, loadTimeScope, result, c);
+
             return result;
         }
 
@@ -396,7 +425,7 @@ private:
         PackageStub stub;
         vector<core::NameRef> exports;
 
-        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix.  They
+        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix. They
         // are not the names exported to the implicit test package via `export_for_test`.
         vector<core::NameRef> testExports;
 
@@ -637,7 +666,8 @@ private:
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
+                                        job.loadTimeScope);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -789,7 +819,8 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
+                                        job.loadTimeScope);
         if (!resolved.exists()) {
             return false;
         }
@@ -1299,6 +1330,7 @@ private:
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
+            job.loadTimeScope = (loadScopeDepth_ == 0);
             if (resolveJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
@@ -1317,14 +1349,38 @@ private:
     }
 
 public:
-    ResolveConstantsWalk() : nesting_(nullptr) {}
+    ResolveConstantsWalk() : nesting_(nullptr), loadScopeDepth_(0) {}
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (loadScopeDepth_ >= 0) {
+            loadScopeDepth_++;
+        }
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (loadScopeDepth_ > 0) {
+            loadScopeDepth_--;
+        }
+    }
+
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (loadScopeDepth_ >= 0) {
+            loadScopeDepth_++;
+        }
+    }
+
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (loadScopeDepth_ > 0) {
+            loadScopeDepth_--;
+        }
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         walkUnresolvedConstantLit(ctx, tree);
+    }
+
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1524,6 +1580,7 @@ public:
                 // In single-package RBI generation mode, we treat Constant[...] as
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
+                job.loadTimeScope = (loadScopeDepth_ == 0);
                 job.possibleGenericType = true;
                 if (!resolveJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));

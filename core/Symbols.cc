@@ -2523,7 +2523,6 @@ namespace {
 void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLoc, InlinedVector<Loc, 2> &locs) {
     for (auto &existing : locs) {
         if (existing.file() == loc.file()) {
-            existing = loc;
             return;
         }
     }
