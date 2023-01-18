@@ -478,7 +478,14 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
     // Generate autoloads for child nodes if they exist and pkgName is not present (since the latter indicates
     // path-based autoloading for the package).
     if (!node.children.empty() && !node.pkgName.exists()) {
-        auto subdir = join(path, node.root() ? "" : name);
+        string dirName;
+        if (!node.mustRender(gs) && node.definitionType(gs) == Definition::Type::Class) {
+            dirName = name + "__klazz";
+        } else {
+            dirName = name;
+        }
+
+        auto subdir = join(path, node.root() ? "" : dirName);
         if (!node.root()) {
             FileOps::ensureDir(subdir);
         }
@@ -506,9 +513,9 @@ bool DefTree::mustRender(const core::GlobalState &gs) const {
     }
 
     // The node is a class node (as opposed to a module)
-    if (definitionType(gs) == Definition::Type::Class) {
-        return true;
-    }
+    /* if (definitionType(gs) == Definition::Type::Class) { */
+    /*     return true; */
+    /* } */
 
     return false;
 }

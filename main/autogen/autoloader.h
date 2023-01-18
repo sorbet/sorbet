@@ -98,6 +98,7 @@ public:
 
     void renderAutoloadSrc(fmt::memory_buffer &buf, const core::GlobalState &gs, const AutoloaderConfig &) const;
     bool mustRender(const core::GlobalState &gs) const;
+    Definition::Type definitionType(const core::GlobalState &) const;
 
     DefTree() = default;
     DefTree(const DefTree &) = delete;
@@ -113,7 +114,6 @@ private:
     bool hasDifferentFile(core::FileRef) const;
     bool hasDef() const;
     const NamedDefinition &definition(const core::GlobalState &) const;
-    Definition::Type definitionType(const core::GlobalState &) const;
     void markPackageNamespace(core::NameRef mangledName, const std::vector<core::NameRef> &nameParts);
     DefTree *findNode(const std::vector<core::NameRef> &nameParts);
 

@@ -86,15 +86,7 @@ end
 
 Opus::Require.for_autoload(Yabba::Dabba::Bar2, "test/cli/autogen-autoloader/example3.rb")
 
---- output/Yabba/Dabba/Jazz.rb
-# frozen_string_literal: true
-# typed: true
-
-
-class Yabba::Dabba::Jazz
-end
-
---- output/Yabba/Dabba/Jazz/JazBaz.rb
+--- output/Yabba/Dabba/Jazz__klazz/JazBaz.rb
 # frozen_string_literal: true
 # typed: true
 
