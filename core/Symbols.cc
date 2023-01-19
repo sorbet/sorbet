@@ -2520,9 +2520,13 @@ const InlinedVector<Loc, 2> &TypeParameter::locs() const {
 }
 
 namespace {
-void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLoc, InlinedVector<Loc, 2> &locs) {
+void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLoc, InlinedVector<Loc, 2> &locs,
+                    bool keepOriginal = false) {
     for (auto &existing : locs) {
         if (existing.file() == loc.file()) {
+            if (!keepOriginal) {
+                existing = loc;
+            }
             return;
         }
     }
@@ -2567,7 +2571,7 @@ void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    addLocInternal(gs, loc, this->loc(), locs_);
+    addLocInternal(gs, loc, this->loc(), locs_, true);
 }
 
 void Field::removeLocsForFile(core::FileRef file) {
@@ -2596,7 +2600,7 @@ void ClassOrModule::addLoc(const core::GlobalState &gs, core::Loc loc) {
     ENFORCE(ref(gs) != Symbols::root());
     ENFORCE(ref(gs) != Symbols::PackageSpecRegistry());
 
-    addLocInternal(gs, loc, this->loc(), locs_);
+    addLocInternal(gs, loc, this->loc(), locs_, true);
 }
 
 void ClassOrModule::removeLocsForFile(core::FileRef file) {
