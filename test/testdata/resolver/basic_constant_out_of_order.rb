@@ -1,3 +1,4 @@
+# stripe-mode: true
 # typed: true
 
 module Foo
