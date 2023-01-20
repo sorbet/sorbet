@@ -2571,7 +2571,7 @@ void Field::addLoc(const core::GlobalState &gs, core::Loc loc) {
         return;
     }
 
-    addLocInternal(gs, loc, this->loc(), locs_, true);
+    addLocInternal(gs, loc, this->loc(), locs_);
 }
 
 void Field::removeLocsForFile(core::FileRef file) {
