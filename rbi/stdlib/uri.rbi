@@ -651,6 +651,11 @@ module URI::Escape
 
 end
 
+# The "file" [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) is defined by
+# RFC8089.
+class URI::File < URI::Generic
+end
+
 # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/URI/FTP.html)
 # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) syntax is defined by
 # RFC1738 section 3.2.
@@ -2350,9 +2355,4 @@ class URI::RFC3986_Parser < Object
 end
 
 module URI::Util
-end
-
-# The "file" [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) is defined by
-# RFC8089.
-class URI::File < URI::Generic
 end
