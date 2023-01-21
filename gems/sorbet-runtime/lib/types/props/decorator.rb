@@ -339,7 +339,7 @@ class T::Props::Decorator
     end
     type_object = smart_coerce(type, enum: rules[:enum])
 
-    rules[:checked] ||= :always
+    rules[:checked] ||= T::Private::RuntimeLevels.default_checked_level
 
     prop_validate_definition!(name, cls, rules, type_object)
 
