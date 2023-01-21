@@ -212,7 +212,11 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
 
       c = make_class(checked: nil)
       c.new(foo: 1)
-      c.new(foo: '1') # wrong, but ignored
+
+      # Does not currently rely on the default_checked_level
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
     end
 
     it 'override default checked level to :tests, without checking tests' do
@@ -221,7 +225,11 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
 
       c = make_class(checked: nil)
       c.new(foo: 1)
-      c.new(foo: '1') # wrong, but ignored
+
+      # Does not currently rely on the default_checked_level
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
 
       T::Private::RuntimeLevels._toggle_checking_tests(true)
       pass
