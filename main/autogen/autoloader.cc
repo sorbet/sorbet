@@ -316,6 +316,25 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
     if (!alConfig.includePath(pf.path)) {
         return;
     }
+
+    // No need to add strictly PBAL-compatible files to the def tree, just add the
+    // package to root and Test-root if it doesn't already exist.
+    auto &pkg = gs.packageDB().getPackageForFile(gs, pf.tree.file);
+    if (pkg.exists() && pkg.strictAutoloaderCompatibility() && !pkgsAddedToDefTree_.contains(pkg.mangledName())) {
+        DefTree *mainPkgNode = addSingleDefNameParts(root, pkg.fullName());
+        mainPkgNode->pkgName = pkg.mangledName();
+
+        auto &testRoot = root->children[core::Names::Constants::Test()];
+        if (testRoot) {
+            auto testPkgNode = addSingleDefNameParts(testRoot, pkg.fullName());
+            testPkgNode->pkgName = pkg.mangledName();
+        }
+
+        pkgsAddedToDefTree_.emplace(pkg.mangledName());
+
+        return;
+    }
+
     for (auto &def : pf.defs) {
         if (def.id.id() == 0) {
             continue;
@@ -379,21 +398,28 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
         return;
     }
 
-    DefTree *node = root.get();
-    for (const auto &part : ndef.qname.nameParts) {
-        auto &child = node->children[part];
-        if (!child) {
-            child = make_unique<DefTree>();
-            child->qname.nameParts = node->qname.nameParts;
-            child->qname.nameParts.emplace_back(part);
-        }
-        node = child.get();
-    }
+    DefTree *node = addSingleDefNameParts(root, ndef.qname.nameParts);
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));
     } else {
         updateNonBehaviorDef(gs, *node, move(ndef));
     }
+}
+
+DefTree *DefTreeBuilder::addSingleDefNameParts(std::unique_ptr<DefTree> &node, std::vector<core::NameRef> nameParts) {
+    auto curNode = node.get();
+
+    for (const auto &part : nameParts) {
+        auto &child = curNode->children[part];
+        if (!child) {
+            child = make_unique<DefTree>();
+            child->qname.nameParts = curNode->qname.nameParts;
+            child->qname.nameParts.emplace_back(part);
+        }
+        curNode = child.get();
+    }
+
+    return curNode;
 }
 
 DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {

@@ -133,7 +133,9 @@ public:
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
+    static UnorderedSet<core::NameRef> pkgsAddedToDefTree_;
     static void updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef);
+    static DefTree *addSingleDefNameParts(std::unique_ptr<DefTree> &node, std::vector<core::NameRef> nameParts);
 };
 
 class AutoloadWriter {
