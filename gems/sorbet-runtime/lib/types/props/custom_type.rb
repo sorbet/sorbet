@@ -62,7 +62,8 @@ module T::Props
       # We don't need to check for val's included modules in
       # T::Configuration.scalar_types, because T::Configuration.scalar_types
       # are all classes.
-      klass = T.let(val.class, T.nilable(Class))
+      # We elide `klass : T.nilable(Class)` to avoid allocations.
+      klass = T.unsafe(val.class)
       until klass.nil?
         return true if T::Configuration.scalar_types.include?(klass.to_s)
         klass = klass.superclass
