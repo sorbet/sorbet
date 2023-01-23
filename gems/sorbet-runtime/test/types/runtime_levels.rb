@@ -7,31 +7,35 @@ module Opus::Types::Test
       before do
         @orig_wrapped_tests_with_validation = T::Private::RuntimeLevels.instance_variable_get(:@wrapped_tests_with_validation)
         @orig_check_tests = T::Private::RuntimeLevels.instance_variable_get(:@check_tests)
+        @orig_sorbet_runtime_enable_checking_in_tests = ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS']
 
-        # Within these specs pretend we haven't yet read this value
+        # Within these specs pretend we haven't yet read this value and checked_tests is false
         T::Private::RuntimeLevels.instance_variable_set(:@wrapped_tests_with_validation, false)
+        T::Private::RuntimeLevels.instance_variable_set(:@check_tests, false)
       end
 
       after do
         T::Private::RuntimeLevels.instance_variable_set(:@check_tests, @orig_check_tests)
         T::Private::RuntimeLevels.instance_variable_set(:@wrapped_tests_with_validation, @orig_wrapped_tests_with_validation)
+        ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = @orig_sorbet_runtime_enable_checking_in_tests
       end
 
-      it 'does not change check_tests' do
-        # Reaching into a private method for testing purposes
-        T::Private::RuntimeLevels.send(:set_enable_checking_in_tests_from_environment)
+      describe 'when SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS env variable is not set' do
+        before do
+          ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = nil
+        end
 
-        assert_equal(T::Private::RuntimeLevels.check_tests?, false)
+        it 'does not change check_tests' do
+          # Reaching into a private method for testing purposes
+          T::Private::RuntimeLevels.send(:set_enable_checking_in_tests_from_environment)
+
+          assert_equal(T::Private::RuntimeLevels.check_tests?, false)
+        end
       end
 
       describe 'when SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS env variable is set' do
         before do
-          @orig_sorbet_runtime_enable_checking_in_tests = ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS']
           ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = '1'
-        end
-
-        after do
-          ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS'] = @orig_sorbet_runtime_enable_checking_in_tests
         end
 
         it 'updates check_tests' do
@@ -47,31 +51,35 @@ module Opus::Types::Test
       before do
         @orig_has_read_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@has_read_default_checked_level)
         @orig_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@default_checked_level)
+        @orig_sorbet_runtime_default_checked_level = ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL']
 
-        # Within these specs pretend we haven't yet read this value
+        # Within these specs pretend we haven't yet read this value and default_checked_level is always
         T::Private::RuntimeLevels.instance_variable_set(:@has_read_default_checked_level, false)
+        T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :always)
       end
 
       after do
         T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, @orig_default_checked_level)
         T::Private::RuntimeLevels.instance_variable_set(:@has_read_default_checked_level, @orig_has_read_default_checked_level)
+        ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = @orig_sorbet_runtime_default_checked_level
       end
 
-      it 'does not change default_typed_level' do
-        # Reaching into a private method for testing purposes
-        T::Private::RuntimeLevels.send(:set_default_checked_level_from_environment)
+      describe 'when SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL env variable is not set' do
+        before do
+          ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = nil
+        end
 
-        assert_equal(T::Private::RuntimeLevels.default_checked_level, :always)
+        it 'does not change default_typed_level' do
+          # Reaching into a private method for testing purposes
+          T::Private::RuntimeLevels.send(:set_default_checked_level_from_environment)
+
+          assert_equal(T::Private::RuntimeLevels.default_checked_level, :always)
+        end
       end
 
       describe 'when SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL env variable is set' do
         before do
-          @orig_sorbet_runtime_default_checked_level = ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL']
           ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = 'never'
-        end
-
-        after do
-          ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL'] = @orig_sorbet_runtime_default_checked_level
         end
 
         it 'updates default_typed_level' do
