@@ -8,7 +8,7 @@ Full docs are at:
 
 ## Environment variables
 
-There are a number of environment variables that `sorbet-runtime` reads from to change it's
+There are a number of environment variables that `sorbet-runtime` reads from to change its
 behavior:
 
 - `SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS`
