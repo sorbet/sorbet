@@ -1043,7 +1043,7 @@ struct PackageInfoFinder {
 
                 if (name.mangledName == info->name.mangledName) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                        e.setHeader("Useless `{}`, because {} cannot import itself, ", "visible_to",
+                        e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to",
                                     info->name.toString(ctx));
                     }
                 }
