@@ -57,13 +57,12 @@ module T::Props
       raise 'Please use "extend", not "include" to attach this module'
     end
 
-    sig(:final) {params(val: Object).returns(T::Boolean).checked(:never)}
+    sig(:final) {params(val: T.untyped).returns(T::Boolean).checked(:never)}
     def self.scalar_type?(val)
       # We don't need to check for val's included modules in
       # T::Configuration.scalar_types, because T::Configuration.scalar_types
       # are all classes.
-      # We elide `klass : T.nilable(Class)` to avoid allocations.
-      klass = T.unsafe(val.class)
+      klass = val.class
       until klass.nil?
         return true if T::Configuration.scalar_types.include?(klass.to_s)
         klass = klass.superclass
