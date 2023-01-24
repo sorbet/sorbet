@@ -26,16 +26,14 @@ module T::Props
         non_nil_type = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
         accessor_key = rules.fetch(:accessor_key)
         validate = rules[:setter_validate]
-        check_level = rules.fetch(:checked)
 
         # It seems like a bug that this affects the behavior of setters, but
         # some existing code relies on this behavior
         has_explicit_nil_default = rules.key?(:default) && rules.fetch(:default).nil?
-        requires_validation = check_level == :always || (check_level == :tests && T::Private::RuntimeLevels.check_tests?)
 
         # Use separate methods in order to ensure that we only close over necessary
         # variables
-        if !requires_validation
+        if !T::Props::Utils.need_type_check?(rules)
           proc do |val|
             instance_variable_set(accessor_key, val)
           end
