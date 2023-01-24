@@ -161,6 +161,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
+    bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
+
     // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
     // Given any other symbol, returns false.
     // Also returns false if called on core::Symbols::noClassOrModule().
@@ -491,6 +493,8 @@ public:
         // 0th index is reserved on all symbol vectors for the non existant symbol.
         return unsafeTableIndex() != 0;
     }
+
+    bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
 
     bool isSynthetic() const;
 

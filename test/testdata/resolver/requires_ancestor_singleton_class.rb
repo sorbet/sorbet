@@ -23,11 +23,11 @@ class Foo
   end
 end
 
-  class Bar
-# ^^^^^^^^^ error: `T.class_of(Bar)` must inherit `T.class_of(Foo)` (required by `Helper`)
-    class << self
-      include Helper
+class Bar
+  class << self
+# ^^^^^ error: `T.class_of(Bar)` must inherit `T.class_of(Foo)` (required by `Helper`)
+    include Helper
 
-      def bar; end
-    end
+    def bar; end
   end
+end

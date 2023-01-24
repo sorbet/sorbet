@@ -262,8 +262,8 @@ module Test9
     include R1
   end
 
-  class C7 # error: `T.class_of(Test9::C7)` must include `R1` (required by `Test9::M1`)
-    class << self
+  class C7
+    class << self # error: `T.class_of(Test9::C7)` must include `R1` (required by `Test9::M1`)
       include M1
     end
   end
@@ -275,8 +275,8 @@ module Test9
     end
   end
 
-  class C9 # error: `T.class_of(T.class_of(Test9::C9))` must include `R1` (required by `Test9::M1`)
-    class << self
+  class C9
+    class << self # error: `T.class_of(T.class_of(Test9::C9))` must include `R1` (required by `Test9::M1`)
       extend M1
     end
   end
