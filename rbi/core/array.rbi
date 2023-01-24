@@ -1578,7 +1578,7 @@ class Array < Object
   # a.intersect?(c)   #=> false
   # ```
   sig { params(other_ary: T.untyped).returns(T::Boolean) }
-  def intersect(other_ary); end
+  def intersect?(other_ary); end
 
   # Returns a string created by converting each element of the array to a
   # string, separated by the given `separator`. If the `separator` is `nil`, it
