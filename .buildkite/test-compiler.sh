@@ -10,6 +10,7 @@ case "${unameOut}" in
 esac
 
 if [[ "linux" == "$platform" ]]; then
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
     apt-get update
     apt-get install -yy libncurses5-dev libncursesw5-dev xxd
 elif [[ "mac" == "$platform" ]]; then

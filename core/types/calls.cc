@@ -4061,6 +4061,68 @@ public:
     }
 } Array_zip;
 
+class Symbol_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        // NOTE:
+        // If you update this, please update error-reference to mention which types this check applies to
+        auto isOnlySymbol =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
+        if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+                e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
+                            args.args[0]->type.show(gs));
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                if (args.args[0]->type == Types::String() && args.argLoc(0).exists()) {
+                    e.replaceWith("Convert arg to Symbol", args.argLoc(0).copyEndWithZeroLength(), ".to_sym");
+                }
+            }
+        }
+    }
+} Symbol_eqeq;
+
+class String_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto isOnlyString =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
+
+        // NOTE:
+        // If you update this, please update error-reference to mention which types this check applies to
+        if (isOnlyString &&
+            // This extra `isSubType` is here (not in Symbol_eqeq) because of how implicit String#==
+            // allows implicit conversions with `to_str`. In essence, this check implements the
+            // assumption that `Symbol` is final and thus no subclass can implement `to_str` (we
+            // could also implement the actual final logic for arbitrary classes, but have opted not
+            // to because it would likely be a cause for surprise).
+            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
+            Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+                e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
+                            args.args[0]->type.show(gs));
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                if (args.args[0]->type == Types::Symbol() && args.receiverLoc().exists()) {
+                    e.replaceWith("Convert arg to Symbol", args.receiverLoc().copyEndWithZeroLength(), ".to_sym");
+                }
+            }
+        }
+    }
+} String_eqeq;
+
 class Kernel_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4318,6 +4380,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::plus(), &Array_plus},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
+
+    {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
+    {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
