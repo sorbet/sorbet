@@ -1803,6 +1803,69 @@ def foo; [0]; end
 For more information, see
 [Arrays, Hashes, and Generics in the Standard Library](stdlib-generics.md).
 
+## 5027
+
+This error fires when a constant is referenced before it is defined.
+
+```ruby
+puts X # error: `X` referenced before it is defined
+X = 1
+```
+
+```ruby
+module Foo
+  A = X
+    # ^ error: `Foo::X` referenced before it is defined
+  class X; end
+end
+```
+
+Generally, Sorbet is not opinionated about definition-reference ordering. It
+assumes the presence of an autoloader which makes constants available at runtime
+when they are referenced (assuming they are defined somewhere).
+
+However, it is helpful in some basic contexts (like class-loading) to catch this
+issue, regardless of the presence of an autoloader. Please note that this error
+will not fire for all cases. There are some conditions which have to be met for
+the error to fire:
+
+### Load-time scope must be established definitively
+
+Sorbet has to prove definitively that a given constant is accessed out-of-order
+at load time. It cannot track accesses across function calls or blocks. Meaning
+that the following code, while technically unloadable, will not throw a Sorbet
+error.
+
+```ruby
+module Foo
+  def bar(&blk)
+    yield
+  end
+
+  bar do
+    A = X # this will not report an error
+  end
+
+  class X; end
+```
+
+### Symbols have to be guaranteed to exist only in one file
+
+In the above example, if `Foo::X` is also declared in another file, the error
+will not fire. In such cases, the constant may get autoloaded, so we cannot
+prove that the behavior is erroneous.
+
+### The error is only reported in --stripe-mode
+
+Since this error is currently most relevant within the Stripe codebase's
+autoloading context, we are making it available only under the `--stripe-mode`
+flag.
+
+Ways to fix the error include:
+
+- Re-ordering the constant access below the declaration.
+- In the case of classes, adding an empty pre-declaration before the access.
+
 ## 5028
 
 In `# typed: strict` files, Sorbet requires that all constants are annotated

@@ -571,6 +571,14 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
     return Symbols::noMethod();
 }
 
+bool SymbolRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    return locs(gs).size() == 1 && loc(gs).file() == file;
+}
+
+bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    return data(gs)->locs().size() == 1 && data(gs)->loc().file() == file;
+}
+
 // Documented in SymbolRef.h
 bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     auto sym = *this;
@@ -2520,13 +2528,10 @@ const InlinedVector<Loc, 2> &TypeParameter::locs() const {
 }
 
 namespace {
-void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLoc, InlinedVector<Loc, 2> &locs,
-                    bool keepOriginal = false) {
+void addLocInternal(const core::GlobalState &gs, core::Loc loc, core::Loc mainLoc, InlinedVector<Loc, 2> &locs) {
     for (auto &existing : locs) {
         if (existing.file() == loc.file()) {
-            if (!keepOriginal) {
-                existing = loc;
-            }
+            existing = loc;
             return;
         }
     }
@@ -2600,7 +2605,7 @@ void ClassOrModule::addLoc(const core::GlobalState &gs, core::Loc loc) {
     ENFORCE(ref(gs) != Symbols::root());
     ENFORCE(ref(gs) != Symbols::PackageSpecRegistry());
 
-    addLocInternal(gs, loc, this->loc(), locs_, true);
+    addLocInternal(gs, loc, this->loc(), locs_);
 }
 
 void ClassOrModule::removeLocsForFile(core::FileRef file) {
