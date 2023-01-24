@@ -7,7 +7,6 @@ require_relative '../lib/sorbet-runtime'
 
 module SorbetBenchmarks
   module SerializeCustomType
-
     class MyCustomType
       extend T::Props::CustomType
 
