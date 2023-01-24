@@ -3956,12 +3956,12 @@ operand of `==` is:
 
 Sorbet is unable to apply these checks for all types, because `==` can be
 overridden in arbitrary ways, including to allow for implicit conversion between
-types unrelated types. This means that Sorbet will sometimes miss reporting this
-error in places where we would like it to, and can't be changed to report an
-error without breaking valid code.
+unrelated types. This means that Sorbet will sometimes miss reporting this error
+in places where we would like it to, and can't be changed to report an error
+without breaking valid code.
 
 To fix this error, ensure that the left and right operands' types match before
-doing the comparison. For example try converting `String`s to `Symbol`s with
+doing the comparison. For example, try converting `String`s to `Symbol`s with
 `to_sym` (or vice versa with `to_s`).
 
 <!-- -->

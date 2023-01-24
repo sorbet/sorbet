@@ -4101,6 +4101,11 @@ public:
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
         if (isOnlyString &&
+            // This extra `isSubType` is here (not in Symbol_eqeq) because of how implicit String#==
+            // allows implicit conversions with `to_str`. In essence, this check implements the
+            // assumption that `Symbol` is final and thus no subclass can implement `to_str` (we
+            // could also implement the actual final logic for arbitrary classes, but have opted not
+            // to because it would likely be a cause for surprise).
             Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
             Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             auto funLoc = args.funLoc();
