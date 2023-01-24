@@ -53,10 +53,29 @@ module T::Private::RuntimeLevels
     if @has_read_default_checked_level
       raise "Set the default checked level earlier. There are already some methods whose sig blocks have evaluated which would not be affected by the new default."
     end
+    if !LEVELS.include?(default_checked_level)
+      raise "Invalid `checked` level '#{default_checked_level}'. Use one of: #{LEVELS}."
+    end
+
     @default_checked_level = default_checked_level
   end
 
   def self._toggle_checking_tests(checked)
     @check_tests = checked
   end
+
+  private_class_method def self.set_enable_checking_in_tests_from_environment
+    if ENV['SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS']
+      enable_checking_in_tests
+    end
+  end
+  set_enable_checking_in_tests_from_environment
+
+  private_class_method def self.set_default_checked_level_from_environment
+    level = ENV['SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL']
+    if level
+      self.default_checked_level = level.to_sym
+    end
+  end
+  set_default_checked_level_from_environment
 end
