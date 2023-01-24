@@ -20,6 +20,7 @@ struct AutoloaderConfig {
 
     // `true` if the definition should have autoloads generated for it based on the `AutoloaderConfig`
     bool include(const NamedDefinition &) const;
+    bool includeParts(const std::vector<core::NameRef> &nameParts) const;
     // `true` if the file should have autoloads generated for it (i.e. it's a ruby source file that's not ignored)
     bool includePath(std::string_view path) const;
     // `true` if the file should be required based on the provided configuration
@@ -124,7 +125,7 @@ class DefTreeBuilder {
 public:
     // Add all definitions in a parsed file to a `DefTree` root.
     static void addParsedFileDefinitions(const core::GlobalState &, const AutoloaderConfig &,
-                                         std::unique_ptr<DefTree> &root, ParsedFile &);
+                                         std::unique_ptr<DefTree> &root, ParsedFile &, UnorderedSet<core::NameRef> &);
     static void addSingleDef(const core::GlobalState &, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
                              NamedDefinition);
 
@@ -133,7 +134,6 @@ public:
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
-    static UnorderedSet<core::NameRef> pkgsAddedToDefTree_;
     static void updateNonBehaviorDef(const core::GlobalState &gs, DefTree &node, NamedDefinition ndef);
     static DefTree *addSingleDefNameParts(std::unique_ptr<DefTree> &node, std::vector<core::NameRef> nameParts);
 };

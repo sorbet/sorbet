@@ -257,7 +257,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                         }
                         if (opts.print.AutogenAutoloader.enabled) {
                             Timer timeit(logger, "autogenNamedDefs");
-                            autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
+                            UnorderedSet<core::NameRef> pkgsAddedToDefTree;
+                            autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf,
+                                                                              pkgsAddedToDefTree);
                         }
                     }
 
@@ -298,10 +300,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
     if (opts.print.AutogenAutoloader.enabled) {
-        /* { */
-        /*     Timer timeit(logger, "autogenMarkPackages"); */
-        /*     autogen::DefTreeBuilder::markPackages(gs, root, autoloaderCfg); */
-        /* } */
+        {
+            Timer timeit(logger, "autogenMarkPackages");
+            autogen::DefTreeBuilder::markPackages(gs, root, autoloaderCfg);
+        }
         {
             Timer timeit(logger, "autogenAutoloaderPrune");
             autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);

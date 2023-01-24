@@ -24,6 +24,10 @@ bool AutoloaderConfig::include(const NamedDefinition &nd) const {
     return !nd.qname.nameParts.empty() && topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
 }
 
+bool AutoloaderConfig::includeParts(const std::vector<core::NameRef> &nameParts) const {
+    return !nameParts.empty() && topLevelNamespaceRefs.contains(nameParts[0]);
+}
+
 bool AutoloaderConfig::includePath(string_view path) const {
     return absl::EndsWith(path, ".rb") &&
            !sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absoluteIgnorePatterns,
@@ -311,7 +315,8 @@ const NamedDefinition &DefTree::definition(const core::GlobalState &gs) const {
 }
 
 void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const AutoloaderConfig &alConfig,
-                                              std::unique_ptr<DefTree> &root, ParsedFile &pf) {
+                                              std::unique_ptr<DefTree> &root, ParsedFile &pf,
+                                              UnorderedSet<core::NameRef> &pkgsAddedToDefTree) {
     ENFORCE(root->root());
     if (!alConfig.includePath(pf.path)) {
         return;
@@ -320,7 +325,8 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
     // No need to add strictly PBAL-compatible files to the def tree, just add the
     // package to root and Test-root if it doesn't already exist.
     auto &pkg = gs.packageDB().getPackageForFile(gs, pf.tree.file);
-    if (pkg.exists() && pkg.strictAutoloaderCompatibility() && !pkgsAddedToDefTree_.contains(pkg.mangledName())) {
+    if (pkg.exists() && pkg.strictAutoloaderCompatibility() && !pkgsAddedToDefTree.contains(pkg.mangledName()) &&
+        alConfig.includeParts(pkg.fullName())) {
         DefTree *mainPkgNode = addSingleDefNameParts(root, pkg.fullName());
         mainPkgNode->pkgName = pkg.mangledName();
 
@@ -330,7 +336,7 @@ void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const
             testPkgNode->pkgName = pkg.mangledName();
         }
 
-        pkgsAddedToDefTree_.emplace(pkg.mangledName());
+        pkgsAddedToDefTree.emplace(pkg.mangledName());
 
         return;
     }
@@ -362,8 +368,9 @@ void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core:
         return;
     }
 
-    ENFORCE(!(node->pkgName.exists()), "Package name should not be already set");
-    node->pkgName = mangledName;
+    if (!(node->pkgName.exists())) {
+        node->pkgName = mangledName;
+    }
 }
 
 void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &alCfg) {
