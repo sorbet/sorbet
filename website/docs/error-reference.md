@@ -849,10 +849,10 @@ end
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
 > at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-The `--stripe-packages` mdoe allows packages to explicitly enumerate which other
+The `--stripe-packages` mode allows packages to explicitly enumerate which other
 packages are allowed to import them by using the `visible_to` directive. If a
 package uses one or more `visible_to` lines, and is imported by a package _not_
-referenced by a `visible_to` line, then Sorbet will raise an error pointing to
+referenced by a `visible_to` line, then Sorbet will report an error pointing to
 that import.
 
 Often, if you're running across this error, it means that you're trying to rely
