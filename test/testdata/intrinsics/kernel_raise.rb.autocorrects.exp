@@ -11,6 +11,14 @@ class MyError < StandardError
   end
 end
 
+class MultipleRequired < StandardError
+  extend T::Sig
+
+  sig { params(input: String, another: Integer).void }
+  def initialize(input, another)
+  end
+end
+
 class DefinesToException
   extend T::Sig
 
@@ -76,6 +84,17 @@ def example(cls)
     # This doesn't define `exception`, but we don't currently detect that, (and
     # probably can't, because of subtyping), opting instead to skip the intrinsic
     raise DoesNotDefineToException
+  end
+
+  0.times do
+    raise TypeError, "one", "two"
+    #                       ^^^^^ error: Expected `T.nilable(T::Array[String])` but found `String("two")` for argument `arg2`
+  end
+
+  0.times do
+    raise MultipleRequired, "one", "two"
+    #                              ^^^^^ error: Expected `T.nilable(T::Array[String])` but found `String("two")` for argument `arg2`
+    #                       ^^^^^ error: Not enough arguments provided for method `MultipleRequired#initialize`. Expected: `2`, got: `1`
   end
 end
 # ------------------------------
