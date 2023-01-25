@@ -880,8 +880,10 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             }
                         }
 
-                        auto thisDistance = caseInsensitiveAndSensitiveDist(
-                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                        auto thisDistance =
+                            Levenstein::distance<false>(
+                                currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance)
+                                .toPair();
 
                         auto bestDistPair = make_pair(best.insensitiveDistance, best.distance);
                         if (thisDistance <= bestDistPair) {
@@ -940,8 +942,10 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         }
                     }
 
-                    auto thisDistance = caseInsensitiveAndSensitiveDist(
-                        currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                    auto thisDistance =
+                        Levenstein::distance<false>(currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8,
+                                                    best.distance)
+                            .toPair();
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
                             globalBest.clear();
@@ -976,12 +980,6 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     absl::c_reverse(result);
     return result;
 }
-std::pair<int, int> ClassOrModule::caseInsensitiveAndSensitiveDist(std::string_view s1, std::string_view s2,
-                                                                   int bound) noexcept {
-    int sensitive = Levenstein::distance(s1, s2, bound);
-    int insensitive = Levenstein::distance(absl::AsciiStrToLower(s1), absl::AsciiStrToLower(s2), bound);
-    return make_pair(insensitive, sensitive);
-}
 
 ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
                                                                          int betterThan) const {
@@ -1001,7 +999,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
             continue;
         }
         auto utf8 = thisName.dataUtf8(gs)->utf8;
-        int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
+        int thisDistance = Levenstein::distance<true>(currentName, utf8, result.distance).sensitive;
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
             result.distance = thisDistance;

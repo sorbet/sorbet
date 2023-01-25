@@ -613,9 +613,6 @@ private:
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;
 
-    static std::pair<int, int> caseInsensitiveAndSensitiveDist(std::string_view s1, std::string_view s2,
-                                                               int bound) noexcept;
-
     /*
      * mixins and superclasses: `superClass` is *not* included in the
      *   `argumentsOrMixins` list. `superClass` may not exist even if

@@ -9,10 +9,10 @@
 namespace sorbet::common {
 
 TEST_CASE("Levenstein") { // NOLINT
-    CHECK_EQ(2, Levenstein::distance("Mama", "Papa", 10));
-    CHECK_EQ(5, Levenstein::distance("Ruby", "Scala", 10));
-    CHECK_EQ(3, Levenstein::distance("Java", "Scala", 10));
-    CHECK_EQ(INT_MAX, Levenstein::distance("Java", "S", 1));
+    CHECK_EQ(2, Levenstein::distance<true>("Mama", "Papa", 10).sensitive);
+    CHECK_EQ(5, Levenstein::distance<true>("Ruby", "Scala", 10).sensitive);
+    CHECK_EQ(3, Levenstein::distance<true>("Java", "Scala", 10).sensitive);
+    CHECK_EQ(INT_MAX, Levenstein::distance<true>("Java", "S", 1).sensitive);
 }
 
 TEST_CASE("FileOps::ensureDir") {
