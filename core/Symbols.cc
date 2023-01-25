@@ -880,8 +880,6 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             }
                         }
 
-                        // auto thisDistance = Levenstein::distance(
-                        //     currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         auto thisDistance = caseInsensitiveAndSensitiveDist(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
 
