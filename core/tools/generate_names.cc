@@ -302,6 +302,7 @@ NameDef names[] = {
     {"genericPropGetter"},
 
     {"raise"},
+    {"fail"},
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
 
     {"test"},
@@ -493,6 +494,7 @@ NameDef names[] = {
     {"Kernel", "Kernel", true},
     {"Range", "Range", true},
     {"Regexp", "Regexp", true},
+    {"Exception", "Exception", true},
     {"StandardError", "StandardError", true},
     {"Complex", "Complex", true},
     {"Rational", "Rational", true},

@@ -365,6 +365,8 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::MagicSingleton());
     klass = synthesizeClass(core::Names::Constants::Module());
     ENFORCE(klass == Symbols::Module());
+    klass = synthesizeClass(core::Names::Constants::Exception());
+    ENFORCE(klass == Symbols::Exception());
     klass = synthesizeClass(core::Names::Constants::StandardError());
     ENFORCE(klass == Symbols::StandardError());
     klass = synthesizeClass(core::Names::Constants::Complex());

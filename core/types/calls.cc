@@ -4141,6 +4141,71 @@ public:
     }
 } Kernel_proc;
 
+class Kernel_raise : public IntrinsicMethod {
+public:
+    vector<NameRef> dispatchesTo() const override {
+        // Technically only dispatches to `new` but we manually flatten the chain to avoid having to
+        // compute the transitive closure of dispatchesTo.
+        return {core::Names::new_(), core::Names::initialize()};
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() < 1) {
+            return;
+        }
+        auto classArg = args.args[0];
+
+        // The isUntyped check is part performance optimization and part "correctness":
+        // - no need to run another dispatch if it's just going to be untyped, but also...
+        // - arguably none of this intrinsic should run if we don't know that arg0 isn't a Class
+        //
+        // Technically speaking, the Ruby VM actually implements this by way of calling
+        // arg0.exception. It just so happens that Exception.exception is defined to forward to
+        // `.new` (https://ruby-doc.org/core-2.7.2/Exception.html#method-c-exception) but anything
+        // that defines a method called `exception` could be called. We don't implement that here,
+        // because implicit conversions are hard in the presence of subtyping. Instead, we restrict
+        // the check to only subclasses of `Exception`, not arbitrary classes.
+        auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
+        if (!classArg->type.isUntyped() && !Types::isSubType(gs, classArg->type, classOfException)) {
+            return;
+        }
+
+        uint16_t newNumPosArgs = args.args.size() >= 2 ? 1 : 0;
+        auto newSendArgLocs = InlinedVector<LocOffsets, 2>();
+        if (newNumPosArgs > 0) {
+            newSendArgLocs.emplace_back(args.locs.args[1]);
+        }
+        auto newCallLocs = CallLocs{
+            args.locs.file,
+            /* callLoc */ args.locs.args[0].join(args.locs.args[newNumPosArgs]),
+            /* receiverLoc */ args.locs.args[0],
+            /* funLoc */ args.locs.args[0].copyEndWithZeroLength(),
+            newSendArgLocs,
+        };
+
+        auto newSendArgs = InlinedVector<const TypeAndOrigins *, 2>();
+        if (newNumPosArgs) {
+            newSendArgs.emplace_back(args.args[1]);
+        }
+
+        DispatchArgs newArgs{
+            Names::new_(),         newCallLocs,
+            newNumPosArgs,         newSendArgs,
+            classArg->type,        *classArg,
+            classArg->type,
+            /* block */ nullptr,   args.originForUninitialized,
+            /* isPrivateOk*/ true, args.suppressErrors,
+        };
+        auto dispatched = classArg->type.dispatchCall(gs, newArgs);
+
+        for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+            for (auto &err : it->main.errors) {
+                res.main.errors.emplace_back(std::move(err));
+            }
+        }
+    }
+} Kernel_raise;
+
 class Enumerable_toH : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
@@ -4386,6 +4451,8 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::fail(), &Kernel_raise},
 
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 

@@ -3820,6 +3820,7 @@ public:
                 overloadSym =
                     ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName, i, sig.argsToKeep);
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
+                overloadSym.data(ctx)->intrinsicOffset = mdef.symbol.data(ctx)->intrinsicOffset;
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->flags.isOverloaded = true;
                 }
