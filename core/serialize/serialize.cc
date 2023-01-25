@@ -631,6 +631,7 @@ void SerializerImpl::pickle(Pickler &p, const Method &what) {
         pickle(p, a);
     }
     pickle(p, what.resultType);
+    p.putU4(what.intrinsicOffset);
     p.putU4(what.locs().size());
     for (auto &loc : what.locs()) {
         pickle(p, loc);
@@ -663,6 +664,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     }
 
     result.resultType = unpickleType(p, gs);
+    result.intrinsicOffset = p.getU4();
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
         result.locs_.emplace_back(unpickleLoc(p));
@@ -1068,7 +1070,6 @@ void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
             "Can't load into a non-empty state");
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
-    gs.installIntrinsics();
 }
 
 uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
