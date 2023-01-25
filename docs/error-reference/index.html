@@ -713,10 +713,10 @@ instead:</p>
 <p>This error is specific to Stripe’s custom <code>--stripe-packages</code> mode. If you are
 at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
-<p>The <code>--stripe-packages</code> mdoe allows packages to explicitly enumerate which other
+<p>The <code>--stripe-packages</code> mode allows packages to explicitly enumerate which other
 packages are allowed to import them by using the <code>visible_to</code> directive. If a
 package uses one or more <code>visible_to</code> lines, and is imported by a package <em>not</em>
-referenced by a <code>visible_to</code> line, then Sorbet will raise an error pointing to
+referenced by a <code>visible_to</code> line, then Sorbet will report an error pointing to
 that import.</p>
 <p>Often, if you’re running across this error, it means that you’re trying to rely
 on an implementation detail that was deliberately made private. However, if
