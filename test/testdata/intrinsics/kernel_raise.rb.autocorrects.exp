@@ -45,13 +45,13 @@ def example(cls)
   end
 
   0.times do
-    raise MyError, "arg"
+    raise MyError
     #              ^^^^^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #              ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
 
   0.times do
-    raise cls, "arg"
+    raise cls
     #          ^^^^^ error: Missing required keyword argument `input` for method `MyError#initialize`
     #          ^^^^^ error: Too many positional arguments provided for method `MyError#initialize`. Expected: `0`, got: `1`
   end
