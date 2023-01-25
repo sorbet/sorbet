@@ -4141,6 +4141,53 @@ public:
     }
 } Kernel_proc;
 
+class Kernel_raise : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() < 1) {
+            return;
+        }
+
+        if (!Types::isSubType(gs, args.args[0]->type, Types::classClass())) {
+            return;
+        }
+
+        uint16_t newNumPosArgs = args.args.size() >= 2 ? 1 : 0;
+        auto newSendArgLocs = InlinedVector<LocOffsets, 2>();
+        if (newNumPosArgs > 0) {
+            newSendArgLocs.emplace_back(args.locs.args[1]);
+        }
+        auto newCallLocs = CallLocs{
+            args.locs.file,
+            /* callLoc */ args.locs.args[0].join(args.locs.args[newNumPosArgs]),
+            /* receiverLoc */ args.locs.args[0],
+            /* funLoc */ args.locs.args[0].copyEndWithZeroLength(),
+            newSendArgLocs,
+        };
+
+        auto newSendArgs = InlinedVector<const TypeAndOrigins *, 2>();
+        if (newNumPosArgs) {
+            newSendArgs.emplace_back(args.args[1]);
+        }
+
+        auto newArgs = DispatchArgs{
+            Names::new_(),         newCallLocs,
+            newNumPosArgs,         newSendArgs,
+            args.args[0]->type,    *args.args[0],
+            args.args[0]->type,
+            /*block*/ nullptr,     args.originForUninitialized,
+            /*isPrivateOk*/ false, args.suppressErrors,
+        };
+        auto dispatched = args.args[0]->type.dispatchCall(gs, newArgs);
+
+        for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+            for (auto &err : it->main.errors) {
+                res.main.errors.emplace_back(std::move(err));
+            }
+        }
+    }
+} Kernel_raise;
+
 class Enumerable_toH : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
@@ -4386,6 +4433,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
 
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
