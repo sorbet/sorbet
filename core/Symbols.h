@@ -521,6 +521,7 @@ public:
         SymbolRef symbol;
         NameRef name;
         int distance;
+        std::pair<int, int> vectorDist;
     };
 
     std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
@@ -611,6 +612,9 @@ private:
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;
+
+    static std::pair<int, int> caseInsensitiveAndSensitiveDist(std::string_view s1, std::string_view s2,
+                                                               int bound) noexcept;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

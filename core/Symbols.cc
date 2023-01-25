@@ -1,4 +1,5 @@
 #include "core/Symbols.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
@@ -877,13 +878,15 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             }
                         }
 
-                        auto thisDistance = Levenstein::distance(
+                        // auto thisDistance = Levenstein::distance(
+                        //     currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
+                        auto thisDistance = caseInsensitiveAndSensitiveDist(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= best.distance) {
-                            if (thisDistance < best.distance) {
+                        if (thisDistance <= best.vectorDist) {
+                            if (thisDistance < best.vectorDist) {
                                 scopeBest.clear();
                             }
-                            best.distance = thisDistance;
+                            best.vectorDist = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
                             scopeBest.emplace_back(best);
@@ -912,7 +915,9 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 
     if (best.distance > 0) {
         // find the closest by global dfs.
-        auto globalBestDistance = best.distance - 1;
+        auto globalBestDistance = best.vectorDist;
+        globalBestDistance.first -= 1;
+
         vector<ClassOrModule::FuzzySearchResult> globalBest;
         vector<ClassOrModuleRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
@@ -933,14 +938,14 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         }
                     }
 
-                    auto thisDistance = Levenstein::distance(
+                    auto thisDistance = caseInsensitiveAndSensitiveDist(
                         currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
                             globalBest.clear();
                         }
                         globalBestDistance = thisDistance;
-                        best.distance = thisDistance;
+                        best.vectorDist = thisDistance;
                         best.symbol = member.second;
                         best.name = member.first;
                         globalBest.emplace_back(best);
@@ -967,6 +972,12 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     // distance are first.
     absl::c_reverse(result);
     return result;
+}
+std::pair<int, int> ClassOrModule::caseInsensitiveAndSensitiveDist(std::string_view s1, std::string_view s2,
+                                                                   int bound) noexcept {
+    int sensitive = Levenstein::distance(s1, s2, bound);
+    int insensitive = Levenstein::distance(absl::AsciiStrToLower(s1), absl::AsciiStrToLower(s2), bound);
+    return make_pair(insensitive, sensitive);
 }
 
 ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
