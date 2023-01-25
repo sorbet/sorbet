@@ -521,7 +521,7 @@ public:
         SymbolRef symbol;
         NameRef name;
         int distance;
-        std::pair<int, int> vectorDist;
+        int insensitiveDistance;
     };
 
     std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;

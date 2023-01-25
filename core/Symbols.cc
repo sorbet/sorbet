@@ -837,7 +837,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
         best.distance = 1 + (currentName.size() / 2);
     }
 
-    best.vectorDist = make_pair(best.distance, best.distance);
+    best.insensitiveDistance = best.distance;
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
 
@@ -884,11 +884,14 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                         //     currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         auto thisDistance = caseInsensitiveAndSensitiveDist(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        if (thisDistance <= best.vectorDist) {
-                            if (thisDistance < best.vectorDist) {
+
+                        auto bestDistPair = make_pair(best.insensitiveDistance, best.distance);
+                        if (thisDistance <= bestDistPair) {
+                            if (thisDistance < bestDistPair) {
                                 scopeBest.clear();
                             }
-                            best.vectorDist = thisDistance;
+                            best.insensitiveDistance = thisDistance.first;
+                            best.distance = thisDistance.second;
                             best.symbol = member.second;
                             best.name = member.first;
                             scopeBest.emplace_back(best);
@@ -917,8 +920,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
 
     if (best.distance > 0) {
         // find the closest by global dfs.
-        auto globalBestDistance = best.vectorDist;
-        globalBestDistance.first -= 1;
+        auto globalBestDistance = make_pair(best.insensitiveDistance - 1, best.distance - 1);
 
         vector<ClassOrModule::FuzzySearchResult> globalBest;
         vector<ClassOrModuleRef> yetToGoDeeper;
@@ -947,7 +949,8 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                             globalBest.clear();
                         }
                         globalBestDistance = thisDistance;
-                        best.vectorDist = thisDistance;
+                        best.insensitiveDistance = thisDistance.first;
+                        best.distance = thisDistance.second;
                         best.symbol = member.second;
                         best.name = member.first;
                         globalBest.emplace_back(best);
