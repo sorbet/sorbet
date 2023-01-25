@@ -271,8 +271,8 @@ default checked level can also be configured. For example:
 T::Configuration.default_checked_level = :tests
 ```
 
-This can also be set via the `SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL`
-environment variable, see [Environment Variables](tconfiguration.md#environment-variables)
+This can also be set via the `SORBET_RUNTIME_DEFAULT_CHECKED_LEVEL` environment
+variable, see [Environment Variables](tconfiguration.md#environment-variables)
 for more.
 
 Writing this will make it so that any sig which does not have a `.checked(...)`
@@ -289,8 +289,8 @@ T::Configuration.enable_checking_for_sigs_marked_checked_tests
 ```
 
 This can also be set via the `SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS`
-environment variable, see [Environment Variables](tconfiguration.md#environment-variables)
-for more.
+environment variable, see
+[Environment Variables](tconfiguration.md#environment-variables) for more.
 
 For example, this should probably be placed as the first line of any `rake test`
 target, as well as any other entry point to a project's tests. If this line is
