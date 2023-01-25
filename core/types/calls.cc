@@ -4452,6 +4452,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::fail(), &Kernel_raise},
 
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
 
