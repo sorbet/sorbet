@@ -4143,10 +4143,17 @@ public:
 
 class Kernel_raise : public IntrinsicMethod {
 public:
+    vector<NameRef> dispatchesTo() const override {
+        // Technically only dispatches to `new` but we manually flatten the chain to avoid having to
+        // compute the transitive closure of dispatchesTo.
+        return {core::Names::new_(), core::Names::initialize()};
+    }
+
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() < 1) {
             return;
         }
+        auto classArg = args.args[0];
 
         // The isUntyped check is part performance optimization and part "correctness":
         // - no need to run another dispatch if it's just going to be untyped, but also...
@@ -4159,7 +4166,7 @@ public:
         // because implicit conversions are hard in the presence of subtyping. Instead, we restrict
         // the check to only subclasses of `Exception`, not arbitrary classes.
         auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
-        if (!args.args[0]->type.isUntyped() && !Types::isSubType(gs, args.args[0]->type, classOfException)) {
+        if (!classArg->type.isUntyped() && !Types::isSubType(gs, classArg->type, classOfException)) {
             return;
         }
 
@@ -4181,15 +4188,15 @@ public:
             newSendArgs.emplace_back(args.args[1]);
         }
 
-        auto newArgs = DispatchArgs{
+        DispatchArgs newArgs{
             Names::new_(),         newCallLocs,
             newNumPosArgs,         newSendArgs,
-            args.args[0]->type,    *args.args[0],
-            args.args[0]->type,
-            /*block*/ nullptr,     args.originForUninitialized,
-            /*isPrivateOk*/ false, args.suppressErrors,
+            classArg->type,        *classArg,
+            classArg->type,
+            /* block */ nullptr,   args.originForUninitialized,
+            /* isPrivateOk*/ true, args.suppressErrors,
         };
-        auto dispatched = args.args[0]->type.dispatchCall(gs, newArgs);
+        auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
             for (auto &err : it->main.errors) {
