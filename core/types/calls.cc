@@ -4148,7 +4148,18 @@ public:
             return;
         }
 
-        if (!Types::isSubType(gs, args.args[0]->type, Types::classClass())) {
+        // The isUntyped check is part performance optimization and part "correctness":
+        // - no need to run another dispatch if it's just going to be untyped, but also...
+        // - arguably none of this intrinsic should run if we don't know that arg0 isn't a Class
+        //
+        // Technically speaking, the Ruby VM actually implements this by way of calling
+        // arg0.exception. It just so happens that Exception.exception is defined to forward to
+        // `.new` (https://ruby-doc.org/core-2.7.2/Exception.html#method-c-exception) but anything
+        // that defines a method called `exception` could be called. We don't implement that here,
+        // because implicit conversions are hard in the presence of subtyping. Instead, we restrict
+        // the check to only subclasses of `Exception`, not arbitrary classes.
+        auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
+        if (!args.args[0]->type.isUntyped() && !Types::isSubType(gs, args.args[0]->type, classOfException)) {
             return;
         }
 
