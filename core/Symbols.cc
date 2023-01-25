@@ -837,6 +837,8 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
         best.distance = 1 + (currentName.size() / 2);
     }
 
+    best.vectorDist = make_pair(best.distance, best.distance);
+
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
 
     // Find the closest by following outer scopes
