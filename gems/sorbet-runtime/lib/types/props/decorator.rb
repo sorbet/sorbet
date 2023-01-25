@@ -407,6 +407,9 @@ class T::Props::Decorator
           @class.send(:define_method, "#{name}=") do |val|
             T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
+        elsif !T::Props::Utils.need_type_check?(rules)
+          # Fastest path (~20x faster as of Ruby 2.6)
+          @class.send(:attr_writer, name) # send is used because `attr_writer` is private in 2.4
         else
           # Fast path (~4x faster as of Ruby 2.6)
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))

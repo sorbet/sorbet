@@ -17,6 +17,11 @@ module SorbetBenchmarks
       prop :nilable, T.nilable(Integer), default: 0
     end
 
+    class ExampleWithoutTypecheck < T::Struct
+      prop :prop, Integer, checked: :never
+      prop :nilable, T.nilable(Integer), default: 0, checked: :never
+    end
+
     class OverrideStruct < T::Struct
       class SetHookDecorator < T::Props::Decorator
         def prop_set(instance, prop, val, rules=prop_rules)
@@ -123,6 +128,52 @@ module SorbetBenchmarks
         end
       end
       puts "T::Struct setter, given prop_set override (μs/iter):"
+      puts result
+
+      struct_without_typecheck = ExampleWithoutTypecheck.new(prop: 0)
+
+      10_000.times do
+        struct_without_typecheck.prop = 0
+      end
+
+      result = Benchmark.measure do
+        100_000.times do
+          struct_without_typecheck.prop = 0
+          struct_without_typecheck.prop = 1
+          struct_without_typecheck.prop = 2
+          struct_without_typecheck.prop = 3
+          struct_without_typecheck.prop = 4
+          struct_without_typecheck.prop = 5
+          struct_without_typecheck.prop = 6
+          struct_without_typecheck.prop = 7
+          struct_without_typecheck.prop = 8
+          struct_without_typecheck.prop = 9
+        end
+      end
+      puts "T::Struct setter, simple type, checked(:never) (μs/iter):"
+      puts result
+
+      struct_without_typecheck = ExampleWithoutTypecheck.new(prop: 0)
+
+      10_000.times do
+        struct_without_typecheck.nilable = 0
+      end
+
+      result = Benchmark.measure do
+        100_000.times do
+          struct_without_typecheck.nilable = 0
+          struct_without_typecheck.nilable = 1
+          struct_without_typecheck.nilable = 2
+          struct_without_typecheck.nilable = 3
+          struct_without_typecheck.nilable = 4
+          struct_without_typecheck.nilable = 5
+          struct_without_typecheck.nilable = 6
+          struct_without_typecheck.nilable = 7
+          struct_without_typecheck.nilable = 8
+          struct_without_typecheck.nilable = 9
+        end
+      end
+      puts "T::Struct setter, nilable type, checked(:never) (μs/iter):"
       puts result
     end
   end
