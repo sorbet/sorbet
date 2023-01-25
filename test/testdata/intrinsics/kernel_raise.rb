@@ -95,4 +95,9 @@ def example(cls)
     #                              ^^^^^ error: Expected `T.nilable(T::Array[String])` but found `String("two")` for argument `arg2`
     #                       ^^^^^ error: Not enough arguments provided for method `MultipleRequired#initialize`. Expected: `2`, got: `1`
   end
+
+  0.times do
+    fail MyError
+    #           ^ error: Missing required keyword argument `input` for method `MyError#initialize`
+  end
 end
