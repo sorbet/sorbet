@@ -29,7 +29,10 @@ int sorbet::Levenstein::distance(string_view s1, string_view s2, int bound) noex
         int lastDiagonal = x - 1;
         for (auto y = 1; y <= s1len; y++) {
             int oldDiagonal = column[y];
-            auto possibilities = {column[y] + 1, column[y - 1] + 1, lastDiagonal + (s1[y - 1] == s2[x - 1] ? 0 : 1)};
+            auto possibilities = {
+                column[y] + 1, column[y - 1] + 1,
+                lastDiagonal +
+                    (std::tolower(s1[y - 1], std::locale()) == std::tolower(s2[x - 1], std::locale()) ? 0 : 1)};
             column[y] = min(possibilities);
             lastDiagonal = oldDiagonal;
         }
