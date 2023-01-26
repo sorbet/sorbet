@@ -90,6 +90,19 @@ module SorbetBenchmarks
       puts "T::Props.new, mostly nil input (μs/iter):"
       puts result
 
+      100_000.times do
+        ExampleWithoutTypecheck.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExampleWithoutTypecheck.new(input)
+        end
+      end
+
+      puts "T::Props.new, mostly nil input, checked(:never) (μs/iter):"
+      puts result
+
       subdoc = Example::Subdoc.new(prop: '').freeze
       input = {
         prop1: 0,
