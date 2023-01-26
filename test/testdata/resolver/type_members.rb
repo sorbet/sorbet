@@ -56,5 +56,5 @@ class BadChild2 < Parent # error: must be re-declared
 end
 
 class BadChild3 < Parent
-  Elem = 3 # error: Type variable `Elem` needs to be declared as `= type_member(SOMETHING)`
+  Elem = 3 # error: Type variable `Elem` needs to be declared as a type_member or type_template, not a static-field
 end

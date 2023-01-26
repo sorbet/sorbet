@@ -13,7 +13,7 @@ module MyEnumerable
   def -(a) end
   class MySet
     include MyEnumerable
-    A = # error: Type variable `A` needs to be declared as `= type_member(SOMETHING)`
+    A = # error: Type variable `A` needs to be declared as a type_member or type_template, not a static-field
       new - MySet.new()
   end
 end
