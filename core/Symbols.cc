@@ -232,6 +232,19 @@ bool SymbolRef::isStaticField(const GlobalState &gs) const {
     return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->flags.isStaticField;
 }
 
+bool SymbolRef::isClassAlias(const GlobalState &gs) const {
+    if (!isFieldOrStaticField()) {
+        return false;
+    }
+
+    const auto &data = asFieldRef().dataAllowingNone(gs);
+    if (!data->flags.isStaticField) {
+        return false;
+    }
+
+    return data->isClassAlias();
+}
+
 ClassOrModuleData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ClassOrModuleData(gs.classAndModules[_id], gs);

@@ -43,7 +43,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                        core::ClassOrModuleRef sym,
                        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
-    core::SymbolRef my = sym.data(gs)->findMember(gs, name);
+    core::SymbolRef my = sym.data(gs)->findMemberNoDealias(gs, name);
     if (!my.exists()) {
         auto code =
             parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
@@ -74,7 +74,21 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     }
     if (!my.isTypeMember()) {
         if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::NotATypeVariable)) {
-            e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
+            auto defaultError = true;
+            if (my.isClassAlias(gs)) {
+                auto dealiased = my.dealias(gs);
+                if (dealiased.owner(gs) == sym.data(gs)->lookupSingletonClass(gs) && dealiased.name(gs) == name) {
+                    e.setHeader("`{}` must be declared as a type_member (not a type_template) to match the parent",
+                                name.show(gs));
+                    e.addErrorLine(parentTypeMember.data(gs)->loc(), "Declared in parent `{}` here",
+                                   parentTypeMember.data(gs)->owner.show(gs));
+                    defaultError = false;
+                }
+            }
+            if (defaultError) {
+                e.setHeader("Type variable `{}` needs to be declared as a type_member or type_template, not a {}",
+                            name.show(gs), my.showKind(gs));
+            }
         }
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
@@ -127,7 +141,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
             // check that type params are in the same order.
             for (auto parentTypeMember : parentTypeMembers) {
                 auto my = dealiasAt(gs, parentTypeMember, sym, typeAliases);
-                ENFORCE(my.exists(), "resolver failed to register type member aliases");
+                ENFORCE(my.exists(), "resolver failed to register type member aliases sym={}", sym.show(gs));
                 if (sym.data(gs)->typeMembers()[parentIdx] != my) {
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
