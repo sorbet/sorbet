@@ -8,6 +8,13 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://github.com/sorbet/sorbet/tree/master/rbi/core/enumerator.rbi#LCENSORED: `Enumerator::Yielder` defined here
       NN |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `NIL`? Use `-a` to autocorrect
+    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `NIL`
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/constants.rbi#LCENSORED: `NIL` defined here
+    NN |::NIL = T.let(T.unsafe(nil), NilClass)
+        ^^^^^
   Did you mean `File`? Use `-a` to autocorrect
     test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `File`
      3 |Yieldr.foo(Intege, Int)
@@ -15,13 +22,6 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://github.com/sorbet/sorbet/tree/master/rbi/core/file.rbi#LCENSORED: `File` defined here
     NN |class File < IO
         ^^^^^^^^^^^^^^^
-  Did you mean `Dir`? Use `-a` to autocorrect
-    test/cli/constant-fuzzy/constant-fuzzy.rb:3: Replace with `Dir`
-     3 |Yieldr.foo(Intege, Int)
-        ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` https://srb.help/5002
      3 |Yieldr.foo(Intege, Int)
