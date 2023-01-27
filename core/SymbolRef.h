@@ -1034,13 +1034,10 @@ public:
 
     static MethodRef PackageSpec_visible_to() {
         return MethodRef::fromRaw(14);
+    }
 
     static MethodRef PackageSpec_export_all() {
         return MethodRef::fromRaw(15);
-    }
-
-    static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
-        return ClassOrModuleRef::fromRaw(88);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
