@@ -131,7 +131,7 @@ private:
     };
 
     shared_ptr<Nesting> nesting_;
-    shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> localFirstDefOfManySymTable;
+    shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
 
     int loadScopeDepth_;
 
@@ -141,7 +141,7 @@ private:
         bool resolutionFailed = false;
         bool possibleGenericType = false;
         bool loadTimeScope = false;
-        shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> localFirstDefOfManySymTable;
+        shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -308,13 +308,13 @@ private:
     // then, report an error.
     static void
     checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, const ast::UnresolvedConstantLit &c,
-                        const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> localFirstDefOfManySymTable) {
+                        const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             core::LocOffsets defLoc;
-            const auto it = localFirstDefOfManySymTable.get()->find(resolutionResult);
+            const auto it = firstDefinitionLocs.get()->find(resolutionResult);
 
-            if (it != localFirstDefOfManySymTable.get()->end()) {
+            if (it != firstDefinitionLocs.get()->end()) {
                 // Use the loc from the local first defs table, if it exists.
                 // When the symbol is declared multiple times in the same file, we want to ensure that
                 // we compare against the *first* definition.
@@ -339,12 +339,12 @@ private:
     static core::SymbolRef
     resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting, const ast::UnresolvedConstantLit &c,
                     bool &resolutionFailed, bool loadTimeScope,
-                    const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> localFirstDefOfManySymTable) {
+                    const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
 
             if (loadTimeScope) {
-                checkReferenceOrder(ctx, result, c, localFirstDefOfManySymTable);
+                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
             }
 
             return result;
@@ -379,7 +379,7 @@ private:
             }
 
             if (loadTimeScope) {
-                checkReferenceOrder(ctx, result, c, localFirstDefOfManySymTable);
+                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
             }
 
             return result;
@@ -691,7 +691,7 @@ private:
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
-                                        job.loadTimeScope, job.localFirstDefOfManySymTable);
+                                        job.loadTimeScope, job.firstDefinitionLocs);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -844,7 +844,7 @@ private:
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
-                                        job.loadTimeScope, job.localFirstDefOfManySymTable);
+                                        job.loadTimeScope, job.firstDefinitionLocs);
         if (!resolved.exists()) {
             return false;
         }
@@ -1355,7 +1355,7 @@ private:
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
             job.loadTimeScope = (loadScopeDepth_ == 0);
-            job.localFirstDefOfManySymTable = localFirstDefOfManySymTable;
+            job.firstDefinitionLocs = firstDefinitionLocs;
             if (resolveJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
@@ -1375,31 +1375,27 @@ private:
 
 public:
     ResolveConstantsWalk() : nesting_(nullptr), loadScopeDepth_(0) {
-        localFirstDefOfManySymTable = make_unique<UnorderedMap<core::SymbolRef, core::LocOffsets>>();
+        firstDefinitionLocs = make_unique<UnorderedMap<core::SymbolRef, core::LocOffsets>>();
     }
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (loadScopeDepth_ >= 0) {
-            loadScopeDepth_++;
-        }
+        ENFORCE(loadScopeDepth_ >= 0);
+        loadScopeDepth_++;
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (loadScopeDepth_ > 0) {
-            loadScopeDepth_--;
-        }
+        ENFORCE(loadScopeDepth_ > 0);
+        loadScopeDepth_--;
     }
 
     void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (loadScopeDepth_ >= 0) {
-            loadScopeDepth_++;
-        }
+        ENFORCE(loadScopeDepth_ >= 0);
+        loadScopeDepth_++;
     }
 
     void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (loadScopeDepth_ > 0) {
-            loadScopeDepth_--;
-        }
+        ENFORCE(loadScopeDepth_ > 0);
+        loadScopeDepth_--;
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1411,17 +1407,19 @@ public:
         auto sym = original.symbol;
 
         // Populate local first definitions table for out-of-order reference checking.
-        // This needs to happen *iff* the symbol is:
+        // This happens *iff* the symbol is:
         //   a). defined only in this file and nowhere else
         //   b). defined multiple times in this file
         //   c). this particular classDef is the first occurrence of the symbol in the file
-        if (loadScopeDepth_ == 0 && sym.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 && sym.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = sym.data(ctx)->loc().offsets();
             auto declLoc = original.declLoc;
 
-            auto localSymMap = localFirstDefOfManySymTable.get();
-            if (defLoc.beginPos() >= declLoc.endPos() && localSymMap->find(sym) == localSymMap->end()) {
-                localSymMap->emplace(sym, declLoc);
+            if (defLoc.beginPos() >= declLoc.endPos()) {
+                // When this condition is met, effectively it means the file has multiple definitions of the symbol
+                // and this is the first one. We need to use the first def for out-of-order checking, since any
+                // reference *before* the first def will be out of order.
+                firstDefinitionLocs->insert(std::make_pair(sym, declLoc));
             }
         }
 
@@ -1558,13 +1556,16 @@ public:
         //   a). defined only in this file and nowhere else
         //   b). defined multiple times in this file
         //   c). this particular assign is the first occurrence of the symbol in the file
-        if (loadScopeDepth_ == 0 && id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
+            id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = id->symbol.loc(ctx).offsets();
             auto declLoc = asgn.loc;
 
-            auto localSymMap = localFirstDefOfManySymTable.get();
-            if (defLoc.beginPos() >= declLoc.endPos() && localSymMap->find(id->symbol) == localSymMap->end()) {
-                localSymMap->emplace(id->symbol, declLoc);
+            if (defLoc.beginPos() >= declLoc.endPos()) {
+                // When this condition is met, effectively it means the file has multiple definitions of the symbol
+                // and this is the first one. We need to use the first def for out-of-order checking, since any
+                // reference *before* the first def will be out of order.
+                firstDefinitionLocs->insert(std::make_pair(id->symbol, declLoc));
             }
         }
 
@@ -1641,7 +1642,7 @@ public:
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
                 job.loadTimeScope = (loadScopeDepth_ == 0);
-                job.localFirstDefOfManySymTable = localFirstDefOfManySymTable;
+                job.firstDefinitionLocs = firstDefinitionLocs;
                 job.possibleGenericType = true;
                 if (!resolveJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));
