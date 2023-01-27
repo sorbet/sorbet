@@ -74,6 +74,36 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
     return core::Symbols::root();
 }
 
+core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
+    auto curSym = core::Symbols::root();
+
+    for (const auto part : fullName()) {
+        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
+        if (!curSym.exists()) {
+            return curSym;
+        }
+    }
+
+    return curSym;
+}
+
+core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState &gs) const {
+    auto curSym = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test()).asClassOrModuleRef();
+
+    if (!curSym.exists()) {
+        return curSym;
+    }
+
+    for (const auto part : fullName()) {
+        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
+        if (!curSym.exists()) {
+            return curSym;
+        }
+    }
+
+    return curSym;
+}
+
 // Given a package named Project::MyPackage, returns the class/module ref corresponding to
 // the symbol Project::MyPackage or Test::Project::MyPackage, depending on whether the suggestion scope
 // is a primary namespace constant or a test namespace constant. See packager/packager.cc for further explanation of

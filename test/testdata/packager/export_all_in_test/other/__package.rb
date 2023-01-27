@@ -2,7 +2,6 @@
 # typed: strict
 
 class Other < PackageSpec
-  import Foo::Bar
-  import Foo::Bar::Baz
-  import Typical
+  test_import Foo::Bar
+  test_import Typical
 end
