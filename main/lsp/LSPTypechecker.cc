@@ -246,7 +246,11 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
         toTypecheck.emplace_back(fref);
+    }
 
+    UnorderedSet<core::FileRef> packageFiles;
+
+    for (auto fref : toTypecheck) {
         // Only need to re-run packager if we're going to delete constants and have to re-define
         // their visibility, which only happens if we're running incrementalNamer.
         if (shouldRunIncrementalNamer) {
@@ -254,20 +258,28 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
             if (!(fref.data(*gs).isPackage())) {
-                auto pkgName = gs->packageDB().getPackageNameForFile(fref);
-                if (pkgName.exists()) {
+                auto &pkg = gs->packageDB().getPackageForFile(*gs, fref);
+                if (pkg.exists()) {
                     // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
                     // and re-added, we have to add the __package.rb files to set of files to retypecheck
                     // so that we can re-run PropagateVisibility to set export bits for any constants.
-                    auto packageFref = gs->packageDB().getPackageInfo(pkgName).fullLoc().file();
-                    if (result.changedFiles.find(packageFref) == result.changedFiles.end()) {
-                        // Skip duplicates
-                        toTypecheck.emplace_back(packageFref);
+                    auto packageFref = pkg.fullLoc().file();
+                    if (!packageFref.exists()) {
+                        continue;
                     }
+
+                    packageFiles.emplace(packageFref);
                 }
             }
         }
     }
+
+    for (auto packageFref : std::move(packageFiles)) {
+        if (std::find(toTypecheck.begin(), toTypecheck.end(), packageFref) == toTypecheck.end()) {
+            toTypecheck.emplace_back(packageFref);
+        }
+    }
+
     fast_sort(toTypecheck);
 
     config->logger->debug("Running fast path over num_files={}", toTypecheck.size());
