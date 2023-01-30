@@ -330,6 +330,9 @@ public:
         // directives in the previous pass; we should instead export
         // the package root
         if (package.exportAll()) {
+            // we check if these exist because if no constants were
+            // defined in the package then we might not have actually
+            // ever created the relevant namespaces
             auto pkgRoot = package.getPackageScope(gs);
             if (pkgRoot.exists()) {
                 pass.recursiveExportSymbol(gs, true, pkgRoot);
@@ -337,7 +340,6 @@ public:
 
             auto pkgTestRoot = package.getPackageTestScope(gs);
             if (pkgTestRoot.exists()) {
-                gs.tracer().error("+++ => {}", pkgTestRoot.show(gs));
                 pass.recursiveExportSymbol(gs, true, pkgTestRoot);
             }
         }
