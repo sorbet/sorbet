@@ -6,9 +6,11 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
     include T::Props
     include T::Props::WeakConstructor
 
-    prop :validated, T.untyped, setter_validate: ->(_prop, _value) {raise Error.new 'invalid'}
+    prop :validated, Integer, setter_validate: ->(_prop, _value) {raise Error.new 'invalid'}
     prop :nilable_validated, T.nilable(Integer), setter_validate: ->(_prop, _value) {raise Error.new 'invalid'}
-    prop :unvalidated, T.untyped, setter_validate: ->(prop, _value) {raise Error.new 'bad prop' unless prop == :unvalidated}
+    prop :unvalidated, Integer, setter_validate: ->(prop, _value) {raise Error.new 'bad prop' unless prop == :unvalidated}
+    prop :untyped, T.untyped, setter_validate: ->(_prop, _value) {raise Error.new 'invalid'}
+    prop :checked_never, Integer, checked: :never, setter_validate: ->(_prop, _value) {raise Error.new 'invalid'}
 
   end
 
@@ -41,6 +43,22 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
     it 'runs when validate_prop_value is called' do
       ex = assert_raises {TestSetValidate.validate_prop_value(:validated, 5)}
       assert_equal('invalid', ex.message)
+    end
+
+    it 'runs on T.untyped' do
+      obj = TestSetValidate.new
+      ex = assert_raises {obj.untyped = 5}
+      assert_equal('invalid', ex.message)
+
+      ex = assert_raises {TestSetValidate.new(untyped: 5)}
+      assert_equal('invalid', ex.message)
+    end
+
+    it 'does not run when checked(:never)' do
+      obj = TestSetValidate.new
+      obj.checked_never = 5
+
+      TestSetValidate.new(checked_never: 5)
     end
 
     it 'does not run when validate_prop_value is called when a nilable is nil' do
