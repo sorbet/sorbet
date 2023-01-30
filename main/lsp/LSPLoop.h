@@ -94,6 +94,9 @@ std::optional<std::string> findDocumentation(std::string_view sourceCode, int be
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::string_view rubyMarkup,
                                                 std::optional<std::string_view> explanation);
+std::string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method);
+std::string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
+                               core::TypePtr retType, const core::TypeConstraint *constraint);
 std::string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                                 const core::TypePtr &retType, const core::TypeConstraint *constraint);
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);

@@ -14,22 +14,29 @@ namespace sorbet::realmain::lsp {
 string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
                         const core::DispatchResult &dispatchResult,
                         const unique_ptr<core::TypeConstraint> &constraint) {
-    string contents;
+    vector<string> contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
-            if (!contents.empty()) {
-                contents += "\n";
-            }
-            contents = absl::StrCat(
-                contents, prettyTypeForMethod(gs, component.method, component.receiver, retType, constraint.get()));
+            auto method = component.method;
+
+            contents.push_back(
+                prettySigForMethod(gs, method, component.receiver, method.data(gs)->resultType, constraint.get()));
         }
         start = start->secondary.get();
     }
 
-    return contents;
+    if (dispatchResult.main.method.exists()) {
+        if (contents.size() > 1) {
+            contents.push_back(fmt::format("\n-> {}", retType.show(gs)));
+        }
+
+        contents.push_back(prettyDefForMethod(gs, dispatchResult.main.method));
+    }
+
+    return absl::StrJoin(contents, "\n");
 }
 
 HoverTask::HoverTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params)
