@@ -512,11 +512,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     describe 'when checked(:never)' do
-      it 'allows nil in constructor' do
-        struct = CheckedNeverStruct.new
-        assert_nil(struct.prop)
-        struct = CheckedNeverStruct.new(prop: nil)
-        assert_nil(struct.prop)
+      it 'forbids nil in constructor' do
+        assert_raises(ArgumentError) do
+          CheckedNeverStruct.new
+        end
+        assert_raises(TypeError) do
+          CheckedNeverStruct.new(prop: nil)
+        end
       end
 
       it 'allows nil in setter' do
@@ -526,7 +528,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
 
       it 'throws exception on nil serialize' do
-        struct = CheckedNeverStruct.new
+        struct = CheckedNeverStruct.new(prop: 'something')
+        struct.prop = nil
         assert_raises(TypeError) do
           struct.serialize
         end

@@ -33,22 +33,45 @@ module T::Props
 
         # Use separate methods in order to ensure that we only close over necessary
         # variables
-        if !T::Props::Utils.need_type_check?(rules)
-          proc do |val|
-            instance_variable_set(accessor_key, val)
-          end
-        elsif !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
-          if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
+        if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
+          if !T::Props::Utils.need_type_check?(rules)
+            unchecked_nilable_proc(prop, accessor_key)
+          elsif validate.nil? && non_nil_type.is_a?(T::Types::Simple)
             simple_nilable_proc(prop, accessor_key, non_nil_type.raw_type, klass)
           else
             nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
           end
         else
-          if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
+          if !T::Props::Utils.need_type_check?(rules)
+            unchecked_non_nil_proc(prop, accessor_key, non_nil_type, klass)
+          elsif validate.nil? && non_nil_type.is_a?(T::Types::Simple)
             simple_non_nil_proc(prop, accessor_key, non_nil_type.raw_type, klass)
           else
             non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
           end
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+          non_nil_type: T::Types::Base,
+          klass: T.all(Module, T::Props::ClassMethods),
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.unchecked_non_nil_proc(prop, accessor_key, non_nil_type, klass)
+        proc do |val|
+          if val.nil?
+            T::Props::Private::SetterFactory.raise_pretty_error(
+              klass,
+              prop,
+              non_nil_type,
+              val,
+            )
+          end
+          instance_variable_set(accessor_key, val)
         end
       end
 
@@ -102,6 +125,19 @@ module T::Props
               val,
             )
           end
+          instance_variable_set(accessor_key, val)
+        end
+      end
+
+      sig do
+        params(
+          prop: Symbol,
+          accessor_key: Symbol,
+        )
+        .returns(SetterProc)
+      end
+      private_class_method def self.unchecked_nilable_proc(prop, accessor_key)
+        proc do |val|
           instance_variable_set(accessor_key, val)
         end
       end
