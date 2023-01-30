@@ -478,7 +478,7 @@ end
 
 Write:
 
-```ruby:
+```ruby
 x = foo.bar
 if x
   x.baz
