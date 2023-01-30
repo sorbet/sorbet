@@ -30,6 +30,6 @@ module T::Props::WeakConstructor::DecoratorMethods
   end
 
   private def generate_initialize_source
-    T::Props::Private::InitializerGenerator.generate(props, raise_on_missing_key: false)
+    T::Props::Private::InitializerGenerator.generate(props, raise_on_missing_required_prop: false)
   end
 end

@@ -10,6 +10,6 @@ module T::Props::Constructor::DecoratorMethods
 
   # Override what `WeakConstructor` does in order to raise errors on nils instead of ignoring them.
   private def generate_initialize_source
-    T::Props::Private::InitializerGenerator.generate(props, raise_on_missing_key: true)
+    T::Props::Private::InitializerGenerator.generate(props, raise_on_missing_required_prop: true)
   end
 end

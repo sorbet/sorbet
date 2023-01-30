@@ -15,12 +15,12 @@ module T::Props
       sig do
         params(
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
-          raise_on_missing_key: T::Boolean,
+          raise_on_missing_required_prop: T::Boolean,
         )
         .returns(String)
         .checked(:never)
       end
-      def self.generate(props, raise_on_missing_key:)
+      def self.generate(props, raise_on_missing_required_prop:)
         parts = props.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
@@ -32,19 +32,22 @@ module T::Props
           raise unless ivar_name.start_with?('@') && T::Props::Decorator::SAFE_NAME.match?(ivar_name[1..-1])
 
           hash_key = prop.inspect
-          need_type_check = T::Props::Utils.need_type_check?(rules)
 
-          present_key_value = <<~RUBY.strip
-            hash[#{hash_key}]
-          RUBY
-          present_key_value = wrap_with_typecheck(present_key_value, hash_key) if need_type_check
+          # It seems like a bug that this affects the behavior of setters, but
+          # some existing code relies on this behavior
+          has_explicit_nil_default = rules.key?(:default) && rules.fetch(:default).nil?
+
+          need_type_check = T::Props::Utils.need_type_check?(rules)
+          need_setter_validate = rules.key?(:setter_validate)
+          need_nil_write_check = T::Props::Utils.need_nil_write_check?(rules) && !has_explicit_nil_default
 
           if rules.key?(:factory)
+            need_missing_value_type_check = true
             missing_key_value = <<~RUBY.strip
               self.class.class_exec(&decorator.props[#{hash_key}].fetch(:factory))
             RUBY
-            missing_key_value = wrap_with_typecheck(missing_key_value, hash_key) if need_type_check
           elsif rules.key?(:default)
+            need_missing_value_type_check = false
             missing_key_value = generate_simple_default(rules.fetch(:default)) || <<~RUBY.strip
               T::Props::Utils.deep_clone_object(decorator.props[#{hash_key}].fetch(:default))
             RUBY
@@ -53,23 +56,55 @@ module T::Props
             #
             # :(
             #
-            # missing_key_value = wrap_with_typecheck(missing_key_value, hash_key) if need_type_check
-          elsif T::Props::Utils.required_prop?(rules) && raise_on_missing_key
-            missing_key_value = <<~RUBY.strip
-              raise ArgumentError.new("Missing required prop `#{prop}` for class `\#{self.class.name}`")
-            RUBY
+            # The comment above was carried over from `ApplyDefault`. However, since the "default"
+            # is a fixed value, instead of doing the typecheck on initialization we could validate the
+            # default here (at load time) like:
+            # T::Utils.check_type_recursive!(rules.fetch(:default), rules.fetch(:type_object))
+          elsif raise_on_missing_required_prop
+            need_missing_value_type_check = true
+
+            if need_nil_write_check
+              missing_key_value = <<~RUBY.strip
+                raise(ArgumentError.new("Missing required prop `#{prop}` for class `\#{self.class.name}`"))
+              RUBY
+            end
           else
-            missing_key_value = <<~RUBY.strip
-              nil
+            need_missing_value_type_check = false
+          end
+
+          raise_pretty_error = <<~RUBY.strip
+            T::Props::Private::SetterFactory.raise_pretty_error(self.class, #{hash_key}, decorator.props[#{hash_key}].fetch(:type_object), #{ivar_name})
+          RUBY
+
+          if need_type_check
+            # The `!required_prop?` is a performance optimization since if this is a required prop, nilability would
+            # be checked via the typecheck.
+            if need_setter_validate || (need_nil_write_check && !T::Props::Utils.required_prop?(rules))
+              additional_validations = <<~RUBY
+                if #{ivar_name}.nil?
+                  #{need_nil_write_check ? raise_pretty_error : ''}
+                else
+                  #{need_setter_validate ? "decorator.props[#{hash_key}].fetch(:setter_validate).call(#{hash_key}, #{ivar_name})" : ''}
+                end
+              RUBY
+            end
+
+            type_checks = <<~RUBY
+              if !decorator.props[#{hash_key}].fetch(:type_object).recursively_valid?(#{ivar_name})
+                #{raise_pretty_error}
+              end
+              #{additional_validations}
             RUBY
           end
 
           <<~RUBY.strip
-            #{ivar_name} = if hash.key?(#{hash_key})
-              result += 1
-              #{present_key_value}
+            #{ivar_name} = hash[#{hash_key}]
+            if #{ivar_name}.nil? && !hash.key?(#{hash_key})
+              #{ivar_name} = #{missing_key_value || nil.inspect}
+              #{need_missing_value_type_check ? type_checks : ''}
             else
-              #{missing_key_value}
+              result += 1
+              #{type_checks}
             end
           RUBY
         end
@@ -86,10 +121,6 @@ module T::Props
             end
           end
         RUBY
-      end
-
-      private_class_method def self.wrap_with_typecheck(string, hash_key)
-        "T::Utils.check_type_recursive!(#{string}, decorator.props[#{hash_key}].fetch(:type_object))"
       end
 
       private_class_method def self.generate_simple_default(default)
