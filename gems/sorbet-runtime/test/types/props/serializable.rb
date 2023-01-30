@@ -512,13 +512,12 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     describe 'when checked(:never)' do
-      it 'forbids nil in constructor' do
+      it 'forbids missing required prop in constructor' do
         assert_raises(ArgumentError) do
           CheckedNeverStruct.new
         end
-        assert_raises(TypeError) do
-          CheckedNeverStruct.new(prop: nil)
-        end
+        struct = CheckedNeverStruct.new(prop: nil)
+        assert_nil(struct.prop)
       end
 
       it 'allows nil in setter' do
