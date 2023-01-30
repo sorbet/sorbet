@@ -69,11 +69,15 @@ T.assert_type!(obj.itself, String)
 # These types are deliberately wrong, because `Kernel#p` is difficult to type
 # in an RBI.  See the comments in kernel.rbi.
 p_result = Kernel.p 1
+# This should be `Integer`.
 T.reveal_type(p_result) # error: Revealed type: `NilClass`
+
 p_result = p "string"
+# This should be `String`.
 T.reveal_type(p_result) # error: Revealed type: `NilClass`
-# This should actually be typed as an array.
+
 p_result = p 1, 2
+# This should be `[1, 2]` or `T::Array[T.untyped]`
 T.reveal_type(p_result) # error: Revealed type: `NilClass`
 
 class CustomError < StandardError
