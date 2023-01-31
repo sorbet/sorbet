@@ -637,4 +637,44 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
       ComplexStruct.new(attributes).serialize
     )
   end
+
+  describe 'generated code' do
+    describe 'initialize' do
+      it 'validates' do
+        src = ComplexStruct.decorator.send(:generate_initialize_source).to_s
+        T::Props::GeneratedCodeValidation.validate_initialize(src)
+      end
+
+      it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_initialize_source).to_s
+        src = src.sub(/\.deep_clone_object\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_initialize(src)
+        end
+      end
+    end
+
+    describe 'disabling evaluation' do
+      it 'works' do
+        T::Props::HasLazilySpecializedMethods.disable_lazy_evaluation!
+
+        m = Class.new do
+          include T::Props::WeakConstructor
+
+          prop :foo, T.nilable(String)
+        end
+
+        assert_raises(T::Props::HasLazilySpecializedMethods::SourceEvaluationDisabled) do
+          m.new
+        end
+
+        # Explicit call is still ok
+        m.decorator.eagerly_define_lazy_methods!
+      end
+
+      after do
+        T::Props::HasLazilySpecializedMethods.remove_instance_variable(:@lazy_evaluation_disabled)
+      end
+    end
+  end
 end

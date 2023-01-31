@@ -71,6 +71,61 @@ module T::Props
       end
     end
 
+    def self.validate_initialize(source)
+      parsed = parse(source)
+
+      # def %<name>(hash)
+      # ...
+      # end
+      assert_equal(:def, parsed.type)
+      name, args, body = parsed.children
+      assert_equal(:__t_props_generated_initialize, name)
+      assert_equal(s(:args, s(:arg, :hash)), args)
+
+      assert_equal(:begin, body.type)
+      found_init, decorator_init, *prop_clauses, unrecognized_check = body.children
+
+      # found = %<prop_count>
+      # decorator = self.class.decorator
+      # ...
+      # if found < hash.size
+      #   raise ArgumentError.new("\#{self.class}: Unrecognized properties: \#{(hash.keys - decorator.props.keys).join(', ')}")
+      # end
+      assert_equal(:lvasgn, found_init.type)
+      found_init_name, found_init_val = found_init.children
+      assert_equal(:found, found_init_name)
+      assert_equal(:int, found_init_val.type)
+      assert_equal(s(:lvasgn, :decorator, self_class_decorator), decorator_init)
+
+      assert_equal(:if, unrecognized_check.type)
+      condition, if_body = unrecognized_check.children
+      assert_equal(:send, condition.type)
+      left, comparison, right = condition.children
+      assert_equal(s(:lvar, :found), left)
+      assert_equal(:<, comparison)
+      assert_equal(s(:send, s(:lvar, :hash), :size), right)
+
+      _, method, arg = if_body.children
+      assert_equal(:raise, method)
+      assert_equal(:send, arg.type)
+
+      error, _, message = arg.children
+      assert_equal(s(:const, nil, :ArgumentError), error)
+
+      interpolation1, str, interpolation2 = message.children
+      assert_equal(s(:begin, s(:send, s(:self), :class)), interpolation1)
+      assert_equal(:str, str.type)
+      assert_equal(s(:begin, s(:send, s(:begin, s(:send, s(:send, s(:lvar, :hash), :keys), :-, s(:send, s(:send, s(:lvar, :decorator), :props), :keys))), :join, s(:str, ", "))), interpolation2)
+
+      prop_clauses.each_with_index do |clause, i|
+        if i.even?
+          validate_initialize_hash_read(clause)
+        else
+          validate_initialize_conditional(clause)
+        end
+      end
+    end
+
     private_class_method def self.validate_serialize_clause(clause)
       assert_equal(:if, clause.type)
       condition, if_body, else_body = clause.children
@@ -102,6 +157,196 @@ module T::Props
       assert_equal(:str, h_key.type)
 
       validate_lack_of_side_effects(h_val, whitelisted_methods_for_serialize)
+    end
+
+    private_class_method def self.validate_initialize_hash_read(clause)
+      # val = hash[%<serialized_form>]
+      assert_equal(:lvasgn, clause.type)
+      name, val = clause.children
+      unless name.is_a?(Symbol)
+        raise ValidationError.new("Unexpected ivar: #{name}")
+      end
+
+      receiver, method, arg = val.children
+      assert_equal(s(:lvar, :hash), receiver)
+      assert_equal(:[], method)
+      assert_equal(:sym, arg.type)
+    end
+
+    private_class_method def self.validate_initialize_conditional(clause)
+      # if @%<accessor_key>.nil? && !hash.key?(%<serialized_form>)
+      #   found -= 1
+      #   @%<accessor_key> = #{missing_handler}
+      #   #{needs_missing_typecheck ? typecheck_handler : ''}
+      # else
+      #   @%<accessor_key> = val
+      #   #{typecheck_handler}
+      # end
+      assert_equal(:if, clause.type)
+      condition, if_body, else_body = clause.children
+
+      # if val.nil? && !hash.key?(%<serialized_form>)
+      assert_equal(:and, condition.type)
+
+      condition1, condition2 = condition.children
+      assert_equal(s(:send, s(:lvar, :val), :nil?), condition1)
+
+      receiver, method = condition2.children
+      assert_equal(:!, method)
+
+      receiver, method, arg = receiver.children
+      assert_equal(s(:lvar, :hash), receiver)
+      assert_equal(:key?, method)
+      assert_equal(:sym, arg.type)
+
+      #   found -= 1
+      #   @%<accessor_key> = #{missing_handler}
+      #   #{needs_missing_typecheck ? typecheck_handler : ''}
+      found_assigment, fallback_assignment, *maybe_type_checks = if_body.type == :begin ? if_body.children : [if_body]
+      assert_equal(s(:op_asgn, s(:lvasgn, :found), :-, s(:int, 1)), found_assigment)
+      validate_initialize_ivar_set(fallback_assignment)
+      maybe_type_checks.each {|c| validate_initialize_type_checks(c)}
+
+      #   @%<accessor_key> = val
+      #   #{typecheck_handler}
+      val_assign, *maybe_type_checks = else_body.type == :begin ? else_body.children : [else_body]
+      validate_initialize_ivar_set(val_assign)
+      maybe_type_checks.each {|c| validate_initialize_type_checks(c)}
+    end
+
+    private_class_method def self.validate_initialize_ivar_set(node)
+      assert_equal(:ivasgn, node.type)
+      name, val = node.children
+      unless name.is_a?(Symbol)
+        raise ValidationError.new("Unexpected ivar: #{name}")
+      end
+
+      case val.type
+      when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :const, :lvar # rubocop:disable Lint/BooleanSymbol
+        # Primitives, constants, local variables are safe
+      when :send
+        receiver, method, *arg = val.children
+        if method == :raise
+          # raise ArgumentError.new("Missing required prop `%<prop>` for class `\#{self.class.name}`")
+          arg = arg.first
+          assert_equal(:send, arg.type)
+
+          error, _, message = arg.children
+          assert_equal(s(:const, nil, :ArgumentError), error)
+          str1, interpolation, str2 = message.children
+          assert_equal(:str, str1.type)
+          assert_equal(s(:begin, s(:send, s(:send, s(:self), :class), :name)), interpolation)
+          assert_equal(:str, str2.type)
+        elsif method == :class_exec
+          # self.class.class_exec(&decorator.props.fetch(%<serialized_form>).fetch(:factory))
+          assert_equal(s(:send, s(:self), :class), receiver)
+          arg = arg.first
+          assert_equal(:block_pass, arg.type)
+
+          inner_receiver, inner_method, inner_arg = arg.children.first.children
+          props, props_fetch, prop = inner_receiver.children
+          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+          assert_equal(:fetch, props_fetch)
+          assert_equal(:sym, prop.type)
+          assert_equal(:fetch, inner_method)
+          assert_equal(s(:sym, :factory), inner_arg)
+        elsif method == :deep_clone_object
+          # T::Props::Utils.deep_clone_object(decorator.props.fetch(%<serialized_form>).fetch(:default))
+          arg = arg.first
+          assert_equal(:send, arg.type)
+
+          inner_receiver, inner_method, inner_arg = arg.children
+          props, props_fetch, prop = inner_receiver.children
+          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+          assert_equal(:fetch, props_fetch)
+          assert_equal(:sym, prop.type)
+          assert_equal(:fetch, inner_method)
+          assert_equal(s(:sym, :default), inner_arg)
+        else
+          raise ValidationError.new("Unexpected receiver in fallback assignment: #{val.inspect}")
+        end
+      else
+        raise ValidationError.new("Unexpected fallback assignment: #{val.inspect}")
+      end
+    end
+
+    private_class_method def self.validate_initialize_type_checks(clause)
+      assert_equal(:if, clause.type)
+      condition, if_body, else_body = clause.children
+
+      if condition.type == :send && condition.children.first.type == :ivar
+        # if #{ivar_name}.nil?
+        #   #{need_nil_write_check ? raise_pretty_error : ''}
+        # else
+        #   #{need_setter_validate ? "decorator.props.fetch(#{hash_key}).fetch(:setter_validate).call(#{hash_key}, #{ivar_name})" : ''}
+        # end
+        if if_body
+          receiver, method, arg1, arg2, arg3, arg4 = if_body.children
+          assert_equal(s(:const, s(:const, s(:const, s(:const, nil, :T), :Props), :Private), :SetterFactory), receiver)
+          assert_equal(:raise_pretty_error, method)
+
+          assert_equal(s(:send, s(:self), :class), arg1)
+          assert_equal(:sym, arg2.type)
+          assert_equal(:ivar, arg4.type)
+
+          inner_receiver, inner_method, inner_arg = arg3.children
+          props, props_fetch, prop = inner_receiver.children
+          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+          assert_equal(:fetch, props_fetch)
+          assert_equal(:sym, prop.type)
+          assert_equal(:fetch, inner_method)
+          assert_equal(s(:sym, :type_object), inner_arg)
+        end
+
+        if else_body
+          # decorator.props.fetch(%<serialized_form>).fetch(:setter_validate).call(%<serialized_form>, @%<prop>)
+          receiver, method, arg1, arg2 = else_body.children
+          assert_equal(:call, method)
+          assert_equal(:sym, arg1.type)
+          assert_equal(:ivar, arg2.type)
+
+          inner_receiver, inner_method, inner_arg = receiver.children
+          props, props_fetch, prop = inner_receiver.children
+          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+          assert_equal(:fetch, props_fetch)
+          assert_equal(:sym, prop.type)
+          assert_equal(:fetch, inner_method)
+          assert_equal(s(:sym, :setter_validate), inner_arg)
+        end
+      else
+        # if !decorator.props.fetch(#{hash_key}).fetch(:type_object).recursively_valid?(#{ivar_name})
+        #   #{raise_pretty_error}
+        # end
+        receiver, method, arg1 = condition.children.first.children
+        assert_equal(:recursively_valid?, method)
+        assert_equal(:ivar, arg1.type)
+
+        inner_receiver, inner_method, inner_arg = receiver.children
+        props, props_fetch, prop = inner_receiver.children
+        assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+        assert_equal(:fetch, props_fetch)
+        assert_equal(:sym, prop.type)
+        assert_equal(:fetch, inner_method)
+        assert_equal(s(:sym, :type_object), inner_arg)
+
+        receiver, method, arg1, arg2, arg3, arg4 = if_body.children
+        assert_equal(s(:const, s(:const, s(:const, s(:const, nil, :T), :Props), :Private), :SetterFactory), receiver)
+        assert_equal(:raise_pretty_error, method)
+
+        assert_equal(s(:send, s(:self), :class), arg1)
+        assert_equal(:sym, arg2.type)
+        assert_equal(:ivar, arg4.type)
+
+        inner_receiver, inner_method, inner_arg = arg3.children
+        props, props_fetch, prop = inner_receiver.children
+        assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+        assert_equal(:fetch, props_fetch)
+        assert_equal(:sym, prop.type)
+        assert_equal(:fetch, inner_method)
+        assert_equal(s(:sym, :type_object), inner_arg)
+
+        assert_equal(nil, else_body)
+      end
     end
 
     private_class_method def self.validate_deserialize_hash_read(clause)
