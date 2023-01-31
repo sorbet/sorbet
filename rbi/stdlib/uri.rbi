@@ -2363,7 +2363,7 @@ end
 # passwords. This is not legal as per the RFC, but used to be
 # supported in Internet Explorer 5 and 6, before the MS04-004 security
 # update. See <URL:http://support.microsoft.com/kb/834489>.
-class URI::WS
+class URI::WS < URI::Generic
   # A Default port of 80 for URI::WS.
   DEFAULT_PORT = T.let(T.unsafe(nil), Integer)
 
