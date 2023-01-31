@@ -77,15 +77,16 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
 core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::ClassOrModuleRef root,
                                     const std::vector<core::NameRef> &name) {
     auto curSym = root;
+    if (!curSym.exists()) {
+        return {};
+    }
+
     for (const auto part : name) {
         auto member = curSym.data(gs)->findMember(gs, part);
-        if (!member.isClassOrModule()) {
+        if (!member.exists() || !member.isClassOrModule()) {
             return {};
         }
         curSym = member.asClassOrModuleRef();
-        if (!curSym.exists()) {
-            return {};
-        }
     }
 
     return curSym;
