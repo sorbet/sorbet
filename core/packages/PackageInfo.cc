@@ -74,34 +74,34 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
     return core::Symbols::root();
 }
 
-core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
-    auto curSym = core::Symbols::root();
-
-    for (const auto part : fullName()) {
-        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
+core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::ClassOrModuleRef root,
+                                    const std::vector<core::NameRef> &name) {
+    auto curSym = root;
+    for (const auto part : name) {
+        auto member = curSym.data(gs)->findMember(gs, part);
+        if (!member.isClassOrModule()) {
+            return {};
+        }
+        curSym = member.asClassOrModuleRef();
         if (!curSym.exists()) {
-            return curSym;
+            return {};
         }
     }
 
     return curSym;
 }
 
+core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
+    return lookupNameOn(gs, core::Symbols::root(), fullName());
+}
+
 core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState &gs) const {
-    auto curSym = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test()).asClassOrModuleRef();
-
-    if (!curSym.exists()) {
-        return curSym;
+    auto testSym = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
+    if (!testSym.isClassOrModule()) {
+        return {};
     }
 
-    for (const auto part : fullName()) {
-        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
-        if (!curSym.exists()) {
-            return curSym;
-        }
-    }
-
-    return curSym;
+    return lookupNameOn(gs, testSym.asClassOrModuleRef(), fullName());
 }
 
 // Given a package named Project::MyPackage, returns the class/module ref corresponding to
@@ -111,16 +111,7 @@ core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState 
 core::ClassOrModuleRef PackageInfo::getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
                                                                       const core::SymbolRef suggestionScope) const {
     auto parentSym = getParentNamespaceSym(gs, suggestionScope);
-    auto curSym = parentSym;
-
-    for (const auto part : fullName()) {
-        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
-        if (!curSym.exists()) {
-            return curSym;
-        }
-    }
-
-    return curSym;
+    return lookupNameOn(gs, parentSym, fullName());
 }
 
 } // namespace sorbet::core::packages
