@@ -948,6 +948,12 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     core::TypeErrorDiagnostics::insertUntypedTypeArguments(ctx, e, klass, ctx.locAt(i.loc));
                 }
             }
+            if (klass == core::Symbols::Boolean()) {
+                if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("`{}` is deprecated in favor of `{}`", "Boolean", "T::Boolean");
+                    e.replaceWith("Replace with T::Boolean", ctx.locAt(i.loc), "{}", "T::Boolean");
+                }
+            }
             if (klass == core::Symbols::StubModule()) {
                 // Though for normal types _and_ stub types `infer` should use `externalType`,
                 // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
