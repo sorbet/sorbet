@@ -38,6 +38,14 @@ bool allComponentsPresent(DispatchResult &res) {
     }
     return allComponentsPresent(*res.secondary);
 }
+
+inline bool isTyped(const TypePtr type) {
+    return type && !type.isUntyped();
+}
+
+inline bool isHash(const GlobalState &gs, const TypePtr type) {
+    return Types::isSubType(gs, type, Types::hashOfUntyped());
+}
 } // namespace
 
 bool NamedLiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
@@ -967,6 +975,107 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
         hasKwsplat = true;
         implicitKwsplat = true;
+    }
+
+    {
+        const ArgInfo &probablyFirstKwarg = *pit;
+        if (gs.ruby3KeywordArgs && args.args.size() > 0 &&
+            // All positional arguments are already processed
+            ait == aPosEnd &&
+            // But not all arguments are processed, some keyword arguments remain
+            ait != aend &&
+            // First keyword parameter doesn't look like keyword param
+            !probablyFirstKwarg.flags.isKeyword && !probablyFirstKwarg.flags.isRepeated &&
+            !probablyFirstKwarg.flags.isBlock) {
+            auto isLastParam /* not counting last block param */ =
+                (pit - data->arguments.begin()) >= data->arguments.size() - 2;
+
+            auto areOtherParamsDefault = !isLastParam;
+            auto curIdx = pit - data->arguments.begin();
+
+            for (int i = data->arguments.size() - 1; i > curIdx; i--) {
+                auto flags = data->arguments[i].flags;
+                if (flags.isBlock || flags.isRepeated) {
+                    continue;
+                }
+                if (!flags.isDefault) {
+                    areOtherParamsDefault = false;
+                    break;
+                }
+            }
+
+            auto maybeKwargIdx =
+                ait - args.args.begin() < args.args.size() ? ait - args.args.begin() : args.args.size() - 1;
+            auto allArgsProcessed = false;
+
+            // `hasKwsplat` can be false positive, because it relies on how we parse positional and keyword args
+            auto actuallyHasKwsplatParam = absl::c_any_of(
+                data->arguments, [](const auto &arg) { return arg.flags.isKeyword && arg.flags.isRepeated; });
+
+            // Check if remaining keyword arg names are matching keyword param names
+            // If kwargs splat exists, all kwargs are allowed and type mismatches will be reported later in the method
+            if (!actuallyHasKwsplatParam) {
+                UnorderedSet<NameRef> keywordArgsNames;
+                for (const auto &param : data->arguments) {
+                    if (!param.flags.isKeyword) {
+                        continue;
+                    }
+                    keywordArgsNames.insert(param.name);
+                }
+
+                if (keywordArgsNames.size() != 0) {
+                    {
+                        auto kwit = args.args.begin() + args.numPosArgs;
+                        auto kwend = args.args.begin() + args.numPosArgs + numKwargs;
+
+                        allArgsProcessed = true;
+                        while (kwit != kwend) {
+                            auto &key = *kwit++;
+                            if (isa_type<NamedLiteralType>(key->type)) {
+                                auto keyLiteral = cast_type_nonnull<NamedLiteralType>(key->type);
+
+                                if (keyLiteral.literalKind == NamedLiteralType::LiteralTypeKind::Symbol &&
+                                    keywordArgsNames.find(keyLiteral.asName()) != keywordArgsNames.end()) {
+                                    kwit++;
+
+                                } else {
+                                    allArgsProcessed = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!allArgsProcessed &&
+                (
+                    // there are keyword args remaining and we expect the current argument to be a hash,
+                    // but it's not a hash => report implicit conversion
+                    (isTyped(probablyFirstKwarg.type) && isHash(gs, probablyFirstKwarg.type) &&
+                     isTyped(args.args[maybeKwargIdx]->type) && !isHash(gs, args.args[maybeKwargIdx]->type) &&
+                     areOtherParamsDefault && !probablyFirstKwarg.flags.isDefault)
+
+                    // this part of the condition handles a corner case,
+                    // see `takes_empty_hash` in test/testdata/infer/ruby3_keyword_args.rb
+                    || (!actuallyHasKwsplatParam && isLastParam && isTyped(args.args[maybeKwargIdx]->type) &&
+                        isHash(gs, args.args[maybeKwargIdx]->type)))) {
+                auto kwargLoc = core::Loc(args.locs.file, args.locs.args[maybeKwargIdx].beginLoc,
+                                          args.locs.args[args.locs.args.size() - 1].endLoc);
+                if (auto e = gs.beginError(kwargLoc, errors::Infer::NoKeywordArgAsLastHashArg)) {
+                    e.setHeader("Passing the keyword argument as the last hash parameter is deprecated");
+                    e.addErrorLine(kwargLoc,
+                                   "This produces a runtime warning in Ruby 2.7, "
+                                   "and will be an error in Ruby 3.0",
+                                   "You can read more about it here ",
+                                   "https://www.ruby-lang.org/en/news/2019/12/12/"
+                                   "separation-of-positional-and-keyword-arguments-in-ruby-3-0/");
+                    if (auto source = kwargLoc.source(gs)) {
+                        e.replaceWith("Wrap keyword arguments into hash", kwargLoc, "{{ {} }}", source.value());
+                    }
+                }
+            }
+        }
     }
 
     // Extract the kwargs hash if there are keyword args present in the send
