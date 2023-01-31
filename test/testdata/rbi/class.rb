@@ -4,6 +4,10 @@ class Parent
   def self.foo; end
 end
 
+Parent.singleton_class.attached_object
+Parent.attached_object
+Parent.new.singleton_class.attached_object
+
 c1 = Class.new
 T.reveal_type(c1) # error: Revealed type: `Class`
 T.reveal_type(c1.new) # error: Revealed type: `Object`
