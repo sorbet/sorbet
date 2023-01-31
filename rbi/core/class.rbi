@@ -89,6 +89,23 @@ class Class < Module
   sig {returns(T.untyped)}
   def allocate(); end
 
+
+  # Returns the object for which the receiver is the singleton class.
+  #
+  # Raises a `TypeError` if the class is not a singleton class.
+  #
+  # ```ruby
+  # class Foo; end
+  #
+  # Foo.singleton_class.attached_object        #=> Foo
+  # Foo.attached_object                        #=> TypeError: `Foo' is not a singleton class
+  # Foo.new.singleton_class.attached_object    #=> #<Foo:0x000000010491a370>
+  # TrueClass.attached_object                  #=> TypeError: `TrueClass' is not a singleton class
+  # NilClass.attached_object                   #=> TypeError: `NilClass' is not a singleton class
+  # ```
+  sig { returns(BasicObject) }
+  def attached_object; end
+
   ### Sorbet hijacks Class#new to re-use the sig from MyClass#initialize when creating new instances of a class.
   ### This method must be here so that all calls to MyClass.new aren't forced to take 0 arguments.
 
