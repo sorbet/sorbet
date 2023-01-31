@@ -267,6 +267,14 @@ These assertions are also subject to the `T::Configuration` hooks that
 [Runtime Configuration](tconfiguration.md) for more. By default, all of these
 assertions will raise a `TypeError` if they are violated at runtime.
 
+It's possible to opt out of runtime checking for individual calls to `T.let`,
+`T.cast`, and `T.bind` by adding `checked: false`, e.g.
+`x = T.let(y, Foo, checked: false)`. This isn't recommended in most
+circumstances, even in performance-critical code; while adding `checked(:never)`
+to a method signature is an easy way to remove performance overhead, doing the
+same for `T.let` removes neither the method call overhead nor the overhead of
+constructing any type argument. For more effective options, see below.
+
 ## Comparison of type assertions
 
 Here are some other ways to think of the behavior of the individual type
@@ -321,3 +329,158 @@ assertions:
   ```
 
   if it were valid in Ruby to assign to `self`.
+
+## Performance considerations
+
+Unlike `sig` annotations, type assertions _always_ have a performance cost, even
+if runtime checks are globally disabled or `checked: false` is used at
+individual callsites. `T.let` and friends are ordinary Ruby method calls, which
+have intrisic overhead, in addition to the overhead of constructing any type
+arguments.
+
+This overhead isn't normally worth worrying about, but in code where you are
+already micro-optimizing to reduce method calls or object allocations, there are
+a few patterns that may be helpful:
+
+### Prefer method signatures over type assertions
+
+It's often possible to avoid using a type assertion at all, without loss of type
+safety, with a slight refactoring.
+
+For example, one common use for a type assertion is defining the type of an
+instance variable. One can frequently move this type definition to the signature
+of the constructor, taking advantage of Sorbet's ability to infer instance
+variable types when variables are set directly from constructor arguments.
+
+Instead of:
+
+```ruby
+sig {void.checked(:tests)}
+def initialize
+  @foo = T.let(MyObject.new, MyInterface)
+end
+```
+
+Write:
+
+```ruby
+sig {params(foo: MyInterface).void.checked(:tests)}
+def initialize(foo: MyObject.new)
+  @foo = foo
+end
+```
+
+In other circumstances, breaking out a method can avoid a type assertion (which
+would itself involve at least one method call anyway).
+
+For example, rather than:
+
+```ruby
+def hot_method(..)
+  # ...
+  x = T.let(polymorphic_factory(foo_please), Foo)
+  # ...
+end
+```
+
+Write:
+
+```ruby
+def hot_method(..)
+  # ...
+  x = make_foo
+  # ...
+end
+
+sig {returns(FooType).checked(:tests)}
+def make_foo
+  polymorphic_factory(foo_please)
+end
+```
+
+### Avoid constructing type objects
+
+The construction of an non-trivial type object is typically the most expensive
+part of a type assertion at runtime. One can usually mitigate this with the use
+of `T.type_alias`.
+
+For example, rather than:
+
+```ruby
+def hot_method(..)
+  # ...
+  foo = T.let({}, T::Hash[T.nilable(Symbol), T.any(Integer, Float)])
+  # ...
+end
+```
+
+Write:
+
+```ruby
+FooHash = T.type_alias { T::Hash[T.nilable(Symbol), T.any(Integer, Float)] }
+
+def hot_method(..)
+  # ...
+  foo = T.let({}, FooHash)
+  # ...
+end
+```
+
+### Put type assertions behind memoization
+
+Performance-sensitive methods are often memoized. In this case, it's usually
+possible to memoize the runtime type check as well.
+
+For example, rather than:
+
+```ruby
+sig {returns(Foo).checked(:tests)}
+def foo
+  @foo = T.let(@foo, T.nilable(Foo))
+  @foo ||= something_expensive
+end
+```
+
+Write:
+
+```ruby
+sig {returns(Foo).checked(:tests)}
+def foo
+  @foo ||= T.let(something_expensive, T.nilable(Foo))
+end
+```
+
+Note that for class methods, there's a better option:
+
+```ruby
+@foo = T.let(nil, T.nilable(Foo))
+
+sig {returns(Foo).checked(:tests)}
+def self.foo
+  @foo ||= something_expensive
+end
+```
+
+### Inline type assertions using flow-sensitivity
+
+A type assertion can usually be replaced by an explicit `===`, `is_a?` or
+equivalent check of a local variable, which will avoid a method call. Sometimes
+this makes code more verbose, but sometimes it can be a readability improvement
+instead, especially in cases involving `T.must`.
+
+For example, in place of:
+
+```ruby
+if foo.bar
+  T.must(foo.bar).baz
+end
+```
+
+Write:
+
+```ruby
+x = foo.bar
+if x
+  x.baz
+end
+```
