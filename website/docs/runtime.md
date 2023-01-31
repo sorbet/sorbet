@@ -335,9 +335,10 @@ Type assertions like `T.let`, `T.cast`, `T.must`, and `T.bind` are normally
 checked at runtime, just like `sig` annotations on methods, unless runtime
 checks have been disabled.
 
-Unlike method signatures, type assertions *always* have a performance cost,
-whether or not they are checked at runtime. See [Type Assertions](type-assertions.md)
-for tips on patterns that reduce or avoid this cost.
+Unlike method signatures, type assertions _always_ have a performance cost,
+whether or not they are checked at runtime. See
+[Type Assertions](type-assertions.md) for tips on patterns that reduce or avoid
+this cost.
 
 ## What's next?
 

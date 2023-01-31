@@ -268,12 +268,12 @@ These assertions are also subject to the `T::Configuration` hooks that
 assertions will raise a `TypeError` if they are violated at runtime.
 
 It's possible to opt out of runtime checking for individual calls to `T.let`,
-`T.cast`, and `T.bind` by adding `checked: false`, e.g. `x = T.let(y, Foo, checked: false)`.
-This isn't recommended in most circumstances, even in performance-critical code;
-while adding `checked(:never)` to a method signature is an easy way to remove
-performance overhead, doing the same for `T.let` removes neither the method call
-overhead nor the overhead of constructing any type argument. For more effective
-options, see below.
+`T.cast`, and `T.bind` by adding `checked: false`, e.g.
+`x = T.let(y, Foo, checked: false)`. This isn't recommended in most
+circumstances, even in performance-critical code; while adding `checked(:never)`
+to a method signature is an easy way to remove performance overhead, doing the
+same for `T.let` removes neither the method call overhead nor the overhead of
+constructing any type argument. For more effective options, see below.
 
 ## Comparison of type assertions
 
@@ -332,15 +332,15 @@ assertions:
 
 ## Performance considerations
 
-Unlike `sig` annotations, type assertions *always* have a performance cost,
-even if runtime checks are globally disabled or `checked: false` is used
-at individual callsites. `T.let` and friends are ordinary Ruby method calls,
-which have intrisic overhead, in addition to the overhead of constructing
-any type arguments.
+Unlike `sig` annotations, type assertions _always_ have a performance cost, even
+if runtime checks are globally disabled or `checked: false` is used at
+individual callsites. `T.let` and friends are ordinary Ruby method calls, which
+have intrisic overhead, in addition to the overhead of constructing any type
+arguments.
 
 This overhead isn't normally worth worrying about, but in code where you are
-already micro-optimizing to reduce method calls or object allocations, there
-are a few patterns that may be helpful:
+already micro-optimizing to reduce method calls or object allocations, there are
+a few patterns that may be helpful:
 
 ### Prefer method signatures over type assertions
 
@@ -370,8 +370,8 @@ def initialize(foo: MyObject.new)
 end
 ```
 
-In other circumstances, breaking out a method can avoid a type assertion
-(which would itself involve at least one method call anyway).
+In other circumstances, breaking out a method can avoid a type assertion (which
+would itself involve at least one method call anyway).
 
 For example, rather than:
 
@@ -384,6 +384,7 @@ end
 ```
 
 Write:
+
 ```ruby
 def hot_method(..)
   # ...
@@ -400,8 +401,8 @@ end
 ### Avoid constructing type objects
 
 The construction of an non-trivial type object is typically the most expensive
-part of a type assertion at runtime. One can usually mitigate this with the
-use of `T.type_alias`.
+part of a type assertion at runtime. One can usually mitigate this with the use
+of `T.type_alias`.
 
 For example, rather than:
 
@@ -462,10 +463,10 @@ end
 
 ### Inline type assertions using flow-sensitivity
 
-A type assertion can usually be replaced by an explicit `===`, `is_a?` or equivalent
-check of a local variable, which will avoid a method call. Sometimes this makes code
-more verbose, but sometimes it can be a readability improvement instead, especially
-in cases involving `T.must`.
+A type assertion can usually be replaced by an explicit `===`, `is_a?` or
+equivalent check of a local variable, which will avoid a method call. Sometimes
+this makes code more verbose, but sometimes it can be a readability improvement
+instead, especially in cases involving `T.must`.
 
 For example, in place of:
 
