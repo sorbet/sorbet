@@ -269,7 +269,7 @@ assertions will raise a `TypeError` if they are violated at runtime.
 
 It's possible to opt out of runtime checking for individual calls to `T.let`,
 `T.cast`, and `T.bind` by adding `checked: false`, e.g. `x = T.let(y, Foo, checked: false)`.
-This isn't recommended in most circumstances, even performance-critical code;
+This isn't recommended in most circumstances, even in performance-critical code;
 while adding `checked(:never)` to a method signature is an easy way to remove
 performance overhead, doing the same for `T.let` removes neither the method call
 overhead nor the overhead of constructing any type argument. For more effective
@@ -445,8 +445,7 @@ Write:
 ```ruby
 sig {returns(Foo).checked(:tests)}
 def foo
-  @foo ||= T.let(@foo, T.nilable(Foo))
-  @foo ||= something_expensive
+  @foo ||= T.let(something_expensive, T.nilable(Foo))
 end
 ```
 
