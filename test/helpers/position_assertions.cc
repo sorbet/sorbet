@@ -41,6 +41,7 @@ const UnorderedMap<
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"stripe-mode", BooleanPropertyAssertion::make},
+        {"enable-out-of-order-reference-checks", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},

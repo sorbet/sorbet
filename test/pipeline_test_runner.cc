@@ -213,6 +213,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
+
+    if (!BooleanPropertyAssertion::getValue("enable-out-of-order-reference-checks", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
     }
 

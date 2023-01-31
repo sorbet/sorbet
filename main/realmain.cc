@@ -519,9 +519,15 @@ int realmain(int argc, char *argv[]) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+        }
+    }
+
+    if (!opts.outOfOrderReferenceChecksEnabled) {
+        if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
         }
     }
+
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);

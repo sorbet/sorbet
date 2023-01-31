@@ -355,6 +355,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options("advanced")("enable-all-beta-lsp-features",
                                     "Enable (expected-to-be-non-crashy) early-access LSP features.");
+    options.add_options("advanced")("enable-out-of-order-reference-checks",
+                                    "Enable out-of-order reference checks (error 5027)");
     options.add_options("advanced")("lsp-error-cap",
                                     "Caps the maximum number of errors that LSP reports to the editor. Can prevent "
                                     "editor slowdown triggered by large error lists. A cap of 0 means 'no cap'.",
@@ -789,6 +791,7 @@ void readOptions(Options &opts,
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
+        opts.outOfOrderReferenceChecksEnabled = raw["enable-out-of-order-reference-checks"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();

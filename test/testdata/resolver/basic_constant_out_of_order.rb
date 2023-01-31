@@ -1,4 +1,4 @@
-# stripe-mode: true
+# enable-out-of-order-reference-checks: true
 # typed: true
 
 module Foo
