@@ -210,9 +210,9 @@ public:
     vector<Export> exports_;
 
     // Whether the code in this package is compatible for path-based autoloading.
-    bool strictAutoloaderCompatibility_ : 1;
+    bool strictAutoloaderCompatibility_;
     // Whether this package should just export everything
-    bool exportAll_ : 1;
+    bool exportAll_;
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
