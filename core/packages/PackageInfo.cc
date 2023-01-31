@@ -74,6 +74,37 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
     return core::Symbols::root();
 }
 
+core::ClassOrModuleRef lookupNameOn(const core::GlobalState &gs, const core::ClassOrModuleRef root,
+                                    const std::vector<core::NameRef> &name) {
+    auto curSym = root;
+    if (!curSym.exists()) {
+        return {};
+    }
+
+    for (const auto part : name) {
+        auto member = curSym.data(gs)->findMember(gs, part);
+        if (!member.exists() || !member.isClassOrModule()) {
+            return {};
+        }
+        curSym = member.asClassOrModuleRef();
+    }
+
+    return curSym;
+}
+
+core::ClassOrModuleRef PackageInfo::getPackageScope(const core::GlobalState &gs) const {
+    return lookupNameOn(gs, core::Symbols::root(), fullName());
+}
+
+core::ClassOrModuleRef PackageInfo::getPackageTestScope(const core::GlobalState &gs) const {
+    auto testSym = core::Symbols::root().data(gs)->findMember(gs, core::Names::Constants::Test());
+    if (!testSym.isClassOrModule()) {
+        return {};
+    }
+
+    return lookupNameOn(gs, testSym.asClassOrModuleRef(), fullName());
+}
+
 // Given a package named Project::MyPackage, returns the class/module ref corresponding to
 // the symbol Project::MyPackage or Test::Project::MyPackage, depending on whether the suggestion scope
 // is a primary namespace constant or a test namespace constant. See packager/packager.cc for further explanation of
@@ -81,16 +112,7 @@ core::ClassOrModuleRef getParentNamespaceSym(const core::GlobalState &gs, const 
 core::ClassOrModuleRef PackageInfo::getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
                                                                       const core::SymbolRef suggestionScope) const {
     auto parentSym = getParentNamespaceSym(gs, suggestionScope);
-    auto curSym = parentSym;
-
-    for (const auto part : fullName()) {
-        curSym = curSym.data(gs)->findMember(gs, part).asClassOrModuleRef();
-        if (!curSym.exists()) {
-            return curSym;
-        }
-    }
-
-    return curSym;
+    return lookupNameOn(gs, parentSym, fullName());
 }
 
 } // namespace sorbet::core::packages

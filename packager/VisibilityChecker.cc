@@ -326,6 +326,24 @@ public:
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         ast::TreeWalk::apply(ctx, pass, f.tree);
 
+        // if we used `export_all`, then there were no `export`
+        // directives in the previous pass; we should instead export
+        // the package root
+        if (package.exportAll()) {
+            // we check if these exist because if no constants were
+            // defined in the package then we might not have actually
+            // ever created the relevant namespaces
+            auto pkgRoot = package.getPackageScope(gs);
+            if (pkgRoot.exists()) {
+                pass.recursiveExportSymbol(gs, true, pkgRoot);
+            }
+
+            auto pkgTestRoot = package.getPackageTestScope(gs);
+            if (pkgTestRoot.exists()) {
+                pass.recursiveExportSymbol(gs, true, pkgTestRoot);
+            }
+        }
+
         return f;
     }
 };

@@ -38,6 +38,9 @@ public:
     core::ClassOrModuleRef getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
                                                              core::SymbolRef suggestionScope) const;
 
+    core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) const;
+    core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
+
     virtual std::optional<ImportType> importsPackage(core::NameRef mangledName) const = 0;
 
     // autocorrects
@@ -62,6 +65,7 @@ public:
 
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
     virtual bool strictAutoloaderCompatibility() const = 0;
+    virtual bool exportAll() const = 0;
 
     // Utilities:
 
