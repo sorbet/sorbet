@@ -81,11 +81,11 @@ class BigFoo; extend T::Sig
   # Tests return markdown output
   sig {void}
   def tests_return_markdown
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```ruby
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: sig {void}
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: ```
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: ---
-    # ^^^^^^^^^^^^^^^^^^^^^ hover: Tests return markdown output
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 1 ```ruby
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 2 sig {void}
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 4 ```
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 6 ---
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 8 Tests return markdown output
   end
 end
 
