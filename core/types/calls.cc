@@ -40,7 +40,7 @@ bool allComponentsPresent(DispatchResult &res) {
 }
 
 inline bool isTyped(const TypePtr type) {
-    return type && !type.isUntyped();
+    return !type.isUntyped();
 }
 
 inline bool isHash(const GlobalState &gs, const TypePtr type) {
