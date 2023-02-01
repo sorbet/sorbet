@@ -75,7 +75,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :color, T.nilable(String)
     prop :type, T.nilable(String), raise_on_nil_write: true
 
-    def initialize(hash = {})
+    def initialize(hash={})
       @name = 'Doe'
       @greeting = nil
       @farewell = 'Ciao'
@@ -112,7 +112,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :color, T.nilable(String)
     prop :type, T.nilable(String), raise_on_nil_write: true
 
-    def initialize(hash = {})
+    def initialize(hash={})
       @name = 'Doe'
       @greeting = nil
       @farewell = 'Ciao'
