@@ -51,6 +51,7 @@ const UnorderedMap<
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
+        {"hover-line", HoverLineAssertion::make},
         {"completion", CompletionAssertion::make},
         {"apply-completion", ApplyCompletionAssertion::make},
         {"apply-code-action", ApplyCodeActionAssertion::make},
@@ -1230,6 +1231,76 @@ void HoverAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
 
 string HoverAssertion::toString() const {
     return fmt::format("hover: {}", message);
+}
+
+shared_ptr<HoverLineAssertion> HoverLineAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                        int assertionLine, string_view assertionContents,
+                                                        string_view assertionType) {
+    static const regex multilineRegex(R"(^([0-9]+) (.+)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+
+    if (regex_search(assertionContentsString, matches, multilineRegex)) {
+        auto lineno = stoi(matches[1].str());
+        auto contents = matches[2].str();
+        return make_shared<HoverLineAssertion>(filename, range, assertionLine, lineno, contents);
+    }
+
+    ADD_FAIL_CHECK_AT(
+        string(filename).c_str(), assertionLine + 1,
+        fmt::format("Improperly formatted hover-line assertion. Expected '<lineno> <contents>'. Found '{}'",
+                    assertionContents, filename));
+
+    return nullptr;
+}
+HoverLineAssertion::HoverLineAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, int lineno,
+                                       string_view message)
+    : RangeAssertion(filename, range, assertionLine), lineno(lineno), message(string(message)) {}
+
+void HoverLineAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                  const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                  LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<HoverLineAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
+        }
+    }
+}
+
+void HoverLineAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                               LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    const auto &config = wrapper.config();
+    auto uri = filePathToUri(config, filename);
+    auto pos = make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range->start->copy());
+    auto id = nextId++;
+    auto msg = make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentHover, move(pos)));
+    auto responses = getLSPResponsesFor(wrapper, move(msg));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &responseMsg = responses.at(0);
+    REQUIRE(responseMsg->isResponse());
+    auto &response = responseMsg->asResponse();
+    REQUIRE_MESSAGE(response.result.has_value(), response.error.value()->message);
+    auto &hoverResponse = get<variant<JSONNullObject, unique_ptr<Hover>>>(*response.result);
+    auto hoverContents = hoverToString(hoverResponse);
+    vector<string> hoverLines = absl::StrSplit(hoverContents, "\n");
+
+    REQUIRE_LE(1, this->lineno);
+    REQUIRE_LE(this->lineno, hoverLines.size());
+
+    // Match a full line. Makes it possible to disambiguate `String` and `T.nilable(String)`.
+    if (hoverLines[this->lineno - 1] != this->message) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected line {} of hover contents:\n{}\nComplete hover contents:\n{}",
+                                      errorPrefix, this->lineno,
+                                      prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *range, hoverContents)));
+    }
+}
+
+string HoverLineAssertion::toString() const {
+    return fmt::format("hover-line: {} {}", lineno, message);
 }
 
 shared_ptr<CompletionAssertion> CompletionAssertion::make(string_view filename, unique_ptr<Range> &range,

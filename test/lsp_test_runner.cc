@@ -821,6 +821,9 @@ TEST_CASE("LSPTest") {
     // Hover assertions
     HoverAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
+    // Hover multiline assertions
+    HoverLineAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
     // sorbet/showSymbol assertions
     ShowSymbolAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
@@ -920,6 +923,9 @@ TEST_CASE("LSPTest") {
 
             // Check any new HoverAssertions in the updates.
             HoverAssertion::checkAll(assertions, updatesAndContents, *lspWrapper, nextId);
+
+            // Check and new HoverMultilneAsserions assertions
+            HoverLineAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
         }
     }
 

@@ -276,6 +276,29 @@ public:
     std::string toString() const override;
 };
 
+// # ^ hover-line: 1 foo
+class HoverLineAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<HoverLineAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                    int assertionLine, std::string_view assertionContents,
+                                                    std::string_view assertionType);
+    /** Checks all HoverLineAssertions within the assertion vector. Skips over non-hover assertions.*/
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
+
+    HoverLineAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, int lineno,
+                       std::string_view message);
+
+    const int lineno;
+    const std::string message;
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string errorPrefix = "");
+
+    std::string toString() const override;
+};
+
 // # ^ completion: foo
 class CompletionAssertion final : public RangeAssertion {
 public:
