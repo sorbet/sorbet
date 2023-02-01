@@ -43,6 +43,12 @@ module T::Props::Utils
     need_nil_read_check?(prop_rules) || T::Props::Utils.required_prop?(prop_rules)
   end
 
+  # The prop_rules indicate whether we should typecheck the value for the prop/field.
+  def self.need_type_check?(prop_rules)
+    check_level = prop_rules.fetch(:checked)
+    check_level == :always || (check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+  end
+
   def self.required_prop?(prop_rules)
     # Clients should never reference :_tnilable as the implementation can change.
     !prop_rules[:_tnilable]

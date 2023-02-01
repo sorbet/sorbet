@@ -78,6 +78,7 @@ class T::Props::Decorator
     clobber_existing_method!
     extra
     setter_validate
+    checked
     _tnilable
   ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
@@ -244,6 +245,11 @@ class T::Props::Decorator
       raise ArgumentError.new("Extra metadata must be a Hash in prop #{@class.name}.#{name}")
     end
 
+    level = rules.fetch(:checked)
+    if !T::Private::RuntimeLevels::LEVELS.include?(level)
+      raise ArgumentError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
+    end
+
     nil
   end
 
@@ -333,6 +339,8 @@ class T::Props::Decorator
     end
     type_object = smart_coerce(type, enum: rules[:enum])
 
+    rules[:checked] ||= :always
+
     prop_validate_definition!(name, cls, rules, type_object)
 
     # Retrive the possible underlying object with T.nilable.
@@ -399,6 +407,9 @@ class T::Props::Decorator
           @class.send(:define_method, "#{name}=") do |val|
             T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
+        elsif !T::Props::Utils.need_type_check?(rules)
+          # Fastest path (~20x faster as of Ruby 2.6)
+          @class.send(:attr_writer, name) # send is used because `attr_writer` is private in 2.4
         else
           # Fast path (~4x faster as of Ruby 2.6)
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))

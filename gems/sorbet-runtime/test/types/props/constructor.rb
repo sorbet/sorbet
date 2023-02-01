@@ -21,6 +21,11 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :untyped_prop, T.untyped, default: nil
   end
 
+  class CheckedNeverStruct < T::Struct
+    prop :checked_never, String, checked: :never
+    prop :nilable_checked_never, T.nilable(String), checked: :never
+  end
+
   it "raises when omitting a required prop" do
     err = assert_raises(ArgumentError) do
       MyStruct.new(foo: 'foo')
@@ -61,5 +66,12 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
 
   it 'can default untyped fields' do
     UntypedField.new
+  end
+
+  it 'raises when omitting a required prop with checked(:never)' do
+    err = assert_raises(ArgumentError) do
+      CheckedNeverStruct.new
+    end
+    assert_equal("Missing required prop `checked_never` for class `Opus::Types::Test::Props::ConstructorTest::CheckedNeverStruct`", err.message)
   end
 end
