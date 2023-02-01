@@ -215,7 +215,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
-    if (!BooleanPropertyAssertion::getValue("enable-out-of-order-reference-checks", assertions).value_or(false)) {
+    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
     }
 

@@ -131,8 +131,17 @@ private:
     };
 
     shared_ptr<Nesting> nesting_;
+
+    // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
+    // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
+    // in case there are multiple definitions of a symbol in the same file, we store the loc of the *first* one.
+    //
+    // There will be a map like this for each file that resolver processes, but it will outlive the initial treewalk
+    // to find ConstantResolutionItems and only get released once all ConstantResolutionItems for that file have been
+    // handled.
     shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
 
+    // Increments to track whether we're at a class top level or whether we're inside a block/method body.
     int loadScopeDepth_;
 
     struct ConstantResolutionItem {
@@ -327,7 +336,7 @@ private:
 
             // Check for ordering between reference loc and definition loc.
             const auto &refLoc = c.loc;
-            if (defLoc.beginPos() >= refLoc.endPos()) {
+            if (defLoc.beginPos() > refLoc.endPos()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::OutOfOrderConstantAccess)) {
                     e.setHeader("`{}` referenced before it is defined", resolutionResult.show(ctx));
                     e.addErrorLine(ctx.locAt(defLoc), "Defined here");
@@ -1410,16 +1419,21 @@ public:
         // This happens *iff* the symbol is:
         //   a). defined only in this file and nowhere else
         //   b). defined multiple times in this file
-        //   c). this particular classDef is the first occurrence of the symbol in the file
+        //   c). this particular classDef is the first definition of the symbol in the file
         if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 && sym.isOnlyDefinedInFile(ctx.state, ctx.file)) {
-            auto defLoc = sym.data(ctx)->loc().offsets();
-            auto declLoc = original.declLoc;
+            auto defLoc = sym.data(ctx)->loc();
 
-            if (defLoc.beginPos() >= declLoc.endPos()) {
-                // When this condition is met, effectively it means the file has multiple definitions of the symbol
-                // and this is the first one. We need to use the first def for out-of-order checking, since any
-                // reference *before* the first def will be out of order.
-                firstDefinitionLocs->insert(std::make_pair(sym, declLoc));
+            if (!defLoc.file().data(ctx).isRBI()) {
+                ENFORCE(defLoc.file() == ctx.file);
+                auto declLoc = original.declLoc;
+
+                if (defLoc.beginPos() > declLoc.endPos()) {
+                    // When this condition is met, it means the file has multiple definitions of the symbol.
+                    // If the insert succeeds below, the current definition is the first one.
+                    // We need to use the first def for out-of-order checking, since any
+                    // reference *before* the first def will be out of order.
+                    firstDefinitionLocs->insert(std::make_pair(sym, declLoc));
+                }
             }
         }
 
@@ -1555,17 +1569,22 @@ public:
         // This needs to happen *iff* the symbol is:
         //   a). defined only in this file and nowhere else
         //   b). defined multiple times in this file
-        //   c). this particular assign is the first occurrence of the symbol in the file
+        //   c). this particular assign is the first definition of the symbol in the file
         if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
             id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
-            auto defLoc = id->symbol.loc(ctx).offsets();
-            auto declLoc = asgn.loc;
+            auto defLoc = id->symbol.loc(ctx);
 
-            if (defLoc.beginPos() >= declLoc.endPos()) {
-                // When this condition is met, effectively it means the file has multiple definitions of the symbol
-                // and this is the first one. We need to use the first def for out-of-order checking, since any
-                // reference *before* the first def will be out of order.
-                firstDefinitionLocs->insert(std::make_pair(id->symbol, declLoc));
+            if (!defLoc.file().data(ctx).isRBI()) {
+                ENFORCE(defLoc.file() == ctx.file);
+                auto declLoc = asgn.loc;
+
+                if (defLoc.beginPos() > declLoc.endPos()) {
+                    // When this condition is met, it means the file has multiple definitions of the symbol.
+                    // If the insert succeeds below, the current definition is the first one.
+                    // We need to use the first def for out-of-order checking, since any
+                    // reference *before* the first def will be out of order.
+                    firstDefinitionLocs->insert(std::make_pair(id->symbol, declLoc));
+                }
             }
         }
 

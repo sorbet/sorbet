@@ -1,9 +1,9 @@
-# enable-out-of-order-reference-checks: true
-# typed: true
+# check-out-of-order-constant-references: true
+# typed: false
 
 module Foo
   A = X 
-    # ^ error: `Foo::X` referenced before it is defined
+  #   ^ error: `Foo::X` referenced before it is defined
 
   def self.foo(arg:)
     X # this is ok
@@ -24,23 +24,25 @@ module Foo
   B = X # this is ok
 
   class Bar
-    Foo::Y
-  # ^^^^^^ error: `Foo::Y` referenced before it is defined
+    p(Foo::Y)
+    # ^^^^^^ error: `Foo::Y` referenced before it is defined
   end
 
   class X; end
 
   class Bar
     Foo.bar do
-      Foo::Y # this is ok
+      p(Foo::Y) # this is ok
     end
   end
 
   Y = 1
 
+  Y = 2
+
   class Bar
-    Foo::Y # this is ok
+    p(Foo::Y) # this is ok
   end
 
-  Y = 2
+  Y = 3
 end
