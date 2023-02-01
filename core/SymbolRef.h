@@ -440,6 +440,7 @@ public:
     bool isTypeAlias(const GlobalState &gs) const;
     bool isField(const GlobalState &gs) const;
     bool isStaticField(const GlobalState &gs) const;
+    bool isClassAlias(const GlobalState &gs) const;
 
     uint32_t classOrModuleIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);

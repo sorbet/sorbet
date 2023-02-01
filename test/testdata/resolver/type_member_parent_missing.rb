@@ -19,7 +19,7 @@
 # ^^^^^^^^^^ error: Missing definition for abstract method `Enumerable#each`
     include Enumerable
     Elem = T.let(0, Integer)
-  # ^^^^ error: Type variable `Elem` needs to be declared as `= type_member(SOMETHING)`
+  # ^^^^ error: Type variable `Elem` needs to be declared as a type_member or type_template, not a static-field
   end
 
   class Bar2 < Foo2
