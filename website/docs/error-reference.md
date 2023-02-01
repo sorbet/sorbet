@@ -1855,12 +1855,6 @@ In the above example, if `Foo::X` is also declared in another file, the error
 will not fire. In such cases, the constant may get autoloaded, so we cannot
 prove that the behavior is erroneous.
 
-### The error is only reported in --stripe-mode
-
-Since this error is currently most relevant within the Stripe codebase's
-autoloading context, we are making it available only under the `--stripe-mode`
-flag.
-
 Ways to fix the error include:
 
 - Re-ordering the constant access below the declaration.
