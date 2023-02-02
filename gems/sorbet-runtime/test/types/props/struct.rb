@@ -30,6 +30,12 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     end
   end
 
+  it 'errors if you try to set an invalid checked level' do
+    assert_raises(ArgumentError) do
+      MyStruct.prop :foo, String, checked: :invalid_level
+    end
+  end
+
   it 'can set hash field correspondingly' do
     doc = StructWithPredefinedHash.new(hash_field1: {a: 100, b: 200}, hash_field2: nil)
     assert_equal(100, doc.hash_field1[:a])

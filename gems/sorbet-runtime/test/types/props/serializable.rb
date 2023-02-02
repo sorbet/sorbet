@@ -379,6 +379,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :prop, T.nilable(String), raise_on_nil_write: true, default: nil
   end
 
+  class CheckedNeverStruct < T::Struct
+    prop :prop, T.nilable(String), raise_on_nil_write: true, checked: :never
+  end
+
   describe 'raise_on_nil_write' do
     it 'requires the value to be true' do
       assert_prop_error(/if specified must be `true`/) do
@@ -501,6 +505,30 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
       it 'throws exception on nil serialize' do
         struct = NilDefaultStruct.new
+        assert_raises(TypeError) do
+          struct.serialize
+        end
+      end
+    end
+
+    describe 'when checked(:never)' do
+      it 'forbids missing required prop in constructor' do
+        assert_raises(ArgumentError) do
+          CheckedNeverStruct.new
+        end
+        struct = CheckedNeverStruct.new(prop: nil)
+        assert_nil(struct.prop)
+      end
+
+      it 'allows nil in setter' do
+        struct = CheckedNeverStruct.new(prop: 'something')
+        struct.prop = nil
+        assert_nil(struct.prop)
+      end
+
+      it 'throws exception on nil serialize' do
+        struct = CheckedNeverStruct.new(prop: 'something')
+        struct.prop = nil
         assert_raises(TypeError) do
           struct.serialize
         end

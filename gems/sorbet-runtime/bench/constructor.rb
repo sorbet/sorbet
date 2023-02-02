@@ -8,6 +8,21 @@ require_relative '../lib/sorbet-runtime'
 module SorbetBenchmarks
   module Constructor
 
+    class ExamplePoro
+      def initialize(hash)
+        @prop1 = hash.fetch(:prop1, nil)
+        @prop2 = hash.fetch(:prop2, 0)
+        @prop3 = hash.fetch(:prop3)
+        @prop4 = hash.fetch(:prop4)
+        @prop5 = hash.fetch(:prop5, [])
+        @prop6 = hash.fetch(:prop6)
+        @prop7 = hash.fetch(:prop7, {})
+        @prop8 = hash.fetch(:prop8, nil)
+        @prop9 = hash.fetch(:prop9, [])
+        @prop10 = hash.fetch(:prop10, {})
+      end
+    end
+
     class Example < T::Struct
       class Subdoc < T::Struct
         prop :prop, String
@@ -25,12 +40,42 @@ module SorbetBenchmarks
       prop :prop10, T::Hash[String, Subdoc], default: {}
     end
 
+    class ExampleWithoutTypecheck < T::Struct
+      class Subdoc < T::Struct
+        prop :prop, String, checked: :never
+      end
+
+      prop :prop1, T.nilable(Integer), checked: :never
+      prop :prop2, Integer, default: 0, checked: :never
+      prop :prop3, Integer, checked: :never
+      prop :prop4, T::Array[Integer], checked: :never
+      prop :prop5, T::Array[Integer], default: [], checked: :never
+      prop :prop6, T::Hash[String, Integer], checked: :never
+      prop :prop7, T::Hash[String, Integer], default: {}, checked: :never
+      prop :prop8, T.nilable(Subdoc), checked: :never
+      prop :prop9, T::Array[Subdoc], default: [], checked: :never
+      prop :prop10, T::Hash[String, Subdoc], default: {}, checked: :never
+    end
+
     def self.run
       input = {
         prop3: 0,
         prop4: [],
         prop6: {},
       }.freeze
+
+      100_000.times do
+        ExamplePoro.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExamplePoro.new(input)
+        end
+      end
+
+      puts "Plain Ruby (μs/iter):"
+      puts result
 
       100_000.times do
         Example.new(input)
@@ -43,6 +88,19 @@ module SorbetBenchmarks
       end
 
       puts "T::Props.new, mostly nil input (μs/iter):"
+      puts result
+
+      100_000.times do
+        ExampleWithoutTypecheck.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExampleWithoutTypecheck.new(input)
+        end
+      end
+
+      puts "T::Props.new, mostly nil input, checked(:never) (μs/iter):"
       puts result
 
       subdoc = Example::Subdoc.new(prop: '').freeze
@@ -70,6 +128,19 @@ module SorbetBenchmarks
       end
 
       puts "T::Props.new, all props set (μs/iter):"
+      puts result
+
+      100_000.times do
+        ExampleWithoutTypecheck.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExampleWithoutTypecheck.new(input)
+        end
+      end
+
+      puts "T::Props.new, all props set, checked(:never) (μs/iter):"
       puts result
     end
   end

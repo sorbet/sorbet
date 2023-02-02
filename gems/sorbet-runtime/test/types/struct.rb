@@ -143,4 +143,117 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       assert_equal(expected_result, struct.inspect)
     end
   end
+
+  describe 'runtime levels' do
+    before do
+      @orig_check_tests = T::Private::RuntimeLevels.check_tests?
+      @orig_default_checked_level = T::Private::RuntimeLevels.instance_variable_get(:@default_checked_level)
+    end
+
+    after do
+      T::Private::RuntimeLevels._toggle_checking_tests(@orig_check_tests)
+      T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, @orig_default_checked_level)
+    end
+
+    def make_class(checked:)
+      Class.new(T::Struct) do
+        const :foo, Integer, checked: checked
+      end
+    end
+
+    it '`always` is checked' do
+      c = make_class(checked: :always)
+      c.new(foo: 1)
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+    end
+
+    it '`never` is not checked' do
+      c = make_class(checked: :never)
+      c.new(foo: 1)
+      c.new(foo: '1') # wrong, but ignored
+    end
+
+    it '`compiled` is not checked' do
+      c = make_class(checked: :compiled)
+      c.new(foo: 1)
+      c.new(foo: '1') # wrong, but ignored
+    end
+
+    it '`tests` can be toggled to validate or not' do
+      T::Private::RuntimeLevels._toggle_checking_tests(false)
+      c = make_class(checked: :tests)
+      c.new(foo: 1)
+      c.new(foo: '1') # wrong, but ignored
+
+      T::Private::RuntimeLevels._toggle_checking_tests(true)
+      c = make_class(checked: :tests)
+      c.new(foo: 1)
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+    end
+
+    it 'raises if `tests` is toggled on too late' do
+      T::Private::RuntimeLevels._toggle_checking_tests(false)
+      c = make_class(checked: :tests)
+      c.new(foo: 1)
+      c.new(foo: '1') # wrong, but ignored
+
+      err = assert_raises(RuntimeError) do
+        T::Configuration.enable_checking_for_sigs_marked_checked_tests
+      end
+      assert_match(/Toggle `:tests`-level runtime type checking earlier/, err.message)
+    end
+
+    it 'override default checked level to :never' do
+      T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+      c = make_class(checked: nil)
+      c.new(foo: 1)
+
+      # Does not currently rely on the default_checked_level
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+    end
+
+    it 'override default checked level to :tests, without checking tests' do
+      T::Private::RuntimeLevels._toggle_checking_tests(false)
+      T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+
+      c = make_class(checked: nil)
+      c.new(foo: 1)
+
+      # Does not currently rely on the default_checked_level
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+
+      T::Private::RuntimeLevels._toggle_checking_tests(true)
+      pass
+    end
+
+    it 'override default checked level to :tests and also check tests' do
+      T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+      T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+      c = make_class(checked: nil)
+      c.new(foo: 1)
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+    end
+
+    it 'override default checked level to :never but opt in with .checked(:always)' do
+      T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
+
+      c = make_class(checked: :always)
+      c.new(foo: 1)
+      assert_raises(TypeError) do
+        c.new(foo: '1')
+      end
+    end
+  end
 end
