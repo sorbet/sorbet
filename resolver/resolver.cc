@@ -329,8 +329,9 @@ private:
                 // we compare against the *first* definition.
                 defLoc = it->second;
             } else {
-                // If the symbol isn't in the local first defs table, we fall back to the
-                // canonical loc.
+                // If the symbol isn't in the local first defs table, that means its loc
+                // in the symbol table is the same as its first definition in this file.
+                // (We skip storing redundant information in firstDefinitionLocs to save memory)
                 defLoc = resolutionResult.loc(ctx).offsets();
             }
 
@@ -1416,10 +1417,13 @@ public:
         auto sym = original.symbol;
 
         // Populate local first definitions table for out-of-order reference checking.
-        // This happens *iff* the symbol is:
-        //   a). defined only in this file and nowhere else
-        //   b). defined multiple times in this file
-        //   c). this particular classDef is the first definition of the symbol in the file
+        // We only do this when we know we're going to need to consult the first definition loc and
+        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // storage overhead.
+        //
+        // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
+        // more than one non-RBI file or if it's only defined once in this file.
+        // Otherwise, it stores the loc of the first definition of the symbol in this file.
         if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 && sym.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = sym.data(ctx)->loc();
 
@@ -1566,10 +1570,13 @@ public:
         }
 
         // Populate local first definitions table for out-of-order reference checking.
-        // This needs to happen *iff* the symbol is:
-        //   a). defined only in this file and nowhere else
-        //   b). defined multiple times in this file
-        //   c). this particular assign is the first definition of the symbol in the file
+        // We only do this when we know we're going to need to consult the first definition loc and
+        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // storage overhead.
+        //
+        // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
+        // more than one non-RBI file or if it's only defined once in this file.
+        // Otherwise, it stores the loc of the first definition of the symbol in this file.
         if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
             id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = id->symbol.loc(ctx);

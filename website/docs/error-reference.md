@@ -1805,6 +1805,13 @@ For more information, see
 
 ## 5027
 
+> This error is opt-in, behind the `--check-out-of-order-constant-references`
+> flag.
+>
+> Sorbet does not check this by default because certain codebases make clever
+> usage of Ruby's `autoload` mechanism to allow all constants to be referenced
+> before their definitions.
+
 This error fires when a constant is referenced before it is defined.
 
 ```ruby
@@ -1821,18 +1828,18 @@ end
 ```
 
 Generally, Sorbet is not opinionated about definition-reference ordering. It
-assumes the presence of an autoloader which makes constants available at runtime
-when they are referenced (assuming they are defined somewhere).
+assumes files are required in the correct order or at the correct times to
+ensure that definitions are available before they're referenced.
 
-However, it is helpful in some basic contexts (like class-loading) to catch this
-issue, regardless of the presence of an autoloader. Please note that this error
-will not fire for all cases. There are some conditions which have to be met for
-the error to fire:
+However, if a constant is defined in a single file, Sorbet can detect when it's
+been referenced in that file ahead of its definition (because in the single-file
+case, it doesn't matter whether or in what order any require statements happen).
+There are some limitations:
 
 ### Load-time scope must be established definitively
 
 Sorbet has to prove definitively that a given constant is accessed out-of-order
-at load time. It cannot track accesses across function calls or blocks. Meaning
+at load time. It cannot track accesses across function calls or blocks, meaning
 that the following code, while technically unloadable, will not throw a Sorbet
 error.
 
@@ -1852,8 +1859,9 @@ module Foo
 ### Symbols have to be guaranteed to exist only in one file
 
 In the above example, if `Foo::X` is also declared in another file, the error
-will not fire. In such cases, the constant may get autoloaded, so we cannot
-prove that the behavior is erroneous.
+will not fire. In such cases, the other file that defines `X` may get required
+first, so Sorbet cannot prove that there will be a problem referencing `X` in
+this file.
 
 Ways to fix the error include:
 
