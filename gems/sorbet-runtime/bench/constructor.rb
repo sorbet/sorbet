@@ -8,6 +8,21 @@ require_relative '../lib/sorbet-runtime'
 module SorbetBenchmarks
   module Constructor
 
+    class ExamplePoro
+      def initialize(hash)
+        @prop1 = hash.fetch(:prop1, nil)
+        @prop2 = hash.fetch(:prop2, 0)
+        @prop3 = hash.fetch(:prop3)
+        @prop4 = hash.fetch(:prop4)
+        @prop5 = hash.fetch(:prop5, [])
+        @prop6 = hash.fetch(:prop6)
+        @prop7 = hash.fetch(:prop7, {})
+        @prop8 = hash.fetch(:prop8, nil)
+        @prop9 = hash.fetch(:prop9, [])
+        @prop10 = hash.fetch(:prop10, {})
+      end
+    end
+
     class Example < T::Struct
       class Subdoc < T::Struct
         prop :prop, String
@@ -31,6 +46,19 @@ module SorbetBenchmarks
         prop4: [],
         prop6: {},
       }.freeze
+
+      100_000.times do
+        ExamplePoro.new(input)
+      end
+
+      result = Benchmark.measure do
+        1_000_000.times do
+          ExamplePoro.new(input)
+        end
+      end
+
+      puts "Plain Ruby (μs/iter):"
+      puts result
 
       100_000.times do
         Example.new(input)
