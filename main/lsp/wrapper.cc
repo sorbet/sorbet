@@ -24,6 +24,10 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
+    if (!options.outOfOrderReferenceChecksEnabled) {
+        gs.suppressErrorClass(sorbet::core::errors::Resolver::OutOfOrderConstantAccess.code);
+    }
+
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
 

@@ -129,13 +129,28 @@ private:
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
+
     shared_ptr<Nesting> nesting_;
+
+    // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
+    // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
+    // in case there are multiple definitions of a symbol in the same file, we store the loc of the *first* one.
+    //
+    // There will be a map like this for each file that resolver processes, but it will outlive the initial treewalk
+    // to find ConstantResolutionItems and only get released once all ConstantResolutionItems for that file have been
+    // handled.
+    shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
+
+    // Increments to track whether we're at a class top level or whether we're inside a block/method body.
+    int loadScopeDepth_;
 
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
         bool possibleGenericType = false;
+        bool loadTimeScope = false;
+        shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -295,10 +310,53 @@ private:
         return !checker.seenUnresolved;
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
+    // Find load-time out-of-order references.
+    // Algorithm:
+    // if resolved symbol is only defined in the current file, and
+    //    the definition is after the reference loc,
+    // then, report an error.
+    static void
+    checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, const ast::UnresolvedConstantLit &c,
+                        const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+        if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
+            resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+            core::LocOffsets defLoc;
+            const auto it = firstDefinitionLocs.get()->find(resolutionResult);
+
+            if (it != firstDefinitionLocs.get()->end()) {
+                // Use the loc from the local first defs table, if it exists.
+                // When the symbol is declared multiple times in the same file, we want to ensure that
+                // we compare against the *first* definition.
+                defLoc = it->second;
+            } else {
+                // If the symbol isn't in the local first defs table, that means its loc
+                // in the symbol table is the same as its first definition in this file.
+                // (We skip storing redundant information in firstDefinitionLocs to save memory)
+                defLoc = resolutionResult.loc(ctx).offsets();
+            }
+
+            // Check for ordering between reference loc and definition loc.
+            const auto &refLoc = c.loc;
+            if (defLoc.beginPos() > refLoc.endPos()) {
+                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::OutOfOrderConstantAccess)) {
+                    e.setHeader("`{}` referenced before it is defined", resolutionResult.show(ctx));
+                    e.addErrorLine(ctx.locAt(defLoc), "Defined here");
+                }
+            }
+        }
+    }
+
+    static core::SymbolRef
+    resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting, const ast::UnresolvedConstantLit &c,
+                    bool &resolutionFailed, bool loadTimeScope,
+                    const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
+
+            if (loadTimeScope) {
+                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
+            }
+
             return result;
         }
         if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
@@ -329,6 +387,11 @@ private:
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
+
+            if (loadTimeScope) {
+                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
+            }
+
             return result;
         }
 
@@ -396,7 +459,7 @@ private:
         PackageStub stub;
         vector<core::NameRef> exports;
 
-        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix.  They
+        // NOTE: these are the public-facing exports of the package that start with the `Test::` special prefix. They
         // are not the names exported to the implicit test package via `export_for_test`.
         vector<core::NameRef> testExports;
 
@@ -637,7 +700,8 @@ private:
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
+                                        job.loadTimeScope, job.firstDefinitionLocs);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -789,7 +853,8 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
+                                        job.loadTimeScope, job.firstDefinitionLocs);
         if (!resolved.exists()) {
             return false;
         }
@@ -1299,6 +1364,8 @@ private:
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
+            job.loadTimeScope = (loadScopeDepth_ == 0);
+            job.firstDefinitionLocs = firstDefinitionLocs;
             if (resolveJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
@@ -1317,14 +1384,64 @@ private:
     }
 
 public:
-    ResolveConstantsWalk() : nesting_(nullptr) {}
+    ResolveConstantsWalk() : nesting_(nullptr), loadScopeDepth_(0) {
+        firstDefinitionLocs = make_unique<UnorderedMap<core::SymbolRef, core::LocOffsets>>();
+    }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(loadScopeDepth_ >= 0);
+        loadScopeDepth_++;
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(loadScopeDepth_ > 0);
+        loadScopeDepth_--;
+    }
+
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(loadScopeDepth_ >= 0);
+        loadScopeDepth_++;
+    }
+
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(loadScopeDepth_ > 0);
+        loadScopeDepth_--;
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         walkUnresolvedConstantLit(ctx, tree);
+    }
+
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        auto sym = original.symbol;
+
+        // Populate local first definitions table for out-of-order reference checking.
+        // We only do this when we know we're going to need to consult the first definition loc and
+        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // storage overhead.
+        //
+        // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
+        // more than one non-RBI file or if it's only defined once in this file.
+        // Otherwise, it stores the loc of the first definition of the symbol in this file.
+        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 && sym.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+            auto defLoc = sym.data(ctx)->loc();
+
+            if (!defLoc.file().data(ctx).isRBI()) {
+                ENFORCE(defLoc.file() == ctx.file);
+                auto declLoc = original.declLoc;
+
+                if (defLoc.beginPos() > declLoc.endPos()) {
+                    // When this condition is met, it means the file has multiple definitions of the symbol.
+                    // If the insert succeeds below, the current definition is the first one.
+                    // We need to use the first def for out-of-order checking, since any
+                    // reference *before* the first def will be out of order.
+                    firstDefinitionLocs->insert(std::make_pair(sym, declLoc));
+                }
+            }
+        }
+
+        nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1452,6 +1569,32 @@ public:
             return;
         }
 
+        // Populate local first definitions table for out-of-order reference checking.
+        // We only do this when we know we're going to need to consult the first definition loc and
+        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // storage overhead.
+        //
+        // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
+        // more than one non-RBI file or if it's only defined once in this file.
+        // Otherwise, it stores the loc of the first definition of the symbol in this file.
+        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
+            id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+            auto defLoc = id->symbol.loc(ctx);
+
+            if (!defLoc.file().data(ctx).isRBI()) {
+                ENFORCE(defLoc.file() == ctx.file);
+                auto declLoc = asgn.loc;
+
+                if (defLoc.beginPos() > declLoc.endPos()) {
+                    // When this condition is met, it means the file has multiple definitions of the symbol.
+                    // If the insert succeeds below, the current definition is the first one.
+                    // We need to use the first def for out-of-order checking, since any
+                    // reference *before* the first def will be out of order.
+                    firstDefinitionLocs->insert(std::make_pair(id->symbol, declLoc));
+                }
+            }
+        }
+
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send != nullptr && send->fun == core::Names::typeAlias()) {
             if (!send->hasBlock()) {
@@ -1524,6 +1667,8 @@ public:
                 // In single-package RBI generation mode, we treat Constant[...] as
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
+                job.loadTimeScope = (loadScopeDepth_ == 0);
+                job.firstDefinitionLocs = firstDefinitionLocs;
                 job.possibleGenericType = true;
                 if (!resolveJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));

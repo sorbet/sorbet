@@ -584,6 +584,42 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
     return Symbols::noMethod();
 }
 
+bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_store &locs, core::FileRef file) {
+    bool result = false;
+
+    for (auto &loc : locs) {
+        if (loc.file().data(gs).isRBI()) {
+            continue;
+        }
+
+        if (loc.file() != file) {
+            return false;
+        }
+
+        result = true;
+    }
+
+    return result;
+}
+
+// Returns true if the given symbol is only defined in a given file (not accounting for RBIs).
+bool SymbolRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    if (file.data(gs).isRBI()) {
+        return false;
+    }
+
+    return singleFileDefinition(gs, locs(gs), file);
+}
+
+// Returns true if the given class/module is only defined in a given file (not accounting for RBIs).
+bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    if (file.data(gs).isRBI()) {
+        return false;
+    }
+
+    return singleFileDefinition(gs, data(gs)->locs(), file);
+}
+
 // Documented in SymbolRef.h
 bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     auto sym = *this;

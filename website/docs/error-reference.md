@@ -1803,6 +1803,71 @@ def foo; [0]; end
 For more information, see
 [Arrays, Hashes, and Generics in the Standard Library](stdlib-generics.md).
 
+## 5027
+
+> This error is opt-in, behind the `--check-out-of-order-constant-references`
+> flag.
+>
+> Sorbet does not check this by default because certain codebases make clever
+> usage of Ruby's `autoload` mechanism to allow all constants to be referenced
+> before their definitions.
+
+This error fires when a constant is referenced before it is defined.
+
+```ruby
+puts X # error: `X` referenced before it is defined
+X = 1
+```
+
+```ruby
+module Foo
+  A = X
+    # ^ error: `Foo::X` referenced before it is defined
+  class X; end
+end
+```
+
+Generally, Sorbet is not opinionated about definition-reference ordering. It
+assumes files are required in the correct order or at the correct times to
+ensure that definitions are available before they're referenced.
+
+However, if a constant is defined in a single file, Sorbet can detect when it's
+been referenced in that file ahead of its definition (because in the single-file
+case, it doesn't matter whether or in what order any require statements happen).
+There are some limitations:
+
+### Load-time scope must be established definitively
+
+Sorbet has to prove definitively that a given constant is accessed out-of-order
+at load time. It cannot track accesses across function calls or blocks, meaning
+that the following code, while technically unloadable, will not throw a Sorbet
+error.
+
+```ruby
+module Foo
+  def bar(&blk)
+    yield
+  end
+
+  bar do
+    A = X # this will not report an error
+  end
+
+  class X; end
+```
+
+### Symbols have to be guaranteed to exist only in one file
+
+In the above example, if `Foo::X` is also declared in another file, the error
+will not fire. In such cases, the other file that defines `X` may get required
+first, so Sorbet cannot prove that there will be a problem referencing `X` in
+this file.
+
+Ways to fix the error include:
+
+- Re-ordering the constant access below the declaration.
+- In the case of classes, adding an empty pre-declaration before the access.
+
 ## 5028
 
 In `# typed: strict` files, Sorbet requires that all constants are annotated

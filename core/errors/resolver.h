@@ -29,6 +29,7 @@ constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::False};
 constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::False};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::False};
 constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::False};
+constexpr ErrorClass OutOfOrderConstantAccess{5027, StrictLevel::False};
 
 // constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::True};
 // constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};

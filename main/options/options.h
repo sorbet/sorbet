@@ -264,6 +264,8 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
+    // Enables out-of-order reference checking
+    bool outOfOrderReferenceChecksEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;

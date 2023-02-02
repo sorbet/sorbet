@@ -23,6 +23,7 @@
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/errors/namer.h"
+#include "core/errors/resolver.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
@@ -212,6 +213,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
+
+    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
     }
 
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
