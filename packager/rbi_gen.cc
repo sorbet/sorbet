@@ -1131,9 +1131,9 @@ private:
         // If this is a type template, there will be an alias type defined on the non-singleton class w/ the same name.
         auto details = typeMemberDetails(tm);
         if (tm.data(gs)->owner.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-            out.println("{} = type_template({})", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
+            out.println("{} = type_template { {} }", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
         } else {
-            out.println("{} = type_member({})", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
+            out.println("{} = type_member { {} }", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
         }
     }
 
