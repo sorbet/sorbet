@@ -115,15 +115,15 @@ end
 module RBIGen::Public::ModuleWithTypeParams
   A = type_member(:in)
   B = type_member(:out)
-  C = type_member(upper: RBIGen::Public::Parent)
-  D = type_member(lower: RBIGen::Public::Child)
-  E = type_member(upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
-  F = type_member(:in, upper: RBIGen::Public::Parent)
-  G = type_member(:in, lower: RBIGen::Public::Child)
-  H = type_member(:in, upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
-  I = type_member(:out, upper: RBIGen::Public::Parent)
-  J = type_member(:out, lower: RBIGen::Public::Child)
-  K = type_member(:out, upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
+  C = type_member {{upper: RBIGen::Public::Parent}}
+  D = type_member {{lower: RBIGen::Public::Child}}
+  E = type_member {{lower: RBIGen::Public::Child, upper: RBIGen::Public::Parent}}
+  F = type_member(:in) {{upper: RBIGen::Public::Parent}}
+  G = type_member(:in) {{lower: RBIGen::Public::Child}}
+  H = type_member(:in) {{lower: RBIGen::Public::Child, upper: RBIGen::Public::Parent}}
+  I = type_member(:out) {{upper: RBIGen::Public::Parent}}
+  J = type_member(:out) {{lower: RBIGen::Public::Child}}
+  K = type_member(:out) {{lower: RBIGen::Public::Child, upper: RBIGen::Public::Parent}}
   extend T::Generic
   extend T::Helpers
 end
@@ -232,14 +232,14 @@ class RBIGen::Public::CustomStruct
   extend T::Sig
 end
 class RBIGen::Public::ClassWithTypeParams
-  C = type_member()
-  D = type_member(upper: RBIGen::Public::Parent)
-  E = type_member(lower: RBIGen::Public::Child)
-  F = type_member(upper: RBIGen::Public::Parent, lower: RBIGen::Public::Child)
+  C = type_member
+  D = type_member {{upper: RBIGen::Public::Parent}}
+  E = type_member {{lower: RBIGen::Public::Child}}
+  F = type_member {{lower: RBIGen::Public::Child, upper: RBIGen::Public::Parent}}
   extend T::Generic
   extend T::Helpers
-  A = type_template(fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate)
-  B = type_template()
+  A = type_template {{fixed: RBIGen::Private::PrivateClassPulledInByTypeTemplate}}
+  B = type_template
 end
 class RBIGen::Public::ClassWithPrivateMethods
   extend T::Sig

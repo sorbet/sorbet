@@ -125,7 +125,7 @@ Errors: 2
 # typed: true
 
 class Util::GenericMessage
-  Elem = type_member()
+  Elem = type_member
   sig {params(x: Elem).void}
   def initialize(x)
     @x = T.let(T.unsafe(nil), Elem)
