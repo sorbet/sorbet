@@ -504,36 +504,44 @@ private:
 
     Output out;
 
-    vector<string> typeMemberDetails(core::TypeMemberRef tm) {
-        vector<string> res;
+    pair<string, string> typeMemberDetails(core::TypeMemberRef tm) {
+        string variance;
+        string bounds;
 
         switch (tm.data(gs)->variance()) {
             case core::Variance::CoVariant:
-                res.emplace_back(":out");
+                variance = "(:out)";
                 break;
 
             case core::Variance::Invariant:
                 break;
 
             case core::Variance::ContraVariant:
-                res.emplace_back(":in");
+                variance = "(:in)";
                 break;
         }
 
         auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(tm.data(gs)->resultType);
         if (tm.data(gs)->flags.isFixed) {
-            res.emplace_back(fmt::format("fixed: {}", showType(lambdaParam.upperBound)));
-        } else {
-            if (lambdaParam.upperBound != core::Types::top()) {
-                res.emplace_back(fmt::format("upper: {}", showType(lambdaParam.upperBound)));
-            }
+            bounds = fmt::format(" {{{{ fixed: {} }}}}", showType(lambdaParam.upperBound));
+        } else if (lambdaParam.upperBound != core::Types::top() || lambdaParam.lowerBound != core::Types::bottom()) {
+            bounds = " {{";
 
             if (lambdaParam.lowerBound != core::Types::bottom()) {
-                res.emplace_back(fmt::format("lower: {}", showType(lambdaParam.lowerBound)));
+                fmt::format("lower: {}", showType(lambdaParam.lowerBound));
             }
+
+            if (lambdaParam.upperBound != core::Types::top()) {
+                if (lambdaParam.lowerBound != core::Types::bottom()) {
+                    bounds += ", ";
+                }
+                bounds += fmt::format("upper: {}", showType(lambdaParam.upperBound));
+            }
+
+            bounds += "}}";
         }
 
-        return res;
+        return {move(variance), move(bounds)};
     }
 
     bool isInTestPackage(core::SymbolRef sym) {
@@ -1129,11 +1137,11 @@ private:
         }
 
         // If this is a type template, there will be an alias type defined on the non-singleton class w/ the same name.
-        auto details = typeMemberDetails(tm);
+        auto [variance, bounds] = typeMemberDetails(tm);
         if (tm.data(gs)->owner.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
-            out.println("{} = type_template {{{{ {} }}}}", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
+            out.println("{} = type_template{}{}", tm.data(gs)->name.show(gs), variance, bounds);
         } else {
-            out.println("{} = type_member {{{{ {} }}}}", tm.data(gs)->name.show(gs), fmt::join(details, ", "));
+            out.println("{} = type_member{}{}", tm.data(gs)->name.show(gs), variance, bounds);
         }
     }
 
