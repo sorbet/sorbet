@@ -523,7 +523,7 @@ private:
 
         auto &lambdaParam = core::cast_type_nonnull<core::LambdaParam>(tm.data(gs)->resultType);
         if (tm.data(gs)->flags.isFixed) {
-            bounds = fmt::format(" {{{{ fixed: {} }}}}", showType(lambdaParam.upperBound));
+            bounds = fmt::format(" {{{{fixed: {}}}}}", showType(lambdaParam.upperBound));
         } else if (lambdaParam.lowerBound != core::Types::bottom() || lambdaParam.upperBound != core::Types::top()) {
             bounds = " {{";
             if (lambdaParam.lowerBound != core::Types::bottom()) {
