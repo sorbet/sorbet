@@ -845,30 +845,38 @@ private:
         }
     }
 
-    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
-        if (isAlreadyResolved(ctx, *job.out)) {
-            if (job.possibleGenericType) {
+    static bool
+    resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
+                       bool &resolutionFailed, const bool possibleGenericType, const bool loadTimeScope,
+                       const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+        if (isAlreadyResolved(ctx, *out)) {
+            if (possibleGenericType) {
                 return false;
             }
             return true;
         }
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
-                                        job.loadTimeScope, job.firstDefinitionLocs);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
+        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed,
+                                        loadTimeScope, firstDefinitionLocs);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType != nullptr) {
-                job.out->symbol = resolved;
+                out->symbol = resolved;
                 return true;
             }
             return false;
         }
 
-        job.out->symbol = resolved;
+        out->symbol = resolved;
         return true;
+    }
+
+    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
+        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType,
+                                  job.loadTimeScope, job.firstDefinitionLocs);
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
@@ -1363,12 +1371,18 @@ private:
             walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-            ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
-            job.loadTimeScope = (loadScopeDepth_ == 0);
-            job.firstDefinitionLocs = firstDefinitionLocs;
-            if (resolveJob(ctx, job)) {
+            auto *constant = ast::cast_tree<ast::ConstantLit>(out);
+            bool resolutionFailed = false;
+            const bool possibleGenericType = false;
+            const bool loadTimeScope = (loadScopeDepth_ == 0);
+            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType, loadTimeScope,
+                                   firstDefinitionLocs)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
+                ConstantResolutionItem job{nesting_, constant};
+                job.resolutionFailed = resolutionFailed;
+                job.loadTimeScope = loadTimeScope;
+                job.firstDefinitionLocs = firstDefinitionLocs;
                 todo_.emplace_back(std::move(job));
             }
             tree = std::move(out);
