@@ -845,30 +845,38 @@ private:
         }
     }
 
-    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
-        if (isAlreadyResolved(ctx, *job.out)) {
-            if (job.possibleGenericType) {
+    static bool resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting,
+                                   ast::ConstantLit *out, bool &resolutionFailed, const bool possibleGenericType,
+                                   const bool loadTimeScope,
+                                   const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+        if (isAlreadyResolved(ctx, *out)) {
+            if (possibleGenericType) {
                 return false;
             }
             return true;
         }
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
-                                        job.loadTimeScope, job.firstDefinitionLocs);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
+        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed,
+                                        loadTimeScope, firstDefinitionLocs);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType != nullptr) {
-                job.out->symbol = resolved;
+                out->symbol = resolved;
                 return true;
             }
             return false;
         }
 
-        job.out->symbol = resolved;
+        out->symbol = resolved;
         return true;
+    }
+
+    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
+        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType,
+                                  job.loadTimeScope, job.firstDefinitionLocs);
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
