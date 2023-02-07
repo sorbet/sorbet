@@ -1542,7 +1542,7 @@ public:
             // only 1 child: String
             auto firstPart = parts.front().get();
             if (auto *s = parser::cast_node<String>(firstPart)) {
-                return make_unique<Symbol>(s->loc, s->val);
+                return make_unique<Symbol>(tokLoc(begin, end), s->val);
             } else {
                 return nullptr;
             }

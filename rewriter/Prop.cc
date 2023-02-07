@@ -233,6 +233,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         ENFORCE(ctx.locAt(sym->loc).exists());
         ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
+        const auto nameValue = ctx.locAt(ret.nameLoc).source(ctx).value();
+        if ((nameValue.front() == '\'' && nameValue.back() == '\'') ||
+            (nameValue.front() == '\"' && nameValue.back() == '\"')) {
+            ret.nameLoc = core::LocOffsets{ret.nameLoc.beginPos() + 1, ret.nameLoc.endPos() - 1};
+        }
     }
 
     // ----- What's the prop's type? -----
