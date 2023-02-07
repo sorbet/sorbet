@@ -1371,12 +1371,18 @@ private:
             walkUnresolvedConstantLit(ctx, c->scope);
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
-            ConstantResolutionItem job{nesting_, ast::cast_tree<ast::ConstantLit>(out)};
-            job.loadTimeScope = (loadScopeDepth_ == 0);
-            job.firstDefinitionLocs = firstDefinitionLocs;
-            if (resolveJob(ctx, job)) {
+            auto *constant = ast::cast_tree<ast::ConstantLit>(out);
+            bool resolutionFailed = false;
+            const bool possibleGenericType = false;
+            const bool loadTimeScope = (loadScopeDepth_ == 0);
+            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType,
+                                   loadTimeScope, firstDefinitionLocs)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
+                ConstantResolutionItem job{nesting_, constant};
+                job.resolutionFailed = resolutionFailed;
+                job.loadTimeScope = loadTimeScope;
+                job.firstDefinitionLocs = firstDefinitionLocs;
                 todo_.emplace_back(std::move(job));
             }
             tree = std::move(out);
