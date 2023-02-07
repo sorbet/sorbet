@@ -845,10 +845,10 @@ private:
         }
     }
 
-    static bool resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                   ast::ConstantLit *out, bool &resolutionFailed, const bool possibleGenericType,
-                                   const bool loadTimeScope,
-                                   const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+    static bool
+    resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
+                       bool &resolutionFailed, const bool possibleGenericType, const bool loadTimeScope,
+                       const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
         if (isAlreadyResolved(ctx, *out)) {
             if (possibleGenericType) {
                 return false;
@@ -1375,8 +1375,8 @@ private:
             bool resolutionFailed = false;
             const bool possibleGenericType = false;
             const bool loadTimeScope = (loadScopeDepth_ == 0);
-            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType,
-                                   loadTimeScope, firstDefinitionLocs)) {
+            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType, loadTimeScope,
+                                   firstDefinitionLocs)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
             } else {
                 ConstantResolutionItem job{nesting_, constant};
