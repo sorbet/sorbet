@@ -103,10 +103,13 @@ optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameR
 }
 
 class MethodCallSiteRenamer : public AbstractRenamer {
+    string oldName;
+    string newName;
+
 public:
     MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                           const string newName)
-        : AbstractRenamer(gs, config, oldName, newName) {
+        : AbstractRenamer(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
             if (oldName == name) {

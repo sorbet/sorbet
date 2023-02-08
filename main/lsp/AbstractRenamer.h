@@ -20,9 +20,8 @@ public:
         UnorderedSet<core::SymbolRef> set;
     };
 
-    AbstractRenamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config,
-                    const std::string oldName, const std::string newName)
-        : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false){};
+    AbstractRenamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config)
+        : gs(gs), config(config), invalid(false){};
 
     virtual ~AbstractRenamer() = default;
     virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) = 0;
@@ -39,8 +38,6 @@ public:
 protected:
     const core::GlobalState &gs;
     const LSPConfiguration &config;
-    std::string oldName;
-    std::string newName;
     UnorderedMap<core::Loc, std::string> edits;
     bool invalid;
     std::shared_ptr<UniqueSymbolQueue> symbolQueue = std::make_shared<UniqueSymbolQueue>();
