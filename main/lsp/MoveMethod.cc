@@ -1,5 +1,5 @@
 #include "main/lsp/MoveMethod.h"
-#include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/AbstractRewriter.h"
 #include "main/sig_finder/sig_finder.h"
 using namespace std;
 
@@ -102,11 +102,14 @@ optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameR
     return nullopt;
 }
 
-class MethodCallSiteRenamer : public AbstractRenamer {
+class MethodCallSiteRenamer : public AbstractRewriter {
+    string oldName;
+    string newName;
+
 public:
     MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                           const string newName)
-        : AbstractRenamer(gs, config, oldName, newName) {
+        : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
             if (oldName == name) {
@@ -223,7 +226,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
     auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
     auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
-    renamer->getRenameEdits(typechecker, definition.symbol);
+    renamer->getEdits(typechecker, definition.symbol);
     auto callSiteEdits = renamer->buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {
