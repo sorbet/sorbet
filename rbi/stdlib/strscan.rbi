@@ -339,7 +339,7 @@ class StringScanner < Object
   # s.getch           # => "\244\242"   # Japanese hira-kana "A" in EUC-JP
   # s.getch           # => nil
   # ```
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def getch(); end
 
   # Returns a string that represents the
