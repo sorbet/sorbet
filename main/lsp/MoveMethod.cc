@@ -203,10 +203,8 @@ unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const cor
                                           LSPTypecheckerDelegate &typechecker) {
     auto fref = definition.termLoc.file();
 
-    auto trees = typechecker.getResolved({fref});
-    ENFORCE(!trees.empty());
-    auto &rootTree = trees[0].tree;
-    auto insertPosition = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
+    auto &rootTree = typechecker.getIndexed({fref});
+    auto insertPosition = Range::fromLoc(gs, core::Loc(fref, rootTree.tree.loc().copyWithZeroLength()));
     auto newModuleSymbol = insertPosition->start->copy();
     newModuleSymbol->character += moduleKeyword.size() + 1;
     return newModuleSymbol;
