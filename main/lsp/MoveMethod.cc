@@ -226,7 +226,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
     auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
     auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
-    renamer->getRenameEdits(typechecker, definition.symbol);
+    renamer->getEdits(typechecker, definition.symbol);
     auto callSiteEdits = renamer->buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {

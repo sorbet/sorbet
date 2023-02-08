@@ -323,20 +323,20 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         }
         if (isValidRenameLocation(constResp->symbolBeforeDealias, gs, response)) {
             renamer = makeRenamer(gs, config, constResp->symbolBeforeDealias, params->newName);
-            renamer->getRenameEdits(typechecker, constResp->symbolBeforeDealias);
+            renamer->getEdits(typechecker, constResp->symbolBeforeDealias);
             enrichResponse(response, renamer);
         }
     } else if (auto defResp = resp->isMethodDef()) {
         if (isValidRenameLocation(defResp->symbol, gs, response)) {
             renamer = makeRenamer(gs, config, defResp->symbol, params->newName);
-            renamer->getRenameEdits(typechecker, defResp->symbol);
+            renamer->getEdits(typechecker, defResp->symbol);
             enrichResponse(response, renamer);
         }
     } else if (auto sendResp = resp->isSend()) {
-        // We don't need to handle dispatchResult->secondary here, because it will be checked in getRenameEdits.
+        // We don't need to handle dispatchResult->secondary here, because it will be checked in getEdits.
         auto method = sendResp->dispatchResult->main.method;
         renamer = makeRenamer(gs, config, method, params->newName);
-        renamer->getRenameEdits(typechecker, method);
+        renamer->getEdits(typechecker, method);
         enrichResponse(response, renamer);
     } else if (auto identResp = resp->isIdent()) {
         if (identResp->enclosingMethod.exists()) {
@@ -356,7 +356,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         }
     } else if (auto fieldResp = resp->isField()) {
         renamer = makeRenamer(gs, config, fieldResp->symbol, params->newName);
-        renamer->getRenameEdits(typechecker, fieldResp->symbol);
+        renamer->getEdits(typechecker, fieldResp->symbol);
         enrichResponse(response, renamer);
     }
 

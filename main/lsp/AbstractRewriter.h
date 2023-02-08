@@ -29,7 +29,7 @@ public:
     std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildWorkspaceEdit();
     virtual void addSymbol(const core::SymbolRef) = 0;
 
-    void getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol);
+    void getEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol);
 
     bool getInvalid();
     std::string getError();
