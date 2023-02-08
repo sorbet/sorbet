@@ -1,7 +1,7 @@
 #ifndef RUBY_TYPER_LSPTASK_H
 #define RUBY_TYPER_LSPTASK_H
 
-#include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/AbstractRewriter.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPTypechecker.h"
 #include "main/lsp/json_types.h"

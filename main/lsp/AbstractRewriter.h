@@ -8,7 +8,7 @@
 
 namespace sorbet::realmain::lsp {
 
-class AbstractRenamer {
+class AbstractRewriter {
 public:
     class UniqueSymbolQueue {
     public:
@@ -20,10 +20,10 @@ public:
         UnorderedSet<core::SymbolRef> set;
     };
 
-    AbstractRenamer(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config)
+    AbstractRewriter(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config)
         : gs(gs), config(config), invalid(false){};
 
-    virtual ~AbstractRenamer() = default;
+    virtual ~AbstractRewriter() = default;
     virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) = 0;
     std::optional<std::vector<std::unique_ptr<TextDocumentEdit>>> buildTextDocumentEdits();
     std::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>> buildWorkspaceEdit();

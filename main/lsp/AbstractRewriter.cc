@@ -1,4 +1,4 @@
-#include "AbstractRenamer.h"
+#include "AbstractRewriter.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 
@@ -24,7 +24,7 @@ core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core
 
 } // namespace
 
-bool AbstractRenamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
+bool AbstractRewriter::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     auto insertResult = set.insert(s);
     bool isNew = insertResult.second;
     if (isNew) {
@@ -33,7 +33,7 @@ bool AbstractRenamer::UniqueSymbolQueue::tryEnqueue(core::SymbolRef s) {
     return isNew;
 }
 
-core::SymbolRef AbstractRenamer::UniqueSymbolQueue::pop() {
+core::SymbolRef AbstractRewriter::UniqueSymbolQueue::pop() {
     if (!symbols.empty()) {
         auto s = symbols.front();
         symbols.pop_front();
@@ -42,7 +42,7 @@ core::SymbolRef AbstractRenamer::UniqueSymbolQueue::pop() {
     return core::Symbols::noSymbol();
 }
 
-optional<vector<unique_ptr<TextDocumentEdit>>> AbstractRenamer::buildTextDocumentEdits() {
+optional<vector<unique_ptr<TextDocumentEdit>>> AbstractRewriter::buildTextDocumentEdits() {
     if (invalid) {
         return nullopt;
     }
@@ -67,7 +67,7 @@ optional<vector<unique_ptr<TextDocumentEdit>>> AbstractRenamer::buildTextDocumen
     return textDocEdits;
 }
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildWorkspaceEdit() {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRewriter::buildWorkspaceEdit() {
     auto edits = buildTextDocumentEdits();
     if (!edits.has_value()) {
         return JSONNullObject();
@@ -78,20 +78,20 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> AbstractRenamer::buildWorkspa
     return we;
 }
 
-bool AbstractRenamer::getInvalid() {
+bool AbstractRewriter::getInvalid() {
     return invalid;
 }
 
-std::string AbstractRenamer::getError() {
+std::string AbstractRewriter::getError() {
     return error;
 }
 
-std::shared_ptr<AbstractRenamer::UniqueSymbolQueue> AbstractRenamer::getQueue() {
+std::shared_ptr<AbstractRewriter::UniqueSymbolQueue> AbstractRewriter::getQueue() {
     return symbolQueue;
 }
 
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
-void AbstractRenamer::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
+void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
                                                 shared_ptr<UniqueSymbolQueue> methods) {
     auto symbolData = symbol.data(gs);
 
@@ -121,7 +121,7 @@ void AbstractRenamer::addSubclassRelatedMethods(const core::GlobalState &gs, cor
 }
 
 // Add methods that are related because of dispatching via secondary components in sends (union types).
-void AbstractRenamer::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
+void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
                                                 shared_ptr<UniqueSymbolQueue> methods) {
     for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
         auto method = dr->main.method;
@@ -133,7 +133,7 @@ void AbstractRenamer::addDispatchRelatedMethods(const core::GlobalState &gs, con
     }
 }
 
-void AbstractRenamer::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) {
+void AbstractRewriter::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) {
     const core::GlobalState &gs = typechecker.state();
     auto originalName = symbol.name(gs).show(gs);
 

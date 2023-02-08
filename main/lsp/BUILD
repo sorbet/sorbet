@@ -9,7 +9,7 @@ cc_library(
         "watchman/*.cc",
     ]) + [
         ":lsp_messages",
-        "AbstractRenamer.h",
+        "AbstractRewriter.h",
         "DefLocSaver.h",
         "ErrorFlusherLSP.h",
         "ErrorReporter.h",

@@ -1,5 +1,5 @@
 #include "main/lsp/MoveMethod.h"
-#include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/AbstractRewriter.h"
 #include "main/sig_finder/sig_finder.h"
 using namespace std;
 
@@ -102,14 +102,14 @@ optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameR
     return nullopt;
 }
 
-class MethodCallSiteRenamer : public AbstractRenamer {
+class MethodCallSiteRenamer : public AbstractRewriter {
     string oldName;
     string newName;
 
 public:
     MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                           const string newName)
-        : AbstractRenamer(gs, config), oldName(oldName), newName(newName) {
+        : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
             if (oldName == name) {
