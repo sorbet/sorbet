@@ -38,6 +38,7 @@ cc_library(
         "LSPPreprocessor.h",
         "LSPQuery.h",
         "MoveMethod.h",
+        "ConvertToSingletonClassMethod.h",
         "json_types.h",
         "wrapper.h",
     ],

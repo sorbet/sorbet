@@ -2,6 +2,7 @@
 #include "absl/algorithm/container.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
@@ -43,8 +44,8 @@ vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &co
 }
 
 const core::lsp::MethodDefResponse *
-hasLoneClassMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
-    // We want to return the singular `MethodDefResponse` for a singleton, non-operator method.
+hasLoneMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+    // We want to return the singular `MethodDefResponse` for a non-operator method.
     // We do not want to return the first such response, because there might be multiple
     // methods "defined" at the same location (cf. the DSLBuilder rewriter).  And because the
     // query we're examining was a location-based query, there might be several overlapping responses,
@@ -60,7 +61,7 @@ hasLoneClassMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<
 
             // If we find a method def we can't handle at this location, assume
             // it also comes from sort of rewriter pass.
-            if (!def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs) || isOperator(def->name.show(gs))) {
+            if (isOperator(def->name.show(gs))) {
                 return nullptr;
             }
 
@@ -161,26 +162,43 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
     // Generate "Move method" code actions only for class method definitions
     if (queryResult.error == nullptr) {
-        if (auto *def = hasLoneClassMethodResponse(gs, queryResult.responses)) {
-            auto action = make_unique<CodeAction>("Move method to a new module");
-            action->kind = CodeActionKind::RefactorExtract;
-
+        if (auto *def = hasLoneMethodResponse(gs, queryResult.responses)) {
+            unique_ptr<CodeAction> action;
             bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
                                     config.getClientConfig().clientCodeActionDataSupport;
-            auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
-            auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
-            auto arg = make_unique<TextDocumentPositionParams>(
-                make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
-            auto args = vector<unique_ptr<TextDocumentPositionParams>>();
-            args.emplace_back(move(arg));
 
-            renameCommand->arguments = move(args);
-            action->command = move(renameCommand);
-            if (canResolveLazily) {
-                action->data = move(params);
+            if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
+                action = make_unique<CodeAction>("Move method to a new module");
+                action->kind = CodeActionKind::RefactorExtract;
+
+                auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
+                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
+                auto arg = make_unique<TextDocumentPositionParams>(
+                    make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
+                auto args = vector<unique_ptr<TextDocumentPositionParams>>();
+                args.emplace_back(move(arg));
+
+                // TODO(jez) Do we need the command to be here if it's not lazy?
+                renameCommand->arguments = move(args);
+                action->command = move(renameCommand);
+                if (canResolveLazily) {
+                    action->data = move(params);
+                } else {
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    auto edits = getMoveMethodEdits(typechecker, config, *def);
+                    workspaceEdit->documentChanges = move(edits);
+                    action->edit = move(workspaceEdit);
+                }
             } else {
+                action = make_unique<CodeAction>("Convert to singleton class method");
+                action->kind = CodeActionKind::RefactorRewrite;
+
+                // TODO(jez) Also support can resolve lazily
+                auto renameCommand = make_unique<Command>("Convert to singleton class method",
+                                                          "sorbet.convert_to_singleton_class_method");
+
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
-                auto edits = getMoveMethodEdits(typechecker, config, *def);
+                auto edits = convertToSingletonClassMethod(typechecker, config, *def);
                 workspaceEdit->documentChanges = move(edits);
                 action->edit = move(workspaceEdit);
             }
