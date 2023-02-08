@@ -19,7 +19,7 @@ class AutogenWalk {
     vector<DefinitionRef> nesting;
     const AutogenConfig *autogenCfg;
 
-    enum class ScopeType { Class, Block };
+    enum class ScopeType { Class, Block, Method, InSig };
     vector<ast::Send *> ignoring;
     vector<ScopeType> scopeTypes;
 
@@ -167,12 +167,23 @@ public:
         scopeTypes.pop_back();
     }
 
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        scopeTypes.emplace_back(ScopeType::Method);
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        scopeTypes.pop_back();
+    }
+
     void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
         scopeTypes.emplace_back(ScopeType::Block);
     }
 
     void postTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
         scopeTypes.pop_back();
+        if (scopeTypes.empty() && scopeTypes.back() == ScopeType::InSig) {
+            scopeTypes.pop_back();
+        }
     }
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
@@ -189,6 +200,11 @@ public:
     }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (scopeTypes.size() >= 2 && scopeTypes.back() == ScopeType::Block && scopeTypes[scopeTypes.size()-2] == ScopeType::InSig) {
+            // Ignore refs in sig blocks.
+            return;
+        }
+
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (!ignoring.empty()) {
@@ -239,6 +255,11 @@ public:
     }
 
     void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (scopeTypes.size() >= 2 && scopeTypes.back() == ScopeType::Block && scopeTypes[scopeTypes.size()-2] == ScopeType::InSig) {
+            // Ignore refs in sig blocks.
+            return;
+        }
+
         auto &original = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         // autogen only cares about constant assignments/definitions, so bail otherwise
@@ -306,6 +327,10 @@ public:
             if (lit && lit->isString()) {
                 requireStatements.emplace_back(lit->asString());
             }
+        }
+        // Start sig block
+        if (!scopeTypes.empty() && scopeTypes.back() == ScopeType::Class && original->fun == core::Names::sig() && original->hasBlock()) {
+            scopeTypes.emplace_back(ScopeType::InSig);
         }
     }
 
