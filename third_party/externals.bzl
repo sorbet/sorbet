@@ -314,15 +314,6 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "rules_rust",
-        sha256 = "727b93eb5d57ec411f2afda7e3993e22d7772d0b2555ba745c3dec7323ea955a",
-        strip_prefix = "rules_rust-0768a7f00de134910c3cbdab7bbfdd011d995766",
-
-        # Master branch as of 2021-06-29
-        urls = _github_public_urls("bazelbuild/rules_rust/archive/0768a7f00de134910c3cbdab7bbfdd011d995766.tar.gz"),
-    )
-
-    http_archive(
         name = "bazel_skylib",
         sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
         strip_prefix = "bazel-skylib-1.0.0",
