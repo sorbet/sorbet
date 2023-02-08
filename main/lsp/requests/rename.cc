@@ -265,8 +265,8 @@ void enrichResponse(unique_ptr<ResponseMessage> &responseMsg, shared_ptr<Abstrac
 }
 
 shared_ptr<AbstractRewriter> makeRenamer(const core::GlobalState &gs,
-                                        const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
-                                        const std::string newName) {
+                                         const sorbet::realmain::lsp::LSPConfiguration &config, core::SymbolRef symbol,
+                                         const std::string newName) {
     if (symbol.isMethod()) {
         auto originalName = symbol.name(gs).show(gs);
         return make_shared<MethodRenamer>(gs, config, originalName, newName);

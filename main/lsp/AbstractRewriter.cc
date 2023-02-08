@@ -92,7 +92,7 @@ std::shared_ptr<AbstractRewriter::UniqueSymbolQueue> AbstractRewriter::getQueue(
 
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
 void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol,
-                                                shared_ptr<UniqueSymbolQueue> methods) {
+                                                 shared_ptr<UniqueSymbolQueue> methods) {
     auto symbolData = symbol.data(gs);
 
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
@@ -121,8 +121,9 @@ void AbstractRewriter::addSubclassRelatedMethods(const core::GlobalState &gs, co
 }
 
 // Add methods that are related because of dispatching via secondary components in sends (union types).
-void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs, const core::DispatchResult *dispatchResult,
-                                                shared_ptr<UniqueSymbolQueue> methods) {
+void AbstractRewriter::addDispatchRelatedMethods(const core::GlobalState &gs,
+                                                 const core::DispatchResult *dispatchResult,
+                                                 shared_ptr<UniqueSymbolQueue> methods) {
     for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
         auto method = dr->main.method;
         ENFORCE(method.exists());
