@@ -1317,7 +1317,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 prefix,
                 MethodSearchParams{
                     sendResp->dispatchResult,
-                    sendResp->totalArgs(),
+                    sendResp->argLocOffsets.size(),
                     sendResp->isPrivateOk,
                 },
                 suggestKeywords,

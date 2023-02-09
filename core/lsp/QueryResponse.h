@@ -26,10 +26,6 @@ public:
     const core::LocOffsets receiverLocOffsets;
     const core::LocOffsets funLocOffsets;
 
-    size_t totalArgs() const {
-        return argLocOffsets.size();
-    }
-
     core::Loc termLoc() const {
         return core::Loc(file, termLocOffsets);
     }
