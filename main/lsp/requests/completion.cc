@@ -1272,7 +1272,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
     if (auto sendResp = resp->isSend()) {
         auto callerSideName = sendResp->callerSideName;
-        auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc.contains(queryLoc))
+        auto prefix = (callerSideName == core::Names::methodNameMissing() || !sendResp->funLoc().contains(queryLoc))
                           ? ""
                           : callerSideName.shortName(gs);
         if (prefix == "" && queryLoc.adjust(gs, -2, 0).source(gs) == "::") {
@@ -1307,7 +1307,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             // and the user's intent might have been to complete a local or a keyword.  In the former case, we
             // know that the user doesn't want such completion results, since they have already written something
             // prefixed with `self.`.
-            auto explicitSelfReceiver = sendResp->receiverLoc.source(gs) == "self";
+            auto explicitSelfReceiver = sendResp->receiverLoc().source(gs) == "self";
             auto wantLocalsAndKeywords = sendResp->isPrivateOk && !explicitSelfReceiver;
             auto suggestKeywords = wantLocalsAndKeywords;
             // `enclosingMethod` existing indicates whether we want local variable completion results.

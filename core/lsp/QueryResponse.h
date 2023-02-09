@@ -10,24 +10,35 @@ class TypeConstraint;
 
 class SendResponse final {
 public:
-    SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName,
-                 bool isPrivateOk, core::MethodRef enclosingMethod, core::Loc receiverLoc, core::Loc funLoc,
-                 size_t totalArgs)
-        : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc),
-          isPrivateOk(isPrivateOk), enclosingMethod(enclosingMethod), receiverLoc(receiverLoc), funLoc(funLoc),
-          totalArgs(totalArgs){};
+    SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, size_t totalArgs, core::NameRef callerSideName,
+                 core::MethodRef enclosingMethod, bool isPrivateOk, core::FileRef file, core::LocOffsets termLocOffsets,
+                 core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets)
+        : dispatchResult(std::move(dispatchResult)), totalArgs(totalArgs), callerSideName(callerSideName),
+          enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), file(file), termLocOffsets(termLocOffsets),
+          receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
-    const core::NameRef callerSideName;
-    const core::Loc termLoc;
-    const bool isPrivateOk;
-    const core::MethodRef enclosingMethod;
-    const core::Loc receiverLoc;
-    const core::Loc funLoc;
     const size_t totalArgs;
+    const core::NameRef callerSideName;
+    const core::MethodRef enclosingMethod;
+    const bool isPrivateOk;
+    const core::FileRef file;
+    const core::LocOffsets termLocOffsets;
+    const core::LocOffsets receiverLocOffsets;
+    const core::LocOffsets funLocOffsets;
+
+    core::Loc termLoc() const {
+        return core::Loc(file, termLocOffsets);
+    }
+    core::Loc receiverLoc() const {
+        return core::Loc(file, receiverLocOffsets);
+    }
+    core::Loc funLoc() const {
+        return core::Loc(file, funLocOffsets);
+    }
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 72, 8);
+CheckSize(SendResponse, 64, 8);
 
 class IdentResponse final {
 public:
