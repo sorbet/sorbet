@@ -86,6 +86,16 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
             bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
             used_vars[bb->bexit.cond.variable.id()] = true;
         }
+        for (auto &bind : bb->exprs) {
+            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value)) {
+                // TODO(jez) check recv is T
+                if (send->fun == core::Names::must()) {
+                    if (!send->args.empty()) {
+                        used_vars[send->args[0].variable.id()] = true;
+                    }
+                }
+            }
+        }
     }
     bool changed = true;
     while (changed) {
@@ -664,6 +674,18 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         whoKnows.sanityCheck();
 
+    } else if (send->fun == core::Names::must()) {
+        // TODO(jez) is it possible to look at the receiver?
+        const auto &recvKlass = send->recv.type;
+        if (!recvKlass.derivesFrom(ctx, core::Symbols::T().data(ctx)->lookupSingletonClass(ctx))) {
+            return;
+        }
+
+        auto &whoKnows = getKnowledge(local);
+        // whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
+        whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, core::Types::nilClass());
+        whoKnows.sanityCheck();
+        assumeKnowledge(ctx, true, local, loc, vars());
     } else if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;

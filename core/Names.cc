@@ -263,6 +263,7 @@ bool NameRef::isUpdateKnowledgeName() const {
         case Names::nil_p().rawId():
         case Names::present_p().rawId():
         case Names::tripleEq().rawId():
+        case Names::must().rawId():
             return true;
         default:
             return false;
