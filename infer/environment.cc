@@ -1118,7 +1118,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx,
-                        core::lsp::SendResponse(retainedResult, send.args.size(), fun, ctx.owner.asMethodRef(),
+                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
                                                 send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
                 }
                 if (send.link) {
