@@ -280,7 +280,7 @@ LSPTask::extractLocations(const core::GlobalState &gs,
     auto queryResponsesFiltered = LSPQuery::filterAndDedup(gs, queryResponses);
     for (auto &q : queryResponsesFiltered) {
         if (auto *send = q->isSend()) {
-            addLocIfExists(gs, locations, send->funLoc);
+            addLocIfExists(gs, locations, send->funLoc());
         } else {
             addLocIfExists(gs, locations, q->getLoc());
         }

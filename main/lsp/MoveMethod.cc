@@ -148,7 +148,7 @@ public:
                 }
             }
 
-            edits[sendResp->receiverLoc] = newName;
+            edits[sendResp->receiverLoc()] = newName;
         }
     }
     void addSymbol(const core::SymbolRef symbol) override {

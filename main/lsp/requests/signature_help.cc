@@ -80,7 +80,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
         auto resp = move(queryResponses[0]);
         // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
         if (auto sendResp = resp->isSend()) {
-            auto sendLocIndex = sendResp->termLoc.beginPos();
+            auto sendLocIndex = sendResp->termLoc().beginPos();
 
             auto fref = config.uri2FileRef(gs, params->textDocument->uri);
             if (!fref.exists()) {

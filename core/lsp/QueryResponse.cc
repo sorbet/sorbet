@@ -18,7 +18,8 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    return (this->funLoc.exists() && !this->funLoc.empty()) ? make_optional<core::Loc>(this->funLoc) : nullopt;
+    auto existsNonEmpty = (this->funLocOffsets.exists() && !this->funLocOffsets.empty());
+    return existsNonEmpty ? make_optional<core::Loc>(this->funLoc()) : nullopt;
 }
 
 const IdentResponse *QueryResponse::isIdent() const {
@@ -49,7 +50,7 @@ core::Loc QueryResponse::getLoc() const {
     if (auto ident = isIdent()) {
         return ident->termLoc;
     } else if (auto send = isSend()) {
-        return send->termLoc;
+        return send->termLoc();
     } else if (auto literal = isLiteral()) {
         return literal->termLoc;
     } else if (auto constant = isConstant()) {

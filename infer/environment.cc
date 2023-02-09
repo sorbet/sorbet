@@ -1143,9 +1143,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(ctx.locAt(bind.loc), retainedResult, fun, send.isPrivateOk,
-                                                     ctx.owner.asMethodRef(), ctx.locAt(send.receiverLoc),
-                                                     ctx.locAt(send.funLoc), send.args.size()));
+                        ctx,
+                        core::lsp::SendResponse(retainedResult, send.args.size(), fun, ctx.owner.asMethodRef(),
+                                                send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
                 }
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
