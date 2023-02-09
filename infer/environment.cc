@@ -681,8 +681,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
 
+        // TODO(jez) I think that this is the wrong way to go about it.
+        // This used to work for `hard_assert` but that was because it was in fact asserting the
+        // truthiness of the first argument. I think that doing it this way works poorly with
+        // `T.nilable(T::Boolean)`
+        // ... actually maybe not? A test case doesn't bear this out...
         auto &whoKnows = getKnowledge(local);
-        // whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, core::Types::nilClass());
         whoKnows.sanityCheck();
         assumeKnowledge(ctx, true, local, loc, vars());
