@@ -190,11 +190,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     action->edit = move(workspaceEdit);
                 }
             } else {
-                action = make_unique<CodeAction>("Convert to singleton class method");
+                action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
                 action->kind = CodeActionKind::RefactorRewrite;
 
                 // TODO(jez) Also support can resolve lazily
-                auto renameCommand = make_unique<Command>("Convert to singleton class method",
+                auto renameCommand = make_unique<Command>("Convert to singleton class method (best effort)",
                                                           "sorbet.convert_to_singleton_class_method");
 
                 auto workspaceEdit = make_unique<WorkspaceEdit>();

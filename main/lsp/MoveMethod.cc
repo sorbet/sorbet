@@ -138,7 +138,6 @@ public:
         if (!source.has_value()) {
             return;
         }
-        string newsrc;
         if (auto sendResp = response->isSend()) {
             // if the call site is not trivial, don't attempt to rename
             // the typecheck error will guide user how to fix it
