@@ -1588,6 +1588,10 @@ requires that the variance on parent and child classes matches.
 
 ## 5016
 
+> Note: more recent versions of Sorbet have eliminated this error--it is now
+> possible to define generic classes with covariant and contravariant type
+> members.
+
 Sorbet does not allow classes to be covariant nor contravariant.
 
 **Why?** The design of generic classes and interfaces in Sorbet was heavily
@@ -2259,10 +2263,6 @@ To allow code like this, we can declare `Elem` using `:out`, but this comes at
 the restriction of only being able to use `Elem` in **out positions**. See
 [Input and output positions](generics.md#input-and-output-positions) for more
 information.
-
-Recall that only modules (not classes) may have covariant and contravariant type
-members—classes are limited to only invariant type members. For more, see the
-docs for error code [5016](#5016).
 
 > **Note** that `T.attached_class` is actually modeled as a covariant (`:out`)
 > `type_template` defined automatically on all singleton classes, which means
