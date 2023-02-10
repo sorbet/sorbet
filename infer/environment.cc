@@ -1088,7 +1088,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // (In retrospect, this hack likely indicates that we want to check method
                     // visibility in dispatchCallSymbol, but that's a yak to shave some other time.)
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk &&
-                        (it->main.method.data(ctx)->name != core::Names::initialize() ||
+                        (it->main.method.data(ctx)->name.unwrapUnique(ctx) != core::Names::initialize() ||
                          send.fun != core::Names::new_())) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             if (multipleComponents) {

@@ -177,6 +177,8 @@ public:
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 
+    NameRef unwrapUnique(const GlobalState &gs) const;
+
     bool isClassName(const GlobalState &gs) const;
 
     // Convenience method, because enums need to be special cased in more places than other kinds of
