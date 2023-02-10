@@ -174,3 +174,12 @@ class BadSigReturnNotLastStatement
     @x = x
   end
 end
+
+class DontAllowLet
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def initialize(x)
+    @x = T.let(x, Integer) # error: Redundant
+  end
+end
