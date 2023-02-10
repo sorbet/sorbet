@@ -879,6 +879,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
             : mayBeOverloaded;
 
+    if (method.data(gs)->flags.isPrivate && !args.isPrivateOk) {
+        if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
+            if (args.fullType.type != args.thisType) {
+                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
+                            method.data(gs)->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
+            } else {
+                e.setHeader("Non-private call to private method `{}` on `{}`", method.data(gs)->name.show(gs),
+                            args.thisType.show(gs));
+            }
+            e.addErrorLine(method.data(gs)->loc(), "Defined in `{}` here", method.data(gs)->owner.show(gs));
+        }
+    }
+
     DispatchResult result;
     auto &component = result.main;
     component.receiver = args.selfType;
@@ -3046,7 +3059,8 @@ public:
                     selfTyAndAnd.type,
                     args.block,
                     args.originForUninitialized,
-                    args.isPrivateOk,
+                    // We already reported one visibility error, if relevant
+                    /* isPrivateOk */ true,
                     args.suppressErrors,
                 };
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);

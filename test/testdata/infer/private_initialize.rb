@@ -1,4 +1,5 @@
 # typed: true
+extend T::Sig
 
 class A
   private def initialize
@@ -33,3 +34,11 @@ class D
 end
 
 D.initialize
+
+class E
+end
+
+sig {params(xs: T::Array[T.class_of(E)]).void}
+def example(xs)
+  xs.map(&:new)
+end

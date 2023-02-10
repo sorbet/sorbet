@@ -55,7 +55,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U F>> $1>#<U f=> (f, <blk>) -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=56:9 end=56:23}
       argument f<> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=55:21 end=55:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-    method <S <C <U F>> $1>#<U initialize> : private (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
+    method <S <C <U F>> $1>#<U initialize> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U F>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
     type-member(+) <S <S <C <U F>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U F>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U F>> $1>   targs = [     <C <U <AttachedClass>>> = F   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
