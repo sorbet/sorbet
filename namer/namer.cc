@@ -1047,9 +1047,11 @@ private:
             return symbol;
         }
 
-        auto implicitlyPrivate = ctx.owner.enclosingClass(ctx) == core::Symbols::root();
+        // Methods defined at the top level default to private (on Object)
+        // Also, the `initialize` method defaults to private
+        auto implicitlyPrivate =
+            (ctx.owner.enclosingClass(ctx) == core::Symbols::root()) || (name == core::Names::initialize());
         if (implicitlyPrivate) {
-            // Methods defined at the top level default to private (on Object)
             symbol.data(ctx)->flags.isPrivate = true;
         } else {
             // All other methods default to public (their visibility might be changed later)

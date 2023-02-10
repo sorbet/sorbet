@@ -1073,7 +1073,23 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     //  - When a method doesn't exist.
                     //
                     // In all of these cases, we bail out and skip the non-private checking.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk) {
+                    //
+                    // A note about new/initialize: internally, Ruby defines `def self.new` something like
+                    //
+                    //      def self.new(...)
+                    //        this = self.alloc()
+                    //        this.initialize
+                    //      end
+                    //
+                    // But it marks `initialize` as private, and grants an exception to it being called from `self.new`
+                    // Sorbet doesn't record that there was a dispatch to the `new` method at all--only the `initialize`
+                    // method. So we use the caller side name (send.fun) to disambiguate a direct call to `initialize`
+                    // vs an indirect call via `new`.
+                    // (In retrospect, this hack likely indicates that we want to check method
+                    // visibility in dispatchCallSymbol, but that's a yak to shave some other time.)
+                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk &&
+                        (it->main.method.data(ctx)->name != core::Names::initialize() ||
+                         send.fun != core::Names::new_())) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             if (multipleComponents) {
                                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
