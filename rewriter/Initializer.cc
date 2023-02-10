@@ -95,7 +95,7 @@ const ast::Send *findParams(const ast::Send *send) {
 // this function checks if the signature of the initialize method is using returns(Something)
 // instead of void and provides an auto-correct option
 void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
-    auto originalSend = send->deepCopy();
+    auto originalSendLoc = send->loc;
     string statementAfterReturns = "";
 
     // try to find the invocation to returns. Save the source code of the invocation
@@ -111,10 +111,10 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
         return;
     }
 
-    if (auto e = ctx.beginError(originalSend.loc(), core::errors::Rewriter::InitializeReturnType)) {
+    if (auto e = ctx.beginError(originalSendLoc, core::errors::Rewriter::InitializeReturnType)) {
         e.setHeader("The {} method should always return {}", "initialize", "void");
 
-        auto loc = core::Loc(ctx.file, originalSend.loc());
+        auto loc = core::Loc(ctx.file, originalSendLoc);
         auto original = string(loc.source(ctx).value());
         unsigned long returnsStart = original.find("returns");
         unsigned long returnsLength, afterReturnsPosition;
