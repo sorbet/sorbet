@@ -96,12 +96,12 @@ const ast::Send *findParams(const ast::Send *send) {
 // instead of void and provides an auto-correct option
 void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
     auto originalSendLoc = send->loc;
-    string statementAfterReturns = "";
+    core::NameRef funAfterReturns;
 
     // try to find the invocation to returns. Save the source code of the invocation
     // immediately after returns() so that we can have the exact length it occupies
     while (send && send->fun != core::Names::returns()) {
-        statementAfterReturns = send->fun.toString(ctx);
+        funAfterReturns = send->fun;
         send = ast::cast_tree<ast::Send>(send->recv);
     }
 
@@ -119,6 +119,10 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
         unsigned long returnsStart = original.find("returns");
         unsigned long returnsLength, afterReturnsPosition;
         string replacement;
+        string statementAfterReturns = "";
+        if (funAfterReturns.exists()) {
+            statementAfterReturns = funAfterReturns.toString(ctx);
+        }
 
         // If there are no statements after returns(), we can use the length of the block to find the length
         // we need to replace. If there are statements after it, we need to find the exact length using the next
