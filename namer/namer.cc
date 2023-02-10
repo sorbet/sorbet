@@ -1050,7 +1050,8 @@ private:
         // Methods defined at the top level default to private (on Object)
         // Also, the `initialize` method defaults to private
         auto implicitlyPrivate =
-            (ctx.owner.enclosingClass(ctx) == core::Symbols::root()) || (name == core::Names::initialize());
+            (ctx.owner.enclosingClass(ctx) == core::Symbols::root()) ||
+            (!symbol.data(ctx)->owner.data(ctx)->attachedClass(ctx).exists() && name == core::Names::initialize());
         if (implicitlyPrivate) {
             symbol.data(ctx)->flags.isPrivate = true;
         } else {

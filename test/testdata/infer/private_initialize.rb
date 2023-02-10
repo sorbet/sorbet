@@ -26,3 +26,10 @@ end
 
 c = C.new
 c.initialize
+
+class D
+  def self.initialize
+  end
+end
+
+D.initialize
