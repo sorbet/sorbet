@@ -46,7 +46,25 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
 
     auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs);
     if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
-        return;
+        auto letrhs = ast::cast_tree<ast::Send>(assn->rhs);
+        if (letrhs == nullptr || letrhs->fun != core::Names::let() || letrhs->numPosArgs() < 2) {
+            return;
+        }
+        
+        auto &arg = letrhs->getPosArg(0);
+        auto var = ast::cast_tree<ast::UnresolvedIdent>(arg);
+        if (var == nullptr || var->kind != ast::UnresolvedIdent::Kind::Local) {
+            return;
+        }
+
+        auto typeExpr = argTypeMap.find(var->name);
+        if (typeExpr == argTypeMap.end()) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(letrhs->loc, core::errors::Rewriter::RedundantInitializeLet)) {
+            e.setHeader("Redundant {} check", "T.let");
+        }
     }
 
     auto typeExpr = argTypeMap.find(rhs->name);
