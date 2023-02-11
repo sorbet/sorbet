@@ -176,16 +176,6 @@ void NameRef::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-NameRef NameRef::unwrapUnique(const GlobalState &gs) const {
-    switch (kind()) {
-        case NameKind::UNIQUE:
-            return dataUnique(gs)->original.unwrapUnique(gs);
-        case NameKind::UTF8:
-        case NameKind::CONSTANT:
-            return *this;
-    }
-}
-
 bool NameRef::isClassName(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8:
