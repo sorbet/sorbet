@@ -325,14 +325,18 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                 if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` must redeclare keyword parameter `{}` as optional",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
-                    e.addErrorLine(opt.get().loc, "The optional super method parameter `{}` was declared here",
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
                                    opt.get().name.show(ctx));
                 }
             } else {
                 if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                     e.setHeader("{} method `{}` must accept optional keyword parameter `{}`",
                                 implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
-                    e.addErrorLine(opt.get().loc, "The optional super method parameter `{}` was declared here",
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
                                    opt.get().name.show(ctx));
                 }
             }

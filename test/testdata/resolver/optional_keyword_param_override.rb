@@ -24,3 +24,19 @@ class Right3 < Left
   def foo(x:) # error: Implementation of overridable method `Left#foo` contains extra required keyword argument `x`
   end
 end
+
+class Parent
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.params(no_check: T::Boolean).void}
+  def example(no_check: false)
+  end
+end
+
+class Child < Parent
+  sig {override.params(opts: T::Hash[T.untyped, T.untyped]).void}
+  def example(opts={})
+  end
+end
