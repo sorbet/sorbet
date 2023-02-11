@@ -21,7 +21,7 @@ class Right2 < Left
 end
 class Right3 < Left
   sig { override.params(x: T::Boolean).returns(T.nilable(String)) }
-  def foo(x:) # error: Implementation of overridable method `Left#foo` msut redeclare keyword parameter `x` as optional
+  def foo(x:) # error: Implementation of overridable method `Left#foo` must redeclare keyword parameter `x` as optional
   end
 end
 
