@@ -41,6 +41,7 @@ class Child1 < Parent
   end
 end
 class Child2 < Parent
+  # The runtime doesn't allow this
   sig {override.params(opts: T.untyped).void}
   def example(**opts)
   end
