@@ -35,8 +35,13 @@ class Parent
   end
 end
 
-class Child < Parent
+class Child1 < Parent
   sig {override.params(opts: T::Hash[T.untyped, T.untyped]).void}
   def example(opts={})
+  end
+end
+class Child2 < Parent
+  sig {override.params(opts: T.untyped).void}
+  def example(**opts)
   end
 end
