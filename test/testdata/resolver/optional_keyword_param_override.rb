@@ -21,7 +21,7 @@ class Right2 < Left
 end
 class Right3 < Left
   sig { override.params(x: T::Boolean).returns(T.nilable(String)) }
-  def foo(x:) # error: Implementation of overridable method `Left#foo` contains extra required keyword argument `x`
+  def foo(x:) # error: Implementation of overridable method `Left#foo` msut redeclare keyword parameter `x` as optional
   end
 end
 
@@ -37,7 +37,7 @@ end
 
 class Child1 < Parent
   sig {override.params(opts: T::Hash[T.untyped, T.untyped]).void}
-  def example(opts={})
+  def example(opts={}) # error: Implementation of abstract method `Parent#example` must accept optional keyword parameter `no_check`
   end
 end
 class Child2 < Parent
