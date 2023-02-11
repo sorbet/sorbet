@@ -832,6 +832,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
 
                     if (possibleSymbol.isClassOrModule()) {
+                        if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
+                            // If this call was in type sytnax, we might have already have built an
+                            // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
+                            continue;
+                        }
                         e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
                         e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
                         continue;

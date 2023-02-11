@@ -606,6 +606,48 @@ void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
     }
 }
 
+core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const ast::Send &send) {
+    core::SymbolRef maybeScopeClass;
+    if (auto *recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+        maybeScopeClass = recv->symbol;
+    } else if (send.recv.isSelfReference()) {
+        // Let's not try to reinvent constant resolution here and just pick a heuristic that tends to
+        // work in some cases and is simple.
+        maybeScopeClass = core::Symbols::root();
+    } else {
+        return core::Symbols::noClassOrModule();
+    }
+
+    if (!maybeScopeClass.isClassOrModule()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto scope = maybeScopeClass.asClassOrModuleRef();
+
+    auto className = ctx.state.lookupNameConstant(send.fun);
+    if (!className.exists()) {
+        // The name itself doesn't even exist, so definitely no class with this name can exist
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto maybeSym = scope.data(ctx)->findMember(ctx, className);
+    if (!maybeSym.exists()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    if (!maybeSym.isClassOrModule()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto klass = maybeSym.asClassOrModuleRef();
+
+    if (klass.data(ctx)->typeArity(ctx) == 0) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    return klass;
+}
+
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
@@ -848,7 +890,14 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
+                if (send.numPosArgs() > 0 && send.onlyPosArgs() && send.block() == nullptr && send.argsLoc().exists()) {
+                    auto replacement =
+                        fmt::format("T::{}[{}]", send.fun.show(ctx), ctx.locAt(send.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(send.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
+                }
             }
             return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
     }
@@ -1098,7 +1147,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv);
         if (recvi == nullptr) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
+                if (klass.exists()) {
+                    auto scope = s.recv.isSelfReference()
+                                     ? ""
+                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
+                    auto replacement =
+                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                }
             }
             result.type = core::Types::untypedUntracked();
             return result;
@@ -1121,7 +1181,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
         if (s.fun != core::Names::squareBrackets()) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
+                if (klass.exists()) {
+                    auto scope = s.recv.isSelfReference()
+                                     ? ""
+                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
+                    auto replacement =
+                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                }
             }
             result.type = core::Types::untypedUntracked();
             return result;
