@@ -890,7 +890,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                if (send.numPosArgs() > 0 && send.onlyPosArgs() && send.block() == nullptr && send.argsLoc().exists()) {
+                if (send.numPosArgs() > 0 && send.onlyPosArgs() && send.block() == nullptr && send.argsLoc().exists() &&
+                    ctx.locAt(send.funLoc).adjustLen(ctx, -1, 1).source(ctx) == ":") {
                     auto replacement =
                         fmt::format("T::{}[{}]", send.fun.show(ctx), ctx.locAt(send.argsLoc()).source(ctx).value());
                     e.setHeader("Did you mean to use square brackets: `{}`", replacement);
