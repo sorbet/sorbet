@@ -1,8 +1,8 @@
 # typed: true
 # disable-fast-path: true
-class CovariantNotAllowed
+class ClassCanBeContravariantNow
   extend T::Generic
-  Elem = type_member(:in) # error: can only have invariant type members
+  Elem = type_member(:in)
 end
 
 class Invalids
