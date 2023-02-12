@@ -1450,5 +1450,6 @@ module Kernel
   # See also
   # [`Pathname::new`](https://docs.ruby-lang.org/en/2.7.0/Pathname.html#method-c-new)
   # for more information.
-  def Pathname(_); end
+  sig { params(path: String).returns(Pathname) }
+  def Pathname(path); end
 end
