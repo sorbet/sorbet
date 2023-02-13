@@ -2264,6 +2264,17 @@ the restriction of only being able to use `Elem` in **out positions**. See
 [Input and output positions](generics.md#input-and-output-positions) for more
 information.
 
+The ways to fix this error include:
+
+- Make the type invariant by removing the `:in` or `:out` annotation on the
+  type. (This comes with the normal restrictions on invariant type members.)
+- Mark the method in question `private`. (This comes with the normal
+  restrictions on `private` methods.)
+
+If neither of these works, you'll have to reconsider whether it's possible to
+statically type the code in question, and how best to rewrite the code so that
+it can be typed statically.
+
 > **Note** that `T.attached_class` is actually modeled as a covariant (`:out`)
 > `type_template` defined automatically on all singleton classes, which means
 > that `T.attached_class` can only be used in `:out` positions.

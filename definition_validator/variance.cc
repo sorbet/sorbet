@@ -94,6 +94,7 @@ private:
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
                             e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.attached_class",
                                         ":out", "returns");
+                            e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
                         }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
@@ -110,6 +111,7 @@ private:
 
                             e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
                                            core::Polarities::showVariance(paramVariance));
+                            e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
                         }
                     }
                 }
