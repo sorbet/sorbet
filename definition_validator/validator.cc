@@ -320,6 +320,25 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
+            } else if (absl::c_any_of(right.kw.required,
+                                      [&](const auto &r) { return r.get().name == opt.get().name; })) {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("{} method `{}` must redeclare keyword parameter `{}` as optional",
+                                implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
+                                   opt.get().name.show(ctx));
+                }
+            } else {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("{} method `{}` must accept optional keyword parameter `{}`",
+                                implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
+                                   opt.get().name.show(ctx));
+                }
             }
         }
     }
@@ -348,6 +367,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     for (auto extra : right.kw.required) {
         if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+            continue;
+        }
+        if (absl::c_any_of(left.kw.optional, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+            // We would have already reported a more informative error above.
             continue;
         }
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
