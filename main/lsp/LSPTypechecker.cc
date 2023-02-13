@@ -465,10 +465,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
 
-        auto &resolved = maybeResolved.result();
-        for (auto &tree : resolved) {
-            ENFORCE(tree.file.exists());
-        }
         if (gs->sleepInSlowPathSeconds.has_value()) {
             auto sleepDuration = gs->sleepInSlowPathSeconds.value();
             for (int i = 0; i < sleepDuration * 10; i++) {
@@ -519,7 +515,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
 
-        auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+        auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
         pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
