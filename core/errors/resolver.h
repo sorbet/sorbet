@@ -18,7 +18,7 @@ constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::False};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::False};
 constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::False};
 constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::False};
-constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::False};
+// constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::False};
 constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::False};
 constexpr ErrorClass NotATypeVariable{5018, StrictLevel::False};
 constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::False};

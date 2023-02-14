@@ -175,6 +175,17 @@ class Parent
 end
 ```
 
+As a final note: none of these problems would happen if `consume` were private:
+
+- The bad call to `Child.consume(Parent.new)` would not be allowed, because
+  `consume` would be private.
+- The bad call to `A.consume_parent(Child)` would not be allowed because the
+  body of `consume_parent` contains `cls.consume`, which is a non-private call
+  to a private method.
+
+As such, Sorbet allows `T.attached_class` to appear in input (`:in`) positions
+of private methods.
+
 ## `T.attached_class` common problems
 
 One common problem people encounter when using `T.attached_class` looks

@@ -174,26 +174,6 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         }
     }
 
-    if (sym.data(gs)->isClass()) {
-        for (auto tm : sym.data(gs)->typeMembers()) {
-            // AttachedClass is covariant, but not controlled by the user.
-            if (tm.data(gs)->name == core::Names::Constants::AttachedClass()) {
-                continue;
-            }
-
-            auto myVariance = tm.data(gs)->variance();
-            if (myVariance != core::Variance::Invariant) {
-                auto loc = tm.data(gs)->loc();
-                if (!loc.file().data(gs).isPayload()) {
-                    if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
-                        e.setHeader("Classes can only have invariant type members");
-                    }
-                    return;
-                }
-            }
-        }
-    }
-
     // If this class has no type members, fix attached class early.
     if (sym.data(gs)->typeMembers().empty()) {
         sym.data(gs)->unsafeComputeExternalType(gs);

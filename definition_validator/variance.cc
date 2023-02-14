@@ -94,6 +94,7 @@ private:
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::AttachedClassAsParam)) {
                             e.setHeader("`{}` may only be used in an `{}` context, like `{}`", "T.attached_class",
                                         ":out", "returns");
+                            e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
                         }
                     } else {
                         if (auto e = ctx.state.beginError(this->loc, core::errors::Resolver::InvalidVariance)) {
@@ -110,6 +111,7 @@ private:
 
                             e.addErrorLine(paramData->loc(), "`{}` `{}` defined here as `{}`", flavor, paramName,
                                            core::Polarities::showVariance(paramVariance));
+                            e.addErrorNote("Methods marked `{}` are not subject to this constraint", "private");
                         }
                     }
                 }
@@ -140,13 +142,27 @@ public:
         return validator.validate(ctx, polarity, type);
     }
 
-    // Variance checking, parameterized on the external polarity of the method
-    // context.
+    // Variance checking, parameterized on the external polarity of the method context.
     static void validateMethod(const core::Context ctx, const core::Polarity polarity, const core::MethodRef method) {
         auto methodData = method.data(ctx);
+        if (methodData->flags.isPrivate) {
+            // `private` methods in Ruby behave like `protected[this]` methods in Scala ("object-protected" methods).
+            // Variance annotations are ignored for all `protected[this]` methods in Scala, so it's fine in Sorbet too:
+            //
+            // > References to the type parameters in object-private or object-protected values,
+            // > types, variables, or methods of the class are not checked for their variance
+            // > position. In these members the type parameter may appear anywhere without restricting
+            // > its legal variance annotations.
+            //
+            // https://scala-lang.org/files/archive/spec/2.13/04-basic-declarations-and-definitions.html#variance-annotations
+            //
+            // Similarly, instance variables behave the same as private methods in Ruby.
+            // (This would stop being the case if Ruby ever invented syntax like `x.@foo` to access an instance
+            // variable on something other than the implicit `self` that the `@foo` syntax currently implies)
+            return;
+        }
 
-        // Negate the polarity for checking arguments in a ContraVariant
-        // context.
+        // Negate the polarity for checking arguments in a ContraVariant context.
         const core::Polarity negated = core::Polarities::negatePolarity(polarity);
 
         for (auto &arg : methodData->arguments) {
