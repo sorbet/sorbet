@@ -884,6 +884,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
             : mayBeOverloaded;
 
+    if (method.data(gs)->flags.isPrivate && !args.isPrivateOk) {
+        if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
+            if (args.fullType.type != args.thisType) {
+                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
+                            method.data(gs)->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
+            } else {
+                e.setHeader("Non-private call to private method `{}` on `{}`", method.data(gs)->name.show(gs),
+                            args.thisType.show(gs));
+            }
+            e.addErrorLine(method.data(gs)->loc(), "Defined in `{}` here", method.data(gs)->owner.show(gs));
+        }
+    }
+
     DispatchResult result;
     auto &component = result.main;
     component.receiver = args.selfType;
@@ -1652,7 +1665,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           wrapped,
                                           args.block,
                                           args.originForUninitialized,
-                                          args.isPrivateOk,
+                                          /* isPrivateOk */ true,
                                           args.suppressErrors};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
@@ -2034,10 +2047,17 @@ public:
             }
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
-        DispatchArgs innerArgs{Names::initialize(), args.locs,          args.numPosArgs,
-                               args.args,           instanceTy,         {instanceTy, args.fullType.origins},
-                               instanceTy,          args.block,         args.originForUninitialized,
-                               args.isPrivateOk,    args.suppressErrors};
+        DispatchArgs innerArgs{Names::initialize(),
+                               args.locs,
+                               args.numPosArgs,
+                               args.args,
+                               instanceTy,
+                               {instanceTy, args.fullType.origins},
+                               instanceTy,
+                               args.block,
+                               args.originForUninitialized,
+                               /* isPrivateOk */ true,
+                               args.suppressErrors};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
         for (auto &err : res.main.errors) {
@@ -2464,7 +2484,7 @@ class Magic_callWithBlock : public IntrinsicMethod {
 private:
     static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
                               LocOffsets callLoc, LocOffsets receiverLoc, LocOffsets funLoc, Loc originForUninitialized,
-                              bool isPrivateOk, bool suppressErrors) {
+                              bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
@@ -2488,7 +2508,7 @@ private:
                                nonNilBlockType.type,
                                nullptr,
                                originForUninitialized,
-                               isPrivateOk,
+                               /* isPrivateOk */ true,
                                suppressErrors};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
@@ -2672,9 +2692,9 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(
-            gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2], args.locs.fun,
-            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
+        TypePtr finalBlockType =
+            Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
+                                            args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
@@ -2773,9 +2793,9 @@ public:
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
 
-        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(
-            gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4], args.locs.fun,
-            args.originForUninitialized, args.isPrivateOk, args.suppressErrors);
+        TypePtr finalBlockType =
+            Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
+                                            args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
@@ -2911,6 +2931,7 @@ public:
         if (self.data(gs)->isSingletonClass(gs) && dispatched.main.method.exists() &&
             (dispatched.main.method == core::Symbols::Class_new() ||
              dispatched.main.method.data(gs)->name == core::Names::initialize())) {
+            // TODO(jez) This doesn't handle when initialize is overloaded
             // AttachedClass will only be missing on `T.untyped`, which will have a dispatch component of noSymbol
             auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             ENFORCE(attachedClass.exists());
@@ -3043,7 +3064,8 @@ public:
                     selfTyAndAnd.type,
                     args.block,
                     args.originForUninitialized,
-                    args.isPrivateOk,
+                    // We already reported one visibility error, if relevant
+                    /* isPrivateOk */ true,
                     args.suppressErrors,
                 };
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
@@ -3127,7 +3149,7 @@ public:
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
-                              args.isPrivateOk,
+                              /* isPrivateOk */ true,
                               args.suppressErrors};
         auto dispatched = arg->type.dispatchCall(gs, dispatch);
 
@@ -3541,7 +3563,7 @@ public:
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
-                              args.isPrivateOk,
+                              /* isPrivateOk */ true,
                               args.suppressErrors};
         res = arg->type.dispatchCall(gs, dispatch);
     }
@@ -3805,7 +3827,7 @@ class Array_flatten : public IntrinsicMethod {
                                type,
                                nullptr,
                                args.originForUninitialized,
-                               args.isPrivateOk,
+                               /* isPrivateOk */ true,
                                args.suppressErrors};
 
         auto dispatched = type.dispatchCall(gs, innerArgs);

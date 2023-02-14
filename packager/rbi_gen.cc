@@ -327,7 +327,7 @@ private:
         if (methodData->flags.isPrivate) {
             if (methodData->owner.data(gs)->isSingletonClass(gs)) {
                 visibility = "private_class_method ";
-            } else {
+            } else if (methodData->name != core::Names::initialize()) {
                 visibility = "private ";
             }
         } else if (methodData->flags.isProtected) {

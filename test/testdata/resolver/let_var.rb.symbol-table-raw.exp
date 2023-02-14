@@ -27,7 +27,7 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U Parent>>#<U @ivar2> -> Integer @ Loc {file=test/testdata/resolver/let_var.rb start=5:5 end=5:11}
     method <C <U Parent>>#<U hi> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=12:3 end=12:9}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
-    method <C <U Parent>>#<U initialize> (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=3:3 end=3:17}
+    method <C <U Parent>>#<U initialize> : private (<blk>) @ Loc {file=test/testdata/resolver/let_var.rb start=3:3 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/resolver/let_var.rb start=??? end=???}
   class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=2:13}
     type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/resolver/let_var.rb start=2:1 end=2:13}

@@ -9,7 +9,7 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U TestAttr>>#<U @v1> -> Integer @ Loc {file=test/testdata/rewriter/attr.rb start=7:5 end=7:8}
     field <C <U TestAttr>>#<U @v2> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=8:5 end=8:8}
     field <C <U TestAttr>>#<U @v6> -> String @ Loc {file=test/testdata/rewriter/attr.rb start=9:5 end=9:8}
-    method <C <U TestAttr>>#<U initialize> (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/attr.rb start=6:3 end=6:17}
+    method <C <U TestAttr>>#<U initialize> : private (<blk>) -> Sorbet::Private::Static::Void @ Loc {file=test/testdata/rewriter/attr.rb start=6:3 end=6:17}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}
     method <C <U TestAttr>>#<U strv7> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/attr.rb start=33:3 end=33:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr.rb start=??? end=???}

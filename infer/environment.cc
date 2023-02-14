@@ -997,7 +997,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
-                auto multipleComponents = it->secondary != nullptr;
                 while (it != nullptr) {
                     for (auto &err : it->main.errors) {
                         if (err->what != core::errors::Infer::UnknownMethod ||
@@ -1060,31 +1059,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             for (auto autocorrect : err->autocorrects) {
                                 e.addAutocorrect(std::move(autocorrect));
                             }
-                        }
-                    }
-
-                    // Sometimes we hit a method here where the method symbol is Symbols::noSymbol().
-                    //
-                    // The primary cases for that is:
-                    //  - When the receiver is untyped
-                    //  - When the receiver is a void type
-                    //  - Calling super
-                    //  - Calling initialize on an object that doesn't define initialize
-                    //  - When a method doesn't exist.
-                    //
-                    // In all of these cases, we bail out and skip the non-private checking.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
-                            if (multipleComponents) {
-                                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
-                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx),
-                                            recvType.type.show(ctx));
-                            } else {
-                                e.setHeader("Non-private call to private method `{}` on `{}`",
-                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
-                            }
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
-                                           it->main.method.data(ctx)->owner.show(ctx));
                         }
                     }
 
