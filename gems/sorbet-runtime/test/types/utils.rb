@@ -11,6 +11,11 @@ module Opus::Types::Test
         assert(T.any(String, Float).subtype_of?(unwrapped))
         assert(unwrapped.subtype_of?(T.any(String, Float)))
       end
+
+      it 'unwraps with a simple pair' do
+        type = T.any(String, Float)
+        assert_nil(T::Utils.unwrap_nilable(type))
+      end
     end
 
     describe 'T::Utils.signature_for_method' do
