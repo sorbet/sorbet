@@ -1268,6 +1268,11 @@ T.let(y1, Parent[T.any(Integer, String)])
 requires that the variance on parent and child classes matches.</p>
 <p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Parent%0A%20%20extend%20T%3A%3AGeneric%0A%20%20X%20%3D%20type_member%28%3Aout%29%0Aend%0A%0Amodule%20Child%0A%20%20extend%20T%3A%3AGeneric%0A%20%20include%20Parent%0A%0A%20%20X%20%3D%20type_member%28%3Ain%29%0Aend%0A%0Ax1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0A%0A%23%20%60Child%3A%3AX%60%20is%20contravariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Symbol%29%22%0A%23%20implies%20%22Child%5BT.any%28String%2C%20Symbol%29%5D%20%3C%3A%20Child%5BString%5D%22%0Ax2%20%3D%20T.let%28x1%2C%20Child%5BString%5D%29%0A%0A%23%20%60String%60%20is%20equivalent%20to%20%60String%60%2C%20so%20Child%5BString%5D%20%3C%3A%20Parent%5BString%5D%0Ax3%20%3D%20T.let%28x2%2C%20Parent%5BString%5D%29%0A%0A%23%20%60Parent%3A%3AX%60%20is%20covariant%2C%20so%20%22String%20%3C%3A%20T.any%28String%2C%20Integer%29%22%0A%23%20implies%20%22Parent%5BString%5D%20%3C%3A%20Parent%5BT.any%28String%2C%20Integer%29%5D%22%0Ax4%20%3D%20T.let%28x3%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29%0A%0Ay1%20%3D%20Child%5BT.any%28String%2C%20Symbol%29%5D.new%0AT.let%28y1%2C%20Parent%5BT.any%28Integer%2C%20String%29%5D%29">→ View full example on sorbet.run</a></p>
 <h2><a class="anchor" aria-hidden="true" id="5016"></a><a href="#5016" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5016</h2>
+<blockquote>
+<p>Note: more recent versions of Sorbet have eliminated this error–it is now
+possible to define generic classes with covariant and contravariant type
+members.</p>
+</blockquote>
 <p>Sorbet does not allow classes to be covariant nor contravariant.</p>
 <p><strong>Why?</strong> The design of generic classes and interfaces in Sorbet was heavily
 inspired by the design of C#. This exact question has been answered for C# by
@@ -1774,9 +1779,16 @@ sig {params(<span class="hljs-symbol">x:</span> IBox[Integer]).void}
 the restriction of only being able to use <code>Elem</code> in <strong>out positions</strong>. See
 <a href="/docs/generics#input-and-output-positions">Input and output positions</a> for more
 information.</p>
-<p>Recall that only modules (not classes) may have covariant and contravariant type
-members—classes are limited to only invariant type members. For more, see the
-docs for error code <a href="#5016">5016</a>.</p>
+<p>The ways to fix this error include:</p>
+<ul>
+<li>Make the type invariant by removing the <code>:in</code> or <code>:out</code> annotation on the
+type. (This comes with the normal restrictions on invariant type members.)</li>
+<li>Mark the method in question <code>private</code>. (This comes with the normal
+restrictions on <code>private</code> methods.)</li>
+</ul>
+<p>If neither of these works, you’ll have to reconsider whether it’s possible to
+statically type the code in question, and how best to rewrite the code so that
+it can be typed statically.</p>
 <blockquote>
 <p><strong>Note</strong> that <code>T.attached_class</code> is actually modeled as a covariant (<code>:out</code>)
 <code>type_template</code> defined automatically on all singleton classes, which means
