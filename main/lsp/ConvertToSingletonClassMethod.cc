@@ -1,36 +1,83 @@
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/AbstractRewriter.h"
+#include "main/sig_finder/sig_finder.h"
+
 using namespace std;
 
 namespace sorbet::realmain::lsp {
 
 namespace {
 
-unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, const LSPConfiguration &config,
+unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
+                                                 const LSPConfiguration &config,
                                                  const core::lsp::MethodDefResponse &definition) {
     const auto &maybeSource = definition.termLoc.source(gs);
     if (!maybeSource.has_value()) {
         return nullptr;
     }
     const auto &source = maybeSource.value();
+    auto file = definition.termLoc.file();
 
-    auto insertAt = source.find(definition.name.shortName(gs));
+    auto shortName = definition.name.shortName(gs);
+    auto insertAt = source.find(shortName);
     if (insertAt == string::npos) {
         return nullptr;
     }
 
-    auto insertAtLoc = definition.termLoc.adjustLen(gs, insertAt, 0);
-    if (!insertAtLoc.exists()) {
+    auto insertSelfLoc = definition.termLoc.adjustLen(gs, insertAt, 0);
+    if (!insertSelfLoc.exists()) {
         return nullptr;
     }
 
-    auto insertAtRange = Range::fromLoc(gs, insertAtLoc);
-    ENFORCE(insertAtRange != nullptr);
+    auto insertParamLoc = definition.termLoc.adjustLen(gs, insertAt + shortName.size(), 0);
+    if (!insertParamLoc.exists()) {
+        return nullptr;
+    }
+    bool needsParens = true;
+    if (insertParamLoc.adjustLen(gs, 0, 1).source(gs) == "(") {
+        insertParamLoc = insertParamLoc.adjustLen(gs, 1, 0);
+        needsParens = false;
+    }
+
+    auto insertSelfRange = Range::fromLoc(gs, insertSelfLoc);
+    ENFORCE(insertSelfRange != nullptr);
+    auto insertParamRange = Range::fromLoc(gs, insertParamLoc);
+    ENFORCE(insertParamRange != nullptr);
 
     auto uri = config.fileRef2Uri(gs, definition.termLoc.file());
     auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(uri), JSONNullObject());
     vector<unique_ptr<TextEdit>> edits;
-    edits.emplace_back(make_unique<TextEdit>(move(insertAtRange), "self."));
+    edits.emplace_back(make_unique<TextEdit>(move(insertSelfRange), "self."));
+    if (needsParens) {
+        edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "(this)"));
+    } else if (definition.symbol.data(gs)->arguments.empty()) {
+        edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "this"));
+    } else {
+        edits.emplace_back(make_unique<TextEdit>(move(insertParamRange), "this, "));
+    }
+
+    if (definition.symbol.data(gs)->hasSig()) {
+        auto trees = typechecker.getResolved({file});
+        ENFORCE(!trees.empty());
+        auto &rootTree = trees[0].tree;
+
+        auto ctx = core::Context(gs, core::Symbols::root(), file);
+        auto queryLoc = definition.termLoc.copyWithZeroLength();
+        auto parsedSig = sig_finder::SigFinder::findSignature(ctx, rootTree, queryLoc);
+        if (parsedSig.has_value()) {
+            if (!parsedSig->argTypes.empty()) {
+                auto firstArgLoc = parsedSig->argTypes[0].nameLoc;
+                auto insertSigParamRange = Range::fromLoc(gs, firstArgLoc.adjustLen(gs, 0, 0));
+                auto sigParamText = fmt::format("this: {}, ", definition.symbol.data(gs)->owner.show(gs));
+                edits.emplace_back(make_unique<TextEdit>(move(insertSigParamRange), move(sigParamText)));
+            } else if (parsedSig->returnsLoc.exists()) {
+                auto insertSigParamsRange = Range::fromLoc(gs, parsedSig->returnsLoc.adjustLen(gs, 0, 0));
+                auto sigParamText = fmt::format("params(this: {}).", definition.symbol.data(gs)->owner.show(gs));
+                edits.emplace_back(make_unique<TextEdit>(move(insertSigParamsRange), move(sigParamText)));
+            }
+        }
+    }
+
     return make_unique<TextDocumentEdit>(move(tdi), move(edits));
 }
 
@@ -68,15 +115,10 @@ public:
             return;
         }
 
-        // auto loc = response->getLoc();
-
         // // TODO(jez) I think because we're skipping T.any we should be able to ignore this,
         // // and anywhere that that fails we should build proper support for.
         // ENFORCE(edits.find(loc) == edits.end());
 
-        // TODO(jez)
-        // (1 + 1).even?    ->   A.even?((1 + 1))
-        // x.foo(y)         ->   A.foo(x, y)
         fmt::memory_buffer buf;
         fmt::format_to(back_inserter(buf), "{}.{}", owner.show(gs), sendResp->callerSideName.show(gs));
         auto receiverSource = sendResp->isPrivateOk ? "self"sv : sendResp->receiverLoc().source(gs).value();
@@ -126,7 +168,7 @@ vector<unique_ptr<TextDocumentEdit>> convertToSingletonClassMethod(LSPTypechecke
         res = move(callSiteEdits.value());
     }
 
-    auto methodDefEdit = createMethodDefEdit(gs, config, definition);
+    auto methodDefEdit = createMethodDefEdit(gs, typechecker, config, definition);
     // TODO(jez) Handle if methodDefEdit is nullptr, abort
     ENFORCE(methodDefEdit != nullptr);
     res.emplace_back(move(methodDefEdit));

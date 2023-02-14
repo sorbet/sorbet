@@ -518,12 +518,14 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     return nullopt;
                 }
                 sig.returns = move(maybeReturns.value());
+                sig.returnsLoc = ctx.locAt(send->loc);
 
                 break;
             }
             case core::Names::void_().rawId():
                 sig.seen.void_ = true;
                 sig.returns = core::Types::void_();
+                sig.returnsLoc = ctx.locAt(send->loc);
                 break;
             case core::Names::checked().rawId():
                 sig.seen.checked = true;
