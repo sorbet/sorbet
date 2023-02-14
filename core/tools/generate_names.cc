@@ -56,6 +56,7 @@ NameDef names[] = {
     {"undef"},
     {"each"},
     {"subclasses"},
+    {"transpose"},
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},
