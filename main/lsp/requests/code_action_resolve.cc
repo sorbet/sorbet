@@ -1,4 +1,5 @@
 #include "main/lsp/requests/code_action_resolve.h"
+#include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
 #include "main/lsp/ShowOperation.h"
@@ -31,12 +32,23 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
 
     for (const auto &resp : queryResult.responses) {
         if (const auto def = resp->isMethodDef()) {
-            auto action = make_unique<CodeAction>("Move method to a new module");
-            action->kind = CodeActionKind::RefactorExtract;
-            auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = getMoveMethodEdits(typechecker, config, *def);
-            action->edit = move(workspaceEdit);
-            response->result = move(action);
+            auto &gs = typechecker.state();
+
+            if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
+                auto action = make_unique<CodeAction>("Move method to a new module");
+                action->kind = CodeActionKind::RefactorExtract;
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = getMoveMethodEdits(typechecker, config, *def);
+                action->edit = move(workspaceEdit);
+                response->result = move(action);
+            } else {
+                auto action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
+                action->kind = CodeActionKind::RefactorRewrite;
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                auto edits = convertToSingletonClassMethod(typechecker, config, *def);
+                workspaceEdit->documentChanges = move(edits);
+                action->edit = move(workspaceEdit);
+            }
         }
     }
 
