@@ -7,6 +7,7 @@ require_relative 'constructor'
 require_relative 'deserialize'
 require_relative 'prop_definition'
 require_relative 'serialize_custom_type'
+require_relative 'tutils'
 require_relative 'typecheck'
 
 namespace :bench do
@@ -38,5 +39,9 @@ namespace :bench do
     SorbetBenchmarks::Typecheck.run
   end
 
-  task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type typecheck]
+  task :tutils do
+    SorbetBenchmarks::TUtils.run
+  end
+
+  task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type tuils typecheck]
 end
