@@ -62,13 +62,13 @@ module T::Types
       when TypedArray
         # warning: covariant arrays
 
-        value_1, value_2, *values_rest = types
-        if !value_2.nil?
-          value_type = T::Types::Union::Private::Pool.union_of_types(value_1, value_2, values_rest)
-        elsif value_1.nil?
-          value_type = T.untyped
+        value1, value2, *values_rest = types
+        value_type = if !value2.nil?
+          T::Types::Union::Private::Pool.union_of_types(value1, value2, values_rest)
+        elsif value1.nil?
+          T.untyped
         else
-          value_type = value_1
+          value1
         end
 
         T::Types::TypedArray.new(value_type).subtype_of?(other)
