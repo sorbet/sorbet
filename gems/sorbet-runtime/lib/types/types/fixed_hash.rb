@@ -38,6 +38,28 @@ module T::Types
       when FixedHash
         # Using `subtype_of?` here instead of == would be unsound
         @types == other.types
+      when TypedHash
+        # warning: covariant hashes
+
+        key_1, key_2, *keys_rest = types.keys.map {|key| T::Utils.coerce(key.class)}
+        if !key_2.nil?
+          key_type = T::Types::Union::Private::Pool.union_of_types(key_1, key_2, keys_rest)
+        elsif key_1.nil?
+          key_type = T.untyped
+        else
+          key_type = key_1
+        end
+
+        value_1, value_2, *values_rest = types.values
+        if !value_2.nil?
+          value_type = T::Types::Union::Private::Pool.union_of_types(value_1, value_2, values_rest)
+        elsif value_1.nil?
+          value_type = T.untyped
+        else
+          value_type = value_1
+        end
+
+        T::Types::TypedHash.new(keys: key_type, values: value_type).subtype_of?(other)
       else
         false
       end
