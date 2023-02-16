@@ -984,7 +984,7 @@ public:
             variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 
-        // See the comment on `VarianceValidator::validateMethod` for an explanation of why we don't
+        // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
         // need to check types on instance variables.
 
         validateOverriding(ctx, methodDef.symbol);
