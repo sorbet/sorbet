@@ -98,16 +98,7 @@ module T::Utils
   def self.unwrap_nilable(type)
     case type
     when T::Types::Union
-      return type.unwrap_nilable if type.is_a?(T::Private::Types::SimplePairUnion)
-
-      non_nil_types = type.types.reject {|t| t == Nilable::NIL_TYPE}
-      return nil if type.types.length == non_nil_types.length
-      case non_nil_types.length
-      when 0 then nil
-      when 1 then non_nil_types.first
-      else
-        T::Types::Union::Private::Pool.union_of_types(non_nil_types[0], non_nil_types[1], non_nil_types[2..-1])
-      end
+      type.unwrap_nilable
     else
       nil
     end
@@ -196,7 +187,7 @@ module T::Utils
     #  - if the type is T.nilable(A), the function returns A
     def self.get_underlying_type(prop_type)
       if prop_type.is_a?(T::Types::Union)
-        non_nilable_type = T::Utils.unwrap_nilable(prop_type)
+        non_nilable_type = prop_type.unwrap_nilable
         if non_nilable_type&.is_a?(T::Types::Simple)
           non_nilable_type = non_nilable_type.raw_type
         end
