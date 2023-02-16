@@ -880,7 +880,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
                 // All singletons have an AttachedClass type member, created by `singletonClass`
-                auto attachedClass =
+                const auto attachedClass =
                     owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass()).asTypeMemberRef();
                 return TypeSyntax::ResultType{core::make_type<core::SelfTypeParam>(attachedClass),
                                               core::Symbols::noClassOrModule()};
