@@ -422,7 +422,8 @@ template <> inline TypePtr make_type<SelfTypeParam, core::TypeArgumentRef &>(cor
     return make_type<SelfTypeParam>(sym);
 }
 
-template <> inline TypePtr make_type<SelfTypeParam, core::TypeMemberRef &>(core::TypeMemberRef &definition) {
+template <>
+inline TypePtr make_type<SelfTypeParam, const core::TypeMemberRef &>(const core::TypeMemberRef &definition) {
     auto sym = SymbolRef(definition);
     return make_type<SelfTypeParam>(sym);
 }
