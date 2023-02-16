@@ -5,8 +5,8 @@ module T::Private::Sealed
   module NoInherit
     def inherited(child)
       super
-      this_line = Kernel.caller.find {|line| !line.match(/in `inherited'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, child, 'inherited')
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `inherited'$/)}
+      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'inherited')
       @sorbet_sealed_module_all_subclasses << child
     end
 
@@ -22,15 +22,15 @@ module T::Private::Sealed
   module NoIncludeExtend
     def included(child)
       super
-      this_line = Kernel.caller.find {|line| !line.match(/in `included'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, child, 'included')
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `included'$/)}
+      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'included')
       @sorbet_sealed_module_all_subclasses << child
     end
 
     def extended(child)
       super
-      this_line = Kernel.caller.find {|line| !line.match(/in `extended'$/)}
-      T::Private::Sealed.validate_inheritance(this_line, self, child, 'extended')
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `extended'$/)}
+      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'extended')
       @sorbet_sealed_module_all_subclasses << child
     end
 

@@ -19,6 +19,7 @@ module T::Private::Types; end
 require_relative 'types/configuration'
 require_relative 'types/_types'
 require_relative 'types/private/decl_state'
+require_relative 'types/private/caller_utils'
 require_relative 'types/private/class_utils'
 require_relative 'types/private/runtime_levels'
 require_relative 'types/private/methods/_methods'
