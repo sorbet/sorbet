@@ -14,11 +14,6 @@ for runtime_version in "${runtime_versions[@]}"; do
   rbenv shell "$runtime_version"
   rbenv exec bundle config set path 'vendor/bundle'
   rbenv exec bundle install
-
-  pushd test/wholesome
-  rbenv exec bundle config set path 'vendor/bundle'
-  rbenv exec bundle install
-  popd
 done
 
 for runtime_version in "${runtime_versions[@]}"; do
@@ -42,6 +37,9 @@ for runtime_version in "${runtime_versions[@]}"; do
   fi
 
   pushd test/wholesome
+
+  rbenv exec bundle config set path 'vendor/bundle'
+  rbenv exec bundle install
 
   if ! rbenv exec bundle exec rake test; then
     failed=1
