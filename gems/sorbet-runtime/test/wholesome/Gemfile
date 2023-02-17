@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+
+gem 'oj'
+gem 'minitest'
+gem 'mocha'
+gem 'sorbet-runtime', path: '../../'
+gem 'rake'
