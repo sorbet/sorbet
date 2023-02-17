@@ -21,6 +21,9 @@ using namespace std;
 namespace sorbet::core {
 
 namespace {
+
+const bool IMPLICIT_CONVERSION_ALLOWS_PRIVATE = true;
+
 DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, const DispatchArgs &args) {
     categoryCounterInc("dispatch_call", "proxytype");
     return und.dispatchCall(gs, args.withThisRef(und));
@@ -1656,6 +1659,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                 return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             }
 
+            // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
             auto innerArgs = DispatchArgs{Names::initialize(),
                                           args.locs,
                                           args.numPosArgs,
@@ -2047,6 +2051,7 @@ public:
             }
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
+        // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
         DispatchArgs innerArgs{Names::initialize(),
                                args.locs,
                                args.numPosArgs,
@@ -2508,7 +2513,7 @@ private:
                                nonNilBlockType.type,
                                nullptr,
                                originForUninitialized,
-                               /* isPrivateOk */ true,
+                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
                                suppressErrors};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
@@ -3149,7 +3154,7 @@ public:
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
-                              /* isPrivateOk */ true,
+                              IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
                               args.suppressErrors};
         auto dispatched = arg->type.dispatchCall(gs, dispatch);
 
@@ -3563,7 +3568,7 @@ public:
                               arg->type,
                               nullptr,
                               args.originForUninitialized,
-                              /* isPrivateOk */ true,
+                              IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
                               args.suppressErrors};
         res = arg->type.dispatchCall(gs, dispatch);
     }
@@ -3827,7 +3832,7 @@ class Array_flatten : public IntrinsicMethod {
                                type,
                                nullptr,
                                args.originForUninitialized,
-                               /* isPrivateOk */ true,
+                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
                                args.suppressErrors};
 
         auto dispatched = type.dispatchCall(gs, innerArgs);
@@ -4216,12 +4221,17 @@ public:
         }
 
         DispatchArgs newArgs{
-            Names::new_(),         newCallLocs,
-            newNumPosArgs,         newSendArgs,
-            classArg->type,        *classArg,
+            Names::new_(),
+            newCallLocs,
+            newNumPosArgs,
+            newSendArgs,
             classArg->type,
-            /* block */ nullptr,   args.originForUninitialized,
-            /* isPrivateOk*/ true, args.suppressErrors,
+            *classArg,
+            classArg->type,
+            /* block */ nullptr,
+            args.originForUninitialized,
+            IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
+            args.suppressErrors,
         };
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
