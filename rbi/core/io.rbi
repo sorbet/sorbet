@@ -1565,7 +1565,7 @@ class IO < Object
   sig do
     params(
         fd: Integer,
-        mode: Integer,
+        mode: T.any(String, Integer),
         opt: T.untyped,
     )
     .void
