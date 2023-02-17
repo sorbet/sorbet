@@ -1477,6 +1477,31 @@ module Opus::Types::Test
           refute_subtype([String, Numeric], [String, Integer])
           refute_subtype([String], [String, Object])
         end
+
+        it 'compares upwards to TypedArray' do
+          assert_subtype([], T::Array[Integer])
+          assert_subtype([], T::Array[String])
+          assert_subtype([Integer], T::Array[Integer])
+          assert_subtype([Integer, String], T::Array[T.any(Integer, String)])
+
+          refute_subtype([Integer], T::Array[String])
+          refute_subtype([Integer, String], T::Array[Integer])
+        end
+      end
+
+      describe 'shapes' do
+        it 'compares upwards to TypedHash' do
+          assert_subtype({}, T::Hash[Integer, String])
+          assert_subtype({}, T::Hash[String, Symbol])
+          assert_subtype({key: Integer}, T::Hash[Symbol, Integer])
+          assert_subtype({'key' => Integer}, T::Hash[String, Integer])
+          assert_subtype({key: Integer, 'another' => Float}, T::Hash[T.any(Symbol, String), T.any(Integer, Float)])
+
+          refute_subtype({key: Integer}, T::Hash[String, Integer])
+          refute_subtype({key: Integer}, T::Hash[Symbol, Float])
+          refute_subtype({key: Integer, 'another' => Float}, T::Hash[Symbol, T.any(Integer, Float)])
+          refute_subtype({key: Integer, 'another' => Float}, T::Hash[T.any(Symbol, String), Integer])
+        end
       end
 
       describe 'untyped' do
