@@ -501,6 +501,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);
         } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
+            // TODO(jez) migth need special handling for attached class in modules
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

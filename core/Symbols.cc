@@ -1771,6 +1771,7 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
+    ENFORCE(this->isClassModuleSet(), "{}", selfRef.show(gs));
     auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
     // Initialize the bounds of AttachedClass as todo, as they will be updated

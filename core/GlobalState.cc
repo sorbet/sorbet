@@ -394,6 +394,7 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE(klass == Symbols::Sorbet_Private());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::Sorbet_Private_Static());
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
@@ -421,16 +422,20 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE(klass == Symbols::T_Generic());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Tuple());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Shape());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
     ENFORCE(klass == Symbols::Subclasses());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
                              core::Names::Constants::ImplicitModuleSuperclass());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
     klass =
         enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
@@ -484,6 +489,7 @@ void GlobalState::initEmpty() {
     Symbols::Net_Protocol().data(*this)->setIsModule(false);
 
     klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::T_Sig_WithoutRuntime());
 
     klass = synthesizeClass(core::Names::Constants::Enumerator());
@@ -496,6 +502,7 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::T_Enumerator_Chain());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Struct());
 
     klass = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
@@ -511,10 +518,12 @@ void GlobalState::initEmpty() {
 
     // Enumerator::Lazy
     klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Enumerator_Lazy());
 
     // Enumerator::Chain
     klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Enumerator_Chain());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
@@ -525,6 +534,7 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Private_Types_Void());
     klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOID());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_Types_Void_VOIDSingleton());
@@ -608,11 +618,13 @@ void GlobalState::initEmpty() {
     ENFORCE(method == Symbols::PackageSpec_export_all());
 
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::T_Private_Compiler());
     klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
@@ -628,6 +640,7 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::T_Types());
 
     klass = enterClassSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Types_Base());
 
     typeArgument =
@@ -832,6 +845,9 @@ void GlobalState::initEmpty() {
     // Collect size prior to loop since singletons will cause vector to grow.
     size_t classAndModulesSize = classAndModules.size();
     for (uint32_t i = 1; i < classAndModulesSize; i++) {
+        if (!classAndModules[i].isClassModuleSet()) {
+            classAndModules[i].setIsModule(true);
+        }
         classAndModules[i].singletonClass(*this);
     }
 
