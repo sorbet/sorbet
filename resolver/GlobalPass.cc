@@ -179,17 +179,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         sym.data(gs)->unsafeComputeExternalType(gs);
         auto singleton = sym.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
-            // AttachedClass doesn't exist on `T.untyped`, which is a problem
-            // with RuntimeProfiled.
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
-            if (attachedClass.exists()) {
-                auto *lambdaParam =
-                    core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
-                ENFORCE(lambdaParam != nullptr);
+            auto *lambdaParam =
+                core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(gs)->resultType);
+            ENFORCE(lambdaParam != nullptr);
 
-                lambdaParam->lowerBound = core::Types::bottom();
-                lambdaParam->upperBound = sym.data(gs)->externalType();
-            }
+            lambdaParam->lowerBound = core::Types::bottom();
+            lambdaParam->upperBound = sym.data(gs)->externalType();
         }
     }
 }

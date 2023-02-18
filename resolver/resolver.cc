@@ -2519,13 +2519,8 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        // NOTE: AttachedClass will not exist on `T.untyped`, which is a problem
-        // because RuntimeProfiled is used as a synonym for `T.untyped`
-        // internally.
         auto attachedClass = singleton.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-        if (!attachedClass.exists()) {
-            return;
-        }
+        ENFORCE(attachedClass.exists());
         auto attachedClassTypeMember = attachedClass.asTypeMemberRef();
         auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClassTypeMember.data(ctx)->resultType);
         ENFORCE(lambdaParam != nullptr);
