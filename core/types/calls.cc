@@ -2968,7 +2968,7 @@ public:
             res.returnType = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
-                e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
+                e.setHeader("`{}` may only be used in a singleton class context", "T.attached_class");
                 e.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
                 auto singletonClass = self.data(gs)->lookupSingletonClass(gs);
                 if (singletonClass.exists()) {
