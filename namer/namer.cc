@@ -1182,6 +1182,7 @@ private:
         // updated and crash. We've chosen the current approach because (1) it matches old behavior
         // (2) adding O(files) locs for something like Opus is far too slow.
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
+        const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
         // project) locs!
         if (symbol != core::Symbols::root() && !isUnknown) {
@@ -1208,10 +1209,12 @@ private:
                 // singletonClass to reset the <AttachedClass> type template to what it used to be.
                 // Is there a better way to accomplish this? (This is largely the same as the bad locs problem above;
                 // we can probably be more principled about what state calling `singletonClass` sets up/resets.)
-                auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
-                auto tp =
-                    singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
-                tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+                if (!isModule) {
+                    auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+                    auto tp =
+                        singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
+                    tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+                }
             }
         }
 
