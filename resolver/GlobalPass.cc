@@ -61,6 +61,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             // name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
             // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
             // grandchild class's file in the set of files to retypecheck.
+            // TODO(jez) Specialize this error for `<AttachedClass>` + `initializable!`
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
