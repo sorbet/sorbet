@@ -130,6 +130,18 @@ Workspace symbol search:
 
 <img src="/img/lsp/symbolsearch.png" width="75%"/>
 
+Custom extension: Copy Symbol to Clipboard
+
+<video autoplay loop muted playsinline width="597">
+  <source src="/img/copy-symbol.mp4" type="video/mp4">
+</video>
+
+(If you are not using the Sorbet VS Code, you can reimplement this feature in
+your preferred LSP client using the [`sorbet/showSymbol` LSP request].)
+
+[`sorbet/showsymbol` lsp request]:
+  https://github.com/sorbet/sorbet/blob/ec02be89e3d1895ea51bc72464538073d27b812c/vscode_extension/src/LanguageClient.ts#L154-L179
+
 ## Switching between configurations
 
 The Sorbet extension supports switching between multiple configurations to make
