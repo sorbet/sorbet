@@ -39,4 +39,17 @@ class T::Private::Types::SimplePairUnion < T::Types::Union
       T::Types::Simple::Private::Pool.type_for_module(@raw_b),
     ]
   end
+
+  # overrides Union
+  def unwrap_nilable
+    a_nil = @raw_a.equal?(NilClass)
+    b_nil = @raw_b.equal?(NilClass)
+    if a_nil
+      return types[1]
+    end
+    if b_nil
+      return types[0]
+    end
+    nil
+  end
 end
