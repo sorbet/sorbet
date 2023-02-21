@@ -3,7 +3,7 @@
 task default: %i[test]
 
 def require_tests
-  Dir.glob('./**/*.rb').each(&method(:require))
+  Dir.glob('./**/*.rb').sort.each(&method(:require))
 end
 
 task :test do

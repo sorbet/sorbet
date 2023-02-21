@@ -22,8 +22,8 @@ class Opus::Types::Test::Wholesome::TEnumOj < MiniTest::Spec
     end
   end
 
-  def assert_equal(exp, act, msg = nil)
-    msg = message(msg, "") { diff exp, act }
+  def assert_equal(exp, act, msg=nil)
+    msg = message(msg, "") {diff exp, act}
     assert(exp.eql?(act), msg)
   end
 
