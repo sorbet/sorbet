@@ -1528,6 +1528,13 @@ module Opus::Types::Test
                          T::Types::TypeMember.new(:out))
         end
 
+        it 'everything is a subtype of type members' do
+          assert_subtype(T.untyped, T::Types::TypeMember.new(:in))
+          assert_subtype(String, T::Types::TypeMember.new(:in))
+          assert_subtype(T::Types::TypeMember.new(:out),
+                         T::Types::TypeMember.new(:in))
+        end
+
         it 'type parameters are subtypes of everything' do
           assert_subtype(T::Types::TypeParameter.new(:T), T.untyped)
           assert_subtype(T::Types::TypeParameter.new(:T), String)
