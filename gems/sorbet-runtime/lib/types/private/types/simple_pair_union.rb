@@ -40,6 +40,7 @@ class T::Private::Types::SimplePairUnion < T::Types::Union
     ]
   end
 
+  # overrides Union
   def unwrap_nilable
     a_nil = @raw_a.equal?(NilClass)
     b_nil = @raw_b.equal?(NilClass)
