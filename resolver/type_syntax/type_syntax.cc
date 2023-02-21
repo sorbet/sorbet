@@ -873,11 +873,9 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             auto owner = ctx.owner.asClassOrModuleRef();
             auto ownerData = owner.data(ctx);
 
+            // Can only use `T.attached_class` on singleton methods in a class (not a module)
             auto attachedClassIsAllowed =
-                // isModule is never true for a singleton class, so this implies that this is a module instance method
-                !ownerData->isModule() &&
-                // In classes, can only use `T.attached_class` on singleton methods
-                (ownerData->isSingletonClass(ctx) && ownerData->attachedClass(ctx).data(ctx)->isClass());
+                ownerData->isSingletonClass(ctx) && ownerData->attachedClass(ctx).data(ctx)->isClass();
             if (!attachedClassIsAllowed) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("`{}` may only be used in a singleton class method context, and not in modules",
