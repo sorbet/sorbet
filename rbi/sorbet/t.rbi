@@ -244,6 +244,9 @@ module T::Generic
   #
   # For more information, see https://sorbet.org/docs/generics#generics-and-runtime-checks
   def [](*types); end
+
+  # TODO(jez) Document
+  def attachable!; end
 end
 
 module T::Helpers

@@ -19,4 +19,7 @@ module T::Generic
   def type_template(variance=:invariant, &blk)
     T::Types::TypeTemplate.new(variance)
   end
+
+  # TODO(jez) Document
+  def attachable!; end
 end
