@@ -904,7 +904,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                     } else {
                         // TODO(jez) different error code, and an autocorrect
                         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                            e.setHeader("You forgot `{}`", core::Names::declareAttachable().show(ctx));
+                            e.setHeader("You forgot `{}`", core::Names::declareInitializable().show(ctx));
                         }
                         return TypeSyntax::ResultType{core::Types::untypedUntracked(),
                                                       core::Symbols::noClassOrModule()};

@@ -196,7 +196,7 @@ NameDef names[] = {
     {"fixed"},
     {"lower"},
     {"upper"},
-    {"declareAttachable", "attachable!"},
+    {"declareInitializable", "initializable!"},
 
     {"prop"},
     {"tokenProp", "token_prop"},

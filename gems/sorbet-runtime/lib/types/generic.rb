@@ -21,5 +21,5 @@ module T::Generic
   end
 
   # TODO(jez) Document
-  def attachable!; end
+  def initializable!; end
 end

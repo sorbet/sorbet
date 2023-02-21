@@ -246,7 +246,7 @@ module T::Generic
   def [](*types); end
 
   # TODO(jez) Document
-  def attachable!; end
+  def initializable!; end
 end
 
 module T::Helpers
