@@ -194,10 +194,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 if (canResolveLazily) {
                     action->data = move(params);
                 } else {
-                    // auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    // auto edits = convertToSingletonClassMethod(typechecker, config, *def);
-                    // workspaceEdit->documentChanges = move(edits);
-                    // action->edit = move(workspaceEdit);
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    auto edits = convertToSingletonClassMethod(typechecker, config, *def);
+                    workspaceEdit->documentChanges = move(edits);
+                    action->edit = move(workspaceEdit);
                 }
             }
 
