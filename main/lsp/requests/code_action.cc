@@ -1,5 +1,6 @@
 #include "main/lsp/requests/code_action.h"
 #include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
 #include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
@@ -171,12 +172,12 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::RefactorExtract;
 
                 auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
+                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
                 auto arg = make_unique<TextDocumentPositionParams>(
                     make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
                 auto args = vector<unique_ptr<TextDocumentPositionParams>>();
                 args.emplace_back(move(arg));
 
-                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
                 renameCommand->arguments = move(args);
                 action->command = move(renameCommand);
                 if (canResolveLazily) {
@@ -194,8 +195,15 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::RefactorRewrite;
 
                 if (canResolveLazily) {
-                    action->data = move(params);
-                    result.emplace_back(move(action));
+                    const auto &maybeSource = def->termLoc.source(gs);
+                    if (maybeSource.has_value() && absl::StartsWith(maybeSource.value(), "def ")) {
+                        action->data = move(params);
+                        result.emplace_back(move(action));
+                    } else {
+                        // Maybe this is an attr_reader or a prop or something. Abort.
+                        // (Only have to do this logic in the lazy case, because the eager case does
+                        // it already.)
+                    }
                 } else {
                     auto workspaceEdit = make_unique<WorkspaceEdit>();
                     auto edits = convertToSingletonClassMethod(typechecker, config, *def);

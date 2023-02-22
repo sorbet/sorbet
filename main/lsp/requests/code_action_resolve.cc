@@ -52,9 +52,7 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
     for (const auto &resp : queryResult.responses) {
         const auto *def = resp->isMethodDef();
         if (def == nullptr) {
-            response->error =
-                make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
-            return response;
+            continue;
         }
 
         auto &gs = typechecker.state();
@@ -75,6 +73,12 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
             action->edit = move(workspaceEdit);
         }
         response->result = move(action);
+    }
+
+    if (response->result == nullopt) {
+        response->error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "Invalid `codeAction/resolve` request");
+        return response;
     }
 
     return response;

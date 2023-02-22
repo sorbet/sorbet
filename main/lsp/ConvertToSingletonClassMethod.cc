@@ -17,6 +17,10 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         return nullptr;
     }
     const auto &source = maybeSource.value();
+    if (!absl::StartsWith(source, "def ")) {
+        // Maybe this is an attr_reader or a prop or something. Abort.
+        return nullptr;
+    }
     auto file = definition.termLoc.file();
 
     auto shortName = definition.name.shortName(gs);
@@ -98,6 +102,13 @@ public:
 
         auto sendResp = response->isSend();
         if (sendResp == nullptr || !sendResp->receiverLocOffsets.exists()) {
+            return;
+        }
+
+        if (sendResp->callerSideName == core::Names::callWithSplat() ||
+            sendResp->callerSideName == core::Names::callWithBlock() ||
+            sendResp->callerSideName == core::Names::callWithSplatAndBlock()) {
+            // These are too hard... skipping for the time being.
             return;
         }
 
