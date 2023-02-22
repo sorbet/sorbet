@@ -362,6 +362,11 @@ class T::Enum
     super
 
     raise "Inheriting from children of T::Enum is prohibited" if self != T::Enum
+
+    # "oj" gem JSON support
+    if Object.const_defined?(:Oj)
+      Object.const_get(:Oj).register_odd(child_class, child_class, :try_deserialize, :serialize)
+    end
   end
 
   # Marshal support

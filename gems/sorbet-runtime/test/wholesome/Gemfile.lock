@@ -1,0 +1,27 @@
+PATH
+  remote: ../..
+  specs:
+    sorbet-runtime (0.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.17.0)
+    mocha (2.0.2)
+      ruby2_keywords (>= 0.0.5)
+    oj (3.14.2)
+    rake (13.0.6)
+    ruby2_keywords (0.0.5)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  minitest
+  mocha
+  oj
+  rake
+  sorbet-runtime!
+
+BUNDLED WITH
+   2.4.1

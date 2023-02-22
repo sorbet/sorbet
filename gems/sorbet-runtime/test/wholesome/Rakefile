@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+task default: %i[test]
+
+def require_tests
+  Dir.glob('./**/*.test.rb').sort.each(&method(:require))
+end
+
+task :test do
+  require_tests
+end
