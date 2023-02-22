@@ -1434,7 +1434,8 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
 
     REQUIRE_NE(completionItem->textEdit, nullopt);
     auto &textEdit = completionItem->textEdit.value();
-    auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText);
+    auto reindent = true;
+    auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText, reindent);
 
     {
         CHECK_EQ_DIFF(expectedEditedFileContents, actualEditedFileContents,
@@ -1590,7 +1591,8 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         for (auto &edit : edits) {
             auto file = core::File(string(sourceFilePath), string(actualEditedFileContents), core::File::Type::Normal);
 
-            actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText);
+            auto reindent = false;
+            actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText, reindent);
         }
         actualEditedFiles[sourceFilePath] = actualEditedFileContents;
     }
@@ -1711,7 +1713,8 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         c = sortEdits(move(c));
 
         for (auto &e : c->edits) {
-            actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText);
+            auto reindent = false;
+            actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText, reindent);
         }
         assertResults(expectedUpdatedFilePath, expectedEditedFileContents, actualEditedFileContents);
     }
@@ -1739,7 +1742,8 @@ void ApplyCodeActionAssertion::checkAll(
                                    ? accumulatedOriginalEditedContents[actualEditedFileContents]
                                    : actualEditedFileContents;
 
-            auto newSource = applyEdit(oldSource, *file, *e->range, e->newText);
+            auto reindent = false;
+            auto newSource = applyEdit(oldSource, *file, *e->range, e->newText, reindent);
             accumulatedOriginalEditedContents.insert_or_assign(actualEditedFileContents, newSource);
         }
     }

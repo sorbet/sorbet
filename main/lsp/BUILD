@@ -30,6 +30,7 @@ cc_library(
         "watchman/WatchmanProcess.h",
     ],
     hdrs = [
+        "ConvertToSingletonClassMethod.h",
         "LSPConfiguration.h",
         "LSPInput.h",
         "LSPLoop.h",

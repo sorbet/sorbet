@@ -10,14 +10,14 @@ class TypeConstraint;
 
 class SendResponse final {
 public:
-    SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, size_t totalArgs, core::NameRef callerSideName,
-                 core::MethodRef enclosingMethod, bool isPrivateOk, core::FileRef file, core::LocOffsets termLocOffsets,
-                 core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets)
-        : dispatchResult(std::move(dispatchResult)), totalArgs(totalArgs), callerSideName(callerSideName),
-          enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), file(file), termLocOffsets(termLocOffsets),
-          receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets){};
+    SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, InlinedVector<core::LocOffsets, 2> argLocOffsets,
+                 core::NameRef callerSideName, core::MethodRef enclosingMethod, bool isPrivateOk, core::FileRef file,
+                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets)
+        : dispatchResult(std::move(dispatchResult)), argLocOffsets(std::move(argLocOffsets)),
+          callerSideName(callerSideName), enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), file(file),
+          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
-    const size_t totalArgs;
+    const InlinedVector<core::LocOffsets, 2> argLocOffsets;
     const core::NameRef callerSideName;
     const core::MethodRef enclosingMethod;
     const bool isPrivateOk;
@@ -38,7 +38,7 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 64, 8);
+CheckSize(SendResponse, 80, 8);
 
 class IdentResponse final {
 public:

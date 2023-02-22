@@ -1094,6 +1094,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
+                if (send.link) {
+                    // This should eventually become ENFORCEs but currently they are wrong
+                    if (!retainedResult->main.blockReturnType) {
+                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    if (!retainedResult->main.blockPreType) {
+                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    ENFORCE(retainedResult->main.sendTp);
+                }
+
                 // For `case x; when X ...`, desugar produces `X.===(x)`, but with
                 // a zero-length funLoc.  We tried producing a zero-length loc for
                 // the entire send so there would never be a match here, but that
@@ -1118,19 +1129,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx,
-                        core::lsp::SendResponse(retainedResult, send.args.size(), fun, ctx.owner.asMethodRef(),
+                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
                                                 send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
                 }
                 if (send.link) {
-                    // This should eventually become ENFORCEs but currently they are wrong
-                    if (!retainedResult->main.blockReturnType) {
-                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
-                    }
-                    if (!retainedResult->main.blockPreType) {
-                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
-                    }
-                    ENFORCE(retainedResult->main.sendTp);
-
                     send.link->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {

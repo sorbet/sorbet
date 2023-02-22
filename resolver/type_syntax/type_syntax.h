@@ -19,6 +19,7 @@ struct ParsedSig {
     core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
+    core::Loc returnsLoc;
 
     struct TypeArgSpec {
         core::Loc loc;
