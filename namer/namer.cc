@@ -632,7 +632,12 @@ public:
             return false;
         }
 
-        auto *cast = ast::cast_tree<ast::Cast>(asgn.rhs);
+        auto *recur = &asgn.rhs;
+        while (auto *outer = ast::cast_tree<ast::InsSeq>(*recur)) {
+            recur = &outer->expr;
+        }
+
+        auto *cast = ast::cast_tree<ast::Cast>(*recur);
         if (cast == nullptr) {
             return false;
         }
