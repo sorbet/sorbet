@@ -167,7 +167,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                                     config.getClientConfig().clientCodeActionDataSupport;
 
             if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
-                action = make_unique<CodeAction>("Move method to a new module");
+                auto action = make_unique<CodeAction>("Move method to a new module");
                 action->kind = CodeActionKind::RefactorExtract;
 
                 auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
@@ -187,8 +187,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     workspaceEdit->documentChanges = move(edits);
                     action->edit = move(workspaceEdit);
                 }
+
+                result.emplace_back(move(action));
             } else {
-                action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
+                auto action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
                 action->kind = CodeActionKind::RefactorRewrite;
 
                 if (canResolveLazily) {
@@ -196,12 +198,16 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 } else {
                     auto workspaceEdit = make_unique<WorkspaceEdit>();
                     auto edits = convertToSingletonClassMethod(typechecker, config, *def);
-                    workspaceEdit->documentChanges = move(edits);
-                    action->edit = move(workspaceEdit);
+                    if (!edits.empty()) {
+                        // "empty" means an error in convertToSingletonClassMethod.
+                        // Don't prevent other code actions from being reported due to this one error.
+                        // Instead, merely skip this code action.
+                        workspaceEdit->documentChanges = move(edits);
+                        action->edit = move(workspaceEdit);
+                        result.emplace_back(move(action));
+                    }
                 }
             }
-
-            result.emplace_back(move(action));
         }
     }
 

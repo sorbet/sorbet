@@ -7,6 +7,7 @@
 
 namespace sorbet::realmain::lsp {
 
+// Returns an empty vector when there was an error.
 std::vector<std::unique_ptr<TextDocumentEdit>>
 convertToSingletonClassMethod(LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config,
                               const core::lsp::MethodDefResponse &definition);

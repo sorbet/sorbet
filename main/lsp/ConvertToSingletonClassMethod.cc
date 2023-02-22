@@ -1,4 +1,5 @@
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "absl/strings/match.h"
 #include "main/lsp/AbstractRewriter.h"
 #include "main/sig_finder/sig_finder.h"
 
@@ -87,10 +88,7 @@ class MethodCallSiteRewriter : public AbstractRewriter {
 
 public:
     MethodCallSiteRewriter(const core::GlobalState &gs, const LSPConfiguration &config, core::MethodRef method)
-        : AbstractRewriter(gs, config), method(method), owner(method.data(gs)->owner) {
-        // TODO(jez) Mark invalid if it isn't "final in practice", because the dynamic dispatch will
-        // go away
-    }
+        : AbstractRewriter(gs, config), method(method), owner(method.data(gs)->owner) {}
     ~MethodCallSiteRewriter() {}
 
     void rename(unique_ptr<core::lsp::QueryResponse> &response, const core::SymbolRef originalSymbol) override {
@@ -109,15 +107,8 @@ public:
             return;
         }
 
-        if (sendResp->dispatchResult->main.blockPreType != nullptr) {
-            // Skip over call sites that pass a block right now.
-            // TODO(jez) We can probably handle these
-            return;
-        }
-
-        // // TODO(jez) I think because we're skipping T.any we should be able to ignore this,
-        // // and anywhere that that fails we should build proper support for.
-        // ENFORCE(edits.find(loc) == edits.end());
+        auto replaceLoc = sendResp->termLoc();
+        ENFORCE(edits.find(replaceLoc) == edits.end(), "Tried to edit the same call site twice...");
 
         fmt::memory_buffer buf;
         fmt::format_to(back_inserter(buf), "{}.{}", owner.show(gs), sendResp->callerSideName.show(gs));
@@ -135,7 +126,21 @@ public:
             fmt::format_to(back_inserter(buf), "({}, {})", receiverSource, argSource);
         }
 
-        edits[sendResp->termLoc()] = to_string(buf);
+        if (sendResp->dispatchResult->main.blockPreType != nullptr) {
+            auto blockLocStart = sendResp->argLocOffsets.empty()
+                                     ? sendResp->funLocOffsets.copyEndWithZeroLength()
+                                     : sendResp->argLocOffsets.back().copyEndWithZeroLength();
+            auto blockLocEnd = sendResp->termLocOffsets.copyEndWithZeroLength();
+            auto blockLoc = core::Loc(sendResp->file, blockLocStart.join(blockLocEnd));
+            if (auto maybeBlockSource = blockLoc.source(gs)) {
+                string_view blockSource = (!maybeBlockSource->empty() && absl::StartsWith(*maybeBlockSource, "()"))
+                                              ? maybeBlockSource->substr(2)
+                                              : *maybeBlockSource;
+                fmt::format_to(back_inserter(buf), "{}", blockSource);
+            }
+        }
+
+        edits[replaceLoc] = to_string(buf);
     }
 
     void addSymbol(const core::SymbolRef symbol) override {
@@ -144,11 +149,21 @@ public:
         }
         getQueue()->tryEnqueue(symbol);
 
-        // TODO(jez) How much breaks if we assume that the method is final?
-        // Right now my gut is not much.
-        // TODO(jez) Is it easy to make the edit if the method is not final?
-        // Right now my gut is that it's hard/not worth.
-        // addSubclassRelatedMethods(gs, symbol.asMethodRef(), getQueue());
+        // This doesn't make any attempt to handle methods that are overridden.
+        //
+        // Technically speaking, this code action doesn't make a ton of sense if the method is
+        // overriden, because converting to a singleton method will kill dynamic dispatch.
+        //
+        // We have two options:
+        // 1.  Assume that there are no overrides of this method.
+        //     Pro: no additional work
+        //     Con: might not catch some callsites on child methods
+        // 2.  Detect when there are overrides of this method, and mark the code action `invalid` with an error
+        //     Pro: "safer" because we can error instead of silently changing the meaning of the program
+        //     Con: requires a full scan of the symbol table
+        //
+        // For the time being, we're taking option (1).
+        // Option (2) would involve a call to addSubclassRelatedMethods or something similar here.
     }
 };
 
@@ -159,18 +174,21 @@ vector<unique_ptr<TextDocumentEdit>> convertToSingletonClassMethod(LSPTypechecke
                                                                    const core::lsp::MethodDefResponse &definition) {
     auto &gs = typechecker.state();
 
+    auto methodDefEdit = createMethodDefEdit(gs, typechecker, config, definition);
+    if (methodDefEdit == nullptr) {
+        config.logger->error("Failed to createMethodDefEdit for convertToSingletonClassMethod");
+        return {};
+    }
+
     auto renamer = make_shared<MethodCallSiteRewriter>(gs, config, definition.symbol);
     renamer->getEdits(typechecker, definition.symbol);
     auto callSiteEdits = renamer->buildTextDocumentEdits();
-
-    vector<unique_ptr<TextDocumentEdit>> res;
-    if (callSiteEdits.has_value()) {
-        res = move(callSiteEdits.value());
+    if (!callSiteEdits.has_value()) {
+        config.logger->error("Failed to buildTextDocumentEdits for convertToSingletonClassMethod");
+        return {};
     }
 
-    auto methodDefEdit = createMethodDefEdit(gs, typechecker, config, definition);
-    // TODO(jez) Handle if methodDefEdit is nullptr, abort
-    ENFORCE(methodDefEdit != nullptr);
+    auto res = move(callSiteEdits.value());
     res.emplace_back(move(methodDefEdit));
 
     return res;
