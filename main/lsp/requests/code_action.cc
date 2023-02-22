@@ -195,6 +195,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
                 if (canResolveLazily) {
                     action->data = move(params);
+                    result.emplace_back(move(action));
                 } else {
                     auto workspaceEdit = make_unique<WorkspaceEdit>();
                     auto edits = convertToSingletonClassMethod(typechecker, config, *def);

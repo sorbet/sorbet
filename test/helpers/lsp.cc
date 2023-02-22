@@ -538,7 +538,10 @@ namespace {
 
 } // namespace
 
-string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
+// reindent should probably be `true` for snippets (e.g., completion items) and false for things that are not snippets.
+// At some point we might want to try to approximate what VS Code does more closely, but I've never
+// been able to find a concise description of how they decide to reindent a snippet and when.
+string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText, bool reindent) {
     auto beginLine = static_cast<uint32_t>(range.start->line + 1);
     auto beginCol = static_cast<uint32_t>(range.start->character + 1);
     auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
@@ -553,7 +556,11 @@ string applyEdit(string_view source, const core::File &file, const Range &range,
     auto indentAfterNewline = absl::StrCat("\n", source.substr(lineStartOffset, firstNonWhitespace));
 
     string actualEditedFileContents = string(source);
-    auto indented = absl::StrReplaceAll(stripTrailingAsciiBlank(newText), {{"\n", indentAfterNewline}});
+    // Only strip trailing whitespace if it will end up at the end of a line
+    auto maybeStripped = (actualEditedFileContents.size() > endOffset && actualEditedFileContents[endOffset] == '\n')
+                             ? stripTrailingAsciiBlank(newText)
+                             : newText;
+    auto indented = reindent ? absl::StrReplaceAll(maybeStripped, {{"\n", indentAfterNewline}}) : string(maybeStripped);
     actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, indented);
 
     return actualEditedFileContents;
