@@ -27,3 +27,11 @@ end
 
 blk = Proc.new
 foo("", tags: {}, x: 1, &blk)
+
+
+def with_base_dir(*segments)
+end
+
+Dir[with_base_dir("")].each do |file_path|
+  p file_path
+end
