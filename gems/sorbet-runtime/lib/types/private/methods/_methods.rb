@@ -83,7 +83,7 @@ module T::Private::Methods
       raise "Procs cannot have override/abstract modifiers"
     end
     if decl.mod != PROC_TYPE
-      raise "You are passing a DeclBuilder as a type. Did you accidentally use `self` inside a `sig` block?"
+      raise "You are passing a DeclBuilder as a type. Did you accidentally use `self` inside a `sig` block? Perhaps you wanted the `T.self_type` instead: https://sorbet.org/docs/self-type"
     end
     if decl.returns == ARG_NOT_PROVIDED
       raise "Procs must specify a return type"
