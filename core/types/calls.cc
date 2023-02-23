@@ -919,7 +919,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, data->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwParams = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
@@ -945,7 +945,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             break;
         }
         auto isKwSplat = spec.flags.isKeyword && spec.flags.isRepeated;
-        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || isKwSplat) &&
+        if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || isKwSplat) &&
             Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
@@ -965,7 +965,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // If positional arguments remain, the method accepts keyword arguments, and no keyword arguments were provided in
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
-    if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
+    if (ait != aPosEnd && hasKwParams && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
@@ -1036,7 +1036,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto &kwSplatArg = *(aend - 1);
             kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
-            if (hasKwargs) {
+            if (hasKwParams) {
                 if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
@@ -1075,7 +1075,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // Detect the case where not all positional arguments were supplied, causing the keyword args to be consumed as
         // a positional hash.
         if (kwargs != nullptr && pit != pend && !pit->flags.isBlock &&
-            (!hasKwargs || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
+            (!hasKwParams || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
             // TODO(trevor) if `hasKwargs` is true at this point but not keyword args were provided, we could add an
             // autocorrect to turn this into `**kwargs`
 
@@ -1095,7 +1095,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // the keyword args as consumed when this method does not accept keyword arguments.
             kwargs = nullptr;
             posArgs++;
-            if (!hasKwargs) {
+            if (!hasKwParams) {
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
@@ -1226,7 +1226,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
-    if (hasKwargs) {
+    if (hasKwParams) {
         // Remember where the kwargs started
         auto kwait = aPosEnd;
         // Mark the keyword args as consumed
@@ -1396,7 +1396,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
             }
 
-            if (!hasKwargs) {
+            if (!hasKwParams) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
