@@ -1,0 +1,10 @@
+# typed: strict
+# assert-fast-path: ambiguous_definitions.rb
+
+module Opus
+  module Foo
+    module Foo::Bar # error: Definition of `Bar` is ambiguous
+    end
+  end
+end
+
