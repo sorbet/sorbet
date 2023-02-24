@@ -39,16 +39,26 @@ core::TypeMemberRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef t
     }
 }
 
+namespace {
+core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::ClassOrModuleRef parent,
+                                           core::NameRef name) {
+    if (parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())) {
+        return core::errors::Resolver::EnumerableParentTypeNotDeclared;
+    } else if (name == core::Names::Constants::AttachedClass()) {
+        return core::errors::Resolver::InitializableIncluded;
+    } else {
+        return core::errors::Resolver::ParentTypeNotDeclared;
+    }
+}
+} // namespace
+
 bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, core::TypeMemberRef parentTypeMember,
                        core::ClassOrModuleRef sym,
                        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMemberNoDealias(gs, name);
     if (!my.exists()) {
-        auto code =
-            parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
-                ? core::errors::Resolver::EnumerableParentTypeNotDeclared
-                : core::errors::Resolver::ParentTypeNotDeclared;
+        auto code = getRedeclarationErrorCode(gs, parent, name);
 
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
             // Note having this error is intentional, as it makes it easier to implement Sorbet's incremental mode.
@@ -61,10 +71,28 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             // name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
             // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
             // grandchild class's file in the set of files to retypecheck.
-            // TODO(jez) Specialize this error for `<AttachedClass>` + `initializable!`
-            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
-                        sym.show(gs));
-            e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+            if (code == core::errors::Resolver::InitializableIncluded) {
+                auto initializable = core::Names::declareInitializable().show(gs);
+                if (sym.data(gs)->isModule()) {
+                    e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", initializable,
+                                parent.show(gs), sym.show(gs));
+                } else if (sym.data(gs)->isSingletonClass(gs)) {
+                    // We'd only get this type member redeclaration error in a singleton class if
+                    // the attached class of this singleton class is a module (because all classes'
+                    // singleton classes get the `<AttachedClass>` type member declared)
+                    e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
+                                initializable, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+                } else {
+                    // sym is a normal, non singleton class
+                    e.setHeader("`{}` was declared `{}` and so must be `{}`ed into the class `{}`", parent.show(gs),
+                                initializable, "extend", sym.show(gs));
+                }
+                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", initializable);
+            } else {
+                e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
+                            parent.show(gs), sym.show(gs));
+                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+            }
         }
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         typeMember.data(gs)->flags.isFixed = true;
