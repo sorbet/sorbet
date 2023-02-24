@@ -1,0 +1,8 @@
+# typed: true
+# assert-fast-path: out_of_order.rb
+
+X = A
+#   ^ error: `A` referenced before it is defined
+
+class A::Foo
+end
