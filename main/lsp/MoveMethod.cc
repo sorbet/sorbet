@@ -201,17 +201,6 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
 } // namespace
 
-unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const core::lsp::MethodDefResponse &definition,
-                                          LSPTypecheckerDelegate &typechecker) {
-    auto fref = definition.termLoc.file();
-
-    auto &rootTree = typechecker.getIndexed({fref});
-    auto insertPosition = Range::fromLoc(gs, core::Loc(fref, rootTree.tree.loc().copyWithZeroLength()));
-    auto newModuleSymbol = insertPosition->start->copy();
-    newModuleSymbol->character += moduleKeyword.size() + 1;
-    return newModuleSymbol;
-}
-
 vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                         const LSPConfiguration &config,
                                                         const core::lsp::MethodDefResponse &definition) {
