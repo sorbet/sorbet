@@ -12,10 +12,10 @@ module Thing
     extend T::Generic
     interface!
 
-    initializable!
+    initializable!(:out) { {upper: Thing} }
 
     sig {abstract.returns(T.attached_class)}
-    def new; end
+    def make_thing; end
   end
   mixes_in_class_methods(Factory)
 end
@@ -27,31 +27,35 @@ sig do
     )
     .returns(T.type_parameter(:Instance))
 end
-def instantiate_class_good(klass)
-  instance = klass.new
-  T.reveal_type(instance.foo) # error: `Integer`
+def instantiate_class(klass)
+  instance = klass.make_thing
+  instance.foo
   instance
 end
 
-class Child
+class GoodThing
   extend T::Generic
   include Thing
 
   sig {override.returns(Integer)}
   def foo; 0; end
+
+  sig {override.returns(T.attached_class)}
+  def self.make_thing
+    new
+  end
 end
 
-class GrandChild < Child; end
+class ChildGoodThing < GoodThing; end
 
-instance = instantiate_class_good(Child)
-T.reveal_type(instance) # error: `Child`
+instance = ChildGoodThing.make_thing
+T.reveal_type(instance) # error: `ChildGoodThing`
 
 sig do
-  params(thing_factory: Thing::Factory[Child]).void
+  params(thing_factory: Thing::Factory[GoodThing]).void
 end
 def example(thing_factory)
 end
 
-# To pass, this requires declaring the type member with covariance
-instance = example(GrandChild)
-#                  ^^^^^^^^^^ error: Expected `Thing::Factory[Child]` but found `T.class_of(GrandChild)` for argument `thing_factory`
+instance = example(ChildGoodThing)
+T.reveal_type(instance)

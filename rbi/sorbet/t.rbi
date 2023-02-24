@@ -245,8 +245,13 @@ module T::Generic
   # For more information, see https://sorbet.org/docs/generics#generics-and-runtime-checks
   def [](*types); end
 
-  # TODO(jez) Document
-  def initializable!; end
+  # Allows using `T.attached_class` in this module, at the expense of only
+  # being allowed to `extend` this module, never `include` it (unless the
+  # module it's included into is also marked `initializable!`).
+  #
+  # For more information, see https://sorbet.org/docs/attached-class
+  sig {params(variance: Symbol, blk: T.untyped).void}
+  def initializable!(variance=:invariant, &blk); end
 end
 
 module T::Helpers

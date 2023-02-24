@@ -20,6 +20,5 @@ module T::Generic
     T::Types::TypeTemplate.new(variance)
   end
 
-  # TODO(jez) Document
-  def initializable!; end
+  def initializable!(variance=:invariant, &blk); end
 end

@@ -222,3 +222,129 @@ type suggests to the caller that `Child.make` will return a `Child` instance
 
 Since `Parent.new` is not an instance of `Child` or any other potential
 subclasses of `Parent`, Sorbet must reject the code at `(1)`.
+
+## `initializable!`: `T.attached_class` in module instance methods
+
+Some modules are only ever mixed into a class with `extend` (not `include`).
+These modules usually want to be able to call `new` to instantiate an instance
+of the class that the module is `extend`'d into.
+
+To annotate module instance methods like this (which become singleton class
+methods after being mixed into a class), Sorbet provides the `initializable!`
+annotation:
+
+```ruby
+module FinderMethods
+  extend T::Sig
+  extend T::Generic
+  abstract!
+
+  initializable!
+
+  sig {abstract.returns(T.attached_class)}
+  def new; end
+
+  sig {params(id: String).returns(T.attached_class)}
+  def find(id)
+    self.new
+  end
+end
+
+class ParentModel
+  extend T::Sig
+  extend FinderMethods
+end
+
+class ChildModel < ParentModel
+end
+
+parent = ChildModel.find('pa_123')
+T.reveal_type(parent) # => `ParentModel`
+child = ChildModel.find('ch_123')
+T.reveal_type(child)  # => `ChildModel`
+```
+
+Some things to note:
+
+- The `initializable!` method is exposed as a method in `T::Generic`, because
+  using `initializable!` implicitly makes the module into a
+  [generic module](generics.md). More on this in a moment.
+
+- We've declared `new` as an abstract method. This method is automatically
+  detected to be implemented when `extend`'d into a class (because all classes
+  inherit a concrete `self.new` method).
+
+  This abstract `new` method allows calling `new` in the `find` method. If this
+  `find` method had been in an [RBI file](rbi.md) (not in a source file), then
+  the abstract `new` declaration would not have been required, because there
+  would be no method bodies to type check.
+
+- The `FinderMethods` module is `extended` into `ParentModel`. Had this been
+  `include FinderMethods`, Sorbet would have reported an error saying that
+  `FinderMethods` can only be extended into classes.
+
+- The two calls to `find` at the bottom of the snippet reveal that `find`'s type
+  changes based on the type of the method call's receiver. Basically: `find` on
+  a `ChildModel` will be a `ChildModel`.
+
+### Generics and `initializable!`
+
+We mentioned above that using `initializable!` in a module makes the module into
+a generic module. The mental model here is to think of `initializable!` as
+syntactic sugar for putting a `type_member` with a pre-determined name into the
+module. This `type_member`, having no explicit name, can then be referenced
+using `T.attached_class`.
+
+What this means is that it's possible to abstract over the attached class of an
+`initializable!` module, the same as any other generic interface:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .params(
+      findable: FinderMethods[T.type_parameter(:U)]
+      id: String
+    )
+    .returns(T.type_parameter(:U))
+end
+def find_and_log(findable, id)
+  instance = findable.find(id)
+  puts("Found #{instance}")
+  instance
+end
+
+parent = find_and_log(ParentModel, 'pa_123')
+T.reveal_type(parent) # => `ParentModel`
+child = find_and_log(ParentModel, 'pa_123')
+T.reveal_type(child) # => `ChildModel`
+```
+
+Note how we've annotated the `findable` parameter as `FinderMethods[...]`,
+indicating that we're using the `FinderMethods` module generically. In fact,
+supplying a type argument to the `FinderMethods` is now **required**: it's not
+possible to reference `FinderMethods` in a type position without providing a
+type annotation. If you truly must ignore this, supply a type argument like
+`BasicObject` or `T.untyped` (or accept the autocorrect on the error, which will
+insert `T.untyped` by default).
+
+As a generic, `initializable!` takes the same arguments that `type_member` takes
+for things like variance and bounds:
+
+```ruby
+# Declares a covariant type member:
+initializable!(:out)
+
+# Places a bound on the type member:
+initializable! { {upper: SomeInterface} }
+
+# Altogether:
+initializable!(:out) { {upper: SomeInterface} }
+```
+
+(Note that this type member cannot be declared contravariant, as that would make
+it impossible to mix this module into a class.)
+
+> Note: you may also find this external blog post useful, which discusses
+> similar topics:
+>
+> [Typing klass.new in Ruby with Sorbet →](https://blog.jez.io/typing-klass-new/)
