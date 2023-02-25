@@ -2755,6 +2755,7 @@ public:
              dispatched.main.method.data(gs)->name == core::Names::initialize())) {
             // TODO(jez) This doesn't handle when initialize is overloaded
             // AttachedClass will only be missing on `T.untyped`, which will have a dispatch component of noSymbol
+            // TODO(jez) Will need updating
             auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             ENFORCE(attachedClass.exists());
 
@@ -2785,6 +2786,7 @@ public:
         auto self = unwrapSymbol(gs, selfTy.type, mustExist);
 
         if (self.data(gs)->isSingletonClass(gs)) {
+            // TODO(jez)
             auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             ENFORCE(attachedClass.exists());
             res.returnType = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
