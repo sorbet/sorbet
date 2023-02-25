@@ -437,6 +437,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
         ENFORCE(attached.exists() || owner.data(gs)->isModule());
+        // TODO(jez) If you end up allowing `initializable!` for arbitrary classes, change this `owner ==` check here.
         if (options.showForRBI || owner == core::Symbols::Class() || owner.data(gs)->isModule()) {
             return "T.attached_class";
         }
@@ -682,6 +683,7 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
 // See the comment in the header.
 // !! The set of stdlib classes receiving this special behavior should NOT grow over time !!
 bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
+    // TODO(jez) Consider not special casing `Class`
     return *this == Symbols::Hash() || *this == Symbols::Array() || *this == Symbols::Set() ||
            *this == Symbols::Range() || *this == Symbols::Enumerable() || *this == Symbols::Enumerator() ||
            *this == Symbols::Enumerator_Lazy() || *this == Symbols::Enumerator_Chain();

@@ -1019,7 +1019,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             auto klass = sym.asClassOrModuleRef();
             // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
             // same way that we check against types like `Array`
-            if (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0) {
+            //
+            // TODO(jez) This `klass == Class` is just a hack to get the payload to build while prototyping...
+            // we should probably fix it properly in the stdlib, and figure out what our rollout strategy is.
+            if (klass != core::Symbols::Class() &&
+                (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0)) {
                 auto level = klass.isLegacyStdlibGeneric() ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                                            : core::errors::Resolver::GenericClassWithoutTypeArgs;
                 if (auto e = ctx.beginError(i.loc, level)) {

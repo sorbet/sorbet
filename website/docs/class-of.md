@@ -199,5 +199,8 @@ However, both the top-level call site to `example3` and the call to
 actually need to use instance methods from `MyInterface`, this may be an
 acceptable workaround.
 
+<!-- TODO(jez) Update this doc -->
+<!-- TODO(jez) Be sure to include guidance on when to use `T.class_of` vs `T::Class` -->
+
 > A future feature of Sorbet might be able to improve this workaround. See
 > https://github.com/sorbet/sorbet/issues/62.

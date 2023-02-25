@@ -1935,15 +1935,23 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
 
+        // TODO(jez) I think we can further simplify this logic
+        // (and maybe even simplify the hacky handling for `initialize` in dispatchCallSymbol?)
+        if (self == Symbols::Class()) {
+            // Call to `.new` on `Class` object itself. We don't know what the object is, so we
+            // can't dispatch to it's `initialize` function. Just let the sig for `Class#new` return
+            // `T.attached_class`
+            //
+            // TODO(jez) Galaxy brain: dispatch to initialize on first type argument
+            return;
+        }
+
+        // TODO(jez) Are there any other intrinsics we think we can clean up?
+
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (self == Symbols::Class()) {
-                // `Class.new(...)`, but it isn't a specific Class. We know
-                // calling .new on a Class will yield some sort of Object
-                attachedClass = Symbols::Object();
-            } else {
-                return;
-            }
+            ENFORCE(false); // TODO(jez) explain why we think this holds?
+            return;
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
@@ -2808,7 +2816,7 @@ public:
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
-                // TODO(jez) Report correct error here
+                // TODO(jez) Report correct error here (w.r.t. instance methods of `Class` itself)
                 if (selfData->isModule()) {
                     e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`", self.show(gs),
                                 hasAttachedClass, "T.attached_class");
@@ -4270,6 +4278,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Enumerator_Chain(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
