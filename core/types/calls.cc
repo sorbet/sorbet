@@ -2214,7 +2214,6 @@ public:
     }
 } T_Generic_squareBrackets;
 
-namespace {
 void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, size_t argsToDropOffEnd) {
     // We should always have the actual receiver plus whatever args we're going
     // to ignore for dispatching purposes.
@@ -2242,7 +2241,6 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
                                       recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
                                       args.suppressErrors});
 }
-} // namespace
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
@@ -3366,8 +3364,6 @@ public:
     }
 } Tuple_concat;
 
-namespace {
-
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
     if (!isa_type<ClassType>(expectedType)) {
         return nullopt;
@@ -3412,8 +3408,6 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
     return nullopt;
 }
-
-} // namespace
 
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
@@ -3690,8 +3684,6 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
-namespace {
-
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -3797,8 +3789,6 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
 
     res.returnType = move(recursiveDispatch.returnType);
 }
-
-} // namespace
 
 class Hash_dig : public IntrinsicMethod {
 public:
