@@ -4277,8 +4277,6 @@ public:
 
 } // namespace
 
-class T_Generic_squareBrackets : public IntrinsicMethod {
-public:
     // This method is actually special: not only is it called from processBinding in infer, it's
     // also called directly by type_syntax parsing in resolver (because this method checks some
     // invariants of generics that we want to hold even in `typed: false` files).
@@ -4385,6 +4383,10 @@ public:
         return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
     }
 
+namespace {
+
+class T_Generic_squareBrackets : public IntrinsicMethod {
+public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
@@ -4397,8 +4399,6 @@ public:
         res.returnType = applyTypeArguments(gs, args, attachedClass);
     }
 } T_Generic_squareBrackets;
-
-namespace {
 
 const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
