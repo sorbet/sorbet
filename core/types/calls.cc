@@ -2016,7 +2016,7 @@ public:
             return;
         }
 
-        res.returnType = Types::applyTypeArguments(gs, args, attachedClass);
+        res.returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
     }
 } T_Generic_squareBrackets;
 

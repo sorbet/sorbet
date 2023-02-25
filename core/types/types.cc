@@ -966,7 +966,9 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 //
 // Unfortunately, this means that some errors are double reported (once by resolver, and then
 // again by infer).
-TypePtr Types::applyTypeArguments(const GlobalState &gs, const DispatchArgs &args, ClassOrModuleRef genericClass) {
+
+TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
+                                  InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
     if (genericClass.data(gs)->typeMembers().empty()) {
@@ -981,11 +983,11 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const DispatchArgs &arg
     }
 
     // This is something like Generic[T1,...,foo: bar...]
-    auto numKwArgs = args.args.size() - args.numPosArgs;
+    auto numKwArgs = args.size() - numPosArgs;
     if (numKwArgs > 0) {
-        auto begin = args.locs.args[args.numPosArgs].beginPos();
-        auto end = args.locs.args.back().endPos();
-        core::Loc kwargsLoc{args.locs.file, begin, end};
+        auto begin = locs.args[numPosArgs].beginPos();
+        auto end = locs.args.back().endPos();
+        core::Loc kwargsLoc{locs.file, begin, end};
 
         if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
             e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
@@ -996,15 +998,17 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
-    if (args.numPosArgs != arity) {
-        if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
+    if (numPosArgs != arity) {
+        auto errLoc = !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back()))
+                                         : core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
             e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`", genericClass.show(gs),
-                        arity, args.numPosArgs);
+                        arity, numPosArgs);
         }
     }
 
     vector<TypePtr> targs;
-    auto it = args.args.begin();
+    auto it = args.begin();
     int i = -1;
     targs.reserve(genericClass.data(gs)->typeMembers().size());
     for (auto mem : genericClass.data(gs)->typeMembers()) {
@@ -1019,8 +1023,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const DispatchArgs &arg
             // Fixed args are implicitly applied, and won't consume type
             // arguments from the list that's supplied.
             targs.emplace_back(memType->upperBound);
-        } else if (it != args.args.end()) {
-            auto loc = args.argLoc(it - args.args.begin());
+        } else if (it != args.end()) {
+            auto loc = core::Loc(locs.file, locs.args[it - args.begin()]);
             auto argType = unwrapType(gs, loc, (*it)->type);
             bool validBounds = true;
 

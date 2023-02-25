@@ -1279,29 +1279,10 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             return result;
         }
 
-        auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
-        ENFORCE_NO_TIMER(correctedSingleton.exists());
-        auto ctype = core::make_type<core::ClassType>(correctedSingleton);
-        core::TypeAndOrigins ctypeAndOrigins{ctype, ctx.locAt(s.loc)};
-        // In `dispatchArgs` this is ordinarily used to specify the origin tag for
-        // uninitialized variables. Inside of a signature we shouldn't need this:
-        auto originForUninitialized = core::Loc::none();
-        core::CallLocs locs{
-            ctx.file, s.loc, recvi->loc, s.loc.copyWithZeroLength(), argLocs,
-        };
-        auto suppressErrors = false;
-        core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
-                                        locs,
-                                        s.numPosArgs(),
-                                        targs,
-                                        ctype,
-                                        ctypeAndOrigins,
-                                        ctype,
-                                        nullptr,
-                                        originForUninitialized,
-                                        s.flags.isPrivateOk,
-                                        suppressErrors};
-        auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
+        auto genericClass = corrected.asClassOrModuleRef();
+        ENFORCE_NO_TIMER(genericClass.exists());
+        core::CallLocs locs{ctx.file, s.loc, recvi->loc, s.funLoc, argLocs};
+        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass);
 
         if (out.isUntyped()) {
             // Using a generic untyped type here will lead to incorrect handling of global state hashing,
@@ -1313,6 +1294,8 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             for (auto &targ : targs) {
                 targPtrs.push_back(targ->type);
             }
+            auto correctedSingleton = genericClass.data(ctx)->lookupSingletonClass(ctx);
+            ENFORCE_NO_TIMER(correctedSingleton.exists());
             result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
             return result;
         }
