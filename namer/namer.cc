@@ -1194,9 +1194,7 @@ private:
             }
 
             auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            if (symbol != core::Symbols::root()) {
-                singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
-            }
+            singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
 
             // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.
             // Ideally, we would be able to make finalizeSymbols fast/incremental enough to run on all edits.
