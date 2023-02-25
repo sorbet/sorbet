@@ -441,94 +441,6 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     return fallback;
 }
 
-/**
- * unwrapType is used to take an expression that's parsed at the value-level,
- * and turn it into a type. For example, consider the following two expressions:
- *
- * > Integer.sqrt 10
- * > T::Array[Integer].new
- *
- * In both lines, `Integer` is initially resolved as the singleton class of
- * `Integer`. This is because it's not immediately clear if we want to refer
- * to the type `Integer` or if we want the singleton class of Integer for
- * calling singleton methods. In the first line this was the correct choice, as
- * we're just invoking the singleton method `sqrt`. In the second case we need
- * to fix up the `Integer` sub-expression, and turn it back into the type of
- * integer values. This is what `unwrapType` does, it turns the value-level
- * expression back into a type-level one.
- */
-TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
-    if (auto *metaType = cast_type<MetaType>(tp)) {
-        return metaType->wrapped;
-    }
-
-    if (isa_type<ClassType>(tp)) {
-        auto classType = cast_type_nonnull<ClassType>(tp);
-        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
-            // T::Enum instances are allowed to stand for themselves in type syntax positions.
-            // See the note in type_syntax.cc regarding T::Enum.
-            return tp;
-        }
-
-        auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
-        if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-                if (classType.symbol == core::Symbols::T_Types_Base() ||
-                    classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
-                    // T::Types::Base is the parent class for runtime type objects.
-                    // Give a more helpful error message
-                    e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
-                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
-                                   "T.unsafe");
-                    auto locSource = loc.source(gs);
-                    if (locSource.has_value()) {
-                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
-                    }
-                }
-            }
-
-            return Types::untypedUntracked();
-        }
-
-        return attachedClass.data(gs)->externalType();
-    }
-
-    if (auto *appType = cast_type<AppliedType>(tp)) {
-        ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
-        if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-            }
-            return Types::untypedUntracked();
-        }
-
-        return attachedClass.data(gs)->externalType();
-    }
-
-    if (auto *shapeType = cast_type<ShapeType>(tp)) {
-        vector<TypePtr> unwrappedValues;
-        unwrappedValues.reserve(shapeType->values.size());
-        for (auto &value : shapeType->values) {
-            unwrappedValues.emplace_back(unwrapType(gs, loc, value));
-        }
-        return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
-    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
-        vector<TypePtr> unwrappedElems;
-        unwrappedElems.reserve(tupleType->elems.size());
-        for (auto &elem : tupleType->elems) {
-            unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
-        }
-        return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
-        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-        }
-        return Types::untypedUntracked();
-    }
-    return tp;
-}
-
 struct ArityComponents {
     int required;
     int optional;
@@ -1709,7 +1621,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
 
             auto returns = core::Types::void_();
             if (args.name == core::Names::returns()) {
-                returns = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+                returns = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
             }
 
             // Have to create a new type for the result because dispatchCall is a const member method
@@ -1803,7 +1715,7 @@ public:
 
         // The argument to `T.class_of(...)` is a value, but has a type meaning. That means we need
         // to  `unwrapType` to handle things like type aliases and constant literal types.
-        auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
         auto mustExist = false;
         auto classSymbol = unwrapSymbol(gs, unwrappedType, mustExist);
         if (!classSymbol.exists()) {
@@ -1895,7 +1807,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, args.argLoc(i), arg->type);
+            auto ty = Types::unwrapType(gs, args.argLoc(i), arg->type);
             ret = Types::any(gs, ret, ty);
         }
 
@@ -1914,7 +1826,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, args.argLoc(i), arg->type);
+            auto ty = Types::unwrapType(gs, args.argLoc(i), arg->type);
             ret = Types::all(gs, ret, ty);
         }
 
@@ -1944,8 +1856,8 @@ public:
             return;
         }
 
-        res.returnType =
-            make_type<MetaType>(Types::any(gs, unwrapType(gs, args.argLoc(0), args.args[0]->type), Types::nilClass()));
+        res.returnType = make_type<MetaType>(
+            Types::any(gs, Types::unwrapType(gs, args.argLoc(0), args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
 
@@ -1976,7 +1888,7 @@ public:
         targs.emplace_back(core::Types::todo());
 
         for (size_t i = 1; i < args.args.size(); i += 2) {
-            auto unwrappedType = unwrapType(gs, args.argLoc(i), args.args[i]->type);
+            auto unwrappedType = Types::unwrapType(gs, args.argLoc(i), args.args[i]->type);
             targs.emplace_back(move(unwrappedType));
         }
 
@@ -2004,7 +1916,7 @@ public:
 
         auto sym = core::Symbols::Proc(0);
         vector<core::TypePtr> targs;
-        auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
         targs.emplace_back(move(unwrappedType));
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }

@@ -888,6 +888,78 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
     return singleton.data(gs)->attachedClass(gs);
 }
 
+TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
+    if (auto *metaType = cast_type<MetaType>(tp)) {
+        return metaType->wrapped;
+    }
+
+    if (isa_type<ClassType>(tp)) {
+        auto classType = cast_type_nonnull<ClassType>(tp);
+        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+            // T::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding T::Enum.
+            return tp;
+        }
+
+        auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
+        if (!attachedClass.exists()) {
+            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+                if (classType.symbol == core::Symbols::T_Types_Base() ||
+                    classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
+                    // T::Types::Base is the parent class for runtime type objects.
+                    // Give a more helpful error message
+                    e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
+                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
+                                   "T.unsafe");
+                    auto locSource = loc.source(gs);
+                    if (locSource.has_value()) {
+                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
+                    }
+                }
+            }
+
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(gs)->externalType();
+    }
+
+    if (auto *appType = cast_type<AppliedType>(tp)) {
+        ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
+        if (!attachedClass.exists()) {
+            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+            }
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(gs)->externalType();
+    }
+
+    if (auto *shapeType = cast_type<ShapeType>(tp)) {
+        vector<TypePtr> unwrappedValues;
+        unwrappedValues.reserve(shapeType->values.size());
+        for (auto &value : shapeType->values) {
+            unwrappedValues.emplace_back(unwrapType(gs, loc, value));
+        }
+        return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
+    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(tupleType->elems.size());
+        for (auto &elem : tupleType->elems) {
+            unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
+        }
+        return make_type<TupleType>(move(unwrappedElems));
+    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
+        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+        }
+        return Types::untypedUntracked();
+    }
+    return tp;
+}
+
 // This method is actually special: not only is it called from dispatchCall in calls.cc, it's
 // also called directly by type_syntax parsing in resolver (because this method checks some
 // invariants of generics that we want to hold even in `typed: false` files).
