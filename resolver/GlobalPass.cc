@@ -80,6 +80,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                     // We'd only get this type member redeclaration error in a singleton class if
                     // the attached class of this singleton class is a module (because all classes'
                     // singleton classes get the `<AttachedClass>` type member declared)
+                    ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
                     e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
                                 initializable, "extend", sym.data(gs)->attachedClass(gs).show(gs));
                 } else {

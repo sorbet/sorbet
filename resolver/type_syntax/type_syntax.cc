@@ -875,41 +875,37 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             auto owner = ctx.owner.asClassOrModuleRef();
             auto ownerData = owner.data(ctx);
 
-            auto attachedClassIsAllowed =
-                // isModule is never true for a singleton class, so this implies that this is a module instance method
-                ownerData->isModule() ||
-                // In classes, can only use `T.attached_class` on singleton methods
-                (ownerData->isSingletonClass(ctx) && ownerData->attachedClass(ctx).data(ctx)->isClass());
-            if (!attachedClassIsAllowed) {
+            auto maybeAttachedClass = ownerData->findMember(ctx, core::Names::Constants::AttachedClass());
+            if (!maybeAttachedClass.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    if (!ownerData->isSingletonClass(ctx)) {
+                    auto initializable = core::Names::declareInitializable().show(ctx);
+                    if (ownerData->isModule()) {
+                        e.setHeader("`{}` must be marked `{}` before module instance methods can use `{}`",
+                                    owner.show(ctx), initializable, "T.attached_class");
+                        // TODO(jez) Autocorrect to insert `initializable!`
+                    } else if (ownerData->isSingletonClass(ctx)) {
+                        // Combination of `isSingletonClass` and `<AttachedClass>` missing means
+                        // this is the singleton class of a module.
+                        ENFORCE(ownerData->attachedClass(ctx).data(ctx)->isModule());
                         e.setHeader("`{}` cannot be used in singleton methods on modules, because modules cannot be "
                                     "instantiated",
                                     "T.attached_class");
                     } else {
-                            e.setHeader("`{}` may only be used in a singleton class context, and not on modules",
-                                        "T.attached_class");
-                            e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
+                        e.setHeader(
+                            "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
+                            "T.attached_class", initializable);
+                        e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
                                        owner.show(ctx));
                     }
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
-                // All singletons have an AttachedClass type member, created by `singletonClass`
-                // TODO(jez) this comment will be wrong
-                auto maybeAttachedClass = owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-                if (!maybeAttachedClass.exists()) {
-                    if (owner.data(ctx)->isClass()) {
-                        ENFORCE(false, "<AttachedClass> type member must always exist for classes");
-                    } else {
-                        // TODO(jez) different error code, and an autocorrect
-                        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                            e.setHeader("You forgot `{}`", core::Names::declareInitializable().show(ctx));
-                        }
-                        return TypeSyntax::ResultType{core::Types::untypedUntracked(),
-                                                      core::Symbols::noClassOrModule()};
-                    }
-                }
+                ENFORCE(
+                    // isModule is never true for a singleton class, which implies this is a module instance method
+                    ownerData->isModule() ||
+                    // In classes, can only use `T.attached_class` on singleton methods
+                    (ownerData->isSingletonClass(ctx) && ownerData->attachedClass(ctx).data(ctx)->isClass()));
+
                 const auto attachedClass = maybeAttachedClass.asTypeMemberRef();
                 return TypeSyntax::ResultType{core::make_type<core::SelfTypeParam>(attachedClass),
                                               core::Symbols::noClassOrModule()};
