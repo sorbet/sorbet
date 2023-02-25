@@ -1004,21 +1004,29 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     // generation mode.
     bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
 
+    bool allowOmittingAttachedClass = false;
     if (!singlePackageRbiGeneration && (numPosArgs != arity || arity == 0)) {
-        auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
-        auto errLoc =
-            !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
-        if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
-            if (arity == 0) {
-                if (genericClass.data(gs)->typeMembers().empty()) {
-                    e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
+        if (numPosArgs + 1 == arity && genericClass.data(gs)->isSingletonClass(gs)) {
+            // Make an exception to allow not providing type arg for <AttachedClass> in a singleton class,
+            // preferring to let it be applied using the upperBound
+            allowOmittingAttachedClass = true;
+        } else {
+            auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+            auto errLoc =
+                !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
+            if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
+                if (arity == 0) {
+                    if (genericClass.data(gs)->typeMembers().empty()) {
+                        e.setHeader("`{}` is not a generic class, but was given type parameters",
+                                    genericClass.show(gs));
+                    } else {
+                        e.setHeader("All type parameters for `{}` have already been fixed", genericClass.show(gs));
+                    }
+                    e.replaceWith("Remove square brackets", squareBracketsLoc, "");
                 } else {
-                    e.setHeader("All type parameters for `{}` have already been fixed", genericClass.show(gs));
+                    e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
+                                genericClass.show(gs), arity, numPosArgs);
                 }
-                e.replaceWith("Remove square brackets", squareBracketsLoc, "");
-            } else {
-                e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            genericClass.show(gs), arity, numPosArgs);
             }
         }
     }
@@ -1042,6 +1050,9 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         if (memData->flags.isFixed) {
             // Fixed args are implicitly applied, and won't consume type
             // arguments from the list that's supplied.
+            targs.emplace_back(memType->upperBound);
+        } else if (allowOmittingAttachedClass && memData->name == core::Names::Constants::AttachedClass()) {
+            // Same comment about not consuming type arguments applies here
             targs.emplace_back(memType->upperBound);
         } else if (it != args.end()) {
             auto loc = core::Loc(locs.file, locs.args[it - args.begin()]);
