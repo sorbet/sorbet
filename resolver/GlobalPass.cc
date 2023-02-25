@@ -214,6 +214,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
+            ref.data(gs)->singletonClass(gs); // force singleton class into existence
 
             // allow us to catch undeclared modules in LSP fast path, so we can report ambiguous
             // definition errors.

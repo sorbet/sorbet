@@ -19,8 +19,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U Funcs>>#<U h> : private (s, <blk>) -> String @ Loc {file=test/testdata/namer/module_function.rb start=16:3 end=16:11}
       argument s<> -> String @ Loc {file=test/testdata/namer/module_function.rb start=15:15 end=15:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
-  class <S <C <U Funcs>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
-    type-member(+) <S <C <U Funcs>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Funcs>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Funcs) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
+  class <S <C <U Funcs>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=2:13}
     method <S <C <U Funcs>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/module_function.rb start=2:1 end=17:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/module_function.rb start=??? end=???}
     method <S <C <U Funcs>> $1>#<U f> (module_function :f, module_function :f) @ Loc {file=test/testdata/namer/module_function.rb start=8:3 end=8:21}

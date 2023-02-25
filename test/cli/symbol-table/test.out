@@ -7,12 +7,9 @@ class ::<root> < ::Object ()
     module ::Net::SSH < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/symbol-table/symbol-table.rb:2
       module ::Net::SSH::Authentication < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/symbol-table/symbol-table.rb:2
         module ::Net::SSH::Authentication::CustomModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/symbol-table/symbol-table.rb:2
-        class ::Net::SSH::Authentication::<Class:CustomModule>[<AttachedClass>] < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
-          type-member(+) ::Net::SSH::Authentication::<Class:CustomModule>::<AttachedClass> -> T.attached_class (of Net::SSH::Authentication::CustomModule) @ test/cli/symbol-table/symbol-table.rb:2
+        class ::Net::SSH::Authentication::<Class:CustomModule> < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
           method ::Net::SSH::Authentication::<Class:CustomModule>#<static-init> (<blk>) @ test/cli/symbol-table/symbol-table.rb:2
             argument <blk><block> @ Loc {file=test/cli/symbol-table/symbol-table.rb start=??? end=???}
-      class ::Net::SSH::<Class:Authentication>[<AttachedClass>] < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
-        type-member(+) ::Net::SSH::<Class:Authentication>::<AttachedClass> -> T.attached_class (of Net::SSH::Authentication) @ test/cli/symbol-table/symbol-table.rb:2
-    class ::Net::<Class:SSH>[<AttachedClass>] < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
-      type-member(+) ::Net::<Class:SSH>::<AttachedClass> -> T.attached_class (of Net::SSH) @ test/cli/symbol-table/symbol-table.rb:2
+      class ::Net::SSH::<Class:Authentication> < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
+    class ::Net::<Class:SSH> < ::Module () @ test/cli/symbol-table/symbol-table.rb:2
 

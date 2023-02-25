@@ -11,8 +11,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U A>>#<U f> (x, <blk>) -> NilClass @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=8:3 end=8:11}
       argument x<> -> A::C1 @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=7:15 end=7:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=??? end=???}
-  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=2:1 end=2:9}
-    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=2:1 end=2:9}
+  class <S <C <U A>> $1> < <C <U Module>> (<C <U Sig>>) @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=2:1 end=2:9}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=2:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/class_alias_inside_method.rb start=??? end=???}
 

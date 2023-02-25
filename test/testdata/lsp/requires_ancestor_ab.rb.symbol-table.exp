@@ -7,8 +7,7 @@ class ::<root> < ::Object ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
     method ::A#only_on_a (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:7
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
-  class ::<Class:A>[<AttachedClass>] < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:4
-    type-member(+) ::<Class:A>::<AttachedClass> -> T.attached_class (of A) @ test/testdata/lsp/requires_ancestor_ab.rb:4
+  class ::<Class:A> < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:4
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:4
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   module ::B < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/lsp/requires_ancestor_ab.rb:13
@@ -16,8 +15,7 @@ class ::<root> < ::Object ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
     method ::B#only_on_b (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:16
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
-  class ::<Class:B>[<AttachedClass>] < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:13
-    type-member(+) ::<Class:B>::<AttachedClass> -> T.attached_class (of B) @ test/testdata/lsp/requires_ancestor_ab.rb:13
+  class ::<Class:B> < ::Module (Sig) @ test/testdata/lsp/requires_ancestor_ab.rb:13
     method ::<Class:B>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:13
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
   class ::C < ::Object (Target) @ test/testdata/lsp/requires_ancestor_ab.rb:35
@@ -34,8 +32,7 @@ class ::<root> < ::Object ()
       argument <arg><> -> [Target] @ Loc {file=??? start=??? end=???}
     method ::Target#foo_b (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:27
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
-  class ::<Class:Target>[<AttachedClass>] < ::Module (Helpers) @ test/testdata/lsp/requires_ancestor_ab.rb:22
-    type-member(+) ::<Class:Target>::<AttachedClass> -> T.attached_class (of Target) @ test/testdata/lsp/requires_ancestor_ab.rb:22
+  class ::<Class:Target> < ::Module (Helpers) @ test/testdata/lsp/requires_ancestor_ab.rb:22
     method ::<Class:Target>#<static-init> (<blk>) @ test/testdata/lsp/requires_ancestor_ab.rb:22
       argument <blk><block> @ Loc {file=test/testdata/lsp/requires_ancestor_ab.rb start=??? end=???}
 
