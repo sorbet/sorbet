@@ -2861,6 +2861,14 @@ To fix this error, there are some options:
   abstract methods to simply `raise`, so that other aspects of the parent class
   can be tested.)
 
+## 5074
+
+A module marked `has_attached_class!` can only be mixed into a class with
+`extend`, or a module with `include`. When mixing a `has_attached_class!` module
+into another module, both modules must be marked `has_attached_class!`.
+
+For more information, see the docs for [`T.attached_class`](attached-class.md).
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
