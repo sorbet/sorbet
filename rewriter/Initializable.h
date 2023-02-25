@@ -5,7 +5,18 @@
 namespace sorbet::rewriter {
 
 /**
- * TODO(jez) Document
+ * Converts things like this
+ *
+ *     module A
+ *       initializable!
+ *     end
+ *
+ * into this:
+ *
+ *     module A
+ *       <AttachedClass> = type_member
+ *       initializable!
+ *     end
  */
 
 class Initializable final {
