@@ -48,11 +48,11 @@ B.bind_attached do
   # `T.let` and the intrinsic report this error
   b = T.let(new, T.attached_class)
   #         ^^^ error: Method `new` does not exist
-  #              ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
-  #              ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
+  #              ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in singleton methods on classes or instance methods on `initializable!` modules
+  #              ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in singleton methods on classes or instance methods on `initializable!` modules
 
   puts(b)
   bs = T::Array[T.attached_class].new
-  #             ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
+  #             ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in singleton methods on classes or instance methods on `initializable!` modules
   T.reveal_type(bs) # error: `T::Array[T.untyped]`
 end

@@ -57,5 +57,6 @@ end
 def example(thing_factory)
 end
 
-instance = example(ChildGoodThing)
-T.reveal_type(instance)
+# Both allowed, because of covariance
+example(GoodThing)
+example(ChildGoodThing)
