@@ -121,11 +121,11 @@ class Class < Module
   sig {params(args: T.untyped, blk: T.untyped).returns(T.attached_class)}
   def new(*args, &blk); end
 
-  sig { params(blk: T.untyped).returns(Class) }
+  sig { params(blk: T.untyped).returns(T::Class[Object]) }
   sig do
     type_parameters(:Parent)
-      .params(super_class: T.all(Class, T.type_parameter(:Parent)), blk: T.untyped)
-      .returns(T.all(Class, T.type_parameter(:Parent)))
+      .params(super_class: T::Class[T.type_parameter(:Parent)], blk: T.untyped)
+      .returns(T::Class[T.type_parameter(:Parent)])
   end
   def self.new(super_class = Object, &blk); end
 
