@@ -2808,6 +2808,7 @@ public:
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
+                // TODO(jez) Report correct error here
                 if (selfData->isModule()) {
                     e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`", self.show(gs),
                                 hasAttachedClass, "T.attached_class");

@@ -437,7 +437,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
         ENFORCE(attached.exists() || owner.data(gs)->isModule());
-        if (options.showForRBI || owner.data(gs)->isModule()) {
+        if (options.showForRBI || owner == core::Symbols::Class() || owner.data(gs)->isModule()) {
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));

@@ -13,10 +13,12 @@ vector<ast::ExpressionPtr> HasAttachedClass::run(core::MutableContext ctx, bool 
     }
 
     if (isClass) {
-        if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::HasAttachedClassInClass)) {
-            e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-                        core::Names::declareHasAttachedClass().show(ctx), "module", "class");
-        }
+        // TODO(jez) Figure out some way to allow `initializeable!` to only be used in `Class` (or
+        // maybe `Class` + children of `Class`)
+        // if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::HasAttachedClassInClass)) {
+        //     e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
+        //                 core::Names::declareHasAttachedClass().show(ctx), "module", "class");
+        // }
         return empty;
     }
 

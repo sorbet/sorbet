@@ -901,6 +901,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
                 ENFORCE(
+                    // T::Class[...] support
+                    owner == core::Symbols::Class() ||
                     // isModule is never true for a singleton class, which implies this is a module instance method
                     ownerData->isModule() ||
                     // In classes, can only use `T.attached_class` on singleton methods
