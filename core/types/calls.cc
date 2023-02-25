@@ -2101,19 +2101,11 @@ public:
     //
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto mustExist = true;
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto attachedClass = self.data(gs)->attachedClass(gs);
-
-        if (!attachedClass.exists()) {
-            return;
-        }
-
-        auto genericClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
+    static TypePtr applyTypeArguments(const GlobalState &gs, const DispatchArgs &args, ClassOrModuleRef genericClass) {
+        genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
         if (genericClass.data(gs)->typeMembers().empty()) {
-            return;
+            return Types::untypedUntracked();
         }
 
         int arity;
@@ -2206,7 +2198,19 @@ public:
             }
         }
 
-        res.returnType = make_type<MetaType>(make_type<AppliedType>(attachedClass, move(targs)));
+        return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
+        auto attachedClass = self.data(gs)->attachedClass(gs);
+
+        if (!attachedClass.exists()) {
+            return;
+        }
+
+        res.returnType = applyTypeArguments(gs, args, attachedClass);
     }
 } T_Generic_squareBrackets;
 
