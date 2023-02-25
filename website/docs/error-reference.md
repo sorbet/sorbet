@@ -536,6 +536,11 @@ type `T.untyped` (along with all other values).
 The `initializable!` annotation is only allowed in a Ruby `module`, not a Ruby
 `class`. For more, see the docs for [`T.attached_class`](attached-class.md).
 
+## 3514
+
+The `initializable!` annotation cannot be given a contravariant `:in` annotation
+because `T.attached_class` is only allowed in output positions.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
