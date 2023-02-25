@@ -1294,9 +1294,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             for (auto &targ : targs) {
                 targPtrs.push_back(targ->type);
             }
-            auto correctedSingleton = genericClass.data(ctx)->lookupSingletonClass(ctx);
-            ENFORCE_NO_TIMER(correctedSingleton.exists());
-            result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
+            result.type = core::make_type<core::UnresolvedAppliedType>(genericClass, move(targPtrs));
             return result;
         }
         if (auto *mt = core::cast_type<core::MetaType>(out)) {
