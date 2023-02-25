@@ -170,6 +170,12 @@ public:
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
     static core::ClassOrModuleRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
+
+    // Converts type syntax like `GenericClass[Arg0, Arg1]` into a TypePtr.
+    //
+    // Called both from type_syntax.cc during sig parsing and from infer after encountering
+    // something that look like type syntax in a method body.
+    static TypePtr applyTypeArguments(const GlobalState &gs, const DispatchArgs &args, ClassOrModuleRef genericClass);
 };
 
 struct Intrinsic {
