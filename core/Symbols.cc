@@ -22,7 +22,7 @@ namespace sorbet::core {
 
 using namespace std;
 
-const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 210;
+const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 212;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
@@ -626,8 +626,9 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
-           *this == Symbols::T_Range() || *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
-           *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
+           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Enumerable() ||
+           *this == Symbols::T_Enumerator() || *this == Symbols::T_Enumerator_Lazy() ||
+           *this == Symbols::T_Enumerator_Chain();
 }
 
 ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
@@ -647,6 +648,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Range();
     } else if (*this == Symbols::T_Set()) {
         return Symbols::Set();
+    } else if (*this == Symbols::T_Class()) {
+        return Symbols::Class();
     } else {
         return *this;
     }
@@ -669,6 +672,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Range();
     } else if (*this == Symbols::Set()) {
         return Symbols::T_Set();
+    } else if (*this == Symbols::Class()) {
+        return Symbols::T_Class();
     } else {
         return Symbols::noClassOrModule();
     }

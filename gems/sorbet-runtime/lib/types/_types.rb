@@ -355,4 +355,15 @@ module T
       end
     end
   end
+
+  module Class
+    def self.[](type)
+      # TODO(jez) Build TypedClass
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedClass::Untyped.new
+      else
+        T::Types::TypedClass.new(type)
+      end
+    end
+  end
 end
