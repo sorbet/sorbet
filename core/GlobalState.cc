@@ -907,7 +907,6 @@ void GlobalState::initEmpty() {
     Symbols::Symbol().data(*this)->resultType = Types::Symbol();
     Symbols::Float().data(*this)->resultType = Types::Float();
     Symbols::Object().data(*this)->resultType = Types::Object();
-    Symbols::Class().data(*this)->resultType = Types::classClass();
 
     // First file is used to indicate absence of a file
     files.emplace_back();

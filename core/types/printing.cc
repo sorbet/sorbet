@@ -441,6 +441,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         fmt::format_to(std::back_inserter(buf), "T::Range");
     } else if (this->klass == Symbols::Set()) {
         fmt::format_to(std::back_inserter(buf), "T::Set");
+    } else if (this->klass == Symbols::Class()) {
+        fmt::format_to(std::back_inserter(buf), "T::Class");
     } else {
         if (std::optional<int> procArity = Types::getProcArity(*this)) {
             fmt::format_to(std::back_inserter(buf), "T.proc");
