@@ -23,18 +23,6 @@ namespace sorbet::core {
 
 using namespace std;
 
-TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args) {
-    auto dispatched = recv.dispatchCall(gs, args);
-    auto link = &dispatched;
-    while (link != nullptr) {
-        for (auto &err : link->main.errors) {
-            gs._error(move(err));
-        }
-        link = link->secondary.get();
-    }
-    return move(dispatched.returnType);
-}
-
 TypePtr Types::top() {
     return make_type<ClassType>(Symbols::top());
 }

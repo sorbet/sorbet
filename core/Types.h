@@ -145,7 +145,6 @@ public:
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
     static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
-    static TypePtr dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args);
     static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
