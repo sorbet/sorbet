@@ -2110,17 +2110,17 @@ public:
             return;
         }
 
-        attachedClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
+        auto genericClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
 
-        if (attachedClass.data(gs)->typeMembers().empty()) {
+        if (genericClass.data(gs)->typeMembers().empty()) {
             return;
         }
 
         int arity;
-        if (attachedClass == Symbols::Hash()) {
+        if (genericClass == Symbols::Hash()) {
             arity = 2;
         } else {
-            arity = attachedClass.data(gs)->typeArity(gs);
+            arity = genericClass.data(gs)->typeArity(gs);
         }
 
         // This is something like Generic[T1,...,foo: bar...]
@@ -2131,7 +2131,7 @@ public:
             core::Loc kwargsLoc{args.locs.file, begin, end};
 
             if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
-                e.setHeader("Keyword arguments given to `{}`", attachedClass.show(gs));
+                e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
                 // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
                 if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
                     e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
@@ -2142,15 +2142,15 @@ public:
         if (args.numPosArgs != arity) {
             if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            attachedClass.show(gs), arity, args.numPosArgs);
+                            genericClass.show(gs), arity, args.numPosArgs);
             }
         }
 
         vector<TypePtr> targs;
         auto it = args.args.begin();
         int i = -1;
-        targs.reserve(attachedClass.data(gs)->typeMembers().size());
-        for (auto mem : attachedClass.data(gs)->typeMembers()) {
+        targs.reserve(genericClass.data(gs)->typeMembers().size());
+        for (auto mem : genericClass.data(gs)->typeMembers()) {
             ++i;
 
             auto memData = mem.data(gs);
@@ -2198,7 +2198,7 @@ public:
                 }
 
                 ++it;
-            } else if (attachedClass == Symbols::Hash() && i == 2) {
+            } else if (genericClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
                 targs.emplace_back(make_type<TupleType>(tupleArgs));
             } else {
