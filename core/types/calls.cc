@@ -4277,111 +4277,111 @@ public:
 
 } // namespace
 
-    // This method is actually special: not only is it called from processBinding in infer, it's
-    // also called directly by type_syntax parsing in resolver (because this method checks some
-    // invariants of generics that we want to hold even in `typed: false` files).
-    //
-    // Unfortunately, this means that some errors are double reported (once by resolver, and then
-    // again by infer).
-    static TypePtr applyTypeArguments(const GlobalState &gs, const DispatchArgs &args, ClassOrModuleRef genericClass) {
-        genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
+// This method is actually special: not only is it called from processBinding in infer, it's
+// also called directly by type_syntax parsing in resolver (because this method checks some
+// invariants of generics that we want to hold even in `typed: false` files).
+//
+// Unfortunately, this means that some errors are double reported (once by resolver, and then
+// again by infer).
+static TypePtr applyTypeArguments(const GlobalState &gs, const DispatchArgs &args, ClassOrModuleRef genericClass) {
+    genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
-        if (genericClass.data(gs)->typeMembers().empty()) {
-            return Types::untypedUntracked();
-        }
+    if (genericClass.data(gs)->typeMembers().empty()) {
+        return Types::untypedUntracked();
+    }
 
-        int arity;
-        if (genericClass == Symbols::Hash()) {
-            arity = 2;
-        } else {
-            arity = genericClass.data(gs)->typeArity(gs);
-        }
+    int arity;
+    if (genericClass == Symbols::Hash()) {
+        arity = 2;
+    } else {
+        arity = genericClass.data(gs)->typeArity(gs);
+    }
 
-        // This is something like Generic[T1,...,foo: bar...]
-        auto numKwArgs = args.args.size() - args.numPosArgs;
-        if (numKwArgs > 0) {
-            auto begin = args.locs.args[args.numPosArgs].beginPos();
-            auto end = args.locs.args.back().endPos();
-            core::Loc kwargsLoc{args.locs.file, begin, end};
+    // This is something like Generic[T1,...,foo: bar...]
+    auto numKwArgs = args.args.size() - args.numPosArgs;
+    if (numKwArgs > 0) {
+        auto begin = args.locs.args[args.numPosArgs].beginPos();
+        auto end = args.locs.args.back().endPos();
+        core::Loc kwargsLoc{args.locs.file, begin, end};
 
-            if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
-                e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
-                // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
-                if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
-                    e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
-                }
+        if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
+            e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
+            // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
+            if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
+                e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
             }
         }
+    }
 
-        if (args.numPosArgs != arity) {
-            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
-                e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            genericClass.show(gs), arity, args.numPosArgs);
-            }
+    if (args.numPosArgs != arity) {
+        if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
+            e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`", genericClass.show(gs),
+                        arity, args.numPosArgs);
         }
+    }
 
-        vector<TypePtr> targs;
-        auto it = args.args.begin();
-        int i = -1;
-        targs.reserve(genericClass.data(gs)->typeMembers().size());
-        for (auto mem : genericClass.data(gs)->typeMembers()) {
-            ++i;
+    vector<TypePtr> targs;
+    auto it = args.args.begin();
+    int i = -1;
+    targs.reserve(genericClass.data(gs)->typeMembers().size());
+    for (auto mem : genericClass.data(gs)->typeMembers()) {
+        ++i;
 
-            auto memData = mem.data(gs);
+        auto memData = mem.data(gs);
 
-            auto *memType = cast_type<LambdaParam>(memData->resultType);
-            ENFORCE(memType != nullptr);
+        auto *memType = cast_type<LambdaParam>(memData->resultType);
+        ENFORCE(memType != nullptr);
 
-            if (memData->flags.isFixed) {
-                // Fixed args are implicitly applied, and won't consume type
-                // arguments from the list that's supplied.
-                targs.emplace_back(memType->upperBound);
-            } else if (it != args.args.end()) {
-                auto loc = args.argLoc(it - args.args.begin());
-                auto argType = unwrapType(gs, loc, (*it)->type);
-                bool validBounds = true;
+        if (memData->flags.isFixed) {
+            // Fixed args are implicitly applied, and won't consume type
+            // arguments from the list that's supplied.
+            targs.emplace_back(memType->upperBound);
+        } else if (it != args.args.end()) {
+            auto loc = args.argLoc(it - args.args.begin());
+            auto argType = unwrapType(gs, loc, (*it)->type);
+            bool validBounds = true;
 
-                // Validate type parameter bounds.
-                if (!Types::isSubType(gs, argType, memType->upperBound)) {
-                    validBounds = false;
-                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType.show(gs);
-                        e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
-                                    mem.showFullName(gs));
-                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs),
-                                       "upper", memType->upperBound.show(gs));
-                    }
+            // Validate type parameter bounds.
+            if (!Types::isSubType(gs, argType, memType->upperBound)) {
+                validBounds = false;
+                if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
+                    auto argStr = argType.show(gs);
+                    e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
+                                mem.showFullName(gs));
+                    e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
+                                   memType->upperBound.show(gs));
                 }
+            }
 
-                if (!Types::isSubType(gs, memType->lowerBound, argType)) {
-                    validBounds = false;
+            if (!Types::isSubType(gs, memType->lowerBound, argType)) {
+                validBounds = false;
 
-                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType.show(gs);
-                        e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
-                                    mem.showFullName(gs));
-                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs),
-                                       "lower", memType->lowerBound.show(gs));
-                    }
+                if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
+                    auto argStr = argType.show(gs);
+                    e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
+                                mem.showFullName(gs));
+                    e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
+                                   memType->lowerBound.show(gs));
                 }
+            }
 
-                if (validBounds) {
-                    targs.emplace_back(argType);
-                } else {
-                    targs.emplace_back(Types::untypedUntracked());
-                }
-
-                ++it;
-            } else if (genericClass == Symbols::Hash() && i == 2) {
-                auto tupleArgs = targs;
-                targs.emplace_back(make_type<TupleType>(tupleArgs));
+            if (validBounds) {
+                targs.emplace_back(argType);
             } else {
                 targs.emplace_back(Types::untypedUntracked());
             }
-        }
 
-        return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
+            ++it;
+        } else if (genericClass == Symbols::Hash() && i == 2) {
+            auto tupleArgs = targs;
+            targs.emplace_back(make_type<TupleType>(tupleArgs));
+        } else {
+            targs.emplace_back(Types::untypedUntracked());
+        }
     }
+
+    return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
+}
 
 namespace {
 
