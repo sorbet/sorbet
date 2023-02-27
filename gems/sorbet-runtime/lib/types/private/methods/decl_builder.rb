@@ -16,7 +16,6 @@ module T::Private::Methods
     end
 
     def initialize(mod, raw)
-      # TODO RUBYPLAT-1278 - with ruby 2.5, use kwargs here
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
