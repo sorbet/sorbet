@@ -41,7 +41,7 @@ module Opus::Types::Test
     end
 
     it 'nils the return for void' do
-      assert_equal(T::Private::Types::Void::VOID, TestReturns.voider)
+      assert_same(T::Private::Types::Void::VOID, TestReturns.voider)
     end
 
     it 'can mark constructors void' do
