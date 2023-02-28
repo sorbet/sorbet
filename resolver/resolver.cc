@@ -3970,94 +3970,6 @@ public:
     }
 };
 
-class CheckAbstractClassInitialization {
-public:
-    struct CheckAbstractClassInitializationWalkResult {
-        vector<ast::ParsedFile> trees;
-    };
-
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.fun != core::Names::new_()) {
-            return;
-        }
-
-        auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
-            return;
-        }
-
-        auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
-        if (!symbol->flags.isAbstract) {
-            return;
-        }
-
-        auto singletonClass = symbol->lookupSingletonClass(ctx.state);
-        if (!singletonClass.exists()) {
-            return;
-        }
-
-        auto method_new = singletonClass.data(ctx)->findMethodTransitive(ctx.state, core::Names::new_());
-        // If the .new method we find is owned by Class, that means
-        // there was no user defined .new method, which warrants an error.
-        if (method_new.data(ctx)->owner == core::Symbols::Class()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
-                e.setHeader("Attempt to instantiate abstract class `{}`", id->symbol.show(ctx));
-            }
-        }
-    }
-
-    template <typename StateType>
-    static vector<ast::ParsedFile> run(StateType &gs, vector<ast::ParsedFile> jobs, WorkerPool &workers) {
-        static_assert(is_same_v<remove_const_t<StateType>, core::GlobalState>);
-        Timer timeit(gs.tracer(), "resolver.check_abstract_class_initialization");
-
-        auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(jobs.size());
-        auto outputq = make_shared<
-            BlockingBoundedQueue<CheckAbstractClassInitialization::CheckAbstractClassInitializationWalkResult>>(
-            jobs.size());
-
-        for (auto &job : jobs) {
-            inputq->push(move(job), 1);
-        }
-
-        jobs.clear();
-
-        workers.multiplexJob("checkAbstractClassInitialization", [&gs, inputq, outputq]() -> void {
-            CheckAbstractClassInitialization walker;
-            CheckAbstractClassInitialization::CheckAbstractClassInitializationWalkResult output;
-
-            ast::ParsedFile current_job;
-            for (auto result = inputq->try_pop(current_job); !result.done(); result = inputq->try_pop(current_job)) {
-                if (result.gotItem()) {
-                    core::Context ctx(gs, core::Symbols::root(), current_job.file);
-                    ast::TreeWalk::apply(ctx, walker, current_job.tree);
-                    output.trees.emplace_back(move(current_job));
-                }
-            }
-
-            if (!output.trees.empty()) {
-                auto count = output.trees.size();
-                outputq->push(move(output), count);
-            }
-        });
-
-        {
-            CheckAbstractClassInitialization::CheckAbstractClassInitializationWalkResult threadResult;
-            for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    jobs.insert(jobs.end(), make_move_iterator(threadResult.trees.begin()),
-                                make_move_iterator(threadResult.trees.end()));
-                }
-            }
-        }
-
-        return jobs;
-    }
-};
-
 vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
@@ -4160,11 +4072,6 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
     finalizeSymbols(gs);
-    if (epochManager.wasTypecheckingCanceled()) {
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
-    }
-
-    trees = CheckAbstractClassInitialization::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
