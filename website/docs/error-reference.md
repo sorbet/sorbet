@@ -2746,6 +2746,24 @@ class MyClass < AbstractSerializable
 end
 ```
 
+## 5073
+
+Abstract classes cannot be instantiated by definition. See
+[Abstract Classes and Interfaces](abstract.md) for more information.
+
+```ruby
+class Abstract
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def foo; end
+end
+
+Abstract.new # error: Attempt to instantiate abstract class `Abstract`
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
