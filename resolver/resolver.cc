@@ -1165,7 +1165,7 @@ private:
                 continue;
             }
             auto idSymbol = id->symbol.asClassOrModuleRef();
-            if (idSymbol.data(gs)->isUndeclared()) {
+            if (!idSymbol.data(gs)->isDeclared()) {
                 if (auto e = gs.beginError(idLoc, core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("`{}` is declared implicitly, but must be defined as a `{}` explicitly",
                                 id->symbol.show(gs), "module");
@@ -1550,7 +1550,7 @@ public:
         }
 
         const auto &precedingSymKlass = precedingSymForCurDef.asClassOrModuleRef().data(ctx);
-        if (!precedingSymKlass->isUndeclared()) {
+        if (precedingSymKlass->isDeclared()) {
             // Not a filler def, but a real def
             return defaultSymbol;
         }
