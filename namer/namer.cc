@@ -1195,8 +1195,8 @@ private:
             // If the unknown class loc is from the same file, it's still possible that it is from a real
             // definition in that file. In which case, we check the declared bit on the class.
             // We only set the loc if the class is not declared.
-            bool updateLoc = !isUnknown || (isUnknown && symbol.data(ctx)->loc().file() == ctx.file &&
-                                            !symbol.data(ctx)->isDeclared());
+            bool updateLoc =
+                !isUnknown || (!symbol.data(ctx)->isDeclared() && symbol.data(ctx)->loc().file() == ctx.file);
             if (updateLoc) {
                 symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
             }
