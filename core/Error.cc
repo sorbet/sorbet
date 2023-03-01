@@ -206,10 +206,6 @@ ErrorBuilder::~ErrorBuilder() {
     this->gs._error(build());
 }
 
-void ErrorBuilder::setSeverity(const ErrorSeverity severity) {
-    this->severity = severity;
-}
-
 unique_ptr<Error> ErrorBuilder::build() {
     ENFORCE(state != State::DidBuild);
     bool isSilenced = state == State::Unreported;
