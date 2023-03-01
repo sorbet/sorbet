@@ -493,39 +493,6 @@ class StringIO
   end
   def write(arg0); end
 
-  # This is a deprecated alias for
-  # [`each_byte`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_byte).
-  sig do
-    params(
-        blk: T.proc.params(arg0: Integer).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[Integer])}
-  def bytes(&blk); end
-
-  # This is a deprecated alias for
-  # [`each_char`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_char).
-  sig do
-    params(
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[String])}
-  def chars(&blk); end
-
-  # This is a deprecated alias for
-  # [`each_codepoint`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_codepoint).
-  sig do
-    params(
-        blk: T.proc.params(arg0: Integer).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[Integer])}
-  def codepoints(&blk); end
-
   # See [`IO#each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each).
   sig do
     params(
@@ -548,25 +515,6 @@ class StringIO
   # The stream must be opened for reading or an `IOError` will be raised.
   sig {returns(T::Boolean)}
   def eof?(); end
-
-  # This is a deprecated alias for
-  # [`each_line`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_line).
-  sig do
-    params(
-        sep: String,
-        limit: Integer,
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig do
-    params(
-        sep: String,
-        limit: Integer,
-    )
-    .returns(T::Enumerator[String])
-  end
-  def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 end
 
 # Pseudo I/O on [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
