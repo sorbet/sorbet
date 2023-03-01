@@ -244,6 +244,7 @@ const DiagnosticSeverity ErrorReporter::toDiagnosticSeverity(const core::ErrorSe
             return DiagnosticSeverity::Information;
         default:
             ENFORCE(false, "Should not happen");
+            return DiagnosticSeverity::Error;
     }
 }
 
