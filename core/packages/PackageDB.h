@@ -59,6 +59,7 @@ public:
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
 
     const std::string_view errorHint() const;
+    bool skipImportVisibilityCheckFor(const core::NameRef mangledName) const;
 
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;

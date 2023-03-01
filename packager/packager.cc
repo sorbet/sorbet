@@ -425,7 +425,7 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
     // Foo::Bar => Foo_Bar_Package
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(ctx, pName.fullName.parts);
+    pName.mangledName = core::packages::MangledName::mangledNameFromParts(ctx.state, pName.fullName.parts);
 
     return pName;
 }
@@ -1326,29 +1326,33 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     }
 
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
-    for (auto &i : pkgInfo.importedPackageNames) {
-        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+    bool skipImportVisibilityCheck = packageDB.skipImportVisibilityCheckFor(pkgInfo.mangledName());
 
-        // this might mean the other package doesn't exist, but that
-        // should have been caught already
-        if (!otherPkg.exists()) {
-            continue;
-        }
+    if (!skipImportVisibilityCheck) {
+        for (auto &i : pkgInfo.importedPackageNames) {
+            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-        const auto &visibleTo = otherPkg.visibleTo();
-        if (visibleTo.empty()) {
-            continue;
-        }
+            // this might mean the other package doesn't exist, but that
+            // should have been caught already
+            if (!otherPkg.exists()) {
+                continue;
+            }
 
-        bool allowed =
-            absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
+            const auto &visibleTo = otherPkg.visibleTo();
+            if (visibleTo.empty()) {
+                continue;
+            }
 
-        if (!allowed) {
-            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                            otherPkg.show(ctx), absPkg.show(ctx));
-                e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                               "visible_to", otherPkg.show(ctx));
+            bool allowed = absl::c_any_of(otherPkg.visibleTo(),
+                                          [&absPkg](const auto &other) { return other == absPkg.fullName(); });
+
+            if (!allowed) {
+                if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                                otherPkg.show(ctx), absPkg.show(ctx));
+                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                                   "visible_to", otherPkg.show(ctx));
+                }
             }
         }
     }

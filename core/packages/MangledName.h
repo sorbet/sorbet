@@ -1,7 +1,7 @@
 #ifndef SORBET_CORE_PACKAGES_MANGLEDNAME_H
 #define SORBET_CORE_PACKAGES_MANGLEDNAME_H
 
-#include "core/Context.h"
+#include "core/GlobalState.h"
 #include "core/LocOffsets.h"
 #include "core/NameRef.h"
 #include <vector>
@@ -9,8 +9,8 @@
 namespace sorbet::core::packages {
 class MangledName final {
 public:
-    static core::NameRef mangledNameFromParts(core::MutableContext ctx, std::vector<std::string> &parts);
-    static core::NameRef mangledNameFromParts(core::MutableContext ctx, std::vector<core::NameRef> &parts);
+    static core::NameRef mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts);
+    static core::NameRef mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts);
 };
 
 class NameFormatter final {

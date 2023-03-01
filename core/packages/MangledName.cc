@@ -6,21 +6,21 @@
 using namespace std;
 
 namespace sorbet::core::packages {
-core::NameRef MangledName::mangledNameFromParts(core::MutableContext ctx, std::vector<std::string> &parts) {
+core::NameRef MangledName::mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts) {
     // Foo::Bar => Foo_Bar_Package
     auto mangledName = absl::StrCat(absl::StrJoin(parts, "_"), core::PACKAGE_SUFFIX);
 
-    auto utf8Name = ctx.state.enterNameUTF8(mangledName);
-    auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-    return ctx.state.enterNameConstant(packagerName);
+    auto utf8Name = gs.enterNameUTF8(mangledName);
+    auto packagerName = gs.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    return gs.enterNameConstant(packagerName);
 }
 
-core::NameRef MangledName::mangledNameFromParts(core::MutableContext ctx, std::vector<core::NameRef> &parts) {
+core::NameRef MangledName::mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts) {
     // Foo::Bar => Foo_Bar_Package
-    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(ctx)), core::PACKAGE_SUFFIX);
+    auto mangledName = absl::StrCat(absl::StrJoin(parts, "_", NameFormatter(gs)), core::PACKAGE_SUFFIX);
 
-    auto utf8Name = ctx.state.enterNameUTF8(mangledName);
-    auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-    return ctx.state.enterNameConstant(packagerName);
+    auto utf8Name = gs.enterNameUTF8(mangledName);
+    auto packagerName = gs.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    return gs.enterNameConstant(packagerName);
 }
 } // namespace sorbet::core::packages
