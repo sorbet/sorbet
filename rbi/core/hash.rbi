@@ -788,8 +788,6 @@ class Hash < Object
   # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   def hash; end
 
-  def index(_); end
-
   sig {void}
   sig {params(default: V).void}
   sig do
