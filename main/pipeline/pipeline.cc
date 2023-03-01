@@ -683,7 +683,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
             gs.setPackagerOptions(opts.secondaryTestPackageNamespaces,
                                   opts.extraPackageFilesDirectoryUnderscorePrefixes,
                                   opts.extraPackageFilesDirectorySlashPrefixes,
-                                  opts.packageSkipRBIExportEnforcementDirs, opts.stripePackagesHint);
+                                  opts.packageSkipRBIExportEnforcementDirs, {}, opts.stripePackagesHint);
         }
         what = packager::Packager::run(gs, workers, move(what));
         if (opts.print.Packager.enabled) {
