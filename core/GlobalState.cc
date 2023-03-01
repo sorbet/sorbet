@@ -2236,7 +2236,7 @@ const ErrorSeverity GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) c
     // Ideally StrictLevel -> ErrorSeverity mapping should be defined
     // with the error itself, but this hack for now
     if (level < StrictLevel::Strong) {
-        if (what == errors::Infer::UntypedMethod) {
+        if (what == errors::Infer::UntypedValue) {
             return ErrorSeverity::Warning;
         }
     }
