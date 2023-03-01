@@ -140,7 +140,7 @@ class ErrorBuilder {
     Loc loc;
     ErrorClass what;
     std::string header;
-    ErrorSeverity severity;
+    const ErrorSeverity severity;
     std::vector<ErrorSection> sections;
     std::vector<AutocorrectSuggestion> autocorrects;
     void _setHeader(std::string &&header);
@@ -183,8 +183,6 @@ public:
         addAutocorrect(
             AutocorrectSuggestion{move(formatted), {AutocorrectSuggestion::Edit{loc, replacement}}, isDidYouMean});
     }
-
-    void setSeverity(const ErrorSeverity severity);
 
     // build() builds and returns the reported Error. Only valid if state ==
     // WillBuild. This passes ownership of the error to the caller; ErrorBuilder
