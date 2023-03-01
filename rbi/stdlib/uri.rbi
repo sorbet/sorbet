@@ -101,8 +101,6 @@ end
 #     *   URI::REGEXP::PATTERN - (in uri/common.rb)
 #
 # *   URI::Util - (in uri/common.rb)
-# *   [`URI::Escape`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html) - (in
-#     uri/common.rb)
 # *   [`URI::Error`](https://docs.ruby-lang.org/en/2.7.0/URI/Error.html) - (in
 #     uri/common.rb)
 #     *   [`URI::InvalidURIError`](https://docs.ruby-lang.org/en/2.7.0/URI/InvalidURIError.html)
@@ -272,14 +270,6 @@ module URI
     )
     .returns(String)
   end
-  sig do
-    params(
-        arg: String,
-        arg0: String,
-    )
-    .returns(String)
-  end
-  def self.escape(arg, *arg0); end
 
   # ## Synopsis
   #
@@ -510,14 +500,6 @@ module URI
   sig do
     params(
         arg: String,
-    )
-    .returns(String)
-  end
-  def self.unescape(*arg); end
-
-  sig do
-    params(
-        arg: String,
         arg0: Regexp,
     )
     .returns(String)
@@ -548,107 +530,6 @@ end
 # Base class for all [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
 # exceptions.
 class URI::Error < StandardError
-end
-
-# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) for escaping
-# unsafe characters with codes.
-module URI::Escape
-  # Alias for:
-  # [`unescape`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html#method-i-unescape)
-  def decode(*arg); end
-
-  # Alias for:
-  # [`escape`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html#method-i-escape)
-  def encode(*arg); end
-
-  # ## Synopsis
-  #
-  # ```
-  # URI.escape(str [, unsafe])
-  # ```
-  #
-  # ## Args
-  #
-  # `str`
-  # :   [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) to replaces
-  #     in.
-  # `unsafe`
-  # :   [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) that matches
-  #     all symbols that must be replaced with codes. By default uses `UNSAFE`.
-  #     When this argument is a
-  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), it
-  #     represents a character set.
-  #
-  #
-  # ## Description
-  #
-  # Escapes the string, replacing all unsafe characters with codes.
-  #
-  # This method is obsolete and should not be used. Instead, use
-  # [`CGI.escape`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escape),
-  # [`URI.encode_www_form`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-encode_www_form)
-  # or
-  # [`URI.encode_www_form_component`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-encode_www_form_component)
-  # depending on your specific use case.
-  #
-  # ## Usage
-  #
-  # ```ruby
-  # require 'uri'
-  #
-  # enc_uri = URI.escape("http://example.com/?a=\11\15")
-  # # => "http://example.com/?a=%09%0D"
-  #
-  # URI.unescape(enc_uri)
-  # # => "http://example.com/?a=\t\r"
-  #
-  # URI.escape("@?@!", "!?")
-  # # => "@%3F@%21"
-  # ```
-  #
-  #
-  # Also aliased as:
-  # [`encode`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html#method-i-encode)
-  def escape(*arg); end
-
-  # ## Synopsis
-  #
-  # ```ruby
-  # URI.unescape(str)
-  # ```
-  #
-  # ## Args
-  #
-  # `str`
-  # :   [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) to unescape.
-  #
-  #
-  # ## Description
-  #
-  # This method is obsolete and should not be used. Instead, use
-  # [`CGI.unescape`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescape),
-  # [`URI.decode_www_form`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-decode_www_form)
-  # or
-  # [`URI.decode_www_form_component`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-decode_www_form_component)
-  # depending on your specific use case.
-  #
-  # ## Usage
-  #
-  # ```ruby
-  # require 'uri'
-  #
-  # enc_uri = URI.escape("http://example.com/?a=\11\15")
-  # # => "http://example.com/?a=%09%0D"
-  #
-  # URI.unescape(enc_uri)
-  # # => "http://example.com/?a=\t\r"
-  # ```
-  #
-  #
-  # Also aliased as:
-  # [`decode`](https://docs.ruby-lang.org/en/2.7.0/URI/Escape.html#method-i-decode)
-  def unescape(*arg); end
-
 end
 
 # The "file" [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) is defined by
