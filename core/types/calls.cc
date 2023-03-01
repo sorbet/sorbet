@@ -1626,11 +1626,29 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                                const TypePtr &wrapped) {
     if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
         e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs), wrapped.show(gs));
+
+        if (isa_type<SelfTypeParam>(wrapped)) {
+            auto selfTypeParam = cast_type_nonnull<SelfTypeParam>(wrapped);
+            if (selfTypeParam.definition.isTypeMember()) {
+                e.addErrorNote("Sorbet erases all generics, so `{}` is never a meaningful, concrete type at runtime.\n"
+                               "    If you want to call a method on some class, that class object must be an argument "
+                               "to this method.",
+                               selfTypeParam.show(gs));
+            }
+        }
+
         if (args.name == core::Names::tripleEq()) {
             if (auto appliedType = cast_type<AppliedType>(wrapped)) {
                 e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                "which doesn't work at runtime");
                 e.replaceWith("Replace with class name", args.callLoc(), "{}", appliedType->klass.show(gs));
+            }
+        } else if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+            // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
+            if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
+                auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
+                e.replaceWith("Replace with class name", receiverLoc, "{}",
+                              appliedType->klass.data(gs)->attachedClass(gs).show(gs));
             }
         }
     }
@@ -1645,19 +1663,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
             if (!canCallNew(gs, wrapped)) {
-                if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
-                    e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", Names::new_().show(gs),
-                                wrapped.show(gs));
-
-                    // For T.class_of(Foo), we'll suggest replacing it with the attached class (Foo).
-                    if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
-                        if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
-                            auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
-                            e.replaceWith("Replace with class name", receiverLoc, "{}",
-                                          appliedType->klass.data(gs)->attachedClass(gs).show(gs));
-                        }
-                    }
-                }
+                badMetaTypeCall(gs, args, errLoc, wrapped);
                 return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             }
 
