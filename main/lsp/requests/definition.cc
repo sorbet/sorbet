@@ -35,16 +35,21 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             for (auto loc : sym.locs(gs)) {
                 locMapping.emplace_back(loc, config.loc2Location(gs, loc));
             }
-            // Move all non-existent Locations to the front of the vector.
-            auto validLocations = absl::c_partition(locMapping, [](const auto &p) { return p.second == nullptr; });
-            // If we have multiple locations, eliminate "definitions" in RBI files
-            // for classes and modules, since the one(s) in Ruby files are more
-            // likely to be what the user is looking for.
-            if (sym.isClassOrModule() && std::distance(validLocations, locMapping.end()) > 1) {
-                validLocations = std::partition(validLocations, locMapping.end(),
-                                                [&gs](const auto &p) { return p.first.file().data(gs).isRBI(); });
+            {
+                // Erase all invalid locations
+                auto validLocations = absl::c_partition(locMapping, [](const auto &p) { return p.second != nullptr; });
+                locMapping.erase(validLocations, locMapping.end());
             }
-            std::transform(validLocations, locMapping.end(), std::back_inserter(locations),
+            // If we have any non-RBI location, eliminate definitions in RBI files for classes and
+            // modules (not methods), since class definitions in RBI files are usually only there to
+            // specify missing methods on the class (and the user doesn't care about those
+            // missing_method.rbi definitions).
+            auto notIsRBI = [&gs](const auto &p) { return !p.first.file().data(gs).isRBI(); };
+            if (sym.isClassOrModule() && !locMapping.empty() && absl::c_any_of(locMapping, notIsRBI)) {
+                auto startOfRBIDefs = absl::c_partition(locMapping, notIsRBI);
+                locMapping.erase(startOfRBIDefs, locMapping.end());
+            }
+            std::transform(locMapping.begin(), locMapping.end(), std::back_inserter(locations),
                            [](auto &p) { return std::move(p.second); });
         } else if (resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
             const auto &retType = resp->getTypeAndOrigins();
