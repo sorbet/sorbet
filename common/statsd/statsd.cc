@@ -131,18 +131,18 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
 void StatsD::addStandardMetrics() {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
-        prodCounterAdd("run.utilization.user_time.us", usage.ru_utime.tv_sec * 1000'000 + usage.ru_utime.tv_usec);
-        prodCounterAdd("run.utilization.system_time.us", usage.ru_stime.tv_sec * 1000'000 + usage.ru_stime.tv_usec);
-        prodCounterAdd("run.utilization.max_rss", usage.ru_maxrss);
-        prodCounterAdd("run.utilization.minor_faults", usage.ru_minflt);
-        prodCounterAdd("run.utilization.major_faults", usage.ru_majflt);
-        prodCounterAdd("run.utilization.inblock", usage.ru_inblock);
-        prodCounterAdd("run.utilization.oublock", usage.ru_oublock);
-        prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
-        prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
+        prodCounterSet("run.utilization.user_time.us", usage.ru_utime.tv_sec * 1000'000 + usage.ru_utime.tv_usec);
+        prodCounterSet("run.utilization.system_time.us", usage.ru_stime.tv_sec * 1000'000 + usage.ru_stime.tv_usec);
+        prodCounterSet("run.utilization.max_rss", usage.ru_maxrss);
+        prodCounterSet("run.utilization.minor_faults", usage.ru_minflt);
+        prodCounterSet("run.utilization.major_faults", usage.ru_majflt);
+        prodCounterSet("run.utilization.inblock", usage.ru_inblock);
+        prodCounterSet("run.utilization.oublock", usage.ru_oublock);
+        prodCounterSet("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
+        prodCounterSet("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
     }
-    prodCounterAdd("release.build_scm_commit_count", sorbet_build_scm_commit_count);
-    prodCounterAdd("release.build_timestamp", sorbet_build_timestamp);
+    prodCounterSet("release.build_scm_commit_count", sorbet_build_scm_commit_count);
+    prodCounterSet("release.build_timestamp", sorbet_build_timestamp);
 }
 
 } // namespace sorbet
