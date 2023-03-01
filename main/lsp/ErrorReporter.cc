@@ -155,7 +155,8 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             tags.push_back(DiagnosticTag::Unnecessary);
             diagnostic->tags = move(tags);
         }
-        diagnostic->severity = DiagnosticSeverity::Error;
+
+        diagnostic->severity = toDiagnosticSeverity(error->severity);
 
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
@@ -229,6 +230,21 @@ void ErrorReporter::sanityCheck() const {
         }
     }
     ENFORCE(errorCount == this->clientErrorCount);
+}
+
+const DiagnosticSeverity ErrorReporter::toDiagnosticSeverity(const core::ErrorSeverity severity) const {
+    switch (severity) {
+        case core::ErrorSeverity::Error:
+            return DiagnosticSeverity::Error;
+        case core::ErrorSeverity::Warning:
+            return DiagnosticSeverity::Warning;
+        case core::ErrorSeverity::Hint:
+            return DiagnosticSeverity::Hint;
+        case core::ErrorSeverity::Information:
+            return DiagnosticSeverity::Information;
+        default:
+            ENFORCE(false, "Should not happen");
+    }
 }
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, uint32_t epoch, bool isIncremental,

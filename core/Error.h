@@ -84,11 +84,20 @@ struct ErrorSection {
     std::string toString(const GlobalState &gs) const;
 };
 
+enum class ErrorSeverity {
+    Error = 1,
+    Warning,
+    Information,
+    Hint,
+    Ignore,
+};
+
 class Error {
 public:
     const Loc loc;
     const ErrorClass what;
     const std::string header;
+    const ErrorSeverity severity;
     const bool isSilenced;
     const std::vector<AutocorrectSuggestion> autocorrects;
     const std::vector<ErrorSection> sections;
@@ -96,9 +105,9 @@ public:
     bool isCritical() const;
     std::string toString(const GlobalState &gs) const;
     Error(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections,
-          std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
-        : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
-          sections(sections) {
+          std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced, ErrorSeverity severity)
+        : loc(loc), what(what), header(move(header)), severity(severity), isSilenced(isSilenced),
+          autocorrects(move(autocorrects)), sections(sections) {
         ENFORCE(this->header.empty() || this->header.back() != '.', "Error headers should not end with a period");
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
@@ -131,6 +140,7 @@ class ErrorBuilder {
     Loc loc;
     ErrorClass what;
     std::string header;
+    ErrorSeverity severity;
     std::vector<ErrorSection> sections;
     std::vector<AutocorrectSuggestion> autocorrects;
     void _setHeader(std::string &&header);
@@ -140,7 +150,7 @@ public:
     // If you undelete this, you will need to make sure the moved ErrorBuilder is marked as 'DidBuild' so Sorbet does
     // not report an empty error.
     ErrorBuilder(ErrorBuilder &&) = delete;
-    ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
+    ErrorBuilder(const GlobalState &gs, const ErrorSeverity severity, Loc loc, ErrorClass what);
     ~ErrorBuilder();
 
     inline explicit operator bool() const {
@@ -173,6 +183,8 @@ public:
         addAutocorrect(
             AutocorrectSuggestion{move(formatted), {AutocorrectSuggestion::Edit{loc, replacement}}, isDidYouMean});
     }
+
+    void setSeverity(const ErrorSeverity severity);
 
     // build() builds and returns the reported Error. Only valid if state ==
     // WillBuild. This passes ownership of the error to the caller; ErrorBuilder

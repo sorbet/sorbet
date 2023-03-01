@@ -22,7 +22,7 @@ constexpr ErrorClass RevealType{7014, StrictLevel::True};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::True};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
-constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
+constexpr ErrorClass UntypedValue{7018, StrictLevel::Strict};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::True};
 constexpr ErrorClass GenericMethodConstraintUnsolved{7020, StrictLevel::True};
 constexpr ErrorClass BlockNotPassed{7021, StrictLevel::True};
