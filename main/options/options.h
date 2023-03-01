@@ -181,6 +181,7 @@ struct Options {
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> secondaryTestPackageNamespaces;
+    std::vector<std::string> skipPackageImportVisibilityCheckFor;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
