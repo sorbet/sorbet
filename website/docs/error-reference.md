@@ -3592,9 +3592,10 @@ def get_value(input)
 end
 ```
 
-Since generic types are erased at runtime, this construct would never work when
-the program executed. Replace the generic type `T::Array[Integer]` by the erased
-type `Array` so the runtime behavior is correct:
+Since [generic types are erased](generics.md#generics-and-runtime-checks) at
+runtime, this construct would never work when the program executed. Replace the
+generic type `T::Array[Integer]` by the erased type `Array` so the runtime
+behavior is correct:
 
 ```ruby
 def get_value(input)

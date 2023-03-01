@@ -1626,6 +1626,17 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                                const TypePtr &wrapped) {
     if (auto e = gs.beginError(errLoc, errors::Infer::MetaTypeDispatchCall)) {
         e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs), wrapped.show(gs));
+
+        if (isa_type<SelfTypeParam>(wrapped)) {
+            auto selfTypeParam = cast_type_nonnull<SelfTypeParam>(wrapped);
+            if (selfTypeParam.definition.isTypeMember()) {
+                e.addErrorNote("Sorbet erases all generics, so `{}` is never a meaningful, concrete type at runtime.\n"
+                               "    If you want to call a method on some class, that class object must be an argument "
+                               "to this method.",
+                               selfTypeParam.show(gs));
+            }
+        }
+
         if (args.name == core::Names::tripleEq()) {
             if (auto appliedType = cast_type<AppliedType>(wrapped)) {
                 e.addErrorNote("It looks like you're trying to pattern match on a generic, "
