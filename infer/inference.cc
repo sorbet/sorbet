@@ -300,8 +300,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
-                            e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong",
-                                           "typed: strict");
+                            e.setSeverity(core::ErrorSeverity::Warning);
+                            // e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed:
+                            // strong",
+                            //                "typed: strict");
                         }
                     }
                 }
