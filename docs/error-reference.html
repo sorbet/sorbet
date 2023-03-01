@@ -2790,9 +2790,10 @@ which would actually return a Sorbet-runtime representation of a type.</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Since generic types are erased at runtime, this construct would never work when
-the program executed. Replace the generic type <code>T::Array[Integer]</code> by the erased
-type <code>Array</code> so the runtime behavior is correct:</p>
+<p>Since <a href="/docs/generics#generics-and-runtime-checks">generic types are erased</a> at
+runtime, this construct would never work when the program executed. Replace the
+generic type <code>T::Array[Integer]</code> by the erased type <code>Array</code> so the runtime
+behavior is correct:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_value</span><span class="hljs-params">(input)</span></span>
   <span class="hljs-keyword">case</span> input
   <span class="hljs-keyword">when</span> Integer
