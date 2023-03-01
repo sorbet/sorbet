@@ -14,7 +14,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U B>> $1>#<U b> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=13:9 end=13:14}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U B>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
+  class <S <S <C <U B>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
     type-member(+) <S <S <C <U B>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U B>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U B>> $1>   targs = [     <C <U <AttachedClass>>> = B   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=12:10}
     method <S <S <C <U B>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=12:5 end=16:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -23,13 +23,13 @@ class <C <U <root>>> < <C <U Object>> ()
     type-member(+) <S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D) @ Loc {file=test/testdata/desugar/sclass.rb start=26:1 end=26:8}
     method <S <C <U D>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=26:1 end=34:4}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U D>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
+  class <S <S <C <U D>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
     type-member(+) <S <S <C <U D>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U D>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U D>> $1>   targs = [     <C <U <AttachedClass>>> = D   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=27:5 end=27:10}
     method <S <S <C <U D>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=27:5 end=33:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <S <C <U D>> $1> $1>#<U d> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=29:13 end=29:18}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <S <C <U D>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <S <S <C <U Object>> $1> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
+  class <S <S <S <C <U D>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Class>> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
     type-member(+) <S <S <S <C <U D>> $1> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <S <C <U D>> $1> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <S <C <U D>> $1> $1>   targs = [     <C <U <AttachedClass>>> = AppliedType {         klass = <S <C <U D>> $1>         targs = [           <C <U <AttachedClass>>> = D         ]       }   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=28:14}
     method <S <S <S <C <U D>> $1> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=28:9 end=32:12}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -42,7 +42,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U E>> $1>#<U wrapper> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=38:9 end=38:20}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U E>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
+  class <S <S <C <U E>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
     type-member(+) <S <S <C <U E>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U E>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U E>> $1>   targs = [     <C <U <AttachedClass>>> = E   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=37:10}
     method <S <S <C <U E>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=37:5 end=43:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -57,7 +57,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U F>> $1>#<U initialize> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U F>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
+  class <S <S <C <U F>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
     type-member(+) <S <S <C <U F>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U F>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U F>> $1>   targs = [     <C <U <AttachedClass>>> = F   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}
     method <S <S <C <U F>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=57:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -72,7 +72,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U G>> $1>#<U inner> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=63:13 end=63:22}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U G>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
+  class <S <S <C <U G>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
     type-member(+) <S <S <C <U G>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U G>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U G>> $1>   targs = [     <C <U <AttachedClass>>> = G   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=62:14}
     method <S <S <C <U G>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=62:9 end=66:12}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
@@ -88,7 +88,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
       method <S <C <U H>> $1>::<S <C <U H2>> $1>#<U h> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=77:13 end=77:23}
         argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
-  class <S <S <C <U H>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
+  class <S <S <C <U H>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
     type-member(+) <S <S <C <U H>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U H>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U H>> $1>   targs = [     <C <U <AttachedClass>>> = H   ] }) @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=75:10}
     method <S <S <C <U H>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=75:5 end=81:8}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}

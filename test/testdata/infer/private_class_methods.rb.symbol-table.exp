@@ -32,7 +32,7 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
     method ::<Class:Test>#method_f : private (<blk>) @ test/testdata/infer/private_class_methods.rb:20
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
-  class ::<Class:<Class:Test>>[<AttachedClass>] < ::<Class:<Class:Object>> () @ test/testdata/infer/private_class_methods.rb:12
+  class ::<Class:<Class:Test>>[<AttachedClass>] < ::Class () @ test/testdata/infer/private_class_methods.rb:12
     type-member(+) ::<Class:<Class:Test>>::<AttachedClass> -> T.attached_class (of T.class_of(Test)) @ test/testdata/infer/private_class_methods.rb:12
     method ::<Class:<Class:Test>>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:12
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
