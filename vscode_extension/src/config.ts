@@ -251,7 +251,7 @@ export class SorbetExtensionConfig implements Disposable {
       this.revealOutputOnError,
     );
     this._warnUntypedValues = workspaceContext.get(
-      "warnUntypedValue",
+      "warnUntypedValues",
       this.warnUntypedValues,
     );
 
@@ -390,7 +390,7 @@ export class SorbetExtensionConfig implements Disposable {
 
   public setWarnUntypedValues(b: boolean): Thenable<void> {
     return this._sorbetWorkspaceContext
-      .update("warnUntypedValue", b)
+      .update("warnUntypedValues", b)
       .then(this._refresh.bind(this));
   }
 

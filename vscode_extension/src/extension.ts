@@ -146,7 +146,7 @@ export function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.toggleWarnUntypedValue", () => {
+    commands.registerCommand("sorbet.toggleWarnUntypedValues", () => {
       sorbetExtensionConfig.setWarnUntypedValues(
         !sorbetExtensionConfig.warnUntypedValues,
       );
