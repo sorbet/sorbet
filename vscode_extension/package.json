@@ -27,6 +27,7 @@
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
+    "onCommand:sorbet.toggleWarnUntypedValue",
     "onCommand:sorbet.showOutput",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
@@ -65,6 +66,11 @@
       {
         "command": "sorbet.restart",
         "title": "Restart",
+        "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.toggleWarnUntypedValue",
+        "title": "Toggle untyped value warnings",
         "category": "Sorbet"
       },
       {
@@ -238,6 +244,11 @@
           "description": "Show the extension output window on errors.",
           "default": false
         },
+        "sorbet.warnUntypedValue": {
+          "type": "boolean",
+          "description": "Shows warning for untyped values.",
+          "default": false
+        },
         "sorbet.configFilePatterns": {
           "type": "array",
           "description": "List of workspace file patterns that contribute to Sorbet's configuration.  Changes to any of those files should trigger a restart of any actively running Sorbet language server.",
@@ -270,6 +281,9 @@
         },
         {
           "command": "sorbet.restart"
+        },
+        {
+          "command": "sorbet.toggleWarnUntypedValue"
         },
         {
           "command": "sorbet.showOutput",
