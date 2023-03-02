@@ -310,10 +310,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     } else if (bind.bind.type.hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
                         auto what = errorClassForUntyped(ctx.state, ctx.file);
-                        if (what.has_value()) {
-                            if (auto e = ctx.beginError(bind.loc, what.value())) {
+                        if (what) {
+                            if (auto e = ctx.beginError(bind.loc, *what)) {
                                 e.setHeader("This code is untyped");
-                                if (what.value() == core::errors::Infer::UntypedValue) {
+                                if (*what == core::errors::Infer::UntypedValue) {
                                     e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.",
                                                    "typed: strong", "typed: strict");
                                 }
