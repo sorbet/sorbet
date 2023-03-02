@@ -404,8 +404,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     // Only do this transformation if we're sure that it would produce an error, so
                     // that we don't pay the performance cost of inflating the CFG needlessly.
                     auto shouldReportErrorOn = cctx.ctx.state.shouldReportErrorOn(
-                                                   cctx.ctx.locAt(a.loc), core::errors::CFG::UndeclaredVariable) !=
-                                               core::ErrorSeverity::Ignore;
+                        cctx.ctx.locAt(a.loc), core::errors::CFG::UndeclaredVariable);
                     if (foundError && shouldReportErrorOn) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());

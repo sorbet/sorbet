@@ -145,10 +145,9 @@ string Error::toString(const GlobalState &gs) const {
     return buf.str();
 }
 
-ErrorBuilder::ErrorBuilder(const GlobalState &gs, const ErrorSeverity severity, Loc loc, ErrorClass what)
-    : gs(gs), state(severity != ErrorSeverity::Ignore ? State::WillBuild : State::Unreported), loc(loc), what(what),
-      severity(severity) {
-    ENFORCE(severity != ErrorSeverity::Ignore || what.minLevel != StrictLevel::Internal);
+ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
+    : gs(gs), state(willBuild ? State::WillBuild : State::Unreported), loc(loc), what(what) {
+    ENFORCE(willBuild || what.minLevel != StrictLevel::Internal);
 }
 
 void ErrorBuilder::_setHeader(string &&header) {
@@ -212,7 +211,7 @@ unique_ptr<Error> ErrorBuilder::build() {
     state = State::DidBuild;
 
     unique_ptr<Error> err = make_unique<Error>(this->loc, this->what, move(this->header), move(this->sections),
-                                               move(this->autocorrects), isSilenced, this->severity);
+                                               move(this->autocorrects), isSilenced);
     return err;
 }
 

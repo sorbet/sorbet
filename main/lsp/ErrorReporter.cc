@@ -156,7 +156,11 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             diagnostic->tags = move(tags);
         }
 
-        diagnostic->severity = toDiagnosticSeverity(error->severity);
+        diagnostic->severity = DiagnosticSeverity::Error;
+
+        if (error->what == sorbet::core::errors::Infer::UntypedValueInformation) {
+            diagnostic->severity = DiagnosticSeverity::Information;
+        }
 
         if (!error->autocorrects.empty()) {
             diagnostic->message += " (fix available)";
@@ -230,22 +234,6 @@ void ErrorReporter::sanityCheck() const {
         }
     }
     ENFORCE(errorCount == this->clientErrorCount);
-}
-
-const DiagnosticSeverity ErrorReporter::toDiagnosticSeverity(const core::ErrorSeverity severity) const {
-    switch (severity) {
-        case core::ErrorSeverity::Error:
-            return DiagnosticSeverity::Error;
-        case core::ErrorSeverity::Warning:
-            return DiagnosticSeverity::Warning;
-        case core::ErrorSeverity::Hint:
-            return DiagnosticSeverity::Hint;
-        case core::ErrorSeverity::Information:
-            return DiagnosticSeverity::Information;
-        default:
-            ENFORCE(false, "Should not happen");
-            return DiagnosticSeverity::Error;
-    }
 }
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, uint32_t epoch, bool isIncremental,
