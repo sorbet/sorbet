@@ -331,6 +331,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         vector<std::string> extraPackageFilesDirectorySlashPrefixes;
         vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
         vector<std::string> skipRBIExportEnforcementDirs;
+        vector<std::string> skipImportVisibilityCheckFor;
 
         auto extraDirUnderscore =
             StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
@@ -344,11 +345,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
         }
 
+        auto skipImportVisibility =
+            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+        if (skipImportVisibility.has_value()) {
+            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+        }
+
         {
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
             gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, {}, "PACKAGE_ERROR_HINT");
+                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                                   "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.

@@ -564,6 +564,12 @@ TEST_CASE("LSPTest") {
                 opts->extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
+            auto skipImportVisibility =
+                StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+            if (skipImportVisibility.has_value()) {
+                opts->skipPackageImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+            }
+            opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }
         opts->disableWatchman = true;
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
