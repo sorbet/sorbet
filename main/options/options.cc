@@ -394,11 +394,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Secondary top-level namespaces which contain test code (in addition to Test, which is primary). "
         "This option must be used in conjunction with --stripe-packages",
         cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("skip-package-import-visibility-check-for",
-                               "Packages for which the visible_to check does not apply. They can import any package "
-                               "regardless of visible_to annotations."
-                               "This option must be used in conjunction with --stripe-packages",
-                               cxxopts::value<vector<string>>(), "string");
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -1010,25 +1005,6 @@ void readOptions(Options &opts,
                 opts.secondaryTestPackageNamespaces.emplace_back(ns);
             }
         }
-
-        if (raw.count("skip-package-import-visibility-check-for")) {
-            if (!opts.stripePackages) {
-                logger->error(
-                    "--skip-package-import-visibility-check-for can only be specified in --stripe-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-            std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
-            for (const string &ns : raw["skip-package-import-visibility-check-for"].as<vector<string>>()) {
-                if (!std::regex_match(ns, nsValid)) {
-                    logger->error(
-                        "--skip-package-import-visibility-check-for must contain items that start with a capital "
-                        "letter and are alphanumeric.");
-                    throw EarlyReturnWithCode(1);
-                }
-                opts.skipPackageImportVisibilityCheckFor.emplace_back(ns);
-            }
-        }
-
         opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
         if (!opts.stripePackagesHint.empty() && !opts.stripePackages) {
             if (!opts.stripePackages) {

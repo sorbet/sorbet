@@ -13,7 +13,6 @@
 #include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
-#include "core/packages/MangledName.h"
 #include "core/packages/PackageInfo.h"
 #include <algorithm>
 #include <cctype>
@@ -68,6 +67,20 @@ struct FullyQualifiedName {
     }
 };
 
+class NameFormatter final {
+    const core::GlobalState &gs;
+
+public:
+    NameFormatter(const core::GlobalState &gs) : gs(gs) {}
+
+    void operator()(std::string *out, core::NameRef name) const {
+        out->append(name.shortName(gs));
+    }
+    void operator()(std::string *out, pair<core::NameRef, core::LocOffsets> p) const {
+        out->append(p.first.shortName(gs));
+    }
+};
+
 struct PackageName {
     core::LocOffsets loc;
     core::NameRef mangledName = core::NameRef::noName();
@@ -76,7 +89,7 @@ struct PackageName {
 
     // Pretty print the package's (user-observable) name (e.g. Foo::Bar)
     string toString(const core::GlobalState &gs) const {
-        return absl::StrJoin(fullName.parts, "::", core::packages::NameFormatter(gs));
+        return absl::StrJoin(fullName.parts, "::", NameFormatter(gs));
     }
 
     bool operator==(const PackageName &rhs) const {
@@ -425,7 +438,11 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
     // Foo::Bar => Foo_Bar_Package
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(ctx.state, pName.fullName.parts);
+    auto mangledName = absl::StrCat(absl::StrJoin(pName.fullName.parts, "_", NameFormatter(ctx)), core::PACKAGE_SUFFIX);
+
+    auto utf8Name = ctx.state.enterNameUTF8(mangledName);
+    auto packagerName = ctx.state.freshNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
+    pName.mangledName = ctx.state.enterNameConstant(packagerName);
 
     return pName;
 }
@@ -900,8 +917,7 @@ private:
         auto reqMangledName = namespaces.packageForNamespace();
         if (reqMangledName.exists()) {
             auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
-            auto givenNamespace =
-                absl::StrJoin(namespaces.currentConstantName(), "::", core::packages::NameFormatter(gs));
+            auto givenNamespace = absl::StrJoin(namespaces.currentConstantName(), "::", NameFormatter(gs));
             e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`", givenNamespace);
         }
     }
@@ -1326,33 +1342,29 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     }
 
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
-    bool skipImportVisibilityCheck = packageDB.skipImportVisibilityCheckFor(pkgInfo.mangledName());
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-    if (!skipImportVisibilityCheck) {
-        for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+        // this might mean the other package doesn't exist, but that
+        // should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
 
-            // this might mean the other package doesn't exist, but that
-            // should have been caught already
-            if (!otherPkg.exists()) {
-                continue;
-            }
+        const auto &visibleTo = otherPkg.visibleTo();
+        if (visibleTo.empty()) {
+            continue;
+        }
 
-            const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty()) {
-                continue;
-            }
+        bool allowed =
+            absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) { return other == absPkg.fullName(); });
 
-            bool allowed = absl::c_any_of(otherPkg.visibleTo(),
-                                          [&absPkg](const auto &other) { return other == absPkg.fullName(); });
-
-            if (!allowed) {
-                if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                otherPkg.show(ctx), absPkg.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", otherPkg.show(ctx));
-                }
+        if (!allowed) {
+            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+                e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            otherPkg.show(ctx), absPkg.show(ctx));
+                e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                               "visible_to", otherPkg.show(ctx));
             }
         }
     }
@@ -1606,7 +1618,7 @@ public:
     ImportFormatter(const core::GlobalState &gs) : gs(gs) {}
 
     void operator()(std::string *out, const vector<core::NameRef> &name) const {
-        fmt::format_to(back_inserter(*out), "\"{}\"", absl::StrJoin(name, "::", core::packages::NameFormatter(gs)));
+        fmt::format_to(back_inserter(*out), "\"{}\"", absl::StrJoin(name, "::", NameFormatter(gs)));
     }
 };
 
@@ -1640,8 +1652,7 @@ public:
         const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
         out->append("{{");
         out->append("\"name\":");
-        fmt::format_to(back_inserter(*out), "\"{}\",",
-                       absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
+        fmt::format_to(back_inserter(*out), "\"{}\",", absl::StrJoin(pkg.fullName(), "::", NameFormatter(gs)));
         out->append("\"imports\":[");
         fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
         out->append("],\"testImports\":[");

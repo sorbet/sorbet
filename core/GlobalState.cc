@@ -13,14 +13,12 @@
 #include "core/hashing/hashing.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
-#include <string_view>
 #include <utility>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
-#include "core/packages/MangledName.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
@@ -2281,7 +2279,6 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
                                      const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                                     const std::vector<std::string> &skipImportVisibilityCheckFor,
                                      std::string errorHint) {
     ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
@@ -2293,14 +2290,6 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
-
-    std::vector<core::NameRef> skipImportVisibilityCheckFor_;
-    for (const string &pkgName : skipImportVisibilityCheckFor) {
-        std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
-        skipImportVisibilityCheckFor_.emplace_back(mangledName);
-    }
-    packageDB_.skipImportVisibilityCheckFor_ = skipImportVisibilityCheckFor_;
     packageDB_.errorHint_ = errorHint;
 }
 
