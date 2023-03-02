@@ -263,14 +263,6 @@ module URI
   end
   def self.encode_www_form_component(str, enc=nil); end
 
-  sig do
-    params(
-        arg: String,
-        arg0: Regexp,
-    )
-    .returns(String)
-  end
-
   # ## Synopsis
   #
   # ```
