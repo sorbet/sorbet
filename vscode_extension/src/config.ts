@@ -373,7 +373,7 @@ export class SorbetExtensionConfig implements Disposable {
   public get revealOutputOnError(): boolean {
     return this._revealOutputOnError;
   }
-  
+
   public get warnUntypedValues(): boolean {
     return this._warnUntypedValues;
   }
