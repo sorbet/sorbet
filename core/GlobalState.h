@@ -308,7 +308,7 @@ public:
 
     bool requiresAncestorEnabled = false;
 
-    const ErrorSeverity shouldReportErrorOn(Loc loc, ErrorClass what) const;
+    bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
 
 private:
     struct DeepCloneHistoryEntry {

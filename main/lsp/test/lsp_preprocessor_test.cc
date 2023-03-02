@@ -341,8 +341,7 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
     // Put an error in the queue.
     gs->errorQueue->pushError(
         *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
-                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false,
-                                      core::ErrorSeverity::Error));
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
     CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs));

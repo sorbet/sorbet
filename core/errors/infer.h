@@ -22,7 +22,7 @@ constexpr ErrorClass RevealType{7014, StrictLevel::True};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::True};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
-constexpr ErrorClass UntypedValue{7018, StrictLevel::Strict};
+constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::True};
 constexpr ErrorClass GenericMethodConstraintUnsolved{7020, StrictLevel::True};
 constexpr ErrorClass BlockNotPassed{7021, StrictLevel::True};
@@ -49,6 +49,7 @@ constexpr ErrorClass UntypedFieldSuggestion{7043, StrictLevel::Strict};
 constexpr ErrorClass DigExtraArgs{7044, StrictLevel::True};
 constexpr ErrorClass IncorrectlyAssumedType{7045, StrictLevel::True};
 constexpr ErrorClass NonOverlappingEqual{7046, StrictLevel::True};
+constexpr ErrorClass UntypedValueInformation{7047, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif

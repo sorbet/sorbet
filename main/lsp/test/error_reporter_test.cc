@@ -54,9 +54,9 @@ unique_ptr<core::GlobalState> makeGS() {
 // Generate `count` errors for `fref` in `errors`.
 void generateErrors(core::FileRef fref, vector<unique_ptr<core::Error>> &errors, uint16_t count) {
     for (uint16_t i = 0; i < count; i++) {
-        errors.emplace_back(make_unique<core::Error>(
-            core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
-            vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+        errors.emplace_back(
+            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
     }
 }
 uint32_t errorsReported(LSPOutputToVector &outputVector) {
@@ -85,9 +85,9 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
     vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(
-        core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError", vector<core::ErrorSection>(),
-        vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+    errors.emplace_back(make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
@@ -125,9 +125,9 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     vector<unique_ptr<core::Error>> emptyErrorList;
 
     vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(
-        core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError", vector<core::ErrorSection>(),
-        vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+    errors.emplace_back(make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
@@ -193,9 +193,9 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     vector<unique_ptr<core::Error>> emptyErrorList;
 
     vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(
-        core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError", vector<core::ErrorSection>(),
-        vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+    errors.emplace_back(make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
@@ -231,9 +231,9 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
     vector<unique_ptr<core::Error>> errors;
-    errors.emplace_back(make_unique<core::Error>(
-        core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError", vector<core::ErrorSection>(),
-        vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+    errors.emplace_back(make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
@@ -363,9 +363,9 @@ TEST_CASE("filesWithErrorsSince") {
 
     vector<unique_ptr<core::Error>> errors;
     vector<unique_ptr<core::Error>> emptyErrorList;
-    errors.emplace_back(make_unique<core::Error>(
-        core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError", vector<core::ErrorSection>(),
-        vector<core::AutocorrectSuggestion>(), false, core::ErrorSeverity::Error));
+    errors.emplace_back(make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True},
+                                                 "MyError", vector<core::ErrorSection>(),
+                                                 vector<core::AutocorrectSuggestion>(), false));
 
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));

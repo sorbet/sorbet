@@ -2,7 +2,7 @@
 #define RUBY_TYPER_LSP_ERRORREPORTER_H
 
 #include "core/core.h"
-#include "main/lsp/LSPMessage.h"
+
 namespace sorbet::realmain::lsp {
 class LSPConfiguration;
 
@@ -63,8 +63,6 @@ public:
 
     // Sanity checks error count data.
     void sanityCheck() const;
-
-    const DiagnosticSeverity toDiagnosticSeverity(const core::ErrorSeverity severity) const;
 };
 
 class ErrorEpoch final {
