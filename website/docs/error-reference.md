@@ -4064,6 +4064,7 @@ Usages of values with type `T.untyped` are highlighted by this error. It is
 intended to only show up as a warning in editors through LSP for files with
 typed sigil set between `true` and `strong` (exclusive). For `typed: strong`
 error [7018](#7018) will be reported.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
