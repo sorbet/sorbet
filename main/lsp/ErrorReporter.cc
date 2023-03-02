@@ -157,9 +157,12 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         }
 
         diagnostic->severity = DiagnosticSeverity::Error;
-
         if (error->what == sorbet::core::errors::Infer::UntypedValueInformation) {
-            diagnostic->severity = DiagnosticSeverity::Information;
+            if (config->getClientConfig().enableWarnUntypedValues) {
+                diagnostic->severity = DiagnosticSeverity::Information;
+            } else {
+                continue;
+            }
         }
 
         if (!error->autocorrects.empty()) {
