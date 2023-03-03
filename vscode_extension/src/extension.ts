@@ -146,15 +146,6 @@ export function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.toggleWarnUntypedValue", () => {
-      sorbetExtensionConfig.setWarnUntypedValues(
-        !sorbetExtensionConfig.warnUntypedValues,
-      );
-      restartSorbet(RestartReason.CONFIG_CHANGE);
-    }),
-  );
-
-  context.subscriptions.push(
     commands.registerCommand("sorbet.restart", () => {
       restartSorbet(RestartReason.COMMAND);
     }),

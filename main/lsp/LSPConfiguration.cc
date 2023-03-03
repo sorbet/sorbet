@@ -103,7 +103,6 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
         enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
         enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
-        enableWarnUntypedValues = initOptions->warnUntypedValues.value_or(false);
     }
 }
 
