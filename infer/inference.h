@@ -7,9 +7,6 @@
 
 namespace sorbet::infer {
 class Inference final {
-    static const std::optional<core::ErrorClass> errorClassForUntyped(const core::GlobalState &gs,
-                                                                      const core::FileRef file);
-
 public:
     static std::unique_ptr<cfg::CFG> run(core::Context ctx, std::unique_ptr<cfg::CFG> cfg);
 };

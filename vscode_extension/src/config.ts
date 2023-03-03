@@ -218,7 +218,6 @@ export class SorbetExtensionConfig implements Disposable {
 
   private _enabled: boolean;
   private _revealOutputOnError: boolean = false;
-  private _warnUntypedValues: boolean = false;
   private _configFilePatterns: ReadonlyArray<string> = [];
   private _configFileWatchers: ReadonlyArray<FileSystemWatcher> = [];
 
@@ -250,11 +249,6 @@ export class SorbetExtensionConfig implements Disposable {
       "revealOutputOnError",
       this.revealOutputOnError,
     );
-    this._warnUntypedValues = workspaceContext.get(
-      "warnUntypedValue",
-      this.warnUntypedValues,
-    );
-
     const oldConfigFilePatterns = this._configFilePatterns;
     this._configFilePatterns = [
       ...workspaceContext.get("configFilePatterns", this._configFilePatterns),
@@ -374,10 +368,6 @@ export class SorbetExtensionConfig implements Disposable {
     return this._revealOutputOnError;
   }
 
-  public get warnUntypedValues(): boolean {
-    return this._warnUntypedValues;
-  }
-
   public get enabled(): boolean {
     return this._enabled;
   }
@@ -385,12 +375,6 @@ export class SorbetExtensionConfig implements Disposable {
   public setEnabled(b: boolean): Thenable<void> {
     return this._sorbetWorkspaceContext
       .update("enabled", b)
-      .then(this._refresh.bind(this));
-  }
-
-  public setWarnUntypedValues(b: boolean): Thenable<void> {
-    return this._sorbetWorkspaceContext
-      .update("warnUntypedValue", b)
       .then(this._refresh.bind(this));
   }
 
