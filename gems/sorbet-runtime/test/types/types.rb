@@ -1223,6 +1223,12 @@ module Opus::Types::Test
         assert_nil(msg)
       end
 
+      it 'fails validation with a superclass' do
+        type = T.class_of(Sub)
+        msg = check_error_message_for_obj(type, Base)
+        assert_equal("Expected type T.class_of(Opus::Types::Test::TypesTest::Sub), got Opus::Types::Test::TypesTest::Base", msg)
+      end
+
       it 'fails validation with some other class' do
         msg = check_error_message_for_obj(@type, InterfaceImplementor1)
         assert_equal("Expected type T.class_of(Opus::Types::Test::TypesTest::Base), got Opus::Types::Test::TypesTest::InterfaceImplementor1", msg)
