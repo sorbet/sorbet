@@ -1267,7 +1267,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
                         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
-                            stopInDebugger();
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
