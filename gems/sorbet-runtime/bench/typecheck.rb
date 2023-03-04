@@ -89,6 +89,12 @@ module SorbetBenchmarks
         type.valid?('hi')
       end
 
+      type = T::Utils.coerce(T.class_of(Numeric))
+      time_block("T.class_of.valid?", iterations_in_block: 2) do
+        type.valid?(Integer)
+        type.valid?(String)
+      end
+
       time_block("T.let(..., Integer)") do
         T.let(0, Integer)
         T.let(1, Integer)
