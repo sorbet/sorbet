@@ -94,3 +94,47 @@ bar(other3 => 10)
   # ^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
 bar(**{other3 => 10})
 
+
+sig {params(x: Integer, y: Integer, z: String).void}
+def f(x, y:, z:)
+  puts x
+  puts y
+  puts z
+end
+
+sig {params(x: Integer, y: Integer, z: String, w: Float).void}
+def g(x, y:, z:, w:)
+  puts x
+  puts y
+  puts z
+  puts w
+end
+
+shaped_hash = {y: 3, z: "hi mom"}
+f(3, shaped_hash)
+   # ^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+f(3, **shaped_hash)
+g(3, **shaped_hash, w: 2.0)
+
+untyped_hash = T.let(shaped_hash, T.untyped)
+f(3, untyped_hash)
+   # ^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+f(3, **untyped_hash)
+g(3, **untyped_hash, w: 2.0)
+
+untyped_values_hash = T.let(shaped_hash, T::Hash[Symbol, T.untyped])
+  f(3, untyped_values_hash)
+     # ^^^^^^^^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+  f(3, **untyped_values_hash)
+  g(3, **untyped_values_hash, w: 2.0)
+
+sig {params(x: Integer, y: Integer, kw_splat: BasicObject).void}
+def h(x, y:, **kw_splat)
+  puts x
+  puts y
+  puts kw_splat
+end
+
+untyped_values_hash = T.let({}, T::Hash[Symbol, T.untyped])
+h(1, y: 2, **untyped_values_hash)
+
