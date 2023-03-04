@@ -994,8 +994,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
                                          "and will be an error in Ruby 3.0");
                 if (auto source = splatLoc.source(gs)) {
-                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
-                                  source.value());
+                    const auto shouldParenthesize = source.value().find("=>") != string::npos;
+                    const auto autofixTemplate = shouldParenthesize ? "**{{{}}}" : "**{}";
+                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc,
+                                  autofixTemplate, source.value());
                 }
             }
         }
