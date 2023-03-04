@@ -944,8 +944,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
-        auto isKwSplat = spec.flags.isKeyword && spec.flags.isRepeated;
-        if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || isKwSplat) &&
+
+        if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || spec.flags.isRepeated) &&
             Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
