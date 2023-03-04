@@ -67,3 +67,30 @@ optional_x(0, 1, 2, **string_keys)
 optional_x(0, 1, 2, **nilble_opts)
                   # ^^^^^^^^^^^^^ error: Expected `String` for keyword parameter `x` but found `T.nilable(Integer)` from keyword splat
 
+def bar(x:, y: 10)
+  p x
+  p y
+end
+
+bar(x: 10)
+bar(x: 10, y: 20)
+
+args = {x: 10}
+bar(**args)
+bar(x: 20, **args)
+
+other1= 10
+bar(other1 => 10)
+  # ^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+bar(**{other1 => 10})
+
+other2 = "bar"
+bar(other2 => 10)
+  # ^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+bar(**{other2 => 10})
+
+other3 = T.let(:bar, Symbol)
+bar(other3 => 10)
+  # ^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+bar(**{other3 => 10})
+
