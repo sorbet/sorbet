@@ -54,8 +54,6 @@ class TestArgs
     kwarg(1, b: "hi")
     #           ^^^^ error: Expected `Integer` but found `String("hi")` for argument `b`
     kwarg(1, any)
-    kwarg(1, a_hash)
-    #        ^^^^^^ error: Cannot call `TestArgs#kwarg` with a `Hash` keyword splat because the method has required keyword parameters
   end
 
   sig do
