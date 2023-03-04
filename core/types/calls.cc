@@ -945,9 +945,28 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             break;
         }
 
+        auto argType = Types::approximate(gs, arg->type, *constr);
         if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
-            break;
+            argType.derivesFrom(gs, Symbols::Hash())) {
+            // Edge case:
+            // sig {params(args: Integer, x: Integer).void}
+            //             ^^^^ pit
+            // def foo(*args, x: 42); end
+            //
+            // sig {returns(T.untyped)}
+            // def returns_untyped; return 42; end
+            //
+            // foo(returns_untyped, returns_untyped, returns_untyped)
+            //                                       ^^^^^^^^^^^^^^^ ait
+            //
+            // The last argument would be dispatched as kwargs hash, because
+            // in the condition above T.untyped would always derive from Hash.
+            // To properly parse the argumnets we need to manually advance the parameter pointer
+            if ((spec.flags.isRepeated && !spec.flags.isKeyword) && argType.isUntyped()) {
+                ++pit;
+            } else {
+                break;
+            }
         }
 
         auto offset = ait - args.args.begin();
