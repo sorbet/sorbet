@@ -17,7 +17,9 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      obj.is_a?(Module) && obj <= @type
+      # This is essentially `obj.is_a?(Module) && obj <= @type`, but it's
+      # ~30% faster due to more efficient codepaths in the Ruby VM.
+      (@type <=> obj)&.>=(0)
     end
 
     # overrides Base
