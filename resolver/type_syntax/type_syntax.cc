@@ -1125,7 +1125,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 }
             }
 
-            vector<core::TypePtr> targs;
+            InlinedVector<core::TypePtr, 1> targs;
 
             if (sig.returns == nullptr) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -1150,7 +1150,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
             auto sym = core::Symbols::Proc(arity);
 
-            result.type = core::make_type<core::AppliedType>(sym, move(targs));
+            result.type = core::make_type<core::AppliedType>(sym, std::move(targs));
             return result;
         }
 

@@ -299,7 +299,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         // now a1 <: a2
 
         InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
-        vector<TypePtr> newTargs;
+        InlinedVector<TypePtr, 1> newTargs;
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
         int j = 0;
@@ -340,7 +340,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (!changedFromT1) {
             return t1s;
         } else {
-            return make_type<AppliedType>(a2->klass, move(newTargs));
+            return make_type<AppliedType>(a2->klass, std::move(newTargs));
         }
     }
 
@@ -961,7 +961,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
         // code below inverts permutation of type params
 
-        vector<TypePtr> newTargs;
+        InlinedVector<TypePtr, 1> newTargs;
         newTargs.reserve(a1->klass.data(gs)->typeMembers().size());
         int j = 0;
         for (auto idx : a1->klass.data(gs)->typeMembers()) {
@@ -1000,7 +1000,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (absl::c_equal(a2->targs, newTargs) && a1->klass == a2->klass) {
             return ltr ? t1 : t2;
         } else {
-            return make_type<AppliedType>(a1->klass, move(newTargs));
+            return make_type<AppliedType>(a1->klass, std::move(newTargs));
         }
     }
     {

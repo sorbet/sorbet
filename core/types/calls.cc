@@ -271,7 +271,7 @@ namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
+                               const TypePtr &selfType, absl::Span<const TypePtr> &targs, Loc argLoc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
@@ -303,7 +303,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 }
 
 unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc, MethodRef method, const ArgInfo &arg,
-                             ClassOrModuleRef inClass, const vector<TypePtr> &targs) {
+                             ClassOrModuleRef inClass, absl::Span<const TypePtr> targs) {
     if (auto e = gs.beginError(argsLoc, errors::Infer::MethodArgumentCountMismatch)) {
         auto argName = arg.name.show(gs);
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
@@ -329,7 +329,8 @@ int getArity(const GlobalState &gs, MethodRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, absl::Span<const TypePtr> targs,
+                        bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
@@ -689,7 +690,7 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
-                                  const vector<TypePtr> &targs) {
+                                  absl::Span<const TypePtr> targs) {
     auto funLoc = args.funLoc();
     auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
@@ -1533,7 +1534,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     return result;
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
+TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name,
+                           absl::Span<const TypePtr> targs) {
     MethodRef method = klass.data(gs)->findMethodTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1719,7 +1721,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             }
 
             // Have to create a new type for the result because dispatchCall is a const member method
-            vector<core::TypePtr> targs;
+            InlinedVector<core::TypePtr, 1> targs;
 
             // Going to overwrite the return type later in MetaType::dispatchCall
             targs.emplace_back(returns);
@@ -1727,7 +1729,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                 targs.emplace_back(applied->targs[i]);
             }
 
-            auto proc = make_type<MetaType>(core::make_type<core::AppliedType>(applied->klass, move(targs)));
+            auto proc = make_type<MetaType>(core::make_type<core::AppliedType>(applied->klass, std::move(targs)));
 
             auto member = core::Symbols::T_Private_Methods_DeclBuilder().data(gs)->findMember(gs, args.name);
             // might not exist if running with --no-stdlib
@@ -1977,7 +1979,7 @@ public:
             return;
         }
 
-        vector<core::TypePtr> targs;
+        InlinedVector<core::TypePtr, 1> targs;
         // Going to overwrite the return type later in MetaType::dispatchCall
         targs.emplace_back(core::Types::todo());
 
@@ -1986,7 +1988,7 @@ public:
             targs.emplace_back(move(unwrappedType));
         }
 
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, std::move(targs)));
     }
 } T_proc_params;
 
@@ -1994,9 +1996,9 @@ class T_proc_void : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto sym = core::Symbols::Proc(0);
-        vector<core::TypePtr> targs;
+        InlinedVector<core::TypePtr, 1> targs;
         targs.emplace_back(core::Types::void_());
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, std::move(targs)));
     }
 } T_proc_void;
 
@@ -2009,10 +2011,10 @@ public:
         }
 
         auto sym = core::Symbols::Proc(0);
-        vector<core::TypePtr> targs;
+        InlinedVector<core::TypePtr, 1> targs;
         auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
         targs.emplace_back(move(unwrappedType));
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, std::move(targs)));
     }
 } T_proc_returns;
 
@@ -2152,7 +2154,7 @@ public:
             }
         }
 
-        vector<TypePtr> targs;
+        InlinedVector<TypePtr, 1> targs;
         auto it = args.args.begin();
         int i = -1;
         targs.reserve(attachedClass.data(gs)->typeMembers().size());
@@ -2205,14 +2207,15 @@ public:
 
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
-                auto tupleArgs = targs;
-                targs.emplace_back(make_type<TupleType>(tupleArgs));
+                vector<TypePtr> tupleArgs;
+                tupleArgs.insert(tupleArgs.end(), targs.begin(), targs.end());
+                targs.emplace_back(make_type<TupleType>(std::move(tupleArgs)));
             } else {
                 targs.emplace_back(Types::untypedUntracked());
             }
         }
 
-        res.returnType = make_type<MetaType>(make_type<AppliedType>(attachedClass, move(targs)));
+        res.returnType = make_type<MetaType>(make_type<AppliedType>(attachedClass, std::move(targs)));
     }
 } T_Generic_squareBrackets;
 
@@ -2598,9 +2601,9 @@ private:
                 // and then use this type instead of passedInBlockType in later subtype checks.
                 // This allows the generic parameters to be instantiated with untyped rather than bottom.
                 if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
-                    vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
+                    InlinedVector<core::TypePtr, 1> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
-                    passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
+                    passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, std::move(targs));
                 }
             } else if (auto e = gs.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
@@ -4175,9 +4178,9 @@ public:
             res.returnType = core::Types::procClass();
             return;
         }
-        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
+        InlinedVector<core::TypePtr, 1> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
-        res.returnType = make_type<core::AppliedType>(procClass, move(targs));
+        res.returnType = make_type<core::AppliedType>(procClass, std::move(targs));
     }
 } Kernel_proc;
 
