@@ -257,7 +257,7 @@ module FileUtils
     .params(
       dir: T.any(String, Pathname),
       verbose: T.nilable(T::Boolean),
-      block: T.proc.returns(T.type_parameter(:U)),
+      block: T.nilable(T.proc.returns(T.type_parameter(:U))),
     )
     .returns(T.type_parameter(:U))
   }
