@@ -109,7 +109,7 @@ build:release-linux --config=lto-linux --config=release-common --platforms=@//to
 build:release-linux           --copt=-march=sandybridge
 build:release-sanitized-linux --copt=-march=sandybridge
 
-build:release-mac --config=release-common --platforms=@//tools/platform:darwin_x86_64
+build:release-mac --config=release-common --platforms=@//tools/platforms:darwin_x86_64
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
