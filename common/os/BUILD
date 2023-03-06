@@ -4,7 +4,7 @@ cc_library(
         "os.h",
         "os.cc",
     ] + select({
-        "//tools/config:darwin": ["mac.cc"],
+        "@platforms//os:osx": ["mac.cc"],
         "//tools/config:webasm": ["emscripten.cc"],
         "//conditions:default": ["linux.cc"],
     }),

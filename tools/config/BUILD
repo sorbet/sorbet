@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
-    name = "darwin",
+    name = "darwin_x86_64",
     constraint_values = [
         "@platforms//os:osx",
         "@platforms//cpu:x86_64",
