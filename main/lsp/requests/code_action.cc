@@ -171,15 +171,6 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 auto action = make_unique<CodeAction>("Move method to a new module");
                 action->kind = CodeActionKind::RefactorExtract;
 
-                auto newModuleLoc = getNewModuleLocation(gs, *def, typechecker);
-                auto renameCommand = make_unique<Command>("Rename Symbol", "sorbet.rename");
-                auto arg = make_unique<TextDocumentPositionParams>(
-                    make_unique<TextDocumentIdentifier>(params->textDocument->uri), move(newModuleLoc));
-                auto args = vector<unique_ptr<TextDocumentPositionParams>>();
-                args.emplace_back(move(arg));
-
-                renameCommand->arguments = move(args);
-                action->command = move(renameCommand);
                 if (canResolveLazily) {
                     action->data = move(params);
                 } else {
