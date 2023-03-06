@@ -1,14 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
-    name = "linux_arm64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:arm64",
-    ],
-)
-
-config_setting(
     name = "darwin",
     constraint_values = [
         "@platforms//os:osx",
@@ -21,6 +13,14 @@ config_setting(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
     ],
 )
 
