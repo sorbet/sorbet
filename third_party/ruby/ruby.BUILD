@@ -55,6 +55,10 @@ ruby(
             "@system_ssl_darwin//:ssl",
             "@system_ssl_darwin//:crypto",
         ],
+        "@com_stripe_ruby_typer//tools/config:linux_arm64": [
+            "@system_ssl_linux//:ssl",
+            "@system_ssl_linux//:crypto",
+        ],
         "@com_stripe_ruby_typer//tools/config:linux": [
             "@system_ssl_linux//:ssl",
             "@system_ssl_linux//:crypto",
