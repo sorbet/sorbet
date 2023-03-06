@@ -17,6 +17,14 @@ platform(
 )
 
 config_setting(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+)
+
+config_setting(
     name = "darwin",
     constraint_values = [
         "@platforms//os:osx",
