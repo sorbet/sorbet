@@ -1,8 +1,8 @@
 cc_import(
     name = "ssl-import",
     shared_library = select({
-        "@com_stripe_ruby_typer//tools/config:linux": "lib/x86_64-linux-gnu/libssl.so",
-        "@com_stripe_ruby_typer//tools/config:linux_arm64": "lib/aarch64-linux-gnu/libssl.so",
+        "@platforms//cpu:x86_64": "lib/x86_64-linux-gnu/libssl.so",
+        "@platforms//cpu:arm64": "lib/aarch64-linux-gnu/libssl.so",
     }),
     visibility = ["//visibility:private"],
 )
@@ -17,8 +17,8 @@ cc_library(
 cc_import(
     name = "crypto-import",
     shared_library = select({
-        "@com_stripe_ruby_typer//tools/config:linux": "lib/x86_64-linux-gnu/libcrypto.so",
-        "@com_stripe_ruby_typer//tools/config:linux_arm64": "lib/aarch64-linux-gnu/libcrypto.so",
+        "@platforms//cpu:x86_64": "lib/x86_64-linux-gnu/libcrypto.so",
+        "@platforms//cpu:arm64": "lib/aarch64-linux-gnu/libcrypto.so",
     }),
     visibility = ["//visibility:private"],
 )
