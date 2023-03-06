@@ -1,3 +1,5 @@
+# typed: strict
+
 FileUtils.cd('/')  # change directory
 
 FileUtils.cd('/', verbose: true)   # change directory and report it
