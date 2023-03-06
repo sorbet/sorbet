@@ -45,7 +45,7 @@ ruby(
         "@bundler_stripe//file",
     ],
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:linux": [
+        "@platforms//os:linux": [
             "-Wl,-Bsymbolic-functions",
             "-Wl,-z,relro",
             "-Wl,-z,noexecstack",
@@ -62,7 +62,7 @@ ruby(
             "@system_ssl_darwin//:ssl",
             "@system_ssl_darwin//:crypto",
         ],
-        "@com_stripe_ruby_typer//tools/config:linux": [
+        "@platforms//os:linux": [
             "@system_ssl_linux//:ssl",
             "@system_ssl_linux//:crypto",
         ],
