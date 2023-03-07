@@ -551,7 +551,6 @@ private:
                                                  ast::cast_tree<ast::UnresolvedConstantLit>(out->original)->cnst);
 
         auto data = symbol.data(ctx);
-        data->setIsModule(true); // This is what would happen in finalizeAncestors
         // force a singleton into existence
         auto singletonClass = data->singletonClass(ctx);
         if (possibleGenericType) {

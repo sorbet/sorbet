@@ -1182,8 +1182,7 @@ private:
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
 
-        // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
-        // project) locs!
+        // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in project) locs!
         if (symbol != core::Symbols::root()) {
             // If the kind is unknown, it means it was only a FoundClass for a class or static field scope, not
             // the class def itself. We want to generally treat these as usage locs, not definition locs.
