@@ -142,7 +142,6 @@ TypePtr TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
 }
 
 unique_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
-    ENFORCE(!wasSolved);
     auto res = make_unique<TypeConstraint>();
     res->lowerBounds = this->lowerBounds;
     res->upperBounds = this->upperBounds;
