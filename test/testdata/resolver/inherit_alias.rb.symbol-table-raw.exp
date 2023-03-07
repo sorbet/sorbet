@@ -14,8 +14,7 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U NS>>::<S <C <U Dest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U NS>>::<S <C <U Dest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NS::Dest) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:3 end=6:13}
       method <C <U NS>>::<S <C <U Dest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=6:3 end=7:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/inherit_alias.rb start=??? end=???}
-  class <S <C <U NS>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=2:10}
-    type-member(+) <S <C <U NS>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U NS>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NS) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=2:10}
+  class <S <C <U NS>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=2:10}
     method <S <C <U NS>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/inherit_alias.rb start=2:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/inherit_alias.rb start=??? end=???}
 

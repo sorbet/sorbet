@@ -769,8 +769,7 @@ private:
             "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
-            if (prevSymbol.kind() == Kind::ClassOrModule &&
-                !prevSymbol.asClassOrModuleRef().data(ctx)->isUndeclared()) {
+            if (prevSymbol.kind() == Kind::ClassOrModule && prevSymbol.asClassOrModuleRef().data(ctx)->isDeclared()) {
                 prevSymbolKind = prevSymbol.asClassOrModuleRef().showKind(ctx);
             }
 
@@ -1153,9 +1152,14 @@ private:
                     }
                 }
             }
+
+            // Even though the declaration is erroneous, the class/module is technically "declared".
+            symbol.data(ctx)->setDeclared();
         } else if (!isUnknown) {
             symbol.data(ctx)->setIsModule(isModule);
+            symbol.data(ctx)->setDeclared();
         }
+
         return symbol;
     }
 
@@ -1175,42 +1179,59 @@ private:
             symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
-        // Skip adding locs when kind is Unknown, becaue that means it was a only a FoundClass for a
-        // class or static field scope (not the class def itself), and we want to treat those as
-        // usage locs, not definition locs.
-        // TODO(jez) This causes known problems on the fast path, where these locs can fail to be
-        // updated and crash. We've chosen the current approach because (1) it matches old behavior
-        // (2) adding O(files) locs for something like Opus is far too slow.
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
+        const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
+
         // Don't add locs for <root>; 1) they aren't useful and 2) they'll end up with O(files in
         // project) locs!
-        if (symbol != core::Symbols::root() && !isUnknown) {
-            symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
-            if (klass.definesBehavior) {
-                auto &behaviorLocs = classBehaviorLocs[symbol];
-                behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
-                symbol.data(ctx)->flags.isBehaviorDefining = true;
+        if (symbol != core::Symbols::root()) {
+            // If the kind is unknown, it means it was only a FoundClass for a class or static field scope, not
+            // the class def itself. We want to generally treat these as usage locs, not definition locs.
+            //
+            // At best, we only want to keep one loc in the codebase per unknown class for perf reasons. We don't
+            // want to store O(files) locs for something like Opus. So if the existing loc (which would have been
+            // brought into existence by getClassSymbol()) is not from this file, we don't add a new loc.
+            //
+            // If the unknown class loc is from the same file, it's still possible that it is from a real
+            // definition in that file. In which case, we check the declared bit on the class.
+            // We only set the loc if the class is not declared.
+            bool updateLoc =
+                !isUnknown || (!symbol.data(ctx)->isDeclared() && symbol.data(ctx)->loc().file() == ctx.file);
+            if (updateLoc) {
+                symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
             }
-        }
-        auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-        if (symbol != core::Symbols::root() && !isUnknown) {
-            singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
-        }
 
-        // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.
-        // Ideally, we would be able to make finalizeSymbols fast/incremental enough to run on all edits.
-        if (willDeleteOldDefs) {
-            // Reset resultType to nullptr for idempotency on the fast path--it will always be
-            // re-entered in resolver.
-            symbol.data(ctx)->resultType = nullptr;
-            singletonClass.data(ctx)->resultType = nullptr;
-            // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
-            // singletonClass to reset the <AttachedClass> type template to what it used to be.
-            // Is there a better way to accomplish this? (This is largely the same as the bad locs problem above;
-            // we can probably be more principled about what state calling `singletonClass` sets up/resets.)
-            auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
-            auto tp = singletonClass.data(ctx)->members()[core::Names::Constants::AttachedClass()].asTypeMemberRef();
-            tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+            if (!isUnknown) {
+                if (klass.definesBehavior) {
+                    auto &behaviorLocs = classBehaviorLocs[symbol];
+                    behaviorLocs.emplace_back(ctx.locAt(klass.declLoc));
+                    symbol.data(ctx)->flags.isBehaviorDefining = true;
+                }
+
+                auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+                singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+
+                // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.
+                // Ideally, we would be able to make finalizeSymbols fast/incremental enough to run on all edits.
+                if (willDeleteOldDefs) {
+                    // Reset resultType to nullptr for idempotency on the fast path--it will always be
+                    // re-entered in resolver.
+                    symbol.data(ctx)->resultType = nullptr;
+                    singletonClass.data(ctx)->resultType = nullptr;
+                    // TODO(jez) This is a gross hack. We are basically re-implementing the logic in
+                    // singletonClass to reset the <AttachedClass> type template to what it used to be.
+                    // Is there a better way to accomplish this? (This is largely the same as the bad locs problem
+                    // above; we can probably be more principled about what state calling `singletonClass` sets
+                    // up/resets.)
+                    if (!isModule) {
+                        auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+                        auto tp = singletonClass.data(ctx)
+                                      ->members()[core::Names::Constants::AttachedClass()]
+                                      .asTypeMemberRef();
+                        tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
+                    }
+                }
+            }
         }
 
         // make sure we've added a static init symbol so we have it ready for the flatten pass later

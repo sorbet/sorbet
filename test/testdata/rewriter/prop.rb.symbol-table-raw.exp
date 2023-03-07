@@ -112,10 +112,8 @@ class <C <U <root>>> < <C <U Object>> ()
         type-member(+) <C <U Chalk>>::<C <U ODM>>::<S <C <U Document>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Chalk>>::<C <U ODM>>::<S <C <U Document>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Chalk::ODM::Document) @ Loc {file=test/testdata/rewriter/prop.rb start=82:1 end=82:27}
         method <C <U Chalk>>::<C <U ODM>>::<S <C <U Document>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=82:1 end=83:4}
           argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    class <C <U Chalk>>::<S <C <U ODM>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:17}
-      type-member(+) <C <U Chalk>>::<S <C <U ODM>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Chalk>>::<S <C <U ODM>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Chalk::ODM) @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:17}
-  class <S <C <U Chalk>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:12}
-    type-member(+) <S <C <U Chalk>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Chalk>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Chalk) @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:12}
+    class <C <U Chalk>>::<S <C <U ODM>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:17}
+  class <S <C <U Chalk>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=82:7 end=82:12}
   class <C <U EncryptedProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=87:1 end=87:20}
     method <C <U EncryptedProp>>#<U bar> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=91:3 end=91:56}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
@@ -164,16 +162,11 @@ class <C <U <root>>> < <C <U Object>> ()
               type-member(+) <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<S <C <U EncryptedValue>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<S <C <U EncryptedValue>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=84:1 end=84:82}
               method <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<C <U Encryptable>>::<S <C <U EncryptedValue>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=84:1 end=85:4}
                 argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-          class <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<S <C <U Encryptable>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:43}
-            type-member(+) <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<S <C <U Encryptable>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<S <C <U Encryptable>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB::Model::Mixins::Encryptable) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:43}
-        class <C <U Opus>>::<C <U DB>>::<C <U Model>>::<S <C <U Mixins>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:30}
-          type-member(+) <C <U Opus>>::<C <U DB>>::<C <U Model>>::<S <C <U Mixins>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U DB>>::<C <U Model>>::<S <C <U Mixins>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB::Model::Mixins) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:30}
-      class <C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:22}
-        type-member(+) <C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB::Model) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:22}
-    class <C <U Opus>>::<S <C <U DB>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
-      type-member(+) <C <U Opus>>::<S <C <U DB>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Opus>>::<S <C <U DB>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus::DB) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
-  class <S <C <U Opus>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
-    type-member(+) <S <C <U Opus>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Opus>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Opus) @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
+          class <C <U Opus>>::<C <U DB>>::<C <U Model>>::<C <U Mixins>>::<S <C <U Encryptable>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:43}
+        class <C <U Opus>>::<C <U DB>>::<C <U Model>>::<S <C <U Mixins>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:30}
+      class <C <U Opus>>::<C <U DB>>::<S <C <U Model>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:22}
+    class <C <U Opus>>::<S <C <U DB>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:15}
+  class <S <C <U Opus>> $1> < <C <U Module>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}
   class <C <U PropHelpers>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:1 end=64:18}
     method <C <U PropHelpers>>#<U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=69:3 end=69:15}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}

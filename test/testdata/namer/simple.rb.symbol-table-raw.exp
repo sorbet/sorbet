@@ -13,8 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U ANamespace>>::<S <C <U ObviousChild>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U ANamespace>>::<S <C <U ObviousChild>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ANamespace::ObviousChild) @ Loc {file=test/testdata/namer/simple.rb start=14:3 end=14:21}
       method <C <U ANamespace>>::<S <C <U ObviousChild>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=14:3 end=15:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
-  class <S <C <U ANamespace>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=13:18}
-    type-member(+) <S <C <U ANamespace>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U ANamespace>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ANamespace) @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=13:18}
+  class <S <C <U ANamespace>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=13:18}
     method <S <C <U ANamespace>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=13:1 end=16:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   class <C <U Child>> < <C <U Parent>> (<C <U Mixin>>) @ Loc {file=test/testdata/namer/simple.rb start=26:1 end=26:21}
@@ -23,8 +22,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U Child>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=26:1 end=35:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   module <C <U Mixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/simple.rb start=22:1 end=22:13}
-  class <S <C <U Mixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=22:1 end=22:13}
-    type-member(+) <S <C <U Mixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin) @ Loc {file=test/testdata/namer/simple.rb start=22:1 end=22:13}
+  class <S <C <U Mixin>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=22:1 end=22:13}
     method <S <C <U Mixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=22:1 end=23:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   class <C <U NormalClass>> < <C <U Object>> () @ Loc {file=test/testdata/namer/simple.rb start=2:1 end=2:18}
@@ -34,8 +32,7 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U NormalClass>>::<S <C <U InnerClass>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=7:3 end=8:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
     module <C <U NormalClass>>::<C <U InnerModule>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/simple.rb start=9:3 end=9:21}
-    class <C <U NormalClass>>::<S <C <U InnerModule>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=9:3 end=9:21}
-      type-member(+) <C <U NormalClass>>::<S <C <U InnerModule>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U NormalClass>>::<S <C <U InnerModule>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=NormalClass::InnerModule) @ Loc {file=test/testdata/namer/simple.rb start=9:3 end=9:21}
+    class <C <U NormalClass>>::<S <C <U InnerModule>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=9:3 end=9:21}
       method <C <U NormalClass>>::<S <C <U InnerModule>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=9:3 end=10:6}
         argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
     method <C <U NormalClass>>#<U normal_method> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=3:3 end=3:20}
@@ -47,8 +44,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U NormalClass>> $1>#<U normal_static_method> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=5:3 end=5:32}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   module <C <U OtherMixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/simple.rb start=24:1 end=24:18}
-  class <S <C <U OtherMixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=24:1 end=24:18}
-    type-member(+) <S <C <U OtherMixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U OtherMixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=OtherMixin) @ Loc {file=test/testdata/namer/simple.rb start=24:1 end=24:18}
+  class <S <C <U OtherMixin>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/simple.rb start=24:1 end=24:18}
     method <S <C <U OtherMixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/simple.rb start=24:1 end=25:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/simple.rb start=??? end=???}
   class <C <U Parent>> < <C <U Object>> () @ Loc {file=test/testdata/namer/simple.rb start=20:1 end=20:13}

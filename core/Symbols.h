@@ -376,7 +376,7 @@ public:
         bool isFinal : 1;
         bool isSealed : 1;
         bool isPrivate : 1;
-        bool isUndeclared : 1;
+        bool isDeclared : 1;
         bool isExported : 1;
         bool isBehaviorDefining : 1;
 
@@ -385,7 +385,7 @@ public:
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
-              isFinal(false), isSealed(false), isPrivate(false), isUndeclared(false), isExported(false),
+              isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isExported(false),
               isBehaviorDefining(false) {}
 
         uint16_t serialize() const {
@@ -499,11 +499,16 @@ public:
         }
     }
 
-    inline bool isUndeclared() const {
-        if (!isClassModuleSet()) {
-            return true;
+    inline bool isDeclared() const {
+        return flags.isDeclared;
+    }
+
+    inline void setDeclared() {
+        ENFORCE(isClassModuleSet());
+
+        if (!flags.isDeclared) {
+            flags.isDeclared = true;
         }
-        return flags.isUndeclared;
     }
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;

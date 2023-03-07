@@ -4,13 +4,11 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
   class <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U StubModule>> (<C <U C>>, <C <U B>>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:1 end=2:12}
     module <C <U A>>::<C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=5:3 end=5:11}
-    class <C <U A>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=5:3 end=5:11}
-      type-member(+) <C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::B) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=5:3 end=5:11}
+    class <C <U A>>::<S <C <U B>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=5:3 end=5:11}
       method <C <U A>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=5:3 end=6:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
     module <C <U A>>::<C <U C>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=3:3 end=3:11}
-    class <C <U A>>::<S <C <U C>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=3:3 end=3:11}
-      type-member(+) <C <U A>>::<S <C <U C>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U C>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::C) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=3:3 end=3:11}
+    class <C <U A>>::<S <C <U C>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=3:3 end=3:11}
       method <C <U A>>::<S <C <U C>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=3:3 end=4:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U StubModule>> $1> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=2:1 end=2:12}
@@ -19,12 +17,10 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
   module <C <U D>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U E>>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=11:9}
     module <C <U D>>::<C <U E>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=13:11}
-    class <C <U D>>::<S <C <U E>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=13:11}
-      type-member(+) <C <U D>>::<S <C <U E>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U D>>::<S <C <U E>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D::E) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=13:11}
+    class <C <U D>>::<S <C <U E>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=13:11}
       method <C <U D>>::<S <C <U E>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=13:3 end=14:6}
         argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
-  class <S <C <U D>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=11:9}
-    type-member(+) <S <C <U D>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=11:9}
+  class <S <C <U D>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=11:9}
     method <S <C <U D>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=11:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_scoping.rb start=??? end=???}
 

@@ -164,7 +164,8 @@ public:
     void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
                             const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                            const std::vector<std::string> &packageSkipRBIExportEnforcementDirs, std::string errorHint);
+                            const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                            const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);

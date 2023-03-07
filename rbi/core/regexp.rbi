@@ -1308,6 +1308,20 @@ class Regexp < Object
   end
   def self.quote(arg0); end
 
+  # It returns the current default timeout interval for Regexp matching in
+  # second. nil means no default timeout configuration.
+  sig { returns(T.nilable(Float)) }
+  def self.timeout; end
+
+  # It sets the default timeout interval for
+  # [`Regexp`](https://docs.ruby-lang.org/en/3.2/Regexp.html) matching in
+  # second. `nil` means no default timeout configuration. This configuration
+  # is process-global. If you want to set timeout for each
+  # [`Regexp`](https://docs.ruby-lang.org/en/3.2/Regexp.html), use `timeout`
+  # keyword for `Regexp.new`.
+  sig { params(value: T.nilable(Float)).returns(T.nilable(Float)) }
+  def self.timeout=(value); end
+
   # Equality---Two regexps are equal if their patterns are identical, they have
   # the same character set code, and their `casefold?` values are the same.
   #

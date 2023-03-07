@@ -299,7 +299,7 @@ win32_cmake_vars = {
 # TODO(phawkins): use a better method to select the right host triple, rather
 # than hardcoding x86_64.
 llvm_all_cmake_vars = select({
-    "@com_stripe_ruby_typer//tools/config:darwin": cmake_var_string(
+    "@com_stripe_ruby_typer//tools/config:darwin_x86_64": cmake_var_string(
         _dict_add(
             cmake_vars,
             llvm_target_cmake_vars("X86", "x86_64-apple-darwin"),
@@ -307,7 +307,7 @@ llvm_all_cmake_vars = select({
             darwin_cmake_vars,
         ),
     ),
-    "@com_stripe_ruby_typer//tools/config:linux": cmake_var_string(
+    "@com_stripe_ruby_typer//tools/config:linux_x86_64": cmake_var_string(
         _dict_add(
             cmake_vars,
             llvm_target_cmake_vars("X86", "x86_64-unknown-linux_gnu"),

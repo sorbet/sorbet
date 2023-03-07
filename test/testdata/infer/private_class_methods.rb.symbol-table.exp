@@ -13,8 +13,7 @@ class ::<root> < ::Object ()
         argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
       method ::Test::ClassMethods#method_i : private (<blk>) @ test/testdata/infer/private_class_methods.rb:31
         argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
-    class ::Test::<Class:ClassMethods>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_class_methods.rb:23
-      type-member(+) ::Test::<Class:ClassMethods>::<AttachedClass> -> T.attached_class (of Test::ClassMethods) @ test/testdata/infer/private_class_methods.rb:23
+    class ::Test::<Class:ClassMethods> < ::Module () @ test/testdata/infer/private_class_methods.rb:23
       method ::Test::<Class:ClassMethods>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:23
         argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
   class ::<Class:Test>[<AttachedClass>] < ::<Class:Object> (ClassMethods) @ test/testdata/infer/private_class_methods.rb:12
@@ -33,7 +32,7 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
     method ::<Class:Test>#method_f : private (<blk>) @ test/testdata/infer/private_class_methods.rb:20
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}
-  class ::<Class:<Class:Test>>[<AttachedClass>] < ::<Class:<Class:Object>> () @ test/testdata/infer/private_class_methods.rb:12
+  class ::<Class:<Class:Test>>[<AttachedClass>] < ::Class () @ test/testdata/infer/private_class_methods.rb:12
     type-member(+) ::<Class:<Class:Test>>::<AttachedClass> -> T.attached_class (of T.class_of(Test)) @ test/testdata/infer/private_class_methods.rb:12
     method ::<Class:<Class:Test>>#<static-init> (<blk>) @ test/testdata/infer/private_class_methods.rb:12
       argument <blk><block> @ Loc {file=test/testdata/infer/private_class_methods.rb start=??? end=???}

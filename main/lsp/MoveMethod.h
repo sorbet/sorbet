@@ -11,10 +11,6 @@ std::vector<std::unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypechecker
                                                                   const LSPConfiguration &config,
                                                                   const core::lsp::MethodDefResponse &definition);
 
-std::unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs,
-                                               const core::lsp::MethodDefResponse &definition,
-                                               LSPTypecheckerDelegate &typechecker);
-
 } // namespace sorbet::realmain::lsp
 
 #endif

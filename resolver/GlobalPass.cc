@@ -214,11 +214,13 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
-
-            // allow us to catch undeclared modules in LSP fast path, so we can report ambiguous
-            // definition errors.
-            ref.data(gs)->flags.isUndeclared = true;
+            ref.data(gs)->singletonClass(gs); // force singleton class into existence
         }
+    }
+
+    auto n = gs.classAndModulesUsed();
+    for (int i = 1; i < n; ++i) {
+        auto ref = core::ClassOrModuleRef(gs, i);
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (ref.data(gs)->isClass()) {
@@ -249,8 +251,11 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
-                auto singleton = attached.data(gs)->superClass().data(gs)->singletonClass(gs);
-                ref.data(gs)->setSuperClass(singleton);
+                auto singletonSuperClass = attached.data(gs)->superClass().data(gs)->lookupSingletonClass(gs);
+                if (!singletonSuperClass.exists()) {
+                    singletonSuperClass = core::Symbols::Class();
+                }
+                ref.data(gs)->setSuperClass(singletonSuperClass);
             }
         } else {
             if (ref.data(gs)->isClass()) {
@@ -265,6 +270,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             }
         }
     }
+    ENFORCE(n == gs.classAndModulesUsed(),
+            "Cannot add new classes in this loop--might not have finalized the new classes!")
 
     prodCounterAdd("types.input.modules.total", moduleCount);
     prodCounterAdd("types.input.classes.total", classCount);
