@@ -8,6 +8,8 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
+#include "core/errors/infer.h"
+#include "core/errors/resolver.h"
 #include <utility>
 
 #include "core/Types.h"
@@ -20,18 +22,6 @@ template class std::vector<sorbet::core::Loc>;
 namespace sorbet::core {
 
 using namespace std;
-
-TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args) {
-    auto dispatched = recv.dispatchCall(gs, args);
-    auto link = &dispatched;
-    while (link != nullptr) {
-        for (auto &err : link->main.errors) {
-            gs._error(move(err));
-        }
-        link = link->secondary.get();
-    }
-    return move(dispatched.returnType);
-}
 
 TypePtr Types::top() {
     return make_type<ClassType>(Symbols::top());
@@ -884,6 +874,188 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
         singleton = at->klass;
     }
     return singleton.data(gs)->attachedClass(gs);
+}
+
+TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
+    if (auto *metaType = cast_type<MetaType>(tp)) {
+        return metaType->wrapped;
+    }
+
+    if (isa_type<ClassType>(tp)) {
+        auto classType = cast_type_nonnull<ClassType>(tp);
+        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+            // T::Enum instances are allowed to stand for themselves in type syntax positions.
+            // See the note in type_syntax.cc regarding T::Enum.
+            return tp;
+        }
+
+        auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
+        if (!attachedClass.exists()) {
+            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+                if (classType.symbol == core::Symbols::T_Types_Base() ||
+                    classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
+                    // T::Types::Base is the parent class for runtime type objects.
+                    // Give a more helpful error message
+                    e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
+                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
+                                   "T.unsafe");
+                    auto locSource = loc.source(gs);
+                    if (locSource.has_value()) {
+                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
+                    }
+                }
+            }
+
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(gs)->externalType();
+    }
+
+    if (auto *appType = cast_type<AppliedType>(tp)) {
+        ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
+        if (!attachedClass.exists()) {
+            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+            }
+            return Types::untypedUntracked();
+        }
+
+        return attachedClass.data(gs)->externalType();
+    }
+
+    if (auto *shapeType = cast_type<ShapeType>(tp)) {
+        vector<TypePtr> unwrappedValues;
+        unwrappedValues.reserve(shapeType->values.size());
+        for (auto &value : shapeType->values) {
+            unwrappedValues.emplace_back(unwrapType(gs, loc, value));
+        }
+        return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
+    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(tupleType->elems.size());
+        for (auto &elem : tupleType->elems) {
+            unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
+        }
+        return make_type<TupleType>(move(unwrappedElems));
+    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
+        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+        }
+        return Types::untypedUntracked();
+    }
+    return tp;
+}
+
+// This method is actually special: not only is it called from dispatchCall in calls.cc, it's
+// also called directly by type_syntax parsing in resolver (because this method checks some
+// invariants of generics that we want to hold even in `typed: false` files).
+//
+// Unfortunately, this means that some errors are double reported (once by resolver, and then
+// again by infer).
+
+TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
+                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
+    genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
+
+    if (genericClass.data(gs)->typeMembers().empty()) {
+        return Types::untypedUntracked();
+    }
+
+    int arity;
+    if (genericClass == Symbols::Hash()) {
+        arity = 2;
+    } else {
+        arity = genericClass.data(gs)->typeArity(gs);
+    }
+
+    // This is something like Generic[T1,...,foo: bar...]
+    auto numKwArgs = args.size() - numPosArgs;
+    if (numKwArgs > 0) {
+        auto begin = locs.args[numPosArgs].beginPos();
+        auto end = locs.args.back().endPos();
+        core::Loc kwargsLoc{locs.file, begin, end};
+
+        if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
+            e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
+            // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
+            if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
+                e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
+            }
+        }
+    }
+
+    if (numPosArgs != arity) {
+        auto errLoc = !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back()))
+                                         : core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
+            e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`", genericClass.show(gs),
+                        arity, numPosArgs);
+        }
+    }
+
+    vector<TypePtr> targs;
+    auto it = args.begin();
+    int i = -1;
+    targs.reserve(genericClass.data(gs)->typeMembers().size());
+    for (auto mem : genericClass.data(gs)->typeMembers()) {
+        ++i;
+
+        auto memData = mem.data(gs);
+
+        auto *memType = cast_type<LambdaParam>(memData->resultType);
+        ENFORCE(memType != nullptr);
+
+        if (memData->flags.isFixed) {
+            // Fixed args are implicitly applied, and won't consume type
+            // arguments from the list that's supplied.
+            targs.emplace_back(memType->upperBound);
+        } else if (it != args.end()) {
+            auto loc = core::Loc(locs.file, locs.args[it - args.begin()]);
+            auto argType = unwrapType(gs, loc, (*it)->type);
+            bool validBounds = true;
+
+            // Validate type parameter bounds.
+            if (!Types::isSubType(gs, argType, memType->upperBound)) {
+                validBounds = false;
+                if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
+                    auto argStr = argType.show(gs);
+                    e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
+                                mem.showFullName(gs));
+                    e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
+                                   memType->upperBound.show(gs));
+                }
+            }
+
+            if (!Types::isSubType(gs, memType->lowerBound, argType)) {
+                validBounds = false;
+
+                if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
+                    auto argStr = argType.show(gs);
+                    e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
+                                mem.showFullName(gs));
+                    e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
+                                   memType->lowerBound.show(gs));
+                }
+            }
+
+            if (validBounds) {
+                targs.emplace_back(argType);
+            } else {
+                targs.emplace_back(Types::untypedUntracked());
+            }
+
+            ++it;
+        } else if (genericClass == Symbols::Hash() && i == 2) {
+            auto tupleArgs = targs;
+            targs.emplace_back(make_type<TupleType>(tupleArgs));
+        } else {
+            targs.emplace_back(Types::untypedUntracked());
+        }
+    }
+
+    return make_type<MetaType>(make_type<AppliedType>(genericClass, move(targs)));
 }
 
 Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
