@@ -169,9 +169,9 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
         sectionTitle = "Autocorrect: Done";
     } else if (autocorrect.isDidYouMean && autocorrect.edits.size() == 1) {
         sectionTitle =
-            ErrorColors::format("Did you mean `{}`? Use `-a` to autocorrect", autocorrect.edits[0].replacement);
+            ErrorColors::format("Did you mean `{}`? Use `{}` to autocorrect", autocorrect.edits[0].replacement, "-a");
     } else {
-        sectionTitle = "Autocorrect: Use `-a` to autocorrect";
+        sectionTitle = ErrorColors::format("Autocorrect: Use `{}` to autocorrect", "-a");
     }
 
     std::vector<ErrorLine> messages;
