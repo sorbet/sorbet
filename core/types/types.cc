@@ -956,7 +956,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 // again by infer).
 
 TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
-                                  InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
+                                  const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
     if (genericClass.data(gs)->typeMembers().empty()) {

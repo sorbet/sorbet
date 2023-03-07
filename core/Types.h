@@ -193,7 +193,8 @@ public:
     // Called both from type_syntax.cc during sig parsing and from infer after encountering
     // something that look like type syntax in a method body.
     static TypePtr applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
-                                      InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass);
+                                      const InlinedVector<const TypeAndOrigins *, 2> &args,
+                                      ClassOrModuleRef genericClass);
 };
 
 struct Intrinsic {
