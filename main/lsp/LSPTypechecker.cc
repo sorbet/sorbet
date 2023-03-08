@@ -348,31 +348,31 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
     auto multiplexResult =
-    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
-        vector<ast::ParsedFile> threadResult;
-        int processedByThread = 0;
-        int job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
+        workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
+            vector<ast::ParsedFile> threadResult;
+            int processedByThread = 0;
+            int job;
+            {
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        processedByThread++;
 
-                    // Stop if typechecking was canceled.
-                    if (!epochManager.wasTypecheckingCanceled()) {
-                        const auto &tree = indexed[job];
-                        // Note: indexed entries for payload files don't have any contents.
-                        if (tree.tree && !ignore.contains(tree.file.id())) {
-                            threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+                        // Stop if typechecking was canceled.
+                        if (!epochManager.wasTypecheckingCanceled()) {
+                            const auto &tree = indexed[job];
+                            // Note: indexed entries for payload files don't have any contents.
+                            if (tree.tree && !ignore.contains(tree.file.id())) {
+                                threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
+            if (processedByThread > 0) {
+                resultq->push(move(threadResult), processedByThread);
+            }
+        });
     {
         vector<ast::ParsedFile> threadResult;
         out.reserve(indexed.size());

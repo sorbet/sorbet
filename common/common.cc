@@ -350,109 +350,109 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     jobq->push(path, 1);
 
     auto multiplexResult =
-    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
-                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
-        Job job;
-        vector<string> output;
+        workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
+                                                   &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
+            Job job;
+            vector<string> output;
 
-        try {
-            while (true) {
-                auto result = jobq->try_pop(job);
-                if (!result.gotItem()) {
-                    continue;
-                }
-                if (auto *token = std::get_if<QuitToken>(&job)) {
-                    break;
-                }
-
-                auto *strvariant = std::get_if<string>(&job);
-                ENFORCE(strvariant != nullptr);
-                auto &path = *strvariant;
-
-                DIR *dir;
-                struct dirent *entry;
-
-                if ((dir = opendir(path.c_str())) == nullptr) {
-                    switch (errno) {
-                        case ENOTDIR: {
-                            throw sorbet::FileNotDirException();
-                        }
-                        default:
-                            // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
-                            auto msg = fmt::format("Couldn't open directory `{}`", path);
-                            throw sorbet::FileNotFoundException(msg);
-                    }
-                }
-
-                while ((entry = readdir(dir)) != nullptr) {
-                    const auto namelen = strlen(entry->d_name);
-                    string_view nameview{entry->d_name, namelen};
-                    if (entry->d_type == DT_DIR) {
-                        if (!recursive) {
-                            continue;
-                        }
-                        if (nameview == "."sv || nameview == ".."sv) {
-                            continue;
-                        }
-                    } else {
-                        auto dotLocation = nameview.rfind('.');
-                        if (dotLocation == string_view::npos) {
-                            continue;
-                        }
-
-                        string_view ext = nameview.substr(dotLocation);
-                        if (!extensions.contains(ext)) {
-                            continue;
-                        }
-                    }
-
-                    auto fullPath = fmt::format("{}/{}", path, nameview);
-                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
-                                                       relativeIgnorePatterns)) {
+            try {
+                while (true) {
+                    auto result = jobq->try_pop(job);
+                    if (!result.gotItem()) {
                         continue;
                     }
+                    if (auto *token = std::get_if<QuitToken>(&job)) {
+                        break;
+                    }
 
-                    if (entry->d_type == DT_DIR) {
-                        ++pendingJobs;
-                        jobq->push(move(fullPath), 1);
-                    } else {
-                        output.push_back(move(fullPath));
+                    auto *strvariant = std::get_if<string>(&job);
+                    ENFORCE(strvariant != nullptr);
+                    auto &path = *strvariant;
+
+                    DIR *dir;
+                    struct dirent *entry;
+
+                    if ((dir = opendir(path.c_str())) == nullptr) {
+                        switch (errno) {
+                            case ENOTDIR: {
+                                throw sorbet::FileNotDirException();
+                            }
+                            default:
+                                // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
+                                auto msg = fmt::format("Couldn't open directory `{}`", path);
+                                throw sorbet::FileNotFoundException(msg);
+                        }
+                    }
+
+                    while ((entry = readdir(dir)) != nullptr) {
+                        const auto namelen = strlen(entry->d_name);
+                        string_view nameview{entry->d_name, namelen};
+                        if (entry->d_type == DT_DIR) {
+                            if (!recursive) {
+                                continue;
+                            }
+                            if (nameview == "."sv || nameview == ".."sv) {
+                                continue;
+                            }
+                        } else {
+                            auto dotLocation = nameview.rfind('.');
+                            if (dotLocation == string_view::npos) {
+                                continue;
+                            }
+
+                            string_view ext = nameview.substr(dotLocation);
+                            if (!extensions.contains(ext)) {
+                                continue;
+                            }
+                        }
+
+                        auto fullPath = fmt::format("{}/{}", path, nameview);
+                        if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
+                                                           relativeIgnorePatterns)) {
+                            continue;
+                        }
+
+                        if (entry->d_type == DT_DIR) {
+                            ++pendingJobs;
+                            jobq->push(move(fullPath), 1);
+                        } else {
+                            output.push_back(move(fullPath));
+                        }
+                    }
+
+                    closedir(dir);
+
+                    // Now that we've finished with this directory, we can decrement.
+                    auto remaining = --pendingJobs;
+                    // If this thread is finished with the last job in the queue, then
+                    // we can start signaling other threads that they need to quit.
+                    if (remaining == 0) {
+                        // Maintain the invariant, even though we're all done.
+                        pendingJobs += numWorkers;
+                        for (auto i = 0; i < numWorkers; ++i) {
+                            jobq->push(QuitToken{}, 1);
+                        }
+                        break;
                     }
                 }
-
-                closedir(dir);
-
-                // Now that we've finished with this directory, we can decrement.
-                auto remaining = --pendingJobs;
-                // If this thread is finished with the last job in the queue, then
-                // we can start signaling other threads that they need to quit.
-                if (remaining == 0) {
-                    // Maintain the invariant, even though we're all done.
-                    pendingJobs += numWorkers;
-                    for (auto i = 0; i < numWorkers; ++i) {
-                        jobq->push(QuitToken{}, 1);
-                    }
-                    break;
+            } catch (sorbet::FileNotFoundException &e) {
+                resultq->push(e, 1);
+                pendingJobs += numWorkers;
+                for (auto i = 0; i < numWorkers; ++i) {
+                    jobq->push(QuitToken{}, 1);
                 }
+                return;
+            } catch (sorbet::FileNotDirException &e) {
+                resultq->push(e, 1);
+                pendingJobs += numWorkers;
+                for (auto i = 0; i < numWorkers; ++i) {
+                    jobq->push(QuitToken{}, 1);
+                }
+                return;
             }
-        } catch (sorbet::FileNotFoundException &e) {
-            resultq->push(e, 1);
-            pendingJobs += numWorkers;
-            for (auto i = 0; i < numWorkers; ++i) {
-                jobq->push(QuitToken{}, 1);
-            }
-            return;
-        } catch (sorbet::FileNotDirException &e) {
-            resultq->push(e, 1);
-            pendingJobs += numWorkers;
-            for (auto i = 0; i < numWorkers; ++i) {
-                jobq->push(QuitToken{}, 1);
-            }
-            return;
-        }
 
-        resultq->push(move(output), 1);
-    });
+            resultq->push(move(output), 1);
+        });
 
     {
         JobOutput threadResult;
