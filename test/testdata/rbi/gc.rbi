@@ -2,12 +2,12 @@
 
 T.assert_type!(
   GC.stat_heap,
-  T::Hash[Numeric, T::Hash[Symbol, Numeric]]
+  T::Hash[Integer, T::Hash[Symbol, Integer]]
 )
 
 T.assert_type!(
   GC.stat_heap(0),
-  T::Hash[Symbol, Numeric]
+  T::Hash[Symbol, Integer]
 )
 
 T.assert_type!(
