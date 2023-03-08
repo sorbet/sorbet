@@ -2,7 +2,7 @@
 #include "absl/strings/match.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 

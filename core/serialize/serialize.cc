@@ -2,7 +2,7 @@
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/FileHash.h"

@@ -23,7 +23,7 @@
 #include "cfg/builder/builder.h"
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
 #include "common/strings/formatting.h"

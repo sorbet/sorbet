@@ -10,7 +10,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "common/sort/sort.h"
 #include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"

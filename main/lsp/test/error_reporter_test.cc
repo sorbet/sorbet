@@ -1,7 +1,7 @@
 #include "doctest/doctest.h"
 // has to go first as it violates our requirements
 #include "common/counters/Counters_impl.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"

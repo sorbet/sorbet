@@ -7,7 +7,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "class_flatten/class_flatten.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort/sort.h"
