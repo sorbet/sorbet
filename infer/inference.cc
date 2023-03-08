@@ -1,5 +1,5 @@
-#include "common/timers/Timer.h"
 #include "common/common.h"
+#include "common/timers/Timer.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/errors/infer.h"

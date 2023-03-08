@@ -1,11 +1,11 @@
 #include "main/autogen/autoloader.h"
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
-#include "common/timers/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
