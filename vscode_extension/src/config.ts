@@ -388,7 +388,7 @@ export class SorbetExtensionConfig implements Disposable {
       .then(this._refresh.bind(this));
   }
 
-  public sethighlightUntypedValues(b: boolean): Thenable<void> {
+  public setHighlightUntypedValues(b: boolean): Thenable<void> {
     return this._sorbetWorkspaceContext
       .update("highlightUntypedValues", b)
       .then(this._refresh.bind(this));

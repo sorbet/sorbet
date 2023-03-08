@@ -35,7 +35,7 @@ public:
     bool enableTypecheckInfo = false;
 
     /** If true, then LSP outputs a warning for untyped values */
-    bool enablehighlightUntypedValues = false;
+    bool enableHighlightUntypedValues = false;
 
     /**
      * Whether or not the active client has support for snippets in CompletionItems.

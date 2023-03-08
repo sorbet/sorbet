@@ -15,7 +15,7 @@ namespace {
 
 const std::optional<core::ErrorClass> errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).strictLevel < core::StrictLevel::Strong) {
-        if (file.data(gs).isOpenInClient()) {
+        if (file.data(gs).isOpenInClient() && gs.highlightUntypedValues) {
             return core::errors::Infer::UntypedValueInformation;
         } else {
             return std::nullopt;
@@ -313,7 +313,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         typedSendCount++;
                     } else if (bind.bind.type.hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
-                        if (auto what = errorClassForUntyped(ctx.state, ctx.file);) {
+                        if (auto what = errorClassForUntyped(ctx.state, ctx.file)) {
                             if (auto e = ctx.beginError(bind.loc, *what)) {
                                 e.setHeader("This code is untyped");
                                 if (*what == core::errors::Infer::UntypedValue) {

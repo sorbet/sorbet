@@ -24,6 +24,7 @@ void InitializedTask::index(LSPIndexer &indexer) {
 
 void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(this->gs != nullptr);
+    this->gs->highlightUntypedValues = config.getClientConfig().enableHighlightUntypedValues;
     typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore));
     typechecker.resumeTaskQueue(*this);
 }

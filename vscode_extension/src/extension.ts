@@ -146,8 +146,8 @@ export function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.togglehighlightUntypedValues", () => {
-      sorbetExtensionConfig.sethighlightUntypedValues(
+    commands.registerCommand("sorbet.toggleHighlightUntypedValues", () => {
+      sorbetExtensionConfig.setHighlightUntypedValues(
         !sorbetExtensionConfig.highlightUntypedValues,
       );
       restartSorbet(RestartReason.CONFIG_CHANGE);
