@@ -212,7 +212,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
     auto crcBuilder = autogen::CRCBuilder::create();
 
-    workers.multiplexJob(
+    auto multiplexResult = workers.multiplexJob(
         "runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, &autogenCfg, crcBuilder, fileq, resultq]() {
             AutogenResult out;
             int n = 0;
@@ -285,6 +285,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
+    multiplexResult.cleanup(workers);
 
     {
         Timer timeit(logger, "autogenDependencyDBPrint");

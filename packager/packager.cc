@@ -1559,7 +1559,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
+        auto multiplexResult = workers.multiplexJob("rewritePackagesAndFiles", [&gs, &files, &barrier, taskq]() {
             Timer timeit(gs.tracer(), "packager.rewritePackagesAndFilesWorker");
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
@@ -1580,6 +1580,8 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
         });
 
         barrier.Wait();
+
+        multiplexResult.cleanup(workers);
     }
 
     return files;

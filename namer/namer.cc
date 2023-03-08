@@ -2134,7 +2134,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
+    auto multiplexResult = workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
         vector<SymbolFinderResult> output;
@@ -2165,6 +2165,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             }
         }
     }
+    multiplexResult.cleanup(workers);
     fast_sort(allFoundDefinitions,
               [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
@@ -2333,7 +2334,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
         fileq->push(move(tree), 1);
     }
 
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
+    auto multiplexResult = workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
         SymbolizeTreesResult output;
@@ -2363,6 +2364,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             }
         }
     }
+    multiplexResult.cleanup(workers);
     fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return trees;
 }

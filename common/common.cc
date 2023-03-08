@@ -349,6 +349,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     ++pendingJobs;
     jobq->push(path, 1);
 
+    auto multiplexResult =
     workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
                                                &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
         Job job;
@@ -476,6 +477,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
             }
         }
     }
+
+    multiplexResult.cleanup(workers);
 }
 
 vector<string> sorbet::FileOps::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,

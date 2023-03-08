@@ -347,6 +347,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     const auto &epochManager = *gs->epochManager;
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
+    auto multiplexResult =
     workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
@@ -384,6 +385,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
+    multiplexResult.cleanup(workers);
     return !epochManager.wasTypecheckingCanceled();
 }
 

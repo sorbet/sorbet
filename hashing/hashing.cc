@@ -126,7 +126,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
 
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger, &opts]() {
+    auto multiplexResult = workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger, &opts]() {
         vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         size_t job;
@@ -160,6 +160,8 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
             }
         }
     }
+
+    multiplexResult.cleanup(workers);
 }
 
 vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::GlobalState> &gs,
@@ -182,7 +184,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
+    auto multiplexResult = workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
         unique_ptr<Timer> timeit;
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
@@ -227,6 +229,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
             }
         }
     }
+    multiplexResult.cleanup(workers);
 
     return asts;
 }

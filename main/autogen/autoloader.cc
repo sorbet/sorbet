@@ -549,7 +549,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         inputq->push(i, 1);
     }
 
-    workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
+    auto multiplexResult = workers.multiplexJob("runAutogenWriteAutoloads", [&gs, &tasks, &alCfg, inputq, outputq]() {
         int n = 0;
         bool anyFilesModified = false;
         {
@@ -581,6 +581,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
         counterConsume(move(out.first));
         modified = modified || out.second;
     }
+    multiplexResult.cleanup(workers);
 
     const std::string mtimeFile = join(path, "_mtime_stamp");
     if (!FileOps::exists(mtimeFile) || modified) {
