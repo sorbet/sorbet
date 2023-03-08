@@ -13,7 +13,8 @@ namespace sorbet::infer {
 
 const std::optional<core::ErrorClass> Inference::errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).strictLevel < core::StrictLevel::Strong) {
-        if (file.data(gs).isOpenInClient()) {
+        /* gs.warnUntypedValues is ONLY set in test cases, file.data(gs).isOpenInClient() returns false in tests */
+        if (file.data(gs).isOpenInClient() || gs.warnUntypedValues) {
             return core::errors::Infer::UntypedValueInformation;
         } else {
             return std::nullopt;

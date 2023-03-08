@@ -436,7 +436,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enforce use of new (Ruby 3.0-style) keyword arguments", cxxopts::value<bool>());
     options.add_options("advanced")("check-out-of-order-constant-references",
                                     "Enable out-of-order constant reference checks (error 5027)");
-    options.add_options("advanced")("warn-untyped-values", "Enables information diagnostics in LSP for untyped values");
+    options.add_options("advanced")("warn-untyped-values",
+                                    "ONLY FOR TESTS: Enables information diagnostics in LSP for untyped values");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");

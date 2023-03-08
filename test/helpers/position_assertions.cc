@@ -39,7 +39,7 @@ const UnorderedMap<
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
-        {"enable-warn-untyped-values", BooleanPropertyAssertion::make},
+        {"warn-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"stripe-mode", BooleanPropertyAssertion::make},
