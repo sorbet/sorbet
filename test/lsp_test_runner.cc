@@ -606,7 +606,7 @@ TEST_CASE("LSPTest") {
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
         sorbetInitOptions->highlightUntypedValues =
-            BooleanPropertyAssertion::getValue("warn-untyped-values", assertions).value_or(false);
+            BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");

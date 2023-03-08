@@ -10,6 +10,7 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 class ErrorAssertion;
+class InfoAssertion;
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.
@@ -67,7 +68,7 @@ public:
 };
 
 // # ^^^ error: message
-class ErrorAssertion final : public RangeAssertion {
+class ErrorAssertion : public RangeAssertion {
 public:
     static std::shared_ptr<ErrorAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents,
@@ -89,7 +90,31 @@ public:
 
     std::string toString() const override;
 
-    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+    virtual bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+};
+
+class InfoAssertion : public ErrorAssertion {
+public:
+    static std::shared_ptr<InfoAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                               int assertionLine, std::string_view assertionContents,
+                                               std::string_view assertionType);
+
+    /**
+     * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
+     */
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
+                         std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string errorPrefix = "");
+
+    const std::string message;
+
+    InfoAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                  std::string_view message);
+
+    std::string toString() const override;
+
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix) override;
 };
 
 // # ^^^ def: symbol

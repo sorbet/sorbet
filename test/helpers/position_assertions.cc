@@ -30,7 +30,7 @@ const regex whitespaceRegex("^[ ]*$");
 const UnorderedMap<
     string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view, string_view)>>
     assertionConstructors = {
-        {"info", ErrorAssertion::make},
+        {"info", InfoAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
@@ -39,7 +39,7 @@ const UnorderedMap<
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
-        {"warn-untyped-values", BooleanPropertyAssertion::make},
+        {"highlight-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"stripe-mode", BooleanPropertyAssertion::make},
@@ -298,6 +298,35 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
                                       prettyPrintRangeComment(sourceLine, *range, toString()),
                                       prettyPrintRangeComment(sourceLine, *diagnostic.range,
                                                               fmt::format("error: {}", diagnostic.message))));
+        return false;
+    }
+    return true;
+}
+
+InfoAssertion::InfoAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
+    : ErrorAssertion(filename, range, assertionLine, message, false), message(message) {}
+
+shared_ptr<InfoAssertion> InfoAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                              string_view assertionContents, string_view assertionType) {
+    return make_shared<InfoAssertion>(filename, range, assertionLine, assertionContents);
+}
+
+string InfoAssertion::toString() const {
+    return fmt::format("{}: {}", "info", message);
+}
+
+bool InfoAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // The error message must contain `message`.
+    if (diagnostic.severity != DiagnosticSeverity::Information || diagnostic.message.find(message) == string::npos) {
+        ADD_FAIL_CHECK_AT(
+            filename.c_str(), range->start->line + 1,
+            fmt::format(
+                "{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(
+                    sourceLine, *diagnostic.range,
+                    fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "info: {}" : "error: {}",
+                                diagnostic.message))));
         return false;
     }
     return true;
@@ -882,7 +911,10 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
             "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
             "expected.",
             errorPrefix,
-            prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message))));
+            prettyPrintRangeComment(
+                sourceLine, *diagnostic.range,
+                fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "info: {}" : "error: {}",
+                            diagnostic.message))));
 }
 
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
