@@ -4,7 +4,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "ast/treemap/treemap.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"

@@ -3,7 +3,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
 

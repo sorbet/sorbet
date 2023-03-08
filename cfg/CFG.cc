@@ -3,7 +3,7 @@
 #include "absl/strings/str_split.h"
 #include "common/Timer.h"
 #include "common/UIntSetForEach.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 
 // helps debugging

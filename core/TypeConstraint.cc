@@ -1,5 +1,5 @@
 #include "core/TypeConstraint.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
 

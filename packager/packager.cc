@@ -8,7 +8,7 @@
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/Unfreeze.h"

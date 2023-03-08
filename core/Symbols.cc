@@ -4,7 +4,7 @@
 #include "absl/strings/str_replace.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"

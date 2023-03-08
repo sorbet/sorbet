@@ -5,7 +5,7 @@
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
 #include "common/common.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/lsp/LSPConfiguration.h"

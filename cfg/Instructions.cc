@@ -1,6 +1,6 @@
 #include "Instructions.h"
 
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"

@@ -7,7 +7,7 @@
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 // ^^^ violate poisons
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"

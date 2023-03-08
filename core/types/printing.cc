@@ -2,7 +2,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
