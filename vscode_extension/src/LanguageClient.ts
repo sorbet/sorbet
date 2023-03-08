@@ -133,7 +133,8 @@ export default class SorbetLanguageClient implements ErrorHandler {
           supportsOperationNotifications: true,
           // Let Sorbet know that we can handle sorbet:// URIs for generated files.
           supportsSorbetURIs: true,
-          highlightUntypedValues: this._sorbetExtensionConfig.highlightUntypedValues,
+          highlightUntypedValues: this._sorbetExtensionConfig
+            .highlightUntypedValues,
         },
         errorHandler: this,
         revealOutputChannelOn: this._sorbetExtensionConfig.revealOutputOnError
