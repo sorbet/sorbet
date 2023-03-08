@@ -33,6 +33,7 @@ cc_library(
         "//common/exception",
         "//common/os",
         "//common/sort",
+        "//common/strings",
         "//sorbet_version",
         "//third_party/progressbar",
         "@com_google_absl//absl/algorithm:container",
