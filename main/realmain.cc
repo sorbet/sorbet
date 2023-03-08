@@ -637,8 +637,6 @@ int realmain(int argc, char *argv[]) {
                 return 1;
             }
 
-            gs->warnUntypedValues = opts.warnUntypedValues;
-
             auto relativeIgnorePatterns = opts.relativeIgnorePatterns;
             auto it = absl::c_find(relativeIgnorePatterns, "/__package.rb");
             if (it != relativeIgnorePatterns.end()) {

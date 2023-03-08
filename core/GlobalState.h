@@ -231,7 +231,6 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
-    bool warnUntypedValues = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
     // this into a valid ruby identifier without suffering.
