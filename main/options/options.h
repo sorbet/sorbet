@@ -1,6 +1,6 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
-#include "common/ConstExprStr.h"
+#include "common/strings/ConstExprStr.h"
 #include "common/EarlyReturnWithCode.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
