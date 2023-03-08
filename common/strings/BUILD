@@ -10,6 +10,7 @@ cc_library(
     ),
     hdrs = [
         "ConstExprStr.h",
+        "formatting.h",
     ],
     linkopts = select({
         "@platforms//os:linux": ["-lm"],
