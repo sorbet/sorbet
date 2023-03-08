@@ -4089,10 +4089,13 @@ doing the comparison. For example, try converting `String`s to `Symbol`s with
 
 ## 7047
 
-Usages of values with type `T.untyped` are highlighted by this error. It is
-intended to only show up as a warning in editors through LSP for files with
-typed sigil set between `true` and `strong` (exclusive). For `typed: strong`
-error [7018](#7018) will be reported.
+This error code is an implementation detail of Sorbet's "highlight untyped in
+editor" mode. It indicates that the given piece of code is has type
+[`T.untyped`](untyped.md). Untyped code can be dangerous, because it circumvents
+the guarantees of the type system.
+
+This feature is opt-in. See [VS Code](vscode.md) for instructions on how to turn
+it on.
 
 <!-- -->
 
