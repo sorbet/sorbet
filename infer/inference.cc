@@ -11,7 +11,9 @@
 using namespace std;
 namespace sorbet::infer {
 
-const std::optional<core::ErrorClass> Inference::errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
+namespace {
+
+const std::optional<core::ErrorClass> errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).strictLevel < core::StrictLevel::Strong) {
         if (file.data(gs).isOpenInClient()) {
             return core::errors::Infer::UntypedValueInformation;
@@ -21,6 +23,8 @@ const std::optional<core::ErrorClass> Inference::errorClassForUntyped(const core
     }
     return core::errors::Infer::UntypedValue;
 }
+
+} // namespace
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
