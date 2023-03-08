@@ -151,7 +151,6 @@ struct Options {
     core::StrictLevel forceMinStrict = core::StrictLevel::Ignore;
     core::StrictLevel forceMaxStrict = core::StrictLevel::Strong;
 
-    bool warnUntypedValues = false;
     bool showProgress = false;
     bool suggestTyped = false;
     std::optional<std::string> suggestUnsafe = std::nullopt;

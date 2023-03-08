@@ -552,7 +552,6 @@ TEST_CASE("LSPTest") {
         opts->requiresAncestorEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-        opts->warnUntypedValues = BooleanPropertyAssertion::getValue("warn-untyped-values", assertions).value_or(false);
 
         if (opts->stripePackages) {
             auto extraDirUnderscore =
@@ -606,6 +605,8 @@ TEST_CASE("LSPTest") {
         string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
+        sorbetInitOptions->warnUntypedValues =
+            BooleanPropertyAssertion::getValue("warn-untyped-values", assertions).value_or(false);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");
