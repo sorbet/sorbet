@@ -272,10 +272,13 @@ export default class SorbetLanguageClient implements ErrorHandler {
       ...args
     ] = this._sorbetExtensionConfig.activeLspConfig!.command;
     this._outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
-    const cwd = this._sorbetExtensionConfig.activeLspConfig!.cwd.replace(
-      "${workspaceFolder}", // eslint-disable-line no-template-curly-in-string
-      workspace.rootPath || "",
-    );
+    const cwdTemplate = this._sorbetExtensionConfig.activeLspConfig!.cwd;
+    const cwd = cwdTemplate
+      ? cwdTemplate.replace(
+          "${workspaceFolder}", // eslint-disable-line no-template-curly-in-string
+          workspace.rootPath || "",
+        )
+      : workspace.rootPath || "";
     this._sorbetProcess = spawn(command, args, { cwd });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯
