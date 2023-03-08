@@ -1,7 +1,7 @@
 #ifndef SORBET_COUNTERS_IMPL_H
 #define SORBET_COUNTERS_IMPL_H
 
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include <string_view>
 
 namespace sorbet {
