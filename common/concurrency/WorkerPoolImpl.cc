@@ -1,6 +1,8 @@
 #include "common/concurrency/WorkerPoolImpl.h"
 #include "absl/strings/str_cat.h"
+#include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
+#include "common/counters/Counters.h"
 #include "common/enforce_no_timer/EnforceNoTimer.h"
 #include "common/os/os.h"
 
@@ -57,7 +59,7 @@ WorkerPoolImpl::~WorkerPoolImpl() {
     // join will be called when destructing joinable;
 }
 
-void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
+WorkerPool::MultiplexCleanup WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
     if (_size > 0) {
         multiplexJob_([t{move(t)}, taskName] {
             setCurrentThreadName(taskName);
@@ -68,6 +70,9 @@ void WorkerPoolImpl::multiplexJob(string_view taskName, WorkerPool::Task t) {
         // main thread is the worker.
         t();
     }
+
+    MultiplexCleanup cleanup;
+    return cleanup;
 }
 
 void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
@@ -75,6 +80,30 @@ void WorkerPoolImpl::multiplexJob_(WorkerPoolImpl::Task_ t) {
     for (int i = 0; i < _size; i++) {
         const bool enqueued = threadQueues[i]->enqueue(t);
         ENFORCE_NO_TIMER(enqueued, "Failed to enqueue (did we surpass MAX_SUBQUEUE_SIZE items enqueued?)");
+    }
+}
+
+void WorkerPoolImpl::consumeCounters() {
+    if (_size == 0) {
+        // No threads were forked, so all counters have already been accumited into the current thread's counters.
+        return;
+    }
+
+    auto resultq = make_shared<BlockingBoundedQueue<CounterState>>(_size);
+
+    multiplexJob_([resultq] {
+        setCurrentThreadName("consumeCounters");
+        resultq->push(getAndClearThreadCounters(), 1);
+        return true;
+    });
+
+    CounterState threadCounterState;
+    for (auto result = resultq->wait_pop_timed(threadCounterState, WorkerPool::BLOCK_INTERVAL(), this->logger);
+         !result.done();
+         result = resultq->wait_pop_timed(threadCounterState, WorkerPool::BLOCK_INTERVAL(), this->logger)) {
+        if (result.gotItem()) {
+            counterConsume(move(threadCounterState));
+        }
     }
 }
 

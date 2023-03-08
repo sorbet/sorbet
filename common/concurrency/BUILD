@@ -23,6 +23,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/counters",
+        "//common/timers",
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
