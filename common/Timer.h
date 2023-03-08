@@ -1,6 +1,6 @@
 #ifndef SORBET_TIMER_H
 #define SORBET_TIMER_H
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include <memory>
 #include <string>
 #include <thread>

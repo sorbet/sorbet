@@ -5,7 +5,7 @@
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
-#include "common/Counters_impl.h"
+#include "common/counters/Counters_impl.h"
 #include "common/Random.h"
 #include "common/typecase.h"
 #include "core/Names.h"

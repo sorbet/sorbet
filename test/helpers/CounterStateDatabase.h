@@ -1,8 +1,8 @@
 #ifndef TEST_LSP_COUNTERSTATEDATABASE_H
 #define TEST_LSP_COUNTERSTATEDATABASE_H
 
-#include "common/Counters.h"
-#include "common/Counters_impl.h"
+#include "common/counters/Counters.h"
+#include "common/counters/Counters_impl.h"
 
 namespace sorbet::test::lsp {
 class CounterStateDatabase final {

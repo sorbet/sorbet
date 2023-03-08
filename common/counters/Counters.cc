@@ -1,6 +1,6 @@
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include "absl/strings/str_cat.h"
-#include "common/Counters_impl.h"
+#include "common/counters/Counters_impl.h"
 #include "common/strings/formatting.h"
 #include "common/sort/sort.h"
 #include <algorithm>

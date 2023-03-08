@@ -1,5 +1,5 @@
 #include "common/statsd/statsd.h"
-#include "common/Counters_impl.h"
+#include "common/counters/Counters_impl.h"
 #include "common/strings/formatting.h"
 #include "sorbet_version/sorbet_version.h"
 

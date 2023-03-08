@@ -1,9 +1,9 @@
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include "common/FileOps.h"
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
-#include "common/Counters_impl.h"
+#include "common/counters/Counters_impl.h"
 #include "common/JSON.h"
 #include "common/strings/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
