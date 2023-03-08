@@ -195,7 +195,6 @@ struct AutogenResult {
         string msgpack;
         optional<autogen::Subclasses::Map> subclasses;
     };
-    CounterState counters;
     vector<pair<int, Serialized>> prints;
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
@@ -265,7 +264,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
             }
 
-            out.counters = getAndClearThreadCounters();
             resultq->push(move(out), n);
         });
 
@@ -276,7 +274,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         if (!res.gotItem()) {
             continue;
         }
-        counterConsume(move(out.counters));
         for (auto &print : out.prints) {
             merged[print.first] = move(print.second);
         }

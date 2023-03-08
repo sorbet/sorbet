@@ -544,7 +544,7 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
 
     // Parallelize writing the files.
     auto inputq = make_shared<ConcurrentBoundedQueue<int>>(tasks.size());
-    auto outputq = make_shared<BlockingBoundedQueue<pair<CounterState, bool>>>(tasks.size());
+    auto outputq = make_shared<BlockingBoundedQueue<bool>>(tasks.size());
     for (int i = 0; i < tasks.size(); ++i) {
         inputq->push(i, 1);
     }
@@ -568,18 +568,17 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
             }
         }
 
-        outputq->push(make_pair(getAndClearThreadCounters(), anyFilesModified), n);
+        outputq->push(anyFilesModified, n);
     });
 
     bool modified = false;
-    pair<CounterState, bool> out;
+    bool out;
     for (auto res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer()); !res.done();
          res = outputq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
         if (!res.gotItem()) {
             continue;
         }
-        counterConsume(move(out.first));
-        modified = modified || out.second;
+        modified = modified || out;
     }
     multiplexResult.cleanup(workers);
 
