@@ -1,8 +1,8 @@
 #include "common/counters/Counters.h"
 #include "absl/strings/str_cat.h"
 #include "common/counters/Counters_impl.h"
-#include "common/strings/formatting.h"
 #include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include <algorithm>
 #include <cmath>
 #include <iomanip> // set
