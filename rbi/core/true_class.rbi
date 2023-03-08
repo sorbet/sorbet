@@ -29,4 +29,6 @@ class TrueClass
   def |(obj); end
   sig {returns(FalseClass)}
   def !; end
+
+  def ==(obj); end
 end

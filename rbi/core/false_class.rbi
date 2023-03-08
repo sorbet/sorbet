@@ -23,4 +23,6 @@ class FalseClass
   sig {returns(TrueClass)}
   def !
   end
+
+  def ==(obj); end
 end
