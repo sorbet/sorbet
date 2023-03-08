@@ -28,8 +28,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//common/counters",
         "//common/concurrency",
+        "//common/counters",
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
