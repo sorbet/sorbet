@@ -6,7 +6,7 @@
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/expectations.h"

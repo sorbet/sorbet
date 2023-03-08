@@ -1,7 +1,7 @@
 #include "main/lsp/LSPTask.h"
 #include "absl/strings/match.h"
 #include "absl/synchronization/notification.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/FileHash.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPLoop.h"

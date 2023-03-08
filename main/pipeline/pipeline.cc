@@ -27,7 +27,7 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
 #include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"

@@ -5,7 +5,7 @@
 #include "absl/strings/str_cat.h"
 #include "ast/treemap/treemap.h"
 #include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/FieldFinder.h"

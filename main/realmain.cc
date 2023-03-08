@@ -25,7 +25,7 @@
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/Timer.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"

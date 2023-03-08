@@ -10,7 +10,7 @@
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/FileHash.h"
 #include "core/FoundDefinitions.h"

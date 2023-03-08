@@ -1,5 +1,5 @@
 #include "main/lsp/LSPQuery.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/FileHash.h"
 #include "main/lsp/json_types.h"
 

@@ -4,7 +4,7 @@
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"

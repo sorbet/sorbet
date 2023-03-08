@@ -2,7 +2,7 @@
 // has to go first as it violates our requirements
 
 #include "common/concurrency/WorkerPool.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"

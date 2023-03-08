@@ -7,7 +7,7 @@
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/GlobalState.h"
 #include "packager/packager.h"
 

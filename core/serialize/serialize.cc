@@ -3,7 +3,7 @@
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
 #include "common/Timer.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/FileHash.h"
 #include "core/GlobalState.h"

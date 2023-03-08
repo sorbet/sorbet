@@ -5,7 +5,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/errors/packager.h"
 #include "core/errors/resolver.h"

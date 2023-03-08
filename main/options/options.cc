@@ -8,7 +8,7 @@
 #include "common/Timer.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/ConfigParser.h"

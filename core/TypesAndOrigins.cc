@@ -1,5 +1,5 @@
 #include "Types.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 
 using namespace std;
 namespace sorbet::core {

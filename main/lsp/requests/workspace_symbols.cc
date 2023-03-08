@@ -1,5 +1,5 @@
 #include "main/lsp/requests/workspace_symbols.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/ShowOperation.h"
