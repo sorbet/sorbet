@@ -30,6 +30,7 @@ const regex whitespaceRegex("^[ ]*$");
 const UnorderedMap<
     string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view, string_view)>>
     assertionConstructors = {
+        {"info", ErrorAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
@@ -38,6 +39,7 @@ const UnorderedMap<
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
+        {"enable-warn-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"stripe-mode", BooleanPropertyAssertion::make},

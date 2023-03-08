@@ -552,6 +552,8 @@ TEST_CASE("LSPTest") {
         opts->requiresAncestorEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+        opts->warnUntypedValues = BooleanPropertyAssertion::getValue("warn-untyped-values", assertions).value_or(false);
+
         if (opts->stripePackages) {
             auto extraDirUnderscore =
                 StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
