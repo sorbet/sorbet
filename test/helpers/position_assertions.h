@@ -93,7 +93,7 @@ public:
     virtual bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
 
-class InfoAssertion : public ErrorAssertion {
+class InfoAssertion final : public ErrorAssertion {
 public:
     static std::shared_ptr<InfoAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                int assertionLine, std::string_view assertionContents,
