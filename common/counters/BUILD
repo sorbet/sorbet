@@ -22,6 +22,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/exception",
         "//common/sort",
         "//common/strings",
         "//sorbet_version",
