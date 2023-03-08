@@ -27,7 +27,7 @@
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
-    "onCommand:sorbet.toggleWarnUntypedValues",
+    "onCommand:sorbet.togglehighlightUntypedValues",
     "onCommand:sorbet.showOutput",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
@@ -69,7 +69,7 @@
         "category": "Sorbet"
       },
       {
-        "command": "sorbet.toggleWarnUntypedValues",
+        "command": "sorbet.togglehighlightUntypedValues",
         "title": "Toggle untyped value warnings",
         "category": "Sorbet"
       },
@@ -244,7 +244,7 @@
           "description": "Show the extension output window on errors.",
           "default": false
         },
-        "sorbet.warnUntypedValues": {
+        "sorbet.highlightUntypedValues": {
           "type": "boolean",
           "description": "Shows warning for untyped values.",
           "default": false
@@ -283,7 +283,7 @@
           "command": "sorbet.restart"
         },
         {
-          "command": "sorbet.toggleWarnUntypedValues"
+          "command": "sorbet.togglehighlightUntypedValues"
         },
         {
           "command": "sorbet.showOutput",

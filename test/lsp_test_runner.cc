@@ -605,7 +605,7 @@ TEST_CASE("LSPTest") {
         string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
-        sorbetInitOptions->warnUntypedValues =
+        sorbetInitOptions->highlightUntypedValues =
             BooleanPropertyAssertion::getValue("warn-untyped-values", assertions).value_or(false);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));

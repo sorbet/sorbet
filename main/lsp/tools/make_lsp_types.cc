@@ -1264,7 +1264,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("supportsOperationNotifications", makeOptional(JSONBool)),
                        makeField("supportsSorbetURIs", makeOptional(JSONBool)),
                        makeField("enableTypecheckInfo", makeOptional(JSONBool)),
-                       makeField("warnUntypedValues", makeOptional(JSONBool)),
+                       makeField("highlightUntypedValues", makeOptional(JSONBool)),
                    },
                    classTypes);
     auto InitializeParams =
