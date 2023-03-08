@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 // has to go first as it violates our requirements
 
+#include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort/sort.h"
 #include "core/Error.h"
