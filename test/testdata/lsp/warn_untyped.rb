@@ -1,6 +1,6 @@
 # typed: strict
 
-# warn-untyped-values: true
+# highlight-untyped-values: true
 
 extend T::Sig
 
