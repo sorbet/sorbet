@@ -99,16 +99,6 @@ public:
                                                int assertionLine, std::string_view assertionContents,
                                                std::string_view assertionType);
 
-    /**
-     * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
-     */
-    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
-                         std::vector<std::shared_ptr<ErrorAssertion>> errorAssertions,
-                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
-                         std::string errorPrefix = "");
-
-    const std::string message;
-
     InfoAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                   std::string_view message);
 

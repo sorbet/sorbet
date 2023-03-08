@@ -304,7 +304,7 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
 }
 
 InfoAssertion::InfoAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
-    : ErrorAssertion(filename, range, assertionLine, message, false), message(message) {}
+    : ErrorAssertion(filename, range, assertionLine, message, false) {}
 
 shared_ptr<InfoAssertion> InfoAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                               string_view assertionContents, string_view assertionType) {
