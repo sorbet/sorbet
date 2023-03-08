@@ -66,7 +66,7 @@ CounterStateDatabase::getTimings(ConstExprStr counter, vector<pair<ConstExprStr,
     for (const auto &timing : counters.counters->timings) {
         auto timing_tags_size = timing.tags == nullptr ? 0 : timing.tags->size();
         if (strncmp(timing.measure, counter.str, counter.size + 1) == 0 && timing_tags_size >= tags.size()) {
-            UnorderedMap<std::string, const char *> timingTags;
+            absl::flat_hash_map<std::string, const char *> timingTags;
             if (timing.tags != nullptr) {
                 for (const auto &tag : *timing.tags) {
                     timingTags[tag.first] = tag.second;
