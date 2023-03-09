@@ -64,7 +64,7 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
 LSPTypechecker::~LSPTypechecker() {}
 
 void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> initialGS,
-                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers) {
+                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers, const LSPConfiguration &currentConfig) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
 
@@ -72,6 +72,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Initialize the global state for the indexer
     {
+
+        initialGS->highlightUntypedValues = currentConfig.getClientConfig().enableHighlightUntypedValues;
         // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
@@ -717,8 +719,8 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &wor
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                                        std::unique_ptr<KeyValueStore> kvstore) {
-    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers);
+                                        std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
+    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
 }
 
 void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
