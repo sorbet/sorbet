@@ -1316,10 +1316,11 @@ class String < Object
     params(
         str: String,
         encoding: T.nilable(Encoding),
+        capacity: T.nilable(Integer),
     )
     .void
   end
-  def initialize(str=T.unsafe(nil), encoding: nil); end
+  def initialize(str=T.unsafe(nil), encoding: nil, capacity: nil); end
 
   # Inserts *other\_str* before the character at the given *index*, modifying
   # *str*. Negative indices count from the end of the string, and insert *after*
