@@ -161,7 +161,7 @@ module GC
   # If the optional argument, hash, is given, it is overwritten and returned.
   #
   # This method is only expected to work on CRuby.
-  sig { returns(T::Hash[Numeric, T::Hash[Symbol, Numeric]]) }
+  sig { returns(T::Hash[Integer, T::Hash[Symbol, Integer]]) }
   sig { params(heap_name: T.any(Integer, String), hash_or_key: Symbol).returns(Integer) }
   sig do
     params(
@@ -169,7 +169,7 @@ module GC
       hash_or_key: T::Hash[T.untyped, T.untyped],
     ).returns(T::Hash[T.untyped, T.untyped])
   end
-  sig { params(heap_name: T.any(Integer, String)).returns(T::Hash[Symbol, Numeric]) }
+  sig { params(heap_name: T.any(Integer, String)).returns(T::Hash[Symbol, Integer]) }
   def self.stat_heap(heap_name = nil, hash_or_key = nil); end
 
   # Returns current status of
