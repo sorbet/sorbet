@@ -226,22 +226,6 @@ module ARGF
   def self.each_codepoint(*several_variants, &blk)
     #This is a stub, used for indexing
   end
-  # This is a deprecated alias for <code>each_line</code>.
-  def self.lines(*args, &blk)
-    #This is a stub, used for indexing
-  end
-  # This is a deprecated alias for <code>each_byte</code>.
-  def self.bytes(&blk)
-    #This is a stub, used for indexing
-  end
-  # This is a deprecated alias for <code>each_char</code>.
-  def self.chars(&blk)
-    #This is a stub, used for indexing
-  end
-  # This is a deprecated alias for <code>each_codepoint</code>.
-  def self.codepoints(&blk)
-    #This is a stub, used for indexing
-  end
   # ARGF.read([length [, outbuf]])    -> string, outbuf, or nil
   #
   # Reads _length_ bytes from ARGF. The files named on the command line

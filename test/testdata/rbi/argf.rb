@@ -20,10 +20,6 @@ ARGF.each
 ARGF.each_byte
 ARGF.each_char
 ARGF.each_codepoint
-ARGF.lines
-ARGF.bytes
-ARGF.chars
-ARGF.codepoints
 ARGF.read
 ARGF.readpartial
 ARGF.read_nonblock
