@@ -1,5 +1,5 @@
 # typed: strict
 # assert-fast-path: static_field_change_type__def.rb,static_field_change_type__use.rb
 
-STATIC_FIELD = T.let({}, T::Hash[Symbol, ]) # error-with-dupes: Not enough arguments provided
+STATIC_FIELD = T.let({}, T::Hash[Symbol, ]) # error: Not enough arguments provided
                                # ^^^^^^ error-with-dupes: Wrong number of type parameters

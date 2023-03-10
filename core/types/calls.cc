@@ -441,94 +441,6 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     return fallback;
 }
 
-/**
- * unwrapType is used to take an expression that's parsed at the value-level,
- * and turn it into a type. For example, consider the following two expressions:
- *
- * > Integer.sqrt 10
- * > T::Array[Integer].new
- *
- * In both lines, `Integer` is initially resolved as the singleton class of
- * `Integer`. This is because it's not immediately clear if we want to refer
- * to the type `Integer` or if we want the singleton class of Integer for
- * calling singleton methods. In the first line this was the correct choice, as
- * we're just invoking the singleton method `sqrt`. In the second case we need
- * to fix up the `Integer` sub-expression, and turn it back into the type of
- * integer values. This is what `unwrapType` does, it turns the value-level
- * expression back into a type-level one.
- */
-TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
-    if (auto *metaType = cast_type<MetaType>(tp)) {
-        return metaType->wrapped;
-    }
-
-    if (isa_type<ClassType>(tp)) {
-        auto classType = cast_type_nonnull<ClassType>(tp);
-        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
-            // T::Enum instances are allowed to stand for themselves in type syntax positions.
-            // See the note in type_syntax.cc regarding T::Enum.
-            return tp;
-        }
-
-        auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
-        if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-                if (classType.symbol == core::Symbols::T_Types_Base() ||
-                    classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
-                    // T::Types::Base is the parent class for runtime type objects.
-                    // Give a more helpful error message
-                    e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
-                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
-                                   "T.unsafe");
-                    auto locSource = loc.source(gs);
-                    if (locSource.has_value()) {
-                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
-                    }
-                }
-            }
-
-            return Types::untypedUntracked();
-        }
-
-        return attachedClass.data(gs)->externalType();
-    }
-
-    if (auto *appType = cast_type<AppliedType>(tp)) {
-        ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
-        if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-            }
-            return Types::untypedUntracked();
-        }
-
-        return attachedClass.data(gs)->externalType();
-    }
-
-    if (auto *shapeType = cast_type<ShapeType>(tp)) {
-        vector<TypePtr> unwrappedValues;
-        unwrappedValues.reserve(shapeType->values.size());
-        for (auto &value : shapeType->values) {
-            unwrappedValues.emplace_back(unwrapType(gs, loc, value));
-        }
-        return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
-    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
-        vector<TypePtr> unwrappedElems;
-        unwrappedElems.reserve(tupleType->elems.size());
-        for (auto &elem : tupleType->elems) {
-            unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
-        }
-        return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
-        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-        }
-        return Types::untypedUntracked();
-    }
-    return tp;
-}
-
 struct ArityComponents {
     int required;
     int optional;
@@ -920,6 +832,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
     auto posArgs = args.numPosArgs;
     bool hasKwParams = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasNonDefaultKwParams =
+        absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword && !arg.flags.isDefault; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
@@ -944,9 +858,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
-
         auto argType = Types::approximate(gs, arg->type, *constr);
-        if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || spec.flags.isRepeated) &&
+        if (ait + 1 == aend && hasNonDefaultKwParams && (spec.flags.isDefault || spec.flags.isRepeated) &&
             argType.derivesFrom(gs, Symbols::Hash())) {
             // Edge case:
             // sig {params(args: Integer, x: Integer).void}
@@ -1603,8 +1516,6 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         auto sym = cast_type_nonnull<ClassType>(wrapped).symbol;
         if (sym == Symbols::untyped() || sym == Symbols::bottom()) {
             return false;
-        } else if (sym.data(gs)->isSingletonClass(gs)) {
-            return false;
         }
     }
 
@@ -1715,7 +1626,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
 
             auto returns = core::Types::void_();
             if (args.name == core::Names::returns()) {
-                returns = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+                returns = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
             }
 
             // Have to create a new type for the result because dispatchCall is a const member method
@@ -1809,7 +1720,7 @@ public:
 
         // The argument to `T.class_of(...)` is a value, but has a type meaning. That means we need
         // to  `unwrapType` to handle things like type aliases and constant literal types.
-        auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
         auto mustExist = false;
         auto classSymbol = unwrapSymbol(gs, unwrappedType, mustExist);
         if (!classSymbol.exists()) {
@@ -1901,7 +1812,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, args.argLoc(i), arg->type);
+            auto ty = Types::unwrapType(gs, args.argLoc(i), arg->type);
             ret = Types::any(gs, ret, ty);
         }
 
@@ -1920,7 +1831,7 @@ public:
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
-            auto ty = unwrapType(gs, args.argLoc(i), arg->type);
+            auto ty = Types::unwrapType(gs, args.argLoc(i), arg->type);
             ret = Types::all(gs, ret, ty);
         }
 
@@ -1950,8 +1861,8 @@ public:
             return;
         }
 
-        res.returnType =
-            make_type<MetaType>(Types::any(gs, unwrapType(gs, args.argLoc(0), args.args[0]->type), Types::nilClass()));
+        res.returnType = make_type<MetaType>(
+            Types::any(gs, Types::unwrapType(gs, args.argLoc(0), args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
 
@@ -1982,7 +1893,7 @@ public:
         targs.emplace_back(core::Types::todo());
 
         for (size_t i = 1; i < args.args.size(); i += 2) {
-            auto unwrappedType = unwrapType(gs, args.argLoc(i), args.args[i]->type);
+            auto unwrappedType = Types::unwrapType(gs, args.argLoc(i), args.args[i]->type);
             targs.emplace_back(move(unwrappedType));
         }
 
@@ -2010,7 +1921,7 @@ public:
 
         auto sym = core::Symbols::Proc(0);
         vector<core::TypePtr> targs;
-        auto unwrappedType = unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
         targs.emplace_back(move(unwrappedType));
         res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
@@ -2101,12 +2012,6 @@ public:
 
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
-    // This method is actually special: not only is it called from processBinding in infer, it's
-    // also called directly by type_syntax parsing in resolver (because this method checks some
-    // invariants of generics that we want to hold even in `typed: false` files).
-    //
-    // Unfortunately, this means that some errors are double reported (once by resolver, and then
-    // again by infer).
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
@@ -2116,107 +2021,10 @@ public:
             return;
         }
 
-        attachedClass = attachedClass.maybeUnwrapBuiltinGenericForwarder();
-
-        if (attachedClass.data(gs)->typeMembers().empty()) {
-            return;
-        }
-
-        int arity;
-        if (attachedClass == Symbols::Hash()) {
-            arity = 2;
-        } else {
-            arity = attachedClass.data(gs)->typeArity(gs);
-        }
-
-        // This is something like Generic[T1,...,foo: bar...]
-        auto numKwArgs = args.args.size() - args.numPosArgs;
-        if (numKwArgs > 0) {
-            auto begin = args.locs.args[args.numPosArgs].beginPos();
-            auto end = args.locs.args.back().endPos();
-            core::Loc kwargsLoc{args.locs.file, begin, end};
-
-            if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
-                e.setHeader("Keyword arguments given to `{}`", attachedClass.show(gs));
-                // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
-                if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
-                    e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
-                }
-            }
-        }
-
-        if (args.numPosArgs != arity) {
-            if (auto e = gs.beginError(args.argsLoc(), errors::Infer::GenericArgumentCountMismatch)) {
-                e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            attachedClass.show(gs), arity, args.numPosArgs);
-            }
-        }
-
-        vector<TypePtr> targs;
-        auto it = args.args.begin();
-        int i = -1;
-        targs.reserve(attachedClass.data(gs)->typeMembers().size());
-        for (auto mem : attachedClass.data(gs)->typeMembers()) {
-            ++i;
-
-            auto memData = mem.data(gs);
-
-            auto *memType = cast_type<LambdaParam>(memData->resultType);
-            ENFORCE(memType != nullptr);
-
-            if (memData->flags.isFixed) {
-                // Fixed args are implicitly applied, and won't consume type
-                // arguments from the list that's supplied.
-                targs.emplace_back(memType->upperBound);
-            } else if (it != args.args.end()) {
-                auto loc = args.argLoc(it - args.args.begin());
-                auto argType = unwrapType(gs, loc, (*it)->type);
-                bool validBounds = true;
-
-                // Validate type parameter bounds.
-                if (!Types::isSubType(gs, argType, memType->upperBound)) {
-                    validBounds = false;
-                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType.show(gs);
-                        e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
-                                    mem.showFullName(gs));
-                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs),
-                                       "upper", memType->upperBound.show(gs));
-                    }
-                }
-
-                if (!Types::isSubType(gs, memType->lowerBound, argType)) {
-                    validBounds = false;
-
-                    if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType.show(gs);
-                        e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
-                                    mem.showFullName(gs));
-                        e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs),
-                                       "lower", memType->lowerBound.show(gs));
-                    }
-                }
-
-                if (validBounds) {
-                    targs.emplace_back(argType);
-                } else {
-                    targs.emplace_back(Types::untypedUntracked());
-                }
-
-                ++it;
-            } else if (attachedClass == Symbols::Hash() && i == 2) {
-                auto tupleArgs = targs;
-                targs.emplace_back(make_type<TupleType>(tupleArgs));
-            } else {
-                targs.emplace_back(Types::untypedUntracked());
-            }
-        }
-
-        res.returnType = make_type<MetaType>(make_type<AppliedType>(attachedClass, move(targs)));
+        res.returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
     }
 } T_Generic_squareBrackets;
 
-namespace {
 void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, size_t argsToDropOffEnd) {
     // We should always have the actual receiver plus whatever args we're going
     // to ignore for dispatching purposes.
@@ -2244,7 +2052,6 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
                                       recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
                                       args.suppressErrors});
 }
-} // namespace
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
@@ -3368,8 +3175,6 @@ public:
     }
 } Tuple_concat;
 
-namespace {
-
 optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
     if (!isa_type<ClassType>(expectedType)) {
         return nullopt;
@@ -3414,8 +3219,6 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
     return nullopt;
 }
-
-} // namespace
 
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
@@ -3692,8 +3495,6 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
-namespace {
-
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -3799,8 +3600,6 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
 
     res.returnType = move(recursiveDispatch.returnType);
 }
-
-} // namespace
 
 class Hash_dig : public IntrinsicMethod {
 public:

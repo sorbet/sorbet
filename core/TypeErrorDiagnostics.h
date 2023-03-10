@@ -16,7 +16,7 @@ public:
     // (It should usually be a cfg::Send::argLocs element or cfg::Return::whatLoc)
     //
     // Statefully accumulates the autocorrect directly onto the provided `ErrorBuilder`.
-    static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
+    static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, const TypeConstraint &constr,
                                  const TypePtr &expectedType, const TypePtr &actualType);
 
     static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,

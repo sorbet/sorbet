@@ -56,8 +56,9 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
     // TODO(jez) Add more cases
 }
 
-void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
-                                            const TypePtr &expectedType, const TypePtr &actualType) {
+void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc,
+                                            const TypeConstraint &constrOrig, const TypePtr &expectedType,
+                                            const TypePtr &actualType) {
     if (!loc.exists()) {
         return;
     }
@@ -66,21 +67,22 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
         e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
                       loc.source(gs).value());
     } else {
+        // Duplicate the current constraint, so that we don't record any additional constraints
+        // simply from trying to generate autocorrects, and then solve it so that each additional
+        // heuristic here doesn't interfere with later heuristics.
+        auto constr = constrOrig.deepCopy();
+        if (!constr->solve(gs)) {
+            // Constraint already doesn't solve. This will be an error later in infer.
+            // For now, let's just give up on our type-driven autocorrects.
+            return;
+        }
+
         auto withoutNil = Types::dropNil(gs, actualType);
         if (!withoutNil.isBottom() &&
-            Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
+            Types::isSubTypeUnderConstraint(gs, *constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
             e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
-        } else if (Types::isSubTypeUnderConstraint(gs, constr, expectedType, Types::Boolean(),
-                                                   UntypedMode::AlwaysCompatible)) {
-            if (core::isa_type<ClassType>(actualType)) {
-                auto classSymbol = core::cast_type_nonnull<ClassType>(actualType).symbol;
-                if (classSymbol.exists() && classSymbol.data(gs)->owner == core::Symbols::root() &&
-                    classSymbol.data(gs)->name == core::Names::Constants::Boolean()) {
-                    e.replaceWith("Prepend `!!`", loc, "!!({})", loc.source(gs).value());
-                }
-            }
         } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType) &&
-                   core::Types::isSubTypeUnderConstraint(gs, constr,
+                   core::Types::isSubTypeUnderConstraint(gs, *constr,
                                                          core::Symbols::T_Types_Base().data(gs)->externalType(),
                                                          expectedType, UntypedMode::AlwaysCompatible)) {
             e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());

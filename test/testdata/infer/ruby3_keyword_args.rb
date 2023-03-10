@@ -28,7 +28,6 @@ end
 blk = Proc.new
 foo("", tags: {}, x: 1, &blk)
 
-
 def with_base_dir(*segments)
 end
 
@@ -138,3 +137,9 @@ end
 untyped_values_hash = T.let({}, T::Hash[Symbol, T.untyped])
 h(1, y: 2, **untyped_values_hash)
 
+module B
+  def self.inner_foo(arg0 = [], arg1: true); end
+  def self.outer_foo(arg0)
+    inner_foo(arg0)
+  end
+end
