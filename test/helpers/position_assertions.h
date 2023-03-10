@@ -10,7 +10,7 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 class ErrorAssertion;
-class InfoAssertion;
+class UntypedAssertion;
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.
@@ -43,6 +43,9 @@ public:
     static std::vector<std::shared_ptr<ErrorAssertion>>
     getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
+    static std::vector<std::shared_ptr<UntypedAssertion>>
+    getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
     const std::string filename;
     const std::unique_ptr<Range> range;
     // Used to produce intelligent error messages when assertion comments are malformed/invalid
@@ -68,7 +71,7 @@ public:
 };
 
 // # ^^^ error: message
-class ErrorAssertion : public RangeAssertion {
+class ErrorAssertion final : public RangeAssertion {
 public:
     static std::shared_ptr<ErrorAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
                                                 int assertionLine, std::string_view assertionContents,
@@ -90,21 +93,31 @@ public:
 
     std::string toString() const override;
 
-    virtual bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
 
-class InfoAssertion final : public ErrorAssertion {
+class UntypedAssertion final : public RangeAssertion {
 public:
-    static std::shared_ptr<InfoAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
-                                               int assertionLine, std::string_view assertionContents,
-                                               std::string_view assertionType);
+    static std::shared_ptr<UntypedAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
 
-    InfoAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                  std::string_view message);
+    UntypedAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     std::string_view message);
 
     std::string toString() const override;
+    const std::string message;
 
-    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix) override;
+    // this exists solely to allow us to reuse ErrorAssertion's checkAll
+    // for UntypedAssertion. It should *always* be false.
+    static constexpr bool matchesDuplicateErrors = false;
+
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
+                         std::vector<std::shared_ptr<UntypedAssertion>> errorAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string errorPrefix = "");
+
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
 
 // # ^^^ def: symbol

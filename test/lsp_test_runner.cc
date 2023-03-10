@@ -655,8 +655,15 @@ TEST_CASE("LSPTest") {
             }
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
-            slowPathPassed = ErrorAssertion::checkAll(
+            bool errorAssertionsPassed = 
+             ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+            
+            bool untypedAssertionsPassed = 
+             UntypedAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions), diagnostics, errorPrefixes[i]);
+            
+            slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
         }
     }
 

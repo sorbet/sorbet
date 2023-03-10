@@ -8,7 +8,7 @@ sig { returns(Integer) }
 def foo
   my_map = T.let({ foo: 1, bar: 'baz' }, T::Hash[Symbol, T.untyped])
   my_map[:foo]
-# ^^^^^^^^^^^^ info: This code is untyped
+# ^^^^^^^^^^^^ untyped: This code is untyped
 end
 
 sig { params(x: Integer, y: String).returns(Integer) }
@@ -27,28 +27,28 @@ end
 
 # assign untyped thing to variable
 b = baz
-#   ^^^ info: This code is untyped
+#   ^^^ untyped: This code is untyped
 
 # use an untyped variable
   b.length
-# ^^^^^^^^ info: This code is untyped
+# ^^^^^^^^ untyped: This code is untyped
 T.let(b, Integer) == 6
 
 
 my_map = T.let({:foo => 5, :bar => "foo"}, T::Hash[Symbol, T.untyped])
 # untyped argument
 bar(my_map[:foo], T.let("foo", T.untyped))
-#   ^^^^^^^^^^^^ info: This code is untyped
+#   ^^^^^^^^^^^^ untyped: This code is untyped
 
 # if condition
 if my_map[:foo]
-#  ^^^^^^^^^^^^ info: This code is untyped
+#  ^^^^^^^^^^^^ untyped: This code is untyped
 	6
 end
 
 # case statement
 case my_map[:bar]
-#    ^^^^^^^^^^^^ info: This code is untyped
+#    ^^^^^^^^^^^^ untyped: This code is untyped
 when "x"
 	"x"
 when "y"
@@ -70,7 +70,7 @@ class Derived < Base
 	sig { override.returns(String) }
 	def foo
 		super
-# ^^^^^ info: This code is untyped
+# ^^^^^ untyped: This code is untyped
 	end
 end
 
@@ -90,5 +90,5 @@ end
 sig {params(blk: T.untyped).returns(T.untyped)}
 def blk_fun(&blk)
 	yield "x"
-#^^^^^^^^^ info: This code is untyped
+#^^^^^^^^^ untyped: This code is untyped
 end
