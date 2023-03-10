@@ -82,3 +82,21 @@ class Derived < Base
 #   ^^^^^ untyped: This code is untyped
   end
 end
+
+sig { params(x: Integer, y: String).returns(Integer) }
+def binary_method(x, y)
+  4
+end
+
+untyped_array_args = [T.let(1, T.untyped), T.let(1, T.untyped)]
+# FIXME this should report an untyped error
+binary_method(*untyped_array_args)
+
+untyped_args = T.unsafe([])
+#              ^^^^^^^^^^^^ untyped: This code is untyped
+
+# FIXME the first assertion is also weird and needs
+# to be fixed.
+ binary_method(*untyped_args)
+#     untyped: This code is untyped
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^ untyped: This code is untyped
