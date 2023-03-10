@@ -468,7 +468,6 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                                           shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
                                           WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    Timer timeit(cgs.tracer(), "mergeIndexResults");
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
     vector<ast::ParsedFile> ret;
@@ -529,7 +528,6 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(baseGs.tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
@@ -676,7 +674,6 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                                 WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
-        Timer timeit(gs.tracer(), "package");
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
