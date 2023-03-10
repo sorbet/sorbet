@@ -103,9 +103,9 @@ string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceF
 }
 
 template <typename T>
-bool checkAllTemp(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::File>> &files,
-                  vector<shared_ptr<T>> errorAssertions,
-                  map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics, string errorPrefix) {
+bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::File>> &files,
+                   vector<shared_ptr<T>> errorAssertions,
+                   map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics, string errorPrefix) {
     // Sort input error assertions so they are in (filename, line, column) order.
     fast_sort(errorAssertions, sorbet::test::RangeAssertion::compareByRange);
 
@@ -499,7 +499,7 @@ bool UntypedAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File
                                 vector<shared_ptr<UntypedAssertion>> errorAssertions,
                                 map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                                 string errorPrefix) {
-    return checkAllTemp<UntypedAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
+    return checkAllInner<UntypedAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
 }
 
 bool UntypedAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
@@ -1094,7 +1094,7 @@ bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>>
                               vector<shared_ptr<ErrorAssertion>> errorAssertions,
                               map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                               string errorPrefix) {
-    return checkAllTemp<ErrorAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
+    return checkAllInner<ErrorAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
 }
 
 shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
