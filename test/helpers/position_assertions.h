@@ -12,6 +12,11 @@ using namespace sorbet::realmain::lsp;
 class ErrorAssertion;
 class UntypedAssertion;
 
+enum AssertionSeverity {
+    Error,
+    Information
+};
+
 /**
  * An assertion that is relevant to a specific set of characters on a line.
  * If Range is set such that the start character is 0 and end character is END_OF_LINE_POS, then the assertion
@@ -87,6 +92,7 @@ public:
 
     const std::string message;
     const bool matchesDuplicateErrors;
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Error;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message, bool matchesDuplicateErrors);
@@ -111,6 +117,7 @@ public:
     // this exists solely to allow us to reuse ErrorAssertion's checkAll
     // for UntypedAssertion. It should *always* be false.
     static constexpr bool matchesDuplicateErrors = false;
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Information;
 
     static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
                          std::vector<std::shared_ptr<UntypedAssertion>> errorAssertions,

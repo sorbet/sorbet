@@ -138,6 +138,11 @@ bool checkAllTemp(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::Fi
             auto &diagnostic = *diagnosticsIt;
             auto &assertion = *assertionsIt;
 
+            if (diagnostic->severity != T::severity) {
+                diagnosticsIt++;
+                continue;
+            }
+
             if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 diagnosticsIt++;
                 lastAssertionMatchedDuplicate = true;
@@ -188,6 +193,12 @@ bool checkAllTemp(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::Fi
         while (diagnosticsIt != diagnostics.end()) {
             // We had more diagnostics than error assertions.
             auto &diagnostic = *diagnosticsIt;
+
+            if (diagnostic->severity != T::severity) {
+                diagnosticsIt++;
+                continue;
+            }
+
             if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
                 lastAssertionMatchedDuplicate = true;
             } else {
