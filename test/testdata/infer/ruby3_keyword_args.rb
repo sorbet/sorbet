@@ -143,3 +143,22 @@ module B
     inner_foo(arg0)
   end
 end
+
+
+sig {returns(T.untyped)}
+def make_untyped; T.unsafe("hello"); end
+class Tempfile_
+  extend T::Sig
+  sig do
+    params(
+      basename: T.any(String, [String, String]),
+      tmpdir: T.nilable(String),
+      mode: Integer,
+      options: T.untyped,
+    )
+    .void
+  end
+  def initialize(basename='', tmpdir=nil, mode: 0, **options); end
+end
+
+Tempfile_.new(make_untyped)
