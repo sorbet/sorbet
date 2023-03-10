@@ -149,19 +149,23 @@ code. Note that it is not yet perfect and may miss occurences of such values.
 
 It can be enabled by adding the following to your VSCode `settings.json` and
 either reopening VSCode or restarting Sorbet.
+
 ```json
 "sorbet.highlightUntyped": true
 ```
- or by using the
-`Sorbet: Toggle Highlight untyped values` command from the command palette (note
-this causes a full restart of Sorbet). 
 
-To enable this feature in other language clients, configure your language client to send
+or by using the `Sorbet: Toggle Highlight untyped values` command from the
+command palette (note this causes a full restart of Sorbet).
+
+To enable this feature in other language clients, configure your language client
+to send
+
 ```json
 "initializationOptions": {
   "highlightUntyped": true
 }
 ```
+
 when sending the LSP initialize request to the Sorbet language server.
 
 <img src="/img/lsp/highlight_untyped.png" />
