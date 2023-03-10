@@ -320,6 +320,10 @@ private:
                         const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
+            if (resolutionResult.isClassOrModule() && !resolutionResult.asClassOrModuleRef().data(ctx)->isDeclared()) {
+                return;
+            }
+
             core::LocOffsets defLoc;
             const auto it = firstDefinitionLocs.get()->find(resolutionResult);
 

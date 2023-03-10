@@ -5,6 +5,8 @@ module Foo
   # This reports an error despite Foo::X also having a definition in the RBI file.
   A = X 
   #   ^ error: `Foo::X` referenced before it is defined
+  
+  foo arg: [ X ] # error: `Foo::X` referenced before it is defined
 
   def self.foo(arg:)
     X # this is ok

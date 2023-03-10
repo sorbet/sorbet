@@ -1,8 +1,7 @@
 # check-out-of-order-constant-references: true
 # typed: true
 
-X = A
-#   ^ error: `A` referenced before it is defined
+X = A # No error
 
 class A::Foo
 end
