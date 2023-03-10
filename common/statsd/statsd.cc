@@ -128,6 +128,23 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     return true;
 }
 
+namespace {
+
+size_t getCurrentRSS() {
+    long rss = 0L;
+    FILE *fp = NULL;
+    if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+        return (size_t)0L; /* Can't open? */
+    if (fscanf(fp, "%*s%ld", &rss) != 1) {
+        fclose(fp);
+        return (size_t)0L; /* Can't read? */
+    }
+    fclose(fp);
+    return (size_t)rss * (size_t)sysconf(_SC_PAGESIZE);
+}
+
+} // namespace
+
 void StatsD::addStandardMetrics() {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
@@ -141,6 +158,8 @@ void StatsD::addStandardMetrics() {
         prodCounterSet("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
         prodCounterSet("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
     }
+    auto currentRSS = getCurrentRSS();
+    prodCounterSet("run.utilization.current_rss", currentRSS);
     prodCounterSet("release.build_scm_commit_count", sorbet_build_scm_commit_count);
     prodCounterSet("release.build_timestamp", sorbet_build_timestamp);
 }

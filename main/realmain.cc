@@ -485,6 +485,14 @@ int realmain(int argc, char *argv[]) {
 
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(logger, opts);
+#ifndef SORBET_REALMAIN_MIN
+    StatsD::addStandardMetrics();
+    if (!opts.webTraceFile.empty()) {
+        auto counters = getAndClearThreadCounters();
+        web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+    }
+#endif
+
     payload::createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
@@ -598,6 +606,14 @@ int realmain(int argc, char *argv[]) {
 #endif
     } else {
         Timer timeall(logger, "wall_time");
+#ifndef SORBET_REALMAIN_MIN
+        StatsD::addStandardMetrics();
+        if (!opts.webTraceFile.empty()) {
+            auto counters = getAndClearThreadCounters();
+            web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+        }
+#endif
+
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
@@ -766,6 +782,14 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autoloaderCfg, autogenCfg, *workers, indexed);
 #endif
         } else {
+#ifndef SORBET_REALMAIN_MIN
+            StatsD::addStandardMetrics();
+            if (!opts.webTraceFile.empty()) {
+                auto counters = getAndClearThreadCounters();
+                web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+            }
+#endif
+
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());
@@ -773,10 +797,26 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
 
+#ifndef SORBET_REALMAIN_MIN
+            StatsD::addStandardMetrics();
+            if (!opts.webTraceFile.empty()) {
+                auto counters = getAndClearThreadCounters();
+                web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+            }
+#endif
+
             if (!opts.packageRBIGeneration) {
                 // we don't need to typecheck when generating rbis
                 pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+
+#ifndef SORBET_REALMAIN_MIN
+                StatsD::addStandardMetrics();
+                if (!opts.webTraceFile.empty()) {
+                    auto counters = getAndClearThreadCounters();
+                    web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile);
+                }
+#endif
             }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
