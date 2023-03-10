@@ -15,7 +15,7 @@ namespace {
 
 const std::optional<core::ErrorClass> errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
     if (file.data(gs).strictLevel < core::StrictLevel::Strong) {
-        if (file.data(gs).isOpenInClient() && gs.highlightUntypedValues) {
+        if (file.data(gs).isOpenInClient() && gs.highlightUntyped) {
             return core::errors::Infer::UntypedValueInformation;
         } else {
             return std::nullopt;

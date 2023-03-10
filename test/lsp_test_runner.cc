@@ -605,7 +605,7 @@ TEST_CASE("LSPTest") {
         string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
-        sorbetInitOptions->highlightUntypedValues =
+        sorbetInitOptions->highlightUntyped =
             BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
@@ -655,14 +655,13 @@ TEST_CASE("LSPTest") {
             }
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
-            bool errorAssertionsPassed = 
-             ErrorAssertion::checkAll(
+            bool errorAssertionsPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
-            
-            bool untypedAssertionsPassed = 
-             UntypedAssertion::checkAll(
-                test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions), diagnostics, errorPrefixes[i]);
-            
+
+            bool untypedAssertionsPassed =
+                UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
+                                           diagnostics, errorPrefixes[i]);
+
             slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
         }
     }

@@ -218,7 +218,7 @@ export class SorbetExtensionConfig implements Disposable {
 
   private _enabled: boolean;
   private _revealOutputOnError: boolean = false;
-  private _highlightUntypedValues: boolean = false;
+  private _highlightUntyped: boolean = false;
   private _configFilePatterns: ReadonlyArray<string> = [];
   private _configFileWatchers: ReadonlyArray<FileSystemWatcher> = [];
 
@@ -250,9 +250,9 @@ export class SorbetExtensionConfig implements Disposable {
       "revealOutputOnError",
       this.revealOutputOnError,
     );
-    this._highlightUntypedValues = workspaceContext.get(
-      "highlightUntypedValues",
-      this.highlightUntypedValues,
+    this._highlightUntyped = workspaceContext.get(
+      "highlightUntyped",
+      this.highlightUntyped,
     );
 
     const oldConfigFilePatterns = this._configFilePatterns;
@@ -374,8 +374,8 @@ export class SorbetExtensionConfig implements Disposable {
     return this._revealOutputOnError;
   }
 
-  public get highlightUntypedValues(): boolean {
-    return this._highlightUntypedValues;
+  public get highlightUntyped(): boolean {
+    return this._highlightUntyped;
   }
 
   public get enabled(): boolean {
@@ -388,9 +388,9 @@ export class SorbetExtensionConfig implements Disposable {
       .then(this._refresh.bind(this));
   }
 
-  public setHighlightUntypedValues(b: boolean): Thenable<void> {
+  public setHighlightUntyped(b: boolean): Thenable<void> {
     return this._sorbetWorkspaceContext
-      .update("highlightUntypedValues", b)
+      .update("highlightUntyped", b)
       .then(this._refresh.bind(this));
   }
 

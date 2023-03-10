@@ -13,16 +13,16 @@ end
 
 sig { params(x: Integer, y: String).returns(Integer) }
 def bar(x, y)
-	if x > y.length
-		x
-	else
-		y.length
-	end
+  if x > y.length
+    x
+  else
+    y.length
+  end
 end
 
 sig { returns(T.untyped) }
 def baz
-	T.let(5, T.untyped)
+  T.let(5, T.untyped)
 end
 
 # assign untyped thing to variable
@@ -43,52 +43,52 @@ bar(my_map[:foo], T.let("foo", T.untyped))
 # if condition
 if my_map[:foo]
 #  ^^^^^^^^^^^^ error: This code is untyped
-	6
+  6
 end
 
 # case statement
 case my_map[:bar]
 #    ^^^^^^^^^^^^ error: This code is untyped
 when "x"
-	"x"
+  "x"
 when "y"
-	"y"
+  "y"
 end
 
 # use of super
 class Base
-	extend T::Sig
+  extend T::Sig
 
-	sig { overridable.returns(String) }
-	def foo
-		"foo"
-	end
+  sig { overridable.returns(String) }
+  def foo
+    "foo"
+  end
 end
 
 class Derived < Base
-	extend T::Sig
-	sig { override.returns(String) }
-	def foo
-		super
+  extend T::Sig
+  sig { override.returns(String) }
+  def foo
+    super
 # ^^^^^ error: This code is untyped
-	end
+  end
 end
 
 # untyped varargs
 sig { params(args: T.untyped).void }
 def args_fn(*args)
-	args.length
+  args.length
 end
 
 # untyped kwargs
 sig { params(kwargs: T.untyped).void }
 def kwargs_fn(**kwargs)
-	kwargs.keys
+  kwargs.keys
 end
 
 # use of &blk with untyped blk
 sig {params(blk: T.untyped).returns(T.untyped)}
 def blk_fun(&blk)
-	yield "x"
+  yield "x"
 #^^^^^^^^^ error: This code is untyped
 end

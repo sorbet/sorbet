@@ -73,7 +73,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Initialize the global state for the indexer
     {
-        initialGS->highlightUntypedValues = currentConfig.getClientConfig().enableHighlightUntypedValues;
+        initialGS->highlightUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
         // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
