@@ -12,10 +12,7 @@ using namespace sorbet::realmain::lsp;
 class ErrorAssertion;
 class UntypedAssertion;
 
-enum AssertionSeverity {
-    Error,
-    Information
-};
+enum AssertionSeverity { Error, Information };
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.

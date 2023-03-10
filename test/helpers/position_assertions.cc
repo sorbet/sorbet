@@ -138,7 +138,7 @@ bool checkAllTemp(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::Fi
             auto &diagnostic = *diagnosticsIt;
             auto &assertion = *assertionsIt;
 
-            if (diagnostic->severity != T::severity) {
+            if (diagnostic->severity.value_or(T::severity) != T::severity) {
                 diagnosticsIt++;
                 continue;
             }
@@ -194,7 +194,7 @@ bool checkAllTemp(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::Fi
             // We had more diagnostics than error assertions.
             auto &diagnostic = *diagnosticsIt;
 
-            if (diagnostic->severity != T::severity) {
+            if (diagnostic->severity.value_or(T::severity) != T::severity) {
                 diagnosticsIt++;
                 continue;
             }

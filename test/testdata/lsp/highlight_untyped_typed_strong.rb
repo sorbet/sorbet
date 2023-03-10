@@ -70,7 +70,7 @@ class Derived < Base
   sig { override.returns(String) }
   def foo
     super
-# ^^^^^ error: This code is untyped
+#   ^^^^^ error: This code is untyped
   end
 end
 
@@ -90,5 +90,5 @@ end
 sig {params(blk: T.untyped).returns(T.untyped)}
 def blk_fun(&blk)
   yield "x"
-#^^^^^^^^^ error: This code is untyped
+# ^^^^^^^^^ error: This code is untyped
 end
