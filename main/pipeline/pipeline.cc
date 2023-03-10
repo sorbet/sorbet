@@ -401,6 +401,10 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     }
     prodCounterAdd("types.input.bytes", src.size());
     prodCounterInc("types.input.files");
+    if (core::File::isRBIPath(fileName)) {
+        counterAdd("types.input.rbi.bytes", src.size());
+        counterInc("types.input.rbi.files");
+    }
 
     {
         core::UnfreezeFileTable unfreezeFiles(gs);
