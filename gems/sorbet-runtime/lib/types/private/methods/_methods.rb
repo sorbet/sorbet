@@ -339,6 +339,8 @@ module T::Private::Methods
         nil
       end
 
+    declaration_block.loc = nil
+
     signature =
       if current_declaration
         build_sig(hook_mod, method_name, original_method, current_declaration)
