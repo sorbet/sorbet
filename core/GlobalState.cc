@@ -1669,8 +1669,8 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
     ENFORCE(!fileTableFrozen);
 
-    DEBUG_ONLY(for (auto &f
-                    : this->files) {
+    SLOW_DEBUG_ONLY(for (auto &f
+                         : this->files) {
         if (f) {
             if (f->path() == file->path()) {
                 Exception::raise("Request to `enterFile` for already-entered file path?");
