@@ -145,7 +145,6 @@ private:
         ast::ConstantLit *out;
         bool resolutionFailed = false;
         bool possibleGenericType = false;
-        bool loadTimeScope = false;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
