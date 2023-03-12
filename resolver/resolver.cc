@@ -139,7 +139,7 @@ private:
     // There will be a map like this for each file that resolver processes, but it will outlive the initial treewalk
     // to find ConstantResolutionItems and only get released once all ConstantResolutionItems for that file have been
     // handled.
-    shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
+    UnorderedMap<core::SymbolRef, core::LocOffsets> firstDefinitionLocs;
 
     // Increments to track whether we're at a class top level or whether we're inside a block/method body.
     int loadScopeDepth_;
@@ -150,7 +150,6 @@ private:
         bool resolutionFailed = false;
         bool possibleGenericType = false;
         bool loadTimeScope = false;
-        shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> firstDefinitionLocs;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -317,13 +316,13 @@ private:
     // then, report an error.
     static void
     checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, const ast::UnresolvedConstantLit &c,
-                        const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+                        UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             core::LocOffsets defLoc;
-            const auto it = firstDefinitionLocs.get()->find(resolutionResult);
+            const auto it = firstDefinitionLocs.find(resolutionResult);
 
-            if (it != firstDefinitionLocs.get()->end()) {
+            if (it != firstDefinitionLocs.end()) {
                 // Use the loc from the local first defs table, if it exists.
                 // When the symbol is declared multiple times in the same file, we want to ensure that
                 // we compare against the *first* definition.
@@ -348,14 +347,9 @@ private:
 
     static core::SymbolRef
     resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting, const ast::UnresolvedConstantLit &c,
-                    bool &resolutionFailed, bool loadTimeScope,
-                    const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+                    bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
-
-            if (loadTimeScope) {
-                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
-            }
 
             return result;
         }
@@ -386,10 +380,6 @@ private:
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
-            }
-
-            if (loadTimeScope) {
-                checkReferenceOrder(ctx, result, c, firstDefinitionLocs);
             }
 
             return result;
@@ -700,8 +690,7 @@ private:
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed,
-                                        job.loadTimeScope, job.firstDefinitionLocs);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -847,8 +836,7 @@ private:
 
     static bool
     resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
-                       bool &resolutionFailed, const bool possibleGenericType, const bool loadTimeScope,
-                       const shared_ptr<UnorderedMap<core::SymbolRef, core::LocOffsets>> &firstDefinitionLocs) {
+                       bool &resolutionFailed, const bool possibleGenericType) {
         if (isAlreadyResolved(ctx, *out)) {
             if (possibleGenericType) {
                 return false;
@@ -856,8 +844,7 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
-        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed,
-                                        loadTimeScope, firstDefinitionLocs);
+        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
@@ -875,8 +862,7 @@ private:
     }
 
     static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
-        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType,
-                                  job.loadTimeScope, job.firstDefinitionLocs);
+        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType);
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
@@ -1374,15 +1360,14 @@ private:
             auto *constant = ast::cast_tree<ast::ConstantLit>(out);
             bool resolutionFailed = false;
             const bool possibleGenericType = false;
-            const bool loadTimeScope = (loadScopeDepth_ == 0);
-            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType, loadTimeScope,
-                                   firstDefinitionLocs)) {
+            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+                if (loadScopeDepth_ == 0) {
+                    checkReferenceOrder(ctx, constant->symbol, *c, firstDefinitionLocs);
+                }
             } else {
                 ConstantResolutionItem job{nesting_, constant};
                 job.resolutionFailed = resolutionFailed;
-                job.loadTimeScope = loadTimeScope;
-                job.firstDefinitionLocs = firstDefinitionLocs;
                 todo_.emplace_back(std::move(job));
             }
             tree = std::move(out);
@@ -1398,9 +1383,7 @@ private:
     }
 
 public:
-    ResolveConstantsWalk() : nesting_(nullptr), loadScopeDepth_(0) {
-        firstDefinitionLocs = make_unique<UnorderedMap<core::SymbolRef, core::LocOffsets>>();
-    }
+    ResolveConstantsWalk() : nesting_(nullptr), loadScopeDepth_(0) {}
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         ENFORCE(loadScopeDepth_ >= 0);
@@ -1450,7 +1433,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs->insert(std::make_pair(sym, declLoc));
+                    firstDefinitionLocs.insert(std::make_pair(sym, declLoc));
                 }
             }
         }
@@ -1604,7 +1587,7 @@ public:
                     // If the insert succeeds below, the current definition is the first one.
                     // We need to use the first def for out-of-order checking, since any
                     // reference *before* the first def will be out of order.
-                    firstDefinitionLocs->insert(std::make_pair(id->symbol, declLoc));
+                    firstDefinitionLocs.insert(std::make_pair(id->symbol, declLoc));
                 }
             }
         }
@@ -1681,8 +1664,6 @@ public:
                 // In single-package RBI generation mode, we treat Constant[...] as
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
-                job.loadTimeScope = (loadScopeDepth_ == 0);
-                job.firstDefinitionLocs = firstDefinitionLocs;
                 job.possibleGenericType = true;
                 if (!resolveJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));
