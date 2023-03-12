@@ -135,10 +135,6 @@ private:
     // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
     // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
     // in case there are multiple definitions of a symbol in the same file, we store the loc of the *first* one.
-    //
-    // There will be a map like this for each file that resolver processes, but it will outlive the initial treewalk
-    // to find ConstantResolutionItems and only get released once all ConstantResolutionItems for that file have been
-    // handled.
     UnorderedMap<core::SymbolRef, core::LocOffsets> firstDefinitionLocs;
 
     // Increments to track whether we're at a class top level or whether we're inside a block/method body.
@@ -314,9 +310,9 @@ private:
     // if resolved symbol is only defined in the current file, and
     //    the definition is after the reference loc,
     // then, report an error.
-    static void
-    checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, const ast::UnresolvedConstantLit &c,
-                        UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
+    static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult,
+                                    const ast::UnresolvedConstantLit &c,
+                                    UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             core::LocOffsets defLoc;
@@ -345,9 +341,8 @@ private:
         }
     }
 
-    static core::SymbolRef
-    resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting, const ast::UnresolvedConstantLit &c,
-                    bool &resolutionFailed) {
+    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
+                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
 
@@ -834,9 +829,8 @@ private:
         }
     }
 
-    static bool
-    resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
-                       bool &resolutionFailed, const bool possibleGenericType) {
+    static bool resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
+                                   bool &resolutionFailed, const bool possibleGenericType) {
         if (isAlreadyResolved(ctx, *out)) {
             if (possibleGenericType) {
                 return false;
@@ -1362,7 +1356,8 @@ private:
             const bool possibleGenericType = false;
             if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (loadScopeDepth_ == 0) {
+                if (loadScopeDepth_ == 0 && (!constant->symbol.isClassOrModule() ||
+                                             constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
                     checkReferenceOrder(ctx, constant->symbol, *c, firstDefinitionLocs);
                 }
             } else {
