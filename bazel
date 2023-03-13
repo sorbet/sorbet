@@ -55,6 +55,9 @@ processor_name="$(uname -m)"
 bazel_installer_platform="${kernel_name}-${processor_name}"
 case "$bazel_installer_platform" in
   linux-x86_64) ;;
+  linux-aarch64)
+    bazel_installer_platform="linux-arm64"
+    ;;
   darwin-x86_64) ;;
   darwin-arm64)
     # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now
@@ -85,24 +88,44 @@ mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
   echo "$PWD"
 
-  installer_name="bazel-${BAZEL_VERSION}-installer-${bazel_installer_platform}.sh"
+  check_sha () {
+    if [ "$actual_sha" != "$expected_sha" ]; then
+      echo >&2 "Installer checksum mismatch:"
+      echo >&2 "  Expected: $expected_sha"
+      echo >&2 "  Actual:   $actual_sha"
+      echo >&2 "To accept this mismatch, update $bazel_installer_sha_variable in the WORKSPACE file and re-run."
+      exit 1
+    fi
+  }
   BAZEL_REMOTE_SOURCE="${BAZEL_REMOTE_SOURCE:-https://github.com/bazelbuild/bazel/releases/download}"
-  BAZEL_INSTALLER_PATH="${BAZEL_INSTALLER_PATH:-$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$installer_name}"
 
-  curl -O -L "$BAZEL_INSTALLER_PATH"
+  # Bazel for linux-arm64 doesn't have a binary installer
+  if [ "$bazel_installer_platform" == "linux-arm64" ]; then
+    bazel_name="bazel-${BAZEL_VERSION}-linux-arm64"
+    BAZEL_PATH="${BAZEL_PATH:-$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/${bazel_name}}"
 
-  actual_sha="$(shasum -a 256 "$installer_name" | awk '{print $1}')"
-  if [ "$actual_sha" != "$expected_sha" ]; then
-    echo >&2 "Installer checksum mismatch:"
-    echo >&2 "  Expected: $expected_sha"
-    echo >&2 "  Actual:   $actual_sha"
-    echo >&2 "To accept this mismatch, update $bazel_installer_sha_variable in the WORKSPACE file and re-run."
-    exit 1
+    curl -O -L "$BAZEL_PATH"
+
+    actual_sha="$(shasum -a 256 "$bazel_name" | awk '{print $1}')"
+    check_sha
+
+    mkdir -p "$bazel_bin_loc/${BAZEL_VERSION}/bin"
+    cp "$bazel_name" "$bazel_bin_loc/${BAZEL_VERSION}/bin/bazel-real"
+    chmod +x "$bazel_bin_loc/${BAZEL_VERSION}/bin/bazel-real"
+  else
+    installer_name="bazel-${BAZEL_VERSION}-installer-${bazel_installer_platform}.sh"
+    BAZEL_INSTALLER_PATH="${BAZEL_INSTALLER_PATH:-$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$installer_name}"
+
+    curl -O -L "$BAZEL_INSTALLER_PATH"
+
+    actual_sha="$(shasum -a 256 "$installer_name" | awk '{print $1}')"
+    check_sha
+
+    chmod +x "$installer_name"
+    mkdir -p "$bazel_bin_loc"
+    "./${installer_name}" --base="${bazel_bin_loc}/${BAZEL_VERSION}" --bin="${bazel_bin_loc}/${BAZEL_VERSION}/bin_t"
   fi
 
-  chmod +x "$installer_name"
-  mkdir -p "$bazel_bin_loc"
-  "./${installer_name}" --base="${bazel_bin_loc}/${BAZEL_VERSION}" --bin="${bazel_bin_loc}/${BAZEL_VERSION}/bin_t"
 )
 rm -rf "$BUILD_DIR"
 
