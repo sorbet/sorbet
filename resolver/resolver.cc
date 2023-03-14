@@ -4201,7 +4201,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
     return trees;
 }
 void sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
-    if (debug_mode) {
+    if (debug_mode && !skip_slow_enforce) {
         Timer timeit(gs.tracer(), "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
