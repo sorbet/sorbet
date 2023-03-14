@@ -8,7 +8,7 @@ namespace sorbet::core {
 NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
     Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
 
-    from.sanityCheck();
+    SLOW_DEBUG_ONLY(from.sanityCheck());
 
     {
         UnfreezeNameTable unfreezeNames(to);
@@ -53,7 +53,7 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
         extension->merge(from, to, *this);
     }
 
-    to.sanityCheck();
+    SLOW_DEBUG_ONLY(to.sanityCheck());
 }
 
 LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS) : fromGS(fromGS), toGS(toGS) {

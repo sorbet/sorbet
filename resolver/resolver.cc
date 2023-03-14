@@ -4186,7 +4186,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
     return trees;
 }
 void sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
-    if (debug_mode) {
+    SLOW_DEBUG_ONLY({
         Timer timeit(gs.tracer(), "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
@@ -4194,7 +4194,7 @@ void sanityCheck(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
             ENFORCE(tree.tree);
             ast::TreeWalk::apply(ctx, sanity, tree.tree);
         }
-    }
+    });
 }
 
 void verifyLinearizationComputed(const core::GlobalState &gs) {
