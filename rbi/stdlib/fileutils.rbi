@@ -123,7 +123,7 @@ module FileUtils
     params(
       src: T.any(String, Pathname),
       dest: T.any(String, Pathname),
-      preserve: T.nilable(T::Hash[Symbol, T::Boolean]),
+      preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       dereference_root: T::Boolean,
