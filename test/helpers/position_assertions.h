@@ -12,8 +12,6 @@ using namespace sorbet::realmain::lsp;
 class ErrorAssertion;
 class UntypedAssertion;
 
-enum AssertionSeverity { Error, Information };
-
 /**
  * An assertion that is relevant to a specific set of characters on a line.
  * If Range is set such that the start character is 0 and end character is END_OF_LINE_POS, then the assertion
