@@ -46,4 +46,8 @@ module Foo
   end
 
   Y = 3
+
+  p(Foo::Z) # this is ok since Foo::Z is also defined in another file
+  class Z
+  end
 end

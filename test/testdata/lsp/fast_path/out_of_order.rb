@@ -21,7 +21,6 @@
 # access that's out of bounds when reporting errors.
 
 X = A
-#   ^ error: `A` referenced before it is defined
 
 class A::Foo
 end
