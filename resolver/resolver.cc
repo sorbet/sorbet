@@ -311,7 +311,7 @@ private:
     // then, report an error.
     static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult,
                                     const ast::UnresolvedConstantLit &c,
-                                    UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
+                                    const UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             core::LocOffsets defLoc;
@@ -1357,6 +1357,16 @@ private:
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
                 if (loadScopeDepth_ == 0 && (!constant->symbol.isClassOrModule() ||
                                              constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
+                    // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
+                    // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
+                    // Sorbet should be taught to emit errors when these references are not actually defined,
+                    // matching Ruby's behavior. Then the reference order checks will be able to check all
+                    // references against their definitions, and not limit them to only isDeclared symbols here.
+
+                    // (Historically, Stripe's custom autoloader used static analysis to predeclare these
+                    // intermediate namespaces, so they would always be defined at the right time. As Stripe's
+                    // codebase moves away from this legacy autoloader, it will be easier to introduce such
+                    // changes into Sorbet.)
                     checkReferenceOrder(ctx, constant->symbol, *c, firstDefinitionLocs);
                 }
             } else {
