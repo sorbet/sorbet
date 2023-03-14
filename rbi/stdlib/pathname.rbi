@@ -244,14 +244,14 @@ class Pathname < Object
   # [`Dir.glob`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-glob).
   sig do
     params(
-        p1: T.any(String, Pathname),
+        p1: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         p2: Integer,
     )
     .returns(T::Array[Pathname])
   end
   sig do
     params(
-        p1: T.any(String, Pathname),
+        p1: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         p2: Integer,
         blk: T.proc.params(arg0: Pathname).void,
     )
@@ -864,14 +864,14 @@ class Pathname < Object
 
   sig do
     params(
-        p1: T.any(String, Pathname),
+        p1: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         p2: Integer,
     )
     .returns(T::Array[Pathname])
   end
   sig do
     params(
-        p1: T.any(String, Pathname),
+        p1: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         p2: Integer,
         blk: T.proc.params(arg0: Pathname).void
     )
@@ -1450,6 +1450,6 @@ module Kernel
   # See also
   # [`Pathname::new`](https://docs.ruby-lang.org/en/2.7.0/Pathname.html#method-c-new)
   # for more information.
-  sig { params(path: String).returns(Pathname) }
+  sig { params(path: T.any(String, Pathname)).returns(Pathname) }
   def Pathname(path); end
 end
