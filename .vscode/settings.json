@@ -1,4 +1,6 @@
 {
+  "files.insertFinalNewline": true,
+  "editor.renderFinalNewline": "off",
   "editor.insertSpaces": true,
   "editor.rulers": [120],
   // Clangd 9.0 has a new semantic highlighting feature, but it's buggy and causes
