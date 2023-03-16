@@ -233,6 +233,10 @@ class Symbol < Object
   end
   def match?(*args); end
 
+  # Returns the name or string corresponding to *sym*. Unlike `to_s`, the returned string is frozen.
+  sig {returns(String)}
+  def name(); end
+
   # Same as `sym.to_s.succ.intern`.
   sig {returns(Symbol)}
   def next(); end
