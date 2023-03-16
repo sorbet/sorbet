@@ -1,7 +1,7 @@
 #include "main/autogen/subclasses.h"
 #include "common/FileOps.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 
 using namespace std;

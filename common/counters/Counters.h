@@ -1,7 +1,7 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
 #include "absl/container/flat_hash_map.h"
-#include "common/ConstExprStr.h"
+#include "common/strings/ConstExprStr.h"
 #include "sorbet_version/sorbet_version.h"
 #include "spdlog/spdlog.h"
 #include <string>

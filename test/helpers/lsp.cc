@@ -5,7 +5,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/common.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/requests/initialize.h"
 #include "test/helpers/lsp.h"

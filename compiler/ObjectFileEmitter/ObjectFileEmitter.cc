@@ -38,7 +38,7 @@
 #include "llvm/Transforms/Vectorize.h"
 
 #include "common/FileOps.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "compiler/Linker/Linker.h"
 #include "compiler/ObjectFileEmitter/ObjectFileEmitter.h"
 #include "compiler/Passes/Passes.h"

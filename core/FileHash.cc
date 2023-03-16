@@ -1,5 +1,5 @@
 #include "core/FileHash.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/FoundDefinitions.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"

@@ -2,7 +2,7 @@
 #include "absl/synchronization/blocking_counter.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
 #include <sstream>

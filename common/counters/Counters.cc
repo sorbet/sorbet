@@ -1,8 +1,9 @@
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include "absl/strings/str_cat.h"
-#include "common/Counters_impl.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/counters/Counters_impl.h"
+#include "common/exception/Exception.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include <algorithm>
 #include <cmath>
 #include <iomanip> // set
@@ -114,9 +115,9 @@ void CounterImpl::clear() {
     this->countersByCategory.clear();
 }
 
-UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram) {
+absl::flat_hash_map<long, long> getAndClearHistogram(ConstExprStr histogram) {
     counterState.canonicalize();
-    UnorderedMap<long, long> ret;
+    absl::flat_hash_map<long, long> ret;
     auto fnd = counterState.histograms.find(counterState.internKey(histogram.str));
     if (fnd != counterState.histograms.end()) {
         for (auto e : fnd->second) {
@@ -391,7 +392,7 @@ string getCounterStatistics() {
     {
         fmt::format_to(std::back_inserter(buf), "Timings: \n");
         vector<pair<string, string>> sortedTimings;
-        UnorderedMap<string, vector<double>> timings;
+        absl::flat_hash_map<string, vector<double>> timings;
         for (const auto &e : counterState.timings) {
             int64_t durationMs = (e.end.usec - e.start.usec) / 1'000;
             timings[e.measure].emplace_back(durationMs);

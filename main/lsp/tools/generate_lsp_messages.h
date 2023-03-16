@@ -5,7 +5,7 @@
 #include "common/FileOps.h"
 #include "common/JSON.h"
 #include "common/common.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 
 #include <fstream>
 #include <iostream>

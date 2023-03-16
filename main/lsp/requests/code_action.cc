@@ -1,7 +1,7 @@
 #include "main/lsp/requests/code_action.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/LSPLoop.h"

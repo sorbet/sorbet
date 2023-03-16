@@ -1,7 +1,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "common/EarlyReturnWithCode.h"
-#include "common/Timer.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 #include "lmdb.h"
 #include "spdlog/spdlog.h"
 

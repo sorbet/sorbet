@@ -1,9 +1,9 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
-#include "common/ConstExprStr.h"
 #include "common/EarlyReturnWithCode.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
+#include "common/strings/ConstExprStr.h"
 #include "core/StrictLevel.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"

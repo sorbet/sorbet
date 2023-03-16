@@ -1,7 +1,7 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"

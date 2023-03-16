@@ -1,8 +1,8 @@
 #ifndef RUBY_TYPER_LSP_JSON_TYPES_H
 #define RUBY_TYPER_LSP_JSON_TYPES_H
 
-#include "common/Timer.h"
 #include "common/common.h"
+#include "common/timers/Timer.h"
 #include "core/core.h"
 #include "main/lsp/json_enums.h"
 #include "rapidjson/document.h"

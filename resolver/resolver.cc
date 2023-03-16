@@ -3,7 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
@@ -17,8 +17,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
-#include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/timers/Timer.h"
 #include "core/Symbols.h"
 #include <utility>
 #include <vector>

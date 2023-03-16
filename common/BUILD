@@ -29,9 +29,13 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common/concurrency",
+        "//common/counters",
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
+        "//common/sort",
+        "//common/strings",
+        "//common/timers",
         "//sorbet_version",
         "//third_party/progressbar",
         "@com_google_absl//absl/algorithm:container",
@@ -41,7 +45,6 @@ cc_library(
         "@com_google_absl//absl/debugging:symbolize",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
-        "@pdqsort",
         "@spdlog",
     ],
 )
