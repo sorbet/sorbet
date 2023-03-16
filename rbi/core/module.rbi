@@ -535,9 +535,10 @@ class Module < Object
   # ```
   sig do
     params(
-      const_added: T.any(Symbol)
+      const_name: T.any(Symbol)
     )
     .returns(T.untyped)
+  end
   def const_added(const_name); end
 
   # Says whether *mod* or its ancestors have a constant with the given name:
@@ -1871,4 +1872,30 @@ class Module < Object
   # [B, A]
   # ```
   def self.used_modules; end
+
+  # Returns an array of all refinements used in the current scope. The ordering
+  # of refinements in the resulting array is not defined.
+  # ```ruby
+  # module A
+  #   refine Object do
+  #   end
+  # end
+  #
+  # module B
+  #   refine Object do
+  #   end
+  # end
+  #
+  # using A
+  # using B
+  # p Module.used_refinements
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # [#<refinement:Object@B>, #<refinement:Object@A>]
+  # ```
+  sig {returns(T::Array[Module])}
+  def self.used_refinements; end
 end
