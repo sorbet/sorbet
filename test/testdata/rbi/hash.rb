@@ -97,3 +97,6 @@ T.reveal_type(T::Hash[Symbol, Integer].new.any? do |(key, value)| # error: Revea
   T.reveal_type(key) # error: Revealed type: `Symbol`
   T.reveal_type(value) # error: Revealed type: `Integer`
 end)
+
+T.assert_type!({a: 1}.shift, T.nilable(T::Array[T.untyped]))
+T.assert_type!({}.shift, T.nilable(T::Array[T.untyped]))
