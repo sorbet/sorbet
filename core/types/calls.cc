@@ -1419,6 +1419,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.addErrorSection(constr->explain(gs));
                 result.main.errors.emplace_back(e.build());
             }
+            // This mimics the behavior of the SolveConstraint case in processBinding
+            resultType = Types::untypedUntracked();
         }
         ENFORCE(!data->arguments.empty(), "Every method should at least have a block arg.");
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
