@@ -1640,6 +1640,27 @@ class Module < Object
   end
   def refine(arg0, &blk); end
 
+  # Returns a list of refinements included in the receiver.
+  #
+  # ```ruby
+  # module A
+  #   refine Integer do
+  #   end
+
+  #   refine String do
+  #   end
+  # end
+
+  # p A.refinements
+  # ```
+  # *produces:*
+  #
+  # ```ruby
+  # [#<refinement:Integer@A>, #<refinement:String@B>]
+  # ```
+  sig {returns(T::Array[Module])}
+  def refinements; end
+
   # Removes the named class variable from the receiver, returning that
   # variable's value.
   #
