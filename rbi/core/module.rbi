@@ -516,6 +516,30 @@ class Module < Object
   end
   def class_variables(inherit=T.unsafe(nil)); end
 
+  # Invoked as a callback whenever a constant is assigned on the receiver
+  #
+  # ```ruby
+  # module Chatty
+  #   def self.const_added(const_name)
+  #     super
+  #     puts "Added #{const_name.inspect}"
+  #   end
+  #   FOO = 1
+  # end
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # Added :FOO
+  # ```
+  sig do
+    params(
+      const_added: T.any(Symbol)
+    )
+    .returns(T.untyped)
+  def const_added(const_name); end
+
   # Says whether *mod* or its ancestors have a constant with the given name:
   #
   # ```ruby
