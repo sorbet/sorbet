@@ -139,8 +139,19 @@ module RubyVM::AbstractSyntaxTree
   # RubyVM::AbstractSyntaxTree.parse_file("my-app/app.rb")
   # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-31:3>
   # ```
-  sig { params(pathname: String).returns(RubyVM::AbstractSyntaxTree::Node) }
-  def self.parse_file(pathname); end
+  #
+  # See [::parse](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree.html#method-c-parse)
+  # for explanation of keyword argument meaning and usage.
+  sig do
+    params(
+      pathname: String,
+      keep_script_lines: T::Boolean,
+      error_tolerant: T::Boolean,
+      keep_tokens: T::Boolean,
+    )
+    .returns(RubyVM::AbstractSyntaxTree::Node)
+  end
+  def self.parse_file(pathname, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 end
 
 # [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree/Node.html)
