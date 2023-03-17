@@ -76,8 +76,19 @@ module RubyVM::AbstractSyntaxTree
   # RubyVM::AbstractSyntaxTree.of(method(:hello))
   # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-3:3>
   # ```
-  sig { params(arg: T.any(T::proc.void, Method)).returns(RubyVM::AbstractSyntaxTree::Node) }
-  def self.of(arg); end
+  #
+  # See [::parse](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree.html#method-c-parse)
+  # for explanation of keyword argument meaning and usage.
+  sig do
+    params(
+      arg: T.any(T::proc.void, Method),
+      keep_script_lines: T::Boolean,
+      error_tolerant: T::Boolean,
+      keep_tokens: T::Boolean,
+    )
+    .returns(RubyVM::AbstractSyntaxTree::Node)
+  end
+  def self.of(arg, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 
   # Parses the given *string* into an abstract syntax tree, returning the root
   # node of that tree.
