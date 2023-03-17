@@ -25,6 +25,24 @@ llvm_toolchain(
     llvm_version = "12.0.0",
 )
 
+toolchain(
+    name = "cc-toolchain-linux-arm64",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ],
+    toolchain = "//tools/build/toolchains/arm64/cc:cc-compiler-aarch64",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+native.register_toolchains(
+    "//:cc-toolchain-linux-arm64"
+)
+
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
