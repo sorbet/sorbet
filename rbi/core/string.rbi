@@ -338,6 +338,60 @@ class String < Object
   sig {returns(String)}
   def b(); end
 
+
+  # Returns the Integer byte-based index of the first occurrence of the given
+  # `substring``, or `nil`` if none found:
+  #
+  # ```ruby
+  # 'foo'.byteindex('f') # => 0
+  # 'foo'.byteindex('o') # => 1
+  # 'foo'.byteindex('oo') # => 1
+  # 'foo'.byteindex('ooo') # => nil
+  # ```
+  #
+  # Returns the Integer byte-based index of the first match for the given
+  # Regexp `regexp`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byteindex(/f/) # => 0
+  # 'foo'.byteindex(/o/) # => 1
+  # 'foo'.byteindex(/oo/) # => 1
+  # 'foo'.byteindex(/ooo/) # => nil
+  # ```
+  #
+  # Integer argument `offset`, if given, specifies the byte-based position
+  # in the string to begin the search:
+  #
+  # ```ruby
+  # 'foo'.byteindex('o', 1) # => 1
+  # 'foo'.byteindex('o', 2) # => 2
+  # 'foo'.byteindex('o', 3) # => nil
+  # ```
+  #
+  # If `offset` is negative, counts backward from the end of `self`:
+  #
+  # ```ruby
+  # 'foo'.byteindex('o', -1) # => 2
+  # 'foo'.byteindex('o', -2) # => 1
+  # 'foo'.byteindex('o', -3) # => 1
+  # 'foo'.byteindex('o', -4) # => nil
+  # ```
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError`
+  # is raised.
+  #
+  # Related:
+  # [`String#index`](https://ruby-doc.org/3.2.0/String.html#method-i-index),
+  # [`String#byterindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byterindex).
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def byteindex(arg0, arg1=T.unsafe(nil)); end
+
   # Returns an array of bytes in *str*. This is a shorthand for
   # `str.each_byte.to_a`.
   #
