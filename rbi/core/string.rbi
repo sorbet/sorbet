@@ -524,6 +524,38 @@ class String < Object
   end
   def byteslice(arg0, arg1=T.unsafe(nil)); end
 
+  # Replaces some or all of the content of `self` with `str`, and returns
+  # `self`. The portion of the string affected is determined using the same
+  # criteria as
+  # [`String#byteslice`](https://docs.ruby-lang.org/en/3.2/String.html#method-i-byteslice),
+  # except that `length` cannot be omitted. If the replacement string is not
+  # the same length as the text it is replacing, the string will be adjusted
+  # accordingly. The form that take an
+  # [`Integer`](https://docs.ruby-lang.org/en/3.2/Integer.html) will raise an
+  # [`IndexError`](https://docs.ruby-lang.org/en/3.2/IndexError.html) if the
+  # value is out of range; the
+  # [`Range`](https://docs.ruby-lang.org/en/3.2/Range.html) form will raise a
+  # [`RangeError`](https://docs.ruby-lang.org/en/3.2/RangeError.html). If the
+  # beginning or ending offset does not land on character (codepoint) boundary,
+  # an [`IndexError`](https://docs.ruby-lang.org/en/3.2/IndexError.html) will
+  # be raised.
+  sig do
+    params(
+      arg0: Integer,
+      arg1: Integer,
+      arg2: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+      arg0: T::Range[Integer],
+      arg1: String,
+    )
+    .returns(String)
+  end
+  def bytesplice(arg0, arg1, arg2=T.unsafe(nil)); end
+
   # Returns a copy of *str* with the first character converted to uppercase and
   # the remainder to lowercase.
   #
