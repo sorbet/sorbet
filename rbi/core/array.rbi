@@ -445,12 +445,6 @@ class Array < Object
   # [`Array#concat`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-concat).
   sig do
     params(
-        arg0: T::Enumerable[Elem],
-    )
-    .returns(T::Array[Elem])
-  end
-  sig do
-    params(
         arg0: T::Array[Elem],
     )
     .returns(T::Array[Elem])
