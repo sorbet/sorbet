@@ -76,21 +76,68 @@ module RubyVM::AbstractSyntaxTree
   # RubyVM::AbstractSyntaxTree.of(method(:hello))
   # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-3:3>
   # ```
-  sig { params(arg: T.any(T::proc.void, Method)).returns(RubyVM::AbstractSyntaxTree::Node) }
-  def self.of(arg); end
+  #
+  # See [::parse](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree.html#method-c-parse)
+  # for explanation of keyword argument meaning and usage.
+  sig do
+    params(
+      arg: T.any(T::proc.void, Method),
+      keep_script_lines: T::Boolean,
+      error_tolerant: T::Boolean,
+      keep_tokens: T::Boolean,
+    )
+    .returns(RubyVM::AbstractSyntaxTree::Node)
+  end
+  def self.of(arg, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 
   # Parses the given *string* into an abstract syntax tree, returning the root
   # node of that tree.
-  #
-  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/SyntaxError.html) is
-  # raised if the given *string* is invalid syntax.
   #
   # ```ruby
   # RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
   # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-1:9>
   # ```
-  sig { params(string: String).returns(RubyVM::AbstractSyntaxTree::Node) }
-  def self.parse(string); end
+  # If `keep_script_lines: true` option is provided, the text of the parsed
+  # source is associated with nodes and is available via
+  # [Node#script_lines](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree/Node.html#method-i-script_lines).
+  #
+  # If `keep_tokens: true` option is provided,
+  # [Node#tokens](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree/Node.html#method-i-tokens)
+  # are populated.
+  #
+  # [`SyntaxError`](https://docs.ruby-lang.org/en/2.7.0/SyntaxError.html) is
+  # raised if the given *string* is invalid syntax. To overwrite this behavior,
+  # `error_tolerant: true`` can be provided. In this case, the parser will
+  # produce a tree where expressions with syntax errors would be represented by
+  # [Node](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree/Node.html)
+  # with `type=:ERROR`.
+  #
+  # ```ruby
+  # root = RubyVM::AbstractSyntaxTree.parse("x = 1; p(x; y=2")
+  # # <internal:ast>:33:in `parse': syntax error, unexpected ';', expecting ')' (SyntaxError)
+  # # x = 1; p(x; y=2
+  # #           ^
+  #
+  # root = RubyVM::AbstractSyntaxTree.parse("x = 1; p(x; y=2", error_tolerant: true)
+  # # (SCOPE@1:0-1:15
+  # #  tbl: [:x, :y]
+  # #  args: nil
+  # #  body: (BLOCK@1:0-1:15 (LASGN@1:0-1:5 :x (LIT@1:4-1:5 1)) (ERROR@1:7-1:11) (LASGN@1:12-1:15 :y (LIT@1:14-1:15 2))))
+  # root.children.last.children
+  # # [(LASGN@1:0-1:5 :x (LIT@1:4-1:5 1)),
+  # #  (ERROR@1:7-1:11),
+  # #  (LASGN@1:12-1:15 :y (LIT@1:14-1:15 2))]
+  # ```
+  sig do
+    params(
+      string: String,
+      keep_script_lines: T::Boolean,
+      error_tolerant: T::Boolean,
+      keep_tokens: T::Boolean,
+    )
+    .returns(RubyVM::AbstractSyntaxTree::Node)
+  end
+  def self.parse(string, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 
   # Reads the file from *pathname*, then parses it like
   # [`::parse`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree.html#method-c-parse),
@@ -103,8 +150,19 @@ module RubyVM::AbstractSyntaxTree
   # RubyVM::AbstractSyntaxTree.parse_file("my-app/app.rb")
   # # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-31:3>
   # ```
-  sig { params(pathname: String).returns(RubyVM::AbstractSyntaxTree::Node) }
-  def self.parse_file(pathname); end
+  #
+  # See [::parse](https://docs.ruby-lang.org/en/3.2/RubyVM/AbstractSyntaxTree.html#method-c-parse)
+  # for explanation of keyword argument meaning and usage.
+  sig do
+    params(
+      pathname: String,
+      keep_script_lines: T::Boolean,
+      error_tolerant: T::Boolean,
+      keep_tokens: T::Boolean,
+    )
+    .returns(RubyVM::AbstractSyntaxTree::Node)
+  end
+  def self.parse_file(pathname, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 end
 
 # [`RubyVM::AbstractSyntaxTree::Node`](https://docs.ruby-lang.org/en/2.7.0/RubyVM/AbstractSyntaxTree/Node.html)
