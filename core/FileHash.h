@@ -35,6 +35,7 @@ public:
 
     uint32_t _hashValue;
 };
+CheckSize(WithoutUniqueNameHash, 4, 4);
 
 template <typename H> H AbslHashValue(H h, const WithoutUniqueNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
@@ -66,6 +67,7 @@ public:
 
     uint32_t _hashValue;
 };
+CheckSize(FullNameHash, 4, 4);
 
 template <typename H> H AbslHashValue(H h, const FullNameHash &m) {
     return H::combine(std::move(h), m._hashValue);
@@ -89,6 +91,7 @@ struct SymbolHash {
         return this->nameHash < h.nameHash || (!(h.nameHash < this->nameHash) && this->symbolHash < h.symbolHash);
     }
 };
+CheckSize(SymbolHash, 8, 4);
 
 // 28 is the same as the size of an ID in FoundDefinitionRef::_storage
 //
@@ -313,6 +316,7 @@ struct LocalSymbolTableHashes {
         return hierarchyHash == HASH_STATE_INVALID_PARSE;
     }
 };
+CheckSize(LocalSymbolTableHashes, 56, 8);
 
 // This structure represents every time a name was used in a place where it could be referencing the
 // name of a (Sorbet) symbol. For example, this program:
@@ -348,6 +352,7 @@ struct FileHash {
     FileHash() = default;
     FileHash(LocalSymbolTableHashes &&localSymbolTableHashes, UsageHash &&usages, FoundDefHashes &&foundHashes);
 };
+CheckSize(FileHash, 176, 8);
 
 }; // namespace sorbet::core
 

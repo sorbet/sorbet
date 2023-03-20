@@ -85,6 +85,7 @@ WithoutUniqueNameHash::WithoutUniqueNameHash(const GlobalState &gs, NameRef nm)
 void WithoutUniqueNameHash::sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
+    hashes.shrink_to_fit();
 }
 
 FullNameHash::FullNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(hashFullNameRef(gs, nm))) {}
@@ -92,6 +93,7 @@ FullNameHash::FullNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZe
 void FullNameHash::sortAndDedupe(std::vector<core::FullNameHash> &hashes) {
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
+    hashes.shrink_to_fit();
 }
 
 FoundDefinitionRef FoundStaticFieldHash::owner() const {
