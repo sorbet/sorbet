@@ -414,7 +414,7 @@ class Pathname < Object
         length: Integer,
         offset: Integer,
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   def binread(length=T.unsafe(nil), offset=T.unsafe(nil)); end
 
