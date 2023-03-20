@@ -392,6 +392,86 @@ class String < Object
   end
   def byteindex(arg0, arg1=T.unsafe(nil)); end
 
+  # Returns the Integer byte-based index of the last occurrence of the given
+  # `substring`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byterindex('f') # => 0
+  # 'foo'.byterindex('o') # => 2
+  # 'foo'.byterindex('oo') # => 1
+  # 'foo'.byterindex('ooo') # => nil
+  # ```
+  #
+  # Returns the Integer byte-based index of the last match for the given Regexp
+  # `regexp`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byterindex(/f/) # => 0
+  # 'foo'.byterindex(/o/) # => 2
+  # 'foo'.byterindex(/oo/) # => 1
+  # 'foo'.byterindex(/ooo/) # => nil
+  # ```
+  #
+  # The _last_ match means starting at the possible last position, not the last
+  # of longest matches.
+  #
+  # ```ruby
+  # 'foo'.byterindex(/o+/) # => 2
+  # $~ #=> #<MatchData "o">
+  # ```
+  #
+  # To get the last longest match, needs to combine with negative lookbehind.
+  #
+  # ```ruby
+  # 'foo'.byterindex(/(?<!o)o+/) # => 1
+  # $~ #=> #<MatchData "oo">
+  # ```
+  #
+  # Or
+  # [`String#byteindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byteindex)
+  # with negative lookforward.
+  #
+  # ```ruby
+  # 'foo'.byteindex(/o+(?!.*o)/) # => 1
+  # $~ #=> #<MatchData "oo">
+  # ```
+  #
+  # Integer argument `offset`, if given and non-negative, specifies the maximum
+  # starting byte-based position in the
+  #
+  # string to _end_ the search:
+  #
+  # ```ruby
+  # 'foo'.byterindex('o', 0) # => nil
+  # 'foo'.byterindex('o', 1) # => 1
+  # 'foo'.byterindex('o', 2) # => 2
+  # 'foo'.byterindex('o', 3) # => 2
+  # ```
+  #
+  # If `offset` is a negative Integer, the maximum starting position in the
+  # string to end the search is the sum of the string’s length and `offset`:
+  #
+  # ```ruby
+  # 'foo'.byterindex('o', -1) # => 2
+  # 'foo'.byterindex('o', -2) # => 1
+  # 'foo'.byterindex('o', -3) # => nil
+  # 'foo'.byterindex('o', -4) # => nil
+  # ```
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError` is
+  # raised.
+  #
+  # Related:
+  # [`String#byteindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byteindex).
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def byterindex(arg0, arg1=T.unsafe(nil)); end
+
   # Returns an array of bytes in *str*. This is a shorthand for
   # `str.each_byte.to_a`.
   #
