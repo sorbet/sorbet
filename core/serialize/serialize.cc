@@ -1060,7 +1060,6 @@ vector<uint8_t> Serializer::store(const GlobalState &gs) {
 }
 
 std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
 }
