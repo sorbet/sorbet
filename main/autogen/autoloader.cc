@@ -297,11 +297,12 @@ const NamedDefinition &DefTree::definition(const core::GlobalState &gs) const {
 }
 
 void DefTreeBuilder::addParsedFileDefinitions(const core::GlobalState &gs, const AutoloaderConfig &alConfig,
-                                              std::unique_ptr<DefTree> &root, ParsedFile &pf) {
+                                              std::unique_ptr<DefTree> &root, ParsedFile &pf, core::FileRef file) {
     ENFORCE(root->root());
     if (!alConfig.includePath(pf.path)) {
         return;
     }
+
     for (auto &def : pf.defs) {
         if (def.id.id() == 0) {
             continue;
@@ -317,24 +318,43 @@ DefTree *DefTree::findNode(const vector<core::NameRef> &nameParts) {
         if (it == node->children.end()) {
             return nullptr;
         }
+
         node = it->second.get();
     }
 
     return node;
 }
 
+DefTree *DefTree::findOrCreateNode(const vector<core::NameRef> &nameParts) {
+    DefTree *node = this;
+    for (auto nr : nameParts) {
+        auto &child = node->children[nr];
+        if (!child) {
+            child = make_unique<DefTree>();
+            child->qname.nameParts = node->qname.nameParts;
+            child->qname.nameParts.emplace_back(nr);
+        }
+
+        node = child.get();
+    }
+
+    return node;
+}
+
 void DefTree::markPackageNamespace(core::NameRef mangledName, const vector<core::NameRef> &nameParts) {
-    DefTree *node = this->findNode(nameParts);
-    if (node == nullptr) {
+    DefTree *node = this->findOrCreateNode(nameParts);
+    if (node == nullptr || node->pkgName.exists()) {
         return;
     }
 
-    ENFORCE(!(node->pkgName.exists()), "Package name should not be already set");
     node->pkgName = mangledName;
 }
 
-void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &alCfg) {
-    auto testRoot = root.findNode({core::Names::Constants::Test()});
+void DefTreeBuilder::markPackages(const core::GlobalState &gs, std::unique_ptr<DefTree> &root, const AutoloaderConfig &alCfg) {
+    ENFORCE(root->root());
+
+    auto rootNode = root.get();
+    auto testRootNode = rootNode->findOrCreateNode({core::Names::Constants::Test()});
 
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
@@ -343,10 +363,9 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.
             auto &pkgFullName = pkg.fullName();
-
-            root.markPackageNamespace(pkg.mangledName(), pkgFullName);
-            if (testRoot != nullptr) {
-                testRoot->markPackageNamespace(pkg.mangledName(), pkgFullName);
+            rootNode->markPackageNamespace(pkg.mangledName(), pkgFullName);
+            if (testRootNode != nullptr) {
+                testRootNode->markPackageNamespace(pkg.mangledName(), pkgFullName);
             }
         }
     }
@@ -367,6 +386,10 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
             child->qname.nameParts.emplace_back(part);
         }
         node = child.get();
+        if (node->pkgName.exists()) {
+            // PBAL-ed code, no need to add to def-tree
+            return;
+        }
     }
     if (ndef.def.defines_behavior) {
         node->namedDefs.emplace_back(move(ndef));

@@ -113,6 +113,7 @@ private:
     Definition::Type definitionType(const core::GlobalState &) const;
     void markPackageNamespace(core::NameRef mangledName, const std::vector<core::NameRef> &nameParts);
     DefTree *findNode(const std::vector<core::NameRef> &nameParts);
+    DefTree *findOrCreateNode(const std::vector<core::NameRef> &nameParts);
 
     friend class DefTreeBuilder;
 };
@@ -121,12 +122,12 @@ class DefTreeBuilder {
 public:
     // Add all definitions in a parsed file to a `DefTree` root.
     static void addParsedFileDefinitions(const core::GlobalState &, const AutoloaderConfig &,
-                                         std::unique_ptr<DefTree> &root, ParsedFile &);
+                                         std::unique_ptr<DefTree> &root, ParsedFile &, core::FileRef file);
     static void addSingleDef(const core::GlobalState &, const AutoloaderConfig &, std::unique_ptr<DefTree> &root,
                              NamedDefinition);
 
     static DefTree merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs);
-    static void markPackages(const core::GlobalState &gs, DefTree &root, const AutoloaderConfig &autoloaderConfig);
+    static void markPackages(const core::GlobalState &gs, std::unique_ptr<DefTree> &root, const AutoloaderConfig &alCfg);
     static void collapseSameFileDefs(const core::GlobalState &gs, const AutoloaderConfig &, DefTree &root);
 
 private:
