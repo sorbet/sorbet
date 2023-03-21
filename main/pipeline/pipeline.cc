@@ -1153,7 +1153,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
     }
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
@@ -1162,7 +1162,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
     for (auto &parsedFile : parsedFiles) {
         fileq->push(&parsedFile, 1);
     }
@@ -1171,7 +1171,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
         vector<pair<string, vector<uint8_t>>> threadResult;
         int processedByThread = 0;
-        ast::ParsedFile *job = nullptr;
+        const ast::ParsedFile *job = nullptr;
         unique_ptr<Timer> timeit;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
