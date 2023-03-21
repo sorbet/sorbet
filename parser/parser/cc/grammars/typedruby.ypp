@@ -870,6 +870,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
@@ -884,6 +885,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
