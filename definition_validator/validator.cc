@@ -460,6 +460,13 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
         }
     }
 
+    if (!overridenMethods.empty() && !method.data(ctx)->flags.isOverride) {
+        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+            e.setHeader("Method `{}` is not marked `{}` but shadows other method symbols", method.show(ctx),
+                        "override");
+        }
+    }
+
     if (overridenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
         !method.data(ctx)->flags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
