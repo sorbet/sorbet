@@ -1931,6 +1931,14 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
                     }
+                | tSTAR
+                  {
+                    if (!driver.lex.is_declared_anonymous_restarg()) {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousRestArg, $1);
+                    }
+
+                    $$ = driver.alloc.node_list(driver.build.forwarded_restarg(self, $1));
+                  }
                 | args tCOMMA arg_value
                     {
                       auto &list = $1;
@@ -4185,6 +4193,8 @@ f_opt_paren_args: f_paren_args
                     }
                 | kwrest_mark
                     {
+                      driver.lex.declare_anonymous_kwrestarg();
+
                       auto kwrestarg = driver.build.kwrestarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(kwrestarg);
@@ -4240,6 +4250,8 @@ f_opt_paren_args: f_paren_args
                     }
                 | restarg_mark
                     {
+                      driver.lex.declare_anonymous_restarg();
+
                       auto restarg = driver.build.restarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(restarg);
@@ -4377,6 +4389,14 @@ f_opt_paren_args: f_paren_args
                 | tDSTAR arg_value
                     {
                       $$ = driver.build.kwsplat(self, $1, $2);
+                    }
+                | tDSTAR
+                    {
+                      if (!driver.lex.is_declared_anonymous_kwrestarg()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousKwrestArg, $1);
+                      }
+
+                      $$ = driver.build.forwarded_kwrestarg(self, $1);
                     }
 
        operation: tIDENTIFIER | tCONSTANT | tFID

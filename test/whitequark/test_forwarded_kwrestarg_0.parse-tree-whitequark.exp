@@ -1,0 +1,6 @@
+s(:def, :foo,
+  s(:args,
+    s(:kwrestarg, :**)),
+  s(:send, nil, :bar,
+    s(:hash,
+      s(:forwarded_kwrestarg))))

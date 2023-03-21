@@ -76,6 +76,8 @@ tuple<string, string> MESSAGES[] = {
     {"ForwardArgAfterRestArg", "... after rest argument"},
     {"InvalidIdToGet", "identifier {} is not valid to get"},
     {"NoAnonymousBlockArg", "no anonymous block parameter"},
+    {"NoAnonymousRestArg", "no anonymous rest parameter"},
+    {"NoAnonymousKwrestArg", "no anonymous keyword rest parameter"},
 
     // Error recovery hints
     {"DedentedEnd", "Hint: this {} token might not be properly closed"},
