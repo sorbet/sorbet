@@ -4369,7 +4369,7 @@ f_opt_paren_args: f_paren_args
                     }
 
        operation: tIDENTIFIER | tCONSTANT | tFID
-      operation2: tIDENTIFIER | tCONSTANT | tFID | op
+      operation2: operation | op
       operation3: tIDENTIFIER | tFID | op
     dot_or_colon: call_op | tCOLON2
          call_op: tDOT
