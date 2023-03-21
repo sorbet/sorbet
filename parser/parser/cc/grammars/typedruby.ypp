@@ -3215,26 +3215,15 @@ lcurly_block_start:
                       $$ = $1;
                       $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER
+                | p_args_head p_rest
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
+                      $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER tCOMMA p_args_post
+                | p_args_head p_rest tCOMMA p_args_post
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
-                      $$->concat($5);
-                    }
-                | p_args_head tSTAR
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
-                    }
-                | p_args_head tSTAR tCOMMA p_args_post
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
+                      $$->emplace_back($2);
                       $$->concat($4);
                     }
                 | p_args_tail
