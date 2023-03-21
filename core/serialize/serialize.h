@@ -9,13 +9,13 @@ public:
     static const uint32_t VERSION = 6;
 
     // Serialize a global state.
-    static std::vector<uint8_t> store(GlobalState &gs);
+    static std::vector<uint8_t> store(const GlobalState &gs);
 
     // Stores a GlobalState, but only includes `File`s with Type == Payload.
     // This can be used in conjunction with `storeFile` to store
     // a global state containing a name table along side a large number of
     // individual cached files, which can be loaded independently.
-    static std::vector<uint8_t> storePayloadAndNameTable(GlobalState &gs);
+    static std::vector<uint8_t> storePayloadAndNameTable(const GlobalState &gs);
 
     // Serializes an AST and file hash.
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);

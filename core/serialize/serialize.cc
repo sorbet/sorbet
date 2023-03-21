@@ -1054,12 +1054,12 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
     return LocOffsets{p.getU4(), p.getU4()};
 }
 
-vector<uint8_t> Serializer::store(GlobalState &gs) {
+vector<uint8_t> Serializer::store(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
     return p.result();
 }
 
-std::vector<uint8_t> Serializer::storePayloadAndNameTable(GlobalState &gs) {
+std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
     Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
