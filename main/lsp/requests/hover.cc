@@ -22,8 +22,13 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
         if (component.method.exists()) {
             auto method = component.method;
 
-            contents.push_back(
-                prettySigForMethod(gs, method, component.receiver, method.data(gs)->resultType, constraint.get()));
+            auto localRetType =
+                getResultType(gs, method.data(gs)->resultType, method, component.receiver, constraint.get());
+            if (localRetType == nullptr || localRetType.isUntyped()) {
+                localRetType = retType;
+            }
+
+            contents.push_back(prettySigForMethod(gs, method, component.receiver, localRetType, constraint.get()));
         }
         start = start->secondary.get();
     }
