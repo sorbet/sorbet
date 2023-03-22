@@ -299,6 +299,7 @@ using namespace std::string_literals;
   call_args
   command_args
   exc_list
+  f_any_kwrest
   f_arg
   f_args
   f_block_arg
@@ -324,6 +325,7 @@ using namespace std::string_literals;
   opt_call_args
   opt_f_block_arg
   opt_rescue
+  p_any_kwrest
   p_args
   p_args_head
   p_args_post
@@ -2516,6 +2518,8 @@ array_premature_end: eof
                       $$ = $2;
                     }
 
+    f_any_kwrest: f_kwrest | f_no_kwarg
+
  block_args_tail: f_block_kwarg tCOMMA f_kwrest opt_f_block_arg
                     {
                       auto &args = $1;
@@ -2529,13 +2533,7 @@ array_premature_end: eof
                       args->concat($2);
                       $$ = args;
                     }
-                | f_kwrest opt_f_block_arg
-                    {
-                      auto &args = $1;
-                      args->concat($2);
-                      $$ = args;
-                    }
-                | f_no_kwarg opt_f_block_arg
+                | f_any_kwrest opt_f_block_arg
                     {
                       auto &args = $1;
                       args->concat($2);
@@ -3290,7 +3288,7 @@ lcurly_block_start:
                       $$->emplace_back($3);
                     }
            p_arg: p_expr
-        p_kwargs: p_kwarg tCOMMA p_kwrest
+        p_kwargs: p_kwarg tCOMMA p_any_kwrest
                     {
                       $$ = $1;
                       $$->concat($3);
@@ -3303,16 +3301,7 @@ lcurly_block_start:
                     {
                       $$ = $1;
                     }
-                | p_kwrest
-                    {
-                      $$ = $1;
-                    }
-                | p_kwarg tCOMMA p_kwnorest
-                    {
-                      $$ = $1;
-                      $$->concat($3);
-                    }
-                | p_kwnorest
+                | p_any_kwrest
                     {
                       $$ = $1;
                     }
@@ -3356,6 +3345,8 @@ lcurly_block_start:
                       auto nil = driver.build.match_nil_pattern(self, $1, $2);
                       $$ = driver.alloc.node_list(nil);
                     }
+    p_any_kwrest: p_kwrest
+                | p_kwnorest
          p_value: p_primitive
                 | p_primitive tDOT2 p_primitive
                     {
@@ -3867,13 +3858,7 @@ f_opt_paren_args: f_paren_args
                       args->concat($2);
                       $$ = args;
                     }
-                | f_kwrest opt_f_block_arg
-                    {
-                      auto &args = $1;
-                      args->concat($2);
-                      $$ = args;
-                    }
-                | f_no_kwarg opt_f_block_arg
+                | f_any_kwrest opt_f_block_arg
                     {
                       auto &args = $1;
                       args->concat($2);
