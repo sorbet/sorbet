@@ -3731,22 +3731,11 @@ regexp_contents: // nothing
                     {
                       $$ = driver.build.ident(self, $1);
                     }
-                | tIVAR
-                    {
-                      $$ = driver.build.ivar(self, $1);
-                    }
-                | tGVAR
-                    {
-                      $$ = driver.build.gvar(self, $1);
-                    }
                 | tCONSTANT
                     {
                       $$ = driver.build.const_(self, $1);
                     }
-                | tCVAR
-                    {
-                      $$ = driver.build.cvar(self, $1);
-                    }
+                | nonlocal_var
 
 keyword_variable: kNIL
                     {
