@@ -717,7 +717,7 @@ class Proc < Object
     )
     .returns(T::Array[T::Array[Symbol]])
   end
-  def parameters(lambda); end
+  def parameters(lambda=nil); end
 
   # Marks the proc as passing keywords through a normal argument splat. This
   # should only be called on procs that accept an argument splat (`*args`) but
