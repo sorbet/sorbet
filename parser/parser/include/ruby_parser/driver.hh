@@ -13,6 +13,24 @@
 
 namespace ruby_parser {
 
+struct token_list {
+    token_list() = default;
+    token_list(const token_t &token) {
+        tokens.emplace_back(token);
+    }
+
+    inline void emplace_back(const token_t &token) {
+        tokens.emplace_back(token);
+    }
+
+    inline const token_t &at(size_t n) {
+        return tokens.at(n);
+    }
+
+protected:
+    std::vector<token_t> tokens;
+};
+
 struct node_list {
     node_list() = default;
     node_list(ForeignPtr node) {
@@ -105,6 +123,7 @@ struct case_body {
 
 class mempool {
     pool<ruby_parser::node_list, 16> _node_list;
+    pool<ruby_parser::token_list, 16> _token_list;
     pool<ruby_parser::delimited_node_list, 32> _delimited_node_list;
     pool<ruby_parser::delimited_block, 32> _delimited_block;
     pool<ruby_parser::node_with_token, 32> _node_with_token;
@@ -119,6 +138,10 @@ public:
 
     template <typename... Args> ruby_parser::node_list *node_list(Args &&...args) {
         return _node_list.alloc(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args> ruby_parser::token_list *token_list(Args &&...args) {
+        return _token_list.alloc(std::forward<Args>(args)...);
     }
 
     template <typename... Args> ruby_parser::delimited_node_list *delimited_node_list(Args &&...args) {

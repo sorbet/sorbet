@@ -287,6 +287,9 @@ using namespace std::string_literals;
   xstring
   rel_expr
 
+%type <token_list>
+  p_kwnorest
+
 %type <list>
   aref_args
   args
@@ -333,7 +336,6 @@ using namespace std::string_literals;
   p_find
   p_kwarg
   p_kwargs
-  p_kwnorest
   p_kwrest
   p_top_expr
   qsym_list
@@ -469,6 +471,7 @@ union parser_value {
   ruby_parser::case_body *case_body;
   ruby_parser::ForeignPtr node;
   ruby_parser::node_list *list;
+  ruby_parser::token_list *token_list;
   ruby_parser::state_stack *stack;
   size_t size;
   bool boolean;
@@ -3342,11 +3345,17 @@ lcurly_block_start:
                     }
       p_kwnorest: kwrest_mark kNIL
                     {
-                      auto nil = driver.build.match_nil_pattern(self, $1, $2);
-                      $$ = driver.alloc.node_list(nil);
+                      auto list = driver.alloc.token_list();
+                      list->emplace_back($1);
+                      list->emplace_back($2);
+                      $$ = list;
                     }
     p_any_kwrest: p_kwrest
                 | p_kwnorest
+                    {
+                      auto nil = driver.build.match_nil_pattern(self, $1->at(0), $1->at(1));
+                      $$ = driver.alloc.node_list(nil);
+                    }
          p_value: p_primitive
                 | p_primitive tDOT2 p_primitive
                     {
@@ -4153,9 +4162,11 @@ f_opt_paren_args: f_paren_args
 
      kwrest_mark: tPOW | tDSTAR
 
-      f_no_kwarg: kwrest_mark kNIL
+      f_no_kwarg: p_kwnorest
                     {
-                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1, $2));
+                      // TODO: i know this is wrong
+                      auto nil = driver.build.kwnilarg(self, $1->at(0), $1->at(1));
+                      $$ = driver.alloc.node_list(nil);
                     }
 
         f_kwrest: kwrest_mark tIDENTIFIER
