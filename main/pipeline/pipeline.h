@@ -58,7 +58,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
                                     const options::Options &opts);
 
 // Caches any uncached trees and files. Returns true if it modifies kvstore.
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, std::vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers,
+                        const std::vector<ast::ParsedFile> &parsedFiles,
                         const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 // Exported for tests only.

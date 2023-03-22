@@ -13,7 +13,7 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
 }
 
 void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
-                                   core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+                                   core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &indexed) {
     return;
 }
 
