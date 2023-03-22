@@ -1958,6 +1958,16 @@ lbrace_cmd_block_start:
                       list->emplace_back(driver.build.splat(self, $3, $4));
                       $$ = list;
                     }
+                | args tCOMMA tSTAR
+                    {
+                      if (!driver.lex.is_declared_anonymous_restarg()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousRestArg, $3);
+                      }
+
+                      auto &list = $1;
+                      list->emplace_back(driver.build.forwarded_restarg(self, $3));
+                      $$ = list;
+                    }
 
         mrhs_arg: mrhs
                     {
