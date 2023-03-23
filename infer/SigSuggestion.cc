@@ -504,7 +504,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     auto sig = to_string(ss);
     auto replacementContents = fmt::format("{}\n{}", sig, spaces);
-    edits.emplace_back(core::AutocorrectSuggestion::Edit{replacementLoc, replacementContents});
+    edits.emplace_back(replacementLoc, replacementContents);
 
     if (lspQueryMatches) {
         core::lsp::QueryResponse::pushQueryResponse(

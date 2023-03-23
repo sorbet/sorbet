@@ -481,12 +481,12 @@ private:
 
             for (auto parent : gs.singlePackageImports->parentImports) {
                 auto &info = db.getPackageInfo(parent);
-                stubs.parents.emplace_back(ParentPackageStub{info});
+                stubs.parents.emplace_back(info);
             }
 
             for (auto parent : gs.singlePackageImports->regularImports) {
                 auto &info = db.getPackageInfo(parent);
-                stubs.imports.emplace_back(PackageStub{info});
+                stubs.imports.emplace_back(info);
             }
 
             return stubs;
@@ -2168,7 +2168,7 @@ class ResolveTypeMembersAndFieldsWalk {
             for (const auto &typeArg : job.owner.asMethodRef().data(gs)->typeArguments()) {
                 const auto &data = typeArg.data(gs);
                 auto name = data->name.dataUnique(gs)->original; // unwrap UniqueNameKind::TypeVarName
-                emptySig.typeArgs.emplace_back(ParsedSig::TypeArgSpec{data->loc(), name, data->resultType});
+                emptySig.typeArgs.emplace_back(data->loc(), name, data->resultType);
             }
         }
         auto allowSelfType = true;
@@ -2881,7 +2881,7 @@ public:
         // class. Otherwise, it will be resolved once all type members have been
         // resolved as well.
         if (isGenericResolved(ctx, klass.symbol)) {
-            todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
+            todoAttachedClassItems_.emplace_back(ctx.owner, klass.symbol, ctx.file);
         }
     }
 
@@ -3099,14 +3099,7 @@ public:
             auto toName = args[1];
             auto owner = methodOwner(ctx);
 
-            todoMethodAliasItems_.emplace_back(ResolveMethodAliasItem{
-                ctx.file,
-                owner,
-                send.loc,
-                send.getPosArg(1).loc(),
-                toName,
-                fromName,
-            });
+            todoMethodAliasItems_.emplace_back(ctx.file, owner, send.loc, send.getPosArg(1).loc(), toName, fromName);
         }
     }
 
@@ -3164,7 +3157,7 @@ public:
                 dependencies_.emplace_back(mixin);
             }
 
-            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
+            todoAssigns_.emplace_back(ctx.owner, sym, send, std::move(dependencies_), ctx.file);
         } else if (sym.isStaticField(ctx)) {
             ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
@@ -3863,9 +3856,8 @@ private:
 
                     if (lastSigs.size() == 1) {
                         auto &lastSig = lastSigs.front();
-                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
-                                                                       lastSig->loc,
-                                                                       parseSig(ctx, sigOwner, *lastSig, mdef)});
+                        signatureJobs.emplace_back(ctx.owner.asClassOrModuleRef(), &mdef, lastSig->loc,
+                                                   parseSig(ctx, sigOwner, *lastSig, mdef));
                     } else {
                         bool isOverloaded = ctx.permitOverloadDefinitions(ctx.file);
                         InlinedVector<OverloadedMethodSignature, 2> sigs;
@@ -3882,11 +3874,11 @@ private:
                                                             }) != sig.argTypes.end());
                                 }
                             }
-                            sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
+                            sigs.emplace_back(lastSig->loc, move(sig), move(argsToKeep));
                         }
 
-                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
-                                                                                 isOverloaded, std::move(sigs)});
+                        multiSignatureJobs.emplace_back(ctx.owner.asClassOrModuleRef(), &mdef, isOverloaded,
+                                                        std::move(sigs));
                     }
 
                     lastSigs.clear();
@@ -4135,8 +4127,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 ast::ShallowWalk::apply(ctx, walk, job.tree);
                 if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
-                    output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
-                        job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
+                    output.fileSigs.emplace_back(job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs));
                 }
                 output.trees.emplace_back(move(job));
             }

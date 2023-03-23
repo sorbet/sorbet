@@ -189,7 +189,7 @@ class LocalNameInserter {
             args.emplace_back(move(named.expr));
             auto &frame = scopeStack.back();
             frame.locals[named.name] = named.local;
-            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
+            frame.args.emplace_back(named.local, named.flags);
         }
 
         return args;

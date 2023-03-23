@@ -1447,7 +1447,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
     bucket.second = name.rawId();
-    utf8Names.emplace_back(UTF8Name{enterString(nm)});
+    utf8Names.emplace_back(enterString(nm));
 
     ENFORCE(hashNameRef(*this, name) == hs);
     categoryCounterInc("names", "utf8");
@@ -1503,7 +1503,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     bucket.first = hs;
     bucket.second = name.rawId();
 
-    constantNames.emplace_back(ConstantName{original});
+    constantNames.emplace_back(original);
     ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
@@ -1659,7 +1659,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     bucket.first = hs;
     bucket.second = name.rawId();
 
-    uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
+    uniqueNames.emplace_back(original, num, uniqueNameKind);
     ENFORCE(hashNameRef(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");

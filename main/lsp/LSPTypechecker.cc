@@ -295,7 +295,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         // `*gs` that we'll be typechecking with. We could do an ast::Substitute here if we had
         // access to `initialGS`, but that's owned by the indexer thread, not this thread.)
         auto t = pipeline::indexOne(config->opts, *gs, f);
-        updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
+        updatedIndexed.emplace_back(t.tree.deepCopy(), t.file);
         updates.updatedFinalGSFileIndexes.push_back(move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
@@ -361,7 +361,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                         const auto &tree = indexed[job];
                         // Note: indexed entries for payload files don't have any contents.
                         if (tree.tree && !ignore.contains(tree.file.id())) {
-                            threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
+                            threadResult.emplace_back(tree.tree.deepCopy(), tree.file);
                         }
                     }
                 }
@@ -421,7 +421,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             for (auto &file : updates.updatedFiles) {
                 auto parsedFile = updateFile(gs, file, config->opts);
                 if (parsedFile.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{parsedFile.tree.deepCopy(), parsedFile.file});
+                    indexedCopies.emplace_back(parsedFile.tree.deepCopy(), parsedFile.file);
                     updatedFiles.insert(parsedFile.file.id());
                 }
                 updates.updatedFinalGSFileIndexes.push_back(move(parsedFile));
@@ -685,7 +685,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     for (auto fref : frefs) {
         auto &indexed = getIndexed(fref);
         if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            updatedIndexed.emplace_back(indexed.tree.deepCopy(), indexed.file);
         }
     }
 

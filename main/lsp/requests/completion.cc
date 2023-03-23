@@ -166,7 +166,7 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::C
 
             if (hasSimilarName(gs, memberName, prefix)) {
                 // Creates the the list if it does not exist
-                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol.asMethodRef()});
+                result[memberName].emplace_back(depth, receiver, memberSymbol.asMethodRef());
             }
         }
     }

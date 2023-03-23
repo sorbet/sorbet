@@ -1929,7 +1929,7 @@ public:
         }
 
         auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-        edits.emplace_back(core::AutocorrectSuggestion::Edit{deleteLoc, ""});
+        edits.emplace_back(deleteLoc, "");
         auto insertLoc = ctx.locAt(send->loc).copyEndWithZeroLength();
         auto kwArgsSource = kwArgsLoc.source(ctx).value();
         if (multiline) {
@@ -1939,15 +1939,13 @@ public:
                 if (kwBeginDetail.line == beginDetail.line) {
                     reindentedSource = absl::StrReplaceAll(reindentedSource, {{"\n", "\n  "}});
                 }
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                    insertLoc, fmt::format(" do\n{0}  {{\n{0}    {1},\n{0}  }}\n{0}end", indent, reindentedSource)});
+                edits.emplace_back(insertLoc,
+                                   fmt::format(" do\n{0}  {{\n{0}    {1},\n{0}  }}\n{0}end", indent, reindentedSource));
             } else {
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                    insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource)});
+                edits.emplace_back(insertLoc, fmt::format(" do\n{0}  {{{1}}}\n{0}end", indent, kwArgsSource));
             }
         } else {
-            edits.emplace_back(
-                core::AutocorrectSuggestion::Edit{insertLoc, fmt::format(" {{ {{{}}} }}", kwArgsSource)});
+            edits.emplace_back(insertLoc, fmt::format(" {{ {{{}}} }}", kwArgsSource));
         }
         e.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Convert `{}` to block form", send->fun.show(ctx)),
