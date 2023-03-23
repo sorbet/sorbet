@@ -15,7 +15,7 @@ bazel_toolchain_dependencies()
 load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain_13_0_0",
+    name = "llvm_toolchain_14_0_0",
     absolute_paths = True,
     llvm_mirror_prefixes = [
         "https://sorbet-deps.s3-us-west-2.amazonaws.com/",
