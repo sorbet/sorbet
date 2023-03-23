@@ -332,6 +332,8 @@ llvm_defines = [
 llvm_copts = [
     "-Wno-error=implicit-fallthrough",
     "-Wno-error=range-loop-construct",
+    # LLVM >= 13 is more aggressive about this warning.
+    "-Wno-error=unused-but-set-variable",
 
     # don't compile llvm with lto. It's too slow to compile and not worth it
     "-fno-lto",
