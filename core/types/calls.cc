@@ -542,6 +542,28 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendModule(const GlobalState
         {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend {}\n", prefix, modStr)}}};
 }
 
+void _maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
+    if (!kwSplatArgLoc.exists()) {
+        return;
+    }
+
+    auto replaceLoc = kwSplatArgLoc;
+    string maybeStarStar = "**";
+    if (kwSplatArgLoc.adjustLen(gs, 0, 2).source(gs) == "**") {
+        replaceLoc = kwSplatArgLoc.adjust(gs, 2, 0);
+        maybeStarStar = "";
+    }
+
+    auto title = fmt::format("Use `{}` for the keyword argument hash", "**");
+    auto replaceValue = replaceLoc.source(gs).value();
+    if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
+        (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
+        e.replaceWith(title, replaceLoc, "{}{}", maybeStarStar, replaceValue);
+    } else {
+        e.replaceWith(title, replaceLoc, "{}{{{}}}", maybeStarStar, replaceValue);
+    }
+}
+
 void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
     if (!kwSplatArgLoc.exists()) {
         return;
@@ -555,15 +577,15 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
     }
 
     auto suggestUnsafe = gs.suggestUnsafe.value_or("T.unsafe"s);
-    auto title = fmt::format("Wrap in `{}`", suggestUnsafe);
+    auto title = fmt::format("Use `{}` for the keyword argument hash", "**");
     auto replaceValue = replaceLoc.source(gs).value();
     if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
         (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
-        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceValue);
+        e.replaceWith(title, replaceLoc, "{}({})", maybeStarStar, replaceValue);
     } else {
         // wraps inside of T.unsafe(...) in `{...}`
         auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
-        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar, replaceValue);
+        e.replaceWith(title, replaceLoc, "{}({{{}{}}})", maybeStarStar, extraStarStar, replaceValue);
     }
 }
 
@@ -856,9 +878,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
-            break;
+        auto argType = Types::approximate(gs, arg->type, *constr);
+        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) && !argType.isUntyped() &&
+            argType.derivesFrom(gs, Symbols::Hash())) {
+            if ((spec.flags.isRepeated && !spec.flags.isKeyword) && argType.isUntyped()) {
+                ++pit;
+            } else {
+                break;
+            }
         }
 
         auto offset = ait - args.args.begin();
@@ -876,12 +903,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // If positional arguments remain, the method accepts keyword arguments, and no keyword arguments were provided in
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
+    UnorderedSet<Loc> kwErrors;
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
-        if (gs.ruby3KeywordArgs) {
+        if (gs.ruby3KeywordArgs && kwErrors.count(splatLoc) == 0) {
             if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
+                // stopInDebugger();
                 e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
                                          "and will be an error in Ruby 3.0");
@@ -889,6 +918,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
                                   source.value());
                 }
+                kwErrors.insert(splatLoc);
             }
         }
         hasKwsplat = true;
@@ -1043,26 +1073,24 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto kwSplatValueType = appliedType.targs[1];
 
                 if (hasRequiredKwParam) {
-                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
-                        // Unfortunately, this prevents even valid splats:
-                        //     def f(x:, y: 0); end
-                        //     f(x: 0, **opts)
-                        // This should work, but we currently handle kwsplat even before we check
-                        // which keyword args have already been consumed (see below for that).
-                        // This is harder to support, but maybe also less likely:
-                        //     f(**opts, x: 0)
-                        e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
-                                    "keyword parameters",
-                                    method.show(gs), "Hash");
-                        e.addErrorLine(kwParams.front()->loc,
-                                       "Keyword parameters of `{}` begin here:", method.show(gs));
-                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
-                                       "with splats.\n"
-                                       "    To ignore this and pass the splat anyways, use `{}`",
-                                       "T.unsafe");
-                        maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
-                        result.main.errors.emplace_back(e.build());
+                    auto hasDoubleStar = absl::StartsWith(kwSplatArgLoc.source(gs).value(), "**");
+                    if (kwErrors.count(kwSplatArgLoc) == 0 && !hasDoubleStar) {
+                        if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                            // Unfortunately, this prevents even valid splats:
+                            //     def f(x:, y: 0); end
+                            //     f(x: 0, **opts)
+                            // This should work, but we currently handle kwsplat even before we check
+                            // which keyword args have already been consumed (see below for that).
+                            // This is harder to support, but maybe also less likely:
+                            //     f(**opts, x: 0)
+                            e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
+                            e.addErrorLine(kwSplatArgLoc, "This produces a runtime warning in Ruby 2.7, "
+                                                          "and will be an error in Ruby 3.0");
+                            stopInDebugger();
+                            _maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                            result.main.errors.emplace_back(e.build());
+                            kwErrors.insert(kwSplatArgLoc);
+                        }
                     }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
                                                             UntypedMode::AlwaysCompatible)) {
