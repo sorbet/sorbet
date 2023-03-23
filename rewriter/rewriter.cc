@@ -10,6 +10,7 @@
 #include "rewriter/Concern.h"
 #include "rewriter/ConstantAssumeType.h"
 #include "rewriter/DSLBuilder.h"
+#include "rewriter/Data.h"
 #include "rewriter/DefDelegator.h"
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
@@ -69,6 +70,12 @@ public:
                     vector<ast::ExpressionPtr> nodes;
 
                     nodes = Struct::run(ctx, &assign);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Data::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

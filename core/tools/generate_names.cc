@@ -350,6 +350,9 @@ NameDef names[] = {
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 
+    // Method names known to Data
+    {"define"},
+
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
     {"destructureArg", "<destructure>"},
@@ -514,6 +517,7 @@ NameDef names[] = {
     {"Chain", "Chain", true},
     {"Set", "Set", true},
     {"Struct", "Struct", true},
+    {"Data", "Data", true},
     {"File", "File", true},
     {"Encoding", "Encoding", true},
     {"getEncoding", "<get-encoding>"},

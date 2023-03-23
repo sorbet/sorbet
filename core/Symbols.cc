@@ -26,7 +26,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 210;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 108;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 109;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;

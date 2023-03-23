@@ -632,6 +632,9 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
     ENFORCE(klass == Symbols::T_Types_Base());
 
+    klass = enterClassSymbol(Loc::none(), Symbols::root(), core::Names::Constants::Data());
+    ENFORCE(klass == Symbols::Data());
+
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE(typeArgument == Symbols::todoTypeArgument());
