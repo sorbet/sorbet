@@ -666,7 +666,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 if (absl::c_any_of(send->args, [](auto &arg) {
                         return parser::isa_node<parser::Splat>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedArgs>(arg.get());
+                               parser::isa_node<parser::ForwardedArgs>(arg.get()) ||
+                               parser::isa_node<parser::ForwardedRestArg>(arg.get());
                     })) {
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
@@ -762,6 +763,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         argnodes.erase(fwdIt);
                     }
 
+                    auto hasFwdRestArg = false;
+                    auto fwdRestIt = absl::c_find_if(
+                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
+                    if (fwdRestIt != argnodes.end()) {
+                        hasFwdRestArg = true;
+                        argnodes.erase(fwdRestIt);
+                    }
+
                     auto array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, std::move(array));
 
@@ -781,6 +790,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                         argsConcat = MK::Send1(loc, std::move(argsConcat), core::Names::concat(), locZeroLen,
                                                std::move(kwargsArray));
+
+                        args = std::move(argsConcat);
+                    } else if (hasFwdRestArg) {
+                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+                        auto argsSplat = MK::Send0(loc, std::move(fwdArgs), core::Names::toA(), locZeroLen);
+                        auto tUnsafe = MK::Unsafe(loc, std::move(argsSplat));
+                        auto argsConcat =
+                            MK::Send1(loc, std::move(args), core::Names::concat(), locZeroLen, std::move(tUnsafe));
 
                         args = std::move(argsConcat);
                     }
