@@ -188,3 +188,38 @@ B.inner_foo(hash_args)
 B.inner_foo([123])
 array_arg = [123]
 B.inner_foo(array_arg)
+
+def takes_default_hash(arg0, arg1 = {}, arg2: false, arg3: "x"); end
+takes_default_hash(
+  {"foo" => "bar"},
+  {"cred1" => true, "cred2" => false, "cred3" => false, "cred4" => true}
+  # The second param here is usually dispatched as a keyword args hash
+  # That's incorrect, but it's impossible to model it correctly rn.
+  # We special cased this use case in calls.cc
+)
+
+# Ruby 2.7: ❌ [{"foo"=>"bar"}, {}, true, "y"] 
+# Ruby 3.0: ✅
+arg1 = {:arg2 => true, :arg3 => "y"}
+takes_default_hash(
+  {"foo" => "bar"},
+  arg1
+# ^^^^ error: Keyword argument hash without `**` is deprecated
+# This is invalid
+)
+
+# Ruby 2.7: ✅
+# Ruby 3.0: ✅
+takes_default_hash(
+  {"foo" => "bar"},
+  {"arg2" => true, "arg3" => "y"}
+)
+
+# Ruby 2.7: ❌ [{"foo"=>"bar"}, {}, true, "y"] 
+# Ruby 3.0: ✅
+takes_default_hash(
+  {"foo" => "bar"},
+  {arg2: true, arg3: "y"}
+# ^^^^^^^^^^^^^^^^^^^^^^^ error: Keyword argument hash without `**` is deprecated
+# This is invalid
+)

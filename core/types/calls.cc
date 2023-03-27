@@ -15,6 +15,7 @@
 
 #include "absl/strings/str_cat.h"
 
+#define _UNUSED(expr) do { (void)(expr); } while (0)
 template class std::vector<sorbet::core::SymbolRef>;
 using namespace std;
 
@@ -878,17 +879,43 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
+
+        auto offset = ait - args.args.begin();
         auto argType = Types::approximate(gs, arg->type, *constr);
+
+        auto argTypeMatchErr =
+            matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
+                         args.argLoc(offset), args.originForUninitialized, args.args.size() == 1);
+
         if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) && !argType.isUntyped() &&
             argType.derivesFrom(gs, Symbols::Hash())) {
+
+    // if (absl::StrContains(method.show(gs), "takes_default_hash")) {
+        // auto shapeT = ;
+        // auto notAllSymbols = ;
+        // auto shouldSkip =  notAllSymbols;
+        // _UNUSED(shouldSkip);
+        // stopInDebugger();
+
+    // }
+// if (!(argTypeMatchErr == nullptr &&  &&
+                         // absl::c_any_of((cast_type<core::ShapeType>(argType))->keys,
+                                        // [](const TypePtr keyType) { return !isa_type<NamedLiteralType>(keyType); }))) {}
+
             if ((spec.flags.isRepeated && !spec.flags.isKeyword) && argType.isUntyped()) {
                 ++pit;
-            } else {
+            } else if (!(!argTypeMatchErr && isa_type<ShapeType>(argType) && pit->flags.isDefault && absl::c_any_of((cast_type<ShapeType>(argType))->keys,
+                            [](const TypePtr keyType) {
+                            return !isa_type<NamedLiteralType>(keyType) ||
+                            cast_type_nonnull<NamedLiteralType>(keyType).literalKind !=
+                            NamedLiteralType::LiteralTypeKind::Symbol;
+
+                            }))) {
+
                 break;
             }
         }
 
-        auto offset = ait - args.args.begin();
         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
                                   args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
@@ -1086,7 +1113,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
                             e.addErrorLine(kwSplatArgLoc, "This produces a runtime warning in Ruby 2.7, "
                                                           "and will be an error in Ruby 3.0");
-                            stopInDebugger();
+                            // stopInDebugger();
                             _maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
                             result.main.errors.emplace_back(e.build());
                             kwErrors.insert(kwSplatArgLoc);
