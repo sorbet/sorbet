@@ -2653,9 +2653,9 @@ module A
 end
 ```
 
-The definition B::C is ambiguous. In Ruby's runtime, it resolves to B::C (and
-not A::B::C). However, things are different in the presence of a pre-declared
-filler namespace like below:
+The definition `B::C` is ambiguous. In Ruby's runtime, it resolves to `B::C`
+(and not `A::B::C`). However, things are different in the presence of a
+pre-declared filler namespace like below:
 
 ```ruby
 # typed: true
@@ -2672,12 +2672,12 @@ module A
 end
 ```
 
-In this case, the definition resolves to A::B::C in Ruby's runtime.
+In this case, the definition resolves to `A::B::C` in Ruby's runtime.
 
 By default, Sorbet assumes the presence of filler namespaces while typechecking,
 regardless of whether they are explicitly predeclared like in the second
-example. This means that in Sorbet's view, the definition resolves to A::B::C in
-either case.
+example. This means that in Sorbet's view, the definition resolves to `A::B::C`
+in either case.
 
 In Stripe's codebase, this is generally not a problem at runtime, as we use
 Sorbet's own autoloader generation to pre-declare filler namespaces, keeping the
