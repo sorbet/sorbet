@@ -2073,9 +2073,9 @@ unambiguously. For example, in this code:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>The definition B::C is ambiguous. In Ruby’s runtime, it resolves to B::C (and
-not A::B::C). However, things are different in the presence of a pre-declared
-filler namespace like below:</p>
+<p>The definition <code>B::C</code> is ambiguous. In Ruby’s runtime, it resolves to <code>B::C</code>
+(and not <code>A::B::C</code>). However, things are different in the presence of a
+pre-declared filler namespace like below:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">B</span></span>
@@ -2089,11 +2089,11 @@ filler namespace like below:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>In this case, the definition resolves to A::B::C in Ruby’s runtime.</p>
+<p>In this case, the definition resolves to <code>A::B::C</code> in Ruby’s runtime.</p>
 <p>By default, Sorbet assumes the presence of filler namespaces while typechecking,
 regardless of whether they are explicitly predeclared like in the second
-example. This means that in Sorbet’s view, the definition resolves to A::B::C in
-either case.</p>
+example. This means that in Sorbet’s view, the definition resolves to <code>A::B::C</code>
+in either case.</p>
 <p>In Stripe’s codebase, this is generally not a problem at runtime, as we use
 Sorbet’s own autoloader generation to pre-declare filler namespaces, keeping the
 Ruby runtime’s behavior equivalent to Sorbet. However, the autoloader has some
