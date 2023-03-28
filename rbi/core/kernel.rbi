@@ -25,6 +25,26 @@
 module Kernel
   RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
 
+  # Generates a [`Continuation`](https://ruby-doc.org/3.2.1/Continuation.html)
+  # object, which it passes to the associated block. You need to
+  # `require 'continuation'` before using this method. Performing a
+  # cont.call will cause the
+  # [`callcc`](https://ruby-doc.org/3.2.1/Kernel.html#method-i-callcc) to
+  # return (as will falling through the end
+  # of the block). The value returned by the
+  # [`callcc`](https://ruby-doc.org/3.2.1/Kernel.html#method-i-callcc) is the
+  # value of the block, or the value passed to cont.call. See class
+  # [`Continuation`](https://ruby-doc.org/3.2.1/Continuation.html) for more
+  # details. Also see
+  # [`Kernel#throw`](https://ruby-doc.org/3.2.1/Kernel.html#method-i-throw)
+  # for an alternative mechanism for unwinding a call stack.
+  sig do
+    type_parameters(:U).params(
+      block: T.proc.params(cont: Continuation).returns(T.type_parameter(:U))
+    ).returns(T.type_parameter(:U))
+  end
+  def callcc(&block); end
+
   ### A note on global functions:
   ###
   ### Ruby tends to define global (e.g. "require", "puts") as
@@ -2272,6 +2292,75 @@ module Kernel
     .returns(T.nilable(T::Array[T::Array[IO]]))
   end
   def select(read_array, write_array=nil, error_array=nil, timeout=nil); end
+
+  # Establishes _proc_ as the handler for tracing, or disables
+  # tracing if the parameter is +nil+.
+  #
+  # *Note:* this method is obsolete, please use TracePoint instead.
+  #
+  # _proc_ takes up to six parameters:
+  #
+  # *   an event name
+  # *   a filename
+  # *   a line number
+  # *   an object id
+  # *   a binding
+  # *   the name of a class
+  #
+  # _proc_ is invoked whenever an event occurs.
+  #
+  # Events are:
+  #
+  # +c-call+:: call a C-language routine
+  # +c-return+:: return from a C-language routine
+  # +call+:: call a Ruby method
+  # +class+:: start a class or module definition
+  # +end+:: finish a class or module definition
+  # +line+:: execute code on a new line
+  # +raise+:: raise an exception
+  # +return+:: return from a Ruby method
+  #
+  # Tracing is disabled within the context of _proc_.
+  #
+  #     class Test
+  #     def test
+  #       a = 1
+  #       b = 2
+  #     end
+  #     end
+  #
+  #     set_trace_func proc { |event, file, line, id, binding, classname|
+  #        printf "%8s %s:%-2d %10s %8s\n", event, file, line, id, classname
+  #     }
+  #     t = Test.new
+  #     t.test
+  #
+  #       line prog.rb:11               false
+  #     c-call prog.rb:11        new    Class
+  #     c-call prog.rb:11 initialize   Object
+  #   c-return prog.rb:11 initialize   Object
+  #   c-return prog.rb:11        new    Class
+  #       line prog.rb:12               false
+  #       call prog.rb:2        test     Test
+  #       line prog.rb:3        test     Test
+  #       line prog.rb:4        test     Test
+  #     return prog.rb:4        test     Test
+  sig do
+    params(
+      arg0: T.nilable(
+        T.proc.params(
+          event: String,
+          file: String,
+          line: Integer,
+          id: T.nilable(Symbol),
+          binding: T.nilable(Binding),
+          classname: Object,
+        ).returns(T.untyped)
+      )
+    ).void
+  end
+  sig { params(arg0: NilClass).returns(NilClass) }
+  def set_trace_func(arg0); end
 
   # Suspends the current thread for *duration* seconds (which may be any number,
   # including a `Float` with fractional seconds). Returns the actual number of
