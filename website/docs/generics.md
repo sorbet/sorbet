@@ -827,7 +827,7 @@ The `fixed` annotation in the [example above](#type_templates-and-bounds) places
 bounds to a `type_member` or `type_template`:
 
 - `upper`: Places an upper bound on types that can be applied to a given type
-  member. Only that are subtypes of that upper bound are valid.
+  member. Only subtypes of that upper bound are valid.
 
 - `lower`: The opposite—places a lower bound, thus requiring only supertypes of
   that bound.
