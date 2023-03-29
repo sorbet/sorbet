@@ -990,7 +990,9 @@ public:
         // there was no user defined .new method, which warrants an error.
         if (method_new.data(ctx)->owner == core::Symbols::Class()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
-                e.setHeader("Attempt to instantiate abstract class `{}`", id->symbol.show(ctx));
+                auto symbolName = id->symbol.show(ctx);
+                e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
             }
         }
     }
