@@ -1760,20 +1760,23 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     }
     ClassOrModuleRef selfRef = this->ref(gs);
 
-    // avoid using `this` after the call to gs.enterTypeMember
-    auto selfLoc = this->loc();
-
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
+
+    // --------
+    // Call to enterClassSymbol might have reallocated the memory that `*this` pointed to
+    // It's not safe to use `this` anymore.
+    // --------
+    const auto &self = selfRef.data(gs);
 
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
-    ENFORCE(this->isClassModuleSet(), "{}", selfRef.show(gs));
-    if (this->isClass()) {
-        auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    ENFORCE(self->isClassModuleSet(), "{}", selfRef.show(gs));
+    if (self->isClass()) {
+        auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
         // Initialize the bounds of AttachedClass as todo, as they will be updated
         // to the externalType of the attached class for the upper bound, and bottom
