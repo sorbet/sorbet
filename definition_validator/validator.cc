@@ -989,6 +989,39 @@ public:
 
         validateOverriding(ctx, methodDef.symbol);
     }
+
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.fun != core::Names::new_()) {
+            return;
+        }
+
+        auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+            return;
+        }
+
+        auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
+        if (!symbol->flags.isAbstract) {
+            return;
+        }
+
+        auto singletonClass = symbol->lookupSingletonClass(ctx.state);
+        if (!singletonClass.exists()) {
+            return;
+        }
+
+        auto method_new = singletonClass.data(ctx)->findMethodTransitive(ctx.state, core::Names::new_());
+        // If the .new method we find is owned by Class, that means
+        // there was no user defined .new method, which warrants an error.
+        if (method_new.data(ctx)->owner == core::Symbols::Class()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
+                auto symbolName = id->symbol.show(ctx);
+                e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+            }
+        }
+    }
 };
 } // namespace
 
@@ -996,7 +1029,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
-    ast::ShallowWalk::apply(ctx, validate, tree.tree);
+    ast::TreeWalk::apply(ctx, validate, tree.tree);
     return tree;
 }
 
