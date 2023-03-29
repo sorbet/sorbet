@@ -735,7 +735,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // synthesize a call to
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
-                    // tuple type and call into the normal call merchanism.
+                    // tuple type and call into the normal call mechanism.
                     unique_ptr<parser::Node> block;
                     auto argnodes = std::move(send->args);
                     bool anonymousBlockPass = false;
