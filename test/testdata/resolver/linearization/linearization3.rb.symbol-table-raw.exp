@@ -3,23 +3,19 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=??? end=???}
   module <C <U A3>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=2:10}
-  class <S <C <U A3>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=2:10}
-    type-member(+) <S <C <U A3>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A3>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A3) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=2:10}
+  class <S <C <U A3>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=2:10}
     method <S <C <U A3>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=2:1 end=2:15}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=??? end=???}
   module <C <U C3>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U A3>>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=3:1 end=3:10}
-  class <S <C <U C3>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=3:1 end=3:10}
-    type-member(+) <S <C <U C3>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U C3>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=C3) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=3:1 end=3:10}
+  class <S <C <U C3>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=3:1 end=3:10}
     method <S <C <U C3>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=3:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=??? end=???}
   module <C <U D3>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U A3>>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=6:1 end=6:10}
-  class <S <C <U D3>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=6:1 end=6:10}
-    type-member(+) <S <C <U D3>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U D3>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=D3) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=6:1 end=6:10}
+  class <S <C <U D3>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=6:1 end=6:10}
     method <S <C <U D3>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=6:1 end=8:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=??? end=???}
   module <C <U E3>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> (<C <U D3>>, <C <U C3>>, <C <U A3>>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=9:1 end=9:10}
-  class <S <C <U E3>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=9:1 end=9:10}
-    type-member(+) <S <C <U E3>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U E3>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=E3) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=9:1 end=9:10}
+  class <S <C <U E3>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=9:1 end=9:10}
     method <S <C <U E3>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=9:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/linearization/linearization3.rb start=??? end=???}
 

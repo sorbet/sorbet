@@ -16,13 +16,11 @@ class ::<root> < ::Object ()
     method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:5
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
   module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/minimize-rbi.rb:12
-  class ::<Class:ModuleCommonToBoth>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:12
-    type-member(+) ::<Class:ModuleCommonToBoth>::<AttachedClass> -> T.attached_class (of ModuleCommonToBoth) @ test/cli/minimize-rbi/minimize-rbi.rb:12
+  class ::<Class:ModuleCommonToBoth> < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:12
     method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:12
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
   module ::ModuleOnlyInFirst < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/minimize-rbi.rb:11
-  class ::<Class:ModuleOnlyInFirst>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:11
-    type-member(+) ::<Class:ModuleOnlyInFirst>::<AttachedClass> -> T.attached_class (of ModuleOnlyInFirst) @ test/cli/minimize-rbi/minimize-rbi.rb:11
+  class ::<Class:ModuleOnlyInFirst> < ::Module () @ test/cli/minimize-rbi/minimize-rbi.rb:11
     method ::<Class:ModuleOnlyInFirst>#<static-init> (<blk>) @ test/cli/minimize-rbi/minimize-rbi.rb:11
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/minimize-rbi.rb start=??? end=???}
   class ::OnlyInFirst < ::Object () @ test/cli/minimize-rbi/minimize-rbi.rb:3
@@ -45,13 +43,11 @@ class ::<root> < ::Object ()
     method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:3
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
   module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:22
-  class ::<Class:ModuleCommonToBoth>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/unknown.rbi:22
-    type-member(+) ::<Class:ModuleCommonToBoth>::<AttachedClass> -> T.attached_class (of ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:22
+  class ::<Class:ModuleCommonToBoth> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:22
     method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:22
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
   module ::ModuleOnlyInSecond < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:23
-  class ::<Class:ModuleOnlyInSecond>[<AttachedClass>] < ::Module () @ test/cli/minimize-rbi/unknown.rbi:23
-    type-member(+) ::<Class:ModuleOnlyInSecond>::<AttachedClass> -> T.attached_class (of ModuleOnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:23
+  class ::<Class:ModuleOnlyInSecond> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:23
     method ::<Class:ModuleOnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:23
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
   class ::OnlyInSecond < ::Object (ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:9
