@@ -1,0 +1,138 @@
+No errors! Great job.
+
+--- output/RootPackage/Foo/Bar/Jazz.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+class RootPackage::Foo::Bar::Jazz < RootPackage::Foo::Bar::Quuz
+end
+
+Opus::Require.for_autoload(RootPackage::Foo::Bar::Jazz, "test/cli/autogen-pkg-autoloader-non-annotated/foo.rb")
+
+--- output/RootPackage/Foo/Bar/Quuz.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+class RootPackage::Foo::Bar::Quuz
+end
+
+Opus::Require.for_autoload(RootPackage::Foo::Bar::Quuz, "test/cli/autogen-pkg-autoloader-non-annotated/foo.rb")
+
+--- output/RootPackage/Foo/Dabba.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader-non-annotated/foo.rb", [RootPackage::Foo, :Dabba])
+
+--- output/RootPackage/Foo/Errors/BaseError.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Foo::Errors::BaseError < StandardError
+end
+
+Opus::Require.for_autoload(RootPackage::Foo::Errors::BaseError, "test/cli/autogen-pkg-autoloader-non-annotated/errors.rb")
+
+--- output/RootPackage/Foo/Errors/MyError1.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Foo::Errors::MyError1 < RootPackage::Foo::Errors::BaseError
+end
+
+Opus::Require.for_autoload(RootPackage::Foo::Errors::MyError1, "test/cli/autogen-pkg-autoloader-non-annotated/errors.rb")
+
+--- output/RootPackage/Foo/Errors/MyError2.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Foo::Errors::MyError2 < RootPackage::Foo::Errors::BaseError
+end
+
+Opus::Require.for_autoload(RootPackage::Foo::Errors::MyError2, "test/cli/autogen-pkg-autoloader-non-annotated/errors.rb")
+
+--- output/RootPackage/Foo/TOP_LEVEL_CONST.rb
+# frozen_string_literal: true
+# typed: true
+
+require 'in_class'
+require 'in_method'
+require 'my_gem'
+
+Opus::Require.for_autoload(nil, "test/cli/autogen-pkg-autoloader-non-annotated/foo.rb", [RootPackage::Foo, :TOP_LEVEL_CONST])
+
+--- output/RootPackage/Nested.rb
+# frozen_string_literal: true
+# typed: true
+
+
+module RootPackage::Nested
+end
+
+Opus::Require.pbal_register_package(RootPackage::Nested, 'test/cli/autogen-pkg-autoloader-non-annotated/nested/')
+
+Opus::Require.for_autoload(RootPackage::Nested, "test/cli/autogen-pkg-autoloader-non-annotated/nested/nested.rb")
+
+--- output/RootPackage/Yabba/Dabba/Bar2.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Yabba::Dabba::Bar2
+end
+
+Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Bar2, "test/cli/autogen-pkg-autoloader-non-annotated/bar2.rb")
+
+--- output/RootPackage/Yabba/Dabba/Jazz.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Yabba::Dabba::Jazz
+end
+
+--- output/RootPackage/Yabba/Dabba/Jazz/JazBaz.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Yabba::Dabba::Jazz::JazBaz
+end
+
+Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Jazz::JazBaz, "test/cli/autogen-pkg-autoloader-non-annotated/bar.rb")
+
+--- output/RootPackage/Yabba/Dabba/NoBehavior.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Yabba::Dabba::NoBehavior
+end
+
+Opus::Require.for_autoload(RootPackage::Yabba::Dabba::NoBehavior, "test/cli/autogen-pkg-autoloader-non-annotated/bar2.rb")
+
+--- output/RootPackage/Yabba/Dabba/Quuz.rb
+# frozen_string_literal: true
+# typed: true
+
+
+class RootPackage::Yabba::Dabba::Quuz < AWS::String
+end
+
+Opus::Require.for_autoload(RootPackage::Yabba::Dabba::Quuz, "test/cli/autogen-pkg-autoloader-non-annotated/bar.rb")
+output/RootPackage/Nested correctly deleted
