@@ -880,7 +880,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     auto hasAttachedClass = core::Names::declareHasAttachedClass().show(ctx);
                     if (ownerData->isModule()) {
-                        e.setHeader("`{}` must be marked `{}` before module instance methods can use `{}`",
+                        e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`",
                                     owner.show(ctx), hasAttachedClass, "T.attached_class");
                         // TODO(jez) Autocorrect to insert `has_attached_class!`
                     } else if (ownerData->isSingletonClass(ctx)) {
