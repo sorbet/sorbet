@@ -344,10 +344,6 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
             // Only mark path-based autoload compatible packages for now to reduce
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.
-
-            // Additionally this package must be registed for path-based autoloading.
-            // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require
-            // special registration.
             auto &pkgFullName = pkg.fullName();
 
             root.markPackageNamespace(pkg.mangledName(), pkgFullName);
