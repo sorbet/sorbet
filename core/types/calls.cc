@@ -2792,7 +2792,7 @@ public:
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 auto initializable = core::Names::declareHasAttachedClass().show(gs);
                 if (selfData->isModule()) {
-                    e.setHeader("`{}` must be marked `{}` before module instance methods can use `{}`", self.show(gs),
+                    e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`", self.show(gs),
                                 initializable, "T.attached_class");
                     // TODO(jez) Autocorrect to insert `initializable!`
                 } else if (selfData->isSingletonClass(gs)) {

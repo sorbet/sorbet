@@ -10,7 +10,7 @@ end
 module M1
   def foo
     xs = T::Array[T.attached_class].new
-    #             ^^^^^^^^^^^^^^^^ error: `M1` must be marked `has_attached_class!` before module instance methods can use `T.attached_class`
+    #             ^^^^^^^^^^^^^^^^ error: `M1` must declare `has_attached_class!` before module instance methods can use `T.attached_class`
   end
 end
 
