@@ -4,7 +4,7 @@ module M
   extend T::Sig
 
   sig {returns(T.attached_class)}
-  #            ^^^^^^^^^^^^^^^^ error: `M` must be marked `initializable!` before module instance methods can use `T.attached_class
+  #            ^^^^^^^^^^^^^^^^ error: `M` must be marked `has_attached_class!` before module instance methods can use `T.attached_class
   def instance_method
   end
 

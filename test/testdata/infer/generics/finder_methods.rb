@@ -5,7 +5,7 @@ module FinderMethods
   extend T::Generic
   abstract!
 
-  initializable!
+  has_attached_class!
 
   sig {abstract.returns(T.attached_class)}
   def new; end

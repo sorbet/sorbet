@@ -878,7 +878,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             auto maybeAttachedClass = ownerData->findMember(ctx, core::Names::Constants::AttachedClass());
             if (!maybeAttachedClass.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    auto initializable = core::Names::declareInitializable().show(ctx);
+                    auto initializable = core::Names::declareHasAttachedClass().show(ctx);
                     if (ownerData->isModule()) {
                         e.setHeader("`{}` must be marked `{}` before module instance methods can use `{}`",
                                     owner.show(ctx), initializable, "T.attached_class");

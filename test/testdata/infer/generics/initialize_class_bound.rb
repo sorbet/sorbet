@@ -12,7 +12,7 @@ module Thing
     extend T::Generic
     interface!
 
-    initializable!(:out) { {upper: Thing} }
+    has_attached_class!(:out) { {upper: Thing} }
 
     sig {abstract.returns(T.attached_class)}
     def make_thing; end

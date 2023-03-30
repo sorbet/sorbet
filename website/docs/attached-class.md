@@ -223,15 +223,19 @@ type suggests to the caller that `Child.make` will return a `Child` instance
 Since `Parent.new` is not an instance of `Child` or any other potential
 subclasses of `Parent`, Sorbet must reject the code at `(1)`.
 
-## `initializable!`: `T.attached_class` in module instance methods
+## `has_attached_class!`: `T.attached_class` in module instance methods
 
-Some modules are only ever mixed into a class with `extend` (not `include`).
+Some modules are only ever eventually mixed into a **class** with `extend` (not
+`include`), meaning that any methods that module defines will eventually be
+called like singleton class methods.
+
 These modules usually want to be able to call `new` to instantiate an instance
-of the class that the module is `extend`'d into.
+of the class that the module is `extend`'d into. That's a problem because
+normally constructor methods like that would have a return type of
+`T.attached_class`, but instance methods cannot mention `T.attached_class`.
 
-To annotate module instance methods like this (which become singleton class
-methods after being mixed into a class), Sorbet provides the `initializable!`
-annotation:
+To allow instance methods in such modules to use `T.attached_class`, Sorbet
+provides the `has_attached_class!` annotation:
 
 ```ruby
 module FinderMethods
@@ -239,7 +243,7 @@ module FinderMethods
   extend T::Generic
   abstract!
 
-  initializable!
+  has_attached_class!
 
   sig {abstract.returns(T.attached_class)}
   def new; end
@@ -258,7 +262,7 @@ end
 class ChildModel < ParentModel
 end
 
-parent = ChildModel.find('pa_123')
+parent = ParentModel.find('pa_123')
 T.reveal_type(parent) # => `ParentModel`
 child = ChildModel.find('ch_123')
 T.reveal_type(child)  # => `ChildModel`
@@ -266,9 +270,10 @@ T.reveal_type(child)  # => `ChildModel`
 
 Some things to note:
 
-- The `initializable!` method is exposed as a method in `T::Generic`, because
-  using `initializable!` implicitly makes the module into a
-  [generic module](generics.md). More on this in a moment.
+- The `has_attached_class!` method is exposed as a method in `T::Generic`,
+  because using `has_attached_class!` implicitly makes the module into a
+  [generic module](generics.md). This is why modules are not allowed to use
+  `T.attached_class` by default. More on this in a moment.
 
 - We've declared `new` as an abstract method. This method is automatically
   detected to be implemented when `extend`'d into a class (because all classes
@@ -287,16 +292,16 @@ Some things to note:
   changes based on the type of the method call's receiver. Basically: `find` on
   a `ChildModel` will be a `ChildModel`.
 
-### Generics and `initializable!`
+### Generics and `has_attached_class!`
 
-We mentioned above that using `initializable!` in a module makes the module into
-a generic module. The mental model here is to think of `initializable!` as
-syntactic sugar for putting a `type_member` with a pre-determined name into the
+We mentioned above that using `has_attached_class!` in a module makes the module
+into a generic module. The mental model is to think of `has_attached_class!` as
+syntactic sugar for putting a `type_member` with an unknown name into the
 module. This `type_member`, having no explicit name, can then be referenced
 using `T.attached_class`.
 
 What this means is that it's possible to abstract over the attached class of an
-`initializable!` module, the same as any other generic interface:
+`has_attached_class!` module, the same as any other generic interface:
 
 ```ruby
 sig do
@@ -315,7 +320,7 @@ end
 
 parent = find_and_log(ParentModel, 'pa_123')
 T.reveal_type(parent) # => `ParentModel`
-child = find_and_log(ParentModel, 'pa_123')
+child = find_and_log(ChildModel, 'pa_123')
 T.reveal_type(child) # => `ChildModel`
 ```
 
@@ -327,18 +332,18 @@ type annotation. If you truly must ignore this, supply a type argument like
 `BasicObject` or `T.untyped` (or accept the autocorrect on the error, which will
 insert `T.untyped` by default).
 
-As a generic, `initializable!` takes the same arguments that `type_member` takes
-for things like variance and bounds:
+As a generic, `has_attached_class!` takes the same arguments that `type_member`
+takes for things like variance and bounds:
 
 ```ruby
 # Declares a covariant type member:
-initializable!(:out)
+has_attached_class!(:out)
 
 # Places a bound on the type member:
-initializable! { {upper: SomeInterface} }
+has_attached_class! { {upper: SomeInterface} }
 
 # Altogether:
-initializable!(:out) { {upper: SomeInterface} }
+has_attached_class!(:out) { {upper: SomeInterface} }
 ```
 
 (Note that this type member cannot be declared contravariant, as that would make

@@ -72,7 +72,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
             // grandchild class's file in the set of files to retypecheck.
             if (code == core::errors::Resolver::InitializableIncluded) {
-                auto initializable = core::Names::declareInitializable().show(gs);
+                auto initializable = core::Names::declareHasAttachedClass().show(gs);
                 if (sym.data(gs)->isModule()) {
                     e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", initializable,
                                 parent.show(gs), sym.show(gs));

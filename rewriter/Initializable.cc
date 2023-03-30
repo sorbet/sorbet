@@ -8,14 +8,14 @@ namespace sorbet::rewriter {
 vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> empty;
 
-    if (send->fun != core::Names::declareInitializable() || !send->recv.isSelfReference()) {
+    if (send->fun != core::Names::declareHasAttachedClass() || !send->recv.isSelfReference()) {
         return empty;
     }
 
     if (isClass) {
         if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InitializableInClass)) {
             e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-                        core::Names::declareInitializable().show(ctx), "module", "class");
+                        core::Names::declareHasAttachedClass().show(ctx), "module", "class");
         }
         return empty;
     }
@@ -26,7 +26,7 @@ vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isC
             if (lit->isSymbol() && lit->asSymbol() == core::Names::contravariant()) {
                 if (auto e = ctx.beginError(arg0.loc(), core::errors::Rewriter::ContravariantInitializable)) {
                     e.setHeader("`{}` cannot be declared `{}`, only invariant or `{}`",
-                                core::Names::declareInitializable().show(ctx), ":in", ":out");
+                                core::Names::declareHasAttachedClass().show(ctx), ":in", ":out");
                     e.replaceWith("Convert to covariant", ctx.locAt(arg0.loc()), "{}", ":out");
                 }
             }
