@@ -1,5 +1,5 @@
-#ifndef SORBET_REWRITER_INITIALIZABLE_H
-#define SORBET_REWRITER_INITIALIZABLE_H
+#ifndef SORBET_REWRITER_HAS_ATTACHED_CLASS_H
+#define SORBET_REWRITER_HAS_ATTACHED_CLASS_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {
