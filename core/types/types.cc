@@ -959,10 +959,6 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                   const InlinedVector<const TypeAndOrigins *, 2> &args, ClassOrModuleRef genericClass) {
     genericClass = genericClass.maybeUnwrapBuiltinGenericForwarder();
 
-    if (genericClass.data(gs)->typeMembers().empty()) {
-        return Types::untypedUntracked();
-    }
-
     int arity;
     if (genericClass == Symbols::Hash()) {
         arity = 2;
@@ -986,13 +982,21 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         }
     }
 
-    if (numPosArgs != arity) {
+    if (numPosArgs != arity || arity == 0) {
         auto errLoc = !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back()))
                                          : core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
-            e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`", genericClass.show(gs),
-                        arity, numPosArgs);
+            if (arity == 0) {
+                e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
+            } else {
+                e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
+                            genericClass.show(gs), arity, numPosArgs);
+            }
         }
+    }
+
+    if (arity == 0) {
+        return Types::untypedUntracked();
     }
 
     vector<TypePtr> targs;
