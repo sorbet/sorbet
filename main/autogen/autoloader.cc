@@ -38,13 +38,6 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
     return !nonCollapsableModuleNames.contains(module);
 }
 
-bool AutoloaderConfig::registeredForPBAL(const vector<core::NameRef> &pkgParts) const {
-    return pbalNamespaces.empty() || (absl::c_any_of(pbalNamespaces, [&pkgParts](auto &pbalNamespace) {
-               return pbalNamespace.size() <= pkgParts.size() &&
-                      std::equal(pbalNamespace.begin(), pbalNamespace.end(), pkgParts.begin());
-           }));
-}
-
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -74,16 +67,10 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
         }
         out.nonCollapsableModuleNames.emplace(refs);
     }
-    for (auto &nameParts : cfg.pbalNamespaces) {
-        vector<core::NameRef> refs;
-        for (auto &name : nameParts) {
-            refs.emplace_back(gs.enterNameConstant(name));
-        }
-        out.pbalNamespaces.emplace(refs);
-    }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
+    out.pbalNonAnnotatedPackages = cfg.pbalNonAnnotatedPackages;
     return out;
 }
 
@@ -352,18 +339,12 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
 
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility()) {
-            // Only mark strictly path-based autoload compatible packages for now to reduce
+        if (pkg.strictAutoloaderCompatibility() ||
+            (alCfg.pbalNonAnnotatedPackages && !pkg.legacyAutoloaderCompatibility())) {
+            // Only mark path-based autoload compatible packages for now to reduce
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.
-
-            // Additionally this package must be registed for path-based autoloading.
-            // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require
-            // special registration.
             auto &pkgFullName = pkg.fullName();
-            if (!alCfg.registeredForPBAL(pkgFullName)) {
-                continue;
-            }
 
             root.markPackageNamespace(pkg.mangledName(), pkgFullName);
             if (testRoot != nullptr) {

@@ -178,6 +178,10 @@ public:
         return strictAutoloaderCompatibility_;
     }
 
+    bool legacyAutoloaderCompatibility() const {
+        return legacyAutoloaderCompatibility_;
+    }
+
     bool exportAll() const {
         return exportAll_;
     }
@@ -196,8 +200,14 @@ public:
     // These are copied into every package that imports this package.
     vector<Export> exports_;
 
-    // Whether the code in this package is compatible for path-based autoloading.
+    // Code in this package is _strictly compatible_ for path-based autoloading (PBAL), and by default will
+    // use PBAL.
     bool strictAutoloaderCompatibility_;
+
+    // Code in this package is _completely incompatible_ for path-based autoloading, and only works with the 'legacy'
+    // Sorbet-generated autoloader.
+    bool legacyAutoloaderCompatibility_;
+
     // Whether this package should just export everything
     bool exportAll_;
 
@@ -1027,8 +1037,13 @@ struct PackageInfoFinder {
 
             if (compatibilityAnnotation == core::Names::strict()) {
                 info->strictAutoloaderCompatibility_ = true;
+            } else if (compatibilityAnnotation == core::Names::legacy()) {
+                info->legacyAutoloaderCompatibility_ = true;
             }
         }
+
+        // Both legacy and strict cannot be set at the same time.
+        ENFORCE(!(info->strictAutoloaderCompatibility_ && info->legacyAutoloaderCompatibility_));
 
         if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {

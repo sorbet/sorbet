@@ -63,6 +63,11 @@ public:
         return false;
     }
 
+    bool legacyAutoloaderCompatibility() const {
+        notImplemented();
+        return true;
+    }
+
     bool exportAll() const {
         notImplemented();
         return false;

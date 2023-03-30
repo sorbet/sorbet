@@ -114,11 +114,11 @@ struct AutoloaderConfig {
     std::string rootObject;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
-    std::vector<std::vector<std::string>> pbalNamespaces;
     std::vector<std::string> stripPrefixes;
 
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+    bool pbalNonAnnotatedPackages = false;
 };
 
 struct AutogenConstCacheConfig {

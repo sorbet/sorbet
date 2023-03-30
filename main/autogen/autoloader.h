@@ -27,8 +27,6 @@ struct AutoloaderConfig {
     // Should definitions in this namespace be collapsed into their
     // parent if they all are from the same file?
     bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
-    // This package is registered for path-based autoloading
-    bool registeredForPBAL(const std::vector<core::NameRef> &pkgParts) const;
     // normalize the path relative to the provided prefixes
     std::string_view normalizePath(const core::GlobalState &gs, core::FileRef file) const;
 
@@ -39,10 +37,10 @@ struct AutoloaderConfig {
     UnorderedSet<core::NameRef> topLevelNamespaceRefs;
     UnorderedSet<core::NameRef> excludedRequireRefs;
     UnorderedSet<std::vector<core::NameRef>> nonCollapsableModuleNames;
-    UnorderedSet<std::vector<core::NameRef>> pbalNamespaces;
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
     std::vector<std::string> stripPrefixes;
+    bool pbalNonAnnotatedPackages = false;
 
     AutoloaderConfig() = default;
     AutoloaderConfig(const AutoloaderConfig &) = delete;
