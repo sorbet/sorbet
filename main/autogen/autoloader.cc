@@ -70,6 +70,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
+    out.pbalNonAnnotatedPackages = cfg.pbalNonAnnotatedPackages;
     return out;
 }
 

@@ -118,6 +118,7 @@ struct AutoloaderConfig {
 
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+    bool pbalNonAnnotatedPackages = false;
 };
 
 struct AutogenConstCacheConfig {
