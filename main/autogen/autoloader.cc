@@ -339,8 +339,9 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
 
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility()) {
-            // Only mark strictly path-based autoload compatible packages for now to reduce
+        if (pkg.strictAutoloaderCompatibility() ||
+            (alCfg.pbalNonAnnotatedPackages && !pkg.legacyAutoloaderCompatibility())) {
+            // Only mark path-based autoload compatible packages for now to reduce
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.
 
