@@ -1,11 +1,11 @@
-#include "rewriter/Initializable.h"
+#include "rewriter/HasAttachedClass.h"
 #include "ast/Helpers.h"
 #include "core/errors/rewriter.h"
 
 using namespace std;
 namespace sorbet::rewriter {
 
-vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
+vector<ast::ExpressionPtr> HasAttachedClass::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> empty;
 
     if (send->fun != core::Names::declareHasAttachedClass() || !send->recv.isSelfReference()) {
@@ -13,7 +13,7 @@ vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isC
     }
 
     if (isClass) {
-        if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InitializableInClass)) {
+        if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::HasAttachedClassInClass)) {
             e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
                         core::Names::declareHasAttachedClass().show(ctx), "module", "class");
         }
@@ -24,7 +24,7 @@ vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isC
         const auto &arg0 = send->posArgs()[0];
         if (const auto *lit = ast::cast_tree<ast::Literal>(arg0)) {
             if (lit->isSymbol() && lit->asSymbol() == core::Names::contravariant()) {
-                if (auto e = ctx.beginError(arg0.loc(), core::errors::Rewriter::ContravariantInitializable)) {
+                if (auto e = ctx.beginError(arg0.loc(), core::errors::Rewriter::ContravariantHasAttachedClass)) {
                     e.setHeader("`{}` cannot be declared `{}`, only invariant or `{}`",
                                 core::Names::declareHasAttachedClass().show(ctx), ":in", ":out");
                     e.replaceWith("Convert to covariant", ctx.locAt(arg0.loc()), "{}", ":out");

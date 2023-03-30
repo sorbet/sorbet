@@ -45,7 +45,7 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
     if (parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())) {
         return core::errors::Resolver::EnumerableParentTypeNotDeclared;
     } else if (name == core::Names::Constants::AttachedClass()) {
-        return core::errors::Resolver::InitializableIncluded;
+        return core::errors::Resolver::HasAttachedClassIncluded;
     } else {
         return core::errors::Resolver::ParentTypeNotDeclared;
     }
@@ -71,7 +71,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             // name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
             // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
             // grandchild class's file in the set of files to retypecheck.
-            if (code == core::errors::Resolver::InitializableIncluded) {
+            if (code == core::errors::Resolver::HasAttachedClassIncluded) {
                 auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
                 if (sym.data(gs)->isModule()) {
                     e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,

@@ -15,7 +15,7 @@
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
 #include "rewriter/Flatten.h"
-#include "rewriter/Initializable.h"
+#include "rewriter/HasAttachedClass.h"
 #include "rewriter/Initializer.h"
 #include "rewriter/InterfaceWrapper.h"
 #include "rewriter/Mattr.h"
@@ -152,7 +152,7 @@ public:
                     }
 
                     // This one is also a little different: it gets the ClassDef kind
-                    nodes = Initializable::run(ctx, isClass, &send);
+                    nodes = HasAttachedClass::run(ctx, isClass, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

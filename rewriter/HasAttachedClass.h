@@ -19,11 +19,11 @@ namespace sorbet::rewriter {
  *     end
  */
 
-class Initializable final {
+class HasAttachedClass final {
 public:
     static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, bool isClass, ast::Send *send);
 
-    Initializable() = delete;
+    HasAttachedClass() = delete;
 };
 
 } // namespace sorbet::rewriter
