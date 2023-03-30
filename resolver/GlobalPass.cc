@@ -72,9 +72,9 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
             // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
             // grandchild class's file in the set of files to retypecheck.
             if (code == core::errors::Resolver::InitializableIncluded) {
-                auto initializable = core::Names::declareHasAttachedClass().show(gs);
+                auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
                 if (sym.data(gs)->isModule()) {
-                    e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", initializable,
+                    e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
                                 parent.show(gs), sym.show(gs));
                 } else if (sym.data(gs)->isSingletonClass(gs)) {
                     // We'd only get this type member redeclaration error in a singleton class if
@@ -82,13 +82,13 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                     // singleton classes get the `<AttachedClass>` type member declared)
                     ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
                     e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
-                                initializable, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+                                hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
                 } else {
                     // sym is a normal, non singleton class
                     e.setHeader("`{}` was declared `{}` and so must be `{}`ed into the class `{}`", parent.show(gs),
-                                initializable, "extend", sym.show(gs));
+                                hasAttachedClass, "extend", sym.show(gs));
                 }
-                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", initializable);
+                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", hasAttachedClass);
             } else {
                 e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
                             parent.show(gs), sym.show(gs));

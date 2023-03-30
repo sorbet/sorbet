@@ -37,11 +37,11 @@ vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isC
     vector<ast::ExpressionPtr> result;
     auto lhs = ast::MK::UnresolvedConstant(zeroLoc, ast::MK::EmptyTree(), core::Names::Constants::AttachedClass());
 
-    // `initializable!` and `type_member` have the same arity, so let's just dup the Send and change
-    // the fun so that everything gets passed through. The rest of the pipeline will validate that
-    // any args passed here are correct or not.
+    // `has_attached_class!` and `type_member` have the same arity, so let's just dup the Send and
+    // change the fun so that everything gets passed through. The rest of the pipeline will validate
+    // that any args passed here are correct or not.
     //
-    // (If there are other popular Ruby DSLs using `initialize!`, we can consider being more
+    // (If there are other popular Ruby DSLs using `has_attached_class!`, we can consider being more
     // conservative in this rewrite by only applying it if the args look correct, but being
     // over-eager like this makes it more obvious when the user did something like make a typo
     // which would have prevented the rewriter from firing.)
@@ -53,12 +53,12 @@ vector<ast::ExpressionPtr> Initializable::run(core::MutableContext ctx, bool isC
     // logic in namer and resolver expects type members to be declared via `Assign` nodes.
     result.emplace_back(ast::MK::Assign(send->loc, move(lhs), move(rhs)));
 
-    // Keep the call to `initializable!` in the tree so that it still gets type checked.
+    // Keep the call to `has_attached_class!` in the tree so that it still gets type checked.
     // If this proves to be a problem, we can either: change the `Assign` to look like
     //
-    //   <AttachedClass> = initializable!(...) {...}
+    //   <AttachedClass> = has_attached_class!(...) {...}
     //
-    // or we can just drop the call to `initializable!`, or we can try to do some loc munging to
+    // or we can just drop the call to `has_attached_class!`, or we can try to do some loc munging to
     // fix any problems that arise.
     result.emplace_back(send->deepCopy());
     return result;

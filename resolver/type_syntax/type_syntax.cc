@@ -878,11 +878,11 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             auto maybeAttachedClass = ownerData->findMember(ctx, core::Names::Constants::AttachedClass());
             if (!maybeAttachedClass.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    auto initializable = core::Names::declareHasAttachedClass().show(ctx);
+                    auto hasAttachedClass = core::Names::declareHasAttachedClass().show(ctx);
                     if (ownerData->isModule()) {
                         e.setHeader("`{}` must be marked `{}` before module instance methods can use `{}`",
-                                    owner.show(ctx), initializable, "T.attached_class");
-                        // TODO(jez) Autocorrect to insert `initializable!`
+                                    owner.show(ctx), hasAttachedClass, "T.attached_class");
+                        // TODO(jez) Autocorrect to insert `has_attached_class!`
                     } else if (ownerData->isSingletonClass(ctx)) {
                         // Combination of `isSingletonClass` and `<AttachedClass>` missing means
                         // this is the singleton class of a module.
@@ -893,7 +893,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                     } else {
                         e.setHeader(
                             "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
-                            "T.attached_class", initializable);
+                            "T.attached_class", hasAttachedClass);
                         e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
                                        owner.show(ctx));
                     }

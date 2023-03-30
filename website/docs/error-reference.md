@@ -533,13 +533,14 @@ type `T.untyped` (along with all other values).
 
 ## 3513
 
-The `initializable!` annotation is only allowed in a Ruby `module`, not a Ruby
-`class`. For more, see the docs for [`T.attached_class`](attached-class.md).
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
+Ruby `class`. For more, see the docs for
+[`T.attached_class`](attached-class.md).
 
 ## 3514
 
-The `initializable!` annotation cannot be given a contravariant `:in` annotation
-because `T.attached_class` is only allowed in output positions.
+The `has_attached_class!` annotation cannot be given a contravariant `:in`
+annotation because `T.attached_class` is only allowed in output positions.
 
 ## 3702
 

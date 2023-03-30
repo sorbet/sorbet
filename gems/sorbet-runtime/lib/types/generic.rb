@@ -20,5 +20,5 @@ module T::Generic
     T::Types::TypeTemplate.new(variance)
   end
 
-  def initializable!(variance=:invariant, &blk); end
+  def has_attached_class!(variance=:invariant, &blk); end
 end

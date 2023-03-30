@@ -8,14 +8,14 @@ namespace sorbet::rewriter {
  * Converts things like this
  *
  *     module A
- *       initializable!
+ *       has_attached_class!
  *     end
  *
  * into this:
  *
  *     module A
  *       <AttachedClass> = type_member
- *       initializable!
+ *       has_attached_class!
  *     end
  */
 
