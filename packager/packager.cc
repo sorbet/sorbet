@@ -174,10 +174,6 @@ public:
         return declLoc_;
     }
 
-    bool strictAutoloaderCompatibility() const {
-        return strictAutoloaderCompatibility_;
-    }
-
     bool legacyAutoloaderCompatibility() const {
         return legacyAutoloaderCompatibility_;
     }
@@ -199,10 +195,6 @@ public:
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_;
-
-    // Code in this package is _strictly compatible_ for path-based autoloading (PBAL), and by default will
-    // use PBAL.
-    bool strictAutoloaderCompatibility_;
 
     // Code in this package is _completely incompatible_ for path-based autoloading, and only works with the 'legacy'
     // Sorbet-generated autoloader.
@@ -1027,23 +1019,26 @@ struct PackageInfoFinder {
             }
 
             auto compatibilityAnnotation = compatibilityAnnotationLit->asString();
-            if (compatibilityAnnotation != core::Names::strict() && compatibilityAnnotation != core::Names::legacy()) {
+            if (compatibilityAnnotation != core::Names::legacy()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` must be either 'strict' or 'legacy'", send.fun.show(ctx));
+                    if (compatibilityAnnotation == core::Names::strict()) {
+                        e.setHeader("The 'strict' argument has been deprecated as an argument to `{}`",
+                                    send.fun.show(ctx));
+                        e.addErrorNote("If you wish to mark your "
+                                       "package as strictly path-based-autoloading compatible, do not provide an "
+                                       "autoloader_compatibility annotation");
+                    } else {
+                        e.setHeader("Argument to `{}` can only be 'legacy'", send.fun.show(ctx));
+                    }
                 }
 
                 return;
             }
 
-            if (compatibilityAnnotation == core::Names::strict()) {
-                info->strictAutoloaderCompatibility_ = true;
-            } else if (compatibilityAnnotation == core::Names::legacy()) {
+            if (compatibilityAnnotation == core::Names::legacy()) {
                 info->legacyAutoloaderCompatibility_ = true;
             }
         }
-
-        // Both legacy and strict cannot be set at the same time.
-        ENFORCE(!(info->strictAutoloaderCompatibility_ && info->legacyAutoloaderCompatibility_));
 
         if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {

@@ -422,10 +422,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
                                     cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-pbal-non-annotated",
-                                    "When this flag is set, packages that don't have 'autoloader_compatibility' "
-                                    "annotations use path-based autoloading",
-                                    cxxopts::value<bool>());
     options.add_options("advanced")("autogen-autoloader-strip-prefix",
                                     "Prefixes to strip from file output paths. "
                                     "If path does not start with prefix, nothing is stripped",
@@ -684,7 +680,6 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
     cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
-    cfg.pbalNonAnnotatedPackages = raw["autogen-autoloader-pbal-non-annotated"].as<bool>();
 
     cfg.rootObject = raw["autogen-root-object"].as<string>();
     return true;

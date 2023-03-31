@@ -2,7 +2,7 @@ baz/__package.rb:4: Argument to `autoloader_compatibility` must be a string lite
      4 |  autoloader_compatibility :invalid
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-baz/__package.rb:5: Argument to `autoloader_compatibility` must be either 'strict' or 'legacy' https://srb.help/3706
+baz/__package.rb:5: Argument to `autoloader_compatibility` can only be 'legacy' https://srb.help/3706
      5 |  autoloader_compatibility 'something'
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -13,4 +13,10 @@ baz/__package.rb:6: Argument to `autoloader_compatibility` must be a string lite
     baz/__package.rb:6: Replace with `"legacy"`
      6 |  autoloader_compatibility :legacy
                                    ^^^^^^^
-Errors: 3
+
+foo/__package.rb:7: The 'strict' argument has been deprecated as an argument to `autoloader_compatibility` https://srb.help/3706
+     7 |  autoloader_compatibility 'strict'
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If you wish to mark your package as strictly path-based-autoloading compatible, do not provide an autoloader_compatibility annotation
+Errors: 4
