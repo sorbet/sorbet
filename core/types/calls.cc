@@ -578,15 +578,15 @@ void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &
     }
 
     auto suggestUnsafe = gs.suggestUnsafe.value_or("T.unsafe"s);
-    auto title = fmt::format("Use `{}` for the keyword argument hash", "**");
+    auto title = fmt::format("Wrap in `{}`", suggestUnsafe);
     auto replaceValue = replaceLoc.source(gs).value();
     if (absl::c_all_of(replaceValue, [](char c) { return absl::ascii_isalnum(c) || c == '_'; }) ||
         (absl::StartsWith(replaceValue, "{") && absl::EndsWith(replaceValue, "}"))) {
-        e.replaceWith(title, replaceLoc, "{}({})", maybeStarStar, replaceValue);
+        e.replaceWith(title, replaceLoc, "{}{}({})", maybeStarStar, suggestUnsafe, replaceValue);
     } else {
         // wraps inside of T.unsafe(...) in `{...}`
         auto extraStarStar = replaceLoc != kwSplatArgLoc ? "**" : "";
-        e.replaceWith(title, replaceLoc, "{}({{{}{}}})", maybeStarStar, extraStarStar, replaceValue);
+        e.replaceWith(title, replaceLoc, "{}{}({{{}{}}})", maybeStarStar, suggestUnsafe, extraStarStar, replaceValue);
     }
 }
 
