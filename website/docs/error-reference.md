@@ -586,10 +586,10 @@ imports.
 
 > See [go/pbal](http://go/pbal) for more details.
 
-`autoloader_compatibility` declarations must take a single String argument. The only allowed value is `legacy`, otherwise the
-declaration cannot be present.
-These declarations annotate a package as incompatible for path-based autoloading and are used by our Ruby code loading
-pipeline.
+`autoloader_compatibility` declarations must take a single String argument. The
+only allowed value is `legacy`, otherwise the declaration cannot be present.
+These declarations annotate a package as incompatible for path-based autoloading
+and are used by our Ruby code loading pipeline.
 
 ## 3707
 
