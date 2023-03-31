@@ -23,6 +23,12 @@ module Opus::Types::Test
       def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end
     end
 
+    class AbstractBase
+      extend T::Sig
+      sig {abstract.void}
+      def initialize; end
+    end
+
     it "succeeds if the override matches the shape" do
       klass = Class.new(Base) do
         extend T::Sig
@@ -207,6 +213,16 @@ module Opus::Types::Test
         def foo; end
       end
       klass.new.foo
+    end
+
+    it "does opt-in override checking on initialize" do
+      klass = Class.new(AbstractBase) do
+        extend T::Sig
+        sig {override.void}
+        def initialize; end
+        def foo; 0; end
+      end
+      assert_equal(0, klass.new.foo)
     end
   end
 end
