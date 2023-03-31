@@ -982,7 +982,18 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         }
     }
 
-    if (numPosArgs != arity || arity == 0) {
+    // This is a hack. In single package RBI generation mode we exclude all source files that are
+    // not in the package we're generating RBIs for, and just recover from the fact that certain
+    // things are missing. So it might look like the `A` in `A[...]` does not resolve, and single
+    // package RBI generation mode simply says "ok I'll make a fake stub constant." It then uses how
+    // UnresolvedAppliedType works (which was invented for a slightly related reason: correct fast path
+    // hashing) to take care of the applied type.
+    //
+    // Because of all of this, we don't actually want to report this error in single package RBI
+    // generation mode.
+    bool singlePackageRbiGeneration = gs.singlePackageImports.has_value();
+
+    if (!singlePackageRbiGeneration && (numPosArgs != arity || arity == 0)) {
         auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         auto errLoc =
             !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
