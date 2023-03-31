@@ -977,19 +977,23 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             e.setHeader("Keyword arguments given to `{}`", genericClass.show(gs));
             // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
             if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
-                e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
+                e.replaceWith("Wrap with braces", kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
             }
         }
     }
 
     if (numPosArgs != arity || arity == 0) {
-        auto errLoc = !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back()))
-                                         : core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        auto squareBracketsLoc = core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
+        auto errLoc =
+            !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back())) : squareBracketsLoc;
         if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
-            if (genericClass.data(gs)->typeMembers().empty()) {
-                // Uses typeMembers().empty() instead of `arity()` to avoid saying that a class with
-                // fixed type members is "not a generic class"
-                e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
+            if (arity == 0) {
+                if (genericClass.data(gs)->typeMembers().empty()) {
+                    e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
+                } else {
+                    e.setHeader("All type parameters for `{}` have already been fixed", genericClass.show(gs));
+                }
+                e.replaceWith("Remove square brackets", squareBracketsLoc, "");
             } else {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                             genericClass.show(gs), arity, numPosArgs);
@@ -997,7 +1001,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         }
     }
 
-    if (arity == 0) {
+    if (genericClass.data(gs)->typeMembers().empty()) {
         return Types::untypedUntracked();
     }
 
