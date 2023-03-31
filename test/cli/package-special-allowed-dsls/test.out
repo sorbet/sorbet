@@ -17,7 +17,6 @@ baz/__package.rb:6: Argument to `autoloader_compatibility` must be a string lite
 foo/__package.rb:7: The 'strict' argument has been deprecated as an argument to `autoloader_compatibility` https://srb.help/3706
      7 |  autoloader_compatibility 'strict'
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    foo/__package.rb:7: If you wish to mark your package as strictly path-based-autoloading compatible, do not provide an autoloader_compatibility annotation
-     7 |  autoloader_compatibility 'strict'
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If you wish to mark your package as strictly path-based-autoloading compatible, do not provide an autoloader_compatibility annotation
 Errors: 4

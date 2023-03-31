@@ -1024,7 +1024,7 @@ struct PackageInfoFinder {
                     if (compatibilityAnnotation == core::Names::strict()) {
                         e.setHeader("The 'strict' argument has been deprecated as an argument to `{}`",
                                     send.fun.show(ctx));
-                        e.addErrorLine(ctx.locAt(send.loc), "If you wish to mark your "
+                        e.addErrorNote("If you wish to mark your "
                                        "package as strictly path-based-autoloading compatible, do not provide an "
                                        "autoloader_compatibility annotation");
                     } else {
