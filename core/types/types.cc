@@ -986,7 +986,9 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         auto errLoc = !locs.args.empty() ? core::Loc(locs.file, locs.args.front().join(locs.args.back()))
                                          : core::Loc(locs.file, locs.fun.endPos(), locs.call.endPos());
         if (auto e = gs.beginError(errLoc, errors::Infer::GenericArgumentCountMismatch)) {
-            if (arity == 0) {
+            if (genericClass.data(gs)->typeMembers().empty()) {
+                // Uses typeMembers().empty() instead of `arity()` to avoid saying that a class with
+                // fixed type members is "not a generic class"
                 e.setHeader("`{}` is not a generic class, but was given type parameters", genericClass.show(gs));
             } else {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
