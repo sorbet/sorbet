@@ -10,15 +10,13 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U Mixin1>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/extend.rb start=2:1 end=2:14}
     method <C <U Mixin1>>#<U say_hello> (<blk>) @ Loc {file=test/testdata/namer/extend.rb start=3:3 end=3:16}
       argument <blk><block> @ Loc {file=test/testdata/namer/extend.rb start=??? end=???}
-  class <S <C <U Mixin1>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/extend.rb start=2:1 end=2:14}
-    type-member(+) <S <C <U Mixin1>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin1>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin1) @ Loc {file=test/testdata/namer/extend.rb start=2:1 end=2:14}
+  class <S <C <U Mixin1>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/extend.rb start=2:1 end=2:14}
     method <S <C <U Mixin1>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/extend.rb start=2:1 end=5:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/extend.rb start=??? end=???}
   module <C <U Mixin2>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/namer/extend.rb start=7:1 end=7:14}
     method <C <U Mixin2>>#<U say_goodbye> (<blk>) @ Loc {file=test/testdata/namer/extend.rb start=8:3 end=8:18}
       argument <blk><block> @ Loc {file=test/testdata/namer/extend.rb start=??? end=???}
-  class <S <C <U Mixin2>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/namer/extend.rb start=7:1 end=7:14}
-    type-member(+) <S <C <U Mixin2>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin2>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin2) @ Loc {file=test/testdata/namer/extend.rb start=7:1 end=7:14}
+  class <S <C <U Mixin2>> $1> < <C <U Module>> () @ Loc {file=test/testdata/namer/extend.rb start=7:1 end=7:14}
     method <S <C <U Mixin2>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/extend.rb start=7:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/extend.rb start=??? end=???}
 
