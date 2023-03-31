@@ -70,7 +70,6 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
-    out.pbalNonAnnotatedPackages = cfg.pbalNonAnnotatedPackages;
     return out;
 }
 
@@ -339,8 +338,7 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
 
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility() ||
-            (alCfg.pbalNonAnnotatedPackages && !pkg.legacyAutoloaderCompatibility())) {
+        if (!pkg.legacyAutoloaderCompatibility()) {
             // Only mark path-based autoload compatible packages for now to reduce
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.

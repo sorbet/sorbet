@@ -2,7 +2,7 @@ baz/__package.rb:4: Argument to `autoloader_compatibility` must be a string lite
      4 |  autoloader_compatibility :invalid
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-baz/__package.rb:5: Argument to `autoloader_compatibility` must be either 'strict' or 'legacy' https://srb.help/3706
+baz/__package.rb:5: Argument to `autoloader_compatibility` can only be 'legacy' https://srb.help/3706
      5 |  autoloader_compatibility 'something'
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

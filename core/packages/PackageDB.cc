@@ -58,11 +58,6 @@ public:
         return false;
     }
 
-    bool strictAutoloaderCompatibility() const {
-        notImplemented();
-        return false;
-    }
-
     bool legacyAutoloaderCompatibility() const {
         notImplemented();
         return true;
