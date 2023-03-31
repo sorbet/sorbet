@@ -1019,9 +1019,17 @@ struct PackageInfoFinder {
             }
 
             auto compatibilityAnnotation = compatibilityAnnotationLit->asString();
-            if (compatibilityAnnotation != core::Names::strict() && compatibilityAnnotation != core::Names::legacy()) {
+            if (compatibilityAnnotation != core::Names::legacy()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` can only be 'legacy'", send.fun.show(ctx));
+                    if (compatibilityAnnotation == core::Names::strict()) {
+                        e.setHeader("The 'strict' argument has been deprecated as an argument to `{}`",
+                                    send.fun.show(ctx));
+                        e.addErrorLine(ctx.locAt(send.loc), "If you wish to mark your "
+                                       "package as strictly path-based-autoloading compatible, do not provide an "
+                                       "autoloader_compatibility annotation");
+                    } else {
+                        e.setHeader("Argument to `{}` can only be 'legacy'", send.fun.show(ctx));
+                    }
                 }
 
                 return;
