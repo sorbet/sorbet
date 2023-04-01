@@ -22,13 +22,13 @@ while ❌ means "this is an error".
 > Below, `standard` (for the child or parent) means "has a `sig`, but has none
 > of the special modifiers."
 
-| ↓Parent \ Child → | no sig | `standard` | `override` |
-| ----------------- | :----: | :--------: | :--------: |
-| no sig            |   ✅   |     ✅     |     ✅     |
-| `standard`        |   ✅   |     ✅     |     ❌     |
-| `overridable`     |   ✅   |     ❌     |     ✅     |
-| `override`        |   ✅   |     ❌     |     ✅     |
-| `abstract`        |   ✅   |     ❌     |     ✅     |
+| ↓Parent \ Child → | no sig | `standard` | `override` | `abstract` |
+| ----------------- | :----: | :--------: | :--------: | :--------: |
+| no sig            |   ✅   |     ✅     |     ✅     |     ❌     |
+| `standard`        |   ✅   |     ✅     |     ❌     |     ❌     |
+| `overridable`     |   ✅   |     ❌     |     ✅     |     ❌     |
+| `override`        |   ✅   |     ❌     |     ✅     |     ❌     |
+| `abstract`        |   ✅   |     ❌     |     ✅     |     ✅     |
 
 Some other things are checked that don't fit into the above table:
 
