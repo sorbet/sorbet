@@ -220,7 +220,10 @@ module Opus::Types::Test
         extend T::Sig
         sig {override.void}
         def initialize; end
-        def foo; 0; end
+
+        def foo
+          0
+        end
       end
       assert_equal(0, klass.new.foo)
     end
