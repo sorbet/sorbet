@@ -24,10 +24,10 @@ while ❌ means "this is an error".
 
 | ↓Parent \ Child → | no sig | `standard` | `override` | `abstract` |
 | ----------------- | :----: | :--------: | :--------: | :--------: |
-| no sig            |   ✅   |     ✅     |     ✅     |     ❌     |
-| `standard`        |   ✅   |     ✅     |     ❌     |     ❌     |
-| `overridable`     |   ✅   |     ❌     |     ✅     |     ❌     |
-| `override`        |   ✅   |     ❌     |     ✅     |     ❌     |
+| no sig            |   ✅   |     ✅     |     ✅     |    ✅\*    |
+| `standard`        |   ✅   |     ✅     |     ❌     |    ✅\*    |
+| `overridable`     |   ✅   |     ❌     |     ✅     |    ✅\*    |
+| `override`        |   ✅   |     ❌     |     ✅     |    ✅\*    |
 | `abstract`        |   ✅   |     ❌     |     ✅     |     ✅     |
 
 Some other things are checked that don't fit into the above table:
@@ -40,6 +40,12 @@ Some other things are checked that don't fit into the above table:
 Note that the **absence** of `abstract` or `overridable` does **not** mean that
 a method is never overridden. To declare that a method can never be overridden,
 look into [final methods](final.md).
+
+> **\***: in the future, Sorbet may stop allowing `abstract` on child methods to
+> override non-`abstract` parent methods. Currently, this is a no-op: grandchild
+> classes are **not** required to provide a further implementation of the
+> `abstract` method in this case, as the concrete parent implementation will be
+> run at runtime.
 
 ## A note on variance
 
