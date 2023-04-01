@@ -46,6 +46,31 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
 
     auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs);
     if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
+        auto letrhs = ast::cast_tree<ast::Cast>(assn->rhs);
+        if (letrhs == nullptr || letrhs->cast != core::Names::let()) {
+            return;
+        }
+
+        auto var = ast::cast_tree<ast::UnresolvedIdent>(letrhs->arg);
+        if (var == nullptr || var->kind != ast::UnresolvedIdent::Kind::Local) {
+            return;
+        }
+
+        auto typeExpr = argTypeMap.find(var->name);
+        if (typeExpr == argTypeMap.end()) {
+            return;
+        }
+
+        // We wouldn't have added a `T.let` for this, below, which means that we probably don't
+        // have a good way of checking for type equivalence, so just let whatever the user wrote
+        // work.
+        if (!isCopyableType(*typeExpr->second)) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(letrhs->loc, core::errors::Rewriter::RedundantInitializeLet)) {
+            e.setHeader("Redundant {} check", "T.let");
+        }
         return;
     }
 
