@@ -59,6 +59,14 @@ module T::Private::Methods::SignatureValidation
     case signature.mode
     when *Modes::OVERRIDE_MODES
       # Peaceful
+    when Modes.abstract
+      if super_signature.mode == Modes.abstract
+        # Peaceful
+      else
+        raise "The non-abstract parent method `#{signature.method_name}` cannot be overridden and made abstract (did you mean to use `override.` here?).\n" \
+              "  Parent definition: #{method_loc_str(super_signature.method)}\n" \
+              "  Child definition:  #{method_loc_str(signature.method)}\n"
+      end
     when *Modes::NON_OVERRIDE_MODES
       if super_signature.mode == Modes.standard
         # Peaceful
