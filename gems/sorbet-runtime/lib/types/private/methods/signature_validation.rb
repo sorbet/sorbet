@@ -59,6 +59,19 @@ module T::Private::Methods::SignatureValidation
     case signature.mode
     when *Modes::OVERRIDE_MODES
       # Peaceful
+    when Modes.abstract
+      # Either the parent method is abstract, or it's not.
+      #
+      # If it's abstract, we want to allow overriding abstract with abstract to
+      # possibly narrow the type or provide more specific documentation.
+      #
+      # If it's not, then marking this method `abstract` will silently be a no-op.
+      # That's bad and we probably want to report an error, but fixing that
+      # will have to be a separate fix (that bad behavior predates this current
+      # comment, introduced when we fixed the abstract/abstract case).
+      #
+      # Therefore:
+      # Peaceful (mostly)
     when *Modes::NON_OVERRIDE_MODES
       if super_signature.mode == Modes.standard
         # Peaceful
