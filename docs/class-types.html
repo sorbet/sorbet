@@ -160,7 +160,7 @@ sig {params(<span class="hljs-symbol">x:</span> Object).void}
 sig {params(<span class="hljs-symbol">x:</span> BasicObject).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">takes_basic_object</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
-<span class="hljs-comment"># The one error is because an instance</span>
+<span class="hljs-comment"># The one error is because an instance of BasicObject is not an instance of Object</span>
 takes_object(Object.new)              <span class="hljs-comment"># ok</span>
 takes_object(BasicObject.new)         <span class="hljs-comment"># error</span>
 takes_basic_object(Object.new)        <span class="hljs-comment"># ok</span>

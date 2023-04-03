@@ -1380,7 +1380,7 @@ than anything else.</p>
 <p>Some modules require specific functionality in the receiving class to work. For
 example <code>Enumerable</code> needs a <code>each</code> method in the target class.</p>
 <p>Failing example in
-<a href="https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0Aend">sorbet.run</a>:</p>
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend">sorbet.run</a>:</p>
 <pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-symbol">Example</span>
   <span class="hljs-symbol">include</span> <span class="hljs-symbol">Enumerable</span>
 <span class="hljs-symbol">end</span>
@@ -1388,7 +1388,7 @@ example <code>Enumerable</code> needs a <code>each</code> method in the target c
 <p>To fix this, implement the required abstract methods in your class to provide
 the required functionality.</p>
 <p>Passing example in
-<a href="https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each(%2526blk)%0A%0A%20%20end%0Aend">sorbet.run</a>:</p>
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend">sorbet.run</a>:</p>
 <pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-symbol">Example</span>
   <span class="hljs-symbol">include</span> <span class="hljs-symbol">Enumerable</span>
 
