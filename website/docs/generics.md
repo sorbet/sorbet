@@ -684,7 +684,8 @@ We can't really explain why this special case is carved out except by answering
 
 To get a sense for why Sorbet places constraints on where covariant and
 contravariant type members can appear within signatures, consider this example,
-which continues the example from the [covariance section](#covariance-out) above:
+which continues the example from the [covariance section](#covariance-out)
+above:
 
 ```ruby
 int_box = Box[Integer].new(value: 0)
