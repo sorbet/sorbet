@@ -4,6 +4,7 @@ require: rubocop-performance
 AllCops:
   NewCops: disable
 
+
 # Stripe in-house styles that are prevalent in the codebase already.
 #
 # Generally, prefer not to add things here; unless there's a specific reason
@@ -65,6 +66,9 @@ Naming/FileName:
   Exclude:
     # Filename deliberately matches gem name
     - 'lib/sorbet-runtime.rb'
+# You can convey semantic meaning by using is_foo?
+Naming/PredicateName:
+  Enabled: false
 
 Lint/MissingSuper:
   Exclude:
