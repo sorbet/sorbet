@@ -82,14 +82,14 @@ of the special modifiers.”</p>
 </blockquote>
 <table>
 <thead>
-<tr><th>↓Parent \ Child →</th><th style="text-align:center">no sig</th><th style="text-align:center"><code>standard</code></th><th style="text-align:center"><code>override</code></th></tr>
+<tr><th>↓Parent \ Child →</th><th style="text-align:center">no sig</th><th style="text-align:center"><code>standard</code></th><th style="text-align:center"><code>override</code></th><th style="text-align:center"><code>abstract</code></th></tr>
 </thead>
 <tbody>
-<tr><td>no sig</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
-<tr><td><code>standard</code></td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
-<tr><td><code>overridable</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
-<tr><td><code>override</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
-<tr><td><code>abstract</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+<tr><td>no sig</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅*</td></tr>
+<tr><td><code>standard</code></td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅*</td></tr>
+<tr><td><code>overridable</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">✅*</td></tr>
+<tr><td><code>override</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">✅*</td></tr>
+<tr><td><code>abstract</code></td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
 </tbody>
 </table>
 <p>Some other things are checked that don’t fit into the above table:</p>
@@ -102,6 +102,13 @@ methods don’t need the <code>override</code> annotation.</li>
 <p>Note that the <strong>absence</strong> of <code>abstract</code> or <code>overridable</code> does <strong>not</strong> mean that
 a method is never overridden. To declare that a method can never be overridden,
 look into <a href="/docs/final">final methods</a>.</p>
+<blockquote>
+<p><strong>*</strong>: in the future, Sorbet may stop allowing <code>abstract</code> on child methods to
+override non-<code>abstract</code> parent methods. Currently, this is a no-op: grandchild
+classes are <strong>not</strong> required to provide a further implementation of the
+<code>abstract</code> method in this case, as the concrete parent implementation will be
+run at runtime.</p>
+</blockquote>
 <h2><a class="anchor" aria-hidden="true" id="a-note-on-variance"></a><a href="#a-note-on-variance" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>A note on variance</h2>
 <p>When overriding a method, the override must accept at least all the same things
 that the parent method accepts, and return at most what the parent method
