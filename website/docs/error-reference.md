@@ -1726,7 +1726,7 @@ Some modules require specific functionality in the receiving class to work. For
 example `Enumerable` needs a `each` method in the target class.
 
 Failing example in
-[sorbet.run](https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0Aend):
+[sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend):
 
 ```
 class Example
@@ -1738,7 +1738,7 @@ To fix this, implement the required abstract methods in your class to provide
 the required functionality.
 
 Passing example in
-[sorbet.run](<https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each(%26blk)%0A%0A%20%20end%0Aend>):
+[sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend):
 
 ```
 class Example
