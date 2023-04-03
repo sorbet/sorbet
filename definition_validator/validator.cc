@@ -841,6 +841,64 @@ void validateRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef s
     validateUnsatisfiableRequiredAncestors(ctx, sym);
 }
 
+namespace {
+
+
+core::Loc underIncludes(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
+    auto loc = sym.data(gs)->loc();
+    auto [start, end] = loc.position(gs);
+    
+    auto insertLine = end.line;
+    for (int i = end.line +1 ;  i < loc.file().data(gs).lineCount(); ++i) {
+      auto line = loc.file().data(gs).getLine(i);
+      line = absl::StripAsciiWhitespace(line);
+      if (!(absl::StartsWith(line, "include") || absl::StartsWith(line, "extend"))) {
+            insertLine = i;
+            break;
+      }
+    }
+    auto detail = core::Loc::Detail{insertLine, 0};
+
+    return core::Loc::fromDetails(gs, loc.file(), detail, detail).value_or(loc);
+}
+
+
+core::AutocorrectSuggestion suggestOverrides(const core::GlobalState &gs, core::ClassOrModuleRef sym,
+                                             core::MethodRef proto) {
+    auto hasParams = proto.data(gs)->arguments.empty() == false;
+    auto hasReturnType = proto.data(gs)->resultType;
+
+    vector<string> params;
+    vector<string> keys;
+    for (auto &arg : proto.data(gs)->arguments) {
+        stopInDebugger();
+        if (absl::StartsWith(arg.show(gs), "<")) {
+            continue;
+        }
+        params.push_back(fmt::format("{}: {}", arg.show(gs), arg.type.show(gs)));
+        keys.push_back(arg.name.show(gs));
+    }
+    auto paramsSig = !hasParams ? "" : fmt::format("params({})", fmt::join(params, ", "));
+    auto owner = proto.data(gs)->owner;
+    auto isClassMethod = owner.exists() && owner.data(gs)->attachedClass(gs).exists();
+
+    auto p = hasParams ? paramsSig : "";
+    string dot = hasParams ? "." : "";
+    auto returnType = proto.data(gs)->resultType.show(gs);
+    auto sig = fmt::format("sig {{override.{}{}returns({})}}", p, dot, returnType);
+
+    auto methodPrototype =
+        fmt::format("\n\n{}\ndef {}{}({})\n\traise NotImplementedError\n end", sig, isClassMethod ? "self." : "", proto.data(gs)->name.show(gs), fmt::join(keys, ", "));
+    return core::AutocorrectSuggestion{
+        "Prefil interface methods",
+        {core::AutocorrectSuggestion::Edit{
+            underIncludes(gs, sym).copyEndWithZeroLength(),
+            methodPrototype,
+        }},
+    };
+}
+} // namespace
+
 class ValidateWalk {
 private:
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
@@ -931,6 +989,7 @@ private:
                 if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
                     e.setHeader("Missing definition for abstract method `{}`", proto.show(gs));
                     e.addErrorLine(proto.data(gs)->loc(), "defined here");
+                    e.addAutocorrect(suggestOverrides(gs, sym, proto));
                 }
             }
         }
