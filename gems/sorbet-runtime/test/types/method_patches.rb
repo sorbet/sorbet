@@ -5,7 +5,7 @@ module Opus::Types::Test
   class MethodPatchesTest < Critic::Unit::UnitTest
     module MethodRefinement
       refine Method do
-        T::CompatibilityPatches::MethodExtensions.each do |method|
+        T::CompatibilityPatches::MethodExtensions.instance_methods(false).each do |method|
           define_method(
             method,
             T::CompatibilityPatches::MethodExtensions.instance_method(method),
