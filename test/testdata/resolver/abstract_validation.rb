@@ -137,7 +137,7 @@ module PrivateMethodInInterface
   interface!
 
   sig {abstract.returns(Object)}
-  private def bad; end # error: Interface method `PrivateMethodInInterface#bad` cannot be private
+  private def ok; end
 end
 
 module ProtectedMethodInInterface

@@ -428,14 +428,9 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overridenMethods;
 
-    // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
-    // interfaces
-    if (klassData->flags.isInterface && method.data(ctx)->flags.isPrivate) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
-        }
-    }
-
+    // Matches the behavior of the runtime checks
+    // NOTE(jez): I don't think this check makes all that much sense, but I haven't thought about it.
+    // We already deleted the corresponding check for `private`, and may want to revisit this, too.
     if (klassData->flags.isInterface && method.data(ctx)->flags.isProtected) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
