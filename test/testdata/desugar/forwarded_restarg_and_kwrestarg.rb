@@ -1,6 +1,8 @@
 # typed: true
 
 def bar(a, b, c); end
+def baz(a:, b:, c:)
+end
 
 def foo(*)
   bar(*)
@@ -9,4 +11,8 @@ def foo(*)
   T.unsafe(self).bar(*)
   T.unsafe(self).bar(1, *)
   T.unsafe(self).bar(1, 2, *)
+end
+
+def buzz(**)
+  baz(**)
 end

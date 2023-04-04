@@ -377,6 +377,10 @@ public:
             return true;
         }
 
+        if (parser::isa_node<ForwardedKwrestArg>(nd)) {
+            return true;
+        }
+
         if (auto *pair = parser::cast_node<Pair>(nd)) {
             return parser::isa_node<Symbol>(pair->key.get());
         }
