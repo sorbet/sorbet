@@ -134,7 +134,7 @@ run_cmd gem install --no-document --local --env-shebang rubygems-update.gem
 # Overwrites the version of the `gem` and `bundle` commands inside the Ruby
 # distribution itself with newer versions (the specific newer versions are
 # pinned for a given rubygems-update version).
-run_cmd update_rubygems --version=3.2.29
+run_cmd update_rubygems
 
 # Fix the shebang in the wrapper scripts updated by 'update_rubygems'
 ruby_path="$(which ruby)"
