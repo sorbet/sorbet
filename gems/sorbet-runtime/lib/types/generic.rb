@@ -19,4 +19,6 @@ module T::Generic
   def type_template(variance=:invariant, &blk)
     T::Types::TypeTemplate.new(variance)
   end
+
+  def has_attached_class!(variance=:invariant, &blk); end
 end

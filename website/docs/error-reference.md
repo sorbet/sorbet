@@ -531,6 +531,17 @@ generated setter method will then be given an invalid name ending with `==`.
 `T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
 type `T.untyped` (along with all other values).
 
+## 3513
+
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
+Ruby `class`. For more, see the docs for
+[`T.attached_class`](attached-class.md).
+
+## 3514
+
+The `has_attached_class!` annotation cannot be given a contravariant `:in`
+annotation because `T.attached_class` is only allowed in output positions.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
@@ -2850,6 +2861,14 @@ To fix this error, there are some options:
   specifics of the test, it may even be possible to simply define all the
   abstract methods to simply `raise`, so that other aspects of the parent class
   can be tested.)
+
+## 5074
+
+A module marked `has_attached_class!` can only be mixed into a class with
+`extend`, or a module with `include`. When mixing a `has_attached_class!` module
+into another module, both modules must declare `has_attached_class!`.
+
+For more information, see the docs for [`T.attached_class`](attached-class.md).
 
 ## 6001
 

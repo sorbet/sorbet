@@ -2783,22 +2783,31 @@ public:
         auto selfTy = *args.args[0];
         auto mustExist = true;
         auto self = unwrapSymbol(gs, selfTy.type, mustExist);
+        auto selfData = self.data(gs);
 
-        if (self.data(gs)->isSingletonClass(gs)) {
-            auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
-            ENFORCE(attachedClass.exists());
+        auto attachedClass = selfData->findMember(gs, core::Names::Constants::AttachedClass());
+        if (attachedClass.exists()) {
             res.returnType = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
-                e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
-                e.addErrorSection(selfTy.explainGot(gs, args.originForUninitialized));
-                auto singletonClass = self.data(gs)->lookupSingletonClass(gs);
-                if (singletonClass.exists()) {
-                    e.addErrorNote(
-                        "`{}` represents instances of a class; `{}` represents the corresponding singleton class",
-                        self.show(gs), singletonClass.show(gs));
+                auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
+                if (selfData->isModule()) {
+                    e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`", self.show(gs),
+                                hasAttachedClass, "T.attached_class");
+                    // TODO(jez) Autocorrect to insert `has_attached_class!`
+                } else if (selfData->isSingletonClass(gs)) {
+                    // Combination of `isSingletonClass` and `<AttachedClass>` missing means
+                    // this is the singleton class of a module.
+                    ENFORCE(selfData->attachedClass(gs).data(gs)->isModule());
+                    e.setHeader("`{}` cannot be used in singleton methods on modules, because modules cannot be "
+                                "instantiated",
+                                "T.attached_class");
                 } else {
-                    e.addErrorNote("`{}` represents instances of a class", self.show(gs));
+                    e.setHeader(
+                        "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
+                        "T.attached_class", hasAttachedClass);
+                    e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
+                                   self.show(gs));
                 }
             }
             res.returnType = core::Types::untypedUntracked();
