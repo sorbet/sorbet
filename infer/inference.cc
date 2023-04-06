@@ -298,14 +298,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         typedSendCount++;
                     } else if (bind.bind.type.hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
-                        auto what = core::errors::Infer::errorClassForUntyped(ctx.state, ctx.file);
-                        if (auto e = ctx.beginError(bind.loc, what)) {
-                            e.setHeader("This code is untyped");
-                            if (what == core::errors::Infer::UntypedValue) {
-                                e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.",
-                                               "typed: strong", "typed: strict");
-                            }
-                        }
                     }
                 }
                 ENFORCE(bind.bind.type);
