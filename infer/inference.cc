@@ -297,6 +297,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
                     } else if (bind.bind.type.hasUntyped()) {
+                        // TODO(jez) We use `hasUntyped`, but untypedBlame doesn't look inside the
+                        // type to find which part has untyped (it just looks at the top-level type).
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
                     }
                 }
@@ -350,6 +352,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
     }
 
+    // TODO(jez) Delete these?
     prodCounterAdd("types.input.sends.typed", typedSendCount);
     prodCounterAdd("types.input.sends.total", totalSendCount);
 
