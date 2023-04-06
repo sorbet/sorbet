@@ -552,6 +552,7 @@ TEST_CASE("LSPTest") {
         opts->requiresAncestorEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+
         if (opts->stripePackages) {
             auto extraDirUnderscore =
                 StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
@@ -604,6 +605,8 @@ TEST_CASE("LSPTest") {
         string rootUri = fmt::format("file://{}", rootPath);
         auto sorbetInitOptions = make_unique<SorbetInitializationOptions>();
         sorbetInitOptions->enableTypecheckInfo = true;
+        sorbetInitOptions->highlightUntyped =
+            BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");
@@ -652,8 +655,14 @@ TEST_CASE("LSPTest") {
             }
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
-            slowPathPassed = ErrorAssertion::checkAll(
+            bool errorAssertionsPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+
+            bool untypedAssertionsPassed =
+                UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
+                                           diagnostics, errorPrefixes[i]);
+
+            slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
         }
     }
 

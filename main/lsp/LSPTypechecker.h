@@ -95,7 +95,7 @@ public:
      * Writes all diagnostic messages to LSPOutput.
      */
     void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
-                    WorkerPool &workers);
+                    WorkerPool &workers, const LSPConfiguration &currentConfig);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -172,7 +172,7 @@ public:
     virtual ~LSPTypecheckerDelegate() = default;
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore);
+                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig);
 
     void resumeTaskQueue(InitializedTask &task);
 

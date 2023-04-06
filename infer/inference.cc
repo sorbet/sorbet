@@ -11,6 +11,19 @@
 using namespace std;
 namespace sorbet::infer {
 
+namespace {
+
+const core::ErrorClass errorClassForUntyped(const core::GlobalState &gs, core::FileRef file) {
+    if (gs.highlightUntyped && file.data(gs).strictLevel < core::StrictLevel::Strong &&
+        file.data(gs).isOpenInClient()) {
+        return core::errors::Infer::UntypedValueInformation;
+    } else {
+        return core::errors::Infer::UntypedValue;
+    }
+}
+
+} // namespace
+
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
@@ -298,10 +311,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         typedSendCount++;
                     } else if (bind.bind.type.hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
+                        auto what = errorClassForUntyped(ctx.state, ctx.file);
+                        if (auto e = ctx.beginError(bind.loc, what)) {
                             e.setHeader("This code is untyped");
-                            e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong",
-                                           "typed: strict");
+                            if (what == core::errors::Infer::UntypedValue) {
+                                e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.",
+                                               "typed: strong", "typed: strict");
+                            }
                         }
                     }
                 }

@@ -146,6 +146,16 @@ export function activate(context: ExtensionContext) {
   );
 
   context.subscriptions.push(
+    commands.registerCommand("sorbet.toggleHighlightUntyped", () => {
+      sorbetExtensionConfig
+        .setHighlightUntyped(!sorbetExtensionConfig.highlightUntyped)
+        .then(() => {
+          restartSorbet(RestartReason.CONFIG_CHANGE);
+        });
+    }),
+  );
+
+  context.subscriptions.push(
     commands.registerCommand("sorbet.restart", () => {
       restartSorbet(RestartReason.COMMAND);
     }),

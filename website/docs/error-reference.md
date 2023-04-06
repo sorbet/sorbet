@@ -4106,6 +4106,16 @@ To fix this error, ensure that the left and right operands' types match before
 doing the comparison. For example, try converting `String`s to `Symbol`s with
 `to_sym` (or vice versa with `to_s`).
 
+## 7047
+
+This error code is an implementation detail of Sorbet's "highlight untyped in
+editor" mode. It indicates that the given piece of code is has type
+[`T.untyped`](untyped.md). Untyped code can be dangerous, because it circumvents
+the guarantees of the type system.
+
+This feature is opt-in. See [VS Code](vscode.md) for instructions on how to turn
+it on.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

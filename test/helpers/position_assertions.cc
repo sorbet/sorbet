@@ -19,6 +19,215 @@ using namespace std;
 namespace sorbet::test {
 
 namespace {
+/**
+ * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
+ * foo.bar
+ *     ^^^ error: bar not defined
+ */
+string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
+    int numLeadingSpaces = range.start->character;
+    if (numLeadingSpaces < 0) {
+        FAIL_CHECK(fmt::format("Invalid range: {} < 0", range.start->character));
+        return "";
+    }
+    string sourceLineNumber = fmt::format("{}", range.start->line + 1);
+    {
+        INFO("Multi-line ranges are not supported at this time.");
+        CHECK_EQ(range.start->line, range.end->line);
+    }
+    if (range.start->line != range.end->line) {
+        return string(comment);
+    }
+
+    int numCarets = range.end->character - range.start->character;
+    if (numCarets == RangeAssertion::END_OF_LINE_POS) {
+        // Caret the entire line.
+        numCarets = sourceLine.length();
+    }
+
+    return fmt::format("{}: {}\n {}{} {}", sourceLineNumber, sourceLine,
+                       string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
+}
+
+template <typename T> bool isDuplicateDiagnostic(string_view filename, T *assertion, const Diagnostic &d) {
+    return assertion && assertion->matchesDuplicateErrors && assertion->matches(filename, *d.range) == 0 &&
+           d.message.find(assertion->message) != string::npos;
+}
+
+template <typename T>
+void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix,
+                        bool missingDuplicate = false) {
+    auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
+    auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
+    ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
+                      fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
+                                  prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()),
+                                  messagePostfix));
+}
+
+void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
+                           string_view errorPrefix) {
+    ADD_FAIL_CHECK_AT(
+        filename.c_str(), diagnostic.range->start->line + 1,
+        fmt::format(
+            "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
+            "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
+            "expected.",
+            errorPrefix,
+            prettyPrintRangeComment(
+                sourceLine, *diagnostic.range,
+                fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
+                            diagnostic.message))));
+}
+string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
+                     int line) {
+    if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
+        return "";
+    }
+
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        FAIL_CHECK(fmt::format("Unable to find referenced source file `{}`", filename));
+        return "";
+    }
+
+    auto &file = it->second;
+    if (line >= file->lineCount()) {
+        ADD_FAIL_CHECK_AT(filename.c_str(), line + 1, "Invalid line number for range.");
+        return "";
+    } else {
+        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
+        auto lineView = file->getLine(line + 1);
+        return string(lineView);
+    }
+}
+
+template <typename T>
+bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::File>> &files,
+                   vector<shared_ptr<T>> errorAssertions,
+                   map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics, string errorPrefix) {
+    // Sort input error assertions so they are in (filename, line, column) order.
+    fast_sort(errorAssertions, sorbet::test::RangeAssertion::compareByRange);
+
+    auto assertionsIt = errorAssertions.begin();
+
+    bool success = true;
+
+    // Due to map's default sort order, this loop iterates over diagnostics in filename order.
+    for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
+        auto &filename = filenameAndDiagnostics.first;
+        auto &diagnostics = filenameAndDiagnostics.second;
+
+        // Sort diagnostics within file in range, message order.
+        // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
+        // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
+        fast_sort(diagnostics, [](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
+            const int rangeCmp = a->range->cmp(*b->range);
+            if (rangeCmp != 0) {
+                return rangeCmp < 0;
+            }
+            return a->message.compare(b->message) < 0;
+        });
+
+        auto diagnosticsIt = diagnostics.begin();
+        T *lastAssertion = nullptr;
+        bool lastAssertionMatchedDuplicate = false;
+
+        while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
+            // See if the ranges match.
+            auto &diagnostic = *diagnosticsIt;
+            auto &assertion = *assertionsIt;
+
+            if (diagnostic->severity.value_or(T::severity) != T::severity) {
+                diagnosticsIt++;
+                continue;
+            }
+
+            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+                diagnosticsIt++;
+                lastAssertionMatchedDuplicate = true;
+                continue;
+            } else {
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                    success = false;
+                }
+                lastAssertionMatchedDuplicate = false;
+                lastAssertion = nullptr;
+            }
+
+            const int cmp = assertion->matches(filename, *diagnostic->range);
+            if (cmp > 0) {
+                // Diagnostic comes *before* this assertion, so we don't
+                // have an assertion that matches the diagnostic.
+                reportUnexpectedError(filename, *diagnostic,
+                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
+                // We've 'consumed' the diagnostic -- nothing matches it.
+                diagnosticsIt++;
+                success = false;
+            } else if (cmp < 0) {
+                // Diagnostic comes *after* this assertion
+                // We don't have a diagnostic that matches the assertion.
+                reportMissingError(assertion->filename, *assertion,
+                                   getSourceLine(files, assertion->filename, assertion->range->start->line),
+                                   errorPrefix);
+                // We've 'consumed' this error assertion -- nothing matches it.
+                assertionsIt++;
+                success = false;
+            } else {
+                // Ranges match, so check the assertion.
+                success = assertion->check(*diagnostic,
+                                           getSourceLine(files, assertion->filename, assertion->range->start->line),
+                                           errorPrefix) &&
+                          success;
+                // We've 'consumed' the diagnostic and assertion.
+                // Save assertion in case it matches multiple diagnostics.
+                lastAssertion = assertion.get();
+                diagnosticsIt++;
+                assertionsIt++;
+            }
+        }
+
+        while (diagnosticsIt != diagnostics.end()) {
+            // We had more diagnostics than error assertions.
+            auto &diagnostic = *diagnosticsIt;
+
+            if (diagnostic->severity.value_or(T::severity) != T::severity) {
+                diagnosticsIt++;
+                continue;
+            }
+
+            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
+                lastAssertionMatchedDuplicate = true;
+            } else {
+                reportUnexpectedError(filename, *diagnostic,
+                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
+                success = false;
+
+                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
+                    reportMissingError(lastAssertion->filename, *lastAssertion,
+                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
+                                       errorPrefix, true);
+                }
+                lastAssertion = nullptr;
+                lastAssertionMatchedDuplicate = false;
+            }
+            diagnosticsIt++;
+        }
+    }
+
+    while (assertionsIt != errorAssertions.end()) {
+        // Had more error assertions than diagnostics
+        reportMissingError((*assertionsIt)->filename, **assertionsIt,
+                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line),
+                           errorPrefix);
+        success = false;
+        assertionsIt++;
+    }
+    return success;
+}
 
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
@@ -30,6 +239,7 @@ const regex whitespaceRegex("^[ ]*$");
 const UnorderedMap<
     string, function<shared_ptr<RangeAssertion>(string_view, unique_ptr<Range> &, int, string_view, string_view)>>
     assertionConstructors = {
+        {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
         {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
@@ -38,6 +248,7 @@ const UnorderedMap<
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
+        {"highlight-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"stripe-mode", BooleanPropertyAssertion::make},
@@ -88,36 +299,6 @@ bool rangeIsSubset(const Range &a, const Range &b) {
 
     // One-liners on same line.
     return b.start->character >= a.start->character && b.end->character <= a.end->character;
-}
-
-/**
- * prettyPrintComment("foo.bar", {start: {character: 4}, end: {character: 7}}, "error: bar not defined") ->
- * foo.bar
- *     ^^^ error: bar not defined
- */
-string prettyPrintRangeComment(string_view sourceLine, const Range &range, string_view comment) {
-    int numLeadingSpaces = range.start->character;
-    if (numLeadingSpaces < 0) {
-        FAIL_CHECK(fmt::format("Invalid range: {} < 0", range.start->character));
-        return "";
-    }
-    string sourceLineNumber = fmt::format("{}", range.start->line + 1);
-    {
-        INFO("Multi-line ranges are not supported at this time.");
-        CHECK_EQ(range.start->line, range.end->line);
-    }
-    if (range.start->line != range.end->line) {
-        return string(comment);
-    }
-
-    int numCarets = range.end->character - range.start->character;
-    if (numCarets == RangeAssertion::END_OF_LINE_POS) {
-        // Caret the entire line.
-        numCarets = sourceLine.length();
-    }
-
-    return fmt::format("{}: {}\n {}{} {}", sourceLineNumber, sourceLine,
-                       string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
 }
 
 string_view getLine(const LSPConfiguration &config,
@@ -301,6 +482,43 @@ bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine,
     return true;
 }
 
+UntypedAssertion::UntypedAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(message) {}
+
+shared_ptr<UntypedAssertion> UntypedAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                    string_view assertionContents, string_view assertionType) {
+    return make_shared<UntypedAssertion>(filename, range, assertionLine, assertionContents);
+}
+
+string UntypedAssertion::toString() const {
+    return fmt::format("{}: {}", "untyped", message);
+}
+
+bool UntypedAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
+                                vector<shared_ptr<UntypedAssertion>> errorAssertions,
+                                map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                                string errorPrefix) {
+    return checkAllInner<UntypedAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
+}
+
+bool UntypedAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
+    // The error message must contain `message`.
+    if (diagnostic.severity != DiagnosticSeverity::Information || diagnostic.message.find(message) == string::npos) {
+        ADD_FAIL_CHECK_AT(
+            filename.c_str(), range->start->line + 1,
+            fmt::format(
+                "{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}", errorPrefix,
+                prettyPrintRangeComment(sourceLine, *range, toString()),
+                prettyPrintRangeComment(
+                    sourceLine, *diagnostic.range,
+                    fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
+                                diagnostic.message))));
+        return false;
+    }
+    return true;
+}
+
 unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int endChar) {
     return make_unique<Range>(make_unique<Position>(sourceLine, startChar), make_unique<Position>(sourceLine, endChar));
 }
@@ -310,6 +528,17 @@ RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &ass
     vector<shared_ptr<ErrorAssertion>> rv;
     for (auto assertion : assertions) {
         if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
+            rv.push_back(assertionOfType);
+        }
+    }
+    return rv;
+}
+
+vector<shared_ptr<UntypedAssertion>>
+RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<UntypedAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
             rv.push_back(assertionOfType);
         }
     }
@@ -861,170 +1090,11 @@ string TypeAssertion::toString() const {
     return fmt::format("type: {}", symbol);
 }
 
-void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,
-                        string_view errorPrefix, bool missingDuplicate = false) {
-    auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
-    auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
-    ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
-                      fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
-                                  prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()),
-                                  messagePostfix));
-}
-
-void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
-                           string_view errorPrefix) {
-    ADD_FAIL_CHECK_AT(
-        filename.c_str(), diagnostic.range->start->line + 1,
-        fmt::format(
-            "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
-            "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
-            "expected.",
-            errorPrefix,
-            prettyPrintRangeComment(sourceLine, *diagnostic.range, fmt::format("error: {}", diagnostic.message))));
-}
-
-string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
-                     int line) {
-    if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
-        return "";
-    }
-
-    auto it = sourceFileContents.find(filename);
-    if (it == sourceFileContents.end()) {
-        FAIL_CHECK(fmt::format("Unable to find referenced source file `{}`", filename));
-        return "";
-    }
-
-    auto &file = it->second;
-    if (line >= file->lineCount()) {
-        ADD_FAIL_CHECK_AT(filename.c_str(), line + 1, "Invalid line number for range.");
-        return "";
-    } else {
-        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
-        auto lineView = file->getLine(line + 1);
-        return string(lineView);
-    }
-}
-
-bool isDuplicateDiagnostic(string_view filename, ErrorAssertion *assertion, const Diagnostic &d) {
-    return assertion && assertion->matchesDuplicateErrors && assertion->matches(filename, *d.range) == 0 &&
-           d.message.find(assertion->message) != string::npos;
-}
-
 bool ErrorAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File>> &files,
                               vector<shared_ptr<ErrorAssertion>> errorAssertions,
                               map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
                               string errorPrefix) {
-    // Sort input error assertions so they are in (filename, line, column) order.
-    fast_sort(errorAssertions, RangeAssertion::compareByRange);
-
-    auto assertionsIt = errorAssertions.begin();
-
-    bool success = true;
-
-    // Due to map's default sort order, this loop iterates over diagnostics in filename order.
-    for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
-        auto &filename = filenameAndDiagnostics.first;
-        auto &diagnostics = filenameAndDiagnostics.second;
-
-        // Sort diagnostics within file in range, message order.
-        // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
-        // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
-        fast_sort(diagnostics, [](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-            const int rangeCmp = a->range->cmp(*b->range);
-            if (rangeCmp != 0) {
-                return rangeCmp < 0;
-            }
-            return a->message.compare(b->message) < 0;
-        });
-
-        auto diagnosticsIt = diagnostics.begin();
-        ErrorAssertion *lastAssertion = nullptr;
-        bool lastAssertionMatchedDuplicate = false;
-
-        while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
-            // See if the ranges match.
-            auto &diagnostic = *diagnosticsIt;
-            auto &assertion = *assertionsIt;
-
-            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
-                diagnosticsIt++;
-                lastAssertionMatchedDuplicate = true;
-                continue;
-            } else {
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                    success = false;
-                }
-                lastAssertionMatchedDuplicate = false;
-                lastAssertion = nullptr;
-            }
-
-            const int cmp = assertion->matches(filename, *diagnostic->range);
-            if (cmp > 0) {
-                // Diagnostic comes *before* this assertion, so we don't
-                // have an assertion that matches the diagnostic.
-                reportUnexpectedError(filename, *diagnostic,
-                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
-                // We've 'consumed' the diagnostic -- nothing matches it.
-                diagnosticsIt++;
-                success = false;
-            } else if (cmp < 0) {
-                // Diagnostic comes *after* this assertion
-                // We don't have a diagnostic that matches the assertion.
-                reportMissingError(assertion->filename, *assertion,
-                                   getSourceLine(files, assertion->filename, assertion->range->start->line),
-                                   errorPrefix);
-                // We've 'consumed' this error assertion -- nothing matches it.
-                assertionsIt++;
-                success = false;
-            } else {
-                // Ranges match, so check the assertion.
-                success = assertion->check(*diagnostic,
-                                           getSourceLine(files, assertion->filename, assertion->range->start->line),
-                                           errorPrefix) &&
-                          success;
-                // We've 'consumed' the diagnostic and assertion.
-                // Save assertion in case it matches multiple diagnostics.
-                lastAssertion = assertion.get();
-                diagnosticsIt++;
-                assertionsIt++;
-            }
-        }
-
-        while (diagnosticsIt != diagnostics.end()) {
-            // We had more diagnostics than error assertions.
-            auto &diagnostic = *diagnosticsIt;
-            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
-                lastAssertionMatchedDuplicate = true;
-            } else {
-                reportUnexpectedError(filename, *diagnostic,
-                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
-                success = false;
-
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                }
-                lastAssertion = nullptr;
-                lastAssertionMatchedDuplicate = false;
-            }
-            diagnosticsIt++;
-        }
-    }
-
-    while (assertionsIt != errorAssertions.end()) {
-        // Had more error assertions than diagnostics
-        reportMissingError((*assertionsIt)->filename, **assertionsIt,
-                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line),
-                           errorPrefix);
-        success = false;
-        assertionsIt++;
-    }
-    return success;
+    return checkAllInner<ErrorAssertion>(files, errorAssertions, filenamesAndDiagnostics, errorPrefix);
 }
 
 shared_ptr<BooleanPropertyAssertion> BooleanPropertyAssertion::make(string_view filename, unique_ptr<Range> &range,
