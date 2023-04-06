@@ -147,10 +147,11 @@ export function activate(context: ExtensionContext) {
 
   context.subscriptions.push(
     commands.registerCommand("sorbet.toggleHighlightUntyped", () => {
-      sorbetExtensionConfig.setHighlightUntyped(
-        !sorbetExtensionConfig.highlightUntyped,
-      );
-      restartSorbet(RestartReason.CONFIG_CHANGE);
+      sorbetExtensionConfig
+        .setHighlightUntyped(!sorbetExtensionConfig.highlightUntyped)
+        .then(() => {
+          restartSorbet(RestartReason.CONFIG_CHANGE);
+        });
     }),
   );
 
