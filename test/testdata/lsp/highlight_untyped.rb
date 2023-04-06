@@ -100,3 +100,9 @@ untyped_args = T.unsafe([])
  binary_method(*untyped_args)
 #     untyped: This code is untyped
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^ untyped: This code is untyped
+
+begin
+# FIXME this should not be an untyped error
+rescue StandardError
+  #    ^^^^^^^^^^^^^ untyped: This code is untyped
+end
