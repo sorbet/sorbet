@@ -605,6 +605,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto funLoc = args.funLoc();
     auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
+        auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+        if (auto e = gs.beginError(args.receiverLoc(), what)) {
+            e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
+            TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
+        }
+
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {

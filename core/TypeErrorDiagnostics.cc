@@ -1,5 +1,6 @@
 #include "core/TypeErrorDiagnostics.h"
 #include "absl/strings/str_join.h"
+#include "core/errors/infer.h"
 
 using namespace std;
 
@@ -115,4 +116,13 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
         }
     }
 }
+
+void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what,
+                                          const TypeAndOrigins &untyped, Loc originForUninitialized) {
+    e.addErrorSection(untyped.explainGot(gs, originForUninitialized));
+    if (what == core::errors::Infer::UntypedValue) {
+        e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
+    }
+}
+
 } // namespace sorbet::core
