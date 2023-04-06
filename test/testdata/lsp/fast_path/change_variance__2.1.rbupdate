@@ -1,0 +1,7 @@
+# typed: true
+# exclude-from-file-update: true
+
+class Parent; end
+class Child < Parent; end
+
+T.let(Box[Child].new, Box[Parent])

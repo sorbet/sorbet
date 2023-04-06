@@ -1,0 +1,7 @@
+# typed: true
+# assert-fast-path: change_variance__1.rb,change_variance__2.rb
+
+class Box
+  extend T::Generic
+  Elem = type_member(:out)
+end

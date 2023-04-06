@@ -2413,7 +2413,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            result = mix(result, _hash(member.name(gs).shortName(gs)));
+            if (member.isTypeMember()) {
+                result = mix(result, member.asTypeMemberRef().data(gs)->hash(gs));
+            } else {
+                result = mix(result, _hash(member.name(gs).shortName(gs)));
+            }
         }
     }
     for (const auto &e : mixins_) {
