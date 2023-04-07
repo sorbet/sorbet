@@ -1552,6 +1552,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind() &&
                         c.cast != core::Names::syntheticBind());
 
+                // TODO(jez) Should we allow `T.let` / `T.cast` opt out of the untyped code error?
                 if (c.cast != core::Names::cast()) {
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
@@ -1633,6 +1634,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
+            // TODO(jez) What should we do about untyped code and pinning?
             bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
                                                    core::Types::dropLiteral(ctx, cur.type));
 

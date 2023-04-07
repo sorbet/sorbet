@@ -1093,6 +1093,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
                                                             UntypedMode::AlwaysCompatible)) {
+                    // TODO(jez) Highlight untyped code for this error
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                         e.setHeader("Expected `{}` but found `{}` for keyword splat keys type", "Symbol",
                                     kwSplatKeyType.show(gs));
@@ -1109,6 +1110,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         if (kwParamType == nullptr) {
                             kwParamType = Types::untyped(gs, method);
                         }
+                        // TODO(jez) Highlight untyped code for this error
                         if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
                                                             UntypedMode::AlwaysCompatible)) {
                             continue;
@@ -1451,6 +1453,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(!data->arguments.empty(), "Every method should at least have a block arg.");
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
+        // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
@@ -2422,6 +2425,7 @@ private:
         // as we do the subtyping check.
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
+        // TODO(jez) How should this interact with highlight untyped?
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
@@ -2466,6 +2470,7 @@ private:
 
                     auto bspecType = bspec.type;
                     if (bspecType) {
+                        // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
                         Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, bspecType,
                                                         UntypedMode::AlwaysCompatible);
@@ -3287,6 +3292,7 @@ public:
             auto expectedType = valueType;
             auto actualType = *args.args[1];
             // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
+            // TODO(jez) How should this interact with highlight untyped?
             if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
                 auto argLoc = args.argLoc(1);
 
@@ -3955,6 +3961,7 @@ public:
 
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
+        // TODO(jez) How should this interact with highlight untyped?
         auto isOnlySymbol =
             Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
         if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
@@ -3980,6 +3987,7 @@ public:
             return;
         }
 
+        // TODO(jez) How should this interact with highlight untyped?
         auto isOnlyString =
             Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
 
