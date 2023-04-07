@@ -789,16 +789,29 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, bodyRubyRegionId);
                 auto exceptionValue = cctx.newTemporary(core::Names::exceptionValue());
-                synthesizeExpr(rescueHeaderBlock, exceptionValue, what.loc(), make_insn<GetCurrentException>());
-                conditionalJump(rescueHeaderBlock, exceptionValue, rescueHandlersBlock, bodyBlock, cctx.inWhat, a.loc);
+                // In `rescue; ...; end`, we don't want the conditional jumps' variables nor the
+                // GetCurrentException calls to look like they blame to the whole `rescue; ...; end`
+                // body. Better to just point at the `rescue` keyword.
+                //
+                // Might be better to point at exception variable like the "e" in `rescue => e`, but
+                // that involves picking one (of possibly many) rescueCases.
+                auto rescueKeywordLoc = (!a.rescueCases.empty() && (a.rescueCases.front().loc().endPos() -
+                                                                    a.rescueCases.front().loc().beginPos()) > 6)
+                                            ? core::LocOffsets{a.rescueCases.front().loc().beginPos(),
+                                                               a.rescueCases.front().loc().beginPos() + 6}
+                                            : a.loc.copyWithZeroLength();
+                synthesizeExpr(rescueHeaderBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
+                conditionalJump(rescueHeaderBlock, exceptionValue, rescueHandlersBlock, bodyBlock, cctx.inWhat,
+                                rescueKeywordLoc);
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a.body, bodyBlock);
 
                 // else is only executed if body didn't raise an exception
                 auto elseBody = cctx.inWhat.freshBlock(cctx.loops, elseRubyRegionId);
-                synthesizeExpr(bodyBlock, exceptionValue, what.loc(), make_insn<GetCurrentException>());
-                conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat, a.loc);
+                synthesizeExpr(bodyBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
+                conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
+                                rescueKeywordLoc);
 
                 elseBody = walk(cctx, a.else_, elseBody);
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, ensureRubyRegionId);
@@ -846,13 +859,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
                         InlinedVector<cfg::LocalRef, 2> args;
                         InlinedVector<core::LocOffsets, 2> argLocs = {loc};
-                        args.emplace_back(exceptionClass);
+                        args.emplace_back(localVar);
 
                         auto isPrivateOk = false;
-                        rescueHandlersBlock->exprs.emplace_back(isaCheck, loc,
-                                                                make_insn<Send>(localVar, loc, core::Names::isA_p(),
-                                                                                core::LocOffsets::none(), args.size(),
-                                                                                args, std::move(argLocs), isPrivateOk));
+                        rescueHandlersBlock->exprs.emplace_back(
+                            isaCheck, loc,
+                            make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
+                                            args.size(), args, std::move(argLocs), isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
