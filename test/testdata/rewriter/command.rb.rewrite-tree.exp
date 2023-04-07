@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.call<<todo method>>(x, &<blk>)
-      ::T.unsafe(nil)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of call>
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.call<<todo method>>(x, &<blk>)
-      ::T.unsafe(nil)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of call>
