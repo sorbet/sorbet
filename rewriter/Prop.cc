@@ -379,7 +379,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // via `T.assert_type!(self.class.compute_foo(T.unsafe(nil)), type)` in the getter.
         auto selfSendClass = ast::MK::Send0(computedByMethodNameLoc, ast::MK::Self(loc), core::Names::class_(),
                                             computedByMethodNameLocZero);
-        auto raiseUnimplemented = ast::MK::RaiseTypedUnimplemented(computedByMethodNameLoc);
+        auto raiseUnimplemented = ast::MK::RaiseUnimplemented(computedByMethodNameLoc);
         auto sendComputedMethod =
             ast::MK::Send1(computedByMethodNameLoc, std::move(selfSendClass), computedByMethodName,
                            computedByMethodNameLocZero, std::move(raiseUnimplemented));
