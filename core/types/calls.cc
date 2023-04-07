@@ -2336,6 +2336,14 @@ private:
                               bool suppressErrors) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
+        if (blockType.type.isUntyped()) {
+            // Don't simulate a call to `to_proc` on `T.untyped`
+            // This avoids reporting a typed: strong error for `&x` where `x` is untyped--we may
+            // still want to report an error later when matching this `T.untyped` we're about to
+            // return with the method's block parameter.
+            return blockType.type;
+        }
+
         if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
             nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
             typeIsNilable = true;
