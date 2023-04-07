@@ -79,7 +79,7 @@ module T::Private::Methods
         raise BuilderError.new("You can't call .void after calling .returns.")
       end
 
-      decl.returns = T::Private::Types::Void.new
+      decl.returns = T::Private::Types::Void::Private::INSTANCE
 
       self
     end
