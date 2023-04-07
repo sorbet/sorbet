@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
