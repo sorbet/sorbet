@@ -1,0 +1,41 @@
+# ParsedFile: test/testdata/autogen/has_attached_class.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=module
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[HasAttachedClassExample]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[HasAttachedClassExample]
+ nesting=[]
+ resolved=[HasAttachedClassExample]
+ loc=test/testdata/autogen/has_attached_class.rb:3
+ is_defining_ref=1
+[ref id=1]
+ scope=[HasAttachedClassExample]
+ name=[T Sig]
+ nesting=[[HasAttachedClassExample]]
+ resolved=[T Sig]
+ loc=test/testdata/autogen/has_attached_class.rb:4
+ is_defining_ref=0
+[ref id=2]
+ scope=[HasAttachedClassExample]
+ name=[T Generic]
+ nesting=[[HasAttachedClassExample]]
+ resolved=[T Generic]
+ loc=test/testdata/autogen/has_attached_class.rb:5
+ is_defining_ref=0
+[ref id=3]
+ scope=[HasAttachedClassExample]
+ name=[T]
+ nesting=[[HasAttachedClassExample]]
+ resolved=[T]
+ loc=test/testdata/autogen/has_attached_class.rb:10
+ is_defining_ref=0
