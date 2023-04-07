@@ -1,8 +1,14 @@
 # typed: strong
-extend T::Sig
+class Module; include T::Sig; end
+
+class A
+  sig {void}
+  def foo; end
+end
 
 sig {returns(T.untyped)}
 def returns_untyped
+  A.new
 end
 
 sig {params(x: Integer).void}
@@ -18,6 +24,9 @@ end
 
   x.foo
 # ^ error: Call to method `foo` on `T.untyped`
+
+y = T.let(x, A)
+y.foo
 
 takes_integer(
   T.unsafe(0)
