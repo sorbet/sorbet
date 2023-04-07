@@ -279,9 +279,9 @@ module T
   module Array
     def self.[](type)
       if type.is_a?(T::Types::Untyped)
-        T::Types::TypedArray::Untyped.new
+        T::Types::TypedArray::Untyped::Private::INSTANCE
       else
-        T::Types::TypedArray.new(type)
+        T::Types::TypedArray::Private::Pool.type_for_module(type)
       end
     end
   end
