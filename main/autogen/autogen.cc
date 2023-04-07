@@ -199,6 +199,11 @@ public:
         if (original.original == nullptr) {
             return;
         }
+        if (original.symbol.name(ctx) == core::Names::Constants::AttachedClass()) {
+            // This is a reference to a constant like <AttachedClass> that came from the `has_attached_class!` DSL
+            // These are not real constant references.
+            return;
+        }
 
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
@@ -244,6 +249,12 @@ public:
         // autogen only cares about constant assignments/definitions, so bail otherwise
         auto *lhs = ast::cast_tree<ast::ConstantLit>(original.lhs);
         if (lhs == nullptr || lhs->original == nullptr) {
+            return;
+        }
+
+        if (lhs->symbol.name(ctx) == core::Names::Constants::AttachedClass()) {
+            // has_attached_class! create constant assignments that look like `<AttachedClass> = type_member`
+            // which do not actually exist at runtime.
             return;
         }
 

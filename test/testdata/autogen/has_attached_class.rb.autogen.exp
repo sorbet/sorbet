@@ -10,11 +10,6 @@ requires: []
  defines_behavior=1
  is_empty=0
  defining_ref=[HasAttachedClassExample]
-[def id=2]
- type=casgn
- defines_behavior=1
- is_empty=0
- defining_ref=[<AttachedClass>]
 ## refs:
 [ref id=0]
  scope=[]
@@ -44,10 +39,3 @@ requires: []
  resolved=[T]
  loc=test/testdata/autogen/has_attached_class.rb:10
  is_defining_ref=0
-[ref id=4]
- scope=[HasAttachedClassExample]
- name=[<AttachedClass>]
- nesting=[[HasAttachedClassExample]]
- resolved=[HasAttachedClassExample <AttachedClass>]
- loc=test/testdata/autogen/has_attached_class.rb:8
- is_defining_ref=1
