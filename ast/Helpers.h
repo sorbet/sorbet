@@ -459,7 +459,6 @@ public:
     static ExpressionPtr RaiseTypedUnimplemented(core::LocOffsets loc) {
         auto kernel = Constant(loc, core::Symbols::Kernel());
         auto msg = String(loc, core::Names::rewriterRaiseUnimplemented());
-        // T.unsafe so that Sorbet doesn't know this unconditionally raises (avoids introducing dead code errors)
         auto ret = Send1(loc, std::move(kernel), core::Names::raise(), loc, std::move(msg));
         cast_tree<ast::Send>(ret)->flags.isRewriterSynthesized = true;
         return ret;
