@@ -27,6 +27,9 @@ public:
 
     static void explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what, const TypeAndOrigins &untyped,
                                Loc originForUninitialized);
+
+    static void explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what, TypePtr untyped, Loc origin,
+                               Loc originForUninitialized);
 };
 
 } // namespace sorbet::core

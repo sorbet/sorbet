@@ -281,6 +281,27 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     expectedType = Types::replaceSelfType(gs, expectedType, selfType);
 
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible)) {
+        if (expectedType.isUntyped()) {
+            // TODO(jez) We should have code like this, but currently there are too many places that
+            // are fine "accepting anything" that are typed as `T.untyped`.
+            //
+            // We should take a pass at fixing a lot of those in our RBI files, and then circle back
+            // to enabling this error.
+            //
+            // auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
+            // if (auto e = gs.beginError(argLoc, what)) {
+            //     e.setHeader("Method parameter `{}` is declared with `{}`", argSym.argumentName(gs), "T.untyped");
+            //     TypeErrorDiagnostics::explainUntyped(gs, e, what, expectedType, argSym.loc, originForUninitialized);
+            //     return e.build();
+            // }
+        } else if (argTpe.type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
+            if (auto e = gs.beginError(argLoc, what)) {
+                e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
+                return e.build();
+            }
+        }
         return nullptr;
     }
 

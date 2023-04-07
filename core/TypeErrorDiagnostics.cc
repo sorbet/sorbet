@@ -125,4 +125,13 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
     }
 }
 
+void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what, TypePtr untyped,
+                                          Loc origin, Loc originForUninitialized) {
+    auto untypedTpo = TypeAndOrigins{untyped, origin};
+    e.addErrorSection(untypedTpo.explainGot(gs, originForUninitialized));
+    if (what == core::errors::Infer::UntypedValue) {
+        e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
+    }
+}
+
 } // namespace sorbet::core

@@ -1392,7 +1392,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
-                    methodReturnType = core::Types::untypedUntracked();
+                    methodReturnType = core::Types::top();
                 }
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible)) {
@@ -1411,6 +1411,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                                          typeAndOrigin.type);
                         }
                     }
+                } else if (methodReturnType.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        e.setHeader("Method result type declared with `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, methodReturnType, ctx.owner.loc(ctx),
+                                                                   ownerLoc);
+                    }
+                } else if (typeAndOrigin.type.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        e.setHeader("Value returned from method is `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
+                    }
                 }
             },
             [&](cfg::BlockReturn &i) {
@@ -1420,7 +1433,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
-                    expectedType = core::Types::untypedUntracked();
+                    expectedType = core::Types::top();
                 }
                 bool isSubtype;
                 if (i.link->result->main.constr) {
@@ -1442,6 +1455,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
+                    }
+                } else if (expectedType.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments.back();
+                        e.setHeader("Block result type declared with `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, expectedType, bspec.loc, ownerLoc);
+                    }
+                } else if (typeAndOrigin.type.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        e.setHeader("Value returned from block is `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
                 }
 

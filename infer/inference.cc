@@ -2,6 +2,7 @@
 #include "common/timers/Timer.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/lsp/QueryResponse.h"
 #include "infer/SigSuggestion.h"
@@ -56,6 +57,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             methodReturnType = returnTypeVar.data(ctx)->resultType;
 
             constr->defineDomain(ctx, domainTemp);
+        } else if (cfg->symbol.data(ctx)->name.isAnyStaticInitName(ctx)) {
+            methodReturnType = core::Types::top();
         } else {
             methodReturnType = core::Types::untyped(ctx, cfg->symbol);
         }
@@ -322,7 +325,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
-            current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            auto bexitTpo = current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            if (bexitTpo.type.isUntyped()) {
+                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                if (auto e = ctx.beginError(bb->bexit.loc, what)) {
+                    e.setHeader("Conditional branch on `{}`", "T.untyped");
+                    core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, bexitTpo, methodLoc);
+                }
+            }
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
