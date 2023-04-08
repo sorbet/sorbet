@@ -1181,7 +1181,7 @@ class Array < Object
   # ```
   sig do
     params(
-        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+        blk: T.proc.params(arg0: Elem).void,
     )
     .returns(T::Array[Elem])
   end
