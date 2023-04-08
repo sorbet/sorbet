@@ -1024,9 +1024,9 @@ by inventing an entirely new value.
 ### Shortcomings of generic methods
 
 Most commonly, when there is something wrong with Sorbet's support for generic
-methods, the error message mentions something about `<top>`, or something about
-unreachable code. Whenever you see `<top>` in an error message, one of two
-things is happening:
+methods, the error message mentions something about `T.unknown`, or something
+about unreachable code. Whenever you see `T.unknown` in an error message
+relating to a generic method, one of two things is happening:
 
 - There is a valid error, because the method's input type was not properly
   constrained. Double check the previous section on

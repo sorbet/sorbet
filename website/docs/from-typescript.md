@@ -325,7 +325,7 @@ end</code></pre>
         <code>unknown</code>
       </td>
       <td>
-        <code>BasicObject</code>
+        <code>T.unknown</code>
       </td>
       <td>
         See <a href="/docs/class-types">Class Types</a> for more.

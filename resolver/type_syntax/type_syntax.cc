@@ -913,6 +913,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         }
         case core::Names::noreturn().rawId():
             return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noClassOrModule()};
+        case core::Names::unknown().rawId():
+            return TypeSyntax::ResultType{core::Types::top(), core::Symbols::noClassOrModule()};
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
