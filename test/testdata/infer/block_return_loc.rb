@@ -6,10 +6,19 @@ def example(&blk)
 end
 
 example {0}
-#         ^  error: Expected `String` but found `Integer(0)` for block result type
+#        ^  error: Expected `String` but found `Integer(0)` for block result type
 
 example do 0 end
-#            ^^^ error: Expected `String` but found `Integer(0)` for block result type
+#          ^ error: Expected `String` but found `Integer(0)` for block result type
+
+example do end
+#          ^^^ error: Expected `String` but found `NilClass` for block result type
+
+example do |x| end
+#              ^^^ error: Expected `String` but found `NilClass` for block result type
+
+example do if Random.rand(2).even?; 0; else 0; end end
+#                                                  ^^^ error: Expected `String` but found `NilClass` for block result type
 
 sig {params(blk: T.proc.params(x: Integer).returns(String)).void}
 def example_blockpass(&blk)
