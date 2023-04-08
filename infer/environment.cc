@@ -1411,14 +1411,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                                          typeAndOrigin.type);
                         }
                     }
-                } else if (methodReturnType.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
-                    if (auto e = ctx.beginError(bind.loc, what)) {
-                        e.setHeader("Method result type declared with `{}`", "T.untyped");
-                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, methodReturnType, ctx.owner.loc(ctx),
-                                                                   ownerLoc);
-                    }
-                } else if (typeAndOrigin.type.isUntyped()) {
+                } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
+                           typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from method is `{}`", "T.untyped");
@@ -1456,14 +1450,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
                     }
-                } else if (expectedType.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
-                    if (auto e = ctx.beginError(bind.loc, what)) {
-                        const auto &bspec = i.link->result->main.method.data(ctx)->arguments.back();
-                        e.setHeader("Block result type declared with `{}`", "T.untyped");
-                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, expectedType, bspec.loc, ownerLoc);
-                    }
-                } else if (typeAndOrigin.type.isUntyped()) {
+                } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from block is `{}`", "T.untyped");
