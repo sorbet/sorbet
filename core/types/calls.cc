@@ -298,6 +298,9 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
+                auto for_ =
+                    ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
+                e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
                 return e.build();
             }
@@ -2255,15 +2258,6 @@ public:
         if (args.args.size() != 4) {
             return;
         }
-        auto &receiver = args.args[0];
-        if (receiver->type.isUntyped()) {
-            res.returnType = receiver->type;
-            return;
-        }
-
-        if (!receiver->type.isFullyDefined()) {
-            return;
-        }
 
         if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
@@ -2274,7 +2268,30 @@ public:
         }
 
         NameRef fn = lit.asName();
+
+        auto &receiver = args.args[0];
+        if (receiver->type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            if (auto e = gs.beginError(args.argLoc(0), what)) {
+                e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
+            }
+
+            res.returnType = receiver->type;
+            return;
+        }
+
+        if (!receiver->type.isFullyDefined()) {
+            return;
+        }
+
         if (args.args[2]->type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            if (auto e = gs.beginError(args.argLoc(2), what)) {
+                e.setHeader("Call to method `{}` with `{}` splat arguments", fn.show(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
+            }
+
             res.returnType = args.args[2]->type;
             return;
         }
@@ -2513,8 +2530,24 @@ public:
         if (args.args.size() < 3) {
             return;
         }
+
+        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
+            return;
+        }
+        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn = lit.asName();
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            if (auto e = gs.beginError(args.argLoc(0), what)) {
+                e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
+            }
+
             res.returnType = receiver->type;
             return;
         }
@@ -2529,16 +2562,6 @@ public:
             }
             return;
         }
-
-        if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
-            return;
-        }
-        auto lit = cast_type_nonnull<NamedLiteralType>(args.args[1]->type);
-        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
-            return;
-        }
-
-        NameRef fn = lit.asName();
 
         uint16_t numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2598,15 +2621,6 @@ public:
         if (args.args.size() != 5) {
             return;
         }
-        auto &receiver = args.args[0];
-        if (receiver->type.isUntyped()) {
-            res.returnType = receiver->type;
-            return;
-        }
-
-        if (!receiver->type.isFullyDefined()) {
-            return;
-        }
 
         if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
@@ -2618,7 +2632,29 @@ public:
 
         NameRef fn = lit.asName();
 
+        auto &receiver = args.args[0];
+        if (receiver->type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            if (auto e = gs.beginError(args.argLoc(0), what)) {
+                e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
+            }
+
+            res.returnType = receiver->type;
+            return;
+        }
+
+        if (!receiver->type.isFullyDefined()) {
+            return;
+        }
+
         if (args.args[2]->type.isUntyped()) {
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            if (auto e = gs.beginError(args.argLoc(2), what)) {
+                e.setHeader("Call to method `{}` with `{}` splat arguments", fn.show(gs), "T.untyped");
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
+            }
+
             res.returnType = args.args[2]->type;
             return;
         }
