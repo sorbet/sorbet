@@ -221,9 +221,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(Test)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
     <self>: T.class_of(Test) = <selfRestore>$8
-    <cfgAlias>$39: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <block-pre-call-temp>$41: Sorbet::Private::Static::Void = <cfgAlias>$39: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
-    <selfRestore>$42: T.class_of(Test) = <self>
+    <cfgAlias>$38: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <block-pre-call-temp>$40: Sorbet::Private::Static::Void = <cfgAlias>$38: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
+    <selfRestore>$41: T.class_of(Test) = <self>
     <unconditional> -> bb6
 
 # backedges
@@ -231,96 +231,96 @@ bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$7: Sorbet::Private::Stat
 bb5[rubyRegionId=1, firstDead=20](<self>: T.class_of(Test), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(Test)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$13: Symbol(:a) = :a
-    <cfgAlias>$15: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$16: Symbol(:b) = :b
-    <cfgAlias>$18: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$19: Symbol(:c) = :c
-    <cfgAlias>$21: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$22: Symbol(:d) = :d
-    <cfgAlias>$24: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$25: Symbol(:e) = :e
-    <cfgAlias>$27: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$28: Symbol(:f) = :f
-    <cfgAlias>$30: T.class_of(String) = alias <C String>
-    <hashTemp>$31: Symbol(:blk) = :blk
-    <cfgAlias>$35: T.class_of(T) = alias <C T>
-    <statTemp>$33: T.class_of(T.proc) = <cfgAlias>$35: T.class_of(T).proc()
-    <hashTemp>$32: Runtime object representing type: T.proc.void = <statTemp>$33: T.class_of(T.proc).void()
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:a), <cfgAlias>$15: T.class_of(Integer), <hashTemp>$16: Symbol(:b), <cfgAlias>$18: T.class_of(Integer), <hashTemp>$19: Symbol(:c), <cfgAlias>$21: T.class_of(Integer), <hashTemp>$22: Symbol(:d), <cfgAlias>$24: T.class_of(Integer), <hashTemp>$25: Symbol(:e), <cfgAlias>$27: T.class_of(Integer), <hashTemp>$28: Symbol(:f), <cfgAlias>$30: T.class_of(String), <hashTemp>$31: Symbol(:blk), <hashTemp>$32: Runtime object representing type: T.proc.void)
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$36: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <hashTemp>$12: Symbol(:a) = :a
+    <cfgAlias>$14: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$15: Symbol(:b) = :b
+    <cfgAlias>$17: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$18: Symbol(:c) = :c
+    <cfgAlias>$20: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$21: Symbol(:d) = :d
+    <cfgAlias>$23: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$24: Symbol(:e) = :e
+    <cfgAlias>$26: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$27: Symbol(:f) = :f
+    <cfgAlias>$29: T.class_of(String) = alias <C String>
+    <hashTemp>$30: Symbol(:blk) = :blk
+    <cfgAlias>$34: T.class_of(T) = alias <C T>
+    <statTemp>$32: T.class_of(T.proc) = <cfgAlias>$34: T.class_of(T).proc()
+    <hashTemp>$31: Runtime object representing type: T.proc.void = <statTemp>$32: T.class_of(T.proc).void()
+    <statTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$12: Symbol(:a), <cfgAlias>$14: T.class_of(Integer), <hashTemp>$15: Symbol(:b), <cfgAlias>$17: T.class_of(Integer), <hashTemp>$18: Symbol(:c), <cfgAlias>$20: T.class_of(Integer), <hashTemp>$21: Symbol(:d), <cfgAlias>$23: T.class_of(Integer), <hashTemp>$24: Symbol(:e), <cfgAlias>$26: T.class_of(Integer), <hashTemp>$27: Symbol(:f), <cfgAlias>$29: T.class_of(String), <hashTemp>$30: Symbol(:blk), <hashTemp>$31: Runtime object representing type: T.proc.void)
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <statTemp>$10: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$35: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 # backedges
 # - bb3(rubyRegionId=0)
 # - bb9(rubyRegionId=2)
-bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp>$41: Sorbet::Private::Static::Void, <selfRestore>$42: T.class_of(Test)):
+bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp>$40: Sorbet::Private::Static::Void, <selfRestore>$41: T.class_of(Test)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$41: Sorbet::Private::Static::Void, <selfRestore>$42: T.class_of(Test)):
-    <statTemp>$37: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$41, sig>
-    <self>: T.class_of(Test) = <selfRestore>$42
-    <cfgAlias>$61: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <block-pre-call-temp>$63: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
-    <selfRestore>$64: T.class_of(Test) = <self>
+bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$40: Sorbet::Private::Static::Void, <selfRestore>$41: T.class_of(Test)):
+    <statTemp>$36: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$40, sig>
+    <self>: T.class_of(Test) = <selfRestore>$41
+    <cfgAlias>$59: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <block-pre-call-temp>$61: Sorbet::Private::Static::Void = <cfgAlias>$59: T.class_of(Sorbet::Private::Static).sig(<self>: T.class_of(Test))
+    <selfRestore>$62: T.class_of(Test) = <self>
     <unconditional> -> bb10
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb9[rubyRegionId=2, firstDead=12](<self>: T.class_of(Test), <block-pre-call-temp>$41: Sorbet::Private::Static::Void, <selfRestore>$42: T.class_of(Test)):
+bb9[rubyRegionId=2, firstDead=12](<self>: T.class_of(Test), <block-pre-call-temp>$40: Sorbet::Private::Static::Void, <selfRestore>$41: T.class_of(Test)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$47: Symbol(:x) = :x
-    <cfgAlias>$49: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$50: Symbol(:rest) = :rest
-    <cfgAlias>$52: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$53: Symbol(:blk) = :blk
-    <cfgAlias>$57: T.class_of(T) = alias <C T>
-    <statTemp>$55: T.class_of(T.proc) = <cfgAlias>$57: T.class_of(T).proc()
-    <hashTemp>$54: Runtime object representing type: T.proc.void = <statTemp>$55: T.class_of(T.proc).void()
-    <statTemp>$45: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$47: Symbol(:x), <cfgAlias>$49: T.class_of(Integer), <hashTemp>$50: Symbol(:rest), <cfgAlias>$52: T.class_of(Integer), <hashTemp>$53: Symbol(:blk), <hashTemp>$54: Runtime object representing type: T.proc.void)
-    <blockReturnTemp>$44: T::Private::Methods::DeclBuilder = <statTemp>$45: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$58: T.noreturn = blockreturn<sig> <blockReturnTemp>$44: T::Private::Methods::DeclBuilder
+    <hashTemp>$45: Symbol(:x) = :x
+    <cfgAlias>$47: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$48: Symbol(:rest) = :rest
+    <cfgAlias>$50: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$51: Symbol(:blk) = :blk
+    <cfgAlias>$55: T.class_of(T) = alias <C T>
+    <statTemp>$53: T.class_of(T.proc) = <cfgAlias>$55: T.class_of(T).proc()
+    <hashTemp>$52: Runtime object representing type: T.proc.void = <statTemp>$53: T.class_of(T.proc).void()
+    <statTemp>$43: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$45: Symbol(:x), <cfgAlias>$47: T.class_of(Integer), <hashTemp>$48: Symbol(:rest), <cfgAlias>$50: T.class_of(Integer), <hashTemp>$51: Symbol(:blk), <hashTemp>$52: Runtime object representing type: T.proc.void)
+    <blockReturnTemp>$42: T::Private::Methods::DeclBuilder = <statTemp>$43: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$56: T.noreturn = blockreturn<sig> <blockReturnTemp>$42: T::Private::Methods::DeclBuilder
     <unconditional> -> bb6
 
 # backedges
 # - bb7(rubyRegionId=0)
 # - bb13(rubyRegionId=3)
-bb10[rubyRegionId=3, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp>$63: Sorbet::Private::Static::Void, <selfRestore>$64: T.class_of(Test)):
+bb10[rubyRegionId=3, firstDead=-1](<self>: T.class_of(Test), <block-pre-call-temp>$61: Sorbet::Private::Static::Void, <selfRestore>$62: T.class_of(Test)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb13 : bb11)
 
 # backedges
 # - bb10(rubyRegionId=3)
-bb11[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$63: Sorbet::Private::Static::Void, <selfRestore>$64: T.class_of(Test)):
-    <statTemp>$59: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$63, sig>
-    <self>: T.class_of(Test) = <selfRestore>$64
-    <cfgAlias>$84: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$86: T.class_of(T) = alias <C T>
-    <statTemp>$81: T.class_of(Test) = <self>: T.class_of(Test).extend(<cfgAlias>$84: T.class_of(T::Sig))
+bb11[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$61: Sorbet::Private::Static::Void, <selfRestore>$62: T.class_of(Test)):
+    <statTemp>$57: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$61, sig>
+    <self>: T.class_of(Test) = <selfRestore>$62
+    <cfgAlias>$81: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$83: T.class_of(T) = alias <C T>
+    <statTemp>$78: T.class_of(Test) = <self>: T.class_of(Test).extend(<cfgAlias>$81: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
 # - bb10(rubyRegionId=3)
-bb13[rubyRegionId=3, firstDead=12](<self>: T.class_of(Test), <block-pre-call-temp>$63: Sorbet::Private::Static::Void, <selfRestore>$64: T.class_of(Test)):
+bb13[rubyRegionId=3, firstDead=12](<self>: T.class_of(Test), <block-pre-call-temp>$61: Sorbet::Private::Static::Void, <selfRestore>$62: T.class_of(Test)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$69: Symbol(:x) = :x
+    <hashTemp>$66: Symbol(:x) = :x
+    <cfgAlias>$68: T.class_of(Integer) = alias <C Integer>
+    <hashTemp>$69: Symbol(:rest) = :rest
     <cfgAlias>$71: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$72: Symbol(:rest) = :rest
-    <cfgAlias>$74: T.class_of(Integer) = alias <C Integer>
-    <hashTemp>$75: Symbol(:blk) = :blk
-    <cfgAlias>$79: T.class_of(T) = alias <C T>
-    <statTemp>$77: T.class_of(T.proc) = <cfgAlias>$79: T.class_of(T).proc()
-    <hashTemp>$76: Runtime object representing type: T.proc.void = <statTemp>$77: T.class_of(T.proc).void()
-    <statTemp>$67: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$69: Symbol(:x), <cfgAlias>$71: T.class_of(Integer), <hashTemp>$72: Symbol(:rest), <cfgAlias>$74: T.class_of(Integer), <hashTemp>$75: Symbol(:blk), <hashTemp>$76: Runtime object representing type: T.proc.void)
-    <blockReturnTemp>$66: T::Private::Methods::DeclBuilder = <statTemp>$67: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$80: T.noreturn = blockreturn<sig> <blockReturnTemp>$66: T::Private::Methods::DeclBuilder
+    <hashTemp>$72: Symbol(:blk) = :blk
+    <cfgAlias>$76: T.class_of(T) = alias <C T>
+    <statTemp>$74: T.class_of(T.proc) = <cfgAlias>$76: T.class_of(T).proc()
+    <hashTemp>$73: Runtime object representing type: T.proc.void = <statTemp>$74: T.class_of(T.proc).void()
+    <statTemp>$64: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$66: Symbol(:x), <cfgAlias>$68: T.class_of(Integer), <hashTemp>$69: Symbol(:rest), <cfgAlias>$71: T.class_of(Integer), <hashTemp>$72: Symbol(:blk), <hashTemp>$73: Runtime object representing type: T.proc.void)
+    <blockReturnTemp>$63: T::Private::Methods::DeclBuilder = <statTemp>$64: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$77: T.noreturn = blockreturn<sig> <blockReturnTemp>$63: T::Private::Methods::DeclBuilder
     <unconditional> -> bb10
 
 }
