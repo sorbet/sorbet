@@ -9,10 +9,10 @@ class A
     .returns(T.type_parameter(:U))
   end
   def instance_eval(&blk)
-    blk.call
+    blk.call(self)
   end
 end
 
 T.reveal_type(A.new.instance_eval {4}) # error: Revealed type: `Integer`
 A.new.instance_eval {T.reveal_type(self)} # error: Revealed type: `T.untyped`
-A.new.instance_eval {|x| T.reval_type(x)} # error: Revealed type: `T.untyped`
+A.new.instance_eval {|x| T.reveal_type(x)} # error: Revealed type: `T.untyped`
