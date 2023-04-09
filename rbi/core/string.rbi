@@ -2147,7 +2147,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.nilable(String))
   end
   def squeeze!(arg0=T.unsafe(nil)); end
 
