@@ -68,10 +68,9 @@ test/cli/expected-got/expected-got.rb:30: `T.must` called on `Integer(0)`, which
     30 |T.must(0)
         ^^^^^^^^^
 
-test/cli/expected-got/expected-got.rb:36: Expected `Integer` but found `String("")` for block result type https://srb.help/7005
-    36 |takes_int_block do
+test/cli/expected-got/expected-got.rb:37: Expected `Integer` but found `String("")` for block result type https://srb.help/7005
     37 |  ''
-    38 |end
+          ^^
   Expected `Integer` for block result type:
     test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
