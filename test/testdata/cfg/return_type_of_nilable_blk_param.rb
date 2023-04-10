@@ -22,12 +22,14 @@ class A
 end
 
 def main
-  A.new.bar do |r| # error: Expected `Integer` but found `String` for block result type
+  A.new.bar do |r|
     r.to_s
+  # ^^^^^^ error: Expected `Integer` but found `String` for block result type
   end
 
-  A.new.baz do |r| # error: Expected `Integer` but found `String` for block result type
+  A.new.baz do |r|
     r.to_s
+  # ^^^^^^ error: Expected `Integer` but found `String` for block result type
   end
 
   A.new.bar do |r|
