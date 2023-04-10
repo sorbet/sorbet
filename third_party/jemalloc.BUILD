@@ -29,7 +29,7 @@ JEMALLOC_BUILD_COMMAND = """
   export OBJCOPY=$$(absolutize $(OBJCOPY))
   export CFLAGS=$(CC_FLAGS)
   export CXXFLAGS=$(CC_FLAGS)
-  export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
+  export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin -Wl,--thinlto-jobs=all")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="$${LTOFLAGS}"
   export EXTRA_CXXFLAGS="-stdlib=libc++ $${EXTRA_CFLAGS}"
 
