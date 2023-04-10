@@ -50,13 +50,13 @@ bb3[rubyRegionId=0, firstDead=3](<block-pre-call-temp>$7: Sorbet::Private::Stati
 bb5[rubyRegionId=1, firstDead=8](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     # outerLoops: 1
     <self>: T.class_of(A) = loadSelf(new)
-    <cfgAlias>$14: T.class_of(T) = alias <C T>
-    <cfgAlias>$16: T.class_of(A) = alias <C A>
-    keep_for_ide$12: Runtime object representing type: T.class_of(A) = <cfgAlias>$14: T.class_of(T).class_of(<cfgAlias>$16: T.class_of(A))
-    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
-    <castTemp>$17: T.class_of(A) = <self>
-    <self>: T.class_of(A) = cast(<castTemp>$17: T.class_of(A), T.class_of(A));
-    <blockReturnTemp>$18: T.noreturn = blockreturn<new> <blockReturnTemp>$10: NilClass
+    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <cfgAlias>$15: T.class_of(A) = alias <C A>
+    keep_for_ide$11: Runtime object representing type: T.class_of(A) = <cfgAlias>$13: T.class_of(T).class_of(<cfgAlias>$15: T.class_of(A))
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
+    <castTemp>$16: T.class_of(A) = <self>
+    <self>: T.class_of(A) = cast(<castTemp>$16: T.class_of(A), T.class_of(A));
+    <blockReturnTemp>$17: T.noreturn = blockreturn<new> <blockReturnTemp>$9: NilClass
     <unconditional> -> bb2
 
 }
@@ -87,9 +87,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$7
 bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
     <self>: T.class_of(A) = <selfRestore>$8
-    <cfgAlias>$16: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$18: T.class_of(T) = alias <C T>
-    <statTemp>$13: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$16: T.class_of(T::Sig))
+    <cfgAlias>$15: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$17: T.class_of(T) = alias <C T>
+    <statTemp>$12: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$15: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -98,8 +98,8 @@ bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Stati
 bb5[rubyRegionId=1, firstDead=3](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.void()
-    <blockReturnTemp>$12: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.void()
+    <blockReturnTemp>$11: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 }
