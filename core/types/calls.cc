@@ -952,20 +952,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
-        auto splatLoc = args.argLoc(args.args.size() - 1);
+       // auto splatLoc = args.argLoc(args.args.size() - 1);
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
-        if (gs.ruby3KeywordArgs) {
-            if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
-                e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
-                e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
-                                         "and will be an error in Ruby 3.0");
-                if (auto source = splatLoc.source(gs)) {
-                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
-                                  source.value());
-                }
-            }
-        }
+        // if (gs.ruby3KeywordArgs) {
+            // if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
+                // e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
+                // e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
+                                         // "and will be an error in Ruby 3.0");
+                // if (auto source = splatLoc.source(gs)) {
+                    // e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
+                                  // source.value());
+                // }
+            // }
+        // }
         hasKwsplat = true;
         implicitKwsplat = true;
     }
@@ -1219,27 +1219,27 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto kwSplatValueType = appliedType.targs[1];
 
                 if (hasRequiredKwParam) {
-                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
-                        // Unfortunately, this prevents even valid splats:
-                        //     def f(x:, y: 0); end
-                        //     f(x: 0, **opts)
-                        // This should work, but we currently handle kwsplat even before we check
-                        // which keyword args have already been consumed (see below for that).
-                        // This is harder to support, but maybe also less likely:
-                        //     f(**opts, x: 0)
-                        e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
-                                    "keyword parameters",
-                                    method.show(gs), "Hash");
-                        e.addErrorLine(kwParams.front()->loc,
-                                       "Keyword parameters of `{}` begin here:", method.show(gs));
-                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
-                                       "with splats.\n"
-                                       "    To ignore this and pass the splat anyways, use `{}`",
-                                       "T.unsafe");
-                        maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
-                        result.main.errors.emplace_back(e.build());
-                    }
+                    // if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
+                        // // Unfortunately, this prevents even valid splats:
+                        // //     def f(x:, y: 0); end
+                        // //     f(x: 0, **opts)
+                        // // This should work, but we currently handle kwsplat even before we check
+                        // // which keyword args have already been consumed (see below for that).
+                        // // This is harder to support, but maybe also less likely:
+                        // //     f(**opts, x: 0)
+                        // e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
+                                    // "keyword parameters",
+                                    // method.show(gs), "Hash");
+                        // e.addErrorLine(kwParams.front()->loc,
+                                       // "Keyword parameters of `{}` begin here:", method.show(gs));
+                        // e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                        // e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
+                                       // "with splats.\n"
+                                       // "    To ignore this and pass the splat anyways, use `{}`",
+                                       // "T.unsafe");
+                        // maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
+                        // result.main.errors.emplace_back(e.build());
+                    // }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
                                                             UntypedMode::AlwaysCompatible)) {
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
