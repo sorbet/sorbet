@@ -1390,21 +1390,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -1475,21 +1463,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -1796,21 +1772,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -1881,21 +1845,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -1962,21 +1914,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2071,21 +2011,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2140,21 +2068,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2225,21 +2141,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2309,21 +2213,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2424,21 +2316,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2512,21 +2392,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2635,21 +2503,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2704,21 +2560,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2773,21 +2617,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2842,21 +2674,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2927,21 +2747,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -2996,21 +2804,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3081,21 +2877,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3196,21 +2980,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3299,21 +3071,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3368,21 +3128,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3453,21 +3201,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3568,21 +3304,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3671,21 +3395,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3740,21 +3452,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3825,21 +3525,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -3940,21 +3628,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4043,21 +3719,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4112,21 +3776,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4197,21 +3849,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4308,21 +3948,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4419,21 +4047,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4488,21 +4104,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4573,21 +4177,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4654,21 +4246,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4763,21 +4343,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4832,21 +4400,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4917,21 +4473,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -4986,21 +4530,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -5071,21 +4603,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -5729,21 +5249,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -5814,21 +5322,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -5883,21 +5379,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -5968,21 +5452,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -6148,21 +5620,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -6233,21 +5693,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
@@ -6302,21 +5750,9 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
-            recv = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr

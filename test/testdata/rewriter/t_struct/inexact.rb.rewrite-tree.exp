@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)

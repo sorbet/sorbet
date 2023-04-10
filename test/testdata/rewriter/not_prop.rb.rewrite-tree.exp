@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def array_of_explicit=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.prop(:type, :type, <emptyTree>::<C String>)
