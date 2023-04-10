@@ -170,6 +170,9 @@ build:lto --config=static-libs
 
 ## flags that substantially increase Clang&LLVMs ability to devirtualize calls
 build:lto-linux --linkopt=-Wl,--icf=all
+
+# Improves linking time on arm64 hosts
+build:lto-linux --linkopt=-Wl,--thinlto-jobs=all
 build:lto-linux --config=lto
 
 # By default, we make static builds, but we can also use dynamic linking if asked to.
