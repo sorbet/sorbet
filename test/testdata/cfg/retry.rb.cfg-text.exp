@@ -24,8 +24,8 @@ bb2[rubyRegionId=0, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass
 # - bb7(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: T.untyped, <magic>$13: T.class_of(<Magic>)):
     <cfgAlias>$16: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$17: T.untyped = <exceptionValue>$4: T.untyped.is_a?(<cfgAlias>$16: T.class_of(StandardError))
-    <isaCheckTemp>$17 -> (T.untyped ? bb10 : bb11)
+    <isaCheckTemp>$17: T::Boolean = <cfgAlias>$16: T.class_of(StandardError).===(<exceptionValue>$4: T.untyped)
+    <isaCheckTemp>$17 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb2(rubyRegionId=0)

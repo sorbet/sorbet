@@ -25,8 +25,8 @@ bb2[rubyRegionId=0, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass
 # - bb18(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: T.untyped, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <cfgAlias>$45: T.class_of(B) = alias <C B>
-    <isaCheckTemp>$46: T.untyped = <exceptionValue>$4: T.untyped.is_a?(<cfgAlias>$45: T.class_of(B))
-    <isaCheckTemp>$46 -> (T.untyped ? bb21 : bb22)
+    <isaCheckTemp>$46: T::Boolean = <cfgAlias>$45: T.class_of(B).===(<exceptionValue>$4: T.untyped)
+    <isaCheckTemp>$46 -> (T::Boolean ? bb21 : bb22)
 
 # backedges
 # - bb2(rubyRegionId=0)
@@ -48,8 +48,8 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass
 # - bb13(rubyRegionId=5)
 bb6[rubyRegionId=6, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: T.untyped, <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <cfgAlias>$32: T.class_of(A) = alias <C A>
-    <isaCheckTemp>$33: T.untyped = <exceptionValue>$8: T.untyped.is_a?(<cfgAlias>$32: T.class_of(A))
-    <isaCheckTemp>$33 -> (T.untyped ? bb16 : bb17)
+    <isaCheckTemp>$33: T::Boolean = <cfgAlias>$32: T.class_of(A).===(<exceptionValue>$8: T.untyped)
+    <isaCheckTemp>$33 -> (T::Boolean ? bb16 : bb17)
 
 # backedges
 # - bb5(rubyRegionId=1)
