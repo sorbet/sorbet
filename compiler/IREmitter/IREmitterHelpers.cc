@@ -11,7 +11,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"

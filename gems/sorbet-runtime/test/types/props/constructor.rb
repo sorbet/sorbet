@@ -62,4 +62,87 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   it 'can default untyped fields' do
     UntypedField.new
   end
+
+  class WeakConstructorCustomInitializeStruct
+    include T::Props
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :name, String
+    prop :greeting, String, default: "Hi"
+    prop :farewell, String, default: "Bye"
+    prop :bool, T::Boolean
+    prop :color, T.nilable(String)
+    prop :type, T.nilable(String), raise_on_nil_write: true
+
+    def initialize(hash={})
+      @name = 'Doe'
+      @greeting = nil
+      @farewell = 'Ciao'
+      @bool = false
+      @color = 'red'
+      @type = 'value'
+      super
+    end
+  end
+
+  it 'does not clobber custom initialize T::Props::WeakConstructor' do
+    c = WeakConstructorCustomInitializeStruct.new
+    assert_equal('Doe', c.name)
+    assert_equal('Hi', c.greeting)
+    assert_equal('Bye', c.farewell)
+    assert_equal(false, c.bool)
+    assert_equal('red', c.color)
+    assert_equal('value', c.type)
+
+    c = WeakConstructorCustomInitializeStruct.new(name: 'Alex', greeting: 'hello', farewell: 'goodbye', bool: true, color: 'blue', type: 'other')
+    assert_equal('Alex', c.name)
+    assert_equal('hello', c.greeting)
+    assert_equal('goodbye', c.farewell)
+    assert_equal(true, c.bool)
+    assert_equal('blue', c.color)
+    assert_equal('other', c.type)
+  end
+
+  class CustomInitializeStruct < T::Struct
+    prop :name, String
+    prop :greeting, String, default: "Hi"
+    prop :farewell, String, default: "Bye"
+    prop :bool, T::Boolean
+    prop :color, T.nilable(String)
+    prop :type, T.nilable(String), raise_on_nil_write: true
+
+    def initialize(hash={})
+      @name = 'Doe'
+      @greeting = nil
+      @farewell = 'Ciao'
+      @bool = false
+      @color = 'red'
+      @type = 'value'
+      super
+    end
+  end
+
+  it 'does not clobber custom initialize for T::Struct' do
+    c = CustomInitializeStruct.new(name: 'Alex', bool: true, type: 'other')
+    assert_equal('Alex', c.name)
+    assert_equal('Hi', c.greeting)
+    assert_equal('Bye', c.farewell)
+    assert_equal(true, c.bool)
+    assert_nil(c.color)
+    assert_equal('other', c.type)
+
+    c = CustomInitializeStruct.new(name: 'Alex', greeting: 'hello', farewell: 'goodbye', bool: true, color: 'blue', type: 'other')
+    assert_equal('Alex', c.name)
+    assert_equal('hello', c.greeting)
+    assert_equal('goodbye', c.farewell)
+    assert_equal(true, c.bool)
+    assert_equal('blue', c.color)
+    assert_equal('other', c.type)
+
+    err = assert_raises(ArgumentError) do
+      CustomInitializeStruct.new(bool: true, type: 'other')
+    end
+    assert_equal("Missing required prop `name` for class `Opus::Types::Test::Props::ConstructorTest::CustomInitializeStruct`", err.message)
+  end
 end

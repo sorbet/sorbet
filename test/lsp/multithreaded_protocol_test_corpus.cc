@@ -2,7 +2,7 @@
 // ^ Violates linting rules, so include first.
 #include "absl/strings/match.h"
 #include "common/common.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "test/helpers/lsp.h"
 #include "test/lsp/ProtocolTest.h"
 

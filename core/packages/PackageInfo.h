@@ -64,7 +64,7 @@ public:
     };
 
     virtual bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const = 0;
-    virtual bool strictAutoloaderCompatibility() const = 0;
+    virtual bool legacyAutoloaderCompatibility() const = 0;
     virtual bool exportAll() const = 0;
 
     // Utilities:

@@ -1,5 +1,5 @@
 #include "main/lsp/UndoState.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"

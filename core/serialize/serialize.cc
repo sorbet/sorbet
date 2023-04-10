@@ -2,8 +2,8 @@
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
-#include "common/Timer.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/FileHash.h"
 #include "core/GlobalState.h"
@@ -1054,13 +1054,12 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
     return LocOffsets{p.getU4(), p.getU4()};
 }
 
-vector<uint8_t> Serializer::store(GlobalState &gs) {
+vector<uint8_t> Serializer::store(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
     return p.result();
 }
 
-std::vector<uint8_t> Serializer::storePayloadAndNameTable(GlobalState &gs) {
-    Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
+std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs, true);
     return p.result();
 }

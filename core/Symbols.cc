@@ -4,8 +4,8 @@
 #include "absl/strings/str_replace.h"
 #include "common/JSON.h"
 #include "common/Levenstein.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
@@ -26,7 +26,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 210;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 108;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 72;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -232,6 +232,19 @@ bool SymbolRef::isStaticField(const GlobalState &gs) const {
     return isFieldOrStaticField() && asFieldRef().dataAllowingNone(gs)->flags.isStaticField;
 }
 
+bool SymbolRef::isClassAlias(const GlobalState &gs) const {
+    if (!isFieldOrStaticField()) {
+        return false;
+    }
+
+    const auto &data = asFieldRef().dataAllowingNone(gs);
+    if (!data->flags.isStaticField) {
+        return false;
+    }
+
+    return data->isClassAlias();
+}
+
 ClassOrModuleData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ClassOrModuleData(gs.classAndModules[_id], gs);
@@ -432,9 +445,10 @@ string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
 string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     if (sym->name == core::Names::Constants::AttachedClass()) {
-        auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists());
-        if (options.showForRBI) {
+        auto owner = sym->owner.asClassOrModuleRef();
+        auto attached = owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists() || owner.data(gs)->isModule());
+        if (options.showForRBI || owner.data(gs)->isModule()) {
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
@@ -569,6 +583,42 @@ MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef nam
         return sym.asMethodRef();
     }
     return Symbols::noMethod();
+}
+
+bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_store &locs, core::FileRef file) {
+    bool result = false;
+
+    for (auto &loc : locs) {
+        if (loc.file().data(gs).isRBI()) {
+            continue;
+        }
+
+        if (loc.file() != file) {
+            return false;
+        }
+
+        result = true;
+    }
+
+    return result;
+}
+
+// Returns true if the given symbol is only defined in a given file (not accounting for RBIs).
+bool SymbolRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    if (file.data(gs).isRBI()) {
+        return false;
+    }
+
+    return singleFileDefinition(gs, locs(gs), file);
+}
+
+// Returns true if the given class/module is only defined in a given file (not accounting for RBIs).
+bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
+    if (file.data(gs).isRBI()) {
+        return false;
+    }
+
+    return singleFileDefinition(gs, data(gs)->locs(), file);
 }
 
 // Documented in SymbolRef.h
@@ -1711,24 +1761,30 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     }
     ClassOrModuleRef selfRef = this->ref(gs);
 
-    // avoid using `this` after the call to gs.enterTypeMember
-    auto selfLoc = this->loc();
-
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
+
+    // --------
+    // Call to enterClassSymbol might have reallocated the memory that `*this` pointed to
+    // It's not safe to use `this` anymore.
+    // --------
+    const auto &self = selfRef.data(gs);
 
     singletonInfo->members()[Names::attached()] = selfRef;
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
-    auto tp = gs.enterTypeMember(selfLoc, singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    ENFORCE(self->isClassModuleSet(), "{}", selfRef.show(gs));
+    if (self->isClass()) {
+        auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
-    // Initialize the bounds of AttachedClass as todo, as they will be updated
-    // to the externalType of the attached class for the upper bound, and bottom
-    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-    auto todo = make_type<ClassType>(Symbols::todo());
-    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
+        // Initialize the bounds of AttachedClass as todo, as they will be updated
+        // to the externalType of the attached class for the upper bound, and bottom
+        // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+        auto todo = make_type<ClassType>(Symbols::todo());
+        tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
+    }
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
@@ -2357,7 +2413,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            result = mix(result, _hash(member.name(gs).shortName(gs)));
+            if (member.isTypeMember()) {
+                result = mix(result, member.asTypeMemberRef().data(gs)->hash(gs));
+            } else {
+                result = mix(result, _hash(member.name(gs).shortName(gs)));
+            }
         }
     }
     for (const auto &e : mixins_) {

@@ -2,7 +2,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -54,16 +54,7 @@ string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, 
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
     string resolvedString = options.showForRBI ? "" : " (unresolved)";
-    ClassOrModuleRef symForPrinting;
-
-    if (options.showForRBI) {
-        auto attachedClass = this->klass.data(gs)->attachedClass(gs);
-        symForPrinting = attachedClass;
-    } else {
-        symForPrinting = this->klass;
-    }
-
-    return fmt::format("{}[{}]{}", symForPrinting.show(gs, options),
+    return fmt::format("{}[{}]{}", this->klass.show(gs, options),
                        fmt::map_join(targs, ", ",
                                      [&](auto targ) {
                                          return options.showForRBI ? argTypeForUnresolvedAppliedType(gs, targ, options)
@@ -500,7 +491,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);
-        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
+        } else if (this->klass.data(gs)->isClass() &&
+                   typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

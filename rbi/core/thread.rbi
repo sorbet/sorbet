@@ -845,15 +845,6 @@ class Thread < Object
   sig {params(abort_on_exception: T.untyped).returns(T.untyped)}
   def self.abort_on_exception=(abort_on_exception); end
 
-  # Wraps the block in a single, VM-global
-  # [`Mutex.synchronize`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html#method-i-synchronize),
-  # returning the value of the block. A thread executing inside the exclusive
-  # section will only block other threads which also use the
-  # [`Thread.exclusive`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-exclusive)
-  # mechanism.
-  sig {params(block: T.untyped).returns(T.untyped)}
-  def self.exclusive(&block); end
-
   # Terminates the currently running thread and schedules another thread to be
   # run.
   #

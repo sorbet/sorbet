@@ -1,11 +1,11 @@
 #include "main/autogen/autoloader.h"
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
@@ -38,13 +38,6 @@ bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) 
     return !nonCollapsableModuleNames.contains(module);
 }
 
-bool AutoloaderConfig::registeredForPBAL(const vector<core::NameRef> &pkgParts) const {
-    return pbalNamespaces.empty() || (absl::c_any_of(pbalNamespaces, [&pkgParts](auto &pbalNamespace) {
-               return pbalNamespace.size() <= pkgParts.size() &&
-                      std::equal(pbalNamespace.begin(), pbalNamespace.end(), pkgParts.begin());
-           }));
-}
-
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -73,13 +66,6 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
             refs.emplace_back(gs.enterNameConstant(name));
         }
         out.nonCollapsableModuleNames.emplace(refs);
-    }
-    for (auto &nameParts : cfg.pbalNamespaces) {
-        vector<core::NameRef> refs;
-        for (auto &name : nameParts) {
-            refs.emplace_back(gs.enterNameConstant(name));
-        }
-        out.pbalNamespaces.emplace(refs);
     }
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
@@ -352,18 +338,11 @@ void DefTreeBuilder::markPackages(const core::GlobalState &gs, DefTree &root, co
 
     for (auto nr : gs.packageDB().packages()) {
         auto &pkg = gs.packageDB().getPackageInfo(nr);
-        if (pkg.strictAutoloaderCompatibility()) {
-            // Only mark strictly path-based autoload compatible packages for now to reduce
+        if (!pkg.legacyAutoloaderCompatibility()) {
+            // Only mark path-based autoload compatible packages for now to reduce
             // computation / code generation, given this is the only current use-case for registering
             // packages in this context in the Stripe codebase.
-
-            // Additionally this package must be registed for path-based autoloading.
-            // TODO: (aadi-stripe, 10/24/2022) Remove this functionality once we no longer require
-            // special registration.
             auto &pkgFullName = pkg.fullName();
-            if (!alCfg.registeredForPBAL(pkgFullName)) {
-                continue;
-            }
 
             root.markPackageNamespace(pkg.mangledName(), pkgFullName);
             if (testRoot != nullptr) {

@@ -1,6 +1,9 @@
 cc_import(
     name = "ssl-import",
-    shared_library = "lib/x86_64-linux-gnu/libssl.so",
+    shared_library = select({
+        "@platforms//cpu:x86_64": "lib/x86_64-linux-gnu/libssl.so",
+        "@platforms//cpu:arm64": "lib/aarch64-linux-gnu/libssl.so",
+    }),
     visibility = ["//visibility:private"],
 )
 
@@ -13,7 +16,10 @@ cc_library(
 
 cc_import(
     name = "crypto-import",
-    shared_library = "lib/x86_64-linux-gnu/libcrypto.so",
+    shared_library = select({
+        "@platforms//cpu:x86_64": "lib/x86_64-linux-gnu/libcrypto.so",
+        "@platforms//cpu:arm64": "lib/aarch64-linux-gnu/libcrypto.so",
+    }),
     visibility = ["//visibility:private"],
 )
 

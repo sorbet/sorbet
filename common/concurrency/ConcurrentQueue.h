@@ -9,8 +9,8 @@
 */
 
 #include "blockingconcurrentqueue.h"
-#include "common/Timer.h"
 #include "common/common.h"
+#include "common/timers/Timer.h"
 #include <atomic>
 #include <chrono>
 #include <type_traits>

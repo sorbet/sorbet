@@ -10,6 +10,7 @@ namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 class ErrorAssertion;
+class UntypedAssertion;
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.
@@ -41,6 +42,9 @@ public:
      */
     static std::vector<std::shared_ptr<ErrorAssertion>>
     getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+
+    static std::vector<std::shared_ptr<UntypedAssertion>>
+    getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
 
     const std::string filename;
     const std::unique_ptr<Range> range;
@@ -83,11 +87,37 @@ public:
 
     const std::string message;
     const bool matchesDuplicateErrors;
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Error;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message, bool matchesDuplicateErrors);
 
     std::string toString() const override;
+
+    bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
+};
+
+class UntypedAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<UntypedAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
+
+    UntypedAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     std::string_view message);
+
+    std::string toString() const override;
+    const std::string message;
+
+    // this exists solely to allow us to reuse ErrorAssertion's checkAll
+    // for UntypedAssertion. It should *always* be false.
+    static constexpr bool matchesDuplicateErrors = false;
+    static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Information;
+
+    static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
+                         std::vector<std::shared_ptr<UntypedAssertion>> errorAssertions,
+                         std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> &filenamesAndDiagnostics,
+                         std::string errorPrefix = "");
 
     bool check(const Diagnostic &diagnostic, std::string_view sourceLine, std::string_view errorPrefix);
 };
@@ -268,6 +298,29 @@ public:
     HoverAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
                    std::string_view message);
 
+    const std::string message;
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string errorPrefix = "");
+
+    std::string toString() const override;
+};
+
+// # ^ hover-line: 1 foo
+class HoverLineAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<HoverLineAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                    int assertionLine, std::string_view assertionContents,
+                                                    std::string_view assertionType);
+    /** Checks all HoverLineAssertions within the assertion vector. Skips over non-hover assertions.*/
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
+
+    HoverLineAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, int lineno,
+                       std::string_view message);
+
+    const int lineno;
     const std::string message;
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,

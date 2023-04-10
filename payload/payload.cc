@@ -1,6 +1,6 @@
 #include "payload/payload.h"
 #include "common/Random.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "core/serialize/serialize.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
@@ -98,7 +98,6 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
         // into the databaase.
         if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
-            Timer timeit(gs.tracer(), "write_global_state.kvstore");
             // Generate a new UUID, since this GS has changed since it was read.
             gs.kvstoreUuid = Random::uniformU4();
             kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(gs));

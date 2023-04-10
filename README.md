@@ -587,6 +587,13 @@ If a location should report the empty string, use the special label `(nothing)`:
 # ^ hover: (nothing)
 ```
 
+Assert the contents of a specific line of the hover response with `hover-line` assertions:
+
+```ruby
+  a = 10
+# ^ hover-line: 1 Integer(10)
+```
+
 #### Testing completion
 
 LSP tests can also assert the contents of completion responses with `completion`

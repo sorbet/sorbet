@@ -1,7 +1,7 @@
 #include "environment.h"
 #include "absl/strings/match.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
@@ -997,7 +997,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
-                auto multipleComponents = it->secondary != nullptr;
                 while (it != nullptr) {
                     for (auto &err : it->main.errors) {
                         if (err->what != core::errors::Infer::UnknownMethod ||
@@ -1063,31 +1062,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
 
-                    // Sometimes we hit a method here where the method symbol is Symbols::noSymbol().
-                    //
-                    // The primary cases for that is:
-                    //  - When the receiver is untyped
-                    //  - When the receiver is a void type
-                    //  - Calling super
-                    //  - Calling initialize on an object that doesn't define initialize
-                    //  - When a method doesn't exist.
-                    //
-                    // In all of these cases, we bail out and skip the non-private checking.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPrivate && !send.isPrivateOk) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
-                            if (multipleComponents) {
-                                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
-                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx),
-                                            recvType.type.show(ctx));
-                            } else {
-                                e.setHeader("Non-private call to private method `{}` on `{}`",
-                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
-                            }
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
-                                           it->main.method.data(ctx)->owner.show(ctx));
-                        }
-                    }
-
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
                         if (klass.exists()) {
@@ -1120,6 +1094,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
+                if (send.link) {
+                    // This should eventually become ENFORCEs but currently they are wrong
+                    if (!retainedResult->main.blockReturnType) {
+                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    if (!retainedResult->main.blockPreType) {
+                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                    }
+                    ENFORCE(retainedResult->main.sendTp);
+                }
+
                 // For `case x; when X ...`, desugar produces `X.===(x)`, but with
                 // a zero-length funLoc.  We tried producing a zero-length loc for
                 // the entire send so there would never be a match here, but that
@@ -1143,20 +1128,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(ctx.locAt(bind.loc), retainedResult, fun, send.isPrivateOk,
-                                                     ctx.owner.asMethodRef(), ctx.locAt(send.receiverLoc),
-                                                     ctx.locAt(send.funLoc), send.args.size()));
+                        ctx,
+                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
+                                                send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
                 }
                 if (send.link) {
-                    // This should eventually become ENFORCEs but currently they are wrong
-                    if (!retainedResult->main.blockReturnType) {
-                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
-                    }
-                    if (!retainedResult->main.blockPreType) {
-                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
-                    }
-                    ENFORCE(retainedResult->main.sendTp);
-
                     send.link->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {

@@ -18,7 +18,7 @@ constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::False};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::False};
 constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::False};
 constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::False};
-constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::False};
+// constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::False};
 constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::False};
 constexpr ErrorClass NotATypeVariable{5018, StrictLevel::False};
 constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::False};
@@ -29,6 +29,7 @@ constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::False};
 constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::False};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::False};
 constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::False};
+constexpr ErrorClass OutOfOrderConstantAccess{5027, StrictLevel::False};
 
 // constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::True};
 // constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
@@ -77,6 +78,8 @@ constexpr ErrorClass MultipleStatementsInSig{5069, StrictLevel::False};
 constexpr ErrorClass NilableUntyped{5070, StrictLevel::False};
 constexpr ErrorClass BindNonBlockParameter{5071, StrictLevel::False};
 constexpr ErrorClass TypeMemberScopeMismatch{5072, StrictLevel::False};
+constexpr ErrorClass AbstractClassInstantiated{5073, StrictLevel::True};
+constexpr ErrorClass HasAttachedClassIncluded{5074, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

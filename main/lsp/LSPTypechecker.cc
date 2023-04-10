@@ -4,7 +4,7 @@
 #include "absl/synchronization/notification.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
@@ -64,7 +64,8 @@ LSPTypechecker::LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
 LSPTypechecker::~LSPTypechecker() {}
 
 void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> initialGS,
-                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers) {
+                                std::unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                const LSPConfiguration &currentConfig) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
 
@@ -72,6 +73,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Initialize the global state for the indexer
     {
+        initialGS->highlightUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
         // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
@@ -465,10 +467,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
 
-        auto &resolved = maybeResolved.result();
-        for (auto &tree : resolved) {
-            ENFORCE(tree.file.exists());
-        }
         if (gs->sleepInSlowPathSeconds.has_value()) {
             auto sleepDuration = gs->sleepInSlowPathSeconds.value();
             for (int i = 0; i < sleepDuration * 10; i++) {
@@ -519,7 +517,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             return;
         }
 
-        auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
+        auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
         pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
@@ -721,8 +719,8 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &wor
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                                        std::unique_ptr<KeyValueStore> kvstore) {
-    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers);
+                                        std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
+    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
 }
 
 void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {

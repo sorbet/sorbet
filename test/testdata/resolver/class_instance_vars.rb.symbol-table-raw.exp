@@ -17,8 +17,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
   module <C <U Mixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
     static-field <C <U Mixin>>::<U @@mixin_cvar> -> Integer @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=16:3 end=16:15}
-  class <S <C <U Mixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
-    type-member(+) <S <C <U Mixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Mixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mixin) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
+  class <S <C <U Mixin>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=15:13}
     method <S <C <U Mixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=15:1 end=18:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
   class <C <U Parent>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=2:13}
@@ -27,7 +26,7 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U Parent>>#<U @ivar2> -> Integer @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=5:5 end=5:11}
     method <C <U Parent>>#<U hi> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=9:3 end=9:9}
       argument <blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
-    method <C <U Parent>>#<U initialize> (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=3:3 end=3:17}
+    method <C <U Parent>>#<U initialize> : private (<blk>) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=3:3 end=3:17}
       argument <blk><block> @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=??? end=???}
   class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=2:13}
     type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/resolver/class_instance_vars.rb start=2:1 end=2:13}

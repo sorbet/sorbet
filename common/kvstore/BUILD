@@ -8,7 +8,7 @@ cc_library(
         "KeyValueStore.h",
     ],
     linkopts = select({
-        "//tools/config:linux": ["-lm"],
+        "@platforms//os:linux": ["-lm"],
         "//conditions:default": [],
     }),
     linkstatic = select({

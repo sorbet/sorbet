@@ -164,7 +164,8 @@ public:
     void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
                             const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                            const std::vector<std::string> &packageSkipRBIExportEnforcementDirs, std::string errorHint);
+                            const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
+                            const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -230,6 +231,7 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
+    bool highlightUntyped = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
     // this into a valid ruby identifier without suffering.

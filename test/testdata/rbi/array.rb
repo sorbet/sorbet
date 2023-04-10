@@ -64,3 +64,9 @@ T.assert_type!([1, 2].to_set, T::Set[T.untyped])
 arr = [1, 2, 3]
 T.assert_type!(arr.intersection([3, 5]), T::Array[Integer])
 T.assert_type!(arr.intersect?([2, 7]), T::Boolean)
+
+T.reveal_type(arr.fetch(0, -1)) # error: Revealed type: `Integer`
+T.reveal_type(arr.fetch(0) { 1 }) # error: Revealed type: `Integer`
+
+T.reveal_type(arr.fetch(0, 'error')) # error: Revealed type: `T.any(Integer, String)`
+T.reveal_type(arr.fetch(0) { 'error' }) # error: Revealed type: `T.any(Integer, String)`

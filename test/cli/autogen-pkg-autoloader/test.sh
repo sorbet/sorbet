@@ -25,7 +25,6 @@ touch "$inner_dir_to_delete/__file_to_delete.rb"
   --autogen-autoloader-exclude-require=byebug \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
-  --autogen-autoloader-pbal-namespaces RootPackage \
   test/cli/autogen-pkg-autoloader/{foo,bar,bar2,errors,__package}.rb \
   test/cli/autogen-pkg-autoloader/nested/*.rb \
   test/cli/autogen-pkg-autoloader/scripts/baz.rb 2>&1

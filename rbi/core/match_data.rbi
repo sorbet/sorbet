@@ -141,6 +141,26 @@ class MatchData < Object
   end
   def begin(n); end
 
+  # Returns a two-element array containing the beginning and ending byte-based
+  # offsets of the nth match. n can be a string or symbol to reference a named capture.
+  #
+  # ```ruby
+  # m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  # m.byteoffset(0)      #=> [1, 7]
+  # m.byteoffset(4)      #=> [6, 7]
+  #
+  # m = /(?<foo>.)(.)(?<bar>.)/.match("hoge")
+  # m.byteoffset(:foo)   #=> [0, 1]
+  # m.byteoffset(:bar)   #=> [2, 3]
+  # ```
+  sig do
+    params(
+      n: T.any(Integer, Symbol, String),
+    )
+    .returns(T::Array[Integer])
+  end
+  def byteoffset(n); end
+
   # Returns the array of captures; equivalent to `mtch.to_a[1..-1]`.
   #
   # ```ruby

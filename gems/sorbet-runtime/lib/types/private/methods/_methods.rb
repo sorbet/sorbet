@@ -83,7 +83,7 @@ module T::Private::Methods
       raise "Procs cannot have override/abstract modifiers"
     end
     if decl.mod != PROC_TYPE
-      raise "You are passing a DeclBuilder as a type. Did you accidentally use `self` inside a `sig` block?"
+      raise "You are passing a DeclBuilder as a type. Did you accidentally use `self` inside a `sig` block? Perhaps you wanted the `T.self_type` instead: https://sorbet.org/docs/self-type"
     end
     if decl.returns == ARG_NOT_PROVIDED
       raise "Procs must specify a return type"
@@ -339,9 +339,11 @@ module T::Private::Methods
         nil
       end
 
+    declaration_block.loc = nil
+
     signature =
       if current_declaration
-        build_sig(hook_mod, method_name, original_method, current_declaration, declaration_block.loc)
+        build_sig(hook_mod, method_name, original_method, current_declaration)
       else
         Signature.new_untyped(method: original_method)
       end
@@ -358,7 +360,7 @@ module T::Private::Methods
       .decl
   end
 
-  def self.build_sig(hook_mod, method_name, original_method, current_declaration, loc)
+  def self.build_sig(hook_mod, method_name, original_method, current_declaration)
     begin
       # We allow `sig` in the current module's context (normal case) and
       if hook_mod != current_declaration.mod &&

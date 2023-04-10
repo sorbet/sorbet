@@ -1,0 +1,34 @@
+# typed: true
+# selective-apply-code-action: refactor.rewrite
+extend T::Sig
+
+class A
+  extend T::Sig
+
+  sig {params(this: A, x: Integer).void}
+  def self.unary(this, x)
+    # ^ apply-code-action: [A] Convert to singleton class method (best effort)
+    puts "Hello, peter."
+  end
+
+  def example
+    A.unary(self) # error: Not enough arguments provided
+    A.unary(self, 0)
+    A.unary(self, 0)) {}
+    A.unary(self, 0)) do
+    end
+  end
+
+  sig {params(other: A).returns(T.self_type)}
+  def +(other); self; end
+end
+
+A.unary(A.new) # error: Not enough arguments provided
+A.unary(A.new, 0)
+A.unary(A.new, 0)
+A.unary(A.new, 0)) do
+end
+
+(T.unsafe(A.new)).unary(0)
+
+A.unary(A.new + A.new, 0)

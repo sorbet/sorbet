@@ -15,14 +15,15 @@
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/common.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/Error.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/errors/namer.h"
+#include "core/errors/resolver.h"
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
@@ -214,6 +215,10 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
+    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
+    }
+
     if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
         gs->initEmpty();
     } else {
@@ -326,6 +331,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         vector<std::string> extraPackageFilesDirectorySlashPrefixes;
         vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
         vector<std::string> skipRBIExportEnforcementDirs;
+        vector<std::string> skipImportVisibilityCheckFor;
 
         auto extraDirUnderscore =
             StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
@@ -339,11 +345,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
         }
 
+        auto skipImportVisibility =
+            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+        if (skipImportVisibility.has_value()) {
+            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+        }
+
         {
             core::UnfreezeNameTable packageNS(*gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
             gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, {}, "PACKAGE_ERROR_HINT");
+                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                                   "PACKAGE_ERROR_HINT");
         }
 
         // Packager runs over all trees.

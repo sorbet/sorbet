@@ -1565,7 +1565,7 @@ class IO < Object
   sig do
     params(
         fd: Integer,
-        mode: Integer,
+        mode: T.any(String, Integer),
         opt: T.untyped,
     )
     .void
@@ -3423,39 +3423,6 @@ class IO < Object
   end
   def self.for_fd(fd, mode=T.unsafe(nil), opt=T.unsafe(nil)); end
 
-  # This is a deprecated alias for
-  # [`each_byte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_byte).
-  sig do
-    params(
-        blk: T.proc.params(arg0: Integer).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[Integer])}
-  def bytes(&blk); end
-
-  # This is a deprecated alias for
-  # [`each_char`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_char).
-  sig do
-    params(
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[String])}
-  def chars(&blk); end
-
-  # This is a deprecated alias for
-  # [`each_codepoint`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_codepoint).
-  sig do
-    params(
-        blk: T.proc.params(arg0: Integer).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig {returns(T::Enumerator[Integer])}
-  def codepoints(&blk); end
-
   # Executes the block for every line in *ios*, where lines are separated by
   # *sep*. *ios* must be opened for reading or an
   # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) will be
@@ -3545,25 +3512,6 @@ class IO < Object
   # Alias for: [`eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof)
   sig {returns(T::Boolean)}
   def eof?(); end
-
-  # This is a deprecated alias for
-  # [`each_line`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_line).
-  sig do
-    params(
-        sep: String,
-        limit: Integer,
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(T.self_type)
-  end
-  sig do
-    params(
-        sep: String,
-        limit: Integer,
-    )
-    .returns(T::Enumerator[String])
-  end
-  def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   # Returns the integer file descriptor for the stream:
   #

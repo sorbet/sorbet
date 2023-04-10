@@ -1,5 +1,5 @@
 #include "main/lsp/MoveMethod.h"
-#include "main/lsp/AbstractRenamer.h"
+#include "main/lsp/AbstractRewriter.h"
 #include "main/sig_finder/sig_finder.h"
 using namespace std;
 
@@ -102,11 +102,14 @@ optional<string> getNewModuleName(const core::GlobalState &gs, const core::NameR
     return nullopt;
 }
 
-class MethodCallSiteRenamer : public AbstractRenamer {
+class MethodCallSiteRenamer : public AbstractRewriter {
+    string oldName;
+    string newName;
+
 public:
     MethodCallSiteRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                           const string newName)
-        : AbstractRenamer(gs, config, oldName, newName) {
+        : AbstractRewriter(gs, config), oldName(oldName), newName(newName) {
         const vector<string> invalidNames = {"initialize", "call"};
         for (auto name : invalidNames) {
             if (oldName == name) {
@@ -135,7 +138,6 @@ public:
         if (!source.has_value()) {
             return;
         }
-        string newsrc;
         if (auto sendResp = response->isSend()) {
             // if the call site is not trivial, don't attempt to rename
             // the typecheck error will guide user how to fix it
@@ -145,7 +147,7 @@ public:
                 }
             }
 
-            edits[sendResp->receiverLoc] = newName;
+            edits[sendResp->receiverLoc()] = newName;
         }
     }
     void addSymbol(const core::SymbolRef symbol) override {
@@ -199,19 +201,6 @@ vector<unique_ptr<TextEdit>> moveMethod(LSPTypecheckerDelegate &typechecker, con
 
 } // namespace
 
-unique_ptr<Position> getNewModuleLocation(const core::GlobalState &gs, const core::lsp::MethodDefResponse &definition,
-                                          LSPTypecheckerDelegate &typechecker) {
-    auto fref = definition.termLoc.file();
-
-    auto trees = typechecker.getResolved({fref});
-    ENFORCE(!trees.empty());
-    auto &rootTree = trees[0].tree;
-    auto insertPosition = Range::fromLoc(gs, core::Loc(fref, rootTree.loc().copyWithZeroLength()));
-    auto newModuleSymbol = insertPosition->start->copy();
-    newModuleSymbol->character += moduleKeyword.size() + 1;
-    return newModuleSymbol;
-}
-
 vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                         const LSPConfiguration &config,
                                                         const core::lsp::MethodDefResponse &definition) {
@@ -225,7 +214,7 @@ vector<unique_ptr<TextDocumentEdit>> getMoveMethodEdits(LSPTypecheckerDelegate &
     auto edits = moveMethod(typechecker, config, definition, newModuleName.value());
 
     auto renamer = make_shared<MethodCallSiteRenamer>(gs, config, definition.name.show(gs), newModuleName.value());
-    renamer->getRenameEdits(typechecker, definition.symbol, newModuleName.value());
+    renamer->getEdits(typechecker, definition.symbol);
     auto callSiteEdits = renamer->buildTextDocumentEdits();
 
     if (callSiteEdits.has_value()) {

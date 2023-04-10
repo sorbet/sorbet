@@ -59,6 +59,19 @@ module T::Types
         @types.size == other.types.size && @types.zip(other.types).all? do |t1, t2|
           t1.subtype_of?(t2)
         end
+      when TypedArray
+        # warning: covariant arrays
+
+        value1, value2, *values_rest = types
+        value_type = if !value2.nil?
+          T::Types::Union::Private::Pool.union_of_types(value1, value2, values_rest)
+        elsif value1.nil?
+          T.untyped
+        else
+          value1
+        end
+
+        T::Types::TypedArray.new(value_type).subtype_of?(other)
       else
         false
       end

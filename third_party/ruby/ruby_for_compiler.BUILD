@@ -45,12 +45,12 @@ ruby(
         "@bundler_stripe//file",
     ],
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:linux": [
+        "@platforms//os:linux": [
             "-Wl,-Bsymbolic-functions",
             "-Wl,-z,relro",
             "-Wl,-z,noexecstack",
         ],
-        "@com_stripe_ruby_typer//tools/config:darwin": [
+        "@platforms//os:osx": [
             "-mlinker-version=400",
         ],
         "//conditions:default": [],
@@ -58,11 +58,11 @@ ruby(
     post_build_patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_bundler.patch"],
     rubygems = "@rubygems_update_stripe//file",
     deps = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": [
+        "@platforms//os:osx": [
             "@system_ssl_darwin//:ssl",
             "@system_ssl_darwin//:crypto",
         ],
-        "@com_stripe_ruby_typer//tools/config:linux": [
+        "@platforms//os:linux": [
             "@system_ssl_linux//:ssl",
             "@system_ssl_linux//:crypto",
         ],

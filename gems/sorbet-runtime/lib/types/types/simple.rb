@@ -60,6 +60,13 @@ module T::Types
 
     module Private
       module Pool
+        CACHE_FROZEN_OBJECTS = begin
+          ObjectSpace::WeakMap.new[1] = 1
+          true # Ruby 2.7 and newer
+                               rescue ArgumentError # Ruby 2.6 and older
+                                 false
+        end
+
         @cache = ObjectSpace::WeakMap.new
 
         def self.type_for_module(mod)
@@ -83,12 +90,14 @@ module T::Types
           end
 
           # Unfortunately, we still need to check if the module is frozen,
-          # since WeakMap adds a finalizer to the key that is added
+          # since on 2.6 and older WeakMap adds a finalizer to the key that is added
           # to the map, so that it can clear the map entry when the key is
           # garbage collected.
           # For a frozen object, though, adding a finalizer is not a valid
           # operation, so this still raises if `mod` is frozen.
-          @cache[mod] = type unless mod.frozen?
+          if CACHE_FROZEN_OBJECTS || (!mod.frozen? && !type.frozen?)
+            @cache[mod] = type
+          end
           type
         end
       end

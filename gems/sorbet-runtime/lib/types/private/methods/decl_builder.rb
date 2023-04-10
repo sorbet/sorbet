@@ -16,7 +16,6 @@ module T::Private::Methods
     end
 
     def initialize(mod, raw)
-      # TODO RUBYPLAT-1278 - with ruby 2.5, use kwargs here
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
@@ -80,7 +79,7 @@ module T::Private::Methods
         raise BuilderError.new("You can't call .void after calling .returns.")
       end
 
-      decl.returns = T::Private::Types::Void.new
+      decl.returns = T::Private::Types::Void::Private::INSTANCE
 
       self
     end

@@ -1,8 +1,8 @@
 # typed: true
 # disable-fast-path: true
-class CovariantNotAllowed
+class ClassCanBeContravariantNow
   extend T::Generic
-  Elem = type_member(:in) # error: can only have invariant type members
+  Elem = type_member(:in)
 end
 
 class Invalids
@@ -56,5 +56,5 @@ class BadChild2 < Parent # error: must be re-declared
 end
 
 class BadChild3 < Parent
-  Elem = 3 # error: Type variable `Elem` needs to be declared as `= type_member(SOMETHING)`
+  Elem = 3 # error: Type variable `Elem` needs to be declared as a type_member or type_template, not a static-field
 end

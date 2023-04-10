@@ -5,19 +5,23 @@ set -euo pipefail
 export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     platform="linux";;
-    Darwin*)    platform="mac";;
-    *)          exit 1
-esac
+kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+processor_name="$(uname -m)"
 
-if [[ "linux" == "$platform" ]]; then
-  CONFIG_OPTS="--config=release-linux"
-elif [[ "mac" == "$platform" ]]; then
-  CONFIG_OPTS="--config=release-mac"
-  command -v autoconf >/dev/null 2>&1 || brew install autoconf
-fi
+platform="${kernel_name}-${processor_name}"
+case "$platform" in
+  linux-x86_64|linux-aarch64)
+    CONFIG_OPTS="--config=release-linux"
+    ;;
+  darwin-x86_64|darwin-arm64)
+    CONFIG_OPTS="--config=release-mac"
+    command -v autoconf >/dev/null 2>&1 || brew install autoconf
+    ;;
+  *)
+    echo >&2 "Building on $platform is not implemented"
+    exit 1
+    ;;
+esac
 
 echo will run with $CONFIG_OPTS
 
@@ -32,7 +36,7 @@ pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
 release_version="0.5.${git_commit_count}"
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
-if [[ "mac" == "$platform" ]]; then
+if [[ "darwin" == "$kernel_name" ]]; then
     # Our binary should work on almost all OSes. The oldest v8 publishes is -14
     # so I'm going with that for now.
     for i in {14..22}; do
@@ -70,11 +74,11 @@ rbenv exec gem uninstall --all --executables --ignore-dependencies minitest moch
 rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static
 trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
 
-if [[ "mac" == "$platform" ]]; then
+if [[ "darwin" == "$kernel_name" ]]; then
   gem_platform="$(ruby -e "(platform = Gem::Platform.local).cpu = 'universal'; puts(platform.to_s)")"
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$gem_platform".gem
 else
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-x86_64-linux.gem
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$processor_name"-linux.gem
 fi
 rbenv exec gem install sorbet-*.gem
 
@@ -104,7 +108,7 @@ rm -rf _out_
 mkdir -p _out_/gems
 
 mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
-if [[ "linux" == "$platform" ]]; then
+if [[ "$kernel_name" == "linux" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 

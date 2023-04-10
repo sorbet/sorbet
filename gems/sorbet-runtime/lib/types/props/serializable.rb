@@ -223,9 +223,10 @@ module T::Props::Serializable::DecoratorMethods
   end
 
   def add_prop_definition(prop, rules)
-    rules[:serialized_form] = rules.fetch(:name, prop.to_s)
+    serialized_form = rules.fetch(:name, prop.to_s)
+    rules[:serialized_form] = serialized_form
     res = super
-    prop_by_serialized_forms[rules[:serialized_form]] = prop
+    prop_by_serialized_forms[serialized_form] = prop
     if T::Configuration.use_vm_prop_serde?
       enqueue_lazy_vm_method_definition!(:__t_props_generated_serialize) {generate_serialize2}
       enqueue_lazy_vm_method_definition!(:__t_props_generated_deserialize) {generate_deserialize2}

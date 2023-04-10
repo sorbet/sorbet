@@ -82,6 +82,8 @@ class FullChild < HalfChild
   V = type_member {{fixed: String}}
 
   sig {params(f: FullChild).returns(FullChild[])}
+  #                                          ^^ error: All type parameters for `FullChild` have already been fixed
+  #                                          ^^ error: All type parameters for `FullChild` have already been fixed
   def f(f); f; end
 end
 

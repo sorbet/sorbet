@@ -3,7 +3,7 @@
 
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
-#include "common/Counters.h"
+#include "common/counters/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/ParsedArg.h"
@@ -145,7 +145,6 @@ public:
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
     static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
-    static TypePtr dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args);
     static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
@@ -170,6 +169,32 @@ public:
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
     static core::ClassOrModuleRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
+
+    /**
+     * unwrapType is used to take an expression that's parsed at the value-level,
+     * and turn it into a type. For example, consider the following two expressions:
+     *
+     * > Integer.sqrt 10
+     * > T::Array[Integer].new
+     *
+     * In both lines, `Integer` is initially resolved as the singleton class of
+     * `Integer`. This is because it's not immediately clear if we want to refer
+     * to the type `Integer` or if we want the singleton class of Integer for
+     * calling singleton methods. In the first line this was the correct choice, as
+     * we're just invoking the singleton method `sqrt`. In the second case we need
+     * to fix up the `Integer` sub-expression, and turn it back into the type of
+     * integer values. This is what `unwrapType` does, it turns the value-level
+     * expression back into a type-level one.
+     */
+    static TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp);
+
+    // Converts type syntax like `GenericClass[Arg0, Arg1]` into a TypePtr.
+    //
+    // Called both from type_syntax.cc during sig parsing and from infer after encountering
+    // something that look like type syntax in a method body.
+    static TypePtr applyTypeArguments(const GlobalState &gs, const CallLocs &locs, uint16_t numPosArgs,
+                                      const InlinedVector<const TypeAndOrigins *, 2> &args,
+                                      ClassOrModuleRef genericClass);
 };
 
 struct Intrinsic {
@@ -418,6 +443,12 @@ template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::Sym
 }
 
 template <> inline TypePtr make_type<SelfTypeParam, core::TypeArgumentRef &>(core::TypeArgumentRef &definition) {
+    auto sym = SymbolRef(definition);
+    return make_type<SelfTypeParam>(sym);
+}
+
+template <>
+inline TypePtr make_type<SelfTypeParam, const core::TypeMemberRef &>(const core::TypeMemberRef &definition) {
     auto sym = SymbolRef(definition);
     return make_type<SelfTypeParam>(sym);
 }

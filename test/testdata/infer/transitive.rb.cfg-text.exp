@@ -61,9 +61,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$7
 bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
     <self>: T.class_of(A) = <selfRestore>$8
-    <cfgAlias>$18: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$20: T.class_of(T) = alias <C T>
-    <statTemp>$15: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$18: T.class_of(T::Sig))
+    <cfgAlias>$17: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$19: T.class_of(T) = alias <C T>
+    <statTemp>$14: T.class_of(A) = <self>: T.class_of(A).extend(<cfgAlias>$17: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -72,9 +72,9 @@ bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Stati
 bb5[rubyRegionId=1, firstDead=4](<self>: T.class_of(A), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(A)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <cfgAlias>$13: T.class_of(Integer) = alias <C Integer>
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$13: T.class_of(Integer))
-    <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <cfgAlias>$12: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$12: T.class_of(Integer))
+    <blockReturnTemp>$13: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 }
@@ -120,9 +120,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Bar), <block-pre-call-temp>
 bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(Bar)):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$7, sig>
     <self>: T.class_of(Bar) = <selfRestore>$8
-    <cfgAlias>$22: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$24: T.class_of(T) = alias <C T>
-    <statTemp>$19: T.class_of(Bar) = <self>: T.class_of(Bar).extend(<cfgAlias>$22: T.class_of(T::Sig))
+    <cfgAlias>$21: T.class_of(T::Sig) = alias <C Sig>
+    <cfgAlias>$23: T.class_of(T) = alias <C T>
+    <statTemp>$18: T.class_of(Bar) = <self>: T.class_of(Bar).extend(<cfgAlias>$21: T.class_of(T::Sig))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -131,12 +131,12 @@ bb3[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$7: Sorbet::Private::Stati
 bb5[rubyRegionId=1, firstDead=7](<self>: T.class_of(Bar), <block-pre-call-temp>$7: Sorbet::Private::Static::Void, <selfRestore>$8: T.class_of(Bar)):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
-    <hashTemp>$13: Symbol(:arg) = :arg
-    <cfgAlias>$15: T.class_of(Integer) = alias <C Integer>
-    <statTemp>$11: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$13: Symbol(:arg), <cfgAlias>$15: T.class_of(Integer))
-    <cfgAlias>$17: T.class_of(Integer) = alias <C Integer>
-    <blockReturnTemp>$10: T::Private::Methods::DeclBuilder = <statTemp>$11: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$17: T.class_of(Integer))
-    <blockReturnTemp>$18: T.noreturn = blockreturn<sig> <blockReturnTemp>$10: T::Private::Methods::DeclBuilder
+    <hashTemp>$12: Symbol(:arg) = :arg
+    <cfgAlias>$14: T.class_of(Integer) = alias <C Integer>
+    <statTemp>$10: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$12: Symbol(:arg), <cfgAlias>$14: T.class_of(Integer))
+    <cfgAlias>$16: T.class_of(Integer) = alias <C Integer>
+    <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <statTemp>$10: T::Private::Methods::DeclBuilder.returns(<cfgAlias>$16: T.class_of(Integer))
+    <blockReturnTemp>$17: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
 
 }

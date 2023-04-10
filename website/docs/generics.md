@@ -285,8 +285,8 @@ motivates why type systems (Sorbet included) place such emphasis on variance.
 
 ### Invariance
 
-(_For convenience throughout these docs, we use the annotation `<:` to claim
-that one type is a subtype of another type._)
+(_For convenience throughout these docs, we use the annotation `A <: B` to claim
+that `A` is a subtype of `B`._)
 
 By default, `type_member`'s and `type_template`'s are invariant. Here is an
 example of what that means:
@@ -321,11 +321,6 @@ Invariant `type_member`'s and `type_template`'s, unlike covariant and
 contravariant ones, may be used in **both** input and output positions within
 method signatures. This nuance is explained in more detail in the next sections
 about covariance and contravariance.
-
-> **Note**: all `type_member`'s and `type_template`'s in a Ruby `class` must be
-> invariant. Only `type_member`'s in a Ruby `module` are allowed to be covariant
-> or contravariant. See the docs for error code [5016](error-reference.md#5016)
-> for more information.
 
 ### Covariance (`:out`)
 
@@ -670,11 +665,27 @@ in the input position of an output position, so they're both in input positions
 (`-1 × +1 = -1`). `F` is in the output position of an output position, so it's
 also in output position (`+1 × +1 = +1`).
 
+#### Variance positions and `private`
+
+A special case is provided for `private` methods and instance variables: Sorbet
+does not check generic types for their variance position in private methods and
+instance variables.
+
+If you need to allow, for example, a covariant generic type to appear in the
+input of a method, that method must be `private`. Note that Ruby treats the
+`initialize` method as `private` even if it is not defined as `private`
+explicitly, which is what allows accepting arguments typed with covariant type
+members in a constructor.
+
+We can't really explain why this special case is carved out except by answering
+"why does tracking variance matter?"
+
 ### Why does tracking variance matter?
 
 To get a sense for why Sorbet places constraints on where covariant and
 contravariant type members can appear within signatures, consider this example,
-which continues the example from the [covariance section](#covariance) above:
+which continues the example from the [covariance section](#covariance-out)
+above:
 
 ```ruby
 int_box = Box[Integer].new(value: 0)
@@ -712,6 +723,17 @@ sync with the runtime reality.
 This is what variance checks buy in a type system: they prevent abstractions
 from being misused in ways that would otherwise compromise the integrity of the
 type checker's predictions.
+
+As for `private` methods and instance variables (which don't have to respect
+variance positions), the short answer is that the general pattern above for how
+to produce a contradiction doesn't apply, and it's not possible to construct any
+other examples which would cause problems. The example above relied on being
+able to explicitly widen the type of the receiver of a method. Since it's not
+possible to widen the type of `self`, that class of bug doesn't apply.
+
+_(As a technicality, this is not quite true because of `T.bind`. Sorbet ignores
+this technicality because `T.bind` is itself already an escape hatch to get out
+of the type system's checks, like `T.cast`.)_
 
 ## A `type_template` example
 
@@ -806,7 +828,7 @@ The `fixed` annotation in the [example above](#type_templates-and-bounds) places
 bounds to a `type_member` or `type_template`:
 
 - `upper`: Places an upper bound on types that can be applied to a given type
-  member. Only that are subtypes of that upper bound are valid.
+  member. Only subtypes of that upper bound are valid.
 
 - `lower`: The opposite—places a lower bound, thus requiring only supertypes of
   that bound.

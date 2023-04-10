@@ -233,6 +233,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         ENFORCE(ctx.locAt(sym->loc).exists());
         ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
+        const auto nameValue = ctx.locAt(ret.nameLoc).source(ctx).value();
+        if ((nameValue.front() == '\'' && nameValue.back() == '\'') ||
+            (nameValue.front() == '\"' && nameValue.back() == '\"')) {
+            ret.nameLoc = core::LocOffsets{ret.nameLoc.beginPos() + 1, ret.nameLoc.endPos() - 1};
+        }
     }
 
     // ----- What's the prop's type? -----
@@ -294,7 +299,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         }
 
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
-            ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
+            ret.default_ = ast::MK::RaiseTypedUnimplemented(ret.loc);
         } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
             auto [key, val] = ASTUtil::extractHashValue(ctx, *rules, core::Names::default_());
             ret.default_ = std::move(val);
@@ -380,11 +385,11 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                            computedByMethodNameLocZero, std::move(raiseUnimplemented));
         auto assertTypeMatches =
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
-        auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseUnimplemented(loc));
+        auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
     } else if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
         // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
     } else if (ret.ifunset == nullptr) {
         if (knownNonModel(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
@@ -419,10 +424,10 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
             nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq), flags));
         } else {
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
         }
     } else {
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
     }
 
     core::NameRef setName = name.addEq(ctx);
@@ -437,7 +442,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
         } else if (ret.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
@@ -464,10 +469,10 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                 auto insSeq = ast::MK::InsSeq1(loc, std::move(propFreezeLogic), std::move(ivarSet));
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));
             } else {
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
             }
         } else {
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
+            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
         }
     }
 
@@ -497,8 +502,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
-        auto fkMethodDef =
-            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc), fkFlags);
+        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg),
+                                                     ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
         // sig {params(opts: T.untyped).returns($foreign)}
@@ -514,7 +519,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         ast::MethodDef::Flags fkBangFlags;
         fkBangFlags.discardDef = true;
         auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
-                                                         ast::MK::RaiseUnimplemented(loc), fkBangFlags);
+                                                         ast::MK::RaiseTypedUnimplemented(loc), fkBangFlags);
         nodes.emplace_back(std::move(fkMethodDefBang));
     }
 

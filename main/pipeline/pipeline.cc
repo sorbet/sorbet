@@ -23,11 +23,11 @@
 #include "cfg/builder/builder.h"
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/crypto_hashing/crypto_hashing.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
@@ -401,6 +401,10 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     }
     prodCounterAdd("types.input.bytes", src.size());
     prodCounterInc("types.input.files");
+    if (core::File::isRBIPath(fileName)) {
+        counterAdd("types.input.rbi.bytes", src.size());
+        counterInc("types.input.rbi.files");
+    }
 
     {
         core::UnfreezeFileTable unfreezeFiles(gs);
@@ -468,7 +472,6 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                                           shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
                                           WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    Timer timeit(cgs.tracer(), "mergeIndexResults");
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
     vector<ast::ParsedFile> ret;
@@ -529,7 +532,6 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(baseGs.tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
@@ -676,14 +678,13 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                                 WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.stripePackages) {
-        Timer timeit(gs.tracer(), "package");
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-            gs.setPackagerOptions(opts.secondaryTestPackageNamespaces,
-                                  opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                                  opts.extraPackageFilesDirectorySlashPrefixes,
-                                  opts.packageSkipRBIExportEnforcementDirs, opts.stripePackagesHint);
+            gs.setPackagerOptions(
+                opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
         }
         what = packager::Packager::run(gs, workers, move(what));
         if (opts.print.Packager.enabled) {
@@ -1152,7 +1153,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
     }
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
@@ -1161,7 +1162,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
     for (auto &parsedFile : parsedFiles) {
         fileq->push(&parsedFile, 1);
     }
@@ -1170,7 +1171,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
         vector<pair<string, vector<uint8_t>>> threadResult;
         int processedByThread = 0;
-        ast::ParsedFile *job = nullptr;
+        const ast::ParsedFile *job = nullptr;
         unique_ptr<Timer> timeit;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {

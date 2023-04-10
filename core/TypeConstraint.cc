@@ -1,5 +1,5 @@
 #include "core/TypeConstraint.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
 
@@ -142,7 +142,6 @@ TypePtr TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
 }
 
 unique_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
-    ENFORCE(!wasSolved);
     auto res = make_unique<TypeConstraint>();
     res->lowerBounds = this->lowerBounds;
     res->upperBounds = this->upperBounds;

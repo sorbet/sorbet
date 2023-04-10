@@ -9,7 +9,7 @@ cc_library(
         "watchman/*.cc",
     ]) + [
         ":lsp_messages",
-        "AbstractRenamer.h",
+        "AbstractRewriter.h",
         "DefLocSaver.h",
         "ErrorFlusherLSP.h",
         "ErrorReporter.h",
@@ -30,6 +30,7 @@ cc_library(
         "watchman/WatchmanProcess.h",
     ],
     hdrs = [
+        "ConvertToSingletonClassMethod.h",
         "LSPConfiguration.h",
         "LSPInput.h",
         "LSPLoop.h",

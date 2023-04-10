@@ -788,8 +788,6 @@ class Hash < Object
   # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   def hash; end
 
-  def index(_); end
-
   sig {void}
   sig {params(default: V).void}
   sig do
@@ -1200,14 +1198,14 @@ class Hash < Object
   def filter!(&blk); end
 
   # Removes a key-value pair from *hsh* and returns it as the two-item array `[`
-  # *key, value* `]`, or the hash's default value if the hash is empty.
+  # *key, value* `]`, or nil if the hash is empty.
   #
   # ```ruby
   # h = { 1 => "a", 2 => "b", 3 => "c" }
   # h.shift   #=> [1, "a"]
   # h         #=> {2=>"b", 3=>"c"}
   # ```
-  sig {returns(T::Array[T.any(K, V)])}
+  sig {returns(T.nilable(T::Array[T.any(K, V)]))}
   def shift(); end
 
   # Returns the number of key-value pairs in the hash.

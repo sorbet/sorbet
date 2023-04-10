@@ -1,6 +1,6 @@
 #include "compiler/Linker/Linker.h"
 #include "common/Subprocess.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 
 using namespace std;
 namespace sorbet::compiler {

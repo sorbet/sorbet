@@ -54,6 +54,12 @@ module T::Types
         return t1.aliased_type.subtype_of?(t2)
       end
 
+      if t1.is_a?(T::Types::TypeVariable) || t2.is_a?(T::Types::TypeVariable)
+        # Generics are erased at runtime. Let's treat them like `T.untyped` for
+        # the purpose of things like override checking.
+        return true
+      end
+
       # pairs to cover: 1  (_, _)
       #                 2  (_, And)
       #                 3  (_, Or)

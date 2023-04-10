@@ -14,8 +14,7 @@ class ::<root> < ::Object ()
       method ::Foo::<Class:AnotherPrivateClass>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:22
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     module ::Foo::AnotherPrivateModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : private @ test/testdata/infer/private_constant_in_rbi__1.rbi:35
-    class ::Foo::<Class:AnotherPrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant_in_rbi__1.rbi:35
-      type-member(+) ::Foo::<Class:AnotherPrivateModule>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateModule) @ test/testdata/infer/private_constant_in_rbi__1.rbi:35
+    class ::Foo::<Class:AnotherPrivateModule> < ::Module () @ test/testdata/infer/private_constant_in_rbi__1.rbi:35
       method ::Foo::<Class:AnotherPrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:35
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     class ::Foo::PrivateClass < ::Object () : private @ test/testdata/infer/private_constant_in_rbi__1.rbi:19
@@ -33,14 +32,12 @@ class ::<root> < ::Object ()
           argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
         method ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>#also_ok_private_usage (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:30
           argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
-    class ::Foo::<Class:PrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant_in_rbi__1.rbi:25
-      type-member(+) ::Foo::<Class:PrivateModule>::<AttachedClass> -> T.attached_class (of Foo::PrivateModule) @ test/testdata/infer/private_constant_in_rbi__1.rbi:25
+    class ::Foo::<Class:PrivateModule> < ::Module () @ test/testdata/infer/private_constant_in_rbi__1.rbi:25
       method ::Foo::<Class:PrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:25
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
       method ::Foo::<Class:PrivateModule>#ok_private_usage (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:26
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
-  class ::<Class:Foo>[<AttachedClass>] < ::Module (Sig) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
-    type-member(+) ::<Class:Foo>::<AttachedClass> -> T.attached_class (of Foo) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
+  class ::<Class:Foo> < ::Module (Sig) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
     method ::<Class:Foo>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
     method ::<Class:Foo>#not_ok_private_usage (<blk>) -> Foo::PrivateClass @ test/testdata/infer/private_constant_in_rbi__1.rbi:39

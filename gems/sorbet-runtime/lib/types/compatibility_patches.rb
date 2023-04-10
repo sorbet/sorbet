@@ -27,8 +27,10 @@ if defined? ::RSpec::Mocks
       module RSpecCompatibility
         module RecorderExtensions
           def observe!(method_name)
-            method = @klass.instance_method(method_name.to_sym)
-            T::Private::Methods.maybe_run_sig_block_for_method(method)
+            if @klass.method_defined?(method_name.to_sym)
+              method = @klass.instance_method(method_name.to_sym)
+              T::Private::Methods.maybe_run_sig_block_for_method(method)
+            end
             super(method_name)
           end
         end

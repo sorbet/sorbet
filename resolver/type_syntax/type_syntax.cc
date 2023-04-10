@@ -518,12 +518,14 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                     return nullopt;
                 }
                 sig.returns = move(maybeReturns.value());
+                sig.returnsLoc = ctx.locAt(send->loc);
 
                 break;
             }
             case core::Names::void_().rawId():
                 sig.seen.void_ = true;
                 sig.returns = core::Types::void_();
+                sig.returnsLoc = ctx.locAt(send->loc);
                 break;
             case core::Names::checked().rawId():
                 sig.seen.checked = true;
@@ -604,6 +606,48 @@ void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
             }
         }
     }
+}
+
+core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const ast::Send &send) {
+    core::SymbolRef maybeScopeClass;
+    if (auto *recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+        maybeScopeClass = recv->symbol;
+    } else if (send.recv.isSelfReference()) {
+        // Let's not try to reinvent constant resolution here and just pick a heuristic that tends to
+        // work in some cases and is simple.
+        maybeScopeClass = core::Symbols::root();
+    } else {
+        return core::Symbols::noClassOrModule();
+    }
+
+    if (!maybeScopeClass.isClassOrModule()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto scope = maybeScopeClass.asClassOrModuleRef();
+
+    auto className = ctx.state.lookupNameConstant(send.fun);
+    if (!className.exists()) {
+        // The name itself doesn't even exist, so definitely no class with this name can exist
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto maybeSym = scope.data(ctx)->findMember(ctx, className);
+    if (!maybeSym.exists()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    if (!maybeSym.isClassOrModule()) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    auto klass = maybeSym.asClassOrModuleRef();
+
+    if (klass.data(ctx)->typeArity(ctx) == 0) {
+        return core::Symbols::noClassOrModule();
+    }
+
+    return klass;
 }
 
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
@@ -829,18 +873,42 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
 
             ENFORCE(ctx.owner.isClassOrModule());
             auto owner = ctx.owner.asClassOrModuleRef();
-            if (!owner.data(ctx)->isSingletonClass(ctx)) {
+            auto ownerData = owner.data(ctx);
+
+            auto maybeAttachedClass = ownerData->findMember(ctx, core::Names::Constants::AttachedClass());
+            if (!maybeAttachedClass.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("`{}` may only be used in a singleton class method context", "T.attached_class");
-                    e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
-                                   owner.show(ctx));
+                    auto hasAttachedClass = core::Names::declareHasAttachedClass().show(ctx);
+                    if (ownerData->isModule()) {
+                        e.setHeader("`{}` must declare `{}` before module instance methods can use `{}`",
+                                    owner.show(ctx), hasAttachedClass, "T.attached_class");
+                        // TODO(jez) Autocorrect to insert `has_attached_class!`
+                    } else if (ownerData->isSingletonClass(ctx)) {
+                        // Combination of `isSingletonClass` and `<AttachedClass>` missing means
+                        // this is the singleton class of a module.
+                        ENFORCE(ownerData->attachedClass(ctx).data(ctx)->isModule());
+                        e.setHeader("`{}` cannot be used in singleton methods on modules, because modules cannot be "
+                                    "instantiated",
+                                    "T.attached_class");
+                    } else {
+                        e.setHeader(
+                            "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
+                            "T.attached_class", hasAttachedClass);
+                        e.addErrorNote("Current context is `{}`, which is an instance class not a singleton class",
+                                       owner.show(ctx));
+                    }
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             } else {
-                // All singletons have an AttachedClass type member, created by `singletonClass`
-                auto attachedClass =
-                    owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass()).asTypeMemberRef();
-                return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::Symbols::noClassOrModule()};
+                ENFORCE(
+                    // isModule is never true for a singleton class, which implies this is a module instance method
+                    ownerData->isModule() ||
+                    // In classes, can only use `T.attached_class` on singleton methods
+                    (ownerData->isSingletonClass(ctx) && ownerData->attachedClass(ctx).data(ctx)->isClass()));
+
+                const auto attachedClass = maybeAttachedClass.asTypeMemberRef();
+                return TypeSyntax::ResultType{core::make_type<core::SelfTypeParam>(attachedClass),
+                                              core::Symbols::noClassOrModule()};
             }
         }
         case core::Names::noreturn().rawId():
@@ -848,7 +916,15 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
+                if (send.numPosArgs() > 0 && send.onlyPosArgs() && send.block() == nullptr && send.argsLoc().exists() &&
+                    ctx.locAt(send.funLoc).adjustLen(ctx, -1, 1).source(ctx) == ":") {
+                    auto replacement =
+                        fmt::format("T::{}[{}]", send.fun.show(ctx), ctx.locAt(send.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(send.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
+                }
             }
             return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
     }
@@ -1098,7 +1174,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv);
         if (recvi == nullptr) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
+                if (klass.exists()) {
+                    auto scope = s.recv.isSelfReference()
+                                     ? ""
+                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
+                    auto replacement =
+                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                }
             }
             result.type = core::Types::untypedUntracked();
             return result;
@@ -1121,7 +1208,18 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
         if (s.fun != core::Names::squareBrackets()) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
+                if (klass.exists()) {
+                    auto scope = s.recv.isSelfReference()
+                                     ? ""
+                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
+                    auto replacement =
+                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
+                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
+                } else {
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+                }
             }
             result.type = core::Types::untypedUntracked();
             return result;
@@ -1198,29 +1296,10 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             return result;
         }
 
-        auto correctedSingleton = corrected.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
-        ENFORCE_NO_TIMER(correctedSingleton.exists());
-        auto ctype = core::make_type<core::ClassType>(correctedSingleton);
-        core::TypeAndOrigins ctypeAndOrigins{ctype, ctx.locAt(s.loc)};
-        // In `dispatchArgs` this is ordinarily used to specify the origin tag for
-        // uninitialized variables. Inside of a signature we shouldn't need this:
-        auto originForUninitialized = core::Loc::none();
-        core::CallLocs locs{
-            ctx.file, s.loc, recvi->loc, s.loc.copyWithZeroLength(), argLocs,
-        };
-        auto suppressErrors = false;
-        core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
-                                        locs,
-                                        s.numPosArgs(),
-                                        targs,
-                                        ctype,
-                                        ctypeAndOrigins,
-                                        ctype,
-                                        nullptr,
-                                        originForUninitialized,
-                                        s.flags.isPrivateOk,
-                                        suppressErrors};
-        auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
+        auto genericClass = corrected.asClassOrModuleRef();
+        ENFORCE_NO_TIMER(genericClass.exists());
+        core::CallLocs locs{ctx.file, s.loc, recvi->loc, s.funLoc, argLocs};
+        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass);
 
         if (out.isUntyped()) {
             // Using a generic untyped type here will lead to incorrect handling of global state hashing,
@@ -1232,7 +1311,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             for (auto &targ : targs) {
                 targPtrs.push_back(targ->type);
             }
-            result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
+            result.type = core::make_type<core::UnresolvedAppliedType>(genericClass, move(targPtrs));
             return result;
         }
         if (auto *mt = core::cast_type<core::MetaType>(out)) {

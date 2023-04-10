@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: has_attached_class__1.rb,has_attached_class__2.rb
+extend T::Sig
+
+module Inheritable
+  extend T::Helpers
+
+  module ClassMethods
+    extend T::Generic
+    has_attached_class!(:out)
+  end
+  mixes_in_class_methods(ClassMethods)
+end

@@ -9,7 +9,11 @@ T::Configuration.default_checked_level = :always
 task default: %i[test rubocop]
 
 def require_tests
-  Dir.glob('./test/**/*.rb').reject {|path| path.match(%r{^./test/types/fixtures/})}.each(&method(:require))
+  Dir
+    .glob('./test/**/*.rb')
+    .reject {|path| path.match(%r{^./test/types/fixtures/})}
+    .reject {|path| path.match(%r{^./test/wholesome/})}
+    .each(&method(:require))
 end
 
 task :test do

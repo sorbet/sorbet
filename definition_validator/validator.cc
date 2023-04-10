@@ -2,7 +2,7 @@
 #include "absl/strings/match.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "common/Timer.h"
+#include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 
@@ -320,6 +320,25 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
                     }
                 }
+            } else if (absl::c_any_of(right.kw.required,
+                                      [&](const auto &r) { return r.get().name == opt.get().name; })) {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("{} method `{}` must redeclare keyword parameter `{}` as optional",
+                                implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
+                                   opt.get().name.show(ctx));
+                }
+            } else {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    e.setHeader("{} method `{}` must accept optional keyword parameter `{}`",
+                                implementationOf(ctx, superMethod), superMethod.show(ctx), opt.get().name.show(ctx));
+                    // Show the superMethod loc (declLoc) so the error message includes the default value
+                    e.addErrorLine(superMethod.data(ctx)->loc(),
+                                   "The optional super method parameter `{}` was declared here",
+                                   opt.get().name.show(ctx));
+                }
             }
         }
     }
@@ -348,6 +367,10 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     for (auto extra : right.kw.required) {
         if (absl::c_any_of(left.kw.required, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+            continue;
+        }
+        if (absl::c_any_of(left.kw.optional, [&](const auto &l) { return l.get().name == extra.get().name; })) {
+            // We would have already reported a more informative error above.
             continue;
         }
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -405,14 +428,9 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto klassData = klass.data(ctx);
     InlinedVector<core::MethodRef, 4> overridenMethods;
 
-    // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
-    // interfaces
-    if (klassData->flags.isInterface && method.data(ctx)->flags.isPrivate) {
-        if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
-        }
-    }
-
+    // Matches the behavior of the runtime checks
+    // NOTE(jez): I don't think this check makes all that much sense, but I haven't thought about it.
+    // We already deleted the corresponding check for `private`, and may want to revisit this, too.
     if (klassData->flags.isInterface && method.data(ctx)->flags.isProtected) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
             e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
@@ -471,7 +489,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
+        if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
             overridenMethod.data(ctx)->flags.isAbstract && overridenMethod.data(ctx)->hasSig() &&
             !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
@@ -961,7 +979,43 @@ public:
             variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 
+        // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
+        // need to check types on instance variables.
+
         validateOverriding(ctx, methodDef.symbol);
+    }
+
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.fun != core::Names::new_()) {
+            return;
+        }
+
+        auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
+            return;
+        }
+
+        auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
+        if (!symbol->flags.isAbstract) {
+            return;
+        }
+
+        auto singletonClass = symbol->lookupSingletonClass(ctx.state);
+        if (!singletonClass.exists()) {
+            return;
+        }
+
+        auto method_new = singletonClass.data(ctx)->findMethodTransitive(ctx.state, core::Names::new_());
+        // If the .new method we find is owned by Class, that means
+        // there was no user defined .new method, which warrants an error.
+        if (method_new.data(ctx)->owner == core::Symbols::Class()) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
+                auto symbolName = id->symbol.show(ctx);
+                e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+            }
+        }
     }
 };
 } // namespace
@@ -970,7 +1024,7 @@ ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
     ValidateWalk validate;
-    ast::ShallowWalk::apply(ctx, validate, tree.tree);
+    ast::TreeWalk::apply(ctx, validate, tree.tree);
     return tree;
 }
 

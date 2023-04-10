@@ -29,18 +29,20 @@ JEMALLOC_BUILD_COMMAND = """
   export OBJCOPY=$$(absolutize $(OBJCOPY))
   export CFLAGS=$(CC_FLAGS)
   export CXXFLAGS=$(CC_FLAGS)
-  export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
+  export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin -Wl,--thinlto-jobs=all")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="$${LTOFLAGS}"
   export EXTRA_CXXFLAGS="-stdlib=libc++ $${EXTRA_CFLAGS}"
 
   LDFLAGS="$${LTOFLAGS}"
 
+  AUTOGEN_FLAGS=
   case "$$(uname)" in
     Linux)
       LDFLAGS="$${LDFLAGS} -fuse-ld=lld"
       ;;
     Darwin)
       LDFLAGS="$${LDFLAGS} -mlinker-version=400"
+      AUTOGEN_FLAGS=--with-lg-vaddr=48
       ;;
   esac
 
@@ -51,7 +53,7 @@ JEMALLOC_BUILD_COMMAND = """
 
   pushd $$(dirname $(location autogen.sh)) > /dev/null
 
-  if compile_output=$$(./autogen.sh --without-export --disable-shared --enable-static 2>&1 && make build_lib_static -j4 2>&1); then
+  if compile_output=$$(./autogen.sh --without-export --disable-shared --enable-static $$AUTOGEN_FLAGS 2>&1 && make build_lib_static -j4 2>&1); then
     popd > /dev/null
     mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a)
     mv $$(dirname $(location autogen.sh))/include/jemalloc/jemalloc.h $(location include/jemalloc/jemalloc.h)
@@ -98,7 +100,7 @@ cc_library(
     srcs = [":jemalloc_genrule"],
     hdrs = ["include/jemalloc/jemalloc.h"],
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:linux": ["-ldl"],  # side step https://github.com/jemalloc/jemalloc/issues/948
+        "@platforms//os:linux": ["-ldl"],  # side step https://github.com/jemalloc/jemalloc/issues/948
         "//conditions:default": [],
     }),
     linkstatic = 1,

@@ -95,6 +95,14 @@ class T::Types::Enum < T::Types::Base
   def values; end
 end
 
+class T::Types::TEnum < T::Types::Base
+  def initialize(val); end
+  def valid?(obj); end
+  def name; end
+  def describe_obj(obj); end
+  def val; end
+end
+
 class T::Types::SelfType < T::Types::Base
   def initialize(); end
   def name; end

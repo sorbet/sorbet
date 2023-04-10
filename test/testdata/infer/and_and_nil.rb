@@ -27,7 +27,7 @@ class A
     end
 
     if a.get_private && a.get_private.my_private
-      #                 ^^^^^^^^^^^^^^^^^^^^^^^^ error: Non-private call to private method `my_private`
+      #                               ^^^^^^^^^^ error: Non-private call to private method `my_private`
       #                               ^^^^^^^^^^ error: Call to method `my_private` after `&&` assumes result type doesn't change
       puts a.foo
     end

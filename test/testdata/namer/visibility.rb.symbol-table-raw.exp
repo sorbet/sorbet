@@ -60,7 +60,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
     method <S <C <U Foo3>> $1>#<U foo> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=42:3 end=42:15}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
-  class <S <S <C <U Foo3>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=44:3 end=44:8}
+  class <S <S <C <U Foo3>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/namer/visibility.rb start=44:3 end=44:8}
     type-member(+) <S <S <C <U Foo3>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U Foo3>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U Foo3>> $1>   targs = [     <C <U <AttachedClass>>> = Foo3   ] }) @ Loc {file=test/testdata/namer/visibility.rb start=44:3 end=44:8}
     method <S <S <C <U Foo3>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=44:3 end=46:6}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
@@ -71,7 +71,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
     method <S <C <U Foo4>> $1>#<U foo> : private (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=51:5 end=51:12}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
-  class <S <S <C <U Foo4>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=50:3 end=50:8}
+  class <S <S <C <U Foo4>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/namer/visibility.rb start=50:3 end=50:8}
     type-member(+) <S <S <C <U Foo4>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U Foo4>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U Foo4>> $1>   targs = [     <C <U <AttachedClass>>> = Foo4   ] }) @ Loc {file=test/testdata/namer/visibility.rb start=50:3 end=50:8}
     method <S <S <C <U Foo4>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=50:3 end=54:6}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}

@@ -338,6 +338,140 @@ class String < Object
   sig {returns(String)}
   def b(); end
 
+
+  # Returns the Integer byte-based index of the first occurrence of the given
+  # `substring``, or `nil`` if none found:
+  #
+  # ```ruby
+  # 'foo'.byteindex('f') # => 0
+  # 'foo'.byteindex('o') # => 1
+  # 'foo'.byteindex('oo') # => 1
+  # 'foo'.byteindex('ooo') # => nil
+  # ```
+  #
+  # Returns the Integer byte-based index of the first match for the given
+  # Regexp `regexp`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byteindex(/f/) # => 0
+  # 'foo'.byteindex(/o/) # => 1
+  # 'foo'.byteindex(/oo/) # => 1
+  # 'foo'.byteindex(/ooo/) # => nil
+  # ```
+  #
+  # Integer argument `offset`, if given, specifies the byte-based position
+  # in the string to begin the search:
+  #
+  # ```ruby
+  # 'foo'.byteindex('o', 1) # => 1
+  # 'foo'.byteindex('o', 2) # => 2
+  # 'foo'.byteindex('o', 3) # => nil
+  # ```
+  #
+  # If `offset` is negative, counts backward from the end of `self`:
+  #
+  # ```ruby
+  # 'foo'.byteindex('o', -1) # => 2
+  # 'foo'.byteindex('o', -2) # => 1
+  # 'foo'.byteindex('o', -3) # => 1
+  # 'foo'.byteindex('o', -4) # => nil
+  # ```
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError`
+  # is raised.
+  #
+  # Related:
+  # [`String#index`](https://ruby-doc.org/3.2.0/String.html#method-i-index),
+  # [`String#byterindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byterindex).
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def byteindex(arg0, arg1=T.unsafe(nil)); end
+
+  # Returns the Integer byte-based index of the last occurrence of the given
+  # `substring`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byterindex('f') # => 0
+  # 'foo'.byterindex('o') # => 2
+  # 'foo'.byterindex('oo') # => 1
+  # 'foo'.byterindex('ooo') # => nil
+  # ```
+  #
+  # Returns the Integer byte-based index of the last match for the given Regexp
+  # `regexp`, or `nil` if none found:
+  #
+  # ```ruby
+  # 'foo'.byterindex(/f/) # => 0
+  # 'foo'.byterindex(/o/) # => 2
+  # 'foo'.byterindex(/oo/) # => 1
+  # 'foo'.byterindex(/ooo/) # => nil
+  # ```
+  #
+  # The _last_ match means starting at the possible last position, not the last
+  # of longest matches.
+  #
+  # ```ruby
+  # 'foo'.byterindex(/o+/) # => 2
+  # $~ #=> #<MatchData "o">
+  # ```
+  #
+  # To get the last longest match, needs to combine with negative lookbehind.
+  #
+  # ```ruby
+  # 'foo'.byterindex(/(?<!o)o+/) # => 1
+  # $~ #=> #<MatchData "oo">
+  # ```
+  #
+  # Or
+  # [`String#byteindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byteindex)
+  # with negative lookforward.
+  #
+  # ```ruby
+  # 'foo'.byteindex(/o+(?!.*o)/) # => 1
+  # $~ #=> #<MatchData "oo">
+  # ```
+  #
+  # Integer argument `offset`, if given and non-negative, specifies the maximum
+  # starting byte-based position in the
+  #
+  # string to _end_ the search:
+  #
+  # ```ruby
+  # 'foo'.byterindex('o', 0) # => nil
+  # 'foo'.byterindex('o', 1) # => 1
+  # 'foo'.byterindex('o', 2) # => 2
+  # 'foo'.byterindex('o', 3) # => 2
+  # ```
+  #
+  # If `offset` is a negative Integer, the maximum starting position in the
+  # string to end the search is the sum of the string’s length and `offset`:
+  #
+  # ```ruby
+  # 'foo'.byterindex('o', -1) # => 2
+  # 'foo'.byterindex('o', -2) # => 1
+  # 'foo'.byterindex('o', -3) # => nil
+  # 'foo'.byterindex('o', -4) # => nil
+  # ```
+  #
+  # If `offset` does not land on character (codepoint) boundary, `IndexError` is
+  # raised.
+  #
+  # Related:
+  # [`String#byteindex`](https://ruby-doc.org/3.2.0/String.html#method-i-byteindex).
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def byterindex(arg0, arg1=T.unsafe(nil)); end
+
   # Returns an array of bytes in *str*. This is a shorthand for
   # `str.each_byte.to_a`.
   #
@@ -389,6 +523,38 @@ class String < Object
     .returns(T.nilable(String))
   end
   def byteslice(arg0, arg1=T.unsafe(nil)); end
+
+  # Replaces some or all of the content of `self` with `str`, and returns
+  # `self`. The portion of the string affected is determined using the same
+  # criteria as
+  # [`String#byteslice`](https://docs.ruby-lang.org/en/3.2/String.html#method-i-byteslice),
+  # except that `length` cannot be omitted. If the replacement string is not
+  # the same length as the text it is replacing, the string will be adjusted
+  # accordingly. The form that take an
+  # [`Integer`](https://docs.ruby-lang.org/en/3.2/Integer.html) will raise an
+  # [`IndexError`](https://docs.ruby-lang.org/en/3.2/IndexError.html) if the
+  # value is out of range; the
+  # [`Range`](https://docs.ruby-lang.org/en/3.2/Range.html) form will raise a
+  # [`RangeError`](https://docs.ruby-lang.org/en/3.2/RangeError.html). If the
+  # beginning or ending offset does not land on character (codepoint) boundary,
+  # an [`IndexError`](https://docs.ruby-lang.org/en/3.2/IndexError.html) will
+  # be raised.
+  sig do
+    params(
+      arg0: Integer,
+      arg1: Integer,
+      arg2: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+      arg0: T::Range[Integer],
+      arg1: String,
+    )
+    .returns(String)
+  end
+  def bytesplice(arg0, arg1, arg2=T.unsafe(nil)); end
 
   # Returns a copy of *str* with the first character converted to uppercase and
   # the remainder to lowercase.
@@ -1316,10 +1482,11 @@ class String < Object
     params(
         str: String,
         encoding: T.nilable(Encoding),
+        capacity: T.nilable(Integer),
     )
     .void
   end
-  def initialize(str=T.unsafe(nil), encoding: nil); end
+  def initialize(str=T.unsafe(nil), encoding: nil, capacity: nil); end
 
   # Inserts *other\_str* before the character at the given *index*, modifying
   # *str*. Negative indices count from the end of the string, and insert *after*

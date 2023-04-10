@@ -133,7 +133,7 @@ end
 ```
 
 <a
-href="https://sorbet.run/#class%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7B%20params(input_param%3A%20T.any('foo'%2C%20'bar')).void%20%7D%0A%20%20def%20a(input_param)%0A%20%20%20%20puts%20input_param%0A%20%20end%0Aend">
+href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7B%20params%28input_param%3A%20T.any%28'foo'%2C%20'bar'%29%29.void%20%7D%0A%20%20def%20a%28input_param%29%0A%20%20%20%20puts%20input_param%0A%20%20end%0Aend">
 → View on sorbet.run </a>
 
 ## `T.nilable` and `T::Boolean`

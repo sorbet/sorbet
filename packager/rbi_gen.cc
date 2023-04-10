@@ -7,7 +7,7 @@
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "core/GlobalState.h"
 #include "packager/packager.h"
 
@@ -327,7 +327,7 @@ private:
         if (methodData->flags.isPrivate) {
             if (methodData->owner.data(gs)->isSingletonClass(gs)) {
                 visibility = "private_class_method ";
-            } else {
+            } else if (methodData->name != core::Names::initialize()) {
                 visibility = "private ";
             }
         } else if (methodData->flags.isProtected) {

@@ -551,49 +551,52 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto bodyLoops = cctx.loops + 1;
                     auto bodyBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
 
-                    LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
-                    bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
                     auto *argBlock = bodyBlock;
-                    for (int i = 0; i < blockArgFlags.size(); ++i) {
-                        auto &arg = blockArgFlags[i];
-                        LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
+                    if (!blockArgFlags.empty()) {
+                        LocalRef argTemp = cctx.newTemporary(core::Names::blkArg());
+                        bodyBlock->exprs.emplace_back(argTemp, s.block()->loc, make_insn<LoadYieldParams>(link));
 
-                        if (arg.flags.isRepeated) {
-                            // Mixing positional and rest args in blocks is
-                            // not currently supported, but we'll handle that in
-                            // inference.
-                            argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                         make_insn<YieldLoadArg>(i, arg.flags, argTemp));
-                            continue;
-                        }
+                        for (int i = 0; i < blockArgFlags.size(); ++i) {
+                            auto &arg = blockArgFlags[i];
+                            LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
 
-                        if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
-                            auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
-                            auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
-
-                            // add a test for YieldParamPresent
-                            auto present = cctx.newTemporary(core::Names::argPresent());
-                            synthesizeExpr(argBlock, present, arg.loc,
-                                           make_insn<YieldParamPresent>(static_cast<uint16_t>(i)));
-                            conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
-
-                            // make a new block for the present and missing blocks to join
-                            argBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
-
-                            // compile the argument fetch in the present block
-                            presentBlock->exprs.emplace_back(argLoc, arg.loc,
+                            if (arg.flags.isRepeated) {
+                                // Mixing positional and rest args in blocks is
+                                // not currently supported, but we'll handle that in
+                                // inference.
+                                argBlock->exprs.emplace_back(argLoc, arg.loc,
                                                              make_insn<YieldLoadArg>(i, arg.flags, argTemp));
-                            unconditionalJump(presentBlock, argBlock, cctx.inWhat, arg.loc);
+                                continue;
+                            }
 
-                            // compile the default expr in `missingBlock`
-                            auto *missingLast = walk(cctx.withTarget(argLoc), opt->default_, missingBlock);
-                            unconditionalJump(missingLast, argBlock, cctx.inWhat, arg.loc);
-                        } else {
-                            argBlock->exprs.emplace_back(argLoc, arg.loc,
-                                                         make_insn<YieldLoadArg>(i, arg.flags, argTemp));
+                            if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
+                                auto *presentBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
+                                auto *missingBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
+
+                                // add a test for YieldParamPresent
+                                auto present = cctx.newTemporary(core::Names::argPresent());
+                                synthesizeExpr(argBlock, present, arg.loc,
+                                               make_insn<YieldParamPresent>(static_cast<uint16_t>(i)));
+                                conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
+
+                                // make a new block for the present and missing blocks to join
+                                argBlock = cctx.inWhat.freshBlock(bodyLoops, newRubyRegionId);
+
+                                // compile the argument fetch in the present block
+                                presentBlock->exprs.emplace_back(argLoc, arg.loc,
+                                                                 make_insn<YieldLoadArg>(i, arg.flags, argTemp));
+                                unconditionalJump(presentBlock, argBlock, cctx.inWhat, arg.loc);
+
+                                // compile the default expr in `missingBlock`
+                                auto *missingLast = walk(cctx.withTarget(argLoc), opt->default_, missingBlock);
+                                unconditionalJump(missingLast, argBlock, cctx.inWhat, arg.loc);
+                            } else {
+                                argBlock->exprs.emplace_back(argLoc, arg.loc,
+                                                             make_insn<YieldLoadArg>(i, arg.flags, argTemp));
+                            }
                         }
                     }
 

@@ -695,14 +695,29 @@ class Proc < Object
   sig {returns(T::Boolean)}
   def lambda?(); end
 
-  # Returns the parameter information of this proc.
+
+
+  # Returns the parameter information of this proc. If the lambda keyword is
+  # provided and not nil, treats the proc as a lambda if true and as a
+  # non-lambda if false.
   #
   # ```ruby
+  # prc = proc{|x, y=42, *other|}
+  # prc.parameters  #=> [[:opt, :x], [:opt, :y], [:rest, :other]]
   # prc = lambda{|x, y=42, *other|}
   # prc.parameters  #=> [[:req, :x], [:opt, :y], [:rest, :other]]
+  # prc = proc{|x, y=42, *other|}
+  # prc.parameters(lambda: true)  #=> [[:req, :x], [:opt, :y], [:rest, :other]]
+  # prc = lambda{|x, y=42, *other|}
+  # prc.parameters(lambda: false) #=> [[:opt, :x], [:opt, :y], [:rest, :other]]
   # ```
-  sig {returns(T::Array[[Symbol, Symbol]])}
-  def parameters(); end
+  sig do
+    params(
+      lambda: T.nilable(T::Boolean),
+    )
+    .returns(T::Array[T::Array[Symbol]])
+  end
+  def parameters(lambda=nil); end
 
   # Marks the proc as passing keywords through a normal argument splat. This
   # should only be called on procs that accept an argument splat (`*args`) but

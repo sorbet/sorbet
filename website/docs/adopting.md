@@ -155,7 +155,7 @@ people encounter at this step:
     types can be used in place of which other types.
 
 [rand-include]:
-  https://sorbet.run/#module%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
+  https://sorbet.run/#%23%20typed%3A%20true%0Amodule%20A%3B%20end%0Amodule%20B%3B%20end%0A%20%20%0Adef%20x%0A%20%20rand.round%20%3D%3D%200%20%3F%20A%20%3A%20B%0Aend%0A%20%20%0Aclass%20Main%0A%20%20include%20x%0Aend
 
 To solve points (3) and (4), Sorbet uses [RBI files](rbi.md). We mentioned RBI
 files before when we introduced `tapioca init`. RBI files are purely annotations

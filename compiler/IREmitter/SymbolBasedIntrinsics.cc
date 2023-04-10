@@ -9,7 +9,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Core/FailCompilation.h"
 #include "compiler/Errors/Errors.h"

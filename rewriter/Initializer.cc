@@ -95,56 +95,62 @@ const ast::Send *findParams(const ast::Send *send) {
 // this function checks if the signature of the initialize method is using returns(Something)
 // instead of void and provides an auto-correct option
 void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
-    auto originalSend = send->deepCopy();
-    string statementAfterReturns = "";
+    auto originalSendLoc = send->loc;
+    core::NameRef funAfterReturns;
 
     // try to find the invocation to returns. Save the source code of the invocation
     // immediately after returns() so that we can have the exact length it occupies
     while (send && send->fun != core::Names::returns()) {
-        statementAfterReturns = send->fun.toString(ctx);
+        funAfterReturns = send->fun;
         send = ast::cast_tree<ast::Send>(send->recv);
     }
 
     // if the returns exists, then add an error an suggest the auto-correct. We need to account for things
     // being invoked after returns too. E.g.: sig { returns(Foo).on_failure(...) }
-    if (send != nullptr) {
-        if (auto e = ctx.beginError(originalSend.loc(), core::errors::Rewriter::InitializeReturnType)) {
-            e.setHeader("The {} method should always return {}", "initialize", "void");
+    if (send == nullptr) {
+        return;
+    }
 
-            auto loc = core::Loc(ctx.file, originalSend.loc());
-            auto original = string(loc.source(ctx).value());
-            unsigned long returnsStart = original.find("returns");
-            unsigned long returnsLength, afterReturnsPosition;
-            string replacement;
+    if (auto e = ctx.beginError(originalSendLoc, core::errors::Rewriter::InitializeReturnType)) {
+        e.setHeader("The {} method should always return {}", "initialize", "void");
 
-            // If there are no statements after returns(), we can use the length of the block to find the length
-            // we need to replace. If there are statements after it, we need to find the exact length using the next
-            // statement and remember to add a dot or else it will produce invalid code
-            returnsLength = original.length() - returnsStart + 1;
-
-            if (statementAfterReturns.empty()) {
-                replacement = original.replace(returnsStart, returnsLength, "void");
-            } else {
-                afterReturnsPosition = original.find(statementAfterReturns, returnsStart);
-
-                // If there is a line break between returns() and the next statement, change the returns() entry and
-                // re-join the string with the line breaks. Otherwise, everything is on the same line and we can replace
-                // directly without worrying about line breaks
-                vector<string> lines = absl::StrSplit(original.substr(returnsStart, afterReturnsPosition), "\n");
-
-                if (lines.size() > 1) {
-                    lines[0] = "void";
-                    replacement = original.replace(returnsStart, returnsLength,
-                                                   fmt::format("{}", fmt::join(lines.begin(), lines.end(), "\n")));
-                } else {
-                    returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
-                    replacement = original.replace(returnsStart, returnsLength, "void.");
-                }
-            }
-
-            e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
-                                                         {core::AutocorrectSuggestion::Edit{loc, replacement}}});
+        auto loc = core::Loc(ctx.file, originalSendLoc);
+        auto original = string(loc.source(ctx).value());
+        unsigned long returnsStart = original.find("returns");
+        unsigned long returnsLength, afterReturnsPosition;
+        string replacement;
+        string statementAfterReturns = "";
+        if (funAfterReturns.exists()) {
+            statementAfterReturns = funAfterReturns.toString(ctx);
         }
+
+        // If there are no statements after returns(), we can use the length of the block to find the length
+        // we need to replace. If there are statements after it, we need to find the exact length using the next
+        // statement and remember to add a dot or else it will produce invalid code
+        returnsLength = original.length() - returnsStart + 1;
+
+        if (statementAfterReturns.empty()) {
+            replacement = original.replace(returnsStart, returnsLength, "void");
+        } else {
+            afterReturnsPosition = original.find(statementAfterReturns, returnsStart);
+
+            // If there is a line break between returns() and the next statement, change the returns() entry and
+            // re-join the string with the line breaks. Otherwise, everything is on the same line and we can replace
+            // directly without worrying about line breaks
+            vector<string> lines = absl::StrSplit(original.substr(returnsStart, afterReturnsPosition), "\n");
+
+            if (lines.size() > 1) {
+                lines[0] = "void";
+                replacement = original.replace(returnsStart, returnsLength,
+                                               fmt::format("{}", fmt::join(lines.begin(), lines.end(), "\n")));
+            } else {
+                returnsLength = original.find(statementAfterReturns, returnsStart) - returnsStart;
+                replacement = original.replace(returnsStart, returnsLength, "void.");
+            }
+        }
+
+        e.addAutocorrect(core::AutocorrectSuggestion{fmt::format("Replace `{}` with `{}`", original, replacement),
+                                                     {core::AutocorrectSuggestion::Edit{loc, replacement}}});
     }
 }
 

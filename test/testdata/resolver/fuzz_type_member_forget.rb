@@ -9,4 +9,4 @@ class DifferentArityChild < Parent # error: Type `TParent` declared by parent `P
   TChild = type_member {{fixed: String}}
 end
 
-T.cast(1, DifferentArityChild[Integer, String, Symbol]) # error-with-dupes: Wrong number of type parameters for `DifferentArityChild`. Expected: `0`, got: `3`
+T.cast(1, DifferentArityChild[Integer, String, Symbol]) # error-with-dupes: All type parameters for `DifferentArityChild` have already been fixed

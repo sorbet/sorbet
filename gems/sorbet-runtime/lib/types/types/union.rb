@@ -64,6 +64,17 @@ module T::Types
       raise "This should never be reached if you're going through `subtype_of?` (and you should be)"
     end
 
+    def unwrap_nilable
+      non_nil_types = types.reject {|t| t == T::Utils::Nilable::NIL_TYPE}
+      return nil if types.length == non_nil_types.length
+      case non_nil_types.length
+      when 0 then nil
+      when 1 then non_nil_types.first
+      else
+        T::Types::Union::Private::Pool.union_of_types(non_nil_types[0], non_nil_types[1], non_nil_types[2..-1])
+      end
+    end
+
     module Private
       module Pool
         EMPTY_ARRAY = [].freeze

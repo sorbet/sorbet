@@ -1,0 +1,7 @@
+# typed: true
+# assert-fast-path: out_of_order.rb
+
+X = A
+
+class A::Foo
+end

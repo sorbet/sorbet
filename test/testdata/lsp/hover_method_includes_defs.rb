@@ -34,7 +34,7 @@ module OuterModule
     extend T::Sig
     sig {params(name: String).void}
     def initialize(name)
-      # ^ hover: def initialize(name); end
+      # ^ hover: private def initialize(name); end
       @name = name
     end
 
@@ -99,7 +99,7 @@ module OuterModule
     def class_usages
       s = "Foo"
       qualified = InnerClass.new(s)
-      #                        ^ hover: def initialize(name); end
+      #                        ^ hover: private def initialize(name); end
       [
         no_args_return_void,
         # ^ hover: def no_args_return_void; end

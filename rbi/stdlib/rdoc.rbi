@@ -1509,10 +1509,6 @@ class RDoc::Context::Section
   def remove_comment(comment); end
 
   # [`Section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html)
-  # sequence number (deprecated)
-  def sequence; end
-
-  # [`Section`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html)
   # title
   def title; end
 end

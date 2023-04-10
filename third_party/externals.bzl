@@ -177,9 +177,9 @@ def register_sorbet_dependencies():
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4.zip"),
-        sha256 = "90c59f14cada755706a38bdd0f5ad8f0402cbf766387929cfbee9c3f1b4c82d7",
-        strip_prefix = "bazel-toolchain-a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/4124470e037b4464a88db71c8565ad44af29664d.zip"),
+        sha256 = "23e9aa7318a6c3bfb2712c4c85e731f1cde8bfdd0d84b39aab6b8746ab7c391e",
+        strip_prefix = "bazel-toolchain-4124470e037b4464a88db71c8565ad44af29664d",
     )
 
     http_archive(
@@ -311,15 +311,6 @@ def register_sorbet_dependencies():
         name = "system_ssl_linux",
         path = "/usr",
         build_file = "@com_stripe_ruby_typer//third_party/openssl:linux.BUILD",
-    )
-
-    http_archive(
-        name = "rules_rust",
-        sha256 = "727b93eb5d57ec411f2afda7e3993e22d7772d0b2555ba745c3dec7323ea955a",
-        strip_prefix = "rules_rust-0768a7f00de134910c3cbdab7bbfdd011d995766",
-
-        # Master branch as of 2021-06-29
-        urls = _github_public_urls("bazelbuild/rules_rust/archive/0768a7f00de134910c3cbdab7bbfdd011d995766.tar.gz"),
     )
 
     http_archive(

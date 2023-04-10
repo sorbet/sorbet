@@ -1,9 +1,9 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
-#include "common/ConstExprStr.h"
 #include "common/EarlyReturnWithCode.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
+#include "common/strings/ConstExprStr.h"
 #include "core/StrictLevel.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
@@ -114,7 +114,6 @@ struct AutoloaderConfig {
     std::string rootObject;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
-    std::vector<std::vector<std::string>> pbalNamespaces;
     std::vector<std::string> stripPrefixes;
 
     std::vector<std::string> absoluteIgnorePatterns;
@@ -181,6 +180,7 @@ struct Options {
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> secondaryTestPackageNamespaces;
+    std::vector<std::string> skipPackageImportVisibilityCheckFor;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
@@ -264,6 +264,8 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
+    // Enables out-of-order reference checking
+    bool outOfOrderReferenceChecksEnabled = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;

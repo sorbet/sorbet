@@ -833,6 +833,10 @@ public:
         return numPosArgs_;
     }
 
+    bool onlyPosArgs() const {
+        return numPosArgs_ == args.size();
+    }
+
     // The number of keyword arguments in the Send.
     uint16_t numKwArgs() const {
         uint16_t range = args.size() - numPosArgs_ - (hasKwSplat() ? 1 : 0) - (hasBlock() ? 1 : 0);

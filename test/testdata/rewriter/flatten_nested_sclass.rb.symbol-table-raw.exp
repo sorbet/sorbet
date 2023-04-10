@@ -11,7 +11,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
     method <S <C <U A>> $1>#<U foo> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=4:3 end=4:15}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
-  class <S <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=5:5 end=5:10}
+  class <S <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=5:5 end=5:10}
     type-member(+) <S <S <C <U A>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U A>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U A>> $1>   targs = [     <C <U <AttachedClass>>> = A   ] }) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=5:5 end=5:10}
     method <S <S <C <U A>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=5:5 end=7:8}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
@@ -24,7 +24,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
     method <S <C <U B>> $1>#<U bar> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=17:7 end=17:14}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
-  class <S <S <C <U B>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=16:5 end=16:10}
+  class <S <S <C <U B>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=16:5 end=16:10}
     type-member(+) <S <S <C <U B>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U B>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U B>> $1>   targs = [     <C <U <AttachedClass>>> = B   ] }) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=16:5 end=16:10}
     method <S <S <C <U B>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=16:5 end=18:8}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
@@ -35,13 +35,13 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
     method <S <C <U C>> $1>#<U foo> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=27:3 end=27:15}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
-  class <S <S <C <U C>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=29:12}
+  class <S <S <C <U C>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=29:12}
     type-member(+) <S <S <C <U C>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U C>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U C>> $1>   targs = [     <C <U <AttachedClass>>> = C   ] }) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=28:5 end=28:10}
     method <S <S <C <U C>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=28:5 end=32:8}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
     method <S <S <C <U C>> $1> $1>#<U bar> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=30:9 end=30:16}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}
-  class <S <S <S <C <U C>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <S <S <C <U Object>> $1> $1> $1> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=29:12}
+  class <S <S <S <C <U C>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Class>> $1> () @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=29:12}
     type-member(+) <S <S <S <C <U C>> $1> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <S <C <U C>> $1> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <S <C <U C>> $1> $1>   targs = [     <C <U <AttachedClass>>> = AppliedType {         klass = <S <C <U C>> $1>         targs = [           <C <U <AttachedClass>>> = C         ]       }   ] }) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=29:12}
     method <S <S <S <C <U C>> $1> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=29:7 end=31:10}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_nested_sclass.rb start=??? end=???}

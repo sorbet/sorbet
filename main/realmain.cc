@@ -24,8 +24,8 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
@@ -521,6 +521,13 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
+
+    if (!opts.outOfOrderReferenceChecksEnabled) {
+        if (opts.isolateErrorCode.empty()) {
+            gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
+        }
+    }
+
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
@@ -657,10 +664,10 @@ int realmain(int argc, char *argv[]) {
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-                gs->setPackagerOptions(opts.secondaryTestPackageNamespaces,
-                                       opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                                       opts.extraPackageFilesDirectorySlashPrefixes,
-                                       opts.packageSkipRBIExportEnforcementDirs, opts.stripePackagesHint);
+                gs->setPackagerOptions(
+                    opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                    opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                    opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
             }
 
             packages = packager::Packager::findPackages(*gs, *workers, move(packages));

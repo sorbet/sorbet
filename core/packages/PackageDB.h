@@ -59,6 +59,7 @@ public:
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
 
     const std::string_view errorHint() const;
+    bool skipImportVisibilityCheckFor(const core::NameRef mangledName) const;
 
 private:
     std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
@@ -66,6 +67,7 @@ private:
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
+    std::vector<NameRef> skipImportVisibilityCheckFor_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having

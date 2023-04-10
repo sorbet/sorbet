@@ -161,6 +161,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
+    bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
+
     // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
     // Given any other symbol, returns false.
     // Also returns false if called on core::Symbols::noClassOrModule().
@@ -440,6 +442,7 @@ public:
     bool isTypeAlias(const GlobalState &gs) const;
     bool isField(const GlobalState &gs) const;
     bool isStaticField(const GlobalState &gs) const;
+    bool isClassAlias(const GlobalState &gs) const;
 
     uint32_t classOrModuleIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
@@ -491,6 +494,8 @@ public:
         // 0th index is reserved on all symbol vectors for the non existant symbol.
         return unsafeTableIndex() != 0;
     }
+
+    bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
 
     bool isSynthetic() const;
 
@@ -1070,6 +1075,10 @@ public:
 
     static ClassOrModuleRef T_Types_Base() {
         return ClassOrModuleRef::fromRaw(96);
+    }
+
+    static ClassOrModuleRef Data() {
+        return ClassOrModuleRef::fromRaw(97);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

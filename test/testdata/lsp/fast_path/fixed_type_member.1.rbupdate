@@ -26,4 +26,4 @@ Box[Integer].new.parent_ex('')
 #                          ^^ error: Expected `Integer` but found `String("")` for argument `x`
 IntBox.new.parent_ex('')
 IntBox[Integer].new
-#      ^^^^^^^ error: Wrong number of type parameters
+#      ^^^^^^^ error: All type parameters for `IntBox` have already been fixed

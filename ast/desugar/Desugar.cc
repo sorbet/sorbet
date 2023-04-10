@@ -7,7 +7,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
-#include "common/formatting.h"
+#include "common/strings/formatting.h"
 #include "core/Names.h"
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
@@ -825,8 +825,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 } else {
                     int numPosArgs = send->args.size();
                     if (numPosArgs > 0) {
-                        // Deconstruct the kwargs hash in the last argument if it's present.
-                        if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
+                        // The keyword arguments hash can be the last argument if there is no block
+                        // or second to last argument otherwise
+                        int kwargsHashIndex = send->args.size() - 1;
+                        if (!parser::isa_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
+                            kwargsHashIndex = max(0, kwargsHashIndex - 1);
+                        }
+
+                        // Deconstruct the kwargs hash if it's present.
+                        if (auto *hash = parser::cast_node<parser::Hash>(send->args[kwargsHashIndex].get())) {
                             if (hash->kwargs) {
                                 numPosArgs--;
 
@@ -839,8 +846,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                         return parser::isa_node<parser::Kwsplat>(node.get());
                                     })) {
                                     // hold a reference to the node, and remove it from the back fo the send list
-                                    auto node = std::move(send->args.back());
-                                    send->args.pop_back();
+                                    auto node = std::move(send->args[kwargsHashIndex]);
+                                    send->args.erase(send->args.begin() + kwargsHashIndex);
 
                                     // inline the hash into the send args
                                     for (auto &entry : hash->pairs) {

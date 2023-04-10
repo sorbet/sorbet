@@ -138,6 +138,40 @@ module GC
   sig {params(arg0: Symbol).returns(Integer)}
   def self.stat(arg0={}); end
 
+  # Returns information for memory pools in the \GC.
+  #
+  # If the first optional argument, +heap_name+, is passed in and not +nil+, it
+  # returns a +Hash+ containing information about the particular memory pool.
+  # Otherwise, it will return a +Hash+ with memory pool names as keys and
+  # a +Hash+ containing information about the memory pool as values.
+  #
+  # If the second optional argument, +hash_or_key+, is given as +Hash+, it will
+  # be overwritten and returned. This is intended to avoid the probe effect.
+  #
+  # If both optional arguments are passed in and the second optional argument is
+  # a symbol, it will return a +Numeric+ of the value for the particular memory
+  # pool.
+  #
+  # On CRuby, +heap_name+ is of the type +Integer+ but may be of type +String+
+  # on other implementations.
+  #
+  # The contents of the hash are implementation specific and may change in
+  # the future without notice.
+  #
+  # If the optional argument, hash, is given, it is overwritten and returned.
+  #
+  # This method is only expected to work on CRuby.
+  sig { returns(T::Hash[Integer, T::Hash[Symbol, Integer]]) }
+  sig { params(heap_name: T.any(Integer, String), hash_or_key: Symbol).returns(Integer) }
+  sig do
+    params(
+      heap_name: T.any(Integer, String, NilClass),
+      hash_or_key: T::Hash[T.untyped, T.untyped],
+    ).returns(T::Hash[T.untyped, T.untyped])
+  end
+  sig { params(heap_name: T.any(Integer, String)).returns(T::Hash[Symbol, Integer]) }
+  def self.stat_heap(heap_name = nil, hash_or_key = nil); end
+
   # Returns current status of
   # [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) stress mode.
   sig {returns(T.any(Integer, TrueClass, FalseClass))}

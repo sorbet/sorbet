@@ -5,10 +5,10 @@
 
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
-#include "common/Timer.h"
 #include "common/concurrency/WorkerPool.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/errors/infer.h"
 #include "main/options/ConfigParser.h"
@@ -394,6 +394,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Secondary top-level namespaces which contain test code (in addition to Test, which is primary). "
         "This option must be used in conjunction with --stripe-packages",
         cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("skip-package-import-visibility-check-for",
+                               "Packages for which the visible_to check does not apply. They can import any package "
+                               "regardless of visible_to annotations."
+                               "This option must be used in conjunction with --stripe-packages",
+                               cxxopts::value<vector<string>>(), "string");
 
     options.add_options("advanced")(
         "autogen-autoloader-exclude-require",
@@ -417,9 +422,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
                                     cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-pbal-namespaces",
-                                    "Namespaces for which path-based autoloading is enabled.",
-                                    cxxopts::value<vector<string>>());
     options.add_options("advanced")("autogen-autoloader-strip-prefix",
                                     "Prefixes to strip from file output paths. "
                                     "If path does not start with prefix, nothing is stripped",
@@ -432,6 +434,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
     options.add_options("advanced")("experimental-ruby3-keyword-args",
                                     "Enforce use of new (Ruby 3.0-style) keyword arguments", cxxopts::value<bool>());
+    options.add_options("advanced")("check-out-of-order-constant-references",
+                                    "Enable out-of-order constant reference checks (error 5027)");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
@@ -673,11 +677,6 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
             cfg.sameFileModules.emplace_back(absl::StrSplit(fullName, "::"));
         }
     }
-    if (raw.count("autogen-autoloader-pbal-namespaces") > 0) {
-        for (auto &fullName : raw["autogen-autoloader-pbal-namespaces"].as<vector<string>>()) {
-            cfg.pbalNamespaces.emplace_back(absl::StrSplit(fullName, "::"));
-        }
-    }
     cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
     cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
@@ -789,6 +788,7 @@ void readOptions(Options &opts,
         opts.lspDocumentFormatRubyfmtEnabled =
             FileOps::exists(opts.rubyfmtPath) &&
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
+        opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
@@ -1002,6 +1002,25 @@ void readOptions(Options &opts,
                 opts.secondaryTestPackageNamespaces.emplace_back(ns);
             }
         }
+
+        if (raw.count("skip-package-import-visibility-check-for")) {
+            if (!opts.stripePackages) {
+                logger->error(
+                    "--skip-package-import-visibility-check-for can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
+            for (const string &ns : raw["skip-package-import-visibility-check-for"].as<vector<string>>()) {
+                if (!std::regex_match(ns, nsValid)) {
+                    logger->error(
+                        "--skip-package-import-visibility-check-for must contain items that start with a capital "
+                        "letter and are alphanumeric.");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.skipPackageImportVisibilityCheckFor.emplace_back(ns);
+            }
+        }
+
         opts.stripePackagesHint = raw["stripe-packages-hint-message"].as<string>();
         if (!opts.stripePackagesHint.empty() && !opts.stripePackages) {
             if (!opts.stripePackages) {

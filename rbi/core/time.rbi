@@ -1093,24 +1093,6 @@ class Time < Object
   sig {returns(Numeric)}
   def subsec(); end
 
-  # Returns a new [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
-  # object, one second later than *time*.
-  # [`Time#succ`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-succ)
-  # is obsolete since 1.9.2 for time is not a discrete value.
-  #
-  # ```ruby
-  # t = Time.now       #=> 2007-11-19 08:23:57 -0600
-  # t.succ             #=> 2007-11-19 08:23:58 -0600
-  # ```
-  #
-  # Use instead `time + 1`
-  #
-  # ```ruby
-  # t + 1              #=> 2007-11-19 08:23:58 -0600
-  # ```
-  sig {returns(Time)}
-  def succ(); end
-
   # Returns `true` if *time* represents Sunday.
   #
   # ```ruby

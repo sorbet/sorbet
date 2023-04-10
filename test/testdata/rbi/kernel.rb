@@ -102,3 +102,30 @@ end
 y = loop do
 end
 puts y # error: This code is unreachable
+
+class Test
+  def test
+    a = 1
+    b = 2
+  end
+end
+
+set_trace_func proc { |event, file, line, id, binding, classname|
+    printf "%8s %s:%-2d %10s %8s\n", event, file, line, id, classname
+}
+t = Test.new
+t.test
+
+set_trace_func(nil)
+
+require "continuation"
+callcc {|cont|
+  for i in 0..4
+    print "\n#{i}: "
+    for j in i*5...(i+1)*5
+      cont.call() if j == 17
+      printf "%3d", j
+    end
+  end
+}
+puts

@@ -1,2 +1,3 @@
-sorbet_ruby_2_7_unpatched
 sorbet_ruby_2_7
+sorbet_ruby_3_0
+sorbet_ruby_3_1

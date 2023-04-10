@@ -1279,18 +1279,20 @@ class Array < Object
     .returns(Elem)
   end
   sig do
-    params(
+    type_parameters(:Fallback)
+    .params(
         arg0: Integer,
-        arg1: Elem,
+        arg1: T.type_parameter(:Fallback),
     )
-    .returns(Elem)
+    .returns(T.any(Elem, T.type_parameter(:Fallback)))
   end
   sig do
-    params(
+    type_parameters(:Fallback)
+    .params(
         arg0: Integer,
-        blk: T.proc.params(arg0: Integer).returns(Elem),
+        blk: T.proc.params(arg0: Integer).returns(T.type_parameter(:Fallback)),
     )
-    .returns(Elem)
+    .returns(T.any(Elem, T.type_parameter(:Fallback)))
   end
   def fetch(arg0, arg1=T.unsafe(nil), &blk); end
 

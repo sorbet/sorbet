@@ -213,7 +213,7 @@ class Exception < Object
 
   sig do
     params(
-        arg0: T.any(String, Symbol, NilClass, Exception),
+        arg0: BasicObject,
     )
     .void
   end

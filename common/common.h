@@ -65,6 +65,11 @@ constexpr bool skip_slow_enforce = false;
         X;            \
     }
 
+#define SLOW_DEBUG_ONLY(X)                                      \
+    if constexpr (!::sorbet::skip_slow_enforce && debug_mode) { \
+        X;                                                      \
+    }
+
 constexpr bool skip_check_memory_layout = debug_mode || emscripten_build;
 
 template <typename ToCheck, std::size_t ExpectedSize, std::size_t RealSize = sizeof(ToCheck)> struct check_size {
@@ -153,7 +158,7 @@ std::string demangle(const char *mangled);
 #pragma GCC poison cuserid
 #pragma GCC poison rexec rexec_af
 
-#include "Timer.h"
 #include "enforce_no_timer/EnforceNoTimer.h"
 #include "exception/Exception.h"
+#include "timers/Timer.h"
 #endif

@@ -1,10 +1,10 @@
 #include "cfg/CFG.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
-#include "common/Timer.h"
 #include "common/UIntSetForEach.h"
-#include "common/formatting.h"
-#include "common/sort.h"
+#include "common/sort/sort.h"
+#include "common/strings/formatting.h"
+#include "common/timers/Timer.h"
 
 // helps debugging
 template class std::unique_ptr<sorbet::cfg::CFG>;
