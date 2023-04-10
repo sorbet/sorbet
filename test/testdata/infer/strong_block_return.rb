@@ -24,11 +24,13 @@ end
 
 example2 do
   T.unsafe(nil)
+# ^^^^^^^^^^^^^ error: Value returned from block is `T.untyped`
 end
 
 # I think that ideally, we would not report the error inside the block, and
 # only report an error when you try to use `res`
 res = example3 do
   T.unsafe(nil)
+# ^^^^^^^^^^^^^ error: Value returned from block is `T.untyped`
 end
-T.reveal_type(res)
+T.reveal_type(res) # error: `T.untyped`
