@@ -4,7 +4,7 @@ test/cli/dedup_loc/dedup_loc.rb:5: Argument does not have asserted type `NilClas
   Got `Exception` originating from:
     test/cli/dedup_loc/dedup_loc.rb:4:
      4 |rescue Exception => e
-     5 |    T.assert_type!(e, NilClass)
+        ^^^^^^
     test/cli/dedup_loc/dedup_loc.rb:4:
      4 |rescue Exception => e
                ^^^^^^^^^

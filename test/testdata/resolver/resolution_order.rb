@@ -1,4 +1,4 @@
-# typed: strong
+# typed: strict
 
 # This file is not valid Ruby since we reference A before
 # definition. However, it would work with our autoloader, and also

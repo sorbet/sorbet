@@ -4,6 +4,7 @@ cc_library(
         [
             "*.cc",
             "*.h",
+            "errors/*.cc",
             "types/*.cc",
             "lsp/*.cc",
             "packages/*.cc",

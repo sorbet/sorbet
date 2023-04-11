@@ -1392,7 +1392,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
-                    methodReturnType = core::Types::untypedUntracked();
+                    methodReturnType = core::Types::top();
                 }
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible)) {
@@ -1411,6 +1411,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                                          typeAndOrigin.type);
                         }
                     }
+                } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
+                           typeAndOrigin.type.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        e.setHeader("Value returned from method is `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
+                    }
                 }
             },
             [&](cfg::BlockReturn &i) {
@@ -1420,7 +1427,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
-                    expectedType = core::Types::untypedUntracked();
+                    expectedType = core::Types::top();
                 }
                 bool isSubtype;
                 if (i.link->result->main.constr) {
@@ -1442,6 +1449,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
+                    }
+                } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    if (auto e = ctx.beginError(bind.loc, what)) {
+                        e.setHeader("Value returned from block is `{}`", "T.untyped");
+                        core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
                 }
 
@@ -1526,6 +1539,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(c.cast != core::Names::uncheckedLet() && c.cast != core::Names::bind() &&
                         c.cast != core::Names::syntheticBind());
 
+                // TODO(jez) Should we allow `T.let` / `T.cast` opt out of the untyped code error?
                 if (c.cast != core::Names::cast()) {
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
@@ -1607,6 +1621,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
+            // TODO(jez) What should we do about untyped code and pinning?
             bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
                                                    core::Types::dropLiteral(ctx, cur.type));
 

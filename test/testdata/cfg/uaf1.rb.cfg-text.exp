@@ -60,8 +60,8 @@ bb7[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Pr
     # outerLoops: 1
     se$1: T.untyped = <exceptionValue>$8
     <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T.untyped = se$1: T.untyped.is_a?(<cfgAlias>$12: T.class_of(StandardError))
-    <isaCheckTemp>$13 -> (T.untyped ? bb11 : bb12)
+    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(se$1: T.untyped)
+    <isaCheckTemp>$13 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
 # - bb5(rubyRegionId=1)
