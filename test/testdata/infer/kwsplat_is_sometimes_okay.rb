@@ -41,23 +41,17 @@ sig do
 end
 def example(opts, nilable_opts, mixed_opts, untyped_opts, string_keys)
   takes_all_required_nilable(**opts)
-  #                          ^^^^^^ error: Cannot call `Object#takes_all_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required_nilable(**opts)
-  #                           ^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
   # It might be nice to get better locations for these two in the future, and
   # also to somehow allow them.
   takes_some_required_nilable(x: nil, **opts)
-  #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required_nilable(**opts, x: nil)
-  #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
   takes_all_optional_nilable(**opts)
 
   takes_all_required(**opts)
-  #                  ^^^^^^ error: Cannot call `Object#takes_all_required` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required(**opts)
-  #                   ^^^^^^ error: Cannot call `Object#takes_some_required` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional(**opts)
   takes_all_optional(**nilable_opts)
   #                  ^^^^^^^^^^^^^^ error: Expected `String` for keyword parameter `x` but found `T.nilable(String)` from keyword splat
@@ -67,15 +61,11 @@ def example(opts, nilable_opts, mixed_opts, untyped_opts, string_keys)
 
 
   takes_all_required_untyped(**opts)
-  #                          ^^^^^^ error: Cannot call `Object#takes_all_required_untyped` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required_untyped(**opts)
-  #                           ^^^^^^ error: Cannot call `Object#takes_some_required_untyped` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional_untyped(**opts)
 
   takes_all_required_unsigged(**opts)
-  #                           ^^^^^^ error: Cannot call `Object#takes_all_required_unsigged` with a `Hash` keyword splat because the method has required keyword parameters
   takes_some_required_unsigged(**opts)
-  #                            ^^^^^^ error: Cannot call `Object#takes_some_required_unsigged` with a `Hash` keyword splat because the method has required keyword parameters
   takes_all_optional_unsigged(**opts)
 
   takes_one_int_one_str(**opts)

@@ -831,7 +831,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         constr->defineDomain(gs, data->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwParams = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
@@ -856,9 +856,29 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
-            break;
+
+        auto argType = Types::approximate(gs, arg->type, *constr);
+        if (ait + 1 == aend && hasKwParams && (spec.flags.isDefault || spec.flags.isRepeated) &&
+            argType.derivesFrom(gs, Symbols::Hash())) {
+            // Edge case:
+            // sig {params(args: Integer, x: Integer).void}
+            //             ^^^^ pit
+            // def foo(*args, x: 42); end
+            //
+            // sig {returns(T.untyped)}
+            // def returns_untyped; return 42; end
+            //
+            // foo(returns_untyped, returns_untyped, returns_untyped)
+            //                                       ^^^^^^^^^^^^^^^ ait
+            //
+            // The last argument would be dispatched as kwargs hash, because
+            // in the condition above T.untyped would always derive from Hash.
+            // To properly parse the argumnets we need to manually advance the parameter pointer
+            if ((spec.flags.isRepeated && !spec.flags.isKeyword) && argType.isUntyped()) {
+                ++pit;
+            } else {
+                break;
+            }
         }
 
         auto offset = ait - args.args.begin();
@@ -876,7 +896,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // If positional arguments remain, the method accepts keyword arguments, and no keyword arguments were provided in
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
-    if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
+    if (ait != aPosEnd && hasKwParams && args.args.size() == args.numPosArgs) {
         auto splatLoc = args.argLoc(args.args.size() - 1);
 
         // If --experimental-ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
@@ -886,8 +906,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
                                          "and will be an error in Ruby 3.0");
                 if (auto source = splatLoc.source(gs)) {
-                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
-                                  source.value());
+                    const auto shouldParenthesize = absl::StrContains(source.value(), "=>");
+                    const auto autofixTemplate = shouldParenthesize ? "**({})" : "**{}";
+                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc,
+                                  autofixTemplate, source.value());
                 }
             }
         }
@@ -947,7 +969,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto &kwSplatArg = *(aend - 1);
             kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
-            if (hasKwargs) {
+            if (hasKwParams) {
                 if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
@@ -986,7 +1008,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // Detect the case where not all positional arguments were supplied, causing the keyword args to be consumed as
         // a positional hash.
         if (kwargs != nullptr && pit != pend && !pit->flags.isBlock &&
-            (!hasKwargs || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
+            (!hasKwParams || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
             // TODO(trevor) if `hasKwargs` is true at this point but not keyword args were provided, we could add an
             // autocorrect to turn this into `**kwargs`
 
@@ -1006,7 +1028,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // the keyword args as consumed when this method does not accept keyword arguments.
             kwargs = nullptr;
             posArgs++;
-            if (!hasKwargs) {
+            if (!hasKwParams) {
                 ait += numKwargs;
             }
         } else if (kwSplatIsHash) {
@@ -1042,30 +1064,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto kwSplatKeyType = appliedType.targs[0];
                 auto kwSplatValueType = appliedType.targs[1];
 
-                if (hasRequiredKwParam) {
-                    if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::UntypedSplat)) {
-                        // Unfortunately, this prevents even valid splats:
-                        //     def f(x:, y: 0); end
-                        //     f(x: 0, **opts)
-                        // This should work, but we currently handle kwsplat even before we check
-                        // which keyword args have already been consumed (see below for that).
-                        // This is harder to support, but maybe also less likely:
-                        //     f(**opts, x: 0)
-                        e.setHeader("Cannot call `{}` with a `{}` keyword splat because the method has required "
-                                    "keyword parameters",
-                                    method.show(gs), "Hash");
-                        e.addErrorLine(kwParams.front()->loc,
-                                       "Keyword parameters of `{}` begin here:", method.show(gs));
-                        e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                        e.addErrorNote("Note that Sorbet does not yet handle mixing explicitly-passed keyword args "
-                                       "with splats.\n"
-                                       "    To ignore this and pass the splat anyways, use `{}`",
-                                       "T.unsafe");
-                        maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
-                        result.main.errors.emplace_back(e.build());
-                    }
-                } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
-                                                            UntypedMode::AlwaysCompatible)) {
+                if (!hasRequiredKwParam &&
+                    !Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
+                                                     UntypedMode::AlwaysCompatible)) {
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                         e.setHeader("Expected `{}` but found `{}` for keyword splat keys type", "Symbol",
                                     kwSplatKeyType.show(gs));
@@ -1137,7 +1138,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
-    if (hasKwargs) {
+    if (hasKwParams) {
         // Remember where the kwargs started
         auto kwait = aPosEnd;
         // Mark the keyword args as consumed
@@ -1306,7 +1307,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
             }
 
-            if (!hasKwargs) {
+            if (!hasKwParams) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
