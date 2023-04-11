@@ -1014,6 +1014,25 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(MyEnum::BAR, roundtripped.deprecated_enum_of_enums)
     end
 
+    it 'raises deserialize errors if the enum value is invalid' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      EnumStruct.from_hash({'enum' => 'invalid'})
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(EnumStruct, storytime[:klass])
+      assert_equal(:enum, storytime[:prop])
+      assert_equal('invalid', storytime[:value])
+      assert_includes(storytime[:error], "key not found")
+    end
+
     it 'does not break during serde when used redundantly with legacy T.deprecated_enum' do
       s = RedundantEnumStruct.new(deprecated_enum: MyEnum::FOO)
       serialized = s.serialize
