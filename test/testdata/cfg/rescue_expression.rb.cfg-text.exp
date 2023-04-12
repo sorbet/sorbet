@@ -3,8 +3,8 @@ method ::Object#foo {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <magic>$8: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.untyped = <get-current-exception>
-    <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb6(rubyRegionId=3)
@@ -15,12 +15,12 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$8: T.class_of(<Magic>)):
-    e: T.untyped = <exceptionValue>$3
+bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: Exception, <magic>$8: T.class_of(<Magic>)):
+    e: Exception = <exceptionValue>$3
     <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
     <statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()
     <exceptionClassTemp>$10: T.class_of(MyException) = <statTemp>$11: MyException.class()
-    <isaCheckTemp>$14: T::Boolean = <exceptionClassTemp>$10: T.class_of(MyException).===(e: T.untyped)
+    <isaCheckTemp>$14: T::Boolean = <exceptionClassTemp>$10: T.class_of(MyException).===(e: Exception)
     <isaCheckTemp>$14 -> (T::Boolean ? bb7 : bb8)
 
 # backedges

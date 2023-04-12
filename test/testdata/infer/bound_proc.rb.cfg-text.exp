@@ -779,9 +779,9 @@ method ::Rescues#foo {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Rescues = cast(<self>: NilClass, Rescues);
     <magic>$11: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <self>: String = cast(<castTemp>$7: NilClass, String);
-    <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb6(rubyRegionId=3)
@@ -792,9 +792,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$11: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: Exception, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: T.untyped)
+    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$15 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -807,8 +807,8 @@ bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>
     <self>: String = cast(<castTemp>$7: String, String);
     <cfgAlias>$9: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
-    <exceptionValue>$3: T.untyped = <get-current-exception>
-    <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
 
 # backedges
 # - bb4(rubyRegionId=1)
@@ -852,11 +852,11 @@ method ::Rescues#bar {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Rescues = cast(<self>: NilClass, Rescues);
     <magic>$11: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$3: T.untyped = <get-current-exception>
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
     <self>: String = cast(<castTemp>$7: NilClass, String);
     <self>: Integer = cast(<castTemp>$19: NilClass, Integer);
     <self>: Float = cast(<castTemp>$28: NilClass, Float);
-    <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb6(rubyRegionId=3)
@@ -867,9 +867,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.untyped, <magic>$11: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: Exception, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: T.untyped)
+    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$15 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -882,8 +882,8 @@ bb4[rubyRegionId=1, firstDead=-1](<self>: Float, <magic>$11: T.class_of(<Magic>)
     <self>: String = cast(<castTemp>$7: Float, String);
     <cfgAlias>$9: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
-    <exceptionValue>$3: T.untyped = <get-current-exception>
-    <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
+    <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
 
 # backedges
 # - bb4(rubyRegionId=1)
@@ -939,9 +939,9 @@ bb0[rubyRegionId=0, firstDead=-1]():
     <cfgAlias>$5: T.class_of(T) = alias <C T>
     <statTemp>$3: Rescues = <cfgAlias>$5: T.class_of(T).reveal_type(<self>: Rescues)
     <magic>$15: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$7: T.untyped = <get-current-exception>
+    <exceptionValue>$7: T.nilable(Exception) = <get-current-exception>
     <self>: String = cast(<castTemp>$11: NilClass, String);
-    <exceptionValue>$7 -> (T.untyped ? bb3 : bb4)
+    <exceptionValue>$7 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb6(rubyRegionId=3)
@@ -952,9 +952,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: T.untyped, <magic>$15: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: Exception, <magic>$15: T.class_of(<Magic>)):
     <cfgAlias>$18: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$19: T::Boolean = <cfgAlias>$18: T.class_of(StandardError).===(<exceptionValue>$7: T.untyped)
+    <isaCheckTemp>$19: T::Boolean = <cfgAlias>$18: T.class_of(StandardError).===(<exceptionValue>$7: Exception)
     <isaCheckTemp>$19 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -967,8 +967,8 @@ bb4[rubyRegionId=1, firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>
     <self>: String = cast(<castTemp>$11: String, String);
     <cfgAlias>$13: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$13: T.class_of(T).reveal_type(<self>: String)
-    <exceptionValue>$7: T.untyped = <get-current-exception>
-    <exceptionValue>$7 -> (T.untyped ? bb3 : bb5)
+    <exceptionValue>$7: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$7 -> (T.nilable(Exception) ? bb3 : bb5)
 
 # backedges
 # - bb4(rubyRegionId=1)
@@ -1039,17 +1039,17 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-t
     # outerLoops: 1
     <self>: T.class_of(Rescues) = loadSelf(takes_block)
     <magic>$17: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$9: T.untyped = <get-current-exception>
+    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
     <self>: Integer = cast(<castTemp>$13: NilClass, Integer);
-    <exceptionValue>$9 -> (T.untyped ? bb7 : bb8)
+    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb8)
 
 # backedges
 # - bb5(rubyRegionId=1)
 # - bb8(rubyRegionId=2)
-bb7[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: T.untyped, <castTemp>$13: T.nilable(Integer), <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$25: NilClass):
+bb7[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: Exception, <castTemp>$13: T.nilable(Integer), <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$25: NilClass):
     # outerLoops: 1
     <cfgAlias>$20: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$9: T.untyped)
+    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$9: Exception)
     <isaCheckTemp>$21 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
@@ -1063,8 +1063,8 @@ bb8[rubyRegionId=2, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorb
     <self>: Integer = cast(<castTemp>$13: Integer, Integer);
     <cfgAlias>$15: T.class_of(T) = alias <C T>
     <blockReturnTemp>$8: Integer = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: Integer)
-    <exceptionValue>$9: T.untyped = <get-current-exception>
-    <exceptionValue>$9 -> (T.untyped ? bb7 : bb9)
+    <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb9)
 
 # backedges
 # - bb8(rubyRegionId=2)
