@@ -1491,7 +1491,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
-                tp.type = core::Types::untypedUntracked();
+                tp.type = core::Types::any(ctx, core::make_type<core::ClassType>(core::Symbols::Exception()),
+                                           core::Types::nilClass());
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
