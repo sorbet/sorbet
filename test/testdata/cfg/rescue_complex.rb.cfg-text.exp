@@ -131,8 +131,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -166,8 +168,10 @@ bb7[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Mag
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+    <rescueTemp>$3: Exception = <exceptionValue>$3
     <cfgAlias>$13: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$14: T::Boolean = <cfgAlias>$13: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$12: T.class_of(StandardError) = <cfgAlias>$13
+    <isaCheckTemp>$14: T::Boolean = <exceptionClassTemp>$12: T.class_of(StandardError).===(<rescueTemp>$3: Exception)
     <isaCheckTemp>$14 -> (T::Boolean ? bb9 : bb10)
 
 # backedges
@@ -212,7 +216,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
     baz: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.untyped = alias <C T.untyped>
-    <isaCheckTemp>$9: T.untyped = <cfgAlias>$8: T.untyped.===(baz: Exception)
+    <exceptionClassTemp>$7: T.untyped = <cfgAlias>$8
+    <isaCheckTemp>$9: T.untyped = <exceptionClassTemp>$7: T.untyped.===(baz: Exception)
     <isaCheckTemp>$9 -> (T.untyped ? bb7 : bb8)
 
 # backedges
@@ -247,7 +252,8 @@ bb7[rubyRegionId=2, firstDead=-1](<magic>$5: T.class_of(<Magic>), baz: Exception
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.untyped, <magic>$5: T.class_of(<Magic>), baz: Exception):
     <cfgAlias>$11: T.untyped = alias <C T.untyped>
-    <isaCheckTemp>$12: T.untyped = <cfgAlias>$11: T.untyped.===(baz: Exception)
+    <exceptionClassTemp>$10: T.untyped = <cfgAlias>$11
+    <isaCheckTemp>$12: T.untyped = <exceptionClassTemp>$10: T.untyped.===(baz: Exception)
     <isaCheckTemp>$12 -> (T.untyped ? bb7 : bb9)
 
 # backedges
@@ -282,8 +288,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -346,8 +354,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<exceptionValue>$3: Exception, <magic>$4: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$7: T.class_of(LoadError) = alias <C LoadError>
-    <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(LoadError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$6: T.class_of(LoadError) = <cfgAlias>$7
+    <isaCheckTemp>$8: T::Boolean = <exceptionClassTemp>$6: T.class_of(LoadError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -407,8 +417,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception, <magic>$7: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$5
     <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <exceptionClassTemp>$9: T.class_of(StandardError) = <cfgAlias>$10
+    <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$9: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -471,8 +483,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -598,8 +612,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$6: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$8: T.class_of(StandardError) = <cfgAlias>$9
+    <isaCheckTemp>$10: T::Boolean = <exceptionClassTemp>$8: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -663,8 +679,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -728,7 +746,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>)):
     ex: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(ex: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(ex: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -793,7 +812,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>), @ex$11: T.nilable(StandardError)):
     <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -817,10 +837,10 @@ bb6[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), <rescueTemp>$2: Exception, @ex$11: T.nilable(StandardError)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), <rescueTemp>$2: StandardError, @ex$11: T.nilable(StandardError)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    @ex$11: T.nilable(StandardError) = <rescueTemp>$2
+    @ex$11: StandardError = <rescueTemp>$2
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
     <unconditional> -> bb6
 
@@ -857,8 +877,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <statTemp>$4: T.untyped, <exceptionValue>$5: Exception, <magic>$7: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$5
     <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <exceptionClassTemp>$9: T.class_of(StandardError) = <cfgAlias>$10
+    <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$9: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -922,8 +944,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](foo: NilClass, <exceptionValue>$3: Exception, <magic>$7: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$9: T.class_of(StandardError) = <cfgAlias>$10
+    <isaCheckTemp>$11: T::Boolean = <exceptionClassTemp>$9: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -988,8 +1012,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <exceptionValue>$5: Exception, <magic>$9: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$5
     <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$5: Exception)
+    <exceptionClassTemp>$11: T.class_of(StandardError) = <cfgAlias>$12
+    <isaCheckTemp>$13: T::Boolean = <exceptionClassTemp>$11: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$13 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -1057,8 +1083,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass, <exceptionValue>$13: Exception, <magic>$17: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$13
     <cfgAlias>$20: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$13: Exception)
+    <exceptionClassTemp>$19: T.class_of(StandardError) = <cfgAlias>$20
+    <isaCheckTemp>$21: T::Boolean = <exceptionClassTemp>$19: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$21 -> (T::Boolean ? bb7 : bb8)
 
 # backedges

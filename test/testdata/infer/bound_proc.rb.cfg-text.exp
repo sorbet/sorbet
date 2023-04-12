@@ -793,8 +793,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: Exception, <magic>$11: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$13: T.class_of(StandardError) = <cfgAlias>$14
+    <isaCheckTemp>$15: T::Boolean = <exceptionClassTemp>$13: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$15 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -868,8 +870,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: Exception, <magic>$11: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$3
     <cfgAlias>$14: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$15: T::Boolean = <cfgAlias>$14: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
+    <exceptionClassTemp>$13: T.class_of(StandardError) = <cfgAlias>$14
+    <isaCheckTemp>$15: T::Boolean = <exceptionClassTemp>$13: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$15 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -953,8 +957,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
 bb3[rubyRegionId=2, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$7: Exception, <magic>$15: T.class_of(<Magic>)):
+    <rescueTemp>$2: Exception = <exceptionValue>$7
     <cfgAlias>$18: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$19: T::Boolean = <cfgAlias>$18: T.class_of(StandardError).===(<exceptionValue>$7: Exception)
+    <exceptionClassTemp>$17: T.class_of(StandardError) = <cfgAlias>$18
+    <isaCheckTemp>$19: T::Boolean = <exceptionClassTemp>$17: T.class_of(StandardError).===(<rescueTemp>$2: Exception)
     <isaCheckTemp>$19 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
@@ -1048,8 +1054,10 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Rescues), <block-pre-call-t
 # - bb8(rubyRegionId=2)
 bb7[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <exceptionValue>$9: Exception, <castTemp>$13: T.nilable(Integer), <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$25: NilClass):
     # outerLoops: 1
+    <rescueTemp>$2$1: Exception = <exceptionValue>$9
     <cfgAlias>$20: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$21: T::Boolean = <cfgAlias>$20: T.class_of(StandardError).===(<exceptionValue>$9: Exception)
+    <exceptionClassTemp>$19: T.class_of(StandardError) = <cfgAlias>$20
+    <isaCheckTemp>$21: T::Boolean = <exceptionClassTemp>$19: T.class_of(StandardError).===(<rescueTemp>$2$1: Exception)
     <isaCheckTemp>$21 -> (T::Boolean ? bb11 : bb12)
 
 # backedges

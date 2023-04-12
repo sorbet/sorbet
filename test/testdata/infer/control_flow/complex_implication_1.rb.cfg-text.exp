@@ -37,7 +37,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, <exceptionValue>$4: Exception, <magic>$5: T.class_of(<Magic>)):
     e: Exception = <exceptionValue>$4
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(e: Exception)
+    <exceptionClassTemp>$7: T.class_of(StandardError) = <cfgAlias>$8
+    <isaCheckTemp>$9: T::Boolean = <exceptionClassTemp>$7: T.class_of(StandardError).===(e: Exception)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
