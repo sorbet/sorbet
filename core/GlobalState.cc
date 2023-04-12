@@ -480,16 +480,6 @@ void GlobalState::initEmpty() {
     klass = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::DeclBuilderForProcsSingleton());
 
-    // Ruby 2.5 Hack
-    klass = synthesizeClass(core::Names::Constants::Net(), 0, true);
-    ENFORCE(klass == Symbols::Net());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP());
-    Symbols::Net_IMAP().data(*this)->setIsModule(false);
-    ENFORCE(klass == Symbols::Net_IMAP());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol());
-    ENFORCE(klass == Symbols::Net_Protocol());
-    Symbols::Net_Protocol().data(*this)->setIsModule(false);
-
     klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE(klass == Symbols::T_Sig_WithoutRuntime());
