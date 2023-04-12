@@ -76,6 +76,12 @@
 # *   aamine@loveruby.net
 # *   http://i.loveruby.net
 class Ripper
+  # This hash contains parser event names and arity to handle them.
+  PARSER_EVENT_TABLE = T.let(T.unsafe(nil), T::Hash[Symbol, Integer])
+
+  # This hash contains scanner event names and arity to handle them.
+  SCANNER_EVENT_TABLE = T.let(T.unsafe(nil), T::Hash[Symbol, Integer])
+
   # This array contains name of all ripper events.
   EVENTS = T.let(T.unsafe(nil), T::Array[Symbol])
 
