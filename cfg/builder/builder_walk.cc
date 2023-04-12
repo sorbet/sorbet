@@ -862,10 +862,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         args.emplace_back(localVar);
 
                         auto isPrivateOk = false;
-                        rescueHandlersBlock->exprs.emplace_back(
-                            isaCheck, loc,
-                            make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
-                                            args.size(), args, std::move(argLocs), isPrivateOk));
+                        synthesizeExpr(rescueHandlersBlock, isaCheck, loc,
+                                       make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(),
+                                                       loc.copyWithZeroLength(), args.size(), args, std::move(argLocs),
+                                                       isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
