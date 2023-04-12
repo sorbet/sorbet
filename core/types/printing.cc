@@ -491,7 +491,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
             it = targs.erase(it);
-        } else if (typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
+        } else if (this->klass.data(gs)->isClass() &&
+                   typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

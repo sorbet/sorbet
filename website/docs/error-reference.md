@@ -531,6 +531,17 @@ generated setter method will then be given an invalid name ending with `==`.
 `T.nilable(T.untyped)` is just `T.untyped`, because `nil` is a valid value of
 type `T.untyped` (along with all other values).
 
+## 3513
+
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
+Ruby `class`. For more, see the docs for
+[`T.attached_class`](attached-class.md).
+
+## 3514
+
+The `has_attached_class!` annotation cannot be given a contravariant `:in`
+annotation because `T.attached_class` is only allowed in output positions.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
@@ -1726,7 +1737,7 @@ Some modules require specific functionality in the receiving class to work. For
 example `Enumerable` needs a `each` method in the target class.
 
 Failing example in
-[sorbet.run](https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0Aend):
+[sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend):
 
 ```
 class Example
@@ -1738,7 +1749,7 @@ To fix this, implement the required abstract methods in your class to provide
 the required functionality.
 
 Passing example in
-[sorbet.run](<https://sorbet.run/#class%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each(%26blk)%0A%0A%20%20end%0Aend>):
+[sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend):
 
 ```
 class Example
@@ -2850,6 +2861,14 @@ To fix this error, there are some options:
   specifics of the test, it may even be possible to simply define all the
   abstract methods to simply `raise`, so that other aspects of the parent class
   can be tested.)
+
+## 5074
+
+A module marked `has_attached_class!` can only be mixed into a class with
+`extend`, or a module with `include`. When mixing a `has_attached_class!` module
+into another module, both modules must declare `has_attached_class!`.
+
+For more information, see the docs for [`T.attached_class`](attached-class.md).
 
 ## 6001
 
@@ -4086,6 +4105,16 @@ without breaking valid code.
 To fix this error, ensure that the left and right operands' types match before
 doing the comparison. For example, try converting `String`s to `Symbol`s with
 `to_sym` (or vice versa with `to_s`).
+
+## 7047
+
+This error code is an implementation detail of Sorbet's "highlight untyped in
+editor" mode. It indicates that the given piece of code has type
+[`T.untyped`](untyped.md). Untyped code can be dangerous, because it circumvents
+the guarantees of the type system.
+
+This feature is opt-in. See [VS Code](vscode.md) for instructions on how to turn
+it on.
 
 <!-- -->
 

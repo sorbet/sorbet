@@ -445,9 +445,10 @@ string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
 string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
     if (sym->name == core::Names::Constants::AttachedClass()) {
-        auto attached = sym->owner.asClassOrModuleRef().data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists());
-        if (options.showForRBI) {
+        auto owner = sym->owner.asClassOrModuleRef();
+        auto attached = owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists() || owner.data(gs)->isModule());
+        if (options.showForRBI || owner.data(gs)->isModule()) {
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
@@ -2412,7 +2413,11 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            result = mix(result, _hash(member.name(gs).shortName(gs)));
+            if (member.isTypeMember()) {
+                result = mix(result, member.asTypeMemberRef().data(gs)->hash(gs));
+            } else {
+                result = mix(result, _hash(member.name(gs).shortName(gs)));
+            }
         }
     }
     for (const auto &e : mixins_) {

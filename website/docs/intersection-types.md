@@ -146,15 +146,6 @@ class FooParent; end
 class FooChild < FooParent; end
 class Bar; end
 
-module ImmutableBox
-  extend T::Generic
-  Elem = type_member(:out)
-end
-class MutableBox
-  extend T::Generic
-  Elem = type_member
-end
-
 sig {params(xs: T::Array[T.all(A, B)]).void}
 def example1(xs)
   # Since A and B are unrelated classes, Sorbet notices that
@@ -186,7 +177,7 @@ def example3(x)
 end
 ```
 
-[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0A%0Amodule%20M%3B%20end%0A%0Aclass%20FooParent%3B%20end%0Aclass%20FooChild%20%3C%20FooParent%3B%20end%0Aclass%20Bar%3B%20end%0A%0Amodule%20ImmutableBox%0A%20%20extend%20T%3A%3AGeneric%0A%20%20Elem%20%3D%20type_member%28%3Aout%29%0Aend%0Aclass%20MutableBox%0A%20%20extend%20T%3A%3AGeneric%0A%20%20Elem%20%3D%20type_member%0Aend%0A%0Asig%20%7Bparams%28xs%3A%20T%3A%3AArray%5BT.all%28A%2C%20B%29%5D%29.void%7D%0Adef%20example1%28xs%29%0A%20%20%23%20Since%20A%20and%20B%20are%20unrelated%20classes%2C%20Sorbet%20notices%20that%0A%20%20%23%20there%20are%20no%20values%20that%20satisfy%20%60T.all%28A%2C%20B%29%60%2C%20and%20thus%0A%20%20%23%20collapses%20the%20type%20to%20%60T.noreturn%60%0A%20%20T.reveal_type%28xs%29%20%23%20%3D%3E%20T%3A%3AArray%5BT.noreturn%5D%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.all%28A%2C%20M%29%29.void%7D%0Adef%20example2%28x%29%0A%20%20%23%20Even%20though%20A%20and%20M%20are%20unrelated%2C%20because%20M%20is%20a%20module%0A%20%20%23%20%28not%20a%20class%29%20the%20type%20does%20not%20collapse.%20Why%3F%20There%20might%0A%20%20%23%20be%20some%20subclasses%20of%20A%20that%20include%20M%2C%20and%20some%20that%20don't.%0A%20%20%23%20%0A%20%20%23%20In%20this%20example%2C%20A%20has%20no%20subclasses.%20If%20we%20explicitly%0A%20%20%23%20declare%20to%20Sorbet%20that%20A%20has%20no%20subclasses%20with%20%60final!%60%2C%0A%20%20%23%20it%20would%20collapse%20the%20type.%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20T.all%28A%2C%20M%29%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.all%28FooParent%2C%20T.any%28FooChild%2C%20Bar%29%29%29.void%7D%0Adef%20example3%28x%29%0A%20%20%23%20Sorbet%20is%20smart%20enough%20to%20distribute%20over%20union%20types%3A%0A%20%20%23%20%20%20%20T.all%28FooParent%2C%20T.any%28FooChild%2C%20Bar%29%29%0A%20%20%23%20%3D%3E%20T.any%28T.all%28FooParent%2C%20FooChild%29%2C%20T.all%28FooParent%2C%20Bar%29%29%0A%20%20%23%20%3D%3E%20T.any%28FooChild%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20T.noreturn%20%20%20%20%20%20%20%20%20%20%20%29%0A%20%20%23%20%3D%3E%20FooChild%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20FooChild%0Aend)
+[→ View on sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20A%3B%20end%0Aclass%20B%3B%20end%0A%0Amodule%20M%3B%20end%0A%0Aclass%20FooParent%3B%20end%0Aclass%20FooChild%20%3C%20FooParent%3B%20end%0Aclass%20Bar%3B%20end%0A%0Asig%20%7Bparams%28xs%3A%20T%3A%3AArray%5BT.all%28A%2C%20B%29%5D%29.void%7D%0Adef%20example1%28xs%29%0A%20%20%23%20Since%20A%20and%20B%20are%20unrelated%20classes%2C%20Sorbet%20notices%20that%0A%20%20%23%20there%20are%20no%20values%20that%20satisfy%20%60T.all%28A%2C%20B%29%60%2C%20and%20thus%0A%20%20%23%20collapses%20the%20type%20to%20%60T.noreturn%60%0A%20%20T.reveal_type%28xs%29%20%23%20%3D%3E%20T%3A%3AArray%5BT.noreturn%5D%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.all%28A%2C%20M%29%29.void%7D%0Adef%20example2%28x%29%0A%20%20%23%20Even%20though%20A%20and%20M%20are%20unrelated%2C%20because%20M%20is%20a%20module%0A%20%20%23%20%28not%20a%20class%29%20the%20type%20does%20not%20collapse.%20Why%3F%20There%20might%0A%20%20%23%20be%20some%20subclasses%20of%20A%20that%20include%20M%2C%20and%20some%20that%20don't.%0A%20%20%23%20%0A%20%20%23%20In%20this%20example%2C%20A%20has%20no%20subclasses.%20If%20we%20explicitly%0A%20%20%23%20declare%20to%20Sorbet%20that%20A%20has%20no%20subclasses%20with%20%60final!%60%2C%0A%20%20%23%20it%20would%20collapse%20the%20type.%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20T.all%28A%2C%20M%29%0Aend%0A%0Asig%20%7Bparams%28x%3A%20T.all%28FooParent%2C%20T.any%28FooChild%2C%20Bar%29%29%29.void%7D%0Adef%20example3%28x%29%0A%20%20%23%20Sorbet%20is%20smart%20enough%20to%20distribute%20over%20union%20types%3A%0A%20%20%23%20%20%20%20T.all%28FooParent%2C%20T.any%28FooChild%2C%20Bar%29%29%0A%20%20%23%20%3D%3E%20T.any%28T.all%28FooParent%2C%20FooChild%29%2C%20T.all%28FooParent%2C%20Bar%29%29%0A%20%20%23%20%3D%3E%20T.any%28FooChild%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20T.noreturn%20%20%20%20%20%20%20%20%20%20%20%29%0A%20%20%23%20%3D%3E%20FooChild%0A%20%20T.reveal_type%28x%29%20%23%20%3D%3E%20FooChild%0Aend%29)
 
 All the examples above use normal, non-generic classes and modules, however the
 same principles govern when intersection types involving generic classes and

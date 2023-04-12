@@ -516,6 +516,31 @@ class Module < Object
   end
   def class_variables(inherit=T.unsafe(nil)); end
 
+  # Invoked as a callback whenever a constant is assigned on the receiver
+  #
+  # ```ruby
+  # module Chatty
+  #   def self.const_added(const_name)
+  #     super
+  #     puts "Added #{const_name.inspect}"
+  #   end
+  #   FOO = 1
+  # end
+  # ```
+  #
+  # *produces:*
+  #
+  # ```
+  # Added :FOO
+  # ```
+  sig do
+    params(
+      const_name: T.any(Symbol)
+    )
+    .returns(T.untyped)
+  end
+  def const_added(const_name); end
+
   # Says whether *mod* or its ancestors have a constant with the given name:
   #
   # ```ruby
@@ -1616,6 +1641,27 @@ class Module < Object
   end
   def refine(arg0, &blk); end
 
+  # Returns a list of refinements included in the receiver.
+  #
+  # ```ruby
+  # module A
+  #   refine Integer do
+  #   end
+
+  #   refine String do
+  #   end
+  # end
+
+  # p A.refinements
+  # ```
+  # *produces:*
+  #
+  # ```ruby
+  # [#<refinement:Integer@A>, #<refinement:String@B>]
+  # ```
+  sig {returns(T::Array[Module])}
+  def refinements; end
+
   # Removes the named class variable from the receiver, returning that
   # variable's value.
   #
@@ -1826,4 +1872,30 @@ class Module < Object
   # [B, A]
   # ```
   def self.used_modules; end
+
+  # Returns an array of all refinements used in the current scope. The ordering
+  # of refinements in the resulting array is not defined.
+  # ```ruby
+  # module A
+  #   refine Object do
+  #   end
+  # end
+  #
+  # module B
+  #   refine Object do
+  #   end
+  # end
+  #
+  # using A
+  # using B
+  # p Module.used_refinements
+  # ```
+  #
+  # *produces:*
+  #
+  # ```ruby
+  # [#<refinement:Object@B>, #<refinement:Object@A>]
+  # ```
+  sig {returns(T::Array[Module])}
+  def self.used_refinements; end
 end

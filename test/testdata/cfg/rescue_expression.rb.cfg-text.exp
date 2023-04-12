@@ -20,8 +20,8 @@ bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValu
     <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
     <statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()
     <exceptionClassTemp>$10: T.class_of(MyException) = <statTemp>$11: MyException.class()
-    <isaCheckTemp>$14: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$10: T.class_of(MyException))
-    <isaCheckTemp>$14 -> (T.untyped ? bb7 : bb8)
+    <isaCheckTemp>$14: T::Boolean = <exceptionClassTemp>$10: T.class_of(MyException).===(e: T.untyped)
+    <isaCheckTemp>$14 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)

@@ -81,6 +81,47 @@ There are some additional stipulations on the use of `abstract!` and
   singleton methods.
 - `abstract!` classes cannot be instantiated (will raise at runtime).
 
+## `overridable`: Providing default implementations of methods
+
+Certain abstract classes or interfaces want to provide methods that provide a
+reasonable default implementation of a method, allowing individual children to
+override the method with a more specific implementation.
+
+This is done with `overridable`:
+
+```ruby
+module Countable
+  extend T::Helpers
+
+  # 1: `abstract!` instead of `interface!`
+  abstract!
+
+  sig { abstract.returns(T.nilable(Integer)) }
+  def to_count; end
+
+  # 2: Use `overridable` to provide default implementation of `to_count!`
+  sig { overridable.returns(Integer) }
+  def to_count!
+    T.must(self.to_count)
+  end
+end
+```
+
+As the example shows, there are two main steps:
+
+1. If the module is not already `abstract!` (i.e., if it's an `interface!`),
+   change it to use `abstract!`. Modules declared with `interface!` are
+   constrained to _only_ have abstract methods, which prevents adding methods
+   with a default implementation.
+
+2. Use `overridable` to declare the default implementation of a method. Using
+   `overridable` opts the method into static
+   [override checking](override-checking.md), which will ensure that children
+   define a type-compatible override.
+
+Note: if you want to provide functionality in an abstract class or module that
+**must not** be possible to override in a child, use a [final method](final.md).
+
 ## Abstract singleton methods
 
 `abstract` singleton methods on a module are not allowed, as there's no way to

@@ -142,6 +142,34 @@ your preferred LSP client using the [`sorbet/showSymbol` LSP request].)
 [`sorbet/showsymbol` lsp request]:
   https://github.com/sorbet/sorbet/blob/ec02be89e3d1895ea51bc72464538073d27b812c/vscode_extension/src/LanguageClient.ts#L154-L179
 
+Highlight `T.untyped` code. This feature is in beta.
+
+This feature reports diagnostics to the editor for occurences of `T.untyped`
+code. Note that it is not yet perfect and may miss occurences of such values.
+
+It can be enabled by adding the following to your VSCode `settings.json` and
+either reopening VSCode or restarting Sorbet.
+
+```json
+"sorbet.highlightUntyped": true
+```
+
+or by using the `Sorbet: Toggle Highlight untyped values` command from the
+command palette (note this causes a full restart of Sorbet).
+
+To enable this feature in other language clients, configure your language client
+to send
+
+```json
+"initializationOptions": {
+  "highlightUntyped": true
+}
+```
+
+when sending the LSP initialize request to the Sorbet language server.
+
+<img src="/img/lsp/highlight_untyped.png" />
+
 ## Switching between configurations
 
 The Sorbet extension supports switching between multiple configurations to make

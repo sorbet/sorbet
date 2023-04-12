@@ -196,6 +196,7 @@ NameDef names[] = {
     {"fixed"},
     {"lower"},
     {"upper"},
+    {"declareHasAttachedClass", "has_attached_class!"},
 
     {"prop"},
     {"tokenProp", "token_prop"},

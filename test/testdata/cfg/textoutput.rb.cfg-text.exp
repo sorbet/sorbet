@@ -21,8 +21,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <exceptionValue>$11: T.untyped, <magic>$22: T.class_of(<Magic>)):
     e: T.untyped = <exceptionValue>$11
     <cfgAlias>$25: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$26: T.untyped = e: T.untyped.is_a?(<cfgAlias>$25: T.class_of(StandardError))
-    <isaCheckTemp>$26 -> (T.untyped ? bb7 : bb8)
+    <isaCheckTemp>$26: T::Boolean = <cfgAlias>$25: T.class_of(StandardError).===(e: T.untyped)
+    <isaCheckTemp>$26 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)

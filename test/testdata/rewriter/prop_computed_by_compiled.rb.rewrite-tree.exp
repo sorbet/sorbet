@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def num_ok<<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(<self>.class().compute_num_ok(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <todo sym>, <emptyTree>::<C Integer>)
-        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
       end
     end
 
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def missing<<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(<self>.class().compute_missing(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <todo sym>, <emptyTree>::<C Integer>)
-        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
       end
     end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def num_wrong_value<<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(<self>.class().compute_num_wrong_value(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <todo sym>, <emptyTree>::<C Integer>)
-        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
       end
     end
 
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def num_wrong_type<<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(<self>.class().compute_num_wrong_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <todo sym>, <emptyTree>::<C Integer>)
-        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
       end
     end
 
@@ -97,7 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def num_unknown_type<<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(<self>.class().compute_num_unknown_type(::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")), <todo sym>, <emptyTree>::<C Integer>)
-        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
       end
     end
 

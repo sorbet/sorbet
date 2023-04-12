@@ -9,8 +9,8 @@ bb0[rubyRegionId=0, firstDead=-1]():
 # - bb3(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
 bb1[rubyRegionId=0, firstDead=-1](<self>):
-    <statTemp>$10 = <self>
-    <block-pre-call-temp>$11 = <statTemp>$10.inner()
+    <statTemp>$9 = <self>
+    <block-pre-call-temp>$10 = <statTemp>$9.inner()
     <unconditional> -> bb1
 
 # backedges
@@ -32,7 +32,7 @@ bb3[rubyRegionId=0, firstDead=3](<self>: Object, <block-pre-call-temp>$4: Sorbet
 bb5[rubyRegionId=1, firstDead=2](<self>: Object):
     # outerLoops: 1
     <self>: Object = loadSelf(outer)
-    <statTemp>$8: T.noreturn = return <returnTemp>$9: NilClass
+    <statTemp>$7: T.noreturn = return <returnTemp>$8: NilClass
     <unconditional> -> bb1
 
 }

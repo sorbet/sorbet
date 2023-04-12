@@ -30,7 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -38,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -114,7 +114,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)

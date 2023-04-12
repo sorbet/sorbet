@@ -33,6 +33,10 @@ public:
     bool enableSorbetURIs = false;
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
+
+    /** If true, then LSP outputs a warning for untyped values */
+    bool enableHighlightUntyped = false;
+
     /**
      * Whether or not the active client has support for snippets in CompletionItems.
      * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are

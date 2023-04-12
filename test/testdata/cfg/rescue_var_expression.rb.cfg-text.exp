@@ -18,8 +18,8 @@ bb1[rubyRegionId=0, firstDead=-1]():
 bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>)):
     <rescueTemp>$2: T.untyped = <exceptionValue>$3
     <cfgAlias>$9: T.class_of(Exception) = alias <C Exception>
-    <isaCheckTemp>$10: T.untyped = <exceptionValue>$3: T.untyped.is_a?(<cfgAlias>$9: T.class_of(Exception))
-    <isaCheckTemp>$10 -> (T.untyped ? bb7 : bb8)
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(Exception).===(<exceptionValue>$3: T.untyped)
+    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)

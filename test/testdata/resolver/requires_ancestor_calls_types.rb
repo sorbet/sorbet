@@ -226,7 +226,7 @@ module Test10
 
     def m2
       T.attached_class.foo
-    # ^^^^^^^^^^^^^^^^ error: `T.attached_class` may only be used in a singleton class method context
+    # ^^^^^^^^^^^^^^^^ error: `Test10::M2` must declare `has_attached_class!` before module instance methods can use `T.attached_class
       T.class_of(M2).foo
       #              ^^^ error: Call to method `foo` on `T.class_of(Test10::M2)`
     end

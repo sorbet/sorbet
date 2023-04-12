@@ -2,6 +2,7 @@
 #include "common/timers/Timer.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/lsp/QueryResponse.h"
 #include "infer/SigSuggestion.h"
@@ -56,6 +57,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             methodReturnType = returnTypeVar.data(ctx)->resultType;
 
             constr->defineDomain(ctx, domainTemp);
+        } else if (cfg->symbol.data(ctx)->name.isAnyStaticInitName(ctx)) {
+            methodReturnType = core::Types::top();
         } else {
             methodReturnType = core::Types::untyped(ctx, cfg->symbol);
         }
@@ -297,12 +300,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
                     } else if (bind.bind.type.hasUntyped()) {
+                        // TODO(jez) We use `hasUntyped`, but untypedBlame doesn't look inside the
+                        // type to find which part has untyped (it just looks at the top-level type).
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
-                            e.setHeader("This code is untyped");
-                            e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong",
-                                           "typed: strict");
-                        }
                     }
                 }
                 ENFORCE(bind.bind.type);
@@ -325,7 +325,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
-            current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            auto bexitTpo = current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            if (bexitTpo.type.isUntyped()) {
+                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                if (auto e = ctx.beginError(bb->bexit.loc, what)) {
+                    e.setHeader("Conditional branch on `{}`", "T.untyped");
+                    core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, bexitTpo, methodLoc);
+                }
+            }
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
@@ -355,6 +362,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
     }
 
+    // TODO(jez) Delete these?
     prodCounterAdd("types.input.sends.typed", typedSendCount);
     prodCounterAdd("types.input.sends.total", totalSendCount);
 

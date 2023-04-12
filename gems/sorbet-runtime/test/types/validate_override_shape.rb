@@ -3,6 +3,16 @@ require_relative '../test_helper'
 
 module Opus::Types::Test
   class ValidateOverrideShapeTest < Critic::Unit::UnitTest
+    class AbstractFoo
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig {abstract.returns(Integer)}
+      def foo; end
+    end
+
     class Base
       extend T::Sig
       sig do
@@ -24,6 +34,26 @@ module Opus::Types::Test
         def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end
       end
       klass.new.foo(1, kwreq: 3) {}
+    end
+
+    it "succeeds specifically for abstract/abstract" do
+      klass = Class.new(AbstractFoo) do
+        extend T::Sig
+        extend T::Helpers
+        abstract!
+
+        sig {abstract.returns(Integer)}
+        def foo; end
+      end
+      another = Class.new(klass) do
+        extend T::Sig
+
+        sig {override.returns(Integer)}
+        def foo
+          0
+        end
+      end
+      assert_equal(0, another.new.foo)
     end
 
     it "succeeds if the override has additional optional args and kwargs" do

@@ -285,8 +285,8 @@ motivates why type systems (Sorbet included) place such emphasis on variance.
 
 ### Invariance
 
-(_For convenience throughout these docs, we use the annotation `<:` to claim
-that one type is a subtype of another type._)
+(_For convenience throughout these docs, we use the annotation `A <: B` to claim
+that `A` is a subtype of `B`._)
 
 By default, `type_member`'s and `type_template`'s are invariant. Here is an
 example of what that means:
@@ -684,7 +684,8 @@ We can't really explain why this special case is carved out except by answering
 
 To get a sense for why Sorbet places constraints on where covariant and
 contravariant type members can appear within signatures, consider this example,
-which continues the example from the [covariance section](#covariance) above:
+which continues the example from the [covariance section](#covariance-out)
+above:
 
 ```ruby
 int_box = Box[Integer].new(value: 0)

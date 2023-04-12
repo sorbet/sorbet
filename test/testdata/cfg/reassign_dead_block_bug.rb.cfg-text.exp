@@ -33,8 +33,8 @@ bb5[rubyRegionId=1, firstDead=4](<self>: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(times)
     x$1: Integer(1) = 1
-    <returnTemp>$10: Integer(1) = 1
-    <statTemp>$9: T.noreturn = return <returnTemp>$10: Integer(1)
+    <returnTemp>$9: Integer(1) = 1
+    <statTemp>$8: T.noreturn = return <returnTemp>$9: Integer(1)
     <unconditional> -> bb1
 
 }

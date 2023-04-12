@@ -43,7 +43,6 @@ require_relative 'types/types/self_type'
 require_relative 'types/types/simple'
 require_relative 'types/types/t_enum'
 require_relative 'types/types/type_parameter'
-require_relative 'types/types/typed_array'
 require_relative 'types/types/typed_enumerator'
 require_relative 'types/types/typed_enumerator_chain'
 require_relative 'types/types/typed_enumerator_lazy'
@@ -82,6 +81,9 @@ require_relative 'types/private/methods/signature'
 require_relative 'types/private/retry'
 require_relative 'types/utils'
 require_relative 'types/boolean'
+
+# Depends on types/utils
+require_relative 'types/types/typed_array'
 
 # Props dependencies
 require_relative 'types/private/abstract/data'
