@@ -4,7 +4,6 @@
 module T::Types
   # The top type
   class Anything < Base
-
     def initialize; end
 
     # overrides Base
