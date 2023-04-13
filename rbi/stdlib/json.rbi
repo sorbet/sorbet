@@ -235,6 +235,26 @@ module JSON
   end
   def self.load(source, proc=T.unsafe(nil), options=T.unsafe(nil)); end
 
+  # https://docs.ruby-lang.org/en/master/JSON.html#method-i-load_file
+  sig do
+    params(
+      path: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_file(path, opts=T.unsafe({})); end
+
+  # https://docs.ruby-lang.org/en/master/JSON.html#method-i-load_file-21
+  sig do
+    params(
+      path: ::T.untyped,
+      opts: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.load_file!(path, opts=T.unsafe({})); end
+
   # The global default options for the
   # [`JSON.load`](https://docs.ruby-lang.org/en/2.7.0/JSON.html#method-i-load)
   # method:
