@@ -7,14 +7,16 @@ sidebar_label: Highlighting untyped
 > **Note**: This feature is in beta. Please give us feedback!
 
 Sorbet can highlight regions of [untyped] Ruby code in editors. Here's what it
-looks like:
+looks like:[^1]
 
 [untyped]: untyped.md
 
 ![](/img/highlight-untyped.png)
 
-(_Note: this screenshot uses the [Error Lens] VS Code extension to display
-diagnostic titles inline._)
+[^1]:
+
+  This screenshot uses the [Error Lens] VS Code extension to display diagnostic
+  titles inline.
 
 [error lens]:
   https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens
@@ -28,7 +30,7 @@ squiggly underline. Other language clients may present them differently.
 
 ## Toggling untyped highlights
 
-**Note**: At the moment, toggling untyped highlights incurs a full restart of
+**Note**: at the moment, toggling untyped highlights incurs a full restart of
 Sorbet. This limitation should be removed in the future.
 
 ### In VS Code
