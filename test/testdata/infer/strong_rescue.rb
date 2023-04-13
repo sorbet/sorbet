@@ -53,3 +53,15 @@ def example4
   end
 end
 
+sig {void}
+def example5
+  begin
+  rescue Exception => e
+# ^^^^^^ error: Conditional branch on `T.untyped`
+# ^^^^^^ error: Conditional branch on `T.untyped`
+    #    ^^^^^^^^^ error: Argument passed to parameter `other` is `T.untyped`
+    T.reveal_type(e) # error: `Exception`
+  else
+  ensure
+  end
+end
