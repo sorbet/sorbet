@@ -3,7 +3,7 @@
 # enable-suggest-unsafe: true
 
 sig { params(x: T.untyped).returns(T.untyped) }
-def foo(x)
+def foo(x) # error: does not have a `sig`
   T.unsafe(nil)
 end
 # ------------------------------
