@@ -474,7 +474,11 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         }
         fmt::format_to(std::back_inserter(ss), ").");
     }
-    if (!guessedSomethingUseful) {
+    if (!guessedSomethingUseful && !ctx.state.suggestUnsafe.has_value()) {
+        // We don't want to condition people to start inserting a bunch of useless signatures filled
+        // with `T.untyped`, unless they've explicitly opted into the behavior with
+        // `--suggest-unsafe` (which usually suggests that they're doing some sort of codemod and
+        // they know what they're asking for).
         return nullopt;
     }
 
