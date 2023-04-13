@@ -530,7 +530,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
 
         whoKnows.sanityCheck();
-    } else if (send->fun == core::Names::nil_p()) {
+        return;
+    }
+
+    if (send->fun == core::Names::nil_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -538,7 +541,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
-    } else if (send->fun == core::Names::blank_p()) {
+        return;
+    }
+
+    if (send->fun == core::Names::blank_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -552,7 +558,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
-    } else if (send->fun == core::Names::present_p()) {
+        return;
+    }
+
+    if (send->fun == core::Names::present_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -566,11 +575,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
+        return;
     }
 
     if (send->args.empty()) {
         return;
     }
+
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
@@ -587,8 +598,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             }
             whoKnows.sanityCheck();
         }
-    } else if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() ||
-               send->fun == core::Names::neq()) {
+        return;
+    }
+
+    if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -635,7 +648,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         whoKnows.sanityCheck();
-    } else if (send->fun == core::Names::tripleEq()) {
+        return;
+    }
+
+    if (send->fun == core::Names::tripleEq()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -663,8 +679,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             }
         }
         whoKnows.sanityCheck();
+        return;
+    }
 
-    } else if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
+    if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
 
@@ -691,6 +709,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         }
         whoKnows.sanityCheck();
+        return;
     }
 }
 
