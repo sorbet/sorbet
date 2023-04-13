@@ -43,7 +43,7 @@ bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untype
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: Object, <magic>$6: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: Object, <exceptionValue>$3: StandardError, <magic>$6: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: Object.b()
