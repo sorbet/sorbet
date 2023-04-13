@@ -20,9 +20,9 @@ looks like:[^1]
 [error lens]:
   https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens
 
-This mode reports fragments of untyped code using a diagnostic severity of
-[Information]. VS Code renders diagnostics at this severity level with a blue
-squiggly underline. Other language clients may present them differently.
+VS Code renders these untyped code highlights with a blue squiggly underline.
+Other language clients may present them differently, depending on how they
+render diagnostics with an [Information] severity.
 
 [information]:
   https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity
@@ -38,13 +38,15 @@ Sorbet. This limitation should be removed in the future.
    [Sorbet VS Code extension](vscode.md).
 
 2. Open a Ruby file, and run the `Sorbet: Toggle highlighting untyped code`
-   command from the command pallet (accessed via ⇧⌘P on macOS, or ⇧⌃P on Windows
+   command from the command pallet (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows
    and Linux).
+
+This setting should persist through restarts of VS Code.
 
 ### In other LSP clients
 
-This feature relies on the `initializationOptions` to the `initialize` request
-that starts
+This feature relies on the `initializationOptions` parameter to the `initialize`
+request that starts
 [every language server protocol session](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize).
 
 To enable this feature, ensure that the `initializationOptions` includes
@@ -53,11 +55,11 @@ To enable this feature, ensure that the `initializationOptions` includes
 "highlightUntyped": true
 ```
 
-as a key-value pair.
+as a key-value pair when launching the Sorbet language server in your preferred
+client.
 
-For example, in Neovim, the `initializationOptions` on the `initialize` request
-are provided via the [`init_options` argument] to the `vim.lsp.start_client()`
-function.
+For example, in Neovim, this setting can be provided via the [`init_options`
+argument] to the `vim.lsp.start_client()` function.
 
 [`init_options` argument]:
   https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions
@@ -66,8 +68,8 @@ function.
 
 - This feature is not enabled in `# typed: false` files. A `# typed: false` file
   is essentially a file where the entire contents would need to be underlined.
-  Sorbet does not actually underline the entire content of a `# typed: false` as
-  it would be too noisy.
+  Sorbet does not actually underline the entire content of such a file, as it
+  would be too noisy.
 
 - This feature will only display diagnostics for **open files**. VS Code scales
   poorly when language servers report a very large number number of diagnostics,
