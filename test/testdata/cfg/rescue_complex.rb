@@ -35,6 +35,16 @@ class TestRescue
     end
   end
 
+  def multiple_rescue_classes_varuse()
+    begin
+      meth
+    rescue LoadError, SocketError => baz
+      baz
+    end
+
+    T.reveal_type(baz) # error: Revealed type: `T.untyped`
+  end
+
   def rescue_loop()
     ex = T.let(nil, T.nilable(StandardError))
 
@@ -61,7 +71,6 @@ class TestRescue
     rescue *typed_exceptions => e
       T.reveal_type(e) # error: Revealed type: `T.untyped`
     end
-  end
 
   def parse_rescue_ensure()
     begin; meth; rescue; baz; ensure; bar; end

@@ -52,6 +52,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       baz
     end
 
+    def multiple_rescue_classes_varuse<<todo method>>(&<blk>)
+      begin
+        <self>.meth()
+      rescue <emptyTree>::<C LoadError>, <emptyTree>::<C SocketError> => baz
+        baz
+        <emptyTree>::<C T>.reveal_type(baz)
+      end
+    end
+
     def rescue_loop<<todo method>>(&<blk>)
       begin
         ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
