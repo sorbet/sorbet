@@ -71,6 +71,7 @@ class TestRescue
     rescue *typed_exceptions => e
       T.reveal_type(e) # error: Revealed type: `T.untyped`
     end
+  end
 
   def parse_rescue_ensure()
     begin; meth; rescue; baz; ensure; bar; end
