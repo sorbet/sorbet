@@ -1540,24 +1540,24 @@ module Opus::Types::Test
         end
       end
 
-      describe 'unknown' do
+      describe 'anything' do
         it 'is not a subtype of things' do
-          refute_subtype(T.unknown, Integer)
-          refute_subtype(T.unknown, Numeric)
-          refute_subtype(T.unknown, [String, String])
-          refute_subtype(T.unknown, T::Array[Integer])
+          refute_subtype(T.anything, Integer)
+          refute_subtype(T.anything, Numeric)
+          refute_subtype(T.anything, [String, String])
+          refute_subtype(T.anything, T::Array[Integer])
 
           # except this one
-          assert_subtype(T.unknown, T.untyped)
+          assert_subtype(T.anything, T.untyped)
         end
 
         it 'other things are a subtype of it' do
-          assert_subtype(Integer, T.unknown)
-          assert_subtype(Numeric, T.unknown)
-          assert_subtype([String, String], T.unknown)
-          assert_subtype(T::Array[Integer], T.unknown)
+          assert_subtype(Integer, T.anything)
+          assert_subtype(Numeric, T.anything)
+          assert_subtype([String, String], T.anything)
+          assert_subtype(T::Array[Integer], T.anything)
 
-          assert_subtype(T.untyped, T.unknown)
+          assert_subtype(T.untyped, T.anything)
         end
       end
 

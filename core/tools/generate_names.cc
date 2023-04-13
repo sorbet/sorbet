@@ -135,7 +135,7 @@ NameDef names[] = {
     {"proc"},
     {"untyped"},
     {"noreturn"},
-    {"unknown"},
+    {"anything"},
     {"singletonClass", "singleton_class"},
     {"class_", "class"},
     {"classOf", "class_of"},
@@ -467,7 +467,7 @@ NameDef names[] = {
     {"compilerVersion", "compiler_version"},
 
     // GlobalState initEmpty()
-    {"Top", "T.unknown", true},
+    {"Top", "T.anything", true},
     {"Bottom", "T.noreturn", true},
     {"Untyped", "T.untyped", true},
     {"Root", "<root>", true},

@@ -3,13 +3,13 @@
 
 module T::Types
   # The top type
-  class Unknown < Base
+  class Anything < Base
 
     def initialize; end
 
     # overrides Base
     def name
-      "T.unknown"
+      "T.anything"
     end
 
     # overrides Base
@@ -20,13 +20,13 @@ module T::Types
     # overrides Base
     private def subtype_of_single?(other)
       case other
-      when T::Types::Unknown then true
+      when T::Types::Anything then true
       else false
       end
     end
 
     module Private
-      INSTANCE = Unknown.new.freeze
+      INSTANCE = Anything.new.freeze
     end
   end
 end

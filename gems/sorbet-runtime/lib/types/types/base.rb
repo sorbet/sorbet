@@ -50,7 +50,7 @@ module T::Types
         t2 = t2.aliased_type
       end
 
-      if t2.is_a?(T::Types::Unknown)
+      if t2.is_a?(T::Types::Anything)
         return true
       end
 

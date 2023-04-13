@@ -1750,12 +1750,12 @@ public:
     }
 } T_noreturn;
 
-class T_unknown : public IntrinsicMethod {
+class T_anything : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         res.returnType = make_type<MetaType>(Types::top());
     }
-} T_unknown;
+} T_anything;
 
 class T_class_of : public IntrinsicMethod {
 public:
@@ -4318,7 +4318,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::noreturn(), &T_noreturn},
-    {Symbols::T(), Intrinsic::Kind::Singleton, Names::unknown(), &T_unknown},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::anything(), &T_anything},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::classOf(), &T_class_of},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::selfType(), &T_self_type},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::attachedClass(), &T_attached_class},

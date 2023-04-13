@@ -1,11 +1,11 @@
 # typed: strict
 extend T::Sig
 
-sig {params(x: T.unknown).returns(T.unknown)}
+sig {params(x: T.anything).returns(T.anything)}
 def example(x)
   x.nil?
-  # ^^^^ error: Method `nil?` does not exist on `T.unknown`
-  T.reveal_type(x) # error: `T.unknown`
+  # ^^^^ error: Method `nil?` does not exist on `T.anything`
+  T.reveal_type(x) # error: `T.anything`
   x
 end
 
@@ -17,8 +17,8 @@ end
 def id(x)
   res = example(x) # this is ok
   res
-# ^^^ error: Expected `T.type_parameter(:U) (of Object#id)` but found `T.unknown` for method result type
+# ^^^ error: Expected `T.type_parameter(:U) (of Object#id)` but found `T.anything` for method result type
 end
 
-xs = T::Array[T.unknown].new
-T.reveal_type(xs) # error: `T::Array[T.unknown]`
+xs = T::Array[T.anything].new
+T.reveal_type(xs) # error: `T::Array[T.anything]`

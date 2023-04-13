@@ -47,8 +47,8 @@ module T
     T::Types::NoReturn::Private::INSTANCE
   end
 
-  def self.unknown
-    T::Types::Unknown::Private::INSTANCE
+  def self.anything
+    T::Types::Anything::Private::INSTANCE
   end
 
   # T.all(<Type>, <Type>, ...) -- matches an object that has all of the types listed

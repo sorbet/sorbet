@@ -44,7 +44,7 @@
       "class-of",
       "self-type",
       "noreturn",
-      "unknown",
+      "anything",
       "attached-class",
       "intersection-types",
       "generics",

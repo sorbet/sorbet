@@ -122,7 +122,7 @@ module T
 
   # Type syntax to declare the "top" type in Sorbet. Every type is a subtype of
   # this type, but absolutely nothing is known about values of this type.
-  def self.unknown; end
+  def self.anything; end
 
   # Deprecated. Use `T::Enum` instead.
   #
