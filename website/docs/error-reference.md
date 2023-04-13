@@ -3467,14 +3467,21 @@ See also: [5028](#5028), [6002](#6002), [7028](#7028), [7043](#7043).
 
 ## 7018
 
-At `typed: strong`, Sorbet no longer allows `T.untyped` as the intermediate
-result of any method call. This effectively means that Sorbet knew the type
-statically for 100% of calls within a file. This sigil is rarely used—usually
-the only files that are `# typed: strong` are RBI files and files with empty
-class definitions. Most Ruby files that actually do interesting things will have
-errors in `# typed: strong`. Support for `typed: strong` files is minimal, as
-Sorbet changes regularly and new features often bring new `T.untyped`
-intermediate values.
+At `# typed: strong`, Sorbet no longer allows using `T.untyped` values. To fix
+errors of this class, add type annotations to the code until Sorbet has enough
+context to know the static type of a value. Usually this means adding
+[method signatures](sigs.md) or [type assertions](type-assertions.md) to declare
+types to Sorbet that it couldn't infer.
+
+**Note**: this strictness level should be considered a beta feature: the errors
+at this level are still being developed. Most Ruby files that actually do
+interesting things will have errors in `# typed: strong`. As such, an
+alternative solution to fixing these errors is simply to downgrade the file to
+`# typed: strict` or below, which will silence all these `T.untyped` errors.
+
+For more information on `# typed: strong`, strategies for dealing with errors
+that arise from using `T.untyped`, and current known limitations, see the docs
+for [`# typed: strong`](strong.md).
 
 ## 7019
 

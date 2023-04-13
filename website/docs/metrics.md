@@ -258,6 +258,16 @@ different phases of adopting Sorbet in a codebase.
     method definitions in that file. The [`rubocop-sorbet`] gem has a number of
     Rubocop rules for enforcing various Sorbet conventions.
 
+4.  Rarely, in codebases that have managed to make heavy use of
+    `# typed: strict`, it can make sense to use `# typed: strong`. At this
+    level, Sorbet prevents using `T.untyped` in the file. We recommend that this
+    level be used sparingly, only in files where 100% type coverage is essential
+    (for example, possibly in the most error-prone parts of a codebase). By no
+    means does it have to be a long term goal to achieve a high degree of
+    `# typed: strong` files in a codebase. For example, Stripe's codebase of
+    [over 150,000 files](https://stripe.com/blog/sorbet-stripes-type-checker-for-ruby)
+    has only a couple dozen `# typed: strong` files.
+
 [ask sorbet what it thinks]:
   https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md
 [`rubocop-sorbet`]: https://github.com/Shopify/rubocop-sorbet

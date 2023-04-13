@@ -47,7 +47,12 @@
       "attached-class",
       "intersection-types",
       "generics",
-      "non-forcing-constants"
+      "non-forcing-constants",
+      "strong"
+    ],
+    "Editor Features": [
+      "sig-suggestion",
+      "highlight-untyped"
     ],
     "Experimental Features": [
       "tuples",
