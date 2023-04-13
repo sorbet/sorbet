@@ -49,6 +49,10 @@
       "generics",
       "non-forcing-constants"
     ],
+    "Editor Features": [
+      "sig-suggestion",
+      "highlight-untyped"
+    ],
     "Experimental Features": [
       "tuples",
       "shapes",
