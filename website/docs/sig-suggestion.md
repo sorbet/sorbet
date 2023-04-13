@@ -12,7 +12,7 @@ method methods without [method signatures](sigs.md).
 
 However, Sorbet has best effort support for **suggesting** method signatures
 that the user may want to insert into the codebase. By best effort we mean that
-sometimes Sorbet will fail to infer a any useful types. Despite limitations,
+sometimes Sorbet will fail to infer any useful types. Despite limitations,
 Sorbet is able to suggest signatures in many cases. There are two main ways to
 get Sorbet to suggest a signature for a method.
 

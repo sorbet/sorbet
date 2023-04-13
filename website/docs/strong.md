@@ -90,7 +90,7 @@ It depends on the source of the `T.untyped`.
 
 - If the untyped comes from a use of `T.unsafe`, either try to remove the call
   to `T.unsafe` and fix any type errors, or replace it with [`T.cast`], which
-  will both be a more limited type system escape hatch than `T.unsafe`.
+  will be a more limited type system escape hatch than `T.unsafe`.
 
 Ultimately, fixing the error is similar to fixing any other type error.
 
