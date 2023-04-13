@@ -826,7 +826,7 @@ bb6[rubyRegionId=3, firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilabl
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: String, <exceptionValue>$3: StandardError, <magic>$11: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$17: T.class_of(T) = alias <C T>
@@ -906,7 +906,7 @@ bb6[rubyRegionId=3, firstDead=-1](<self>: T.any(Float, String, Integer), <return
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <magic>$11: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: T.any(Float, String), <exceptionValue>$3: StandardError, <magic>$11: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$12: Sorbet::Private::Static::Void = <magic>$11: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$18: T.class_of(Integer) = alias <C Integer>
@@ -984,7 +984,7 @@ bb6[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(String), <goto
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1](<self>: String, <exceptionValue>$7: StandardError, <magic>$15: T.class_of(<Magic>)):
     <exceptionValue>$7: NilClass = nil
     <keepForCfgTemp>$16: Sorbet::Private::Static::Void = <magic>$15: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$7: NilClass)
     <cfgAlias>$21: T.class_of(T) = alias <C T>
@@ -1082,7 +1082,7 @@ bb10[rubyRegionId=4, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sor
 
 # backedges
 # - bb7(rubyRegionId=3)
-bb11[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <castTemp>$13: T.nilable(Integer), <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$25: NilClass):
+bb11[rubyRegionId=3, firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <exceptionValue>$9: StandardError, <castTemp>$13: T.nilable(Integer), <magic>$17: T.class_of(<Magic>), <gotoDeadTemp>$25: NilClass):
     # outerLoops: 1
     <exceptionValue>$9: NilClass = nil
     <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$9: NilClass)
