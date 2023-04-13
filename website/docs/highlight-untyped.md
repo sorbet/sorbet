@@ -14,9 +14,8 @@ looks like:[^1]
 ![](/img/highlight-untyped.png)
 
 [^1]:
-
-  This screenshot uses the [Error Lens] VS Code extension to display diagnostic
-  titles inline.
+    This screenshot uses the [Error Lens] VS Code extension to display
+    diagnostic titles inline.
 
 [error lens]:
   https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens
