@@ -50,13 +50,13 @@ It's maybe more interesting to see what **doesn't** count as a usage of untyped:
 - Any usage of a type like `T::Array[T.untyped]` or
   `T::Hash[String, T.untyped]`, which has `T.untyped` somewhere inside it.
 
-  We may reconsider this decision in the future. For now, Sorbet will at least
-  report code like this as using an untyped value:
+  We may reconsider this decision in the future. Sorbet will, at least, flag
+  that usages of **elements** of these values are usages of untyped:
 
   ```ruby
   sig { params(xs: T::Array[T.untyped]).void }
   def example(xs)
-    x0 = xs.first
+    x0 = xs.first # (nothing reported here)
     x0.even?
   # ^^ Call to method `even?` on `T.untyped`
   end
