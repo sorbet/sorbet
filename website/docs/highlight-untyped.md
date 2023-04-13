@@ -84,6 +84,11 @@ argument] to the `vim.lsp.start_client()` function.
   (i.e., red-underline diagnostics) by marking the file `# typed: strong`. For
   more information, see [the docs for `# typed: strong`](strong.md).
 
+- It may be helpful to use the filtering mechanism built into VS Code's
+  "Problems" pane to filter these errors. A filter of `!7047` should hide these
+  in the problems pane. ([7047](error-reference.md#7047) is the code for this
+  diagnostic, and the `!` negates the filter.)
+
 ## Why is this feature in beta?
 
 This feature is currently under development, and we'd love your feedback!
