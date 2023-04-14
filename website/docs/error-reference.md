@@ -883,8 +883,14 @@ are reported when encountered.
 
 ## 4002
 
-Sorbet requires that every `include` references a constant literal. For example,
-this is an error, even in `# typed: false` files:
+Sorbet requires seeing the complete inheritance hierarchy in a codebase. To do
+this, it must be able to statically resolve a class's superclass and any mixins,
+declared with `include` or `extend`.
+
+To make this possible, Sorbet requires that every superclass, `include`, and
+`extend` references a constant literal. It's not possible to use an arbitrary
+expression (like a method call that produces a class or module) as an ancestor.
+This restriction holds even in `# typed: false` files.
 
 ```ruby
 module A; end
@@ -899,14 +905,17 @@ class C
 end
 ```
 
-Non-constant literals make it hard to impossible to determine the complete
-inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
-hierarchy of a codebase in order to check that a variable is a valid instance of
-a type.
+(For some intuition why this restriction is in place: Sorbet requires resolving
+the inheritance hierarchy before it can run inference. Inference is when it
+assigns types to every expression in the codebase. Therefore inheritance
+resolution cannot depend on inference, as otherwise there would be a logical
+cycle in the order Sorbet has to type check a codebase. Similar restrictions
+appear throughout Sorbet: see [Why type annotations?](why-type-annotations.md)
+for more examples.)
 
-It is possible to silence this error with `T.unsafe`, but it should be done with
-**utmost caution**, as Sorbet will not consider the include and provide a less
-accurate analysis:
+For module mixins, it is possible to silence this error with `T.unsafe`, but it
+should be done with **utmost caution**, as Sorbet will not consider the include
+and provide a less accurate analysis:
 
 ```ruby
 module A; end
@@ -932,6 +941,8 @@ c.b # error: Method `b` does not exist on `C`
 T.let(C, A) # error: Argument does not have asserted type `A`
 T.let(C, B) # error: Argument does not have asserted type `B`
 ```
+
+There is no such workaround for superclasses.
 
 ## 4003
 
