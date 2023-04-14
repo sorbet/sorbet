@@ -960,8 +960,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
     }
 
-    pipeline::printFileTable(gs, opts);
-
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
