@@ -4,8 +4,7 @@
 namespace sorbet::core::errors::Infer {
 
 ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
-    if (gs.highlightUntyped && file.data(gs).strictLevel < core::StrictLevel::Strong &&
-        file.data(gs).isOpenInClient()) {
+    if (gs.trackUntyped && file.data(gs).strictLevel < core::StrictLevel::Strong && file.data(gs).isOpenInClient()) {
         return core::errors::Infer::UntypedValueInformation;
     } else {
         return core::errors::Infer::UntypedValue;
