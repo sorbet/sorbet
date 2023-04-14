@@ -2731,7 +2731,7 @@ public:
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
-            if (!ty.isUntyped() && loc.exists() && argLocExists) {
+            if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists) {
                 // (skip the autocorrect if we had to fall back to using callLoc, because using that
                 // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
                 e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
@@ -2767,7 +2767,7 @@ public:
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
                         "T.let", "# typed: strict");
             auto replaceLoc = args.argLoc(0);
-            if (replaceLoc.exists()) {
+            if ((gs.suggestUnsafe.has_value() || !suggestType.isUntyped()) && replaceLoc.exists()) {
                 // Loc might not exist be because our argument was an EmptyTree (`begin; end`).
                 // In that case we don't have an RHS we can easily wrap in something, so skip the autocorrect.
                 auto title = fmt::format("Initialize as `{}`", suggestType.show(gs));
