@@ -657,7 +657,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
-    MethodRef mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
+    // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
+    // in which case we could simply let the findMethodTransitive run and fail to find any methods
+    MethodRef mayBeOverloaded;
+    if (symbol != core::Symbols::top()) {
+        mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
+    }
 
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
@@ -1744,6 +1749,13 @@ public:
         res.returnType = make_type<MetaType>(Types::bottom());
     }
 } T_noreturn;
+
+class T_anything : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = make_type<MetaType>(Types::top());
+    }
+} T_anything;
 
 class T_class_of : public IntrinsicMethod {
 public:
@@ -4306,6 +4318,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::nilable(), &T_nilable},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::revealType(), &T_revealType},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::noreturn(), &T_noreturn},
+    {Symbols::T(), Intrinsic::Kind::Singleton, Names::anything(), &T_anything},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::classOf(), &T_class_of},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::selfType(), &T_self_type},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::attachedClass(), &T_attached_class},

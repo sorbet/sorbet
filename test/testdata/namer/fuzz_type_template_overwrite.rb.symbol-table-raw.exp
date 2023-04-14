@@ -9,5 +9,5 @@ class <C <U <root>>> < <C <U Object>> ()
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=3:1 end=3:8}
     method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=3:1 end=6:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=??? end=???}
-    type-member(=) <S <C <U A>> $1>::<C <U B>> -> LambdaParam(<S <C <U A>> $1>::<C <U B>>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=5:3 end=5:20}
+    type-member(=) <S <C <U A>> $1>::<C <U B>> -> LambdaParam(<S <C <U A>> $1>::<C <U B>>, lower=T.noreturn, upper=T.anything) @ Loc {file=test/testdata/namer/fuzz_type_template_overwrite.rb start=5:3 end=5:20}
 

@@ -120,6 +120,10 @@ module T
   # For more information, see https://sorbet.org/docs/noreturn
   def self.noreturn; end
 
+  # Type syntax to declare the "top" type in Sorbet. Every type is a subtype of
+  # this type, but absolutely nothing is known about values of this type.
+  def self.anything; end
+
   # Deprecated. Use `T::Enum` instead.
   #
   # For more information, see https://sorbet.org/docs/tenum
