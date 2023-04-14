@@ -785,6 +785,8 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
+        pipeline::printFileTable(gs, opts);
+
         if (!opts.minimizeRBI.empty()) {
 #ifdef SORBET_REALMAIN_MIN
             logger->warn("--minimize-rbi is disabled in sorbet-orig for faster builds");

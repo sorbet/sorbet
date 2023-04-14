@@ -54,6 +54,8 @@ void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, c
                std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
                bool presorted = false, bool intentionallyLeakASTs = false);
 
+void printFileTable(std::unique_ptr<core::GlobalState> &gs, const options::Options &opts);
+
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
 
