@@ -1520,6 +1520,47 @@ module Opus::Types::Test
         end
       end
 
+      describe 'noreturn' do
+        it 'is a subtype of things' do
+          assert_subtype(T.noreturn, Integer)
+          assert_subtype(T.noreturn, Numeric)
+          assert_subtype(T.noreturn, [String, String])
+          assert_subtype(T.noreturn, T::Array[Integer])
+          assert_subtype(T.noreturn, T.untyped)
+        end
+
+        it 'other things are not a subtype of it' do
+          refute_subtype(Integer, T.noreturn)
+          refute_subtype(Numeric, T.noreturn)
+          refute_subtype([String, String], T.noreturn)
+          refute_subtype(T::Array[Integer], T.noreturn)
+
+          # except this one
+          assert_subtype(T.untyped, T.noreturn)
+        end
+      end
+
+      describe 'anything' do
+        it 'is not a subtype of things' do
+          refute_subtype(T.anything, Integer)
+          refute_subtype(T.anything, Numeric)
+          refute_subtype(T.anything, [String, String])
+          refute_subtype(T.anything, T::Array[Integer])
+
+          # except this one
+          assert_subtype(T.anything, T.untyped)
+        end
+
+        it 'other things are a subtype of it' do
+          assert_subtype(Integer, T.anything)
+          assert_subtype(Numeric, T.anything)
+          assert_subtype([String, String], T.anything)
+          assert_subtype(T::Array[Integer], T.anything)
+
+          assert_subtype(T.untyped, T.anything)
+        end
+      end
+
       describe 'type variables' do
         it 'type members are subtypes of everything' do
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)

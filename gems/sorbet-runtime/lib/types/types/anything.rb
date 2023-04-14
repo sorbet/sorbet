@@ -2,27 +2,30 @@
 # typed: true
 
 module T::Types
-  # The bottom type
-  class NoReturn < Base
+  # The top type
+  class Anything < Base
     def initialize; end
 
     # overrides Base
     def name
-      "T.noreturn"
+      "T.anything"
     end
 
     # overrides Base
     def valid?(obj)
-      false
+      true
     end
 
     # overrides Base
     private def subtype_of_single?(other)
-      true
+      case other
+      when T::Types::Anything then true
+      else false
+      end
     end
 
     module Private
-      INSTANCE = NoReturn.new.freeze
+      INSTANCE = Anything.new.freeze
     end
   end
 end

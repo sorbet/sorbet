@@ -47,6 +47,10 @@ module T
     T::Types::NoReturn::Private::INSTANCE
   end
 
+  def self.anything
+    T::Types::Anything::Private::INSTANCE
+  end
+
   # T.all(<Type>, <Type>, ...) -- matches an object that has all of the types listed
   def self.all(type_a, type_b, *types)
     T::Types::Intersection.new([type_a, type_b] + types)
