@@ -27,42 +27,42 @@ Errors: 2
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "enclosing_package": "Project::Bar"
+   "pkg": "Project::Bar"
   },
   {
    "path": "./bar/bar.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "enclosing_package": "Project::Bar"
+   "pkg": "Project::Bar"
   },
   {
    "path": "./bar/bar_methods.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "enclosing_package": "Project::Bar"
+   "pkg": "Project::Bar"
   },
   {
    "path": "./foo/__package.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "enclosing_package": "Project::Foo"
+   "pkg": "Project::Foo"
   },
   {
    "path": "./foo/foo.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "False",
-   "enclosing_package": "Project::Foo"
+   "pkg": "Project::Foo"
   },
   {
    "path": "./foo/foo_methods.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "enclosing_package": "Project::Foo"
+   "pkg": "Project::Foo"
   }
  ]
 }
