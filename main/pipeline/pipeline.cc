@@ -441,11 +441,6 @@ struct IndexResult {
     vector<ast::ParsedFile> trees;
 };
 
-struct IndexThreadResultPack {
-    CounterState counters;
-    IndexResult res;
-};
-
 struct IndexSubstitutionJob {
     // Not necessary for substitution, but passing this through to the worker means it's freed in that thread, instead
     // of serially in the main thread.
@@ -469,8 +464,9 @@ struct IndexSubstitutionJob {
 };
 
 vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
-                                          shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                                          WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                                          shared_ptr<BlockingBoundedQueue<IndexResult>> input, WorkerPool &workers,
+                                          const unique_ptr<const OwnedKeyValueStore> &kvstore,
+                                          WorkerPool::MultiplexCleanup &&multiplexResult) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
 
     auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
@@ -479,23 +475,23 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 
     {
         Timer timeit(cgs.tracer(), "mergeGlobalStates");
-        IndexThreadResultPack threadResult;
+        IndexResult threadResult;
         for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
              !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
-                counterConsume(move(threadResult.counters));
-                auto numTrees = threadResult.res.trees.size();
-                batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult.res)}, numTrees);
+                auto numTrees = threadResult.trees.size();
+                batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult)}, numTrees);
                 totalNumTrees += numTrees;
             }
         }
     }
+    multiplexResult.cleanup(workers);
 
     {
         Timer timeit(cgs.tracer(), "substituteTrees");
         auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
 
-        workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
+        auto multiplexResult = workers.multiplexJob("substituteTrees", [&cgs, batchq, resultq]() {
             Timer timeit(cgs.tracer(), "substituteTreesWorker");
             IndexSubstitutionJob job;
             for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
@@ -524,6 +520,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
                 progress.reportProgress(resultq->doneEstimate());
             }
         }
+        multiplexResult.cleanup(workers);
     }
 
     return ret;
@@ -532,7 +529,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
 vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
+    auto resultq = make_shared<BlockingBoundedQueue<IndexResult>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
     for (auto &file : files) {
         fileq->push(move(file), 1);
@@ -540,14 +537,14 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
 
     std::shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndex();
 
-    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
+    auto multiplexResult = workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
 
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
         unique_ptr<core::GlobalState> localGs = emptyGs->deepCopy();
 
-        IndexThreadResultPack threadResult;
+        IndexResult threadResult;
 
         {
             core::FileRef job;
@@ -556,20 +553,19 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                     auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
-                    threadResult.res.trees.emplace_back(move(parsedFile));
+                    threadResult.trees.emplace_back(move(parsedFile));
                 }
             }
         }
 
-        if (!threadResult.res.trees.empty()) {
-            threadResult.counters = getAndClearThreadCounters();
-            threadResult.res.gs = move(localGs);
-            auto computedTreesCount = threadResult.res.trees.size();
+        if (!threadResult.trees.empty()) {
+            threadResult.gs = move(localGs);
+            auto computedTreesCount = threadResult.trees.size();
             resultq->push(move(threadResult), computedTreesCount);
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
+    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore, move(multiplexResult));
 }
 
 vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files, const options::Options &opts,
@@ -1008,8 +1004,9 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, intentionallyLeakASTs]() {
+            auto multiplexResult = workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager,
+                                                                      &preemptionManager, fileq, outputq, cancelable,
+                                                                      intentionallyLeakASTs]() {
                 vector<core::FileRef> processedFiles;
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -1077,20 +1074,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                 }
             }
 
-            if (workers.size() > 0) {
-                auto counterq = make_shared<BlockingBoundedQueue<CounterState>>(workers.size());
-                workers.multiplexJob("collectCounters",
-                                     [counterq]() { counterq->push(getAndClearThreadCounters(), 1); });
-                {
-                    sorbet::CounterState counters;
-                    for (auto result = counterq->try_pop(counters); !result.done();
-                         result = counterq->try_pop(counters)) {
-                        if (result.gotItem()) {
-                            counterConsume(move(counters));
-                        }
-                    }
-                }
-            }
+            multiplexResult.cleanup(workers);
         }
         for (auto &extension : gs.semanticExtensions) {
             extension->finishTypecheck(gs);
@@ -1170,7 +1154,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const 
     }
 
     auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
-    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
+    auto multiplexResult = workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
         vector<pair<string, vector<uint8_t>>> threadResult;
         int processedByThread = 0;
         const ast::ParsedFile *job = nullptr;
@@ -1219,6 +1203,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const 
             }
         }
     }
+    multiplexResult.cleanup(workers);
     return written;
 }
 
@@ -1233,7 +1218,7 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
         fileq->push(move(pf), 1);
     }
 
-    workers.multiplexJob("computeConstantCache", [&]() {
+    auto multiplexResult = workers.multiplexJob("computeConstantCache", [&]() {
         ast::ParsedFile job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             resultq->push(autogen::constantHashTree(gs, move(job)), 1);
@@ -1254,6 +1239,7 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
             results.emplace_back(move(output.pf));
         }
     }
+    multiplexResult.cleanup(workers);
 
     FileOps::write(cachePath, cache.pack());
 

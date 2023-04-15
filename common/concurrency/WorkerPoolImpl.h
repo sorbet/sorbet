@@ -82,12 +82,13 @@ class WorkerPoolImpl : public WorkerPool {
     spdlog::logger &logger;
 
     void multiplexJob_(Task_ t);
+    void consumeCounters() override;
 
 public:
     WorkerPoolImpl(int size, spdlog::logger &logger);
     ~WorkerPoolImpl();
 
-    void multiplexJob(std::string_view taskName, Task t) override;
+    MultiplexCleanup multiplexJob(std::string_view taskName, Task t) override;
     int size() override;
 };
 };     // namespace sorbet

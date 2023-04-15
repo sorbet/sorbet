@@ -873,7 +873,7 @@ private:
         }
         jobs.clear();
 
-        workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
+        auto multiplexResult = workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
             vector<ResolveItems<ConstantResolutionItem>> leftover;
             ResolveItems<ConstantResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
@@ -910,6 +910,7 @@ private:
                             make_move_iterator(threadResult.second.end()));
             }
         }
+        multiplexResult.cleanup(workers);
         categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
         return retries > 0;
     }
@@ -1730,7 +1731,7 @@ public:
             fileq->push(move(tree), 1);
         }
 
-        workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
+        auto multiplexResult = workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
             Timer timeit(igs.tracer(), "ResolveConstantsWorker");
             ResolveConstantsWalk constants;
             ResolveWalkResult walkResult;
@@ -1803,6 +1804,7 @@ public:
                 }
             }
         }
+        multiplexResult.cleanup(workers);
 
         // Note: `todo` does not need to be sorted. There are no ordering effects on error production.
 
@@ -3197,7 +3199,7 @@ public:
         }
         trees.clear();
 
-        workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
+        auto multiplexResult = workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
             ResolveTypeMembersAndFieldsWalk walk;
             ResolveTypeMembersAndFieldsWorkerResult output;
@@ -3258,6 +3260,7 @@ public:
                 }
             }
         }
+        multiplexResult.cleanup(workers);
 
         // Put files into a consistent order for subsequent passes.
         fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file < b.file; });
@@ -4127,7 +4130,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
 
     trees.clear();
 
-    workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
+    auto multiplexResult = workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
@@ -4162,6 +4165,7 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
             }
         }
     }
+    multiplexResult.cleanup(workers);
 
     // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
     // sig 'wins'.

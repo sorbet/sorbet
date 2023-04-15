@@ -23,9 +23,11 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//common/counters",
         "//common/enforce_no_timer",
         "//common/exception",
         "//common/os",
+        "//common/timers",
         "@concurrentqueue",
         "@spdlog",
     ],

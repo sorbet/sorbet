@@ -9,7 +9,7 @@
 */
 
 #include "blockingconcurrentqueue.h"
-#include "common/common.h"
+#include "common/enforce_no_timer/EnforceNoTimer.h"
 #include "common/timers/Timer.h"
 #include <atomic>
 #include <chrono>
@@ -45,7 +45,7 @@ public:
                      int count) noexcept {
         _queue.enqueue(std::move(elem));
         elementsLeftToPush.fetch_add(-count, std::memory_order_release);
-        ENFORCE(elementsLeftToPush.load(std::memory_order_relaxed) >= 0);
+        ENFORCE_NO_TIMER(elementsLeftToPush.load(std::memory_order_relaxed) >= 0);
     }
 
     inline DequeueResult try_pop(Elem &elem) noexcept {

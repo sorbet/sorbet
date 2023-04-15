@@ -1468,7 +1468,7 @@ ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&
             fileq->push(move(tree), 1);
         }
 
-        workers.multiplexJob("deleteTrees", [fileq, &threadBarrier]() {
+        auto multiplexResult = workers.multiplexJob("deleteTrees", [fileq, &threadBarrier]() {
             {
                 ast::ParsedFile job;
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1480,6 +1480,7 @@ ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&
 
         // Wait for threads to complete destructing the trees.
         threadBarrier.Wait();
+        multiplexResult.cleanup(workers);
     }
 
     return ParsedFilesOrCancelled();

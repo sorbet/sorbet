@@ -504,7 +504,7 @@ public:
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        auto multiplexResult = workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
@@ -522,6 +522,7 @@ public:
         });
 
         barrier.Wait();
+        multiplexResult.cleanup(workers);
 
         return files;
     }
@@ -613,7 +614,7 @@ public:
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("ImportChecker", [&gs, &files, &barrier, taskq]() {
+        auto multiplexResult = workers.multiplexJob("ImportChecker", [&gs, &files, &barrier, taskq]() {
             Timer timeit(gs.tracer(), "ImportCheckerWorker");
             size_t idx;
             ImportCheckerPass pass;
@@ -634,6 +635,7 @@ public:
         });
 
         barrier.Wait();
+        multiplexResult.cleanup(workers);
 
         return files;
     }

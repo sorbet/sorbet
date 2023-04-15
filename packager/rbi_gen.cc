@@ -1308,7 +1308,7 @@ void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrMo
         inputq->push(move(package), 1);
     }
 
-    workers.multiplexJob(
+    auto multiplexResult = workers.multiplexJob(
         "RBIGenerator", [inputq, outputDir, &threadBarrier, &rogs = std::as_const(gs), &packageNamespaces]() {
             core::NameRef job;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
@@ -1331,6 +1331,7 @@ void RBIGenerator::run(core::GlobalState &gs, const UnorderedSet<core::ClassOrMo
             threadBarrier.DecrementCount();
         });
     threadBarrier.Wait();
+    multiplexResult.cleanup(workers);
 }
 
 void RBIGenerator::runSinglePackage(core::GlobalState &gs,
