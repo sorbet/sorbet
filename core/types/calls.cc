@@ -40,7 +40,7 @@ bool allComponentsPresent(DispatchResult &res) {
 }
 
 inline bool isTyped(const TypePtr type) {
-    return !type.isUntyped();
+    return type && !type.isUntyped();
 }
 
 inline bool isHash(const GlobalState &gs, const TypePtr type) {
@@ -1048,20 +1048,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
 
-            if (!allArgsProcessed &&
+            if (!allArgsProcessed && 
+
+                    // working with untyped is hard, opt out from untyped params
+                    isTyped(probablyFirstKwarg.type) && isHash(gs, probablyFirstKwarg.type) && isTyped(args.args[maybeKwargIdx]->type) &&
                 (
                     // there are keyword args remaining and we expect the current argument to be a hash,
                     // but it's not a hash => report implicit conversion
-                    (isTyped(probablyFirstKwarg.type) && isHash(gs, probablyFirstKwarg.type) &&
-                     isTyped(args.args[maybeKwargIdx]->type) && !isHash(gs, args.args[maybeKwargIdx]->type) &&
-                     areOtherParamsDefault && !probablyFirstKwarg.flags.isDefault)
+                    (!isHash(gs, args.args[maybeKwargIdx]->type) && areOtherParamsDefault && !probablyFirstKwarg.flags.isDefault)
 
                     // this part of the condition handles a corner case,
                     // see `takes_empty_hash` in test/testdata/infer/ruby3_keyword_args.rb
-                    || (!actuallyHasKwsplatParam && isLastParam && isTyped(args.args[maybeKwargIdx]->type) &&
-                        isHash(gs, args.args[maybeKwargIdx]->type)))) {
+                    || 
+                    (!actuallyHasKwsplatParam && isLastParam && isHash(gs, args.args[maybeKwargIdx]->type)))) {
                 auto kwargLoc = core::Loc(args.locs.file, args.locs.args[maybeKwargIdx].beginLoc,
                                           args.locs.args[args.locs.args.size() - 1].endLoc);
+
+
                 if (auto e = gs.beginError(kwargLoc, errors::Infer::NoKeywordArgAsLastHashArg)) {
                     e.setHeader("Passing the keyword argument as the last hash parameter is deprecated");
                     e.addErrorLine(kwargLoc,
