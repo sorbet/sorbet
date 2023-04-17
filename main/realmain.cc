@@ -20,8 +20,10 @@
 #include "packager/rbi_gen.h"
 #endif
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/sort/sort.h"
@@ -200,8 +202,50 @@ struct AutogenResult {
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
+bool canSkipAutoloadGenerationForFile(const core::GlobalState &gs, const string_view rootDir, std::string_view file) {
+    auto fref = gs.findFileByPath(file);
+    auto &pkg = gs.packageDB().getPackageForFile(gs, fref);
+
+    // False if a file is *not* in a path-based-autoloading-compatible package; in this case
+    // we will need autoload generation.
+    if (pkg.legacyAutoloaderCompatibility()) {
+        return false;
+    }
+
+    // If we get here, the file is in a path-based-autoloaded package. We can skip it if it is
+    // reachable from the root of the autoload tree by an existing package-local path-based autoloading shim.
+    auto dirPath = std::string{rootDir};
+    std::string fullPath;
+
+    // Iterate over the package name parts (assume package is called Foo::Bar::Baz).
+    // Then, we don't need autoload regeneration if:
+    // - Foo.rb exists and Foo/ does not exist, OR
+    // - Foo/Bar.rb exists and Foo/Bar/ does not exist, OR
+    // - Foo/Bar/Baz.rb exists and Foo/Bar/Baz/ does not exist.
+    for (auto &pkgNamePart : pkg.fullName()) {
+        absl::StrAppend(&dirPath, "/", pkgNamePart.show(gs));
+
+        fullPath.clear();
+        absl::StrAppend(&fullPath, dirPath, ".rb");
+
+        if (!FileOps::dirExists(dirPath) && FileOps::exists(fullPath)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool canSkipAutoloadGeneration(const core::GlobalState &gs, const string_view rootDir,
+                               const vector<std::string> &files) {
+    // Return true if we can skip autoload generation for every file.
+    return absl::c_all_of(
+        files, [&gs, &rootDir](const auto &file) { return canSkipAutoloadGenerationForFile(gs, rootDir, file); });
+}
+
 void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
-                const autogen::AutogenConfig &autogenCfg, WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
+                const autogen::AutogenConfig &autogenCfg, WorkerPool &workers, vector<ast::ParsedFile> &indexed,
+                const vector<std::string> &changedFiles) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -211,6 +255,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         fileq->push(i, 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
+
+    bool generateAutoloads =
+        opts.print.AutogenAutoloader.enabled &&
+        (changedFiles.empty() || !canSkipAutoloadGeneration(gs, opts.print.AutogenAutoloader.outputPath, changedFiles));
 
     workers.multiplexJob(
         "runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, &autogenCfg, crcBuilder, fileq, resultq]() {
@@ -280,24 +328,27 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         for (auto &print : out.prints) {
             merged[print.first] = move(print.second);
         }
-        if (opts.print.AutogenAutoloader.enabled) {
+        if (generateAutoloads) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
 
-    {
-        Timer timeit(logger, "autogenDependencyDBPrint");
-        for (auto &elem : merged) {
-            if (opts.print.Autogen.enabled) {
-                opts.print.Autogen.print(elem.strval);
-            }
-            if (opts.print.AutogenMsgPack.enabled) {
-                opts.print.AutogenMsgPack.print(elem.msgpack);
+    if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
+        {
+            Timer timeit(logger, "autogenDependencyDBPrint");
+            for (auto &elem : merged) {
+                if (opts.print.Autogen.enabled) {
+                    opts.print.Autogen.print(elem.strval);
+                }
+                if (opts.print.AutogenMsgPack.enabled) {
+                    opts.print.AutogenMsgPack.print(elem.msgpack);
+                }
             }
         }
     }
-    if (opts.print.AutogenAutoloader.enabled) {
+
+    if (generateAutoloads) {
         {
             Timer timeit(logger, "autogenMarkPackages");
             autogen::DefTreeBuilder::markPackages(gs, root, autoloaderCfg);
@@ -765,7 +816,8 @@ int realmain(int argc, char *argv[]) {
             autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
                                                      std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
 
-            runAutogen(*gs, opts, autoloaderCfg, autogenCfg, *workers, indexed);
+            runAutogen(*gs, opts, autoloaderCfg, autogenCfg, *workers, indexed,
+                       opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
             // Only need to compute hashes when running to compute a FileHash
