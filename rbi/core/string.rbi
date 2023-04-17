@@ -1225,24 +1225,11 @@ class String < Object
     params(
       arg0: T.any(String, Encoding),
       arg1: T.any(String, Encoding),
-      arg2: T::Hash[Symbol, T.untyped]
+      arg2: T.untyped
     )
     .returns(String)
   end
-  sig do
-    params(
-      arg0: T.any(String, Encoding),
-      arg1: T::Hash[Symbol, T.untyped]
-    )
-    .returns(String)
-  end
-  sig do
-    params(
-      arg0: T::Hash[Symbol, T.untyped]
-    )
-    .returns(String)
-  end
-  def encode(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
+  def encode(arg0=T.unsafe(nil), arg1=T.unsafe(nil), **arg2); end
 
   # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
   # object that represents the encoding of obj.
@@ -1256,7 +1243,15 @@ class String < Object
   # conversion. See
   # [`String#encode`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-encode)
   # for details. Returns the string even if no changes were made.
-  def encode!(*_); end
+  sig do
+    params(
+      arg0: T.any(String, Encoding),
+      arg1: T.any(String, Encoding),
+      arg2: T.untyped
+    )
+    .returns(String)
+  end
+  def encode!(arg0, arg1=T.unsafe(nil), **arg2); end
 
   # Returns true if `str` ends with one of the `suffixes` given.
   #
