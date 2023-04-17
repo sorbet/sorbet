@@ -29,31 +29,8 @@ bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     return true;
 }
 
-// copied from rewriter/Prop.cc
-bool isT(const ast::ExpressionPtr &expr) {
-    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
-}
-
-// partially copied from resolver/type_syntax/type_syntax.cc
-bool isTProc(core::Context ctx, const ast::Send *send) {
-    while (send != nullptr) {
-        if (send->fun == core::Names::proc()) {
-            if (isT(send->recv)) {
-                return true;
-            }
-        }
-        send = ast::cast_tree<ast::Send>(send->recv);
-    }
-    return false;
-}
-
 // Not checking for being T.proc, it's expected to be checked
 void maybeRemoveBind(core::Context ctx, ast::Send *send) {
-    if (!isTProc(ctx, send)) {
-        return;
-    }
-
     auto lastSend = send;
     while (send != nullptr) {
         if (send->fun == core::Names::bind()) {
