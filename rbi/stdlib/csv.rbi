@@ -459,11 +459,11 @@ class CSV < Object
   sig do
     params(
         io: T.any(::Sorbet::Private::Static::IOLike, String),
-        options: T::Hash[Symbol, T.untyped],
+        options: T.untyped,
     )
     .void
   end
-  def initialize(io=T.unsafe(nil), options=T.unsafe(nil)); end
+  def initialize(io=T.unsafe(nil), **options); end
 
   # This method can be used to easily parse
   # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) out of a
@@ -479,8 +479,8 @@ class CSV < Object
   # understands.
   sig do
     params(
-        str: String,
-        options: T::Hash[Symbol, T.untyped],
+        str: T.any(String, ::Sorbet::Private::Static::IOLike),
+        options: T.untyped,
     )
     .returns(
       T.any(
@@ -491,12 +491,12 @@ class CSV < Object
   end
   sig do
     params(
-        str: String,
-        options: T::Hash[Symbol, T.untyped],
+        str: T.any(String, ::Sorbet::Private::Static::IOLike),
+        options: T.untyped,
         blk: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.untyped])).void
     ).void
   end
-  def self.parse(str, options=T.unsafe(nil), &blk); end
+  def self.parse(str, **options, &blk); end
 
   # This method is a shortcut for converting a single line of a
   # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
