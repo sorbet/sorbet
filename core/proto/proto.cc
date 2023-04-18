@@ -390,6 +390,8 @@ com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel 
 com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
                                                       const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
+    const auto &packageDB = gs.packageDB();
+    auto stripePackages = !packageDB.empty();
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
         if (file.data(gs).isPayload()) {
@@ -413,6 +415,13 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         auto frefIdIt = untypedUsages.find(i);
         if (frefIdIt != untypedUsages.end()) {
             entry->set_untyped_usages(frefIdIt->second);
+        }
+
+        if (stripePackages) {
+            const auto &packageInfo = packageDB.getPackageForFile(gs, file);
+            if (packageInfo.exists()) {
+                entry->set_pkg(packageInfo.show(gs));
+            }
         }
     }
     return files;

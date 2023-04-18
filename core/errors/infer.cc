@@ -12,9 +12,9 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
     if (gs.printingFileTable) {
         // Note: this metric, despite being a prod metric, will not get reported in the normal way
         // to the metrics file, the web trace file, nor statsd. We call getAndClearHistogram BEFORE
-        // calling getAndClearThreadCounters, which means that the metric will have been deleted
-        // before reporting to SignalFX, and we don't even compute this if we are not running that
-        // code path (i.e. printing in realmain), because:
+        // calling getAndClearThreadCounters on the main thread, which means that the metric will
+        // have been deleted before reporting to SignalFX. We don't even compute this if we are
+        // not running that code path (i.e. printing in realmain), because:
         //
         // - Tracking this metric causes a noticeable slowdown (it involves growing and merging
         //   large UnorderedMap's), and
