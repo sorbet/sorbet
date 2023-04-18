@@ -387,7 +387,8 @@ com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel 
     }
 }
 
-com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, bool showFull) {
+com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
+                                                      const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
@@ -408,6 +409,11 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, boo
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
         entry->set_compiled(compiledToProto(file.data(gs).compiledLevel));
+
+        auto frefIdIt = untypedUsages.find(i);
+        if (frefIdIt != untypedUsages.end()) {
+            entry->set_untyped_usages(frefIdIt->second);
+        }
     }
     return files;
 }

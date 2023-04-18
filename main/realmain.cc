@@ -579,6 +579,11 @@ int realmain(int argc, char *argv[]) {
         }
     }
 
+    gs->trackUntyped = opts.trackUntyped;
+    gs->printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
+                            opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
+                            opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
@@ -837,7 +842,9 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        pipeline::printFileTable(gs, opts);
+        // getAndClearHistogram ensures that we don't accidentally submit a high-cardinality histogram to statsd
+        auto untypedUsages = getAndClearHistogram("untyped.usages");
+        pipeline::printFileTable(gs, opts, untypedUsages);
 
         if (!opts.minimizeRBI.empty()) {
 #ifdef SORBET_REALMAIN_MIN
