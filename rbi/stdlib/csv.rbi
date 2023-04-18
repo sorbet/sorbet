@@ -479,7 +479,7 @@ class CSV < Object
   # understands.
   sig do
     params(
-        str: T.any(String, IO),
+        str: T.any(String, ::Sorbet::Private::Static::IOLike),
         options: T.untyped,
     )
     .returns(
@@ -491,7 +491,7 @@ class CSV < Object
   end
   sig do
     params(
-        str: T.any(String, IO),
+        str: T.any(String, ::Sorbet::Private::Static::IOLike),
         options: T.untyped,
         blk: T.proc.params(arg0: T.any(CSV::Row, T::Array[T.untyped])).void
     ).void
