@@ -1103,13 +1103,14 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
     }
 }
 
-void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &opts) {
+void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &opts,
+                    const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
         if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
             Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullProto.enabled);
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullProto.enabled);
         if (opts.print.FileTableProto.outputPath.empty()) {
             files.SerializeToOstream(&cout);
         } else {
@@ -1122,7 +1123,7 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullJson.enabled);
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullJson.enabled);
         if (opts.print.FileTableJson.outputPath.empty()) {
             core::Proto::toJSON(files, cout);
         } else {
@@ -1135,7 +1136,7 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
             Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullMessagePack.enabled);
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
         stringstream buf;
         core::Proto::toJSON(files, buf);
         auto str = buf.str();

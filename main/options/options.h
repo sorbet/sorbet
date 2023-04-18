@@ -266,6 +266,7 @@ struct Options {
     bool lspSignatureHelpEnabled = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
+    bool trackUntyped = false;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;
