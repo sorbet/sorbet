@@ -9,17 +9,17 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
     }
 
     auto isOpenInClient = file.data(gs).isOpenInClient();
-    if (!isOpenInClient) {
+    if (gs.printingFileTable) {
         // Note: this metric, despite being a prod metric, will not get reported in the normal way
         // to the metrics file, the web trace file, nor statsd. We call getAndClearHistogram BEFORE
         // calling getAndClearThreadCounters, which means that the metric will have been deleted
-        // before reporting to SignalFX.
+        // before reporting to SignalFX, and we don't even compute this if we are not running that
+        // code path (i.e. printing in realmain), because:
         //
-        // (We explicitly don't even compute this in LSP, as evidenced by the isOpenInClient guard,
-        // and so don't have to worry about the non-CLI metrics pipeline clearing this histogram
-        // before publishing.)
-        //
-        // Why all this? To avoid spamming high-cardinality metrics to statsd services.
+        // - Tracking this metric causes a noticeable slowdown (it involves growing and merging
+        //   large UnorderedMap's), and
+        // - If we did accidentally forget to clear the metric (e.g., in all LSP code paths), it
+        //   would spam statsd services
         prodHistogramInc("untyped.usages", file.id());
     }
 

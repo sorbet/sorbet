@@ -2033,6 +2033,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->trackUntyped = this->trackUntyped;
+    result->printingFileTable = this->printingFileTable;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;

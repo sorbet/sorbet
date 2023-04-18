@@ -232,6 +232,7 @@ public:
     bool silenceErrors = false;
     bool autocorrect = false;
     bool trackUntyped = false;
+    bool printingFileTable = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
     // this into a valid ruby identifier without suffering.

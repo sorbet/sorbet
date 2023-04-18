@@ -529,6 +529,9 @@ int realmain(int argc, char *argv[]) {
     }
 
     gs->trackUntyped = opts.trackUntyped;
+    gs->printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
+                            opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
+                            opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
 
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
