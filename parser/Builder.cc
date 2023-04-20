@@ -377,6 +377,10 @@ public:
             return true;
         }
 
+        if (parser::isa_node<ForwardedKwrestArg>(nd)) {
+            return true;
+        }
+
         if (auto *pair = parser::cast_node<Pair>(nd)) {
             return parser::isa_node<Symbol>(pair->key.get());
         }
@@ -984,6 +988,14 @@ public:
             error_without_recovery(ruby_parser::dclass::UnexpectedToken, tokLoc(dots), "\"...\"");
         }
         return make_unique<ForwardedArgs>(tokLoc(dots));
+    }
+
+    unique_ptr<Node> forwarded_restarg(const token *star) {
+        return make_unique<ForwardedRestArg>(tokLoc(star));
+    }
+
+    unique_ptr<Node> forwarded_kwrestarg(const token *dstar) {
+        return make_unique<ForwardedKwrestArg>(tokLoc(dstar));
     }
 
     unique_ptr<Node> gvar(const token *tok) {
@@ -2200,6 +2212,16 @@ ForeignPtr forwarded_args(SelfPtr builder, const token *dots) {
     return build->toForeign(build->forwarded_args(dots));
 }
 
+ForeignPtr forwarded_restarg(SelfPtr builder, const token *star) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forwarded_restarg(star));
+}
+
+ForeignPtr forwarded_kwrestarg(SelfPtr builder, const token *dstar) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forwarded_kwrestarg(dstar));
+}
+
 ForeignPtr gvar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->gvar(tok));
@@ -2734,6 +2756,8 @@ struct ruby_parser::builder Builder::interface = {
     for_,
     forward_arg,
     forwarded_args,
+    forwarded_restarg,
+    forwarded_kwrestarg,
     gvar,
     hash_pattern,
     ident,

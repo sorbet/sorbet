@@ -666,7 +666,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 if (absl::c_any_of(send->args, [](auto &arg) {
                         return parser::isa_node<parser::Splat>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedArgs>(arg.get());
+                               parser::isa_node<parser::ForwardedArgs>(arg.get()) ||
+                               parser::isa_node<parser::ForwardedRestArg>(arg.get());
                     })) {
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
@@ -693,11 +694,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                                 // skip inlining the kwargs if there are any kwsplat nodes present
                                 if (absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
-                                        // kwsplat nodes
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
+                                        // kwsplat, or forwarded kwrest arg nodes
                                         ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                                parser::isa_node<parser::Pair>(node.get()) ||
+                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
                                     elts.emplace_back(std::move(node));
                                 } else {
@@ -735,7 +739,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // synthesize a call to
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
-                    // tuple type and call into the normal call merchanism.
+                    // tuple type and call into the normal call mechanism.
                     unique_ptr<parser::Node> block;
                     auto argnodes = std::move(send->args);
                     bool anonymousBlockPass = false;
@@ -762,6 +766,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         argnodes.erase(fwdIt);
                     }
 
+                    auto hasFwdRestArg = false;
+                    auto fwdRestIt = absl::c_find_if(
+                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
+                    if (fwdRestIt != argnodes.end()) {
+                        hasFwdRestArg = true;
+                        argnodes.erase(fwdRestIt);
+                    }
+
                     auto array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, std::move(array));
 
@@ -781,6 +793,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                         argsConcat = MK::Send1(loc, std::move(argsConcat), core::Names::concat(), locZeroLen,
                                                std::move(kwargsArray));
+
+                        args = std::move(argsConcat);
+                    } else if (hasFwdRestArg) {
+                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+                        auto argsSplat = MK::Send0(loc, std::move(fwdArgs), core::Names::toA(), locZeroLen);
+                        auto tUnsafe = MK::Unsafe(loc, std::move(argsSplat));
+                        auto argsConcat =
+                            MK::Send1(loc, std::move(args), core::Names::concat(), locZeroLen, std::move(tUnsafe));
 
                         args = std::move(argsConcat);
                     }
@@ -839,11 +859,13 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                                 // skip inlining the kwargs if there are any non-key/value pairs present
                                 if (!absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
-                                        // kwsplat nodes
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
+                                        // kwsplat, or forwarded kwrest nodes
                                         ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()) ||
                                                 parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
                                     // hold a reference to the node, and remove it from the back fo the send list
                                     auto node = std::move(send->args[kwargsHashIndex]);
@@ -1003,7 +1025,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
-                    ENFORCE(splat != nullptr, "kwsplat cast failed");
+
+                    ExpressionPtr expr;
+                    if (splat != nullptr) {
+                        expr = node2TreeImpl(dctx, std::move(splat->expr));
+                    } else {
+                        auto *fwdKwrestArg = parser::cast_node<parser::ForwardedKwrestArg>(pairAsExpression.get());
+                        ENFORCE(fwdKwrestArg != nullptr, "kwsplat and fwdkwrestarg cast failed");
+
+                        auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
+                        expr = MK::Unsafe(loc, std::move(fwdKwargs));
+                    }
 
                     if (havePairsToMerge) {
                         havePairsToMerge = false;
@@ -1022,8 +1054,6 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         mergeValues.clear();
                         mergeValues.emplace_back(MK::Local(loc, acc));
                     }
-
-                    auto expr = node2TreeImpl(dctx, std::move(splat->expr));
 
                     // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
                     // intrinsic is assumed to mutate its first argument.
