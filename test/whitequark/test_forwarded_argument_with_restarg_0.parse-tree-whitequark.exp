@@ -1,0 +1,7 @@
+s(:def, :foo,
+  s(:args,
+    s(:arg, :argument),
+    s(:restarg, :*)),
+  s(:send, nil, :bar,
+    s(:lvar, :argument),
+    s(:forwarded_restarg)))
