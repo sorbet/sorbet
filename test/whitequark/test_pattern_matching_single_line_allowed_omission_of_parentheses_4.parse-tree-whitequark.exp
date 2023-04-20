@@ -1,0 +1,11 @@
+s(:begin,
+  s(:match_pattern_p,
+    s(:hash,
+      s(:pair,
+        s(:sym, :key),
+        s(:sym, :value))),
+    s(:hash_pattern,
+      s(:pair,
+        s(:sym, :key),
+        s(:match_var, :value)))),
+  s(:lvar, :value))
