@@ -174,3 +174,21 @@ class BadSigReturnNotLastStatement
     @x = x
   end
 end
+
+class TProcBindInInitializerLet
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String).void).void }
+  def initialize(&blk)
+    @blk = blk
+  end
+end
+
+class NoBindInTProcInitializerLet
+  extend T::Sig
+
+  sig {params(blk: T.proc.void).void }
+  def initialize(&blk)
+    @blk = blk
+  end
+end
