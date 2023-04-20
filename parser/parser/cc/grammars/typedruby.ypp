@@ -870,6 +870,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
@@ -884,6 +885,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
@@ -3215,26 +3217,15 @@ lcurly_block_start:
                       $$ = $1;
                       $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER
+                | p_args_head p_rest
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
+                      $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER tCOMMA p_args_post
+                | p_args_head p_rest tCOMMA p_args_post
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
-                      $$->concat($5);
-                    }
-                | p_args_head tSTAR
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
-                    }
-                | p_args_head tSTAR tCOMMA p_args_post
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
+                      $$->emplace_back($2);
                       $$->concat($4);
                     }
                 | p_args_tail
@@ -3413,7 +3404,7 @@ lcurly_block_start:
                       auto non_lvar = driver.build.accessible(self, $2);
                       $$ = driver.build.pin(self, $1, non_lvar);
                     }
-      p_expr_ref: tCARET tLPAREN expr_value tRPAREN
+      p_expr_ref: tCARET tLPAREN expr_value rparen
                     {
                       auto expr = driver.build.begin(self, $2, $3, $4);
                       $$ = driver.build.pin(self, $1, expr);
@@ -3740,22 +3731,11 @@ regexp_contents: // nothing
                     {
                       $$ = driver.build.ident(self, $1);
                     }
-                | tIVAR
-                    {
-                      $$ = driver.build.ivar(self, $1);
-                    }
-                | tGVAR
-                    {
-                      $$ = driver.build.gvar(self, $1);
-                    }
                 | tCONSTANT
                     {
                       $$ = driver.build.const_(self, $1);
                     }
-                | tCVAR
-                    {
-                      $$ = driver.build.cvar(self, $1);
-                    }
+                | nonlocal_var
 
 keyword_variable: kNIL
                     {
@@ -4380,7 +4360,7 @@ f_opt_paren_args: f_paren_args
                     }
 
        operation: tIDENTIFIER | tCONSTANT | tFID
-      operation2: tIDENTIFIER | tCONSTANT | tFID | op
+      operation2: operation | op
       operation3: tIDENTIFIER | tFID | op
     dot_or_colon: call_op | tCOLON2
          call_op: tDOT
@@ -4414,7 +4394,7 @@ f_opt_paren_args: f_paren_args
                       $$ = $2;
                     }
 
-         trailer:  | tNL | tCOMMA
+         trailer: opt_nl | tCOMMA
 
             term: tSEMI
                   {
