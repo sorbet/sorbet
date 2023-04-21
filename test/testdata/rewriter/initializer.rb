@@ -192,3 +192,25 @@ class NoBindInTProcInitializerLet
     @blk = blk
   end
 end
+
+class TProcBindInInitializerLastSend
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String)).void }
+  # error: Using `bind` is not permitted here
+  # error-with-dupes: Malformed T.proc: You must specify a return type
+  def initialize(&blk)
+    @blk = blk
+  end
+end
+
+class TProcBindInInitializerManyBinds
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String).bind(String).void).void }
+  # error: Using `bind` is not permitted here
+  # error: Malformed `bind`: Multiple calls to `.bind`
+  def initialize(&blk)
+    @blk = blk
+  end
+end
