@@ -14,8 +14,9 @@ looks like:[^1]
 ![](/img/highlight-untyped.png)
 
 [^1]:
-    This screenshot uses the [Error Lens] VS Code extension to display
-    diagnostic titles inline.
+
+  This screenshot uses the [Error Lens] VS Code extension to display diagnostic
+  titles inline.
 
 [error lens]:
   https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens
@@ -88,6 +89,10 @@ argument] to the `vim.lsp.start_client()` function.
   "Problems" pane to filter these errors. A filter of `!7047` should hide these
   in the problems pane. ([7047](error-reference.md#7047) is the code for this
   diagnostic, and the `!` negates the filter.)
+
+## How can I avoid using `T.untyped`?
+
+→ [How can I avoid using `T.untyped`](strong.md#how-can-i-avoid-using-tuntyped)
 
 ## Why is this feature in beta?
 
