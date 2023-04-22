@@ -16,6 +16,13 @@ unreasonably high barrier to entry when changing the codebase in the future.
 Frequently, the best approach to dealing with `# typed: strong`-level errors is
 to simply ignore them, by downgrading the sigil to `# typed: strict`.
 
+A better option is to configure Sorbet to highlight untyped code in the editor:
+
+→ [Highlighting untyped code](highlight-untyped.md)
+
+This will give most of the benefits of flagging which code is covered by Sorbet,
+while not being a large burden.
+
 For more information on our recommendations when adopting Sorbet, see
 [Suggestions for driving adoption](metrics.md#suggestions-for-driving-adoption).
 
@@ -70,7 +77,7 @@ It's maybe more interesting to see what **doesn't** count as a usage of untyped:
   currently lacks syntax to declare when this is intentional vs accidental
   because a more precise type has not been declared.
 
-## How can I fix `# typed: strong` errors?
+## How can I avoid using `T.untyped`?
 
 It depends on the source of the `T.untyped`.
 
@@ -94,7 +101,7 @@ It depends on the source of the `T.untyped`.
 
 Ultimately, fixing the error is similar to fixing any other type error.
 
-[`T.cast`]: type-assertions.md#tcast
+[`t.cast`]: type-assertions.md#tcast
 
 ## Why is this feature in beta?
 
