@@ -89,6 +89,10 @@ argument] to the `vim.lsp.start_client()` function.
   in the problems pane. ([7047](error-reference.md#7047) is the code for this
   diagnostic, and the `!` negates the filter.)
 
+## How can I avoid using `T.untyped`?
+
+→ [How can I avoid using `T.untyped`](strong.md#how-can-i-avoid-using-tuntyped)
+
 ## Why is this feature in beta?
 
 This feature is currently under development, and we'd love your feedback!
