@@ -614,7 +614,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 
     resolved = class_flatten::runOne(ctx, move(resolved));
 
-    resolved = definition_validator::runOne(ctx, std::move(resolved));
+    // resolved = definition_validator::runOne(ctx, std::move(resolved));
 
     if (opts.print.FlattenTree.enabled || opts.print.AST.enabled) {
         opts.print.FlattenTree.fmt("{}\n", resolved.tree.toString(ctx));
