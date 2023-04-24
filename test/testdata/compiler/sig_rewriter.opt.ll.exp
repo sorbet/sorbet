@@ -290,7 +290,7 @@ entry:
   tail call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %46, i8 0, i64 28, i1 false) #11, !dbg !46
   tail call void @sorbet_vm_define_method(i64 %39, i8* getelementptr inbounds ([175 x i8], [175 x i8]* @sorbet_moduleStringTable, i64 0, i64 80), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*, i8*)* noundef @"func_A#3foo", i8* nonnull %42, %struct.rb_iseq_struct* %stackFrame42.i.i, i1 noundef zeroext false) #11, !dbg !46
   tail call void @sorbet_popFrame() #11, !dbg !39
-  store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %11, align 8, !dbg !39, !tbaa !20
+  store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %11, align 8, !dbg !47, !tbaa !20
   %47 = tail call i64 @sorbet_maybeAllocateObjectFastPath(i64 %39, %struct.FunctionInlineCache* noundef @ic_new) #11, !dbg !10
   %48 = icmp eq i64 %47, 52, !dbg !10
   br i1 %48, label %slowNew.i, label %fastNew.i, !dbg !10
@@ -333,19 +333,19 @@ fastNew.i:                                        ; preds = %38
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define internal noundef i64 @"func_A#3foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %calling, i8* nocapture nofree readnone %callData) #7 !dbg !47 {
+define internal noundef i64 @"func_A#3foo"(i32 %argc, i64* nocapture nofree readnone %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp, i8* nocapture nofree readnone %calling, i8* nocapture nofree readnone %callData) #7 !dbg !48 {
 functionEntryInitializers:
   %0 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
   store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %0, align 8, !tbaa !20
-  %tooManyArgs = icmp ugt i32 %argc, 0, !dbg !48
-  br i1 %tooManyArgs, label %argCountFailBlock, label %fillRequiredArgs, !dbg !48, !prof !49
+  %tooManyArgs = icmp ugt i32 %argc, 0, !dbg !49
+  br i1 %tooManyArgs, label %argCountFailBlock, label %fillRequiredArgs, !dbg !49, !prof !50
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 0, i32 noundef 0) #13, !dbg !48
-  unreachable, !dbg !48
+  tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 0, i32 noundef 0) #13, !dbg !49
+  unreachable, !dbg !49
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %0, align 8, !dbg !50, !tbaa !20
+  store i64* getelementptr inbounds ([14 x i64], [14 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %0, align 8, !dbg !51, !tbaa !20
   ret i64 183
 }
 
@@ -368,7 +368,7 @@ functionEntryInitializers:
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !32
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 3
-  %4 = load i64, i64* %3, align 8, !tbaa !51
+  %4 = load i64, i64* %3, align 8, !tbaa !52
   %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_A.13<static-init>$block_1", align 8
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame, %struct.rb_iseq_struct** %5, align 8, !tbaa !35
@@ -504,8 +504,9 @@ attributes #13 = { noreturn }
 !44 = !{!28, !28, i64 0}
 !45 = !{!"branch_weights", i32 1, i32 10000}
 !46 = !DILocation(line: 8, column: 3, scope: !18, inlinedAt: !41)
-!47 = distinct !DISubprogram(name: "A#foo", linkageName: "func_A#3foo", scope: null, file: !4, line: 8, type: !12, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
-!48 = !DILocation(line: 8, column: 3, scope: !47)
-!49 = !{!"branch_weights", i32 1, i32 2000}
-!50 = !DILocation(line: 0, scope: !47)
-!51 = !{!36, !7, i64 24}
+!47 = !DILocation(line: 5, column: 7, scope: !11)
+!48 = distinct !DISubprogram(name: "A#foo", linkageName: "func_A#3foo", scope: null, file: !4, line: 8, type: !12, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!49 = !DILocation(line: 8, column: 3, scope: !48)
+!50 = !{!"branch_weights", i32 1, i32 2000}
+!51 = !DILocation(line: 0, scope: !48)
+!52 = !{!36, !7, i64 24}

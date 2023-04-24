@@ -299,17 +299,17 @@ entry:
   %23 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %14, i64 0, i32 0
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 4), i64** %23, align 8, !dbg !45, !tbaa !20
   tail call void @sorbet_popFrame() #11, !dbg !44
-  store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %11, align 8, !dbg !44, !tbaa !20
-  %stackFrame21.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#3foo", align 8, !dbg !48
-  %24 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !48
-  %25 = bitcast i8* %24 to i16*, !dbg !48
-  %26 = load i16, i16* %25, align 8, !dbg !48
-  %27 = and i16 %26, -384, !dbg !48
-  store i16 %27, i16* %25, align 8, !dbg !48
-  %28 = getelementptr inbounds i8, i8* %24, i64 4, !dbg !48
-  tail call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %28, i8 0, i64 28, i1 false) #11, !dbg !48
-  tail call void @sorbet_vm_define_method(i64 %12, i8* noundef getelementptr inbounds ([100 x i8], [100 x i8]* @sorbet_moduleStringTable, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*, i8*)* noundef @"func_Object#3foo", i8* nonnull %24, %struct.rb_iseq_struct* %stackFrame21.i, i1 noundef zeroext false) #11, !dbg !48
-  store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %11, align 8, !dbg !48, !tbaa !20
+  store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %11, align 8, !dbg !48, !tbaa !20
+  %stackFrame23.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#3foo", align 8, !dbg !49
+  %24 = tail call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #12, !dbg !49
+  %25 = bitcast i8* %24 to i16*, !dbg !49
+  %26 = load i16, i16* %25, align 8, !dbg !49
+  %27 = and i16 %26, -384, !dbg !49
+  store i16 %27, i16* %25, align 8, !dbg !49
+  %28 = getelementptr inbounds i8, i8* %24, i64 4, !dbg !49
+  tail call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %28, i8 0, i64 28, i1 false) #11, !dbg !49
+  tail call void @sorbet_vm_define_method(i64 %12, i8* noundef getelementptr inbounds ([100 x i8], [100 x i8]* @sorbet_moduleStringTable, i64 0, i64 0), i64 (i32, i64*, i64, %struct.rb_control_frame_struct*, i8*, i8*)* noundef @"func_Object#3foo", i8* nonnull %24, %struct.rb_iseq_struct* %stackFrame23.i, i1 noundef zeroext false) #11, !dbg !49
+  store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %11, align 8, !dbg !49, !tbaa !20
   %29 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %5, i64 0, i32 1, !dbg !18
   %30 = load i64*, i64** %29, align 8, !dbg !18
   store i64 %2, i64* %30, align 8, !dbg !18, !tbaa !6
@@ -411,4 +411,5 @@ attributes #12 = { nounwind allocsize(0,1) }
 !45 = !DILocation(line: 0, scope: !46, inlinedAt: !47)
 !46 = distinct !DISubprogram(name: "A.<static-init>", linkageName: "func_A.13<static-init>L61", scope: null, file: !4, line: 4, type: !12, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !47 = distinct !DILocation(line: 4, column: 1, scope: !19)
-!48 = !DILocation(line: 5, column: 1, scope: !19)
+!48 = !DILocation(line: 4, column: 7, scope: !19)
+!49 = !DILocation(line: 5, column: 1, scope: !19)

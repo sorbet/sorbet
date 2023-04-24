@@ -226,9 +226,9 @@ entry:
   store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %38, align 8, !dbg !32, !tbaa !10
   tail call void @sorbet_popFrame() #7, !dbg !28
   tail call void @sorbet_popFrame() #7, !dbg !24
-  store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !24, !tbaa !10
-  %39 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 53), i64 %27) #7, !dbg !35
-  %40 = tail call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %39) #7, !dbg !35
+  store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %8, align 8, !dbg !35, !tbaa !10
+  %39 = tail call i64 @rb_define_class(i8* getelementptr inbounds ([117 x i8], [117 x i8]* @sorbet_moduleStringTable, i64 0, i64 53), i64 %27) #7, !dbg !36
+  %40 = tail call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %39) #7, !dbg !36
   %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Baz.13<static-init>", align 8
   %41 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !10
   %42 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %41, i64 0, i32 2
@@ -242,8 +242,8 @@ entry:
   store i64 %48, i64* %46, align 8, !tbaa !6
   tail call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %41, %struct.rb_control_frame_struct* %43, %struct.rb_iseq_struct* %stackFrame.i.i) #7
   %49 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %40, i64 0, i32 0
-  store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %49, align 8, !dbg !36, !tbaa !10
-  tail call void @sorbet_popFrame() #7, !dbg !35
+  store i64* getelementptr inbounds ([10 x i64], [10 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %49, align 8, !dbg !37, !tbaa !10
+  tail call void @sorbet_popFrame() #7, !dbg !36
   ret void
 }
 
@@ -342,7 +342,8 @@ attributes #7 = { nounwind }
 !32 = !DILocation(line: 0, scope: !33, inlinedAt: !34)
 !33 = distinct !DISubprogram(name: "Bar.<static-init>", linkageName: "func_Foo::Bar.13<static-init>L74", scope: null, file: !4, line: 5, type: !21, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
 !34 = distinct !DILocation(line: 5, column: 3, scope: !26, inlinedAt: !27)
-!35 = !DILocation(line: 8, column: 1, scope: !20)
-!36 = !DILocation(line: 0, scope: !37, inlinedAt: !38)
-!37 = distinct !DISubprogram(name: "Baz.<static-init>", linkageName: "func_Baz.13<static-init>L94", scope: null, file: !4, line: 8, type: !21, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
-!38 = distinct !DILocation(line: 8, column: 1, scope: !20)
+!35 = !DILocation(line: 4, column: 8, scope: !20)
+!36 = !DILocation(line: 8, column: 1, scope: !20)
+!37 = !DILocation(line: 0, scope: !38, inlinedAt: !39)
+!38 = distinct !DISubprogram(name: "Baz.<static-init>", linkageName: "func_Baz.13<static-init>L94", scope: null, file: !4, line: 8, type: !21, scopeLine: 8, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !3, retainedNodes: !5)
+!39 = distinct !DILocation(line: 8, column: 1, scope: !20)
