@@ -197,8 +197,9 @@ class TProcBindInInitializerLastSend
   extend T::Sig
 
   sig {params(blk: T.proc.bind(String)).void }
-  # error: Using `bind` is not permitted here
-  # error-with-dupes: Malformed T.proc: You must specify a return type
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed T.proc: You must specify a return type
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed T.proc: You must specify a return type
+  #                ^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
   def initialize(&blk)
     @blk = blk
   end
