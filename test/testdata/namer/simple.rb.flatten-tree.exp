@@ -5,38 +5,38 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass)
+          <keep-for-ide>(::NormalClass)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::ANamespace)
+          <keep-for-ide>(::ANamespace)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ClassInNamespace)
+          <keep-for-ide>(::ANamespace::ClassInNamespace)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Mixin)
+          <keep-for-ide>(::Mixin)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::OtherMixin)
+          <keep-for-ide>(::OtherMixin)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Child)
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Child)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         <emptyTree>
@@ -58,12 +58,12 @@ begin
         <runtime method definition of self.normal_static_method>
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)
+          <keep-for-ide>(::NormalClass::InnerClass)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerModule)
+          <keep-for-ide>(::NormalClass::InnerModule)
           <emptyTree>
         end
         <emptyTree>
@@ -84,7 +84,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::ANamespace::ObviousChild)
+        <keep-for-ide>(::ANamespace::ObviousChild)
         <emptyTree>
       end
     end

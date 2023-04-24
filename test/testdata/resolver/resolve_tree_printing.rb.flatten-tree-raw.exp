@@ -19,25 +19,7 @@ InsSeq{
           rhs = InsSeq{
             stats = [
               EmptyTree
-              Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::Sorbet::Private::Static)
-                  orig = nullptr
-                }
-                fun = <U keep_for_ide>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (class ::A)
-                    orig = UnresolvedConstantLit{
-                      cnst = <C <U A>>
-                      scope = EmptyTree
-                    }
-                  }
-                ]
-              }
+              <keep-for-ide>(::A)
             ],
             expr = EmptyTree
           }

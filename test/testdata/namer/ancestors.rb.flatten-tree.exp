@@ -5,28 +5,28 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Mixin1)
+          <keep-for-ide>(::Mixin1)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Mixin2)
+          <keep-for-ide>(::Mixin2)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Child)
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Child)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::MultipleInclude)
+          <keep-for-ide>(::MultipleInclude)
           <emptyTree>
         end
         <emptyTree>

@@ -2,9 +2,9 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$8: T.class_of(TestRescue) = alias <C TestRescue>
-    <statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$8: T.class_of(TestRescue))
+    <cfgAlias>$6: T.class_of(TestRescue) = alias <C TestRescue>
+    keep_for_ide$5: T.class_of(TestRescue) = <cfgAlias>$6
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

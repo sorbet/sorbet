@@ -5,13 +5,13 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Child)
-          ::Sorbet::Private::Static.keep_for_ide(::Parent)
+          <keep-for-ide>(::Child)
+          <keep-for-ide>(::Parent)
           <emptyTree>
         end
         <emptyTree>

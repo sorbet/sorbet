@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::A)
+        <keep-for-ide>(::A)
         <emptyTree>
       end
     end
@@ -19,7 +19,7 @@ begin
         <runtime method definition of Foo>
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A::Foo)
+          <keep-for-ide>(::A::Foo)
           <emptyTree>
         end
         <emptyTree>

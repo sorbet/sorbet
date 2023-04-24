@@ -5,14 +5,14 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         ::A.new().outer_method()
         ::A.new().inner_method()
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <keep-for-ide>(::B)
           <emptyTree>
         end
         b = ::B.new()
@@ -20,14 +20,14 @@ begin
         b.inner_method()
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::C)
+          <keep-for-ide>(::C)
           <emptyTree>
         end
         ::C.outer_method()
         ::C.new().inner_method()
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::D)
+          <keep-for-ide>(::D)
           <emptyTree>
         end
         ::D.outer_method()
