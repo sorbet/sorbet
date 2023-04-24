@@ -6,7 +6,7 @@ begin
         $a = 1
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         <emptyTree>

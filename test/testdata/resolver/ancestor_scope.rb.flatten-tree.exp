@@ -5,13 +5,13 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Other)
+          <keep-for-ide>(::Other)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test)
-          ::Sorbet::Private::Static.keep_for_ide(::Other)
+          <keep-for-ide>(::Test)
+          <keep-for-ide>(::Other)
           <emptyTree>
         end
         <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
@@ -31,12 +31,12 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
+          <keep-for-ide>(::Test::Mixin)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
+          <keep-for-ide>(::Test::Other)
           <emptyTree>
         end
         <self>.include(::Test::Mixin)

@@ -4,7 +4,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::TestSig)
+        <keep-for-ide>(::TestSig)
         <emptyTree>
       end
     end
@@ -33,7 +33,7 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::T1)
+          <keep-for-ide>(::T1)
           <emptyTree>
         end
         ::T2 = ::T1
