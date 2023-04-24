@@ -209,8 +209,8 @@ class TProcBindInInitializerManyBinds
   extend T::Sig
 
   sig {params(blk: T.proc.bind(String).bind(String).void).void }
-  # error: Using `bind` is not permitted here
-  # error: Malformed `bind`: Multiple calls to `.bind`
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed `bind`: Multiple calls to `.bind`
+  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
   def initialize(&blk)
     @blk = blk
   end
