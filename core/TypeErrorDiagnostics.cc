@@ -137,19 +137,18 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
 
 // dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
 // dsl can be `""` to simply insert `extend {dslOwner}` if dslOwner is not already an ancestor
-optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMethod(const Context &ctx,
-                                                                                   ClassOrModuleRef inWhatRef,
-                                                                                   ClassOrModuleRef dslOwner,
-                                                                                   string_view dsl) {
-    auto inWhat = inWhatRef.data(ctx);
-    auto inWhatSingleton = inWhat->lookupSingletonClass(ctx);
+optional<core::AutocorrectSuggestion::Edit>
+TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, ClassOrModuleRef inWhatRef,
+                                       ClassOrModuleRef dslOwner, string_view dsl) {
+    auto inWhat = inWhatRef.data(gs);
+    auto inWhatSingleton = inWhat->lookupSingletonClass(gs);
 
     auto needsDslOwner = false;
     if (dslOwner.exists()) {
-        needsDslOwner = !inWhatSingleton.data(ctx)->derivesFrom(ctx, dslOwner);
+        needsDslOwner = !inWhatSingleton.data(gs)->derivesFrom(gs, dslOwner);
     }
 
-    auto inCurrentFile = [&](const auto &loc) { return loc.file() == ctx.file; };
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == fileToEdit; };
     auto &classLocs = inWhat->locs();
     auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
 
@@ -159,19 +158,19 @@ optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMeth
         return nullopt;
     }
 
-    auto [classStart, classEnd] = classLoc->position(ctx);
+    auto [classStart, classEnd] = classLoc->position(gs);
 
     core::Loc::Detail thisLineStart = {classStart.line, 1};
-    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
     ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
 
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
     }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(gs);
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
@@ -179,7 +178,7 @@ optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMeth
     if (needsDslOwner) {
         return core::AutocorrectSuggestion::Edit{
             nextLineLoc.value(),
-            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(ctx), dsl != "" ? prefix : "", dsl),
+            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(gs), dsl != "" ? prefix : "", dsl),
         };
     } else if (dsl != "") {
         return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}{}\n", prefix, dsl)};

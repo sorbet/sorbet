@@ -472,7 +472,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     auto topAttachedClass = enclosingClass.data(ctx)->topAttachedClass(ctx);
-    if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(ctx, topAttachedClass, core::Symbols::T_Sig(), "")) {
+    if (auto edit =
+            core::TypeErrorDiagnostics::editForDSLMethod(ctx, ctx.file, topAttachedClass, core::Symbols::T_Sig(), "")) {
         edits.emplace_back(edit.value());
     }
 
