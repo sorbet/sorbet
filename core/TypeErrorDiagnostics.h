@@ -35,6 +35,9 @@ public:
     static std::optional<core::AutocorrectSuggestion::Edit>
     editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, Loc defaultInsertLoc, ClassOrModuleRef inWhat,
                      ClassOrModuleRef dslOwner, std::string_view dsl);
+
+    static void maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit, Loc defaultInsertLoc,
+                                     ClassOrModuleRef inWhat, ClassOrModuleRef dslOwner, std::string_view dsl);
 };
 
 } // namespace sorbet::core

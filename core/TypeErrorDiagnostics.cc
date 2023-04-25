@@ -207,4 +207,17 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
     return autocorrectEditForDSLMethod(gs, nextLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
 }
 
+void TypeErrorDiagnostics::maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit,
+                                                Loc defaultInsertLoc, ClassOrModuleRef inWhatRef,
+                                                ClassOrModuleRef dslOwner, string_view dsl) {
+    auto edit = editForDSLMethod(gs, fileToEdit, defaultInsertLoc, inWhatRef, dslOwner, dsl);
+    if (!edit.has_value()) {
+        return;
+    }
+
+    auto label = dsl == "" ? fmt::format("Add `extend {}`", dslOwner.show(gs)) : fmt::format("Insert `{}`", dsl);
+
+    e.addAutocorrect(core::AutocorrectSuggestion{move(label), {move(edit.value())}});
+}
+
 } // namespace sorbet::core
