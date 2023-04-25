@@ -19,15 +19,13 @@ bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
 }
 
 optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
-    auto method = methodSymbol.data(ctx);
-
     auto enclosingClass = methodSymbol.enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
     if (extendsTSig(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
     }
 
-    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == method->loc().file(); };
+    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == ctx.file; };
     auto &classLocs = enclosingClass.data(ctx)->locs();
     auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
 
