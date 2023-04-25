@@ -472,9 +472,14 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     auto topAttachedClass = enclosingClass.data(ctx)->topAttachedClass(ctx);
-    if (auto edit =
-            core::TypeErrorDiagnostics::editForDSLMethod(ctx, ctx.file, topAttachedClass, core::Symbols::T_Sig(), "")) {
-        edits.emplace_back(edit.value());
+    if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(ctx, ctx.file, replacementLoc, topAttachedClass,
+                                                                 core::Symbols::T_Sig(), "")) {
+        if (edit->loc == edits.back().loc) {
+            // Merge edits if we need to insert the `extend T::Sig` at the same point as the `sig`,
+            edits.back().replacement = edit->replacement + edits.back().replacement;
+        } else {
+            edits.emplace_back(edit.value());
+        }
     }
 
     return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};
