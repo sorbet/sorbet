@@ -136,6 +136,7 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
 }
 
 // dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
+// dsl can be `""` to simply insert `extend {dslOwner}` if dslOwner is not already an ancestor
 optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMethod(const Context &ctx,
                                                                                    ClassOrModuleRef inWhatRef,
                                                                                    ClassOrModuleRef dslOwner,
@@ -178,10 +179,12 @@ optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMeth
     if (needsDslOwner) {
         return core::AutocorrectSuggestion::Edit{
             nextLineLoc.value(),
-            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(ctx), prefix, dsl),
+            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(ctx), dsl != "" ? prefix : "", dsl),
         };
-    } else {
+    } else if (dsl != "") {
         return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}{}\n", prefix, dsl)};
+    } else {
+        return nullopt;
     }
 }
 

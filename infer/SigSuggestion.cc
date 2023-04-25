@@ -472,11 +472,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     auto topAttachedClass = enclosingClass.data(ctx)->topAttachedClass(ctx);
-    if (!topAttachedClass.data(ctx)->lookupSingletonClass(ctx).data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig())) {
-        if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(
-                ctx, topAttachedClass, core::Symbols::noClassOrModule(), "extend T::Sig")) {
-            edits.emplace_back(edit.value());
-        }
+    if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(ctx, topAttachedClass, core::Symbols::T_Sig(), "")) {
+        edits.emplace_back(edit.value());
     }
 
     return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};
