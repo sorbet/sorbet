@@ -140,12 +140,22 @@ optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const Gl
                                                                         string_view prefix, ClassOrModuleRef dslOwner,
                                                                         string_view dsl, bool needsDslOwner) {
     if (needsDslOwner) {
+        if (dsl == "") {
+            return core::AutocorrectSuggestion::Edit{
+                insertLoc,
+                fmt::format("{}extend {}\n", prefix, dslOwner.show(gs)),
+            };
+        } else {
+            return core::AutocorrectSuggestion::Edit{
+                insertLoc,
+                fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(gs), prefix, dsl),
+            };
+        }
+    } else if (dsl != "") {
         return core::AutocorrectSuggestion::Edit{
             insertLoc,
-            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(gs), dsl != "" ? prefix : "", dsl),
+            fmt::format("{}{}\n", prefix, dsl),
         };
-    } else if (dsl != "") {
-        return core::AutocorrectSuggestion::Edit{insertLoc, fmt::format("{}{}\n", prefix, dsl)};
     } else {
         return nullopt;
     }
