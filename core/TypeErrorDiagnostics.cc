@@ -1,4 +1,5 @@
 #include "core/TypeErrorDiagnostics.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_join.h"
 #include "core/errors/infer.h"
 
@@ -131,6 +132,56 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
     e.addErrorSection(untypedTpo.explainGot(gs, originForUninitialized));
     if (what == core::errors::Infer::UntypedValue) {
         e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
+    }
+}
+
+// dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
+optional<core::AutocorrectSuggestion::Edit> TypeErrorDiagnostics::editForDSLMethod(const Context &ctx,
+                                                                                   ClassOrModuleRef inWhatRef,
+                                                                                   ClassOrModuleRef dslOwner,
+                                                                                   string_view dsl) {
+    auto inWhat = inWhatRef.data(ctx);
+    auto inWhatSingleton = inWhat->lookupSingletonClass(ctx);
+
+    auto needsDslOwner = false;
+    if (dslOwner.exists()) {
+        needsDslOwner = !inWhatSingleton.data(ctx)->derivesFrom(ctx, dslOwner);
+    }
+
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == ctx.file; };
+    auto &classLocs = inWhat->locs();
+    auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
+
+    if (classLoc == classLocs.end()) {
+        // Couldn't find a loc for the class in this file; give up.
+        // An alternative heuristic here might be "found a file that we know we can write to"
+        return nullopt;
+    }
+
+    auto [classStart, classEnd] = classLoc->position(ctx);
+
+    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
+
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
+
+    // Preserve the indentation of the line below us.
+    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+
+    if (needsDslOwner) {
+        return core::AutocorrectSuggestion::Edit{
+            nextLineLoc.value(),
+            fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(ctx), prefix, dsl),
+        };
+    } else {
+        return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}{}\n", prefix, dsl)};
     }
 }
 

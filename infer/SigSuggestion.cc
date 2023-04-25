@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/lsp/QueryResponse.h"
 #include <optional>
 
@@ -10,49 +11,6 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
-
-bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
-    ENFORCE(enclosingClass.exists());
-    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
-    ENFORCE(enclosingSingletonClass.exists());
-    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
-}
-
-optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
-    auto enclosingClass = methodSymbol.enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
-    if (extendsTSig(ctx, enclosingClass)) {
-        // No need to suggest here, because it already has 'extend T::Sig'
-        return nullopt;
-    }
-
-    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == ctx.file; };
-    auto &classLocs = enclosingClass.data(ctx)->locs();
-    auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
-
-    if (classLoc == classLocs.end()) {
-        // Couldn't a loc for the enclosing class in this file, give up.
-        // An alternative heuristic here might be "found a file that we can write to"
-        return nullopt;
-    }
-
-    auto [classStart, classEnd] = classLoc->position(ctx);
-
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
-    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
-
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    if (!nextLineLoc.has_value()) {
-        return nullopt;
-    }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
-
-    // Preserve the indentation of the line below us.
-    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Sig\n", prefix)};
-}
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                              optional<core::NameRef> keyword, int argId) {
@@ -513,8 +471,12 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
     }
 
-    if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
-        edits.emplace_back(edit.value());
+    auto topAttachedClass = enclosingClass.data(ctx)->topAttachedClass(ctx);
+    if (!topAttachedClass.data(ctx)->lookupSingletonClass(ctx).data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig())) {
+        if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(
+                ctx, topAttachedClass, core::Symbols::noClassOrModule(), "extend T::Sig")) {
+            edits.emplace_back(edit.value());
+        }
     }
 
     return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};
