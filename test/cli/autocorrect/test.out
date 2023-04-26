@@ -285,7 +285,6 @@ T.must(foo)[0]
 "hi" + T.must(foo)
 
 extend T::Sig
-
 sig {params(a: String).void}
 def int(a:); end
 int(a: T.must(foo))
@@ -298,7 +297,6 @@ T.must(foo.bar) &= "a"
 T.must([1].max_by {|l,r| 1})[2]
 
 extend T::Sig
-
 sig {params(a: T.nilable(Integer)).void}
 def foo(a:)
 end
