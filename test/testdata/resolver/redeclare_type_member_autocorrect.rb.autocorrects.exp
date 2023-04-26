@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/redeclare_type_member_autocorrect.rb --
 # typed: true
 
 class Mutator
@@ -7,6 +8,7 @@ class Mutator
 end
 
 class MyMutator < Mutator # error: must be re-declared
+  ModelType = type_template
 end
 
 module AbstractRPCMethod
@@ -17,6 +19,8 @@ module AbstractRPCMethod
 end
 
 class MyRPCMethod1 # error-with-dupes: must be re-declared
+  extend T::Generic
+  RPCInput = type_template
   # ^ This autocorrect is weird, as it inserts the autocorrect here.
   #
   # As it turns out, that's fine--there's no requirement that the type member
@@ -32,6 +36,7 @@ class MyRPCMethod1 # error-with-dupes: must be re-declared
 end
 
 class MyRPCMethod2 # error: must be re-declared
+  RPCOutput = type_template
   extend T::Generic
   RPCInput = type_template
   extend AbstractRPCMethod
@@ -44,7 +49,9 @@ class NumericBox
 end
 
 class IntegerBox < NumericBox # error: must be re-declared
+  Elem = type_member(:out)
   # ^ This autocorrect does not copy the upper bounds, but it should copy the
   # variance. (It would be neat if it could do both, but we don't have that
   # information resolved by the time we run this error.)
 end
+# ------------------------------

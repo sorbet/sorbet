@@ -1,5 +1,6 @@
 #include "common/timers/Timer.h"
 #include "core/Names.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
@@ -91,6 +92,23 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+
+            auto inWhat = sym.data(gs)->topAttachedClass(gs);
+            auto isTypeTemplate = inWhat != sym;
+
+            auto variance = parentTypeMember.data(gs)->variance();
+            auto varianceStr = variance == core::Variance::Invariant
+                                   ? ""s
+                                   : fmt::format("({})", core::Polarities::showVariance(variance));
+
+            // We haven't resolved bounds at this point, so we can't have this autocorrect
+            // generate correct bounds. If there are bounds on the parent type member, we'll
+            // have to have another autocorrect for that that people can apply.
+
+            auto dsl =
+                fmt::format("{} = {}{}", name.show(gs), isTypeTemplate ? "type_template" : "type_member", varianceStr);
+            core::TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, inWhat.data(gs)->loc().file(), core::Loc::none(),
+                                                             inWhat, core::Symbols::T_Generic(), dsl);
         }
     }
 }
