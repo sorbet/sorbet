@@ -624,14 +624,14 @@ module Kernel
   sig do
     params(
         arg0: T.any(String, Symbol),
-        arg1: BasicObject,
+        arg1: T.anything,
     )
     .returns(T.untyped)
   end
   sig do
     params(
         arg0: T.any(String, Symbol),
-        arg1: BasicObject,
+        arg1: T.anything,
         blk: T.untyped,
     )
     .returns(T.untyped)
