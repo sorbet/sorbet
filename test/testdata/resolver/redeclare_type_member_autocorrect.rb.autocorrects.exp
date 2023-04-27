@@ -1,5 +1,6 @@
 # -- test/testdata/resolver/redeclare_type_member_autocorrect.rb --
 # typed: true
+# disable-fast-path: true
 
 class Mutator
   extend T::Generic
