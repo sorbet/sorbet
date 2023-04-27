@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 
 class Mutator
   extend T::Generic
