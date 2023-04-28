@@ -85,6 +85,9 @@ class SymbolFinder {
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
     // Instead, we track the owner manually via FoundDefinitionRefs.
     vector<core::FoundDefinitionRef> ownerStack;
+    // We want to look through all code not inside methods to find ancestors.
+    // To do that, we need access to classDef.ancestors inside a postTransformSend
+    vector<ast::ClassDef *> enclosingClassDefs;
     // `private` with no arguments toggles the visibility of all methods below in the class def.
     // This tracks those as they appear.
     vector<optional<core::FoundModifier>> methodVisiStack = {nullopt};
@@ -198,6 +201,7 @@ public:
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
         methodVisiStack.emplace_back(nullopt);
+        enclosingClassDefs.emplace_back(ast::cast_tree<ast::ClassDef>(tree));
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -206,10 +210,10 @@ public:
         core::FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
         methodVisiStack.pop_back();
+        enclosingClassDefs.pop_back();
 
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
-            addAncestor(ctx, klass, exp);
         }
 
         if (!klass.ancestors.empty()) {
@@ -354,6 +358,13 @@ public:
         auto ownerIsMethod = getOwnerRaw().kind() == core::FoundDefinitionRef::Kind::Method;
 
         switch (original.fun.rawId()) {
+            case core::Names::include().rawId():
+            case core::Names::extend().rawId(): {
+                if (!ownerIsMethod && !enclosingClassDefs.empty()) {
+                    addAncestor(ctx, *enclosingClassDefs.back(), tree);
+                }
+                break;
+            }
             case core::Names::privateClassMethod().rawId():
             case core::Names::publicClassMethod().rawId(): {
                 if (ownerIsMethod) {
