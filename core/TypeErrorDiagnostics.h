@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPE_ERROR_DIAGNOSTICS_H
 #define SORBET_TYPE_ERROR_DIAGNOSTICS_H
 
+#include "core/Context.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
@@ -30,6 +31,13 @@ public:
 
     static void explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what, TypePtr untyped, Loc origin,
                                Loc originForUninitialized);
+
+    static std::optional<core::AutocorrectSuggestion::Edit>
+    editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, Loc defaultInsertLoc, ClassOrModuleRef inWhat,
+                     ClassOrModuleRef dslOwner, std::string_view dsl);
+
+    static void maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit, Loc defaultInsertLoc,
+                                     ClassOrModuleRef inWhat, ClassOrModuleRef dslOwner, std::string_view dsl);
 };
 
 } // namespace sorbet::core

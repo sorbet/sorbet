@@ -1,4 +1,5 @@
 #include "core/TypeErrorDiagnostics.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_join.h"
 #include "core/errors/infer.h"
 
@@ -132,6 +133,101 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
     if (what == core::errors::Infer::UntypedValue) {
         e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
     }
+}
+
+namespace {
+optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const GlobalState &gs, Loc insertLoc,
+                                                                        string_view prefix, ClassOrModuleRef dslOwner,
+                                                                        string_view dsl, bool needsDslOwner) {
+    if (needsDslOwner) {
+        if (dsl == "") {
+            return core::AutocorrectSuggestion::Edit{
+                insertLoc,
+                fmt::format("{}extend {}\n", prefix, dslOwner.show(gs)),
+            };
+        } else {
+            return core::AutocorrectSuggestion::Edit{
+                insertLoc,
+                fmt::format("{}extend {}\n{}{}\n", prefix, dslOwner.show(gs), prefix, dsl),
+            };
+        }
+    } else if (dsl != "") {
+        return core::AutocorrectSuggestion::Edit{
+            insertLoc,
+            fmt::format("{}{}\n", prefix, dsl),
+        };
+    } else {
+        return nullopt;
+    }
+}
+} // namespace
+
+// dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
+// dsl can be `""` to simply insert `extend {dslOwner}` if dslOwner is not already an ancestor
+optional<core::AutocorrectSuggestion::Edit>
+TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, Loc defaultInsertLoc,
+                                       ClassOrModuleRef inWhatRef, ClassOrModuleRef dslOwner, string_view dsl) {
+    auto inWhat = inWhatRef.data(gs);
+    auto inWhatSingleton = inWhat->lookupSingletonClass(gs);
+
+    auto needsDslOwner = false;
+    if (dslOwner.exists()) {
+        needsDslOwner = !inWhatSingleton.data(gs)->derivesFrom(gs, dslOwner);
+    }
+
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == fileToEdit; };
+    auto &classLocs = inWhat->locs();
+    auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
+
+    if (classLoc == classLocs.end()) {
+        if ((inWhatRef == Symbols::root() || inWhatRef == Symbols::Object()) && defaultInsertLoc.exists()) {
+            // We don't put any locs on <root> for performance (would have one loc for each file in the codebase)
+            // If they're writing methods at the top level, it's probably a small script.
+            // Just put the `extend` immediately above the sig.
+
+            auto [sigStart, _sigEnd] = defaultInsertLoc.position(gs);
+            auto thisLineStart = core::Loc::Detail{sigStart.line, 1};
+            auto thisLineLoc = core::Loc::fromDetails(gs, defaultInsertLoc.file(), thisLineStart, thisLineStart);
+            ENFORCE(thisLineLoc.has_value());
+            auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+
+            string prefix(thisLinePadding, ' ');
+            return autocorrectEditForDSLMethod(gs, thisLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
+        } else {
+            return nullopt;
+        }
+    }
+
+    auto [classStart, classEnd] = classLoc->position(gs);
+
+    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    auto thisLineLoc = core::Loc::fromDetails(gs, classLoc->file(), thisLineStart, thisLineStart);
+    ENFORCE(thisLineLoc.has_value());
+    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(gs);
+
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(gs);
+
+    // Preserve the indentation of the line below us.
+    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
+    return autocorrectEditForDSLMethod(gs, nextLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
+}
+
+void TypeErrorDiagnostics::maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit,
+                                                Loc defaultInsertLoc, ClassOrModuleRef inWhatRef,
+                                                ClassOrModuleRef dslOwner, string_view dsl) {
+    auto edit = editForDSLMethod(gs, fileToEdit, defaultInsertLoc, inWhatRef, dslOwner, dsl);
+    if (!edit.has_value()) {
+        return;
+    }
+
+    auto label = dsl == "" ? fmt::format("Add `extend {}`", dslOwner.show(gs)) : fmt::format("Insert `{}`", dsl);
+
+    e.addAutocorrect(core::AutocorrectSuggestion{move(label), {move(edit.value())}});
 }
 
 } // namespace sorbet::core
