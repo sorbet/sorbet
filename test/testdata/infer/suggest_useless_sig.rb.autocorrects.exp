@@ -2,6 +2,7 @@
 # typed: strict
 # enable-suggest-unsafe: true
 
+extend T::Sig
 sig { params(x: T.untyped).returns(T.untyped) }
 def foo(x) # error: does not have a `sig`
   T.unsafe(nil)
