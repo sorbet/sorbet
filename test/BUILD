@@ -375,6 +375,9 @@ sh_binary(
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
+    # This is to get the test to run on the compiler build job,
+    # so we can avoid building ruby on the test-static-sanitized job.
+    tags = ["compiler"],
 )
 
 sh_binary(
