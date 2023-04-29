@@ -227,5 +227,21 @@ module Opus::Types::Test
       end
       assert_equal(0, klass.new.foo)
     end
+
+    it "raises if initialize is not compatible with parent" do
+      klass = Class.new(AbstractBase) do
+        extend T::Sig
+        sig do
+          override
+          .params(x: Integer)
+          .void
+        end
+        def initialize(x); end
+      end
+      err = assert_raises(RuntimeError) do
+        klass.new(0)
+      end
+      assert_includes(err.message, "must have no more than 0 required argument(s) to be compatible")
+    end
   end
 end
