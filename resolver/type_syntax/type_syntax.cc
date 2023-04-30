@@ -1020,12 +1020,14 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
             // same way that we check against types like `Array`
             //
-            // TODO(jez) This `klass == Class` is just a hack to get the payload to build while prototyping...
-            // we should probably fix it properly in the stdlib, and figure out what our rollout strategy is.
+            // TODO(jez) Once there's a version of Sorbet that supports T::Class[...] syntax, remove this check.
             if (klass != core::Symbols::Class() &&
                 (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0)) {
-                auto level = klass.isLegacyStdlibGeneric() ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
-                                                           : core::errors::Resolver::GenericClassWithoutTypeArgs;
+                // Class is not isLegacyStdlibGeneric (because its type members don't default to T.untyped),
+                // but we want to report this syntax error at `# typed: strict` like other stdlib classes.
+                auto level = klass.isLegacyStdlibGeneric() || klass == core::Symbols::Class()
+                                 ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
+                                 : core::errors::Resolver::GenericClassWithoutTypeArgs;
                 if (auto e = ctx.beginError(i.loc, level)) {
                     e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                 klass.show(ctx));
