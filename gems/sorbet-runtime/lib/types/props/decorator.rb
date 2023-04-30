@@ -338,20 +338,23 @@ class T::Props::Decorator
     # Retrive the possible underlying object with T.nilable.
     type = T::Utils::Nilable.get_underlying_type(type)
 
-    sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
-    normalize = T::Configuration.normalize_sensitivity_and_pii_handler
-    if normalize
-      sensitivity_and_pii = normalize.call(sensitivity_and_pii)
+    rules_sensitivity = rules[:sensitivity]
+    sensitivity_and_pii = {sensitivity: rules_sensitivity}
+    if !rules_sensitivity.nil?
+      normalize = T::Configuration.normalize_sensitivity_and_pii_handler
+      if normalize
+        sensitivity_and_pii = normalize.call(sensitivity_and_pii)
 
-      # We check for Class so this is only applied on concrete
-      # documents/models; We allow mixins containing props to not
-      # specify their PII nature, as long as every class into which they
-      # are ultimately included does.
-      #
-      if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
-        raise ArgumentError.new(
-          'Cannot include a pii prop in a class that declares `contains_no_pii`'
-        )
+        # We check for Class so this is only applied on concrete
+        # documents/models; We allow mixins containing props to not
+        # specify their PII nature, as long as every class into which they
+        # are ultimately included does.
+        #
+        if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
+          raise ArgumentError.new(
+            'Cannot include a pii prop in a class that declares `contains_no_pii`'
+          )
+        end
       end
     end
 
