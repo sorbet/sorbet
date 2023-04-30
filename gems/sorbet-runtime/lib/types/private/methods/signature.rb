@@ -179,15 +179,7 @@ class T::Private::Methods::Signature
       kwargs = EMPTY_HASH
     end
 
-    arg_types = @arg_types
-
-    if @has_rest
-      rest_count = args_length - @arg_types.length
-      rest_count = 0 if rest_count.negative?
-
-      arg_types += [[@rest_name, @rest_type]] * rest_count
-
-    elsif (args_length < @req_arg_count) || (args_length > @arg_types.length)
+    if !@has_rest && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
       expected_str = @req_arg_count.to_s
       if @arg_types.length != @req_arg_count
         expected_str += "..#{@arg_types.length}"
@@ -197,9 +189,22 @@ class T::Private::Methods::Signature
 
     begin
       it = 0
-      while it < args_length
-        yield arg_types[it][0], args[it], arg_types[it][1]
+
+      # Process given pre-rest args. When there are no rest args,
+      # this is just the given number of args.
+      while it < [args_length, @arg_types.length].min
+        yield @arg_types[it][0], args[it], @arg_types[it][1]
         it += 1
+      end
+
+      if @has_rest
+        rest_count = args_length - @arg_types.length
+        rest_count = 0 if rest_count.negative?
+
+        rest_count.times do
+          yield @rest_name, args[it], @rest_type
+          it += 1
+        end
       end
     end
 
@@ -208,6 +213,7 @@ class T::Private::Methods::Signature
       if !type && @has_keyrest
         type = @keyrest_type
       end
+
       yield name, val, type if type
     end
   end
