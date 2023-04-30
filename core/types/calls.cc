@@ -1920,7 +1920,8 @@ public:
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
         } else {
-            // TODO(jez) Can we make this return T::Class[args.thisType] or something?
+            // TODO(jez) We can circle back to improving this type after the initial `T::Class` change lands.
+            // It can probably be something like `T::Class[args.thisType]`.
             res.returnType = Symbols::Class().data(gs)->externalType();
         }
     }
