@@ -2837,6 +2837,9 @@ public:
                                 "instantiated",
                                 "T.attached_class");
                 } else {
+                    // Technically, this error message should also have something like "..., or
+                    // instance methods on `::Class`", but that makes the error message wordy, and
+                    // anyone who cares about that technicality likely knows what they're doing.
                     e.setHeader(
                         "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
                         "T.attached_class", hasAttachedClass);

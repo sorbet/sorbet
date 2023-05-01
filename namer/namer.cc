@@ -1357,7 +1357,24 @@ private:
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
-        if (ctx.owner == core::Symbols::root()) {
+        auto owner = ctx.owner.asClassOrModuleRef();
+        if (owner == core::Symbols::root() ||
+            (typeMember.name == core::Names::Constants::AttachedClass() && owner != core::Symbols::Class() &&
+             owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx))) {
+            if (typeMember.name == core::Names::Constants::AttachedClass()) {
+                if (auto e = ctx.beginError(typeMember.asgnLoc, core::errors::Namer::HasAttachedClassInClass)) {
+                    // This is the simple way to explain the error to users, even though the
+                    // condition above is more complicated. The one exception to the way this error
+                    // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
+                    //
+                    // But since `::Class` is final (even according to the VM), and since we've
+                    // already marked `::Class` with `has_attached_class!`, it's not worth leaking
+                    // that special case to the user.
+                    e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
+                                core::Names::declareHasAttachedClass().show(ctx), "module", "class");
+                }
+            }
+
             core::FoundStaticField staticField;
             staticField.owner = typeMember.owner;
             staticField.name = typeMember.name;
@@ -1370,8 +1387,7 @@ private:
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplate;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
-                                       : ctx.owner.asClassOrModuleRef();
+        auto onSymbol = isTypeTemplate ? owner.data(ctx)->singletonClass(ctx) : owner;
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {

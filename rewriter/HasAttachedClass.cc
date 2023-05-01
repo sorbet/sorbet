@@ -12,16 +12,6 @@ vector<ast::ExpressionPtr> HasAttachedClass::run(core::MutableContext ctx, bool 
         return empty;
     }
 
-    // TODO(jez) Figure out some way to allow `initializeable!` to only be used in `Class` (or
-    // maybe `Class` + children of `Class`)
-    // if (isClass) {
-    //     if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::HasAttachedClassInClass)) {
-    //         e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-    //                     core::Names::declareHasAttachedClass().show(ctx), "module", "class");
-    //     }
-    //     return empty;
-    // }
-
     if (send->numPosArgs() > 0) {
         const auto &arg0 = send->posArgs()[0];
         if (const auto *lit = ast::cast_tree<ast::Literal>(arg0)) {

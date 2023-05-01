@@ -436,9 +436,10 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     if (sym->name == core::Names::Constants::AttachedClass()) {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists() || owner == core::Symbols::Class() || owner.data(gs)->isModule());
-        // TODO(jez) If you end up allowing `initializable!` for arbitrary classes, change this `owner ==` check here.
-        if (options.showForRBI || owner == core::Symbols::Class() || owner.data(gs)->isModule()) {
+        if (options.showForRBI || !attached.exists()) {
+            // Attached wont exist for a number of cases:
+            // - owner is a module that uses has_attached_class!
+            // - owner is ::Class
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));

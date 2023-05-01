@@ -50,6 +50,60 @@ core::ErrorClass getRedeclarationErrorCode(const core::GlobalState &gs, core::Cl
         return core::errors::Resolver::ParentTypeNotDeclared;
     }
 }
+
+// Note having this error is intentional, as it makes it easier to implement Sorbet's incremental mode.
+//
+// In the past, we have floated ideas of allowing users to skip redeclaring a parent's type members if
+// those type members are fixed, and simply copying the fixed type member down onto the child on the
+// user's behalf.
+//
+// But that runs afoul of our (simple) heuristic to retypecheck all files that simply mention a symbol
+// name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
+// `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
+// grandchild class's file in the set of files to retypecheck.
+void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef parent,
+                              core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
+    auto name = parentTypeMember.data(gs)->name;
+    auto code = getRedeclarationErrorCode(gs, parent, name);
+
+    if (parent == core::Symbols::Class() && code == core::errors::Resolver::HasAttachedClassIncluded) {
+        // Here we make one exception for our rant above about always wanting to report this error,
+        // because we already mark `Class` as `final!`, so there will already be an error reported
+        // preventing people from writing this code.
+        //
+        // We choose to silence this one because finalizeSymbols comes before definition_validator,
+        // and the "do not inherit final!" error much easier for users to interpret. (This one would
+        // mention something about needing to `include Class` and `has_attached_class`, which the
+        // user would be confused by.)
+        return;
+    }
+
+    if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
+        if (code == core::errors::Resolver::HasAttachedClassIncluded) {
+            auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
+            if (sym.data(gs)->isModule()) {
+                e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
+                            parent.show(gs), sym.show(gs));
+            } else if (sym.data(gs)->isSingletonClass(gs)) {
+                // We'd only get this type member redeclaration error in a singleton class if
+                // the attached class of this singleton class is a module (because all classes'
+                // singleton classes get the `<AttachedClass>` type member declared)
+                ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
+                e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
+                            hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+            } else {
+                // sym is a normal, non singleton class
+                e.setHeader("`{}` was declared `{}` and so must be `{}`ed into the class `{}`", parent.show(gs),
+                            hasAttachedClass, "extend", sym.show(gs));
+            }
+            e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", hasAttachedClass);
+        } else {
+            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
+                        sym.show(gs));
+            e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+        }
+    }
+}
 } // namespace
 
 bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, core::TypeMemberRef parentTypeMember,
@@ -58,44 +112,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMemberNoDealias(gs, name);
     if (!my.exists()) {
-        auto code = getRedeclarationErrorCode(gs, parent, name);
+        reportRedeclarationError(gs, parent, parentTypeMember, sym);
 
-        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-            // Note having this error is intentional, as it makes it easier to implement Sorbet's incremental mode.
-            //
-            // In the past, we have floated ideas of allowing users to skip redeclaring a parent's type members if
-            // those type members are fixed, and simply copying the fixed type member down onto the child on the
-            // user's behalf.
-            //
-            // But that runs afoul of our (simple) heuristic to retypecheck all files that simply mention a symbol
-            // name on the LSP fast path. If a grandchild class was not forced to redeclare a grandparent's
-            // `type_member`, then the grandparent class's file could be edited and Sorbet wouldn't include the
-            // grandchild class's file in the set of files to retypecheck.
-            if (code == core::errors::Resolver::HasAttachedClassIncluded) {
-                // TODO(jez) Report correct error here
-                auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
-                if (sym.data(gs)->isModule()) {
-                    e.setHeader("`{}` declared by parent `{}` must be re-declared in `{}`", hasAttachedClass,
-                                parent.show(gs), sym.show(gs));
-                } else if (sym.data(gs)->isSingletonClass(gs)) {
-                    // We'd only get this type member redeclaration error in a singleton class if
-                    // the attached class of this singleton class is a module (because all classes'
-                    // singleton classes get the `<AttachedClass>` type member declared)
-                    ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
-                    e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
-                                hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
-                } else {
-                    // sym is a normal, non singleton class
-                    e.setHeader("`{}` was declared `{}` and so must be `{}`ed into the class `{}`", parent.show(gs),
-                                hasAttachedClass, "extend", sym.show(gs));
-                }
-                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", hasAttachedClass);
-            } else {
-                e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
-                            parent.show(gs), sym.show(gs));
-                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
-            }
-        }
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         typeMember.data(gs)->flags.isFixed = true;
         auto untyped = core::Types::untyped(gs, sym);
