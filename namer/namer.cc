@@ -696,6 +696,12 @@ public:
 using BehaviorLocs = InlinedVector<core::Loc, 1>;
 using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
 
+bool isBadHasAttachedClass(core::Context ctx, core::NameRef name) {
+    auto owner = ctx.owner.asClassOrModuleRef();
+    return name == core::Names::Constants::AttachedClass() && owner != core::Symbols::Class() &&
+           owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx);
+}
+
 /**
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
@@ -1357,24 +1363,7 @@ private:
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
-        auto owner = ctx.owner.asClassOrModuleRef();
-        if (owner == core::Symbols::root() ||
-            (typeMember.name == core::Names::Constants::AttachedClass() && owner != core::Symbols::Class() &&
-             owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx))) {
-            if (typeMember.name == core::Names::Constants::AttachedClass()) {
-                if (auto e = ctx.beginError(typeMember.asgnLoc, core::errors::Namer::HasAttachedClassInClass)) {
-                    // This is the simple way to explain the error to users, even though the
-                    // condition above is more complicated. The one exception to the way this error
-                    // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
-                    //
-                    // But since `::Class` is final (even according to the VM), and since we've
-                    // already marked `::Class` with `has_attached_class!`, it's not worth leaking
-                    // that special case to the user.
-                    e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-                                core::Names::declareHasAttachedClass().show(ctx), "module", "class");
-                }
-            }
-
+        if (ctx.owner == core::Symbols::root() || isBadHasAttachedClass(ctx, typeMember.name)) {
             core::FoundStaticField staticField;
             staticField.owner = typeMember.owner;
             staticField.name = typeMember.name;
@@ -1387,7 +1376,8 @@ private:
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplate;
 
-        auto onSymbol = isTypeTemplate ? owner.data(ctx)->singletonClass(ctx) : owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
+                                       : ctx.owner.asClassOrModuleRef();
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1984,9 +1974,23 @@ public:
             }
             return ast::MK::EmptyTree();
         }
-        if (ctx.owner == core::Symbols::root()) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                e.setHeader("`{}` cannot be used at the top-level", "type_member");
+        if (ctx.owner == core::Symbols::root() || isBadHasAttachedClass(ctx, typeName->cnst)) {
+            if (ctx.owner == core::Symbols::root()) {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                    e.setHeader("`{}` cannot be used at the top-level", "type_member");
+                }
+            } else {
+                if (auto e = ctx.beginError(asgn.loc, core::errors::Namer::HasAttachedClassInClass)) {
+                    // This is the simple way to explain the error to users, even though the
+                    // condition above is more complicated. The one exception to the way this error
+                    // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
+                    //
+                    // But since `::Class` is final (even according to the VM), and since we've
+                    // already marked `::Class` with `has_attached_class!`, it's not worth leaking
+                    // that special case to the user.
+                    e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
+                                core::Names::declareHasAttachedClass().show(ctx), "module", "class");
+                }
             }
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                             asgn.loc.copyWithZeroLength(),
