@@ -1363,7 +1363,7 @@ private:
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
-        if (ctx.owner == core::Symbols::root() || isBadHasAttachedClass(ctx, typeMember.name)) {
+        if (ctx.owner == core::Symbols::root()) {
             core::FoundStaticField staticField;
             staticField.owner = typeMember.owner;
             staticField.name = typeMember.name;
@@ -1980,17 +1980,6 @@ public:
                     e.setHeader("`{}` cannot be used at the top-level", "type_member");
                 }
             } else {
-                if (auto e = ctx.beginError(asgn.loc, core::errors::Namer::HasAttachedClassInClass)) {
-                    // This is the simple way to explain the error to users, even though the
-                    // condition above is more complicated. The one exception to the way this error
-                    // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
-                    //
-                    // But since `::Class` is final (even according to the VM), and since we've
-                    // already marked `::Class` with `has_attached_class!`, it's not worth leaking
-                    // that special case to the user.
-                    e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
-                                core::Names::declareHasAttachedClass().show(ctx), "module", "class");
-                }
             }
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                             asgn.loc.copyWithZeroLength(),
@@ -1998,6 +1987,30 @@ public:
 
             return handleAssignment(ctx,
                                     ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+        }
+
+        if (isBadHasAttachedClass(ctx, typeName->cnst)) {
+            // We could go out of our way to try to not even define the <AttachedClass> type member,
+            // in an attempt to maintain an invariant that <AttachedClass> is only ever defined on
+            // - modules
+            // - class singleton classes
+            // - ::Class itself
+            // But then in GlobalPass, resolveTypeMember would simply mangle rename things so that
+            // the <AttachedClass> symbol pointed to a type member symbol anyways (instead of a
+            // static field or type alias symbol). So let's just report an error and then continue
+            // to let the type member be defined, shedding a single tear that we can't enforce the
+            // invariant we might have otherwise wanted.
+            if (auto e = ctx.beginError(asgn.loc, core::errors::Namer::HasAttachedClassInClass)) {
+                // This is the simple way to explain the error to users, even though the
+                // condition above is more complicated. The one exception to the way this error
+                // is phrased: `::Class` itself, which is a `class`, is allowed to use `has_attached_class!`.
+                //
+                // But since `::Class` is final (even according to the VM), and since we've
+                // already marked `::Class` with `has_attached_class!`, it's not worth leaking
+                // that special case to the user.
+                e.setHeader("`{}` can only be used inside a `{}`, not a `{}`",
+                            core::Names::declareHasAttachedClass().show(ctx), "module", "class");
+            }
         }
 
         bool isTypeTemplate = send->fun == core::Names::typeTemplate();
