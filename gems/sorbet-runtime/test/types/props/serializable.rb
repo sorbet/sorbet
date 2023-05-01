@@ -598,12 +598,25 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'unions of two different serializables' do
-    it 'are just cloned on serde' do
+    it 'are serialized' do
       obj = MyNilableSerializable.new
-      T::Props::Utils.expects(:deep_clone_object).with(obj).at_least_once.returns(obj)
+      obj.name = "test"
+      T::Props::Utils.expects(:deep_clone_object).never
 
       s = MultipleStructUnionStruct.new(prop: obj)
-      assert_equal(obj, MultipleStructUnionStruct.from_hash(s.serialize).prop)
+      deserialized = MultipleStructUnionStruct.from_hash(s.serialize).prop
+
+      assert_instance_of(MyNilableSerializable, deserialized)
+      assert_equal(obj.address, deserialized.address)
+      assert_equal(obj.name, deserialized.name)
+    end
+
+    it 'can deserialize when a __class__ magic prop does not exist' do
+      deserialized = MultipleStructUnionStruct.from_hash({"prop" => {"name" => "foo", "address" => "bar"}}).prop
+
+      assert_instance_of(MyNilableSerializable, deserialized)
+      assert_equal("bar", deserialized.address)
+      assert_equal("foo", deserialized.name)
     end
   end
 

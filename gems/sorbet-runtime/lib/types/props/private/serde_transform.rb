@@ -99,6 +99,30 @@ module T::Props
             else
               "#{varname}.nil? ? nil : #{inner}"
             end
+          elsif type.types.map(&:raw_type).all? {|t| t < T::Props::Serializable}
+            case mode
+            when Serialize
+              "#{varname}.serialize(strict).merge!(__class__: #{varname}.class.name)"
+            when Deserialize
+              # Handles the case where we serialize a member of a union outside
+              # of a T::Struct, and then manually stitch together the
+              # serialized representation without the class name.
+              <<-DESER
+                if #{varname}.include?(:__class__)
+                  Module.const_get(#{varname}.delete(:__class__)).from_hash(#{varname})
+                else
+                  [#{type.types.map(&:raw_type).map(&:name).join(', ')}].lazy.map do |x|
+                    begin
+                      x.from_hash(#{varname}, true)
+                    rescue
+                      false
+                    end
+                  end.select(&:itself).first || T::Props::Utils.deep_clone_object(#{varname})
+                end
+              DESER
+            else
+              T.absurd(mode)
+            end
           elsif type.types.all? {|t| generate(t, mode, varname).nil?}
             # Handle, e.g., T::Boolean
             nil
