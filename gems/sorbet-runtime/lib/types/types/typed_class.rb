@@ -20,7 +20,7 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      obj.is_a?(Class)
+      Class.===(obj)
     end
 
     module Private
