@@ -1489,7 +1489,6 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     }
 
     if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
-        // TODO(jez) Add a test for this error
         if (appliedType->klass == core::Symbols::Class()) {
             // T::Class[...].new is not implemented--users should just use Class.new(super_class)
             return false;
@@ -1535,6 +1534,9 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                 auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
                 e.replaceWith("Replace with class name", receiverLoc, "{}",
                               appliedType->klass.data(gs)->attachedClass(gs).show(gs));
+            } else if (appliedType->klass == core::Symbols::Class()) {
+                e.addErrorNote("Sorbet erases generics, so `{}` does not work. Use `{}` instead.", "T::Class[...].new",
+                               "Class.new(...)");
             }
         }
     }
