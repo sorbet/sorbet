@@ -71,6 +71,9 @@
 class Class < Module
   extend T::Generic
   has_attached_class!(:out)
+
+  ### TODO(jez) Use `T.attached_class` in `allocate`
+
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
   # *class*.
@@ -116,11 +119,15 @@ class Class < Module
   # to create a new object of *class*'s class, then invokes that object's
   # initialize method, passing it *args*. This is the method that ends up
   # getting called whenever an object is constructed using `.new`.
-  # TODO(jez) Are there any other Class instance methods we want to annotate?
-  # TODO(jez) Are there any other non-Class instance methods we want to queue up to fix in a future change?
   sig {params(args: T.untyped, blk: T.untyped).returns(T.attached_class)}
   def new(*args, &blk); end
 
+  # Creates a new anonymous (unnamed) class with the given superclass (or
+  # Object if no parameter is given). You can give a class a name by assigning
+  # the class object to a constant.
+  #
+  # If a block is given, it is passed the class object, and the block is
+  # evaluated in the context of this class like class_eval.
   sig { params(blk: T.untyped).returns(T::Class[Object]) }
   sig do
     type_parameters(:Parent)
