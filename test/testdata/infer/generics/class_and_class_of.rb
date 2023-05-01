@@ -53,17 +53,14 @@ example4(MyClass)             # ok
 sig {params(x: T::Class[MyClass]).void}
 def example5(x)
   x.new.some_instance_method  # ok
-  # TODO(jez) weird `Class[MyClass]`? where's the `T::`?
-  x.some_class_method         # error
+  x.some_class_method         # error: Method `some_class_method` does not exist on `T::Class[MyClass]`
 end
-
-# TODO(jez) Is there a value of type `T::Class[MyClass]` that doesn't respond to `some_class_method`?
 
 example5(MyClass)             # ok
 
 sig {params(x: T.all(T::Class[MyClass], T.class_of(MyClass))).void}
 def example6(x)
-  T.reveal_type(x)            # collapses
+  T.reveal_type(x)            # error: `T.class_of(MyClass)`
   x.new.some_instance_method  # ok
   x.some_class_method         # ok
 end

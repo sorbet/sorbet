@@ -200,7 +200,15 @@ actually need to use instance methods from `MyInterface`, this may be an
 acceptable workaround.
 
 <!-- TODO(jez) Update this doc -->
-<!-- TODO(jez) Be sure to include guidance on when to use `T.class_of` vs `T::Class` -->
+<!-- TODO(jez) Be sure to include guidance on when to use `T.class_of` vs `T::Class`
+
+Quick difference: `T::Class[M]` is useful because you might have two classes `A`
+and `B` that include some mixin `M`, but do not have some common parent class.
+
+T::Class[M] allows accepting either `A` or `B`, whereas `T.class_of(M)` is only
+inhabited by the singleton class of `M`. So while it's somewhat confusing,
+`T::Class` and `T.class_of` don't serve exactly the same purpose as each other.
+-->
 
 > A future feature of Sorbet might be able to improve this workaround. See
 > https://github.com/sorbet/sorbet/issues/62.
