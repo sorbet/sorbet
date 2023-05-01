@@ -977,6 +977,52 @@ module Opus::Types::Test
       end
     end
 
+    describe "TypedClass" do
+      it 'works if the type is right' do
+        type = T::Class[Base]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'works if the type is wrong, but a class' do
+        type = T::Class[Sub]
+        value = Base
+        assert_nil(type.error_message_for_obj(value))
+      end
+
+      it 'cannot have its metatype instantiated' do
+        # People might assume that this creates a class with a supertype of
+        # `Base`. It doesn't, because generics are erased, and also `[...]` can
+        # hold an arbitrary type, not necessarily a class type.
+        #
+        # Also, `Class.new` already has a sig that infers a _better_ type:
+        # Class.new(Base) has an inferred type of `T.class_of(Base)`, which is
+        # more narrow.
+        assert_raises(NoMethodError) do
+          T::Class[Base].new
+        end
+      end
+
+      it 'is not coerced from plain class literal' do
+        # This is for backwards compatibility. If this poses problems for the
+        # sake of runtime checking and reflection, we may want to make this
+        # behavior more like the static system, where `::Class` has type
+        # `T.class_of(Class)`. It looks like we already don't treat `::A` as
+        # coercing to `T.class_of(A)`, which is why I don't know whether it
+        # particularly matters.
+        #
+        # (It's also worth noting: Sorbet doesn't have a separate notion of
+        # `T::Types::Simple` and `T::Types::ClassOf`. A ClassType is used to
+        # model `T::Types::Simple` and _was_ used to model `T.class_of(...)`
+        # until we made all singleton classes generic with `<AttachedClass>`,
+        # when they became AppliedType.)
+        type = T::Utils.coerce(::Class)
+        assert_instance_of(T::Types::Simple, type)
+        assert_equal(::Class, type.raw_type)
+      end
+    end
+
     describe 'TypeAlias' do
       it 'delegates name' do
         type = T.type_alias {T.any(Integer, String)}

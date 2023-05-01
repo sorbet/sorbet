@@ -358,11 +358,12 @@ module T
 
   module Class
     def self.[](type)
-      # TODO(jez) Build TypedClass
       if type.is_a?(T::Types::Untyped)
-        T::Types::TypedClass::Untyped.new
+        T::Types::TypedClass::Untyped::Private::INSTANCE
+      elsif type.is_a?(T::Types::Anything)
+        T::Types::TypedClass::Anything::Private::INSTANCE
       else
-        T::Types::TypedClass.new(type)
+        T::Types::TypedClass::Private::Pool.type_for_module(type)
       end
     end
   end

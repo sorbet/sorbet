@@ -1489,6 +1489,12 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     }
 
     if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+        // TODO(jez) Add a test for this error
+        if (appliedType->klass == core::Symbols::Class()) {
+            // T::Class[...].new is not implemented--users should just use Class.new(super_class)
+            return false;
+        }
+
         if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
             return false;
         }

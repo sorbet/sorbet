@@ -683,7 +683,6 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
 // See the comment in the header.
 // !! The set of stdlib classes receiving this special behavior should NOT grow over time !!
 bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
-    // TODO(jez) Consider not special casing `Class`
     return *this == Symbols::Hash() || *this == Symbols::Array() || *this == Symbols::Set() ||
            *this == Symbols::Range() || *this == Symbols::Enumerable() || *this == Symbols::Enumerator() ||
            *this == Symbols::Enumerator_Lazy() || *this == Symbols::Enumerator_Chain();
