@@ -1974,12 +1974,9 @@ public:
             }
             return ast::MK::EmptyTree();
         }
-        if (ctx.owner == core::Symbols::root() || isBadHasAttachedClass(ctx, typeName->cnst)) {
-            if (ctx.owner == core::Symbols::root()) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("`{}` cannot be used at the top-level", "type_member");
-                }
-            } else {
+        if (ctx.owner == core::Symbols::root()) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                e.setHeader("`{}` cannot be used at the top-level", "type_member");
             }
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                             asgn.loc.copyWithZeroLength(),
