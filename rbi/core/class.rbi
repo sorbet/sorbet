@@ -69,6 +69,15 @@
 # obj--->OtherClass---------->(OtherClass)-----------...
 # ```
 class Class < Module
+  # See this check in the Ruby VM:
+  # → https://github.com/ruby/ruby/blob/v2_7_7/class.c#L231-L233
+  #
+  # We're explicitly not declaring `extend T::Helpers` to avoid polluting
+  # Sorbet's view of the inheritance hierarchy. Luckily this is an RBI file, so
+  # inference will not run on it, and no other part of Sorbet requires that a
+  # `final!` annotation must have a matching `extend T::Helpers` declaration.
+  final!
+
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
   # *class*.
