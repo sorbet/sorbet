@@ -6,6 +6,7 @@ require_relative 'setters'
 require_relative 'constructor'
 require_relative 'deserialize'
 require_relative 'prop_definition'
+require_relative 'prop_validation'
 require_relative 'serialize_custom_type'
 require_relative 'tutils'
 require_relative 'typecheck'
@@ -29,6 +30,10 @@ namespace :bench do
 
   task :prop_definition do
     SorbetBenchmarks::PropDefinition.run
+  end
+
+  task :prop_validation do
+    SorbetBenchmarks::PropValidation.run
   end
 
   task :serialize_custom_type do
