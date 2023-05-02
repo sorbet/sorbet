@@ -108,7 +108,9 @@ module T::Props
               # of a T::Struct, and then manually stitch together the
               # serialized representation without the class name.
               <<-DESER
-                if #{varname}.include?(:__class__)
+                if [#{type.types.map(&:raw_type).map(&:name).join(', ')}].any? {|x| #{varname}.is_a?(x)}
+                  T::Props::Utils.deep_clone_object(#{varname})
+                elsif #{varname}.is_a?(Hash) && #{varname}.include?(:__class__)
                   Module.const_get(#{varname}.delete(:__class__)).from_hash(#{varname})
                 else
                   [#{type.types.map(&:raw_type).map(&:name).join(', ')}].lazy.map do |x|
