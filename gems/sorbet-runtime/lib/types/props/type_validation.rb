@@ -41,6 +41,7 @@ module T::Props::TypeValidation
         field_name: T.any(Symbol, String),
       )
       .void
+      .checked(:never)
     end
     private def validate_type(type, field_name)
       if (invalid_subtype = find_invalid_subtype(type))
