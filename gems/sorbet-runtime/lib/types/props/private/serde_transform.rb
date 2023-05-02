@@ -99,7 +99,7 @@ module T::Props
             else
               "#{varname}.nil? ? nil : #{inner}"
             end
-          elsif type.types.all? {|x| x.respond_to?(:raw_type)} && type.types.map(&:raw_type).all? {|t| t < T::Props::Serializable}
+          elsif type.types.all? {|x| x < T::Types::Simple && x.raw_type < T::Props::Serializable}
             case mode
             when Serialize
               "#{varname}.serialize(strict).merge!(__class__: #{varname}.class.name)"
