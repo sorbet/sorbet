@@ -14,3 +14,14 @@ end
 
 A.new.parent_method(1)
 A.new.bar(1)
+
+
+module SomeModuleExtension
+  def extension_method
+  end
+end
+
+class SomeExtendedClass
+  include SomeModuleExtension
+  alias_method :aliased_method, :extension_method
+end
