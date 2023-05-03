@@ -348,7 +348,7 @@ class T::Props::Decorator
       # specify their PII nature, as long as every class into which they
       # are ultimately included does.
       #
-      if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
+      if sensitivity_and_pii[:pii] && !T.unsafe(@class).contains_pii?
         raise ArgumentError.new(
           'Cannot include a pii prop in a class that declares `contains_no_pii`'
         )
