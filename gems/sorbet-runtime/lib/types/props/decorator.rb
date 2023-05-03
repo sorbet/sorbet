@@ -393,7 +393,7 @@ class T::Props::Decorator
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
-    # checked(:never) - Rules hash is expensive to check
+  # checked(:never) - Rules hash is expensive to check
   sig {params(name: Symbol, rules: Rules).void.checked(:never)}
   private def define_getter_and_setter(name, rules)
     T::Configuration.without_ruby_warnings do
