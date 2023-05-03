@@ -401,15 +401,15 @@ class T::Props::Decorator
         if method(:prop_set).owner != T::Props::Decorator
           @class.class_eval <<~SETTER
             def #{name}=(val)
-              rules = T.unsafe(self.class).decorator.prop_rules(:#{name})
-              T.unsafe(self.class).decorator.prop_set(self, :#{name}, val, rules)
+              rules = self.class.decorator.prop_rules(:#{name})
+              self.class.decorator.prop_set(self, :#{name}, val, rules)
             end
           SETTER
         else
           # Fast path (~4x faster as of Ruby 2.6)
           @class.class_eval <<~SETTER
             def #{name}=(val)
-              rules = T.unsafe(self.class).decorator.prop_rules(:#{name})
+              rules = self.class.decorator.prop_rules(:#{name})
               instance_exec(val, &rules.fetch(:setter_proc))
             end
           SETTER
@@ -419,8 +419,8 @@ class T::Props::Decorator
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
         @class.class_eval <<~GETTER
           def #{name}
-            rules = T.unsafe(self.class).decorator.prop_rules(:#{name})
-            T.unsafe(self.class).decorator.prop_get(self, :#{name}, rules)
+            rules = self.class.decorator.prop_rules(:#{name})
+            self.class.decorator.prop_get(self, :#{name}, rules)
           end
         GETTER
       else
