@@ -72,7 +72,7 @@ class Class < Module
   extend T::Generic
   has_attached_class!(:out)
 
-  ### TODO(jez) Use `T.attached_class` in `allocate`
+  ### TODO(jez) After T::Class change: Use `T.attached_class` in `allocate`
 
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
