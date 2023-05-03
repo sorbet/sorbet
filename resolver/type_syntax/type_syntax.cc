@@ -1020,7 +1020,9 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
             // same way that we check against types like `Array`
             //
-            // TODO(jez) Once there's a version of Sorbet that supports T::Class[...] syntax, remove this check.
+            // TODO(jez) After T::Class change: fix the payload, fix all the codebases, and remove this check.
+            // (Leaving at least one version in between, so that there is a published version that
+            // supports both `Class` and `T::Class` as valid syntax.)
             if (klass != core::Symbols::Class() &&
                 (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0)) {
                 // Class is not isLegacyStdlibGeneric (because its type members don't default to T.untyped),
