@@ -1945,22 +1945,29 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
 
-        // TODO(jez) I think we can further simplify this logic
-        // (and maybe even simplify the hacky handling for `initialize` in dispatchCallSymbol?)
+        // Technically if you get all the way up to `Class`, `new` is an instance method, so there
+        // is no attachedClass.
+        // we don't need to try to dispatch to `initialize`.
         if (self == Symbols::Class()) {
-            // Call to `.new` on `Class` object itself. We don't know what the object is, so we
-            // can't dispatch to it's `initialize` function. Just let the sig for `Class#new` return
-            // `T.attached_class`
-            //
-            // TODO(jez) Galaxy brain: dispatch to initialize on first type argument
             return;
         }
 
-        // TODO(jez) Are there any other intrinsics we think we can clean up?
+        // TODO(jez) After T::Class change:
+        // We have some weird handling for `initialize` in dispatchCallSymbol to avoid reporting
+        // "method does not exist" error. We can simply delete that, and check
+        // `res.main.method.exists()` and only report the res.main.errors if we actually dispatched
+        // to a real `initialize` method.
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            ENFORCE(false); // TODO(jez) explain why we think this holds?
+            // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
+            // actually going to be on an "instance" not a singleton (Class.new, the one on the
+            // singleton, is the one that defines a new class at runtime).
+            //
+            // In that case, there's no attachedClass to look for an `initialize` method on.
+            // We could _maybe_ imagine trying to dispatch to `initialize` on the `<AttachedClass>`
+            // type argument? But I haven't thought about what the consequences of that would be.
+            ENFORCE(self == Symbols::Class());
             return;
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
