@@ -9,7 +9,7 @@ Parent.attached_object
 Parent.new.singleton_class.attached_object
 
 c1 = Class.new
-T.reveal_type(c1) # error: Revealed type: `Class`
+T.reveal_type(c1) # error: Revealed type: `T::Class[Object]`
 T.reveal_type(c1.new) # error: Revealed type: `Object`
 
 c2 = Class.new(Parent)
@@ -17,7 +17,7 @@ T.reveal_type(c2) # error: Revealed type: `T.class_of(Parent)`
 T.reveal_type(c2.new) # error: Revealed type: `Parent`
 
 c3 = Class.new { |cls| cls.superclass }
-T.reveal_type(c3) # error: Revealed type: `Class`
+T.reveal_type(c3) # error: Revealed type: `T::Class[Object]`
 T.reveal_type(c3.new) # error: Revealed type: `Object`
 
 c4 = Class.new(Parent) { |cls| cls.superclass }
@@ -37,4 +37,4 @@ C = Class.new(Parent) do |cls|
 end
 C.foo
 
-Class.new('Foo') # error: Expected `T.all(Class, T.type_parameter(:Parent))` but found `String("Foo")` for argument `super_class`
+Class.new('Foo') # error: Expected `T.all(T::Class[T.type_parameter(:Parent)], T.type_parameter(:Parent))` but found `String("Foo")` for argument `super_class`

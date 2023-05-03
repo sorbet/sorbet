@@ -13,7 +13,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <S <C <U A>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=4:3 end=12:6}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=??? end=???}
     type-member(+) <S <S <C <U A>> $1> $1>::<C <U X>> -> LambdaParam(<S <S <C <U A>> $1> $1>::<C <U X>>, lower=T.noreturn, upper=Integer) @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=10:7 end=10:47}
-  class <S <S <S <C <U A>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Class>> $1> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=8:5 end=8:10}
+  class <S <S <S <C <U A>> $1> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Class>> $1> () @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=8:5 end=8:10}
     type-member(+) <S <S <S <C <U A>> $1> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <S <S <C <U A>> $1> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <S <C <U A>> $1> $1>   targs = [     <C <U <AttachedClass>>> = AppliedType {         klass = <S <C <U A>> $1>         targs = [           <C <U <AttachedClass>>> = A           <C <U X>> = String         ]       }     <C <U X>> = Integer   ] }) @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=8:5 end=8:10}
     method <S <S <S <C <U A>> $1> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=8:5 end=11:8}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_singleton_members.rb start=??? end=???}

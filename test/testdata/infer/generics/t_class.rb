@@ -10,9 +10,9 @@ sig do
 end
 def instantiate_class(klass)
   instance = klass.new
-  T.reveal_type(instance)
+  T.reveal_type(instance) # error: `T.type_parameter(:U) (of Object#instantiate_class)`
   instance
 end
 
 a = instantiate_class(A)
-T.reveal_type(a)
+T.reveal_type(a) # error: `A`
