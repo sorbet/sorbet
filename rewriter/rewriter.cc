@@ -26,7 +26,6 @@
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Regexp.h"
-#include "rewriter/SelfNew.h"
 #include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
@@ -195,11 +194,6 @@ public:
         }
 
         if (auto expr = InterfaceWrapper::run(ctx, send)) {
-            tree = std::move(expr);
-            return;
-        }
-
-        if (auto expr = SelfNew::run(ctx, send)) {
             tree = std::move(expr);
             return;
         }

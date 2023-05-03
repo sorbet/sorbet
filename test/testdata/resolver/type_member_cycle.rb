@@ -33,7 +33,8 @@ end
 # receiver, but there was always this lurking problem.
 b = B.new
 T.reveal_type(b) # error: `<todo sym>`
-T.reveal_type(B.new.test_method) # error: Method `test_method` does not exist on `<todo sym>`
+res = B.new.test_method # error: Method `test_method` does not exist on `<todo sym>`
+T.reveal_type(res) # error: `T.untyped`
 
 class C
   extend T::Generic
