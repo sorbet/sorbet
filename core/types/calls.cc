@@ -1945,13 +1945,6 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
 
-        // Technically if you get all the way up to `Class`, `new` is an instance method, so there
-        // is no attachedClass.
-        // we don't need to try to dispatch to `initialize`.
-        if (self == Symbols::Class()) {
-            return;
-        }
-
         // TODO(jez) After T::Class change:
         // We have some weird handling for `initialize` in dispatchCallSymbol to avoid reporting
         // "method does not exist" error. We can simply delete that, and check
