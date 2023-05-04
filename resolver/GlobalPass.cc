@@ -66,18 +66,6 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
     auto name = parentTypeMember.data(gs)->name;
     auto code = getRedeclarationErrorCode(gs, parent, name);
 
-    if (parent == core::Symbols::Class() && code == core::errors::Resolver::HasAttachedClassIncluded) {
-        // Here we make one exception for our rant above about always wanting to report this error,
-        // because we already mark `Class` as `final!`, so there will already be an error reported
-        // preventing people from writing this code.
-        //
-        // We choose to silence this one because finalizeSymbols comes before definition_validator,
-        // and the "do not inherit final!" error much easier for users to interpret. (This one would
-        // mention something about needing to `include Class` and `has_attached_class`, which the
-        // user would be confused by.)
-        return;
-    }
-
     if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
         if (code == core::errors::Resolver::HasAttachedClassIncluded) {
             auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
@@ -91,6 +79,8 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                 ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
                 e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
                             hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
+            } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Class())) {
+                e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Class");
             } else {
                 // sym is a normal, non singleton class
                 e.setHeader("`{}` was declared `{}` and so must be `{}`ed into the class `{}`", parent.show(gs),
