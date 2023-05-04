@@ -192,7 +192,7 @@ class T::Private::Methods::Signature
 
       # Process given pre-rest args. When there are no rest args,
       # this is just the given number of args.
-      while it < [args_length, @arg_types.length].min
+      while it < args_length && it < @arg_types.length
         yield @arg_types[it][0], args[it], @arg_types[it][1]
         it += 1
       end
