@@ -32,8 +32,6 @@ module SorbetBenchmarks
     end
 
     def self.run
-      example = Example.new
-
       time_block("sig {params(s: Symbol, rest: String, x: Integer, y: Integer).void} (with kwargs plus splat)") do
         arg_plus_kwargs(:foo, "foo", "bar", "baz", x: 1, y: 2)
         arg_plus_kwargs(:bar, "foo", "bar", "baz", x: 1)
@@ -44,4 +42,3 @@ module SorbetBenchmarks
     def self.arg_plus_kwargs(s, *rest, x:, y: 0); end
   end
 end
-

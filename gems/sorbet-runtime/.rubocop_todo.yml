@@ -220,6 +220,7 @@ Naming/MemoizedInstanceVariableName:
 Naming/MethodParameterName:
   Exclude:
     - 'bench/typecheck.rb'
+    - 'bench/typecheck_kwargs_splat.rb'
     - 'lib/types/types/base.rb'
     - 'test/types/abstract_validation.rb'
     - 'test/types/builder_syntax.rb'
