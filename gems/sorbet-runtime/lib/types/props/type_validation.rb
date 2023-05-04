@@ -16,6 +16,7 @@ module T::Props::TypeValidation
       super || key == :DEPRECATED_underspecified_type
     end
 
+    # checked(:never) - Rules hash is expensive to check
     sig do
       params(
         name: T.any(Symbol, String),
@@ -24,6 +25,7 @@ module T::Props::TypeValidation
         type: T.any(T::Types::Base, Module)
       )
       .void
+      .checked(:never)
     end
     def prop_validate_definition!(name, _cls, rules, type)
       super
