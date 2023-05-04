@@ -69,7 +69,9 @@
 # obj--->OtherClass---------->(OtherClass)-----------...
 # ```
 class Class < Module
-  extend T::Generic
+  # Intentionally does not write extend T::Generic so we don't pollute the
+  # stdlib with an ancestor that doesn't exist at runtime. It doesn't matter,
+  # because RBI files are not typechecked anyways.
   has_attached_class!(:out)
 
   ### TODO(jez) After T::Class change: Use `T.attached_class` in `allocate`
