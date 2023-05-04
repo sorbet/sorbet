@@ -10,6 +10,7 @@ require_relative 'prop_validation'
 require_relative 'serialize_custom_type'
 require_relative 'tutils'
 require_relative 'typecheck'
+require_relative 'typecheck_kwargs_splat'
 
 namespace :bench do
   task :getters do
@@ -42,6 +43,10 @@ namespace :bench do
 
   task :typecheck do
     SorbetBenchmarks::Typecheck.run
+  end
+
+  task :typecheck_kwargs_splat do
+    SorbetBenchmarks::TypecheckKwargsSplat.run
   end
 
   task :tutils do
