@@ -1369,36 +1369,47 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
-                core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
-                core::TypeAndOrigins arg{argType, recvType.origins};
-                InlinedVector<const core::TypeAndOrigins *, 2> args;
-                args.emplace_back(&arg);
+                if (recvType.type.isUntyped()) {
+                    // This avoids reporting an untyped usage for ->(x) { 0 }. Sorbet would
+                    // initialize the type of the local `x` by calling <blk>.[](0), which makes it
+                    // look like we're "using" an untyped value, but that's purely internal to
+                    // Sorbet. By early returning here, we'll only report an untyped usage if that
+                    // real argument ends up then getting used.
+                    tp = recvType;
+                } else {
+                    core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
-                InlinedVector<core::LocOffsets, 2> argLocs;
-                argLocs.emplace_back(bind.loc);
-                core::CallLocs locs{
-                    ctx.file, bind.loc, bind.loc, bind.loc, argLocs,
-                };
+                    core::TypeAndOrigins arg{argType, recvType.origins};
+                    InlinedVector<const core::TypeAndOrigins *, 2> args;
+                    args.emplace_back(&arg);
 
-                const auto numPosArgs = 1;
-                const auto suppressErrors = true;
-                const auto isPrivateOk = true;
-                const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
-                core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
-                                                locs,
-                                                numPosArgs,
-                                                args,
-                                                recvType.type,
-                                                recvType,
-                                                recvType.type,
-                                                block,
-                                                ctx.locAt(bind.loc),
-                                                isPrivateOk,
-                                                suppressErrors};
-                auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
-                tp.type = dispatched.returnType;
-                tp.origins.emplace_back(ctx.locAt(bind.loc));
+                    InlinedVector<core::LocOffsets, 2> argLocs;
+                    argLocs.emplace_back(bind.loc);
+                    core::CallLocs locs{
+                        ctx.file, bind.loc, bind.loc, bind.loc, argLocs,
+                    };
+
+                    const auto numPosArgs = 1;
+                    const auto suppressErrors = true;
+                    const auto isPrivateOk = true;
+                    const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
+                    core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
+                                                    locs,
+                                                    numPosArgs,
+                                                    args,
+                                                    recvType.type,
+                                                    recvType,
+                                                    recvType.type,
+                                                    block,
+                                                    ctx.locAt(bind.loc),
+                                                    isPrivateOk,
+                                                    suppressErrors};
+                    auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
+                    tp.type = dispatched.returnType;
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+                }
+
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat), tp,
