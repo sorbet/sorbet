@@ -9,6 +9,13 @@ foo_class.rb:15: Unable to resolve constant `MyClass` https://srb.help/5002
     NN |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
+    foo_class.rb:15: Replaced with `T::Class`
+    15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T::Class` defined here
+      NN |module T::Class
+          ^^^^^^^^^^^^^^^
+  Autocorrect: Done
     foo_class.rb:15: Replaced with `Digest::Class`
     15 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
           ^^^^^^^^^^^^^^^^^

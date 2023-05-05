@@ -118,10 +118,10 @@ test/cli/flow-sensitivity-hint/test.rb:46: Method `even?` does not exist on `Nil
     46 |    looks_like_var_but_is_method.even?
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/flow-sensitivity-hint/test.rb:58: Method `sqrt` does not exist on `Class` https://srb.help/7003
+test/cli/flow-sensitivity-hint/test.rb:58: Method `sqrt` does not exist on `T::Class[T.anything]` https://srb.help/7003
     58 |    returns_class.sqrt(4)
                           ^^^^
-  Got `Class` originating from:
+  Got `T::Class[T.anything]` originating from:
     test/cli/flow-sensitivity-hint/test.rb:58:
     58 |    returns_class.sqrt(4)
             ^^^^^^^^^^^^^
