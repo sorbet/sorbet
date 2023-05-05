@@ -79,7 +79,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean], checked: false)
+  ].to_h {|k| [k, true]}.freeze, T::Hash[Symbol, T::Boolean], checked: false)
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
@@ -358,16 +358,12 @@ class T::Props::Decorator
       end
     end
 
-    rules.merge!(
-      # TODO: The type of this element is confusing. We should refactor so that
-      # it can be always `type_object` (a PropType) or always `cls` (a Module)
-      type: type,
-      type_object: type_object,
-      accessor_key: "@#{name}".to_sym,
-      sensitivity: sensitivity_and_pii[:sensitivity],
-      pii: sensitivity_and_pii[:pii],
-      extra: rules[:extra]&.freeze,
-    )
+    rules[:type] = type
+    rules[:type_object] = type_object
+    rules[:accessor_key] = "@#{name}".to_sym
+    rules[:sensitivity] = sensitivity_and_pii[:sensitivity]
+    rules[:pii] = sensitivity_and_pii[:pii]
+    rules[:extra] = rules[:extra]&.freeze
 
     # extra arbitrary metadata attached by the code defining this property
 
@@ -530,8 +526,8 @@ class T::Props::Decorator
     # here, but we're baking in `allow_direct_mutation` since we
     # *haven't* allowed additional options in the past and want to
     # default to keeping this interface narrow.
+    foreign = T.let(foreign, T.untyped, checked: false)
     @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
-      foreign = T.let(foreign, T.untyped, checked: false)
       if foreign.is_a?(Proc)
         resolved_foreign = foreign.call
         if !resolved_foreign.respond_to?(:load)
