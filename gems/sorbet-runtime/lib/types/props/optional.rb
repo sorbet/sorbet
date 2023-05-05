@@ -53,7 +53,7 @@ module T::Props::Optional::DecoratorMethods
   def add_prop_definition(prop, rules)
     compute_derived_rules(rules)
 
-    default_setter = T::Props::Private::ApplyDefault.for(decorated_class, rules)
+    default_setter = T::Props::Private::ApplyDefault.for(prop, decorated_class, rules)
     if default_setter
       @props_with_defaults ||= {}
       @props_with_defaults[prop] = default_setter
@@ -62,7 +62,7 @@ module T::Props::Optional::DecoratorMethods
       rules[DEFAULT_SETTER_RULE_KEY] = default_setter
     else
       @props_without_defaults ||= {}
-      @props_without_defaults[prop] = rules.fetch(:setter_proc)
+      @props_without_defaults[prop] = { rules: rules, class: decorated_class } 
       props_with_defaults&.delete(prop) # Handle potential override
     end
 

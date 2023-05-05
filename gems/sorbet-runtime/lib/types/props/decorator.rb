@@ -79,7 +79,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  ].to_h {|k| [k, true]}.freeze, T::Hash[Symbol, T::Boolean], checked: false)
+  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean], checked: false)
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
@@ -103,7 +103,8 @@ class T::Props::Decorator
     # We call `setter_proc` here without binding to an instance, so it'll run
     # `instance_variable_set` if validation passes, but nothing will care.
     # We only care about the validation.
-    prop_rules(prop).fetch(:setter_proc).call(val)
+    rules = prop_rules(prop)
+    rules.fetch(:setter_proc).call(val, decorated_class, prop, rules)
   end
 
   # For performance, don't use named params here.
@@ -127,7 +128,7 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules.fetch(:setter_proc))
+    instance.instance_exec(val, decorated_class, prop, rules, &rules.fetch(:setter_proc))
   end
   alias_method :set, :prop_set
 
@@ -358,12 +359,16 @@ class T::Props::Decorator
       end
     end
 
-    rules[:type] = type
-    rules[:type_object] = type_object
-    rules[:accessor_key] = "@#{name}".to_sym
-    rules[:sensitivity] = sensitivity_and_pii[:sensitivity]
-    rules[:pii] = sensitivity_and_pii[:pii]
-    rules[:extra] = rules[:extra]&.freeze
+    rules.merge!(
+      # TODO: The type of this element is confusing. We should refactor so that
+      # it can be always `type_object` (a PropType) or always `cls` (a Module)
+      type: type,
+      type_object: type_object,
+      accessor_key: "@#{name}".to_sym,
+      sensitivity: sensitivity_and_pii[:sensitivity],
+      pii: sensitivity_and_pii[:pii],
+      extra: rules[:extra]&.freeze,
+    )
 
     # extra arbitrary metadata attached by the code defining this property
 
@@ -401,7 +406,9 @@ class T::Props::Decorator
           end
         else
           # Fast path (~4x faster as of Ruby 2.6)
-          @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
+          @class.send(:define_method, "#{name}=") do |val|
+            instance_exec(val, T.unsafe(self.class), name, rules, &rules.fetch(:setter_proc))
+          end
         end
       end
 
@@ -526,8 +533,8 @@ class T::Props::Decorator
     # here, but we're baking in `allow_direct_mutation` since we
     # *haven't* allowed additional options in the past and want to
     # default to keeping this interface narrow.
-    foreign = T.let(foreign, T.untyped, checked: false)
     @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
+      foreign = T.let(foreign, T.untyped, checked: false)
       if foreign.is_a?(Proc)
         resolved_foreign = foreign.call
         if !resolved_foreign.respond_to?(:load)

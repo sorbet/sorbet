@@ -6,7 +6,7 @@ module T::Props
     module SetterFactory
       extend T::Sig
 
-      SetterProc = T.type_alias {T.proc.params(val: T.untyped).void}
+      SetterProc = T.type_alias {T.proc.params(val: T.untyped, klass: T.untyped, prop: T.untyped, rules: T.untyped).void}
       ValidateProc = T.type_alias {T.proc.params(prop: Symbol, value: T.untyped).void}
 
       sig do
@@ -24,6 +24,8 @@ module T::Props
         # of defaults & factories), so unwrap any T.nilable and do a check
         # manually.
         non_nil_type = T::Utils::Nilable.get_underlying_type_object(rules.fetch(:type_object))
+        rules[:non_nil_type] = non_nil_type
+
         accessor_key = rules.fetch(:accessor_key)
         validate = rules[:setter_validate]
 
@@ -35,30 +37,24 @@ module T::Props
         # variables
         if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
           if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
-            simple_nilable_proc(prop, accessor_key, non_nil_type.raw_type, klass)
+            simple_nilable_proc
           else
-            nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
+            nilable_proc
           end
         else
           if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
-            simple_non_nil_proc(prop, accessor_key, non_nil_type.raw_type, klass)
+            simple_non_nil_proc
           else
-            non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
+            non_nil_proc
           end
         end
       end
 
-      sig do
-        params(
-          prop: Symbol,
-          accessor_key: Symbol,
-          non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
-        )
-        .returns(SetterProc)
-      end
-      private_class_method def self.simple_non_nil_proc(prop, accessor_key, non_nil_type, klass)
-        proc do |val|
+      sig { returns(SetterProc) }
+      private_class_method def self.simple_non_nil_proc
+        @simple_non_nil_proc ||= proc do |val, klass, prop, rules|
+          non_nil_type = rules[:non_nil_type].raw_type
+          accessor_key = rules[:accessor_key]
           unless val.is_a?(non_nil_type)
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
@@ -71,25 +67,19 @@ module T::Props
         end
       end
 
-      sig do
-        params(
-          prop: Symbol,
-          accessor_key: Symbol,
-          non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
-          validate: T.nilable(ValidateProc)
-        )
-        .returns(SetterProc)
-      end
-      private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
-        proc do |val|
+      sig { returns(SetterProc) }
+      private_class_method def self.non_nil_proc
+        @non_nil_proc ||= proc do |val, klass, prop, rules|
+          non_nil_type = rules[:non_nil_type]
+          accessor_key = rules[:accessor_key]
+          setter_validate = rules[:setter_validate]
           # this use of recursively_valid? is intentional: unlike for
           # methods, we want to make sure data at the 'edge'
           # (e.g. models that go into databases or structs serialized
           # from disk) are correct, so we use more thorough runtime
           # checks there
           if non_nil_type.recursively_valid?(val)
-            validate&.call(prop, val)
+            setter_validate&.call(prop, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
@@ -102,17 +92,12 @@ module T::Props
         end
       end
 
-      sig do
-        params(
-          prop: Symbol,
-          accessor_key: Symbol,
-          non_nil_type: Module,
-          klass: T.all(Module, T::Props::ClassMethods),
-        )
-        .returns(SetterProc)
-      end
-      private_class_method def self.simple_nilable_proc(prop, accessor_key, non_nil_type, klass)
-        proc do |val|
+      sig { returns(SetterProc) }
+      private_class_method def self.simple_nilable_proc
+        @simple_nilable_proc ||= proc do |val, klass, prop, rules|
+          non_nil_type = rules[:non_nil_type].raw_type
+          accessor_key = rules[:accessor_key]
+
           if val.nil?
             instance_variable_set(accessor_key, nil)
           elsif val.is_a?(non_nil_type)
@@ -129,18 +114,13 @@ module T::Props
         end
       end
 
-      sig do
-        params(
-          prop: Symbol,
-          accessor_key: Symbol,
-          non_nil_type: T::Types::Base,
-          klass: T.all(Module, T::Props::ClassMethods),
-          validate: T.nilable(ValidateProc),
-        )
-        .returns(SetterProc)
-      end
-      private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
-        proc do |val|
+      sig { returns(SetterProc) }
+      private_class_method def self.nilable_proc
+        @nilable_proc ||= proc do |val, klass, prop, rules|
+          non_nil_type = rules[:non_nil_type]
+          accessor_key = rules[:accessor_key]
+          setter_validate = rules[:setter_validate]
+
           if val.nil?
             instance_variable_set(accessor_key, nil)
           # this use of recursively_valid? is intentional: unlike for
@@ -149,7 +129,7 @@ module T::Props
           # from disk) are correct, so we use more thorough runtime
           # checks there
           elsif non_nil_type.recursively_valid?(val)
-            validate&.call(prop, val)
+            setter_validate&.call(prop, val)
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(

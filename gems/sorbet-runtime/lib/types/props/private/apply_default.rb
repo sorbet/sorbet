@@ -12,11 +12,28 @@ module T::Props
       sig {returns(SetterFactory::SetterProc).checked(:never)}
       attr_reader :setter_proc
 
+      sig {returns(Symbol).checked(:never)}
+      attr_reader :prop
+
+      sig {returns(T.untyped).checked(:never)}
+      attr_reader :rules
+
+      sig {returns(Symbol).checked(:never)}
+      attr_reader :accessor_key
+
+      sig {returns(Class).checked(:never)}
+      def klass
+        @class
+      end
+
       # checked(:never) - We do this with `T.let` instead
-      sig {params(accessor_key: Symbol, setter_proc: SetterFactory::SetterProc).void.checked(:never)}
-      def initialize(accessor_key, setter_proc)
+      sig {params(prop: Symbol, cls: Class, accessor_key: Symbol, setter_proc: SetterFactory::SetterProc, rules: T.untyped).void.checked(:never)}
+      def initialize(prop, cls, accessor_key, setter_proc, rules)
+        @prop = T.let(prop, Symbol)
+        @class = T.let(cls, Module)
         @accessor_key = T.let(accessor_key, Symbol)
         @setter_proc = T.let(setter_proc, SetterFactory::SetterProc)
+        @rules = T.let(rules, T::Hash[T.untyped, T.untyped])
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -30,33 +47,33 @@ module T::Props
       NO_CLONE_TYPES = T.let([TrueClass, FalseClass, NilClass, Symbol, Numeric, T::Enum].freeze, T::Array[Module])
 
       # checked(:never) - Rules hash is expensive to check
-      sig {params(cls: Module, rules: T::Hash[Symbol, T.untyped]).returns(T.nilable(ApplyDefault)).checked(:never)}
-      def self.for(cls, rules)
+      sig {params(prop: Symbol, cls: Module, rules: T::Hash[Symbol, T.untyped]).returns(T.nilable(ApplyDefault)).checked(:never)}
+      def self.for(prop, cls, rules)
         accessor_key = rules.fetch(:accessor_key)
         setter = rules.fetch(:setter_proc)
 
         if rules.key?(:factory)
-          ApplyDefaultFactory.new(cls, rules.fetch(:factory), accessor_key, setter)
+          ApplyDefaultFactory.new(prop, cls, rules.fetch(:factory), accessor_key, setter, rules)
         elsif rules.key?(:default)
           default = rules.fetch(:default)
           case default
           when *NO_CLONE_TYPES
-            return ApplyPrimitiveDefault.new(default, accessor_key, setter)
+            return ApplyPrimitiveDefault.new(prop, cls, default, accessor_key, setter, rules)
           when String
             if default.frozen?
-              return ApplyPrimitiveDefault.new(default, accessor_key, setter)
+              return ApplyPrimitiveDefault.new(prop, cls, default, accessor_key, setter, rules)
             end
           when Array
             if default.empty? && default.class == Array
-              return ApplyEmptyArrayDefault.new(accessor_key, setter)
+              return ApplyEmptyArrayDefault.new(prop, cls, accessor_key, setter, rules)
             end
           when Hash
             if default.empty? && default.default.nil? && T.unsafe(default).default_proc.nil? && default.class == Hash
-              return ApplyEmptyHashDefault.new(accessor_key, setter)
+              return ApplyEmptyHashDefault.new(prop, cls, accessor_key, setter, rules)
             end
           end
 
-          ApplyComplexDefault.new(default, accessor_key, setter)
+          ApplyComplexDefault.new(prop, cls, default, accessor_key, setter, rules)
         else
           nil
         end
@@ -67,8 +84,8 @@ module T::Props
       abstract!
 
       # checked(:never) - We do this with `T.let` instead
-      sig {params(default: BasicObject, accessor_key: Symbol, setter_proc: SetterFactory::SetterProc).void.checked(:never)}
-      def initialize(default, accessor_key, setter_proc)
+      sig {params(prop: Symbol, cls: Class, default: BasicObject, accessor_key: Symbol, setter_proc: SetterFactory::SetterProc, rules: T.untyped).void.checked(:never)}
+      def initialize(prop, cls, default, accessor_key, setter_proc, rules)
         # FIXME: Ideally we'd check here that the default is actually a valid
         # value for this field, but existing code relies on the fact that we don't.
         #
@@ -76,7 +93,7 @@ module T::Props
         #
         # setter_proc.call(default)
         @default = T.let(default, BasicObject)
-        super(accessor_key, setter_proc)
+        super(prop, cls, accessor_key, setter_proc, rules)
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -138,18 +155,19 @@ module T::Props
       # checked(:never) - We do this with `T.let` instead
       sig do
         params(
+          prop: Symbol,
           cls: Module,
           factory: T.any(Proc, Method),
           accessor_key: Symbol,
           setter_proc: SetterFactory::SetterProc,
+          rules: T::Hash[T.untyped, T.untyped]
         )
         .void
         .checked(:never)
       end
-      def initialize(cls, factory, accessor_key, setter_proc)
-        @class = T.let(cls, Module)
+      def initialize(prop, cls, factory, accessor_key, setter_proc, rules)
         @factory = T.let(factory, T.any(Proc, Method))
-        super(accessor_key, setter_proc)
+        super(prop, cls, accessor_key, setter_proc, rules)
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -157,7 +175,7 @@ module T::Props
       def set_default(instance)
         # Use the actual setter to validate the factory returns a legitimate
         # value every time
-        instance.instance_exec(default, &@setter_proc)
+        instance.instance_exec(default, @class, @prop, @rules, &@setter_proc)
       end
 
       # checked(:never) - O(object construction x prop count)
