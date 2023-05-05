@@ -17,7 +17,7 @@ class T::Props::Decorator
 
   class NoRulesError < StandardError; end
 
-  EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules])
+  EMPTY_PROPS = T.let({}.freeze, T::Hash[Symbol, Rules], checked: false)
   private_constant :EMPTY_PROPS
 
   sig {params(klass: T.untyped).void.checked(:never)}
@@ -26,7 +26,7 @@ class T::Props::Decorator
     @class.plugins.each do |mod|
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
-    @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules])
+    @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules], checked: false)
   end
 
   # checked(:never) - O(prop accesses)
@@ -79,7 +79,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
+  ].to_h {|k| [k, true]}.freeze, T::Hash[Symbol, T::Boolean], checked: false)
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
@@ -205,7 +205,7 @@ class T::Props::Decorator
   end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
-  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) {|x, acc| acc[x] = true}.freeze, T::Hash[Symbol, TrueClass])
+  BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) {|x, acc| acc[x] = true}.freeze, T::Hash[Symbol, TrueClass], checked: false)
 
   # checked(:never) - Rules hash is expensive to check
   sig do
@@ -247,10 +247,10 @@ class T::Props::Decorator
     nil
   end
 
-  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp)
+  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp, checked: false)
 
   # Used to validate both prop names and serialized forms
-  sig {params(name: T.any(Symbol, String)).void}
+  sig {params(name: T.any(Symbol, String)).void.checked(:never)}
   private def validate_prop_name(name)
     if !name.match?(SAFE_NAME)
       raise ArgumentError.new("Invalid prop name in #{@class.name}: #{name}")
@@ -258,7 +258,7 @@ class T::Props::Decorator
   end
 
   # This converts the type from a T::Type to a regular old ruby class.
-  sig {params(type: T::Types::Base).returns(Module)}
+  sig {params(type: T::Types::Base).returns(Module).checked(:never)}
   private def convert_type_to_class(type)
     case type
     when T::Types::TypedArray, T::Types::FixedArray
@@ -358,17 +358,14 @@ class T::Props::Decorator
       end
     end
 
-    rules = rules.merge(
-      # TODO: The type of this element is confusing. We should refactor so that
-      # it can be always `type_object` (a PropType) or always `cls` (a Module)
-      type: type,
-      type_object: type_object,
-      accessor_key: "@#{name}".to_sym,
-      sensitivity: sensitivity_and_pii[:sensitivity],
-      pii: sensitivity_and_pii[:pii],
-      # extra arbitrary metadata attached by the code defining this property
-      extra: rules[:extra]&.freeze,
-    )
+    rules[:type] = type
+    rules[:type_object] = type_object
+    rules[:accessor_key] = "@#{name}".to_sym
+    rules[:sensitivity] = sensitivity_and_pii[:sensitivity]
+    rules[:pii] = sensitivity_and_pii[:pii]
+    rules[:extra] = rules[:extra]&.freeze
+
+    # extra arbitrary metadata attached by the code defining this property
 
     validate_not_missing_sensitivity(name, rules)
 
@@ -422,6 +419,7 @@ class T::Props::Decorator
   sig do
     params(type: PropTypeOrClass, enum: T.untyped)
     .returns(T::Types::Base)
+    .checked(:never)
   end
   private def smart_coerce(type, enum:)
     # Backwards compatibility for pre-T::Types style
@@ -474,6 +472,7 @@ class T::Props::Decorator
       redaction: T.untyped,
     )
     .void
+    .checked(:never)
   end
   private def handle_redaction_option(prop_name, redaction)
     redacted_method = "#{prop_name}_redacted"
@@ -495,6 +494,7 @@ class T::Props::Decorator
       valid_type_msg: String,
     )
     .void
+    .checked(:never)
   end
   private def validate_foreign_option(option_sym, foreign, valid_type_msg:)
     if foreign.is_a?(Symbol) || foreign.is_a?(String)
@@ -526,8 +526,8 @@ class T::Props::Decorator
     # here, but we're baking in `allow_direct_mutation` since we
     # *haven't* allowed additional options in the past and want to
     # default to keeping this interface narrow.
+    foreign = T.let(foreign, T.untyped, checked: false)
     @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
-      foreign = T.let(foreign, T.untyped)
       if foreign.is_a?(Proc)
         resolved_foreign = foreign.call
         if !resolved_foreign.respond_to?(:load)
