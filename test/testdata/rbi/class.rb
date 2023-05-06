@@ -37,4 +37,4 @@ C = Class.new(Parent) do |cls|
 end
 C.foo
 
-Class.new('Foo') # error: Expected `T.all(T::Class[T.type_parameter(:Parent)], T.type_parameter(:Parent))` but found `String("Foo")` for argument `super_class`
+Class.new('Foo') # error: Expected `T.all(T::Class[T.anything], T.type_parameter(:Parent))` but found `String("Foo")` for argument `super_class`
