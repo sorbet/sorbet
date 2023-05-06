@@ -23,8 +23,8 @@ public:
     static void explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
                                     const TypePtr &got);
 
-    static void insertUntypedTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
-                                           core::Loc replaceLoc);
+    static void insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
+                                    core::Loc replaceLoc);
 
     static void explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what, const TypeAndOrigins &untyped,
                                Loc originForUninitialized);
