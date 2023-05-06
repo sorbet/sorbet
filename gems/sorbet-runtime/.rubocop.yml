@@ -91,6 +91,9 @@ Style/DoubleNegation:
 Style/SlicingWithRange:
   Enabled: false
 
+Style/CaseEquality:
+  Enabled: false
+
 Layout/EmptyLines:
   Exclude:
     # We deliberately add extra lines here to aid Pry debugging
