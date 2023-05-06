@@ -1,0 +1,9 @@
+# -- test/testdata/resolver/t_class.rb --
+# typed: strict
+extend T::Sig
+
+sig {returns(Class)}
+def example
+  Integer
+end
+# ------------------------------
