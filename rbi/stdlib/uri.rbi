@@ -452,7 +452,7 @@ module URI
 
   # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of the
   # defined schemes.
-  sig {returns(T::Hash[String, Class])}
+  sig {returns(T::Hash[String, T::Class[T.anything]])}
   def self.scheme_list(); end
 
   # ## Synopsis
