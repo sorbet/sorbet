@@ -2,7 +2,8 @@
 # typed: strict
 extend T::Sig
 
-sig {returns(Class)}
+sig {returns(T::Class[T.anything])}
+#            ^^^^^ error: Generic class without type arguments `Class`
 def example
   Integer
 end
