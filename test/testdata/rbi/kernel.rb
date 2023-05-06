@@ -33,6 +33,11 @@ def raise_test
   raise ArgumentError, 'bad argument', nil
 end
 
+sig { params(obj_or_str: T.any(Exception, String)) }
+def raise_obj_or_string(obj_or_str)
+  raise obj_or_str
+end
+
 # make sure we don't regress and mark these as errors
 env = {'VAR' => 'VAL'}
 system('echo')
