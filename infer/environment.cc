@@ -1376,7 +1376,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // look like we're "using" an untyped value, but that's purely internal to
                     // Sorbet. By early returning here, we'll only report an untyped usage if that
                     // real argument ends up then getting used.
-                    tp = recvType;
+                    tp.type = recvType.type;
                 } else {
                     core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
@@ -1407,8 +1407,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     suppressErrors};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
-                    tp.origins.emplace_back(ctx.locAt(bind.loc));
                 }
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
