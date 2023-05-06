@@ -1945,12 +1945,6 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
 
-        // TODO(jez) After T::Class change:
-        // We have some weird handling for `initialize` in dispatchCallSymbol to avoid reporting
-        // "method does not exist" error. We can simply delete that, and check
-        // `res.main.method.exists()` and only report the res.main.errors if we actually dispatched
-        // to a real `initialize` method.
-
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
