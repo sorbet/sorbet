@@ -379,4 +379,36 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'override checking' do
+    class OverrideProps
+      include T::Props
+      prop :a, String
+    end
+
+    it 'errors if a prop is overriden without override => true' do
+      error = assert_raises(ArgumentError) do
+        class OverrideProps1 < OverrideProps
+          prop :a, Integer
+        end
+      end
+
+      assert(error.message.include?("Attempted to redefine prop :a on class Opus::Types::Test::Props::PropsTest::OverrideProps1 that's already defined without specifying :override => true"))
+    end
+
+    it 'allows overriding with override => true' do
+      class OverrideProps2 < OverrideProps
+        prop :a, Integer, override: true
+      end
+    end
+
+    it 'errors if a prop has override => true but does not exist' do
+      error = assert_raises(ArgumentError) do
+        class OverrideProps3 < OverrideProps
+          prop :b, Integer, override: true
+        end
+      end
+
+      assert(error.message.include?("Attempted to override a prop :b on class Opus::Types::Test::Props::PropsTest::OverrideProps3 that doesn't already exist"))
+    end
+  end
 end
