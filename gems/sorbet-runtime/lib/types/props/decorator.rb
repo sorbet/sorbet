@@ -50,9 +50,9 @@ class T::Props::Decorator
     override = rules.delete(:override)
 
     if props.include?(prop) && !override
-      raise ArgumentError.new("Attempted to redefine prop #{prop.inspect} on class #{@class.inspect} that's already defined without specifying :override => true: #{prop_rules(prop)}")
+      raise ArgumentError.new("Attempted to redefine prop #{prop.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(prop)}")
     elsif !props.include?(prop) && override
-      raise ArgumentError.new("Attempted to override a prop #{prop.inspect} on class #{@class.inspect} that doesn't already exist")
+      raise ArgumentError.new("Attempted to override a prop #{prop.inspect} on class #{@class} that doesn't already exist")
     end
 
     @props = @props.merge(prop => rules.freeze).freeze
