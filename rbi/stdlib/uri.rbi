@@ -263,6 +263,16 @@ module URI
   end
   def self.encode_www_form_component(str, enc=nil); end
 
+  # Like URI.encode_www_form_component, except that <tt>' '</tt> (space)
+  # is encoded as <tt>'%20'</tt> (instead of <tt>'+'</tt>).
+  sig do
+    params(
+      str: Object,
+      enc: T.nilable(Encoding)
+    ).returns(String)
+  end
+  def self.encode_uri_component(str, enc=nil);end
+
   # ## Synopsis
   #
   # ```
