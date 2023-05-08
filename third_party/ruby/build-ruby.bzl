@@ -151,6 +151,11 @@ cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
 
 {install_gems}
 
+# Since we get our version of bundler from update_rubygems, we have to apply
+# this patch after everything is built. This is a bit of a hack, but the need
+# for the patch should go away once we upgrade Ruby and/or bundler anyway.
+{post_build_patch_command}
+
 popd > /dev/null
 
 rm -rf "$build_dir"
