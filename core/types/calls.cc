@@ -1925,12 +1925,21 @@ public:
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
+        auto tClassSelfType = Types::tClass(args.selfType);
         if (singleton.exists()) {
-            res.returnType = singleton.data(gs)->externalType();
+            // `singleton` might have more type members than just the `<AttachedClass>` one.
+            // Calling `externalType` is the easiest way to get proper defaults for all of those.
+            // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
+            //     T.class_of(MyClass)[MyClass, ...]
+            // Then the `T.all` is the easiest way to narrow *only* the type argument that
+            // corresponds to the `<AttachedClass>` type member, because `T.all` has logic to align
+            // type members in parent/child classes. The `T.all` gets pushed through and collapsed
+            // like normal, and ends up something like
+            //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
+            // (This matters, btw, in case the receiver is something like a generic.)
+            res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
         } else {
-            // TODO(jez) After T::Class change:
-            // We can circle back to improving this type. It can probably be something like `T::Class[args.thisType]`.
-            res.returnType = Symbols::Class().data(gs)->externalType();
+            res.returnType = tClassSelfType;
         }
     }
 } Object_class;
