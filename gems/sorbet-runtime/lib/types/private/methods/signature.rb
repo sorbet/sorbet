@@ -8,6 +8,9 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
+  SIG_EMPTY_DECLARED_PARAMETERS = [nil]
+  UNNAMED_REQUIRED_PARAMETERS = [[:req]]
+
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
     not_typed = T::Private::Types::NotTyped.new
@@ -61,7 +64,7 @@ class T::Private::Methods::Signature
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
     # by attr_writer or attr_accessor
-    writer_method = declared_param_names != [nil] && parameters == [[:req]] && method_name[-1] == "="
+    writer_method = declared_param_names != SIG_EMPTY_DECLARED_PARAMETERS && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     param_names = parameters.map {|_, name| name}
