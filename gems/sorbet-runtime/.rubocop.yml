@@ -69,6 +69,8 @@ Naming/FileName:
 # You can convey semantic meaning by using is_foo?
 Naming/PredicateName:
   Enabled: false
+Naming/MethodParameterName:
+  Enabled: false
 
 Lint/MissingSuper:
   Exclude:
