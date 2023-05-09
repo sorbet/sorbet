@@ -12,8 +12,8 @@ class T::Private::Methods::Signature
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
-    # Using `Untyped` ensures we'll get an error if we ever try validation on these.
-    not_typed = T::Private::Types::NotTyped.new
+    # Using `NotTyped` ensures we'll get an error if we ever try validation on these.
+    not_typed = T::Private::Types::NotTyped::INSTANCE
     raw_return_type = not_typed
     # Map missing parameter names to "argN" positionally
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
