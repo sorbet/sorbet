@@ -19,9 +19,9 @@ class T::Private::Methods::Signature
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
       [param_kind, param_name || "arg#{index}"]
     end
-    raw_arg_types = parameters.map do |_param_kind, param_name|
+    raw_arg_types = parameters.to_h do |_param_kind, param_name|
       [param_name, not_typed]
-    end.to_h
+    end
 
     self.new(
       method: method,
