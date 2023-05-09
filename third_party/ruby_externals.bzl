@@ -10,8 +10,8 @@ def register_ruby_dependencies():
 
     http_file(
         name = "rubygems_update_stripe",
-        urls = _rubygems_urls("rubygems-update-3.2.33.gem"),
-        sha256 = "46862bd39dd078789d1cc7e2359772e50b33880a28b3eb83f80d42eec7e5a7e2",
+        urls = _rubygems_urls("rubygems-update-3.3.3.gem"),
+        sha256 = "610aef544e0c15ff3cd5492dff3f5f46bd2062896f4f62c7191432c6f1d681c9",
     )
 
     ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"
