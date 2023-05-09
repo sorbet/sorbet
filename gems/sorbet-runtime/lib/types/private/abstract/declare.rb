@@ -27,15 +27,15 @@ module T::Private::Abstract::Declare
         raise "Classes can't be interfaces. Use `abstract!` instead of `interface!`."
       end
 
-      if mod.instance_method(:initialize).owner == mod
-        raise "You must call `abstract!` *before* defining an initialize method"
+      if mod.method(:new).owner == mod
+        raise "You must call `abstract!` *before* defining a `new` method"
       end
 
       # Don't need to silence warnings via without_ruby_warnings when calling
       # define_method because of the guard above
 
-      mod.send(:define_method, :initialize) do |*args, &blk|
-        if self.class == mod
+      mod.send(:define_singleton_method, :new) do |*args, &blk|
+        if T.unsafe(self) == mod
           raise "#{mod} is declared as abstract; it cannot be instantiated"
         end
         super(*args, &blk)
@@ -43,10 +43,10 @@ module T::Private::Abstract::Declare
 
       # Ruby doesn not emit "method redefined" warnings for aliased methods
       # (more robust than undef_method that would create a small window in which the method doesn't exist)
-      mod.send(:alias_method, :initialize, :initialize)
+      mod.singleton_class.send(:alias_method, :new, :new)
 
-      if mod.respond_to?(:ruby2_keywords, true)
-        mod.send(:ruby2_keywords, :initialize)
+      if mod.singleton_class.respond_to?(:ruby2_keywords, true)
+        mod.singleton_class.send(:ruby2_keywords, :new)
       end
     end
   end
