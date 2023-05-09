@@ -1,5 +1,7 @@
 # typed: true
 
+extend T::Sig
+
 T.assert_type!(caller, T::Array[String])
 T.assert_type!(caller(10), T.nilable(T::Array[String]))
 
@@ -33,7 +35,7 @@ def raise_test
   raise ArgumentError, 'bad argument', nil
 end
 
-sig { params(obj_or_str: T.any(Exception, String)) }
+sig { params(obj_or_str: T.any(Exception, String)).void }
 def raise_obj_or_string(obj_or_str)
   raise obj_or_str
 end
