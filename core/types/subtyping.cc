@@ -286,8 +286,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass);
-        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
