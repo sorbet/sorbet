@@ -8,6 +8,9 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
+  SIG_EMPTY_DECLARED_PARAMETERS = [nil].freeze
+  UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
+
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
     not_typed = T::Private::Types::NotTyped.new
@@ -16,9 +19,9 @@ class T::Private::Methods::Signature
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
       [param_kind, param_name || "arg#{index}"]
     end
-    raw_arg_types = parameters.map do |_param_kind, param_name|
+    raw_arg_types = parameters.to_h do |_param_kind, param_name|
       [param_name, not_typed]
-    end.to_h
+    end
 
     self.new(
       method: method,
@@ -61,17 +64,19 @@ class T::Private::Methods::Signature
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
     # by attr_writer or attr_accessor
-    writer_method = declared_param_names != [nil] && parameters == [[:req]] && method_name[-1] == "="
+    writer_method = declared_param_names != SIG_EMPTY_DECLARED_PARAMETERS && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     param_names = parameters.map {|_, name| name}
     missing_names = param_names - declared_param_names
-    extra_names = declared_param_names - param_names
     if !missing_names.empty?
       raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
-    end
-    if !extra_names.empty?
-      raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
+    elsif param_names.length == declared_param_names.length
+    else
+      extra_names = declared_param_names - param_names
+      if !extra_names.empty?
+        raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
+      end
     end
 
     if parameters.size != raw_arg_types.size
