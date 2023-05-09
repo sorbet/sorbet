@@ -66,12 +66,14 @@ class T::Private::Methods::Signature
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     param_names = parameters.map {|_, name| name}
     missing_names = param_names - declared_param_names
-    extra_names = declared_param_names - param_names
     if !missing_names.empty?
       raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
-    end
-    if !extra_names.empty?
-      raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
+    elsif param_names.length == declared_param_names.length
+    else
+      extra_names = declared_param_names - param_names
+      if !extra_names.empty?
+        raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
+      end
     end
 
     if parameters.size != raw_arg_types.size
