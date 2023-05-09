@@ -2,11 +2,9 @@
 # typed: true
 
 class T::Private::Methods::Signature
-  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
-              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
-              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
-              :check_level, :parameters, :on_failure, :override_allow_incompatible,
-              :defined_raw
+  attr_accessor :method_name
+  attr_reader :method, :arg_types, :kwarg_types, :block_type, :block_name, :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :return_type, :mode, :req_arg_count, :req_kwarg_names,
+              :has_rest, :has_keyrest, :check_level, :parameters, :on_failure, :override_allow_incompatible, :defined_raw
 
   SIG_EMPTY_DECLARED_PARAMETERS = [nil].freeze
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
@@ -68,14 +66,17 @@ class T::Private::Methods::Signature
     writer_method = declared_param_names != SIG_EMPTY_DECLARED_PARAMETERS && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
-    param_names = parameters.map {|_, name| name}
-    missing_names = param_names - declared_param_names
-    if !missing_names.empty?
+    is_name_missing = parameters.any? {|_, name| !raw_arg_types.key?(name)}
+    if is_name_missing
+      param_names = parameters.map {|_, name| name}
+      missing_names = param_names - raw_arg_types.keys
       raise "The declaration for `#{method.name}` is missing parameter(s): #{missing_names.join(', ')}"
-    elsif param_names.length == declared_param_names.length
+    elsif parameters.length == raw_arg_types.size
     else
-      extra_names = declared_param_names - param_names
-      if !extra_names.empty?
+      param_names = parameters.map {|_, name| name}
+      has_extra_names = parameters.count {|_, name| raw_arg_types.key?(name)} < raw_arg_types.size
+      if has_extra_names
+        extra_names = raw_arg_types.keys - param_names
         raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
       end
     end
@@ -104,7 +105,7 @@ class T::Private::Methods::Signature
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{declared_param_names.index(type_name) + 1}, defined in the method as arg number " \
-              "#{param_names.index(type_name) + 1}).#{hint}\nMethod: #{method_desc}"
+              "#{parameters.index {|_, name| name == type_name} + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
       type = T::Utils.coerce(raw_type)
@@ -150,7 +151,6 @@ class T::Private::Methods::Signature
     end
   end
 
-  attr_writer :method_name
   protected :method_name=
 
   def as_alias(alias_name)
