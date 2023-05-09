@@ -8,8 +8,8 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
-  SIG_EMPTY_DECLARED_PARAMETERS = [nil]
-  UNNAMED_REQUIRED_PARAMETERS = [[:req]]
+  SIG_EMPTY_DECLARED_PARAMETERS = [nil].freeze
+  UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
