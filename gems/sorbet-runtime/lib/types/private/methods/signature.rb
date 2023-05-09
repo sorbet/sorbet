@@ -83,8 +83,13 @@ class T::Private::Methods::Signature
     if parameters.size != raw_arg_types.size
       raise "The declaration for `#{method.name}` has arguments with duplicate names"
     end
+    params_size = parameters.size
+    i = 0
+    while i < params_size
+      param_kind, param_name = parameters[i]
+      type_name = declared_param_names[i]
+      raw_type = raw_arg_types[type_name]
 
-    parameters.zip(raw_arg_types) do |(param_kind, param_name), (type_name, raw_type)|
       if type_name != param_name
         hint = ""
         # Ruby reorders params so that required keyword arguments
@@ -140,6 +145,8 @@ class T::Private::Methods::Signature
       else
         raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
       end
+
+      i += 1
     end
   end
 
