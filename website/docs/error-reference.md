@@ -533,9 +533,9 @@ type `T.untyped` (along with all other values).
 
 ## 3513
 
-The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
-Ruby `class`. For more, see the docs for
-[`T.attached_class`](attached-class.md).
+This error code is from an old Sorbet version. It's equivalent to error 4023:
+
+[→ 4023](#4023)
 
 ## 3514
 

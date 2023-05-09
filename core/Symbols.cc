@@ -438,8 +438,8 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         auto attached = owner.data(gs)->attachedClass(gs);
         if (options.showForRBI || !attached.exists()) {
             // Attached wont exist for a number of cases:
-            // - owner is a module that uses has_attached_class!
-            // - owner is ::Class
+            // - owner is a module that doesn't use has_attached_class!
+            // - owner is a singleton class of a module
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));

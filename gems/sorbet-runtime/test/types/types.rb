@@ -988,7 +988,8 @@ module Opus::Types::Test
       it 'works if the type is wrong, but a class' do
         type = T::Class[Sub]
         value = Base
-        assert_nil(type.error_message_for_obj(value))
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
       end
 
       it 'cannot have its metatype instantiated' do
