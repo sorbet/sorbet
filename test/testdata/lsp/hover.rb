@@ -105,9 +105,9 @@ def main
   # Test primitive types
   n = nil
 # ^ hover: NilClass
-  t = true 
+  t = true
 # ^ hover: TrueClass
-  f = false 
+  f = false
 # ^ hover: FalseClass
   r = //
 # ^ hover: Regexp
@@ -144,5 +144,5 @@ def main
   hoo = BigFoo::LittleFoo1.new
                          # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"
-# ^ hover: sig {params(arg0: String).returns(T.noreturn)}
+# ^ hover: sig {params(arg0: T.any(Class, Exception, String)).returns(T.noreturn)}
 end
