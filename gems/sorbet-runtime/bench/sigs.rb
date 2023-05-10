@@ -15,7 +15,7 @@ module SorbetBenchmarks
 
       t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
       begin_allocs = GC.stat(:total_allocated_objects)
-      T::Utils::run_all_sig_blocks
+      T::Utils.run_all_sig_blocks
       duration_s = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond) - t0
       end_allocs = GC.stat(:total_allocated_objects) - 1
 
