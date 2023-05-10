@@ -2,9 +2,11 @@
 # typed: true
 
 class T::Private::Methods::Signature
-  attr_accessor :method_name
-  attr_reader :method, :arg_types, :kwarg_types, :block_type, :block_name, :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :return_type, :mode, :req_arg_count, :req_kwarg_names,
-              :has_rest, :has_keyrest, :check_level, :parameters, :on_failure, :override_allow_incompatible, :defined_raw
+  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
+              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
+              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
+              :check_level, :parameters, :on_failure, :override_allow_incompatible,
+              :defined_raw
 
   SIG_EMPTY_DECLARED_PARAMETERS = [nil].freeze
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
@@ -151,6 +153,7 @@ class T::Private::Methods::Signature
     end
   end
 
+  attr_writer :method_name
   protected :method_name=
 
   def as_alias(alias_name)
