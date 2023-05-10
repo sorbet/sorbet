@@ -108,5 +108,21 @@ module Opus::Types::Test
       assert_includes(err.message, "Incompatible return type in signature for override of method `foo`")
     end
 
+    it "allows T::Class to be compatible with itself" do
+      parent = Class.new do
+        extend T::Sig
+        sig {overridable.returns(T::Class[T.anything])}
+        def example; Object; end
+      end
+
+      child = Class.new(parent) do
+        extend T::Sig
+        sig {override.returns(T::Class[T.anything])}
+        def example; Object; end
+      end
+
+      child.new.example
+    end
+
   end
 end

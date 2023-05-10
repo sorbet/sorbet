@@ -23,6 +23,19 @@ module T::Types
       Class.===(obj)
     end
 
+    # overrides Base
+    private def subtype_of_single?(type)
+      case type
+      when TypedClass
+        # treat like generics are erased
+        true
+      when Simple
+        Class <= type.raw_type
+      else
+        false
+      end
+    end
+
     module Private
       module Pool
         CACHE_FROZEN_OBJECTS =
