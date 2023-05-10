@@ -12,15 +12,16 @@ class T::Private::Methods::Signature
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
-    # Using `Untyped` ensures we'll get an error if we ever try validation on these.
-    not_typed = T::Private::Types::NotTyped.new
+    # Using `NotTyped` ensures we'll get an error if we ever try validation on these.
+    not_typed = T::Private::Types::NotTyped::INSTANCE
     raw_return_type = not_typed
     # Map missing parameter names to "argN" positionally
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
       [param_kind, param_name || "arg#{index}"]
     end
-    raw_arg_types = parameters.to_h do |_param_kind, param_name|
-      [param_name, not_typed]
+    raw_arg_types = {}
+    parameters.each do |_, param_name|
+      raw_arg_types[param_name] = not_typed
     end
 
     self.new(
@@ -82,8 +83,13 @@ class T::Private::Methods::Signature
     if parameters.size != raw_arg_types.size
       raise "The declaration for `#{method.name}` has arguments with duplicate names"
     end
+    params_size = parameters.size
+    i = 0
+    while i < params_size
+      param_kind, param_name = parameters[i]
+      type_name = declared_param_names[i]
+      raw_type = raw_arg_types[type_name]
 
-    parameters.zip(raw_arg_types) do |(param_kind, param_name), (type_name, raw_type)|
       if type_name != param_name
         hint = ""
         # Ruby reorders params so that required keyword arguments
@@ -139,6 +145,8 @@ class T::Private::Methods::Signature
       else
         raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
       end
+
+      i += 1
     end
   end
 
