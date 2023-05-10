@@ -8,6 +8,7 @@ require_relative 'deserialize'
 require_relative 'prop_definition'
 require_relative 'prop_validation'
 require_relative 'serialize_custom_type'
+require_relative 'sigs'
 require_relative 'tutils'
 require_relative 'typecheck'
 require_relative 'typecheck_kwargs_splat'
@@ -41,6 +42,10 @@ namespace :bench do
     SorbetBenchmarks::SerializeCustomType.run
   end
 
+  task :sigs do
+    SorbetBenchmarks::Sigs.run
+  end
+
   task :typecheck do
     SorbetBenchmarks::Typecheck.run
   end
@@ -53,5 +58,5 @@ namespace :bench do
     SorbetBenchmarks::TUtils.run
   end
 
-  task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type tuils typecheck]
+  task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type sigs tutils typecheck]
 end
