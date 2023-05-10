@@ -8,7 +8,6 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
-  SIG_EMPTY_DECLARED_PARAMETERS = [nil].freeze
   UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
@@ -61,11 +60,10 @@ class T::Private::Methods::Signature
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
 
-    declared_param_names = raw_arg_types.keys
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
     # by attr_writer or attr_accessor
-    writer_method = declared_param_names != SIG_EMPTY_DECLARED_PARAMETERS && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
+    writer_method = !(raw_arg_types.size == 1 && raw_arg_types.key?(nil)) && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     is_name_missing = parameters.any? {|_, name| !raw_arg_types.key?(name)}
@@ -86,12 +84,9 @@ class T::Private::Methods::Signature
     if parameters.size != raw_arg_types.size
       raise "The declaration for `#{method.name}` has arguments with duplicate names"
     end
-    params_size = parameters.size
     i = 0
-    while i < params_size
+    raw_arg_types.each do |type_name, raw_type|
       param_kind, param_name = parameters[i]
-      type_name = declared_param_names[i]
-      raw_type = raw_arg_types[type_name]
 
       if type_name != param_name
         hint = ""
@@ -106,7 +101,7 @@ class T::Private::Methods::Signature
         end
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
-              "#{declared_param_names.index(type_name) + 1}, defined in the method as arg number " \
+              "#{i + 1}, defined in the method as arg number " \
               "#{parameters.index {|_, name| name == type_name} + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
