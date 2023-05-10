@@ -2910,21 +2910,13 @@ module Kernel
   sig {returns(T.noreturn)}
   sig do
     params(
-        arg0: String,
+        arg0: T.any(Class, Exception, String),
     )
     .returns(T.noreturn)
   end
   sig do
     params(
-        arg0: Class,
-        arg1: T.untyped,
-        arg2: T.nilable(T::Array[String]),
-    )
-    .returns(T.noreturn)
-  end
-  sig do
-    params(
-        arg0: Exception,
+        arg0: T.any(Class, Exception),
         arg1: T.untyped,
         arg2: T.nilable(T::Array[String]),
     )
