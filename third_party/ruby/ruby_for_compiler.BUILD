@@ -55,7 +55,6 @@ ruby(
         ],
         "//conditions:default": [],
     }),
-    post_build_patches = ["@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_bundler.patch"],
     rubygems = "@rubygems_update_stripe//file",
     deps = select({
         "@platforms//os:osx": [
