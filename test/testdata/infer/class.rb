@@ -12,6 +12,6 @@ class TestCase
 
     T.reveal_type(self.class.new) # error: `TestCase`
     T.reveal_type(self.class) # error: `T.class_of(TestCase)`
-    T.reveal_type(self.class.class) # error: `Class`
+    T.reveal_type(self.class.class) # error: `T::Class[T.anything]`
   end
 end

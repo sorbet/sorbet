@@ -69,6 +69,13 @@
 # obj--->OtherClass---------->(OtherClass)-----------...
 # ```
 class Class < Module
+  # Intentionally does not write extend T::Generic so we don't pollute the
+  # stdlib with an ancestor that doesn't exist at runtime. It doesn't matter,
+  # because RBI files are not typechecked anyways.
+  has_attached_class!(:out)
+
+  ### TODO(jez) After T::Class change: Use `T.attached_class` in `allocate`
+
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
   # *class*.
@@ -114,14 +121,23 @@ class Class < Module
   # to create a new object of *class*'s class, then invokes that object's
   # initialize method, passing it *args*. This is the method that ends up
   # getting called whenever an object is constructed using `.new`.
-  sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
+  sig {params(args: T.untyped, blk: T.untyped).returns(T.attached_class)}
   def new(*args, &blk); end
 
-  sig { params(blk: T.untyped).returns(Class) }
+  # Creates a new anonymous (unnamed) class with the given superclass (or
+  # Object if no parameter is given). You can give a class a name by assigning
+  # the class object to a constant.
+  #
+  # If a block is given, it is passed the class object, and the block is
+  # evaluated in the context of this class like class_eval.
+  sig { params(blk: T.untyped).returns(T::Class[Object]) }
   sig do
     type_parameters(:Parent)
-      .params(super_class: T.all(Class, T.type_parameter(:Parent)), blk: T.untyped)
-      .returns(T.all(Class, T.type_parameter(:Parent)))
+      .params(
+        super_class: T.all(T::Class[T.anything], T.type_parameter(:Parent)),
+        blk: T.untyped
+      )
+      .returns(T.all(T::Class[T.anything], T.type_parameter(:Parent)))
   end
   def self.new(super_class = Object, &blk); end
 

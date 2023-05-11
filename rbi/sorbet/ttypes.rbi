@@ -73,6 +73,17 @@ class T::Types::Untyped < T::Types::Base
   def valid?(obj); end
 end
 
+class T::Types::Anything < T::Types::Base
+  sig {void}
+  def initialize; end
+
+  sig {returns(String)}
+  def name; end
+
+  sig {params(obj: T.anything).returns(T::Boolean)}
+  def valid?(obj); end
+end
+
 class T::Types::Proc < T::Types::Base
   def initialize(arg_types, returns); end
   def name; end
@@ -191,3 +202,19 @@ class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
   def type; end
 end
 
+class T::Types::TypedClass < T::Types::Base
+  sig {params(type: T.untyped).void}
+  def initialize(type); end
+
+  sig {returns(String)}
+  def name; end
+
+  sig {params(obj: T.anything).returns(T::Boolean)}
+  def valid?(obj); end
+
+  sig {returns(T::Types::Base)}
+  def type; end
+
+  sig {returns(T.class_of(Class))}
+  def underlying_class; end
+end

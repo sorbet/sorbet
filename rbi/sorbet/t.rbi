@@ -335,6 +335,10 @@ module T::Range
   # Type syntax to specify the element type of a standard library Range
   def self.[](type); end
 end
+module T::Class
+  # Type syntax to specify the element type of a standard library Class
+  def self.[](type); end
+end
 module T::Enumerable
   # Type syntax to specify the element type of a standard library Enumerable
   def self.[](type); end

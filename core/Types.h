@@ -113,7 +113,6 @@ public:
     static TypePtr hashOfUntyped();
     static TypePtr procClass();
     static TypePtr nilableProcClass();
-    static TypePtr classClass();
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
     static TypePtr todo();

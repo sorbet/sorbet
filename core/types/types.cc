@@ -99,10 +99,6 @@ TypePtr Types::nilableProcClass() {
     return res;
 }
 
-TypePtr Types::classClass() {
-    return make_type<ClassType>(Symbols::Class());
-}
-
 TypePtr Types::declBuilderForProcsSingletonClass() {
     return make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
 }

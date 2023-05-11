@@ -1081,6 +1081,10 @@ public:
         return ClassOrModuleRef::fromRaw(97);
     }
 
+    static ClassOrModuleRef T_Class() {
+        return ClassOrModuleRef::fromRaw(98);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

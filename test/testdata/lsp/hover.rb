@@ -144,5 +144,5 @@ def main
   hoo = BigFoo::LittleFoo1.new
                          # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"
-# ^ hover: sig {params(arg0: T.any(Class, Exception, String)).returns(T.noreturn)}
+  # ^ hover-line: 4     arg0: T.any(T::Class[T.anything], Exception, String)
 end
