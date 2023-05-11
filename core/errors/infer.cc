@@ -3,7 +3,7 @@
 
 namespace sorbet::core::errors::Infer {
 
-ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
+ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, SymbolRef blame) {
     if (!gs.trackUntyped) {
         return UntypedValue;
     }
@@ -22,6 +22,8 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
         //   would spam statsd services
         prodHistogramInc("untyped.usages", file.id());
     }
+
+    histogramInc("untyped.blames", blame.rawId());
 
     if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {
         return UntypedValueInformation;

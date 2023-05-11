@@ -1443,7 +1443,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
                 } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    auto what =
+                        core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type.untypedBlame());
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from method is `{}`", "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
@@ -1481,7 +1482,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
                     }
                 } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    auto what =
+                        core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type.untypedBlame());
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from block is `{}`", "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);

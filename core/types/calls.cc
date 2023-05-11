@@ -295,7 +295,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             //     return e.build();
             // }
         } else if (argTpe.type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
+            auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), argTpe.type.untypedBlame());
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
                 auto for_ =
@@ -562,7 +562,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto funLoc = args.funLoc();
     auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
-        auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+        auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType.untypedBlame());
         if (auto e = gs.beginError(args.receiverLoc(), what)) {
             e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
@@ -2248,7 +2248,7 @@ public:
 
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, receiver->type.untypedBlame());
             if (auto e = gs.beginError(args.argLoc(0), what)) {
                 e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
@@ -2263,7 +2263,8 @@ public:
         }
 
         if (args.args[2]->type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            auto what =
+                core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.args[2]->type.untypedBlame());
             if (auto e = gs.beginError(args.argLoc(2), what)) {
                 e.setHeader("Call to method `{}` with `{}` splat arguments", fn.show(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
@@ -2519,7 +2520,7 @@ public:
         NameRef fn = lit.asName();
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, receiver->type.untypedBlame());
             if (auto e = gs.beginError(args.argLoc(0), what)) {
                 e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
@@ -2611,7 +2612,7 @@ public:
 
         auto &receiver = args.args[0];
         if (receiver->type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, receiver->type.untypedBlame());
             if (auto e = gs.beginError(args.argLoc(0), what)) {
                 e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
@@ -2626,7 +2627,8 @@ public:
         }
 
         if (args.args[2]->type.isUntyped()) {
-            auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file);
+            auto what =
+                core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.args[2]->type.untypedBlame());
             if (auto e = gs.beginError(args.argLoc(2), what)) {
                 e.setHeader("Call to method `{}` with `{}` splat arguments", fn.show(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
