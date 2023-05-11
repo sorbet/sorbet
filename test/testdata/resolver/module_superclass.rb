@@ -1,4 +1,5 @@
 # typed: true
+# disable-fast-path: true
 
 # It's okay to subclass BasicObject
 class SubclassBasicObject < BasicObject; end
@@ -9,8 +10,8 @@ class SubclassObject < Object; end
 # It's okay to subclass Module (the class)
 class SubclassModule2 < Module; end
 
-# It's okay to subclass Class
-class SubclassClass < Class; end
+# It's not okay to subclass Class
+class SubclassClass < Class; end # error: `SubclassClass` is a subclass of `Class` which is not allowed
 
 module M; end
 

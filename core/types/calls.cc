@@ -1489,6 +1489,11 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     }
 
     if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
+        if (appliedType->klass == core::Symbols::Class()) {
+            // T::Class[...].new is not implemented--users should just use Class.new(super_class)
+            return false;
+        }
+
         if (appliedType->klass.data(gs)->isSingletonClass(gs)) {
             return false;
         }
@@ -1529,6 +1534,9 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
                 auto receiverLoc = core::Loc(args.locs.file, args.locs.receiver);
                 e.replaceWith("Replace with class name", receiverLoc, "{}",
                               appliedType->klass.data(gs)->attachedClass(gs).show(gs));
+            } else if (appliedType->klass == core::Symbols::Class()) {
+                e.addErrorNote("Sorbet erases generics, so `{}` does not work. Use `{}` instead.", "T::Class[...].new",
+                               "Class.new(...)");
             }
         }
     }
@@ -1920,7 +1928,9 @@ public:
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
         } else {
-            res.returnType = Types::classClass();
+            // TODO(jez) After T::Class change:
+            // We can circle back to improving this type. It can probably be something like `T::Class[args.thisType]`.
+            res.returnType = Symbols::Class().data(gs)->externalType();
         }
     }
 } Object_class;
@@ -1937,13 +1947,15 @@ public:
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (self == Symbols::Class()) {
-                // `Class.new(...)`, but it isn't a specific Class. We know
-                // calling .new on a Class will yield some sort of Object
-                attachedClass = Symbols::Object();
-            } else {
-                return;
-            }
+            // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
+            // actually going to be on an "instance" not a singleton (Class.new, the one on the
+            // singleton, is the one that defines a new class at runtime).
+            //
+            // In that case, there's no attachedClass to look for an `initialize` method on.
+            // We could _maybe_ imagine trying to dispatch to `initialize` on the `<AttachedClass>`
+            // type argument? But I haven't thought about what the consequences of that would be.
+            ENFORCE(self == Symbols::Class());
+            return;
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
@@ -2820,6 +2832,9 @@ public:
                                 "instantiated",
                                 "T.attached_class");
                 } else {
+                    // Technically, this error message should also have something like "..., or
+                    // instance methods on `::Class`", but that makes the error message wordy, and
+                    // anyone who cares about that technicality likely knows what they're doing.
                     e.setHeader(
                         "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
                         "T.attached_class", hasAttachedClass);
@@ -4269,6 +4284,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Enumerator_Chain(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},

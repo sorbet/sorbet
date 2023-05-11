@@ -27,6 +27,8 @@ module T::Types
         @type <= other.type
       when Simple
         @type.is_a?(other.raw_type)
+      when TypedClass
+        true
       else
         false
       end
