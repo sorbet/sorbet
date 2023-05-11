@@ -124,5 +124,21 @@ module Opus::Types::Test
       child.new.example
     end
 
+    it "allows T::Class to be compatible with T.class_of in child" do
+      parent = Class.new do
+        extend T::Sig
+        sig {overridable.returns(T::Class[T.anything])}
+        def example; Object; end
+      end
+
+      child = Class.new(parent) do
+        extend T::Sig
+        sig {override.returns(T.class_of(Object))}
+        def example; Object; end
+      end
+
+      child.new.example
+    end
+
   end
 end
