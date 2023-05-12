@@ -28,7 +28,6 @@
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
 #include "rewriter/SigRewriter.h"
-#include "rewriter/Singleton.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TestCase.h"
@@ -54,7 +53,6 @@ public:
         Flatfiles::run(ctx, classDef);
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
-        Singleton::run(ctx, classDef);
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
 
