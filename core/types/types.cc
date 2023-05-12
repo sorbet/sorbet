@@ -294,6 +294,12 @@ TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
+TypePtr Types::tClass(const TypePtr &attachedClass) {
+    vector<TypePtr> targs;
+    targs.emplace_back(attachedClass);
+    return make_type<AppliedType>(Symbols::Class(), move(targs));
+}
+
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
     return Types::dropSubtypesOf(gs, from, Symbols::NilClass());
 }
