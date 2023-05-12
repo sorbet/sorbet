@@ -559,6 +559,8 @@ NameDef names[] = {
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
     {"Token", "Token", true},
+    {"Account", "Account", true},
+    {"Merchant", "Merchant", true},
 
     // Typos
     {"Int", "Int", true},
