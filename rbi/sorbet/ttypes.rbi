@@ -141,6 +141,7 @@ class T::Types::TypeParameter < T::Types::Base
   def valid?(obj); end
   def subtype_of_single?(type); end
   def name; end
+  def self.make(name); end
 end
 
 # --- stdlib generics ---
