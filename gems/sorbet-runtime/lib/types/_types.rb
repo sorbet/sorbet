@@ -123,7 +123,7 @@ module T
   #  .returns(T::Array[T.type_parameter(:U)])
   #  def map(&blk); end
   def self.type_parameter(name)
-    T::Types::TypeParameter.new(name)
+    T::Types::TypeParameter.make(name)
   end
 
   # Tells the typechecker that `value` is of type `type`. Use this to get additional checking after

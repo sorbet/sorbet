@@ -1629,6 +1629,12 @@ module Opus::Types::Test
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
         end
+
+        it 'pools' do
+          assert_equal(T.type_parameter(:T).object_id, T.type_parameter(:T).object_id)
+          refute_equal(T.type_parameter(:T).object_id, T.type_parameter(:U).object_id)
+          refute_equal(T::Types::TypeParameter.new(:T).object_id, T::Types::TypeParameter.new(:T).object_id)
+        end
       end
 
       describe 'untyped containers' do
