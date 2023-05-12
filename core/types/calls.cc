@@ -1924,14 +1924,38 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto singleton = self.data(gs)->lookupSingletonClass(gs);
-        if (singleton.exists()) {
-            res.returnType = singleton.data(gs)->externalType();
-        } else {
-            // TODO(jez) After T::Class change:
-            // We can circle back to improving this type. It can probably be something like `T::Class[args.thisType]`.
-            res.returnType = Symbols::Class().data(gs)->externalType();
+        auto tClassSelfType = Types::tClass(args.selfType);
+        if (self.data(gs)->isModule()) {
+            ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
+            // This normally can't happen, because `Object` is not an ancestor of any module
+            // instance by default. But Sorbet supports requires ancestor in a really weird way (by
+            // simply dispatching to a completely unrelated method) which means that sometimes we
+            // can actually get a call to this on a module.
+            //
+            // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
+            // which will not actually reflect how `.class` in a module instance method works at runtime.
+            // (see https://sorbet.org/docs/class-of#tclass_of-and-modules)
+            res.returnType = tClassSelfType;
+            return;
         }
+
+        auto singleton = self.data(gs)->lookupSingletonClass(gs);
+        if (!singleton.exists()) {
+            res.returnType = tClassSelfType;
+            return;
+        }
+
+        // `singleton` might have more type members than just the `<AttachedClass>` one.
+        // Calling `externalType` is the easiest way to get proper defaults for all of those.
+        // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
+        //     T.class_of(MyClass)[MyClass, ...]
+        // Then the `T.all` is the easiest way to narrow *only* the type argument that
+        // corresponds to the `<AttachedClass>` type member, because `T.all` has logic to align
+        // type members in parent/child classes. The `T.all` gets pushed through and collapsed
+        // like normal, and ends up something like
+        //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
+        // (This matters, btw, in case the receiver is something like a generic.)
+        res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
     }
 } Object_class;
 
