@@ -151,6 +151,11 @@ cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
 
 {install_gems}
 
+# Since we get our version of bundler from update_rubygems, we have to apply
+# this patch after everything is built. This is a bit of a hack, but the need
+# for the patch should go away once we upgrade Ruby and/or bundler anyway.
+{post_build_patch_command}
+
 popd > /dev/null
 
 rm -rf "$build_dir"
@@ -264,10 +269,18 @@ def _build_ruby_impl(ctx):
 
     install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
 
+    post_build_patches = ctx.files.post_build_patches
+
+    post_build_patch_commands = []
+    for patch in post_build_patches:
+        dirname = patch.dirname
+        install_extra_srcs.append(_INSTALL_EXTRA_SRC.format(file = patch.path, dirname = dirname, basename = patch.basename))
+        post_build_patch_commands.append(_APPLY_PATCH.format(path = patch.path))
+
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs + post_build_patches,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -286,6 +299,7 @@ def _build_ruby_impl(ctx):
             extra_srcs_object_files = " ".join(extra_srcs_object_files),
             install_append_srcs = "\n".join(install_append_srcs),
             install_gems = "\n".join(install_gems),
+            post_build_patch_command = "\n".join(post_build_patch_commands),
         )),
     )
 
@@ -337,6 +351,10 @@ _build_ruby = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
         "sysroot_flag": attr.string(),
+        "post_build_patches": attr.label_list(
+            allow_files = True,
+            doc = "Patches to apply to the output tree after Ruby is built and gems are installed",
+        ),
     },
     fragments = ["cpp"],
     provides = [
@@ -529,7 +547,7 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
-def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = [], post_build_patches = []):
     """
     Define a ruby build.
     """
@@ -557,6 +575,7 @@ def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags 
             "@platforms//os:osx": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
             "//conditions:default": "",
         }),
+        post_build_patches = post_build_patches,
     )
 
     _ruby_headers(
