@@ -1744,8 +1744,12 @@ module Enumerable
   # ```ruby
   # ["a", "b", "c", "b"].tally  #=> {"a"=>1, "b"=>2, "c"=>1}
   # ```
-  sig {returns(T::Hash[Elem, Integer])}
-  def tally(); end
+  #
+  # If a hash is given, the number of occurrences is added to each value
+  # in the hash, and the hash is returned. The value corresponding to
+  # each element must be an integer.
+  sig {params(hash: T::Hash[Elem, Integer]).returns(T::Hash[Elem, Integer])}
+  def tally(hash = {}); end
 
   ### Implemented in C++
 
