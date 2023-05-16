@@ -3,7 +3,7 @@ suggest-sig-literal.rb:2: The method `index_for_live` does not have a `sig` http
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     suggest-sig-literal.rb:2: Inserted `extend T::Sig
-    sig { params(fields: T.untyped).returns(T::Array[T::Array[T.any(Integer, Symbol)]]) }`
+    sig { params(fields: T.untyped).returns(T::Array[T.untyped]) }`
      2 |def index_for_live(fields)
         ^
 Errors: 1
@@ -12,7 +12,7 @@ Errors: 1
 
 # typed: strict
 extend T::Sig
-sig { params(fields: T.untyped).returns(T::Array[T::Array[T.any(Integer, Symbol)]]) }
+sig { params(fields: T.untyped).returns(T::Array[T.untyped]) }
 def index_for_live(fields)
   [[:deleted_at, 1]] + fields
 end
