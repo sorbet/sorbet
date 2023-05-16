@@ -3857,86 +3857,6 @@ public:
     }
 } Array_compact;
 
-class Array_plus : public IntrinsicMethod {
-public:
-    vector<NameRef> dispatchesTo() const override {
-        return {core::Names::concat()};
-    }
-
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.suppressErrors || res.main.errors.empty() || args.numPosArgs != 1) {
-            return;
-        }
-
-        const auto finder = [](const auto &e) { return e->what == core::errors::Infer::MethodArgumentMismatch; };
-        if (absl::c_count_if(res.main.errors, finder) != 1) {
-            // Want exactly one, not at least one
-            return;
-        }
-
-        auto dispatchArgs = DispatchArgs{
-            core::Names::concat(),
-            args.locs,
-            args.numPosArgs,
-            // x.+(y) is the same arity as x.concat(y)
-            args.args,
-            args.selfType,
-            args.fullType,
-            // Reset thisType to selfType. dispatchCallProxyType will widen to underlying if needed
-            args.selfType,
-            args.block,
-            args.originForUninitialized,
-            args.isPrivateOk,
-            args.suppressErrors,
-        };
-        auto dispatched = args.selfType.dispatchCall(gs, dispatchArgs);
-
-        if (!dispatched.main.errors.empty()) {
-            return;
-        }
-
-        const auto iter = absl::c_find_if(res.main.errors, finder);
-        ENFORCE(iter != res.main.errors.end(), "c_count above should have guaranteed a result");
-
-        const auto argMismatchErrorIdx = std::distance(res.main.errors.begin(), iter);
-        const auto &argMismatchError = *iter;
-
-        if (auto e = gs.beginError(argMismatchError->loc, core::errors::Infer::MethodArgumentMismatch)) {
-            e.setHeader("{}", argMismatchError->header);
-            // This copies the section intentionally (no auto&) to hack around const-ness
-            for (auto section : argMismatchError->sections) {
-                e.addErrorSection(std::move(section));
-            }
-            // This copies the section intentionally (no auto&) to hack around const-ness
-            for (auto autocorrect : argMismatchError->autocorrects) {
-                e.addAutocorrect(std::move(autocorrect));
-            }
-
-            e.addErrorNote("If the desired behavior is to widen the type to `{}`, use `{}` instead",
-                           dispatched.returnType.show(gs), "Array#concat");
-
-            auto replaceBegin = args.locs.receiver.endPos();
-            auto replaceEnd = args.locs.call.endPos();
-            auto replaceLoc = core::Loc(args.locs.file, replaceBegin, replaceEnd);
-            if (replaceLoc.exists() && args.locs.args[0].exists()) {
-                auto arg0Loc = core::Loc(args.locs.file, args.locs.args[0]);
-                auto replaceLocSource = replaceLoc.source(gs).value();
-                if (absl::StartsWith(absl::StripLeadingAsciiWhitespace(replaceLocSource), "+=")) {
-                    auto recvSource = core::Loc(args.locs.file, args.locs.receiver).source(gs);
-                    if (recvSource.has_value()) {
-                        e.replaceWith("Replace with `concat`", replaceLoc, " = {}.concat({})", recvSource.value(),
-                                      arg0Loc.source(gs).value());
-                    }
-                } else {
-                    e.replaceWith("Replace with `concat`", replaceLoc, ".concat({})", arg0Loc.source(gs).value());
-                }
-            }
-
-            res.main.errors[argMismatchErrorIdx] = e.build();
-        }
-    }
-} Array_plus;
-
 class Array_zip : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4359,7 +4279,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
-    {Symbols::Array(), Intrinsic::Kind::Instance, Names::plus(), &Array_plus},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
 
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
