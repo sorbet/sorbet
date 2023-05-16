@@ -140,5 +140,21 @@ module Opus::Types::Test
       child.new.example
     end
 
+    it "allows Object to be compatible with T::Hash in child" do
+      parent = Class.new do
+        extend T::Sig
+        sig {overridable.returns(Object)}
+        def example; nil; end
+      end
+
+      child = Class.new(parent) do
+        extend T::Sig
+        sig {override.returns(T::Hash[Symbol, T.untyped])}
+        def example; {}; end
+      end
+
+      child.new.example
+    end
+
   end
 end
