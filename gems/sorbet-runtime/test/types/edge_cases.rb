@@ -906,7 +906,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers
-      def self.method; end # bad override of Object#method
+      # bad override of Object#method
+      def self.method; end
       abstract!
     end
   end
