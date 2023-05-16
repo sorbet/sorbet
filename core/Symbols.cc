@@ -1875,6 +1875,9 @@ TypePtr sealedSubclassesToAppliedImpl(const GlobalState &gs, TypePtr currentClas
     while (auto orType = cast_type<OrType>(currentClasses)) {
         if (isa_type<AppliedType>(orType->right)) {
             // We already converted ClassTypes to AppliedTypes once; don't need to do it again.
+            // (This might happen if e.g. a class is opened once in a Ruby file and again in an RBI)
+            // However, if all the subclasses are modules, this short circuit might never happen.
+            // That's fine though, because this method should be idempotent.
             return currentClasses;
         }
 
@@ -1941,17 +1944,30 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        ENFORCE(isa_type<AppliedType>(orType->right), "Something in sealedSubclasses that's not an AppliedType");
-        auto &appliedType = cast_type_nonnull<AppliedType>(orType->right);
-        auto subclass = appliedType.klass.data(gs)->attachedClass(gs);
+        core::ClassOrModuleRef subclass;
+        if (auto *right = cast_type<AppliedType>(orType->right)) {
+            subclass = right->klass.data(gs)->attachedClass(gs);
+        } else if (isa_type<ClassType>(orType->right)) {
+            auto right = cast_type_nonnull<ClassType>(orType->right);
+            subclass = right.symbol.data(gs)->attachedClass(gs);
+        } else {
+            ENFORCE(false, "Unexpected type in sealedSubclasses!")
+        }
+
         ENFORCE(subclass.exists());
         result = Types::any(gs, subclass.data(gs)->externalType(), result);
         currentClasses = orType->left;
     }
 
-    ENFORCE(isa_type<AppliedType>(currentClasses), "Last element of sealedSubclasses must be AppliedType");
-    auto &appliedType = cast_type_nonnull<AppliedType>(currentClasses);
-    auto subclass = appliedType.klass.data(gs)->attachedClass(gs);
+    core::ClassOrModuleRef subclass;
+    if (auto *lastType = cast_type<AppliedType>(currentClasses)) {
+        subclass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(currentClasses)) {
+        auto lastType = cast_type_nonnull<ClassType>(currentClasses);
+        subclass = lastType.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+    }
     ENFORCE(subclass.exists());
     result = Types::any(gs, subclass.data(gs)->externalType(), result);
 
