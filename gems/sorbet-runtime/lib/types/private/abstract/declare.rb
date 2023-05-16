@@ -27,7 +27,7 @@ module T::Private::Abstract::Declare
         raise "Classes can't be interfaces. Use `abstract!` instead of `interface!`."
       end
 
-      if mod.method(:new).owner == mod
+      if Object.instance_method(:method).bind_call(mod, :new).owner == mod
         raise "You must call `abstract!` *before* defining a `new` method"
       end
 
