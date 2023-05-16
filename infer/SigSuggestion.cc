@@ -445,7 +445,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");
     } else {
-        fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx));
+        auto options = core::ShowOptions().withShowForRBI();
+        fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx, options));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);
