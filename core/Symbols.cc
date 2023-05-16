@@ -1863,23 +1863,9 @@ void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef su
     }
 }
 
-const InlinedVector<Loc, 2> &ClassOrModule::sealedLocs(const GlobalState &gs) const {
-    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
-    auto &result = sealedSubclasses.data(gs)->locs();
-    ENFORCE(result.size() > 0);
-    return result;
-}
-
 namespace {
 
-// When we call recordSealedSubclass in ResolveConstantsWalk, we've only just resolved
-// ancestors, but haven't created all the type members for classes yet (including <AttachedClass>).
-//
-// This method is called later, when those type members are created, and converts the
-// `T.class_of(...)` types inside the from `ClassType` to `AppliedType` with their
-// `<AttachedClass>` type members properly applied.
-TypePtr sealedSubclassesToApplied(const GlobalState &gs, TypePtr currentClasses) {
+TypePtr sealedSubclassesToAppliedImpl(const GlobalState &gs, TypePtr currentClasses) {
     if (currentClasses.isBottom()) {
         // Declared sealed parent class, but never saw any children.
         return currentClasses;
@@ -1892,6 +1878,69 @@ TypePtr sealedSubclassesToApplied(const GlobalState &gs, TypePtr currentClasses)
             return currentClasses;
         }
 
+        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
+        auto classType = cast_type_nonnull<ClassType>(orType->right);
+        result = Types::any(gs, classType.symbol.data(gs)->externalType(), result);
+        currentClasses = orType->left;
+    }
+
+    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
+    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
+    result = Types::any(gs, lastClassType.symbol.data(gs)->externalType(), result);
+
+    return result;
+}
+
+} // namespace
+
+// When we call recordSealedSubclass in ResolveConstantsWalk, we've only just resolved
+// ancestors, but haven't created all the type members for classes yet (including <AttachedClass>).
+//
+// This method is called later, when those type members are created, and converts the
+// `T.class_of(...)` types inside the from `ClassType` to `AppliedType` with their
+// `<AttachedClass>` type members properly applied.
+void ClassOrModule::sealedSubclassesToApplied(GlobalState &gs) {
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
+
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
+
+    auto data = sealedSubclasses.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+    auto currentClasses = appliedType->targs[0];
+
+    data->resultType = Types::setOf(sealedSubclassesToAppliedImpl(gs, currentClasses));
+}
+
+const InlinedVector<Loc, 2> &ClassOrModule::sealedLocs(const GlobalState &gs) const {
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
+    auto &result = sealedSubclasses.data(gs)->locs();
+    ENFORCE(result.size() > 0);
+    return result;
+}
+
+TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
+
+    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
+
+    auto data = sealedSubclasses.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
+    auto appliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+
+    auto currentClasses = appliedType->targs[0];
+    if (currentClasses.isBottom()) {
+        // Declared sealed parent class, but never saw any children.
+        return Types::bottom();
+    }
+
+    auto result = Types::bottom();
+    while (auto orType = cast_type<OrType>(currentClasses)) {
         ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
         auto classType = cast_type_nonnull<ClassType>(orType->right);
         auto subclass = classType.symbol.data(gs)->attachedClass(gs);
@@ -1907,23 +1956,6 @@ TypePtr sealedSubclassesToApplied(const GlobalState &gs, TypePtr currentClasses)
     result = Types::any(gs, subclass.data(gs)->externalType(), result);
 
     return result;
-}
-
-} // namespace
-
-TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
-    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
-
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
-
-    auto data = sealedSubclasses.data(gs);
-    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType);
-    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
-
-    auto currentClasses = appliedType->targs[0];
-    return sealedSubclassesToApplied(gs, currentClasses);
 }
 
 bool ClassOrModule::hasSingleSealedSubclass(const GlobalState &gs) const {

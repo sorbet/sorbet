@@ -294,6 +294,11 @@ TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
+TypePtr Types::setOf(const TypePtr &elem) {
+    vector<TypePtr> targs{elem};
+    return make_type<AppliedType>(Symbols::Set(), move(targs));
+}
+
 TypePtr Types::tClass(const TypePtr &attachedClass) {
     vector<TypePtr> targs;
     targs.emplace_back(attachedClass);
