@@ -51,6 +51,7 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by.patch",  # https://github.com/ruby/ruby/pull/6791
             "@com_stripe_ruby_typer//third_party/ruby:hash-transform-values.patch",  # https://github.com/ruby/ruby/pull/2964
         ],
+        patch_tool = "patch",
     )
 
     http_archive(
