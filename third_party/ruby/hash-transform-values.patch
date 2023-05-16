@@ -1,0 +1,43 @@
+commit 713dc619f5372a645b66bef9dacee217c4101cb4
+Author: Alan Wu <XrXr@users.noreply.github.com>
+Date:   Fri Mar 13 20:59:55 2020 -0400
+
+    Add missing write barrier for Hash#transform_values{,!}
+    
+    21994b7fd686f263544fcac1616ecf3189fb78b3 removed the write barrier that
+    was present in rb_hash_aset(). Re-insert it to not crash during GC.
+    
+    [Bug #16689]
+
+diff --git hash.c hash.c
+index 62383a6c92..5bbb3da5f2 100644
+--- hash.c
++++ hash.c
+@@ -3257,7 +3257,8 @@ static int
+ transform_values_foreach_replace(st_data_t *key, st_data_t *value, st_data_t argp, int existing)
+ {
+     VALUE new_value = rb_yield((VALUE)*value);
+-    *value = new_value;
++    VALUE hash = (VALUE)argp;
++    RB_OBJ_WRITE(hash, value, new_value);
+     return ST_CONTINUE;
+ }
+ 
+@@ -3287,7 +3288,7 @@ rb_hash_transform_values(VALUE hash)
+     result = hash_copy(hash_alloc(rb_cHash), hash);
+ 
+     if (!RHASH_EMPTY_P(hash)) {
+-        rb_hash_stlike_foreach_with_replace(result, transform_values_foreach_func, transform_values_foreach_replace, 0);
++        rb_hash_stlike_foreach_with_replace(result, transform_values_foreach_func, transform_values_foreach_replace, result);
+     }
+ 
+     return result;
+@@ -3317,7 +3318,7 @@ rb_hash_transform_values_bang(VALUE hash)
+     rb_hash_modify_check(hash);
+ 
+     if (!RHASH_TABLE_EMPTY_P(hash)) {
+-        rb_hash_stlike_foreach_with_replace(hash, transform_values_foreach_func, transform_values_foreach_replace, 0);
++        rb_hash_stlike_foreach_with_replace(hash, transform_values_foreach_func, transform_values_foreach_replace, hash);
+     }
+ 
+     return hash;
