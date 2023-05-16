@@ -1929,11 +1929,11 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType);
-    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+    auto setAppliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(setAppliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(setAppliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
 
-    auto currentClasses = appliedType->targs[0];
+    auto currentClasses = setAppliedType->targs[0];
     if (currentClasses.isBottom()) {
         // Declared sealed parent class, but never saw any children.
         return Types::bottom();
@@ -1941,17 +1941,17 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
-        auto classType = cast_type_nonnull<ClassType>(orType->right);
-        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
+        ENFORCE(isa_type<AppliedType>(orType->right), "Something in sealedSubclasses that's not an AppliedType");
+        auto &appliedType = cast_type_nonnull<AppliedType>(orType->right);
+        auto subclass = appliedType.klass.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, subclass.data(gs)->externalType(), result);
         currentClasses = orType->left;
     }
 
-    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
-    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
-    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
+    ENFORCE(isa_type<AppliedType>(currentClasses), "Last element of sealedSubclasses must be AppliedType");
+    auto &appliedType = cast_type_nonnull<AppliedType>(currentClasses);
+    auto subclass = appliedType.klass.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
     result = Types::any(gs, subclass.data(gs)->externalType(), result);
 
