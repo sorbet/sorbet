@@ -1,0 +1,11 @@
+# -- test/testdata/infer/suggest_attached_class.rb --
+# typed: strict
+
+class Foo
+  extend T::Sig
+  sig { returns(T.attached_class (of Foo)) }
+  def self.generate
+    self.new
+  end
+end
+# ------------------------------
