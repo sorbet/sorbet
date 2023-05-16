@@ -971,23 +971,9 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        auto untypedBlames = getAndClearHistogram("untyped.blames");
-        vector<pair<string, int>> withNames;
-        long sum = 0;
-        for (auto e : untypedBlames) {
-            auto sym = core::SymbolRef::fromRaw(e.first);
-            if (!sym.exists() || !sym.loc(*gs).exists()) {
-                logger->error("doesn't exist");
-                continue;
-            }
-            auto path = sym.loc(*gs).file().data(*gs).path();
-            auto owner = sym.owner(*gs).show(*gs);
-            withNames.emplace_back(absl::StrCat(path, ",", owner, ",", sym.showFullName(*gs)), e.second);
-            sum += e.second;
-        }
-        fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-        for (auto &p : withNames) {
-            logger->error("{},{},{}", p.first, p.second, sum);
+        if (opts.printBlameUntyped) {
+            auto untypedBlames = getAndClearHistogram("untyped.blames");
+            pipeline::printUntypedBlames(*gs, untypedBlames, opts.untypedBlameFilePath);
         }
     }
 

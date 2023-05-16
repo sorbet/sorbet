@@ -1264,4 +1264,28 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
 #endif
 }
 
+void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> untypedBlames,
+                        const std::string &blameFilePath) {
+#ifndef SORBET_REALMAIN_MIN
+    vector<pair<string, int>> withNames;
+    long sum = 0;
+    for (auto e : untypedBlames) {
+        auto sym = core::SymbolRef::fromRaw(e.first);
+        if (!sym.exists() || !sym.loc(gs).exists()) {
+            continue;
+        }
+        auto path = sym.loc(gs).file().data(gs).path();
+        auto owner = sym.owner(gs).show(gs);
+        withNames.emplace_back(absl::StrCat(path, ",", owner, ",", sym.showFullName(gs)), e.second);
+        sum += e.second;
+    }
+    fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
+    std::string output;
+    for (auto &p : withNames) {
+        output = absl::StrCat(output, p.first, ",", p.second, ",", sum, "\n");
+    }
+    FileOps::write(blameFilePath, output);
+#endif
+}
+
 } // namespace sorbet::realmain::pipeline

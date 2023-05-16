@@ -196,6 +196,8 @@ struct Options {
     bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
+    bool printBlameUntyped = false;
+    std::string untypedBlameFilePath = "untyped-blame.csv";
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
