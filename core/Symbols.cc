@@ -1827,11 +1827,12 @@ void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef su
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     ClassOrModuleRef selfRef = this->ref(ctx);
 
-    // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
-    // bloat the `sizeof class Symbol` with an extra field that most class sybmols will never use.
-    // Note: We had hoped to ALSO implement this method in the runtime, but we couldn't think of a way to make it work
-    // that didn't require running with the help of Stripe's autoloader, specifically because we might want to allow
-    // subclassing a sealed class across multiple files, not just one file.
+    // We record sealed subclasses on the method called core::Names::sealedSubclasses().
+    //
+    // This is so we don't bloat the `sizeof ClassOrModule` with an extra field that all non-sealed
+    // classes will never use.
+    //
+    // Note: this method actually exists at runtime as well--the name is not magic.
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
     auto sealedSubclasses =
         selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMethod(ctx, core::Names::sealedSubclasses());
@@ -1847,7 +1848,6 @@ void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef su
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
         auto right = cast_type_nonnull<ClassType>(orT->right);
-        ENFORCE(left);
         if (right.symbol == classOfSubclass) {
             return;
         }
