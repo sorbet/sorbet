@@ -319,7 +319,7 @@ module Psych
     params(
       yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
-      permitted_classes: T::Array[Class],
+      permitted_classes: T::Array[T::Class[T.anything]],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
       filename: T.nilable(String),
@@ -396,7 +396,7 @@ module Psych
       legacy_permitted_symbols: Object,
       legacy_aliases: Object,
       legacy_filename: Object,
-      permitted_classes: T::Array[Class],
+      permitted_classes: T::Array[T::Class[T.anything]],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
       filename: T.nilable(String),

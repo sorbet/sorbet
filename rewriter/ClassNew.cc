@@ -125,7 +125,10 @@ bool ClassNew::run(core::MutableContext ctx, ast::Send *send) {
     ast::ExpressionPtr type;
 
     if (argc == 0) {
-        type = ast::MK::Constant(send->loc, core::Symbols::Class());
+        auto zeroLoc = send->loc.copyWithZeroLength();
+        type =
+            ast::MK::Send1(send->loc, ast::MK::Constant(send->recv.loc(), core::Symbols::T_Class()),
+                           core::Names::squareBrackets(), zeroLoc, ast::MK::Constant(zeroLoc, core::Symbols::Object()));
     } else {
         auto target = send->getPosArg(0).deepCopy();
         type = ast::MK::ClassOf(send->loc, std::move(target));

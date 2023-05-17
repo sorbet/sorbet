@@ -14,7 +14,7 @@ test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, S
                   ^^^
   Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: T.any(Class, Exception, String),
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -71,7 +71,7 @@ test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, S
                   ^^^
   Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: T.any(Class, Exception, String),
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -128,7 +128,7 @@ test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, S
                   ^^^
   Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: T.any(Class, Exception, String),
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
