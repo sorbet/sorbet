@@ -841,12 +841,24 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
-            auto singleton = sym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+            auto attachedClass = sym.asClassOrModuleRef();
+            auto singleton = attachedClass.data(ctx)->lookupSingletonClass(ctx);
             if (!singleton.exists()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+            }
+            // modules do not have an <AttachedClass> on their singleton.
+            // TODO(jez) Maybe we should audit calls to typeArity and make it aware of this. Some
+            // usages will want to check that things are under the max, and some will want to check
+            // that they're over the min.
+            auto allowedDefaultTypeTemplates = attachedClass.data(ctx)->isModule() ? 0 : 1;
+            if (singleton.data(ctx)->typeArity(ctx) > allowedDefaultTypeTemplates) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::GenericClassWithoutTypeArgs)) {
+                    e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
+                                singleton.show(ctx));
+                }
             }
             return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noClassOrModule()};
         }
