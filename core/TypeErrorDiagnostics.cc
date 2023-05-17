@@ -92,8 +92,8 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
     }
 }
 
-void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
-                                                      core::Loc replaceLoc) {
+void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
+                                               core::Loc replaceLoc) {
     // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
     // if we're already looking at `T::Array` instead.
     klass = klass.maybeUnwrapBuiltinGenericForwarder();
@@ -109,9 +109,10 @@ void TypeErrorDiagnostics::insertUntypedTypeArguments(const GlobalState &gs, Err
             e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
         } else {
             auto numTypeArgs = klass.data(gs)->typeArity(gs);
+            auto arg = (klass == Symbols::Class() || klass == Symbols::T_Class()) ? "T.anything" : "T.untyped";
             vector<string> untypeds;
             for (int i = 0; i < numTypeArgs; i++) {
-                untypeds.emplace_back("T.untyped");
+                untypeds.emplace_back(arg);
             }
             e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
         }

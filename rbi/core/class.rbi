@@ -167,7 +167,7 @@ class Class < Module
   # ```
   sig do
     params(
-        arg0: Class,
+        arg0: T::Class[T.anything],
     )
     .returns(T.untyped)
   end
@@ -198,7 +198,7 @@ class Class < Module
   # B.subclasses        #=> [C]
   # C.subclasses        #=> []
   # ```
-  sig { returns(T::Array[Class]) }
+  sig { returns(T::Array[T::Class[T.anything]]) }
   def subclasses(); end
 
   # Returns the superclass of *class*, or `nil`.
@@ -217,26 +217,26 @@ class Class < Module
   # ```ruby
   # BasicObject.superclass   #=> nil
   # ```
-  sig {returns(T.nilable(Class))}
+  sig {returns(T.nilable(T::Class[T.anything]))}
   def superclass(); end
 
   sig {void}
   sig do
     params(
-        superclass: Class,
+        superclass: T::Class[T.anything],
     )
     .void
   end
   sig do
     params(
-        blk: T.proc.params(arg0: Class).returns(BasicObject),
+        blk: T.proc.params(arg0: T::Class[T.anything]).returns(BasicObject),
     )
     .void
   end
   sig do
     params(
-        superclass: Class,
-        blk: T.proc.params(arg0: Class).returns(BasicObject),
+        superclass: T::Class[T.anything],
+        blk: T.proc.params(arg0: T::Class[T.anything]).returns(BasicObject),
     )
     .void
   end

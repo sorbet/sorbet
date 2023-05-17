@@ -493,7 +493,7 @@ module Kernel
 
   sig do
     params(
-        arg0: Class,
+        arg0: T::Class[T.anything],
     )
     .returns(T::Boolean)
   end
@@ -638,7 +638,7 @@ module Kernel
   end
   def send(arg0, *arg1, &blk); end
 
-  sig {returns(Class)}
+  sig {returns(T::Class[T.anything])}
   def singleton_class(); end
 
   sig do
@@ -1272,7 +1272,7 @@ module Kernel
   end
   sig do
     params(
-        arg0: Class,
+        arg0: T::Class[T.anything],
         arg1: T.any(String, T::Array[String]),
     )
     .returns(T.noreturn)
@@ -2910,13 +2910,13 @@ module Kernel
   sig {returns(T.noreturn)}
   sig do
     params(
-        arg0: T.any(Class, Exception, String),
+        arg0: T.any(T::Class[T.anything], Exception, String),
     )
     .returns(T.noreturn)
   end
   sig do
     params(
-        arg0: T.any(Class, Exception),
+        arg0: T.any(T::Class[T.anything], Exception),
         arg1: T.untyped,
         arg2: T.nilable(T::Array[String]),
     )
