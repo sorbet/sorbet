@@ -94,6 +94,8 @@ build:release-debug-common --config=forcedebug
 build:release-debug-common --config=debugsymbols
 build:release-debug-common --config=skipslowenforce
 
+build:untyped-blame --copt=-DTRACK_UNTYPED_BLAME_MODE
+
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
