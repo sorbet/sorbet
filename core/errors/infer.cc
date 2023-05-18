@@ -23,6 +23,8 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, SymbolRef b
         prodHistogramInc("untyped.usages", file.id());
     }
 
+    prodCounterInc("types.input.untyped.usages");
+
     if constexpr (sorbet::track_untyped_blame_mode) {
         histogramInc("untyped.blames", blame.rawId());
     }
