@@ -902,4 +902,13 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       %i[a_public_method public],
     ], unique_method_redefinitions.sort)
   end
+
+  it "can mark a class abstract! even if it defines a method called method" do
+    Class.new do
+      extend T::Helpers
+      # bad override of Object#method
+      def self.method; end
+      abstract!
+    end
+  end
 end
