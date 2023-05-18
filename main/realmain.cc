@@ -950,13 +950,6 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
-        if constexpr (sorbet::debug_mode) {
-            if (opts.suggestSig) {
-                auto untypedSources = getAndClearHistogram("untyped.sources");
-                pipeline::printUntypedBlames(*gs, untypedSources, opts.untypedBlameFilePath);
-            }
-        }
-
         if constexpr (sorbet::track_untyped_blame_mode) {
             if (opts.printBlameUntyped) {
                 auto untypedBlames = getAndClearHistogram("untyped.blames");

@@ -299,12 +299,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
-                    } else if constexpr (sorbet::debug_mode) {
-                        if (bind.bind.type.hasUntyped()) {
-                            // TODO(jez) We use `hasUntyped`, but untypedBlame doesn't look inside the
-                            // type to find which part has untyped (it just looks at the top-level type).
-                            histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId());
-                        }
                     }
                 }
                 ENFORCE(bind.bind.type);
