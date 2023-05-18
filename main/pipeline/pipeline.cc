@@ -1291,6 +1291,9 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
         writer.String("symbol");
         writer.String(std::string(sym.name(gs).show(gs)));
 
+        writer.String("count");
+        writer.Int64(e.second);
+
         writer.EndObject();
     }
 
