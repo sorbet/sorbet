@@ -23,7 +23,9 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, SymbolRef b
         prodHistogramInc("untyped.usages", file.id());
     }
 
-    histogramInc("untyped.blames", blame.rawId());
+    if constexpr (sorbet::track_untyped_blame_mode) {
+        histogramInc("untyped.blames", blame.rawId());
+    }
 
     if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {
         return UntypedValueInformation;

@@ -950,30 +950,18 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
-        auto untypedSources = getAndClearHistogram("untyped.sources");
-        if (opts.suggestSig) {
-            ENFORCE(sorbet::debug_mode);
-            vector<pair<string, int>> withNames;
-            long sum = 0;
-            for (auto e : untypedSources) {
-                auto sym = core::SymbolRef::fromRaw(e.first);
-                if (!sym.exists() || !sym.loc(*gs).exists()) {
-                    continue;
-                }
-                auto path = sym.loc(*gs).file().data(*gs).path();
-                auto owner = sym.owner(*gs).show(*gs);
-                withNames.emplace_back(absl::StrCat(path, ",", owner, ",", sym.showFullName(*gs)), e.second);
-                sum += e.second;
-            }
-            fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-            for (auto &p : withNames) {
-                logger->error("{},{},{}", p.first, p.second, sum);
+        if constexpr (sorbet::debug_mode) {
+            if (opts.suggestSig) {
+                auto untypedSources = getAndClearHistogram("untyped.sources");
+                pipeline::printUntypedBlames(*gs, untypedSources, opts.untypedBlameFilePath);
             }
         }
 
-        if (opts.printBlameUntyped) {
-            auto untypedBlames = getAndClearHistogram("untyped.blames");
-            pipeline::printUntypedBlames(*gs, untypedBlames, opts.untypedBlameFilePath);
+        if constexpr (sorbet::track_untyped_blame_mode) {
+            if (opts.printBlameUntyped) {
+                auto untypedBlames = getAndClearHistogram("untyped.blames");
+                pipeline::printUntypedBlames(*gs, untypedBlames, opts.untypedBlameFilePath);
+            }
         }
     }
 

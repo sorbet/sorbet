@@ -8,7 +8,7 @@
 
 namespace sorbet {
 
-constexpr bool enable_counters = debug_mode;
+constexpr bool enable_counters = debug_mode || track_untyped_blame_mode;
 
 // A comment on the use of strings in this API
 //
