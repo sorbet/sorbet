@@ -1267,24 +1267,36 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> untypedBlames,
                         const std::string &blameFilePath) {
 #ifndef SORBET_REALMAIN_MIN
-    vector<pair<string, int>> withNames;
-    long sum = 0;
+
+    rapidjson::StringBuffer result;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(result);
+
+    writer.StartArray();
+
     for (auto e : untypedBlames) {
         auto sym = core::SymbolRef::fromRaw(e.first);
         if (!sym.exists() || !sym.loc(gs).exists()) {
             continue;
         }
-        auto path = sym.loc(gs).file().data(gs).path();
+
+        writer.StartObject();
+
+        writer.String("path");
+        writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+
+        writer.String("owner");
         auto owner = sym.owner(gs).show(gs);
-        withNames.emplace_back(absl::StrCat(path, ",", owner, ",", sym.showFullName(gs)), e.second);
-        sum += e.second;
+        writer.String(std::string(owner));
+
+        writer.String("symbol");
+        writer.String(std::string(sym.show(gs)));
+
+        writer.EndObject();
     }
-    fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-    std::string output;
-    for (auto &p : withNames) {
-        output = absl::StrCat(output, p.first, ",", p.second, ",", sum, "\n");
-    }
-    FileOps::write(blameFilePath, output);
+
+    writer.EndArray();
+    FileOps::write(blameFilePath, result.GetString());
+
 #endif
 }
 

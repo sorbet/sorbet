@@ -197,7 +197,7 @@ struct Options {
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
     bool printBlameUntyped = false;
-    std::string untypedBlameFilePath = "untyped-blame.csv";
+    std::string untypedBlameFilePath = "untyped-blame.json";
 
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
