@@ -550,6 +550,8 @@ public:
     // Returns the locations that are allowed to subclass the sealed class.
     const SymbolRef::LOC_store &sealedLocs(const GlobalState &gs) const;
 
+    void sealedSubclassesToApplied(GlobalState &gs);
+
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
     bool hasSingleSealedSubclass(const GlobalState &ctx) const;
