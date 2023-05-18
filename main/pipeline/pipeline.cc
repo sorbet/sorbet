@@ -1289,7 +1289,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
         writer.String(std::string(owner));
 
         writer.String("symbol");
-        writer.String(std::string(sym.show(gs)));
+        writer.String(std::string(sym.name(gs).show(gs)));
 
         writer.EndObject();
     }

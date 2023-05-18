@@ -971,9 +971,8 @@ int realmain(int argc, char *argv[]) {
             }
         }
 
-        auto untypedBlames = getAndClearHistogram("untyped.blames");
         if (opts.printBlameUntyped) {
-            logger->info("untypedBlames size: {}", untypedBlames.size());
+            auto untypedBlames = getAndClearHistogram("untyped.blames");
             pipeline::printUntypedBlames(*gs, untypedBlames, opts.untypedBlameFilePath);
         }
     }
