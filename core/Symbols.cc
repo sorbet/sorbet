@@ -1820,12 +1820,12 @@ ClassOrModuleRef ClassOrModule::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
-    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(ctx).show(ctx));
-    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
+void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass) {
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(gs).show(gs));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
-    ClassOrModuleRef selfRef = this->ref(ctx);
+    ClassOrModuleRef selfRef = this->ref(gs);
 
     // We record sealed subclasses on the method called core::Names::sealedSubclasses().
     //
@@ -1833,11 +1833,11 @@ void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef su
     // classes will never use.
     //
     // Note: this method actually exists at runtime as well--the name is not magic.
-    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
+    auto classOfSubclass = subclass.data(gs)->singletonClass(gs);
     auto sealedSubclasses =
-        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMethod(ctx, core::Names::sealedSubclasses());
+        selfRef.data(gs)->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
-    auto data = sealedSubclasses.data(ctx);
+    auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
