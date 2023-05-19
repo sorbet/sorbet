@@ -34,6 +34,6 @@ extend T::Sig
 
 sig {params(x: T.all(A, M)).void}
 def example(x)
-  T.reveal_type(x.class) # error: `T.class_of(A)`
+  T.reveal_type(x.class) # error: `T.class_of(A)[T.all(A, M)]`
   T.reveal_type(x.class.new) # error: `T.all(A, M)`
 end
