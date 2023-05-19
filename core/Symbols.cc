@@ -774,6 +774,8 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
     if (result.exists()) {
         return result;
     }
+    // Make a new method that is basically this method from here onwards (ie. none of the stuff above)
+    // can also assumed flag.isLinearizationComputed == true
     if (flags.isLinearizationComputed) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());

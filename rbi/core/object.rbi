@@ -27,4 +27,9 @@
 class Object < BasicObject
   include Kernel
 
+  private
+
+  def initialize_clone(*args); end
+  def initialize_copy(orig); end
+  def initialize_dup(orig); end
 end
