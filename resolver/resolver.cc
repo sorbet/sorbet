@@ -2079,7 +2079,6 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
-        vector<core::ClassOrModuleRef> todoSealedClassItems;
     };
 
     struct ResolveTypeMembersAndFieldsResult {
@@ -2095,7 +2094,6 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
     vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
     vector<ResolveMethodAliasItem> todoMethodAliasItems_;
-    vector<core::ClassOrModuleRef> todoSealedClassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -2886,10 +2884,6 @@ public:
         if (isGenericResolved(ctx, klass.symbol)) {
             todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
-
-        if (klass.symbol.data(ctx)->flags.isSealed) {
-            todoSealedClassItems_.emplace_back(klass.symbol);
-        }
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -3224,7 +3218,6 @@ public:
                 output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
                 output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
-                output.todoSealedClassItems = move(walk.todoSealedClassItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -3241,7 +3234,6 @@ public:
         vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
         vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
-        vector<vector<core::ClassOrModuleRef>> combinedTodoSealedClassItems;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
@@ -3263,7 +3255,6 @@ public:
                     combinedTodoResolveSimpleStaticFieldItems.emplace_back(
                         move(threadResult.todoResolveSimpleStaticFieldItems));
                     combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
-                    combinedTodoSealedClassItems.emplace_back(move(threadResult.todoSealedClassItems));
                 }
             }
         }
@@ -3371,11 +3362,6 @@ public:
             for (auto &job : threadTodos) {
                 core::MutableContext ctx(gs, job.owner, job.file);
                 resolveMethodAlias(ctx, job);
-            }
-        }
-        for (auto &threadTodos : combinedTodoSealedClassItems) {
-            for (auto &sealedClass : threadTodos) {
-                sealedClass.data(gs)->sealedSubclassesToApplied(gs);
             }
         }
 

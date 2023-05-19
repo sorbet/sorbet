@@ -155,7 +155,6 @@ public:
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
-    static TypePtr setOf(const TypePtr &elem);
     static TypePtr tClass(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 

@@ -1269,7 +1269,9 @@ private:
 
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
-            sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+            vector<core::TypePtr> targs{core::Types::bottom()};
+            sealedSubclasses.data(ctx)->resultType =
+                core::make_type<core::AppliedType>(core::Symbols::Set(), move(targs));
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
             symbolData->flags.isAbstract = true;
