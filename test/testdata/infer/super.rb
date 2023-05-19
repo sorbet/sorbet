@@ -1,7 +1,8 @@
 # typed: true
 
 module M
-  def foo
+  sig { returns(Integer) }
+  def baz
     T.reveal_type(super) # error: Revealed type: `T.untyped`
   end
 end
@@ -22,6 +23,8 @@ class A
 end
 
 class B < A
+  include M
+
   sig { params(x: Integer).returns(Integer) }
   def foo(x)
     super # error: 
@@ -35,5 +38,10 @@ class B < A
     super("a") # error: 
     super # error: 
     super(1)
+  end
+
+  sig { returns(Integer) }
+  def baz
+    T.reveal_type(super) # error: Revealed type: `Integer`
   end
 end
