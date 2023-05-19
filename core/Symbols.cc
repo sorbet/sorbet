@@ -1847,74 +1847,38 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
-        auto right = cast_type_nonnull<ClassType>(orT->right);
-        if (right.symbol == classOfSubclass) {
+        core::ClassOrModuleRef subclass;
+        if (auto *right = cast_type<AppliedType>(orT->right)) {
+            subclass = right->klass;
+        } else if (isa_type<ClassType>(orT->right)) {
+            auto right = cast_type_nonnull<ClassType>(orT->right);
+            subclass = right.symbol;
+        } else {
+            ENFORCE(false, "Unexpected type in sealedSubclasses!")
+        }
+        if (subclass == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
+
+    core::ClassOrModuleRef lastClass;
+    if (auto *lastType = cast_type<AppliedType>(*iter)) {
+        lastClass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(*iter)) {
+        auto lastType = cast_type_nonnull<ClassType>(*iter);
+        lastClass = lastType.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+    }
+    if (lastClass == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
+        appliedType->targs[0] = OrType::make_shared(currentClasses, classOfSubclass.data(gs)->externalType());
     } else {
-        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
+        appliedType->targs[0] = classOfSubclass.data(gs)->externalType();
     }
-}
-
-namespace {
-
-TypePtr sealedSubclassesToAppliedImpl(const GlobalState &gs, TypePtr currentClasses) {
-    if (currentClasses.isBottom()) {
-        // Declared sealed parent class, but never saw any children.
-        return currentClasses;
-    }
-
-    auto result = Types::bottom();
-    while (auto orType = cast_type<OrType>(currentClasses)) {
-        if (isa_type<AppliedType>(orType->right)) {
-            // We already converted ClassTypes to AppliedTypes once; don't need to do it again.
-            // (This might happen if e.g. a class is opened once in a Ruby file and again in an RBI)
-            // However, if all the subclasses are modules, this short circuit might never happen.
-            // That's fine though, because this method should be idempotent.
-            return currentClasses;
-        }
-
-        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
-        auto classType = cast_type_nonnull<ClassType>(orType->right);
-        result = Types::any(gs, classType.symbol.data(gs)->externalType(), result);
-        currentClasses = orType->left;
-    }
-
-    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
-    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
-    result = Types::any(gs, lastClassType.symbol.data(gs)->externalType(), result);
-
-    return result;
-}
-
-} // namespace
-
-// When we call recordSealedSubclass in ResolveConstantsWalk, we've only just resolved
-// ancestors, but haven't created all the type members for classes yet (including <AttachedClass>).
-//
-// This method is called later, when those type members are created, and converts the
-// `T.class_of(...)` types inside the from `ClassType` to `AppliedType` with their
-// `<AttachedClass>` type members properly applied.
-void ClassOrModule::sealedSubclassesToApplied(GlobalState &gs) {
-    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
-
-    auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
-
-    auto data = sealedSubclasses.data(gs);
-    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType);
-    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
-    auto currentClasses = appliedType->targs[0];
-
-    data->resultType = Types::setOf(sealedSubclassesToAppliedImpl(gs, currentClasses));
 }
 
 const InlinedVector<Loc, 2> &ClassOrModule::sealedLocs(const GlobalState &gs) const {

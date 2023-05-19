@@ -1285,18 +1285,6 @@ private:
         owner.data(gs)->recordRequiredAncestor(gs, symbol, blockLoc);
     }
 
-    static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
-        ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
-        auto ancestorSym = job.ancestor->symbol.dealias(ctx).asClassOrModuleRef();
-
-        if (!ancestorSym.data(ctx)->flags.isSealed) {
-            return;
-        }
-        Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
-
-        ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
-    }
-
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
                            bool isInclude, bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
@@ -1836,9 +1824,6 @@ public:
                     const auto origSize = job.items.size();
                     auto g = [&](AncestorResolutionItem &item) -> bool {
                         auto resolved = resolveAncestorJob(ctx, item, false);
-                        if (resolved) {
-                            tryRegisterSealedSubclass(ctx, item);
-                        }
                         return resolved;
                     };
                     auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
@@ -2069,6 +2054,11 @@ class ResolveTypeMembersAndFieldsWalk {
         core::NameRef fromName;
     };
 
+    struct RecordSealedSubclassItem {
+        core::ClassOrModuleRef sealedClass;
+        core::ClassOrModuleRef subclass;
+    };
+
     struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
@@ -2079,7 +2069,7 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
-        vector<core::ClassOrModuleRef> todoSealedClassItems;
+        vector<RecordSealedSubclassItem> todoSealedSubclassItems;
     };
 
     struct ResolveTypeMembersAndFieldsResult {
@@ -2095,7 +2085,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
     vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
     vector<ResolveMethodAliasItem> todoMethodAliasItems_;
-    vector<core::ClassOrModuleRef> todoSealedClassItems_;
+    vector<RecordSealedSubclassItem> todoSealedSubclassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -2887,8 +2877,23 @@ public:
             todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
 
-        if (klass.symbol.data(ctx)->flags.isSealed) {
-            todoSealedClassItems_.emplace_back(klass.symbol);
+        for (const auto &ancestor : klass.ancestors) {
+            auto *ancestorCnst = ast::cast_tree<ast::ConstantLit>(ancestor);
+            if (ancestorCnst == nullptr) {
+                continue;
+            }
+
+            auto dealiased = ancestorCnst->symbol.dealias(ctx);
+            if (!dealiased.isClassOrModule()) {
+                continue;
+            }
+
+            auto ancestorSym = dealiased.asClassOrModuleRef();
+            if (!ancestorSym.data(ctx)->flags.isSealed) {
+                continue;
+            }
+
+            todoSealedSubclassItems_.emplace_back(RecordSealedSubclassItem{ancestorSym, klass.symbol});
         }
     }
 
@@ -3224,7 +3229,7 @@ public:
                 output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
                 output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
-                output.todoSealedClassItems = move(walk.todoSealedClassItems_);
+                output.todoSealedSubclassItems = move(walk.todoSealedSubclassItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -3241,7 +3246,7 @@ public:
         vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
         vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
-        vector<vector<core::ClassOrModuleRef>> combinedTodoSealedClassItems;
+        vector<vector<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
@@ -3263,7 +3268,7 @@ public:
                     combinedTodoResolveSimpleStaticFieldItems.emplace_back(
                         move(threadResult.todoResolveSimpleStaticFieldItems));
                     combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
-                    combinedTodoSealedClassItems.emplace_back(move(threadResult.todoSealedClassItems));
+                    combinedTodoSealedSubclassItems.emplace_back(move(threadResult.todoSealedSubclassItems));
                 }
             }
         }
@@ -3373,9 +3378,12 @@ public:
                 resolveMethodAlias(ctx, job);
             }
         }
-        for (auto &threadTodos : combinedTodoSealedClassItems) {
-            for (auto &sealedClass : threadTodos) {
-                sealedClass.data(gs)->sealedSubclassesToApplied(gs);
+        {
+            Timer timeit(gs.tracer(), "resolver.registerSealedSubclass");
+            for (auto &threadTodos : combinedTodoSealedSubclassItems) {
+                for (auto &[sealedClass, subclass] : threadTodos) {
+                    sealedClass.data(gs)->recordSealedSubclass(gs, subclass);
+                }
             }
         }
 
