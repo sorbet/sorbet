@@ -25,8 +25,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
     <self>.enums() do ||
       begin
-        <emptyTree>::<C X> = ::<Magic>.<self-new>(<self>)
-        <emptyTree>::<C Y> = <cast:let>(::<Magic>.<self-new>(<self>), <todo sym>, <self>)
+        <emptyTree>::<C X> = <self>.new()
+        <emptyTree>::<C Y> = <cast:let>(<self>.new(), <todo sym>, <self>)
       end
     end
   end

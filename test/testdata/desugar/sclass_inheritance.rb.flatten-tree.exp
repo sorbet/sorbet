@@ -54,7 +54,7 @@ begin
   end
   class <singleton class><<Class:A>> < (::MM)
     def newer(<blk>)
-      ::<Magic>.<self-new>(<self>)
+      <self>.new()
     end
 
     def self.<static-init>(<blk>)
@@ -67,7 +67,7 @@ begin
   end
   class ::B<<C B>> < (::<todo sym>)
     def self.newer(<blk>)
-      ::<Magic>.<self-new>(<self>)
+      <self>.new()
     end
 
     def self.<static-init>(<blk>)

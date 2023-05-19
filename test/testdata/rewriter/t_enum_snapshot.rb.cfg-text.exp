@@ -164,7 +164,7 @@ method ::<Class:NotAnEnum>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <C X>$8: T.untyped = alias <C X>
-    <C Y>$15: NotAnEnum = alias <C Y>
+    <C Y>$13: NotAnEnum = alias <C Y>
     <self>: T.class_of(NotAnEnum) = cast(<self>: NilClass, T.class_of(NotAnEnum));
     <block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: T.class_of(NotAnEnum).enums()
     <selfRestore>$5: T.class_of(NotAnEnum) = <self>
@@ -178,7 +178,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.class_of(NotAnEnum), <C X>$8: T.untyped, <C Y>$15: NotAnEnum):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.class_of(NotAnEnum), <C X>$8: T.untyped, <C Y>$13: NotAnEnum):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -191,20 +191,18 @@ bb3[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Stati
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=12](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.class_of(NotAnEnum), <C X>$8: T.untyped, <C Y>$15: NotAnEnum):
+bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(NotAnEnum), <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: T.class_of(NotAnEnum), <C X>$8: T.untyped, <C Y>$13: NotAnEnum):
     # outerLoops: 1
     <self>: T.class_of(NotAnEnum) = loadSelf(enums)
     <cfgAlias>$10: T.class_of(<Magic>) = alias <C <Magic>>
-    <cfgAlias>$13: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$11: T.attached_class (of NotAnEnum) = <cfgAlias>$13: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
+    <statTemp>$11: T.attached_class (of NotAnEnum) = <self>: T.class_of(NotAnEnum).new()
     <C X>$8: T.attached_class (of NotAnEnum) = <cfgAlias>$10: T.class_of(<Magic>).<suggest-constant-type>(<statTemp>$11: T.attached_class (of NotAnEnum))
-    keep_for_ide$16: T.class_of(NotAnEnum) = <self>
-    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
-    <cfgAlias>$19: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$17: T.attached_class (of NotAnEnum) = <cfgAlias>$19: T.class_of(<Magic>).<self-new>(<self>: T.class_of(NotAnEnum))
-    <C Y>$15: NotAnEnum = cast(<castTemp>$17: T.attached_class (of NotAnEnum), NotAnEnum);
-    <blockReturnTemp>$6: NotAnEnum = <C Y>$15
-    <blockReturnTemp>$21: T.noreturn = blockreturn<enums> <blockReturnTemp>$6: NotAnEnum
+    keep_for_ide$14: T.class_of(NotAnEnum) = <self>
+    keep_for_ide$14: T.untyped = <keep-alive> keep_for_ide$14
+    <castTemp>$15: T.attached_class (of NotAnEnum) = <self>: T.class_of(NotAnEnum).new()
+    <C Y>$13: NotAnEnum = cast(<castTemp>$15: T.attached_class (of NotAnEnum), NotAnEnum);
+    <blockReturnTemp>$6: NotAnEnum = <C Y>$13
+    <blockReturnTemp>$17: T.noreturn = blockreturn<enums> <blockReturnTemp>$6: NotAnEnum
     <unconditional> -> bb2
 
 }
