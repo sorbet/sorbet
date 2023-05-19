@@ -1032,15 +1032,26 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 }
             }
             if (klass == core::Symbols::StubModule()) {
-                // Though for normal types _and_ stub types `infer` should use `externalType`,
-                // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
-                // where we won't see difference between two different unresolved stubs(or a mistyped stub). thus,
-                // while normally we would treat stubs as untyped, in `sig`s we treat them as proper types, so that
-                // we can correctly hash them.
-                auto unresolvedPath = i.fullUnresolvedPath(ctx);
-                ENFORCE(unresolvedPath.has_value());
-                result.type =
-                    core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
+                if (maybeAliased != sym) {
+                    // There is a bug here, where were don't take the fast path when fixing a
+                    // constant resolution error in a class alias.
+                    // We can't use our normal trick with fullUnresolvedPath though, because we only
+                    // store that on the constant lit that fails to resolve. In this case, the
+                    // constant lit itself resolves, but points at something that doesn't resolve,
+                    // so there's no resolutionScopes on the constant that we can use to create an
+                    // UnresolvedClassType. Just default to untyped.
+                    result.type = core::Types::untypedUntracked();
+                } else {
+                    // Though for normal types _and_ stub types `infer` should use `externalType`,
+                    // using `externalType` for stub types here will lead to incorrect handling of global state hashing,
+                    // where we won't see difference between two different unresolved stubs(or a mistyped stub). thus,
+                    // while normally we would treat stubs as untyped, in `sig`s we treat them as proper types, so that
+                    // we can correctly hash them.
+                    auto unresolvedPath = i.fullUnresolvedPath(ctx);
+                    ENFORCE(unresolvedPath.has_value());
+                    result.type =
+                        core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
+                }
             } else {
                 result.type = klass.data(ctx)->externalType();
             }
