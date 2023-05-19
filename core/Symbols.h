@@ -545,12 +545,10 @@ public:
 
     ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
-    void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
+    void recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass);
 
     // Returns the locations that are allowed to subclass the sealed class.
     const SymbolRef::LOC_store &sealedLocs(const GlobalState &gs) const;
-
-    void sealedSubclassesToApplied(GlobalState &gs);
 
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 

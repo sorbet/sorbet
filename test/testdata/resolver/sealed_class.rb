@@ -22,7 +22,7 @@ def foo(x)
   end
 end
 
-T.reveal_type(AbstractParent.sealed_subclasses) # error: Revealed type: `T::Set[T.any(T.class_of(Child2), T.class_of(Child3), T.class_of(Child1))]`
+T.reveal_type(AbstractParent.sealed_subclasses) # error: Revealed type: `T::Set[T.any(T.class_of(Child1), T.class_of(Child2), T.class_of(Child3))]`
 
 
 class EmptyParent
