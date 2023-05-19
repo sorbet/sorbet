@@ -169,7 +169,7 @@ class Index extends React.Component {
                   title: 'sorbet-struct-comparable',
                   link: 'https://github.com/samuelgiles/sorbet-struct-comparable',
                   description:
-                    'Comparable T::Struct's for the equality focused typed Ruby developer',
+                    "Comparable T::Struct's for the equality focused typed Ruby developer",
                 },
                 {
                   title: 'Parlour',
