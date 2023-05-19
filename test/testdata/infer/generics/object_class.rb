@@ -23,3 +23,17 @@ class Get
     x
   end
 end
+
+class A
+end
+
+module M
+end
+
+extend T::Sig
+
+sig {params(x: T.all(A, M)).void}
+def example(x)
+  T.reveal_type(x.class)
+  T.reveal_type(x.class.new)
+end
