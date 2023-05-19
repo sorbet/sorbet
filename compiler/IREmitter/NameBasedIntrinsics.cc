@@ -891,6 +891,7 @@ static const vector<CallCMethod> knownCMethods{
      core::ClassOrModuleRef()},
     {core::Names::stringInterpolate(), "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::String()},
+    {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,

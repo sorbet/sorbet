@@ -730,6 +730,10 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg2()) // method name where assign is
                  .untypedArg(Names::arg3()) // name of variable
                  .buildWithResultUntyped();
+    // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.attachedClass(arg: *T.untyped) => T.untyped
     // (accept any args to avoid repeating errors that would otherwise be reported by type syntax parsing)
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::attachedClass())

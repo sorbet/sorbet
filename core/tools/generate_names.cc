@@ -446,6 +446,7 @@ NameDef names[] = {
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
     {"blockBreak", "<block-break>"},
+    {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
 
     // Packager

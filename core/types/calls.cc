@@ -2000,6 +2000,7 @@ public:
             dispatched.main.errors.emplace_back(std::move(err));
         }
         res.main.errors.clear();
+        res.returnType = instanceTy;
         res.main = move(dispatched.main);
         if (!res.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
@@ -2758,6 +2759,70 @@ public:
         }
     }
 } Magic_suggestUntypedFieldType;
+
+/**
+ * This is a special version of `new` that will return `T.attached_class`
+ * instead.
+ */
+class Magic_selfNew : public IntrinsicMethod {
+public:
+    vector<NameRef> dispatchesTo() const override {
+        // Technically only dispatches to `new` but we manually flatten the chain to avoid having to
+        // compute the transitive closure of dispatchesTo.
+        return {core::Names::new_(), core::Names::initialize()};
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // args[0] is the Class to create an instance of
+        // args[1..] are the arguments to the constructor
+
+        if (args.args.empty()) {
+            res.returnType = core::Types::untypedUntracked();
+            return;
+        }
+
+        auto selfTy = *args.args[0];
+        auto mustExist = true;
+        ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type, mustExist);
+
+        uint16_t numPosArgs = args.numPosArgs - 1;
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgStore;
+        InlinedVector<LocOffsets, 2> sendArgLocs;
+        for (int i = 1; i < args.args.size(); ++i) {
+            sendArgStore.emplace_back(args.args[i]);
+            sendArgLocs.emplace_back(args.locs.args[i]);
+        }
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, sendArgLocs};
+
+        DispatchArgs innerArgs{Names::new_(),    sendLocs,           numPosArgs,
+                               sendArgStore,     selfTy.type,        selfTy,
+                               selfTy.type,      args.block,         args.originForUninitialized,
+                               args.isPrivateOk, args.suppressErrors};
+        auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
+        auto returnTy = dispatched.returnType;
+
+        // If we actually dispatch to something that looks like a construtor, replace return with `T.attached_class`
+        if (self.data(gs)->isSingletonClass(gs) && dispatched.main.method.exists() &&
+            (dispatched.main.method == core::Symbols::Class_new() ||
+             dispatched.main.method.data(gs)->name == core::Names::initialize())) {
+            // TODO(jez) This doesn't handle when initialize is overloaded
+            // AttachedClass will only be missing on `T.untyped`, which will have a dispatch component of noSymbol
+            auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+            ENFORCE(attachedClass.exists());
+
+            returnTy = make_type<SelfTypeParam>(attachedClass);
+        }
+
+        for (auto &err : res.main.errors) {
+            dispatched.main.errors.emplace_back(std::move(err));
+        }
+        res.main.errors.clear();
+        res.main = move(dispatched.main);
+        res.returnType = returnTy;
+        res.main.sendTp = returnTy;
+    }
+} Magic_selfNew;
 
 class Magic_attachedClass : public IntrinsicMethod {
 public:
@@ -4184,6 +4249,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestConstantType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestFieldType(), &Magic_suggestUntypedFieldType},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::attachedClass(), &Magic_attachedClass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkAndAnd(), &Magic_checkAndAnd},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},

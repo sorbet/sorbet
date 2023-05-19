@@ -17,7 +17,7 @@ class Box
     klass = self.class
     T.reveal_type(klass) # error: `T.class_of(Box)`
     new_box = self.class.new(new_val)
-    T.reveal_type(new_box) # error: `Box[Box::Elem]`
+    T.reveal_type(new_box) # error: `Box[T.untyped]`
 
     box_elem_class = self.class[Elem]
     T.reveal_type(box_elem_class) # error: Runtime object representing type: Box[Box::Elem]
