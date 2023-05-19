@@ -305,9 +305,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
-      ::<Magic>.<self-new>(<self>).x()
+      <self>.new().x()
 
-      ::<Magic>.<self-new>(<self>).foo()
+      <self>.new().foo()
     end
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -339,13 +339,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
-      ::<Magic>.<self-new>(<self>).x()
+      <self>.new().x()
 
-      ::<Magic>.<self-new>(<self>).foo()
+      <self>.new().foo()
 
-      ::<Magic>.<self-new>(<self>, 1, 2)
+      <self>.new(1, 2)
 
-      ::<Magic>.<self-new>(<self>, :giberish, 1)
+      <self>.new(:giberish, 1)
     end
 
     <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)

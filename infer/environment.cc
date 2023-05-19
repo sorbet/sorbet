@@ -1781,7 +1781,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
             result.type = lambdaParam->upperBound;
         } else {
-            result.type = rebind.data(ctx)->externalType();
+            result.type = rebind.data(ctx)->selfType(ctx);
         }
 
         result.origins.emplace_back(main.blockSpec.loc);

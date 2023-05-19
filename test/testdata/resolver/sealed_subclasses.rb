@@ -32,3 +32,9 @@ end
 
 y = T.must(Parent.sealed_subclasses.first)
 T.let(y, T.class_of(Parent))
+
+Parent.sealed_subclasses.each do |klass|
+  T.reveal_type(klass) # error: `T.any(T.class_of(Child1), T.class_of(Child2))`
+  instance = klass.new
+  T.reveal_type(instance) # error: `T.any(Child1, Child2)`
+end
