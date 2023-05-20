@@ -46,7 +46,6 @@ module M
     # ^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(String)` for method result type
     else
       return self.class.name
-    # ^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(String)` for method result type
     end
   end
 end
