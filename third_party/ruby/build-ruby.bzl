@@ -120,7 +120,7 @@ touch opt_sc.inc optinsn.inc optunifs.inc insns.inc insns_info.inc vmtc.inc vm.i
 # We also need to touch these files, since they depend on id.h.  But we are only
 # defining new global identifiers to use in C code; we're not touching tokens used
 # by the parser in any way.
-touch parse.c parse.h parse.y
+touch ext/ripper/ripper.y parse.c parse.h parse.y
 
 run_cmd make V=1 -j8
 run_cmd make V=1 install
