@@ -219,8 +219,8 @@ index f1d8966bb3..14980465db 100644
 +static VALUE
 +vm_opt_is_a_p(CALL_DATA cd, VALUE recv, VALUE mod)
 +{
-+    if (mod == rb_cInteger) {
-+        return FIXNUM_P(recv) ? Qtrue : Qfalse;
++    if (FIXNUM_P(recv) && mod == rb_cInteger) {
++        return Qtrue;
 +    }
 +    if (!SPECIAL_CONST_P(recv) && mod == rb_cHash) {
 +        return RB_TYPE_P(recv, T_HASH) ? Qtrue : Qfalse;
