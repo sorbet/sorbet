@@ -6,12 +6,12 @@ begin
         ::A = 91
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <keep-for-ide>(::B)
           <emptyTree>
         end
         ::B = 91

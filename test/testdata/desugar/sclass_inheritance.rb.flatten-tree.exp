@@ -13,23 +13,23 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::MM)
+          <keep-for-ide>(::MM)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <keep-for-ide>(::B)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::C)
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::C)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         <runtime method definition of main>
@@ -47,7 +47,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::MM)
+        <keep-for-ide>(::MM)
         <emptyTree>
       end
     end

@@ -44,7 +44,7 @@ begin
 
         <runtime method definition of baz>
       end
-      ::Sorbet::Private::Static.keep_for_ide(::Test)
+      <keep-for-ide>(::Test)
       <emptyTree>
     end
   end

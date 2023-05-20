@@ -4,7 +4,7 @@ begin
       module ::Constants<<C Constants>> < ()
         ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES = 200
       end
-      ::Sorbet::Private::Static.keep_for_ide(::Constants)
+      <keep-for-ide>(::Constants)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ begin
       module ::Routes::Helpers<<C Helpers>> < ()
         ::Routes::Helpers::MAX_NUM_ADDITIONAL_DEVBOXES = ::Constants::MAX_NUM_ADDITIONAL_DEVBOXES
       end
-      ::Sorbet::Private::Static.keep_for_ide(::Routes::Helpers)
+      <keep-for-ide>(::Routes::Helpers)
       <emptyTree>
     end
 
@@ -20,7 +20,7 @@ begin
       module ::Routes::WillCollapseOut<<C WillCollapseOut>> < ()
         ::Routes::WillCollapseOut::Helpers = ::Routes::Helpers
       end
-      ::Sorbet::Private::Static.keep_for_ide(::Routes::WillCollapseOut)
+      <keep-for-ide>(::Routes::WillCollapseOut)
       <emptyTree>
     end
 

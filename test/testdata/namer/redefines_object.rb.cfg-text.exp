@@ -2,24 +2,24 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=20]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(Object) = alias <C Object>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Object))
-    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$16: T.class_of(Trigger) = alias <C Trigger>
-    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$16: T.class_of(Trigger))
-    <cfgAlias>$21: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$23: T.class_of(Foo) = alias <C Foo>
-    <statTemp>$19: Sorbet::Private::Static::Void = <cfgAlias>$21: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$23: T.class_of(Foo))
-    <cfgAlias>$26: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$28: T.class_of(Bar) = alias <C Bar>
-    <statTemp>$24: Sorbet::Private::Static::Void = <cfgAlias>$26: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$28: T.class_of(Bar))
-    <cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$35: T.class_of(Bar) = alias <C Bar>
-    <statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(Bar))
-    <cfgAlias>$38: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$40: T.class_of(Foo) = alias <C Foo>
-    <statTemp>$36: Sorbet::Private::Static::Void = <cfgAlias>$38: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$40: T.class_of(Foo))
+    <cfgAlias>$7: T.class_of(Object) = alias <C Object>
+    keep_for_ide$6: T.class_of(Object) = <cfgAlias>$7
+    keep_for_ide$6: T.untyped = <keep-alive> keep_for_ide$6
+    <cfgAlias>$12: T.class_of(Trigger) = alias <C Trigger>
+    keep_for_ide$11: T.class_of(Trigger) = <cfgAlias>$12
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
+    <cfgAlias>$17: T.class_of(Foo) = alias <C Foo>
+    keep_for_ide$16: T.class_of(Foo) = <cfgAlias>$17
+    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
+    <cfgAlias>$20: T.class_of(Bar) = alias <C Bar>
+    keep_for_ide$19: T.class_of(Bar) = <cfgAlias>$20
+    keep_for_ide$19: T.untyped = <keep-alive> keep_for_ide$19
+    <cfgAlias>$25: T.class_of(Bar) = alias <C Bar>
+    keep_for_ide$24: T.class_of(Bar) = <cfgAlias>$25
+    keep_for_ide$24: T.untyped = <keep-alive> keep_for_ide$24
+    <cfgAlias>$28: T.class_of(Foo) = alias <C Foo>
+    keep_for_ide$27: T.class_of(Foo) = <cfgAlias>$28
+    keep_for_ide$27: T.untyped = <keep-alive> keep_for_ide$27
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

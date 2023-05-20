@@ -18,38 +18,38 @@ begin
       begin
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
+          <keep-for-ide>(::A)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
+          <keep-for-ide>(::B)
           <emptyTree>
         end
         $c = ::Object.new()
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::D)
+          <keep-for-ide>(::D)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::E)
+          <keep-for-ide>(::E)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::F)
+          <keep-for-ide>(::F)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::G)
+          <keep-for-ide>(::G)
           <emptyTree>
         end
         begin
           <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::H)
+          <keep-for-ide>(::H)
           <emptyTree>
         end
         <runtime method definition of main>
@@ -201,7 +201,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
+        <keep-for-ide>(::<Class:H>::H2)
         <emptyTree>
       end
     end
