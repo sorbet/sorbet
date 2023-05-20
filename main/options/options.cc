@@ -80,6 +80,7 @@ const vector<PrintOptions> print_options({
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
     {"payload-sources", &Printers::PayloadSources},
+    {"token-prop-analysis", &Printers::TokenPropAnalysis, true},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -148,6 +149,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         AutogenMsgPack,
         AutogenAutoloader,
         AutogenSubclasses,
+        TokenPropAnalysis,
         Packager,
         MinimizeRBI,
         PayloadSources,
@@ -155,7 +157,8 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
 }
 
 bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled;
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled ||
+           TokenPropAnalysis.enabled;
 }
 
 struct StopAfterOptions {

@@ -83,6 +83,7 @@ struct Printers {
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
+    PrinterConfig TokenPropAnalysis;
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
     PrinterConfig PayloadSources;
