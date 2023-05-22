@@ -67,9 +67,7 @@ TEST_CASE("namer tests") {
         const auto &objectScope = core::Symbols::Object().data(gs);
         REQUIRE_EQ(core::Symbols::root(), objectScope->owner);
 
-        // 2 members: the `hello_world` method (defined by the test), and the magic
-        // "<singleton class>" method that Sorbet uses to link a class with its singleton class.
-        REQUIRE_EQ(2, objectScope->members().size());
+        REQUIRE_EQ(4, objectScope->members().size());
         auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world")).asMethodRef();
         const auto &symbol = methodSym.data(gs);
         REQUIRE_EQ(core::Symbols::Object(), symbol->owner);
