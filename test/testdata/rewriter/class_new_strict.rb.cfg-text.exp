@@ -19,8 +19,8 @@ method ::<Class:A>#make {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <cfgAlias>$5: T.class_of(Class) = alias <C Class>
-    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Class).new()
+    <cfgAlias>$5: T.class_of(Class)[T::Class[T.anything]] = alias <C Class>
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(Class)[T::Class[T.anything]].new()
     <selfRestore>$7: T.class_of(A) = <self>
     <unconditional> -> bb2
 
@@ -41,9 +41,9 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$6
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(A)):
     _cls: T::Class[Object] = Solve<<block-pre-call-temp>$6, new>
     <self>: T.class_of(A) = <selfRestore>$7
-    <cfgAlias>$18: T.class_of(Class) = alias <C Class>
+    <cfgAlias>$18: T.class_of(Class)[T::Class[T.anything]] = alias <C Class>
     <cfgAlias>$20: T.class_of(A) = alias <C A>
-    <block-pre-call-temp>$21: Sorbet::Private::Static::Void = <cfgAlias>$18: T.class_of(Class).new(<cfgAlias>$20: T.class_of(A))
+    <block-pre-call-temp>$21: Sorbet::Private::Static::Void = <cfgAlias>$18: T.class_of(Class)[T::Class[T.anything]].new(<cfgAlias>$20: T.class_of(A))
     <selfRestore>$22: T.class_of(A) = <self>
     <unconditional> -> bb6
 

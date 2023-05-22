@@ -15,7 +15,7 @@ class Box
   sig {params(new_val: Elem).returns(T.self_type)}
   def copy_with(new_val)
     klass = self.class
-    T.reveal_type(klass) # error: `T.class_of(Box)`
+    T.reveal_type(klass) # error: `T.class_of(Box)[Box[Box::Elem]]`
     new_box = self.class.new(new_val)
     T.reveal_type(new_box) # error: `Box[Box::Elem]`
 

@@ -17,7 +17,7 @@ class Get
   sig {params(instance: ModelType).returns(ModelType)}
   def get(instance)
     T.reveal_type(instance) # error: `Get::ModelType`
-    T.reveal_type(instance.class) # error: `T.class_of(Model)`
+    T.reveal_type(instance.class) # error: `T.class_of(Model)[T.all(Model, Get::ModelType)]`
     x = instance.class.load_one
     T.reveal_type(x) # error: `T.all(Model, Get::ModelType)`
     x
@@ -34,6 +34,6 @@ extend T::Sig
 
 sig {params(x: T.all(A, M)).void}
 def example(x)
-  T.reveal_type(x.class) # error: `T.class_of(A)`
+  T.reveal_type(x.class) # error: `T.class_of(A)[T.all(A, M)]`
   T.reveal_type(x.class.new) # error: `T.all(A, M)`
 end
