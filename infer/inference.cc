@@ -323,7 +323,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             ENFORCE(bb->firstDeadInstructionIdx == -1);
             auto bexitTpo = current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
             if (bexitTpo.type.isUntyped()) {
-                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, bexitTpo.type.untypedBlame());
+                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, bexitTpo.type);
                 if (auto e = ctx.beginError(bb->bexit.loc, what)) {
                     e.setHeader("Conditional branch on `{}`", "T.untyped");
                     core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, bexitTpo, methodLoc);
