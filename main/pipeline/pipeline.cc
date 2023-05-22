@@ -1264,7 +1264,7 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
 #endif
 }
 
-void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> untypedBlames,
+void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN
 
@@ -1301,8 +1301,6 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
     writer.EndArray();
 
     opts.print.UntypedBlame.print(result.GetString());
-#else
-    return "";
 #endif
 }
 
