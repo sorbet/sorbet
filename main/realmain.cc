@@ -951,10 +951,8 @@ int realmain(int argc, char *argv[]) {
         }
 
         if constexpr (sorbet::track_untyped_blame_mode) {
-            if (opts.printBlameUntyped) {
-                auto untypedBlames = getAndClearHistogram("untyped.blames");
-                pipeline::printUntypedBlames(*gs, untypedBlames, opts.untypedBlameFilePath);
-            }
+            auto untypedBlames = getAndClearHistogram("untyped.blames");
+            pipeline::printUntypedBlames(*gs, untypedBlames, opts);
         }
     }
 

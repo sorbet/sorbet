@@ -3,7 +3,8 @@
 
 namespace sorbet::core::errors::Infer {
 
-ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, SymbolRef blame) {
+ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypePtr &untyped) {
+    prodCounterInc("types.input.untyped.usages");
     if (!gs.trackUntyped) {
         return UntypedValue;
     }
@@ -23,10 +24,10 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, SymbolRef b
         prodHistogramInc("untyped.usages", file.id());
     }
 
-    prodCounterInc("types.input.untyped.usages");
-
-    if constexpr (sorbet::track_untyped_blame_mode) {
-        histogramInc("untyped.blames", blame.rawId());
+    // we also run this code in test mode so we get some rudimentary coverage
+    // by running this path when running tests.
+    if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
+        prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
     }
 
     if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {

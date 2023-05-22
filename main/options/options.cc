@@ -80,6 +80,7 @@ const vector<PrintOptions> print_options({
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
     {"payload-sources", &Printers::PayloadSources},
+    {"untyped-blame", &Printers::UntypedBlame},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -151,6 +152,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         Packager,
         MinimizeRBI,
         PayloadSources,
+        UntypedBlame,
     });
 }
 
@@ -525,13 +527,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("counters", "Print all internal counters");
     if (sorbet::debug_mode) {
         options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
-    }
-
-    if (sorbet::track_untyped_blame_mode) {
-        options.add_options("dev")("blame-untyped",
-                                   "Report the symbols responsible for T.untyped code in the codebase");
-        options.add_options("dev")("blame-untyped-path", "Path to write CSV file for untyped blames",
-                                   cxxopts::value<string>()->default_value(empty.untypedBlameFilePath), "file");
     }
 
     options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
@@ -1116,11 +1111,6 @@ void readOptions(Options &opts,
 
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
-        }
-        if (sorbet::track_untyped_blame_mode) {
-            opts.printBlameUntyped = raw["blame-untyped"].as<bool>();
-            opts.untypedBlameFilePath = raw["blame-untyped-path"].as<string>();
-            opts.trackUntyped = opts.trackUntyped || opts.printBlameUntyped;
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&

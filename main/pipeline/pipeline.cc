@@ -1265,7 +1265,7 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
 }
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> untypedBlames,
-                        const std::string &blameFilePath) {
+                        const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN
 
     rapidjson::StringBuffer result;
@@ -1273,33 +1273,36 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
     writer.StartArray();
 
-    for (auto e : untypedBlames) {
-        auto sym = core::SymbolRef::fromRaw(e.first);
-        if (!sym.exists() || !sym.loc(gs).exists()) {
-            continue;
-        }
+    for (auto &[symId, count] : untypedBlames) {
+        auto sym = core::SymbolRef::fromRaw(symId);
 
         writer.StartObject();
 
         writer.String("path");
-        writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+        if (sym.exists() && sym.loc(gs).exists()) {
+            writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+        } else {
+            writer.String("<none>");
+        }
 
         writer.String("owner");
         auto owner = sym.owner(gs).show(gs);
-        writer.String(std::string(owner));
+        writer.String(owner);
 
-        writer.String("symbol");
-        writer.String(std::string(sym.name(gs).show(gs)));
+        writer.String("name");
+        writer.String(sym.name(gs).show(gs));
 
         writer.String("count");
-        writer.Int64(e.second);
+        writer.Int64(count);
 
         writer.EndObject();
     }
 
     writer.EndArray();
-    FileOps::write(blameFilePath, result.GetString());
 
+    opts.print.UntypedBlame.print(result.GetString());
+#else
+    return "";
 #endif
 }
 

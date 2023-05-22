@@ -68,8 +68,8 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers,
 // Exported for tests only.
 std::string fileKey(const core::File &file);
 
-void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> untypedBlames,
-                        const std::string &blameFilePath);
+void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
+                        const options::Options &opts);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

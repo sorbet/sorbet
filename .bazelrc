@@ -94,6 +94,14 @@ build:release-debug-common --config=forcedebug
 build:release-debug-common --config=debugsymbols
 build:release-debug-common --config=skipslowenforce
 
+# This mode has been added to allow tracking the symbols
+# which are to blame for usages of untyped code in a codebase.
+# This allows identifying what symbols would be the highest impact
+# to type.
+#
+# Earlier, we allowed for such statistic collection only in DEBUG mode
+# However, that was far too slow for our purposes. Thus, this mode allows
+# you to build in release mode and track these statistics.
 build:untyped-blame --copt=-DTRACK_UNTYPED_BLAME_MODE
 
 # harden: mark relocation sections read-only
