@@ -1285,6 +1285,17 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
         writer.String("path");
         if (sym.exists() && sym.loc(gs).exists()) {
             writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+
+        } else {
+            writer.String("<none>");
+        }
+
+        writer.String("package");
+        if (sym.exists() && sym.loc(gs).exists()) {
+            const auto file = sym.loc(gs).file();
+            const auto pkg = gs.packageDB().getPackageNameForFile(file);
+            writer.String(pkg.show(gs));
+
         } else {
             writer.String("<none>");
         }
