@@ -608,6 +608,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    if (!mayBeOverloaded.exists() && symbol.data(gs)->isClass() && args.name == core::Names::super()) {
+        // TODO: confirm 100 and true params
+        SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
+        if (sym.exists() && sym.isMethod()) {
+            mayBeOverloaded = sym.asMethodRef();
+        }
+    }
+
     if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
@@ -624,7 +632,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             return result;
-        } else if (args.name == core::Names::super()) {
+        } else if (args.name == core::Names::super() && !symbol.data(gs)->isClass()) {
             return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                                   Symbols::noMethod());
         }

@@ -1,6 +1,8 @@
 # typed: true
 
 module M
+  extend T::Sig
+
   sig { returns(Integer) }
   def baz
     T.reveal_type(super) # error: Revealed type: `T.untyped`
@@ -23,6 +25,8 @@ class A
 end
 
 class B < A
+  extend T::Sig
+
   include M
 
   sig { params(x: Integer).returns(Integer) }
