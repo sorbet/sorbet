@@ -40,7 +40,11 @@ TypePtr Types::untypedUntracked() {
 }
 
 TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
-    if ((sorbet::track_untyped_blame_mode || sorbet::debug_mode) && blame.exists()) {
+    if constexpr (!sorbet::track_untyped_blame_mode && !sorbet::debug_mode) {
+        return untypedUntracked();
+    }
+
+    if (blame.exists()) {
         return make_type<BlamedUntyped>(blame);
     } else {
         return untypedUntracked();

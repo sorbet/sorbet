@@ -1268,6 +1268,10 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
                         const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN
 
+    if (!opts.print.UntypedBlame.enabled) {
+        return;
+    }
+
     rapidjson::StringBuffer result;
     rapidjson::Writer<rapidjson::StringBuffer> writer(result);
 

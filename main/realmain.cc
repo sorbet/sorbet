@@ -950,8 +950,8 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
+        auto untypedBlames = getAndClearHistogram("untyped.blames");
         if constexpr (sorbet::track_untyped_blame_mode) {
-            auto untypedBlames = getAndClearHistogram("untyped.blames");
             pipeline::printUntypedBlames(*gs, untypedBlames, opts);
         }
     }

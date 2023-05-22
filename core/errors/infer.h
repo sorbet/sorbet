@@ -1,7 +1,7 @@
 #ifndef SORBET_CORE_ERRORS_INFER_H
 #define SORBET_CORE_ERRORS_INFER_H
 #include "core/Error.h"
-#include "core/SymbolRef.h"
+#include "core/TypePtr.h"
 
 namespace sorbet::core::errors::Infer {
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
