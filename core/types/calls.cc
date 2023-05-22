@@ -1919,15 +1919,18 @@ public:
     }
 } DeclBuilderForProcs_bind;
 
-class Kernel_class : public IntrinsicMethod {
+class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto tClassSelfType = Types::tClass(args.selfType);
         if (self.data(gs)->isModule()) {
-            // This means either: self is Kernel, or self includes Kernel, or self is some module
-            // which has requires_ancestor of Kernel.
+            ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
+            // This normally can't happen, because `Object` is not an ancestor of any module
+            // instance by default. But Sorbet supports requires ancestor in a really weird way (by
+            // simply dispatching to a completely unrelated method) which means that sometimes we
+            // can actually get a call to this on a module.
             //
             // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
             // which will not actually reflect how `.class` in a module instance method works at runtime.
@@ -1954,7 +1957,7 @@ public:
         // (This matters, btw, in case the receiver is something like a generic.)
         res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
     }
-} Kernel_class;
+} Object_class;
 
 class Class_new : public IntrinsicMethod {
 public:
@@ -4162,6 +4165,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
+    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
+
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
 
@@ -4212,8 +4218,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
     {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},
 
-    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::class_(), &Kernel_class},
-    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::singletonClass(), &Kernel_class},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
