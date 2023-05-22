@@ -1294,7 +1294,11 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
         if (sym.exists() && sym.loc(gs).exists()) {
             const auto file = sym.loc(gs).file();
             const auto pkg = gs.packageDB().getPackageNameForFile(file);
-            writer.String(pkg.show(gs));
+            if (pkg == core::NameRef::noName()) {
+                writer.String("<none>");
+            } else {
+                writer.String(pkg.show(gs));
+            }
 
         } else {
             writer.String("<none>");
