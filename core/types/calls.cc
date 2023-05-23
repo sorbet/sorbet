@@ -288,13 +288,13 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             // We should take a pass at fixing a lot of those in our RBI files, and then circle back
             // to enabling this error.
 
-            auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file());
+            auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), expectedType);
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Method parameter `{}` is declared with `{}`", argSym.argumentName(gs), "T.untyped");
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, expectedType, argSym.loc, originForUninitialized);
                 return e.build();
             }
-        } else if (argTpe.type.isUntyped()) {
+        } else if (argTpe.type.isUntyped() && !expectedType.isTop()) {
             auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), argTpe.type);
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");

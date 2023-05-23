@@ -2,7 +2,7 @@
 module Sorbet::Private::Static
   sig do
     params(
-        arg0: T.untyped,
+        arg0: T.anything,
         arg1: T.nilable(Symbol),
         blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
     )
@@ -13,7 +13,7 @@ module Sorbet::Private::Static
 
   sig do
     params(
-        expr: T.untyped,
+        expr: T.anything,
     )
     .void
   end
@@ -22,7 +22,7 @@ module Sorbet::Private::Static
 
   sig do
     type_parameters(:U)
-      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
+      .params(this: T.anything, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
       .returns(T.type_parameter(:U))
   end
   def self.keep_def(this, fun, kind)
@@ -30,7 +30,7 @@ module Sorbet::Private::Static
 
   sig do
     type_parameters(:U)
-      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
+      .params(this: T.anything, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
       .returns(T.type_parameter(:U))
   end
   def self.keep_self_def(this, fun, kind)
@@ -58,10 +58,10 @@ module Sorbet::Private::Static::ResolvedSig
   # original_recv.sig with the last two args dropped.
   sig do
     params(
-        original_recv: T.untyped,
-        sig_arg: T.untyped,
-        is_self_method: T.untyped,
-        method_name: T.untyped,
+        original_recv: T.anything,
+        sig_arg: T.anything,
+        is_self_method: T.anything,
+        method_name: T.anything,
         blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
     )
     .void
