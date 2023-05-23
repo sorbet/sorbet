@@ -86,6 +86,7 @@ struct Printers {
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
     PrinterConfig PayloadSources;
+    PrinterConfig UntypedBlame;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();

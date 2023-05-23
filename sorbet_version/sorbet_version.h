@@ -9,6 +9,7 @@ extern "C" {
 
 #if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
+#define TRACK_UNTYPED_BLAME_MODE
 #else
 #undef DEBUG_MODE
 #endif
@@ -20,6 +21,12 @@ namespace sorbet {
 constexpr bool debug_mode = true;
 #else
 constexpr bool debug_mode = false;
+#endif
+
+#ifdef TRACK_UNTYPED_BLAME_MODE
+constexpr bool track_untyped_blame_mode = true;
+#else
+constexpr bool track_untyped_blame_mode = false;
 #endif
 
 #if !defined(EMSCRIPTEN)

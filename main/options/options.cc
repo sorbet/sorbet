@@ -80,6 +80,7 @@ const vector<PrintOptions> print_options({
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
     {"payload-sources", &Printers::PayloadSources},
+    {"untyped-blame", &Printers::UntypedBlame},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -151,6 +152,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         Packager,
         MinimizeRBI,
         PayloadSources,
+        UntypedBlame,
     });
 }
 
@@ -526,6 +528,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     if (sorbet::debug_mode) {
         options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
     }
+
     options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
     options.add_options("dev")("suggest-unsafe",
                                "In as many errors as possible, suggest autocorrects to wrap problem code with "
@@ -871,6 +874,11 @@ void readOptions(Options &opts,
             }
             opts.autogenBehaviorAllowedInRBIFilesPaths =
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
+        }
+
+        if (opts.print.UntypedBlame.enabled && !opts.trackUntyped) {
+            logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
+            throw EarlyReturnWithCode(1);
         }
 
         extractAutogenConstCacheConfig(raw, opts.autogenConstantCacheConfig);
