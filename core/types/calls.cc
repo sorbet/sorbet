@@ -649,6 +649,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
+            // TODO: this should show enclosingMethodForSuper instead of args.name for super
+            // and mention that it does not exist on the ancestors
             if (args.fullType.type != args.thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
                             args.fullType.type.show(gs));
@@ -1339,7 +1341,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
                     }
 
-                    if (blockLoc.exists()) {
+                    if (blockLoc.exists() && !blockLoc.empty()) {
                         e.replaceWith("Remove block", blockLoc, "");
                     }
                 }

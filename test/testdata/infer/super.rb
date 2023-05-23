@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 module M
   extend T::Sig
@@ -20,7 +20,12 @@ class A
 
   sig { params(x: Integer).returns(Integer) }
   def bar(x)
-    1
+    x
+  end
+
+  sig { params(x: Integer).returns(Integer) }
+  def quz(x)
+    x
   end
 end
 
@@ -47,5 +52,10 @@ class B < A
   sig { returns(Integer) }
   def baz
     T.reveal_type(super) # error: Revealed type: `Integer`
+  end
+
+  sig { params(x: Integer).returns(Integer) }
+  def quz(x)
+    super
   end
 end
