@@ -108,7 +108,7 @@ bool StatsD::submitCounters(const CounterState &counters, string_view host, int 
     }
 
     for (auto &hist : counters.counters->histograms) {
-        if (ignoredHistograms->find(hist.first) != std::string_view::npos) {
+        if (find(ignoredHistograms.begin(), ignoredHistograms.end(), hist.first) != ignoredHistograms.end()) {
             continue;
         }
         CounterImpl::CounterType sum = 0;

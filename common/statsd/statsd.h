@@ -11,7 +11,7 @@ public:
 
     // these are histograms which we do not want to report to statsd/SignalFX under any
     // circumstances.
-    static constexpr std::string_view ignoredHistograms[2] = {"untyped.usages", "untyped.blames"};
+    static constexpr std::array<std::string_view, 2> ignoredHistograms{{"untyped.usages", "untyped.blames"}};
 
     /** Adds standard process and sorbet-related metrics (RSS, faults, Sorbet version, etc). */
     static void addStandardMetrics();
