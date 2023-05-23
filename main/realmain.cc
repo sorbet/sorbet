@@ -950,20 +950,9 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
-        auto untypedSources = getAndClearHistogram("untyped.sources");
-        if (opts.suggestSig) {
-            ENFORCE(sorbet::debug_mode);
-            vector<pair<string, int>> withNames;
-            long sum = 0;
-            for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).showFullName(*gs), e.second);
-                sum += e.second;
-            }
-            fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-            for (auto &p : withNames) {
-                logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
-                              p.second, sum);
-            }
+        auto untypedBlames = getAndClearHistogram("untyped.blames");
+        if constexpr (sorbet::track_untyped_blame_mode) {
+            pipeline::printUntypedBlames(*gs, untypedBlames, opts);
         }
     }
 

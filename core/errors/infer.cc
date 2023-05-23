@@ -3,7 +3,8 @@
 
 namespace sorbet::core::errors::Infer {
 
-ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
+ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypePtr &untyped) {
+    prodCounterInc("types.input.untyped.usages");
     if (!gs.trackUntyped) {
         return UntypedValue;
     }
@@ -21,6 +22,14 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file) {
         // - If we did accidentally forget to clear the metric (e.g., in all LSP code paths), it
         //   would spam statsd services
         prodHistogramInc("untyped.usages", file.id());
+    }
+
+    // we also run this code in test mode so we get some rudimentary coverage
+    // by running this path when running tests.
+    //
+    // Keep this in sync with core::Types::untyped(...)
+    if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
+        prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
     }
 
     if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {
