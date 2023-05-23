@@ -43,10 +43,6 @@ public:
     // prevent the caller from needing to try/catch removeDir.
     static bool removeEmptyDir(const std::string &path);
 
-    // Removes directories recursively, but they have to be completely empty. Useful for cleaning up dangling
-    // autoloader shim directories after an autogen run.
-    static void removeEmptyDirsRecursively(const std::string &dirPath);
-
     static void removeFile(const std::string &path);
 
     /**

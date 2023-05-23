@@ -43,9 +43,7 @@ struct Definition;
 struct DefinitionRef;
 struct ReferenceRef;
 
-struct AutoloaderConfig;
 struct NamedDefinition;
-class DefTree;
 
 enum class ClassKind { Class, Module };
 
