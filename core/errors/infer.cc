@@ -26,6 +26,8 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
 
     // we also run this code in test mode so we get some rudimentary coverage
     // by running this path when running tests.
+    //
+    // Keep this in sync with core::Types::untyped(...)
     if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
         prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
     }
