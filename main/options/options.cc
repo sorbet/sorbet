@@ -75,7 +75,6 @@ const vector<PrintOptions> print_options({
     {"missing-constants", &Printers::MissingConstants},
     {"autogen", &Printers::Autogen},
     {"autogen-msgpack", &Printers::AutogenMsgPack},
-    {"autogen-autoloader", &Printers::AutogenAutoloader, true, false},
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
@@ -146,7 +145,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         MissingConstants,
         Autogen,
         AutogenMsgPack,
-        AutogenAutoloader,
         AutogenSubclasses,
         Packager,
         MinimizeRBI,
@@ -155,7 +153,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
 }
 
 bool Printers::isAutogen() const {
-    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled || AutogenAutoloader.enabled;
+    return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
 }
 
 struct StopAfterOptions {
@@ -399,33 +397,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "regardless of visible_to annotations."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
-
-    options.add_options("advanced")(
-        "autogen-autoloader-exclude-require",
-        "Names that should be excluded from top-level require statements in autoloader output. (e.g. 'pry')",
-        cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-ignore",
-                                    "Input files to exclude from autoloader output. (See --ignore for formatting.)",
-                                    cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-modules", "Top-level modules to include in autoloader output",
-                                    cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-preamble", "Preamble to add to each autoloader file",
-                                    cxxopts::value<string>()->default_value(""));
-    options.add_options("advanced")("autogen-autoloader-root", "Root directory for autoloader output",
-                                    cxxopts::value<string>()->default_value("autoloader"));
-    options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
-                                    cxxopts::value<string>()->default_value("Opus::Require"));
-    options.add_options("advanced")("autogen-root-object",
-                                    "Name of Ruby object on which root autoloads should be installed",
-                                    cxxopts::value<string>()->default_value("Object"));
-    options.add_options("advanced")("autogen-autoloader-samefile",
-                                    "Modules that should never be collapsed into their parent. This helps break cycles "
-                                    "in certain cases. (e.g. Foo::Bar::Baz)",
-                                    cxxopts::value<vector<string>>());
-    options.add_options("advanced")("autogen-autoloader-strip-prefix",
-                                    "Prefixes to strip from file output paths. "
-                                    "If path does not start with prefix, nothing is stripped",
-                                    cxxopts::value<vector<string>>());
     buildAutogenCacheOptions(options);
 
     options.add_options("advanced")("error-url-base",
@@ -590,10 +561,6 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
                         opts.cacheDir = "";
                     }
                 }
-                if (opt == "autogen-autoloader" && outPath.empty()) {
-                    logger->error("--print={} requires an output path to be specified", opt);
-                    throw EarlyReturnWithCode(1);
-                }
                 found = true;
                 break;
             }
@@ -656,34 +623,6 @@ void parseIgnorePatterns(const vector<string> &rawIgnorePatterns, vector<string>
             relativeIgnorePatterns.push_back(fmt::format("/{}", pNormalized));
         }
     }
-}
-
-bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog::logger> logger) {
-    AutoloaderConfig &cfg = opts.autoloaderConfig;
-    if (raw.count("autogen-autoloader-exclude-require") > 0) {
-        cfg.requireExcludes = raw["autogen-autoloader-exclude-require"].as<vector<string>>();
-    }
-    if (raw.count("autogen-autoloader-ignore") > 0) {
-        auto rawIgnorePatterns = raw["autogen-autoloader-ignore"].as<vector<string>>();
-        parseIgnorePatterns(rawIgnorePatterns, cfg.absoluteIgnorePatterns, cfg.relativeIgnorePatterns);
-    }
-    if (raw.count("autogen-autoloader-modules") > 0) {
-        cfg.modules = raw["autogen-autoloader-modules"].as<vector<string>>();
-    }
-    if (raw.count("autogen-autoloader-strip-prefix") > 0) {
-        cfg.stripPrefixes = raw["autogen-autoloader-strip-prefix"].as<vector<string>>();
-    }
-    if (raw.count("autogen-autoloader-samefile") > 0) {
-        for (auto &fullName : raw["autogen-autoloader-samefile"].as<vector<string>>()) {
-            cfg.sameFileModules.emplace_back(absl::StrSplit(fullName, "::"));
-        }
-    }
-    cfg.preamble = raw["autogen-autoloader-preamble"].as<string>();
-    cfg.registryModule = raw["autogen-registry-module"].as<string>();
-    cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
-
-    cfg.rootObject = raw["autogen-root-object"].as<string>();
-    return true;
 }
 
 void addFilesFromDir(Options &opts, string_view dir, WorkerPool &workerPool, shared_ptr<spdlog::logger> logger) {
@@ -836,8 +775,7 @@ void readOptions(Options &opts,
 
         // Certain features only need certain passes
         if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
-            logger->error(
-                "-p autogen{-msgpack,-classlist,-subclasses,-autoloader} must also include --stop-after=namer");
+            logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
             throw EarlyReturnWithCode(1);
         }
 
@@ -864,7 +802,7 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
-            if (!opts.print.isAutogen() || opts.print.AutogenAutoloader.enabled) {
+            if (!opts.print.isAutogen()) {
                 logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
                               "autogen-msgpack");
                 throw EarlyReturnWithCode(1);
@@ -1077,7 +1015,6 @@ void readOptions(Options &opts,
             }
         }
 
-        extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
