@@ -1,22 +1,11 @@
 import * as Spinner from "elegant-spinner";
-import { commands, OutputChannel, StatusBarAlignment, window } from "vscode";
+import { Disposable, OutputChannel, StatusBarAlignment, window } from "vscode";
 
-import { ShowOperationParams, ServerStatus, RestartReason } from "./types";
+import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
 import { SorbetExtensionConfig } from "./config";
-import SorbetConfigPicker from "./ConfigPicker";
+import { ShowOperationParams, ServerStatus, RestartReason } from "./types";
 
-/**
- * Actions provided when 'Sorbet' fails to start.
- */
-const enum Action {
-  EnableSorbet = "Enable Sorbet",
-  ConfigureSorbet = "Configure Sorbet",
-  RestartSorbet = "Restart Sorbet",
-  DisableSorbet = "Disable Sorbet",
-  ViewOutput = "View Output",
-}
-
-export default class SorbetStatusBarEntry {
+export default class SorbetStatusBarEntry implements Disposable {
   private readonly _statusBarItem = window.createStatusBarItem(
     StatusBarAlignment.Left,
     10,
@@ -30,89 +19,33 @@ export default class SorbetStatusBarEntry {
 
   constructor(
     private readonly _outputChannel: OutputChannel,
-    private readonly _sorbetExtensionConfig: SorbetExtensionConfig,
-    private readonly _restartSorbet: (reason: RestartReason) => void,
+    private readonly _extensionConfig: SorbetExtensionConfig,
+    private readonly _restartSorbet: (reason: RestartReason) => Thenable<void>,
   ) {
-    // Note: Internal command. Not advertised to users in `package.json`.
-    const statusBarClickedCommand = "_sorbet.statusBarClicked";
-    this._statusBarItem.command = statusBarClickedCommand;
+    this._statusBarItem.command = SHOW_ACTIONS_COMMAND_ID;
     this._render();
     this._statusBarItem.show();
-    commands.registerCommand(statusBarClickedCommand, () =>
-      this.handleStatusBarClicked(),
-    );
-    _sorbetExtensionConfig.onLspConfigChange(() => this._render());
+    _extensionConfig.onLspConfigChange(() => this._render());
   }
 
-  private _runAction(action?: string) {
-    switch (action) {
-      case Action.ViewOutput:
-        this._outputChannel.show();
-        break;
-      case Action.ConfigureSorbet:
-        new SorbetConfigPicker(this._sorbetExtensionConfig).show();
-        break;
-      case Action.EnableSorbet:
-        this._sorbetExtensionConfig.setEnabled(true);
-        break;
-      case Action.DisableSorbet:
-        this._sorbetExtensionConfig.setEnabled(false);
-        break;
-      case Action.RestartSorbet:
-        this._restartSorbet(RestartReason.STATUS_BAR_BUTTON);
-        break;
-      default:
-        // Nothing selected.
-        break;
-    }
+  /**
+   * Return current {@link ServerStatus server status}.
+   */
+  public get serverStatus(): ServerStatus {
+    return this._serverStatus;
   }
 
-  public async handleStatusBarClicked(): Promise<void> {
-    switch (this._serverStatus) {
-      case ServerStatus.ERROR: {
-        const actions = [
-          Action.ViewOutput,
-          Action.ConfigureSorbet,
-          Action.RestartSorbet,
-        ];
-        const message = await window.showErrorMessage(
-          this._lastError,
-          ...actions,
-        );
-        return this._runAction(message);
-      }
-      case ServerStatus.DISABLED: {
-        // Switch to Sorbet option.
-        return this._runAction(
-          await window.showInformationMessage(
-            "Sorbet: Select action...",
-            Action.ViewOutput,
-            Action.ConfigureSorbet,
-            Action.EnableSorbet,
-          ),
-        );
-      }
-      default: {
-        return this._runAction(
-          await window.showInformationMessage(
-            "Sorbet: Select action...",
-            Action.ViewOutput,
-            Action.ConfigureSorbet,
-            Action.RestartSorbet,
-            Action.DisableSorbet,
-          ),
-        );
-      }
-    }
-  }
-
-  public changeServerStatus(s: ServerStatus, lastError: string = "") {
-    const isError = this._serverStatus !== s && s === ServerStatus.ERROR;
-    this._serverStatus = s;
+  public async changeServerStatus(
+    status: ServerStatus,
+    lastError: string = "",
+  ): Promise<void> {
+    const isError =
+      this._serverStatus !== status && status === ServerStatus.ERROR;
+    this._serverStatus = status;
     this._lastError = lastError;
     this._render();
     if (isError) {
-      this._restartSorbet(RestartReason.CRASH_EXT_ERROR);
+      await this._restartSorbet(RestartReason.CRASH_EXT_ERROR);
     }
   }
 
@@ -147,7 +80,7 @@ export default class SorbetStatusBarEntry {
 
   private _render() {
     const numOperations = this._operationStack.length;
-    const { activeLspConfig } = this._sorbetExtensionConfig;
+    const { activeLspConfig } = this._extensionConfig;
     const sorbetName = activeLspConfig ? activeLspConfig.name : "Sorbet";
     let text: string;
     let tooltip: string;
