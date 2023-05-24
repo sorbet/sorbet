@@ -142,7 +142,7 @@ module T
   # one type or another type.
   #
   # For more information, see https://sorbet.org/docs/union-types
-  sig {params(type_a: T.untyped, type_b: T.untyped, types: T.untyped).returns(BasicObject)}
+  sig {params(type_a: T.anything, type_b: T.anything, types: T.anything).returns(BasicObject)}
   def self.any(type_a, type_b, *types); end
 
   # Type syntax to declare an intersection type, which declares that a value
@@ -150,7 +150,7 @@ module T
   # one interface type and a second, unrelated interface type.
   #
   # For more information, see https://sorbet.org/docs/intersection-types
-  sig {params(type_a: T.untyped, type_b: T.untyped, types: T.untyped).returns(BasicObject)}
+  sig {params(type_a: T.anything, type_b: T.anything, types: T.anything).returns(BasicObject)}
   def self.all(type_a, type_b, *types); end
 
   # Utility to request that Sorbet report a static error showing the type of
