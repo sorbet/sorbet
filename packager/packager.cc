@@ -1544,6 +1544,8 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::F
 }
 
 vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+    ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
+
     Timer timeit(gs.tracer(), "packager");
 
     files = findPackages(gs, workers, std::move(files));
