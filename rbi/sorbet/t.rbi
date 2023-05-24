@@ -91,7 +91,7 @@ module T
   #
   # - https://sorbet.org/docs/nilable-types
   # - https://sorbet.org/docs/union-types
-  sig {params(type: T.untyped).returns(BasicObject)}
+  sig {params(type: T.anything).returns(BasicObject)}
   def self.nilable(type); end
 
   # Type syntax to declare the type of a block, proc, or lambda.
@@ -111,6 +111,7 @@ module T
   # (because classes in Ruby are proper values in their own right)
   #
   # For more information, see https://sorbet.org/docs/class-of
+  sig {params(klass: Module).returns(T.untyped)}
   def self.class_of(klass); end
 
   # Type syntax to declare the "bottom" type in Sorbet. Put another way,
