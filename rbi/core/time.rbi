@@ -689,12 +689,12 @@ class Time < Object
 
   sig do
     params(
-      year: T.any(Integer, String),
+      year: Integer,
       month: T.any(Integer, String),
-      day: T.any(Integer, String),
-      hour: T.any(Integer, String),
-      min: T.any(Integer, String),
-      sec: T.any(Numeric, String),
+      day: Integer,
+      hour: Integer,
+      min: Integer,
+      sec: Numeric,
       tz: T.any(Numeric, String),
     )
     .void
