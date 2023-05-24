@@ -730,8 +730,14 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
             gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
+            // Remove all package files
+            auto it = std::remove_if(indexed.begin(), indexed.end(),
+                                     [&gs](auto &file) -> bool { return file.file.data(*gs).isPackage(); });
+            indexed.erase(it, indexed.end());
+
             // Only need to compute FoundMethodHashes when running to compute a FileHash
             auto foundMethodHashes = nullptr;
+
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers, foundMethodHashes).result());
 
             {
