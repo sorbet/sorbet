@@ -8,15 +8,24 @@ import {
 } from "vscode";
 import { TextDocumentItem } from "vscode-languageclient";
 
-import SorbetConfigPicker from "./ConfigPicker";
+import {
+  SHOW_ACTIONS_COMMAND_ID,
+  SHOW_CONFIG_PICKER_COMMAND_ID,
+  SHOW_OUTPUT_COMMAND_ID,
+  SORBET_DISABLE_COMMAND_ID,
+  SORBET_ENABLE_COMMAND_ID,
+  SORBET_RESTART_COMMAND_ID,
+} from "./commandIds";
+import { ShowSorbetActions } from "./commands/showSorbetActions";
+import ShowSorbetConfigurationPicker from "./commands/showSorbetConfigurationPicker";
 import {
   SorbetExtensionConfig,
   SorbetLspConfigChangeEvent,
   DefaultSorbetWorkspaceContext,
 } from "./config";
 import SorbetLanguageClient from "./LanguageClient";
-import { ServerStatus, RestartReason } from "./types";
 import SorbetStatusBarEntry from "./SorbetStatusBarEntry";
+import { ServerStatus, RestartReason } from "./types";
 import { emitCountMetric } from "./veneur";
 
 /**
@@ -43,7 +52,7 @@ export function activate(context: ExtensionContext) {
   let activeSorbetLanguageClient: SorbetLanguageClient | null = null;
   context.subscriptions.push(outputChannel, statusBarEntry);
 
-  function stopSorbet(newStatus: ServerStatus) {
+  async function stopSorbet(newStatus: ServerStatus): Promise<void> {
     if (activeSorbetLanguageClient) {
       activeSorbetLanguageClient.dispose();
       // Garbage collect the language client.
@@ -55,15 +64,15 @@ export function activate(context: ExtensionContext) {
     }
     // Reset status bar state impacted by previous language client.
     statusBarEntry.clearOperations();
-    statusBarEntry.changeServerStatus(newStatus);
+    await statusBarEntry.changeServerStatus(newStatus);
   }
 
-  function restartSorbet(reason: RestartReason) {
+  async function restartSorbet(reason: RestartReason): Promise<void> {
     stopSorbet(ServerStatus.RESTARTING);
 
     // NOTE: `reason` is an enum type with a small and finite number of values.
     emitMetric(`restart.${reason}`, 1);
-    startSorbet();
+    await startSorbet();
   }
 
   let lastSorbetRetryTime = 0;
@@ -134,43 +143,52 @@ export function activate(context: ExtensionContext) {
   }
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.enable", () => {
-      sorbetExtensionConfig.setEnabled(true);
-    }),
+    commands.registerCommand(SORBET_ENABLE_COMMAND_ID, () =>
+      sorbetExtensionConfig.setEnabled(true),
+    ),
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.disable", () => {
-      sorbetExtensionConfig.setEnabled(false);
-    }),
+    commands.registerCommand(SORBET_DISABLE_COMMAND_ID, () =>
+      sorbetExtensionConfig.setEnabled(false),
+    ),
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.toggleHighlightUntyped", () => {
+    commands.registerCommand("sorbet.toggleHighlightUntyped", () =>
       sorbetExtensionConfig
         .setHighlightUntyped(!sorbetExtensionConfig.highlightUntyped)
-        .then(() => {
-          restartSorbet(RestartReason.CONFIG_CHANGE);
-        });
-    }),
+        .then(() => restartSorbet(RestartReason.CONFIG_CHANGE)),
+    ),
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.restart", () => {
-      restartSorbet(RestartReason.COMMAND);
-    }),
+    commands.registerCommand(
+      SORBET_RESTART_COMMAND_ID,
+      (reason: RestartReason = RestartReason.COMMAND) => restartSorbet(reason),
+    ),
+  );
+
+  const showSorbetActions = new ShowSorbetActions(statusBarEntry);
+  context.subscriptions.push(
+    commands.registerCommand(SHOW_ACTIONS_COMMAND_ID, () =>
+      showSorbetActions.execute(),
+    ),
+  );
+
+  const showSorbetConfiguration = new ShowSorbetConfigurationPicker(
+    sorbetExtensionConfig,
+  );
+  context.subscriptions.push(
+    commands.registerCommand(SHOW_CONFIG_PICKER_COMMAND_ID, () =>
+      showSorbetConfiguration.execute(),
+    ),
   );
 
   context.subscriptions.push(
-    commands.registerCommand("sorbet.configure", () => {
-      new SorbetConfigPicker(sorbetExtensionConfig).show();
-    }),
-  );
-
-  context.subscriptions.push(
-    commands.registerCommand("sorbet.showOutput", () => {
-      outputChannel.show();
-    }),
+    commands.registerCommand(SHOW_OUTPUT_COMMAND_ID, () =>
+      outputChannel.show(),
+    ),
   );
 
   const provider: TextDocumentContentProvider = {
