@@ -6,7 +6,7 @@ export const SHOW_ACTIONS_COMMAND_ID = "sorbet.showAvailableActions";
 /**
  * Show Configuration picker. See {@link ShowSorbetConfigurationPicker}.
  */
-export const SHOW_CONFIG_PICKER_COMMAND_ID = "sorbet.showConfigPicker";
+export const SHOW_CONFIG_PICKER_COMMAND_ID = "sorbet.configure";
 
 /**
  * Show Sorbet Output panel. See {@link ShowSorbetOutput}.
