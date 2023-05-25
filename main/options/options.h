@@ -81,7 +81,6 @@ struct Printers {
     PrinterConfig MissingConstants;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
-    PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
@@ -106,21 +105,6 @@ enum class Phase {
     INFERENCER,
 };
 
-struct AutoloaderConfig {
-    // Top-level modules to include in autoloader output
-    std::vector<std::string> modules;
-    std::string rootDir;
-    std::string preamble;
-    std::string registryModule;
-    std::string rootObject;
-    std::vector<std::string> requireExcludes;
-    std::vector<std::vector<std::string>> sameFileModules;
-    std::vector<std::string> stripPrefixes;
-
-    std::vector<std::string> absoluteIgnorePatterns;
-    std::vector<std::string> relativeIgnorePatterns;
-};
-
 struct AutogenConstCacheConfig {
     // A file which contains a cache that can be used to potentially skip autogen
     std::string cacheFile;
@@ -141,7 +125,6 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 
 struct Options {
     Printers print;
-    AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 
