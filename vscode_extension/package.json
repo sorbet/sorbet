@@ -271,21 +271,6 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "sorbet.configure"
-        },
-        {
-          "command": "sorbet.disable"
-        },
-        {
-          "command": "sorbet.enable"
-        },
-        {
-          "command": "sorbet.restart"
-        },
-        {
-          "command": "sorbet.toggleHighlightUntyped"
-        },
-        {
           "command": "sorbet.showOutput",
           "when": "editorLangId == ruby"
         }
