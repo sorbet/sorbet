@@ -691,10 +691,10 @@ class Time < Object
     params(
       year: Integer,
       month: T.any(Integer, String),
-      day: Integer,
-      hour: Integer,
-      min: Integer,
-      sec: Numeric,
+      day: T.any(Integer, String),
+      hour: T.any(Integer, String),
+      min: T.any(Integer, String),
+      sec: T.any(Numeric, String),
       tz: T.any(Numeric, String),
     )
     .void
