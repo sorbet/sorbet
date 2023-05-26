@@ -5,5 +5,5 @@
 
 ->(arg0) do
   arg0.foo
-# ^^^^ error: Call to method `foo` on `T.untyped`
+  #    ^^^ error: Call to method `foo` on `T.untyped`
 end
