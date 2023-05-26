@@ -6,7 +6,7 @@ import {
   SORBET_ENABLE_COMMAND_ID,
   SORBET_RESTART_COMMAND_ID,
 } from "../commandIds";
-import SorbetStatusBarEntry from "../SorbetStatusBarEntry";
+import SorbetStatusBarEntry from "../sorbetStatusBarEntry";
 import { RestartReason, ServerStatus } from "../types";
 
 export const enum Action {
