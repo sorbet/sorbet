@@ -154,6 +154,24 @@ class Index extends React.Component {
                     'Measure your progress as you adopt Sorbet, stay motivated!',
                 },
                 {
+                  title: 'activerecord-ejection_seat',
+                  link: 'https://github.com/maxveldink/activerecord-ejection_seat',
+                  description:
+                    'Eject from an ActiveRecord model to a Sorbet T::Struct, or buckle back in',
+                },
+                {
+                  title: 'sorbet-result',
+                  link: 'https://github.com/maxveldink/sorbet-result',
+                  description:
+                    'Introduces T::Result, T::Success and T::Failure types to facilitate Railway Oriented Programming',
+                },
+                {
+                  title: 'sorbet-struct-comparable',
+                  link: 'https://github.com/samuelgiles/sorbet-struct-comparable',
+                  description:
+                    "Comparable T::Struct's for the equality focused typed Ruby developer",
+                },
+                {
                   title: 'Parlour',
                   link: 'https://github.com/AaronC81/parlour',
                   description: 'A versatile RBI generator and plugin system',
