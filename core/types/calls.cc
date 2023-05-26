@@ -563,7 +563,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
     if (symbol == core::Symbols::untyped()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
-        if (auto e = gs.beginError(args.receiverLoc(), what)) {
+        if (auto e = gs.beginError(errLoc, what)) {
             e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
         }
