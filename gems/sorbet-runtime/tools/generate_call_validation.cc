@@ -94,12 +94,10 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
     }
 
     fmt::print("    # trampoline to reduce stack frame size\n");
+    fmt::print("    arg_types = method_sig.arg_types\n");
+    fmt::print("    case arg_types.length\n");
     for (size_t arity = 0; arity <= MAX_ARITY; arity++) {
-        if (arity == 0) {
-            fmt::print("    if method_sig.arg_types.empty?\n");
-        } else {
-            fmt::print("    elsif method_sig.arg_types.length == {}\n", arity);
-        }
+        fmt::print("    when {}\n", arity);
 
         fmt::print("      create_validator_{}_{}{}(mod, original_method, method_sig, original_visibility", kindString,
                    typeString, arity);
@@ -110,7 +108,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
 
         for (size_t i = 0; i < arity; i++) {
             fmt::print(",\n");
-            fmt::print("                                    method_sig.arg_types[{}][1]{}", i, rawTypeMethodCall);
+            fmt::print("                                    arg_types[{}][1]{}", i, rawTypeMethodCall);
         }
         fmt::print(")\n");
     }
