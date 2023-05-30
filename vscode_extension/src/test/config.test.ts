@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import { isEqual } from "lodash";
 import * as sinon from "sinon";
 import {
   EventEmitter,
@@ -224,16 +223,6 @@ suite("SorbetLspConfig", () => {
           !SorbetLspConfig.areEqual(config1, c),
           `Should not equal: ${c}`,
         );
-      });
-    });
-    test("using lodash.isEqual()", () => {
-      assert.notEqual(config1, config2, "Should not be identical");
-      assert.ok(
-        isEqual(config1, config2),
-        `Should be deeply equal to ${config2}`,
-      );
-      differentConfigs.forEach((c) => {
-        assert.ok(!isEqual(c, config1), `Should not be deeply equal to ${c}`);
       });
     });
   });

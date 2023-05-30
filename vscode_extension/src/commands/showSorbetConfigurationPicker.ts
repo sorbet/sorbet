@@ -1,5 +1,4 @@
 import { QuickPickItem, window } from "vscode";
-import { isEqual } from "lodash";
 import { SorbetExtensionConfig, SorbetLspConfig } from "../config";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 
@@ -20,7 +19,7 @@ export default class ShowSorbetConfigurationPicker {
   public async execute(): Promise<void> {
     const { activeLspConfig, lspConfigs } = this._extensionConfig;
     const items: SorbetQuickPickItem[] = lspConfigs.map((config) => ({
-      label: `${isEqual(activeLspConfig, config) ? "• " : ""}${config.name}`,
+      label: `${config.isEqualTo(activeLspConfig) ? "• " : ""}${config.name}`,
       description: config.description,
       detail: config.command.join(" "),
       lspConfig: config,
