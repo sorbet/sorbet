@@ -29,8 +29,8 @@ end
 b = baz
 
 # use an untyped variable
-  b.length
-# ^ error: Call to method `length` on `T.untyped`
+b.length
+# ^^^^^^ error: Call to method `length` on `T.untyped`
 T.let(b, Integer) == 6
 
 
