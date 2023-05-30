@@ -1,13 +1,5 @@
-import {
-  ExtensionContext,
-  commands,
-  window,
-  TextDocumentContentProvider,
-  Uri,
-  workspace,
-} from "vscode";
+import { commands, ExtensionContext, Uri, workspace } from "vscode";
 import { TextDocumentItem } from "vscode-languageclient";
-
 import {
   SHOW_ACTIONS_COMMAND_ID,
   SHOW_CONFIG_PICKER_COMMAND_ID,
@@ -18,216 +10,95 @@ import {
 } from "./commandIds";
 import { ShowSorbetActions } from "./commands/showSorbetActions";
 import ShowSorbetConfigurationPicker from "./commands/showSorbetConfigurationPicker";
-import {
-  SorbetExtensionConfig,
-  SorbetLspConfigChangeEvent,
-  DefaultSorbetWorkspaceContext,
-} from "./config";
-import SorbetLanguageClient from "./LanguageClient";
-import SorbetStatusBarEntry from "./SorbetStatusBarEntry";
+import { SorbetExtensionContext } from "./sorbetExtensionContext";
+import SorbetStatusBarEntry from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
-import { emitCountMetric } from "./veneur";
 
 /**
  * Extension entrypoint.
  */
 export function activate(context: ExtensionContext) {
-  const sorbetExtensionConfig = new SorbetExtensionConfig(
-    new DefaultSorbetWorkspaceContext(context),
-  );
-  sorbetExtensionConfig.onLspConfigChange(handleConfigChange);
-  const outputChannel = window.createOutputChannel("Sorbet");
-  const statusBarEntry = new SorbetStatusBarEntry(
-    outputChannel,
-    sorbetExtensionConfig,
-    restartSorbet,
-  );
-
-  const emitMetric = emitCountMetric.bind(
-    null,
-    sorbetExtensionConfig,
-    outputChannel,
-  );
-
-  let activeSorbetLanguageClient: SorbetLanguageClient | null = null;
-  context.subscriptions.push(outputChannel, statusBarEntry);
-
-  async function stopSorbet(newStatus: ServerStatus): Promise<void> {
-    if (activeSorbetLanguageClient) {
-      activeSorbetLanguageClient.dispose();
-      // Garbage collect the language client.
-      const i = context.subscriptions.indexOf(activeSorbetLanguageClient);
-      if (i !== -1) {
-        context.subscriptions.splice(i, 1);
-      }
-      activeSorbetLanguageClient = null;
-    }
-    // Reset status bar state impacted by previous language client.
-    statusBarEntry.clearOperations();
-    await statusBarEntry.changeServerStatus(newStatus);
-  }
-
-  async function restartSorbet(reason: RestartReason): Promise<void> {
-    stopSorbet(ServerStatus.RESTARTING);
-
-    // NOTE: `reason` is an enum type with a small and finite number of values.
-    emitMetric(`restart.${reason}`, 1);
-    await startSorbet();
-  }
-
-  let lastSorbetRetryTime = 0;
-  const minTimeBetweenRetries = 7000;
-  // Mutex for startSorbet. Prevents us from starting multiple processes at once.
-  let isStarting = false;
-  async function startSorbet() {
-    if (isStarting) return;
-
-    const currentTime = Date.now();
-    // Debounce by 7 seconds. Returns 0 if the calculated time to sleep is negative.
-    const timeToSleep = Math.max(
-      0,
-      minTimeBetweenRetries - (currentTime - lastSorbetRetryTime),
-    );
-    if (timeToSleep > 0) {
-      console.log(
-        `Waiting ${timeToSleep.toFixed(0)} ms before restarting Sorbet...`,
-      );
-    }
-
-    // Wait timeToSleep ms. Use mutex, as this yields the event loop for future events.
-    isStarting = true;
-    await new Promise((res) => setTimeout(res, timeToSleep));
-    isStarting = false;
-
-    lastSorbetRetryTime = Date.now();
-
-    const sorbet = new SorbetLanguageClient(
-      sorbetExtensionConfig,
-      outputChannel,
-      filterUpdatesFromOldClients(restartSorbet),
-    );
-    activeSorbetLanguageClient = sorbet;
-    context.subscriptions.push(activeSorbetLanguageClient);
-
-    // Helper function. Drops any status updates and operations from old clients that are in the process of shutting down.
-    function filterUpdatesFromOldClients<TS extends any[]>(
-      fn: (...args: TS) => void,
-    ): (...args: TS) => void {
-      return (...args: TS): void => {
-        if (activeSorbetLanguageClient !== sorbet) {
-          return;
+  const sorbetExtensionContext = new SorbetExtensionContext(context);
+  context.subscriptions.push(
+    sorbetExtensionContext,
+    sorbetExtensionContext.config.onLspConfigChange(
+      ({ oldLspConfig, newLspConfig }) => {
+        const { statusProvider } = sorbetExtensionContext;
+        if (oldLspConfig && newLspConfig) {
+          // Something about the config changed, so restart
+          statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
+        } else if (oldLspConfig) {
+          statusProvider.stopSorbet(ServerStatus.DISABLED);
+        } else {
+          statusProvider.startSorbet();
         }
-        return fn(...args);
-      };
-    }
-
-    // Pipe updates to status bar, and reset status bar state impacted by previous language client.
-    statusBarEntry.changeServerStatus(sorbet.status, sorbet.lastError);
-
-    sorbet.onStatusChange = filterUpdatesFromOldClients(
-      (status: ServerStatus) => {
-        statusBarEntry.changeServerStatus(status, sorbet.lastError);
       },
-    );
-
-    sorbet.languageClient.onReady().then(
-      filterUpdatesFromOldClients(() => {
-        sorbet.languageClient.onNotification(
-          "sorbet/showOperation",
-          filterUpdatesFromOldClients(
-            statusBarEntry.handleShowOperation.bind(statusBarEntry),
-          ),
-        );
-      }),
-    );
-  }
-
-  context.subscriptions.push(
-    commands.registerCommand(SORBET_ENABLE_COMMAND_ID, () =>
-      sorbetExtensionConfig.setEnabled(true),
     ),
   );
 
+  const statusBarEntry = new SorbetStatusBarEntry(sorbetExtensionContext);
+  context.subscriptions.push(statusBarEntry);
+
+  // Register providers
   context.subscriptions.push(
-    commands.registerCommand(SORBET_DISABLE_COMMAND_ID, () =>
-      sorbetExtensionConfig.setEnabled(false),
-    ),
+    workspace.registerTextDocumentContentProvider("sorbet", {
+      // URIs are of the form sorbet:[file_path]
+      provideTextDocumentContent: async (uri: Uri): Promise<string> => {
+        let content: string;
+        const {
+          activeSorbetLanguageClient,
+        } = sorbetExtensionContext.statusProvider;
+        console.log(`Opening sorbet: file. URI:${uri}`);
+        if (activeSorbetLanguageClient) {
+          const response: TextDocumentItem = await activeSorbetLanguageClient.languageClient.sendRequest(
+            "sorbet/readFile",
+            {
+              uri: uri.toString(),
+            },
+          );
+          content = response.text;
+        } else {
+          console.log(" > Cannot retrieve file content, no active client.");
+          content = "";
+        }
+        return content;
+      },
+    }),
   );
 
-  context.subscriptions.push(
-    commands.registerCommand("sorbet.toggleHighlightUntyped", () =>
-      sorbetExtensionConfig
-        .setHighlightUntyped(!sorbetExtensionConfig.highlightUntyped)
-        .then(() => restartSorbet(RestartReason.CONFIG_CHANGE)),
-    ),
-  );
-
-  context.subscriptions.push(
-    commands.registerCommand(
-      SORBET_RESTART_COMMAND_ID,
-      (reason: RestartReason = RestartReason.COMMAND) => restartSorbet(reason),
-    ),
-  );
-
-  const showSorbetActions = new ShowSorbetActions(statusBarEntry);
+  // Register commands
   context.subscriptions.push(
     commands.registerCommand(SHOW_ACTIONS_COMMAND_ID, () =>
-      showSorbetActions.execute(),
+      new ShowSorbetActions(statusBarEntry).execute(),
     ),
-  );
-
-  const showSorbetConfiguration = new ShowSorbetConfigurationPicker(
-    sorbetExtensionConfig,
-  );
-  context.subscriptions.push(
     commands.registerCommand(SHOW_CONFIG_PICKER_COMMAND_ID, () =>
-      showSorbetConfiguration.execute(),
+      new ShowSorbetConfigurationPicker(sorbetExtensionContext).execute(),
     ),
-  );
-
-  context.subscriptions.push(
     commands.registerCommand(SHOW_OUTPUT_COMMAND_ID, () =>
-      outputChannel.show(),
+      sorbetExtensionContext.outputChannel.show(),
+    ),
+    commands.registerCommand(SORBET_ENABLE_COMMAND_ID, () =>
+      sorbetExtensionContext.config.setEnabled(true),
+    ),
+    commands.registerCommand(SORBET_DISABLE_COMMAND_ID, () =>
+      sorbetExtensionContext.config.setEnabled(false),
+    ),
+    commands.registerCommand(
+      SORBET_RESTART_COMMAND_ID,
+      (reason: RestartReason = RestartReason.COMMAND) =>
+        sorbetExtensionContext.statusProvider.restartSorbet(reason),
+    ),
+    commands.registerCommand("sorbet.toggleHighlightUntyped", () =>
+      sorbetExtensionContext.config
+        .setHighlightUntyped(!sorbetExtensionContext.config.highlightUntyped)
+        .then(() =>
+          sorbetExtensionContext.statusProvider.restartSorbet(
+            RestartReason.CONFIG_CHANGE,
+          ),
+        ),
     ),
   );
-
-  const provider: TextDocumentContentProvider = {
-    provideTextDocumentContent: async (uri: Uri): Promise<string> => {
-      // URIs are of the form sorbet:[file_path]
-      console.log(`Opening sorbet: file at uri ${uri.toString()}`);
-      if (activeSorbetLanguageClient) {
-        const response: TextDocumentItem = await activeSorbetLanguageClient.languageClient.sendRequest(
-          "sorbet/readFile",
-          {
-            uri: uri.toString(),
-          },
-        );
-        return response.text;
-      }
-      return "";
-    },
-  };
-  context.subscriptions.push(
-    workspace.registerTextDocumentContentProvider("sorbet", provider),
-  );
-
-  function handleConfigChange(event: SorbetLspConfigChangeEvent) {
-    const { oldLspConfig, newLspConfig } = event;
-    if (oldLspConfig && newLspConfig) {
-      // Something about the config changed, so restart
-      restartSorbet(RestartReason.CONFIG_CHANGE);
-    } else if (oldLspConfig) {
-      // Stop using Sorbet
-      stopSorbet(ServerStatus.DISABLED);
-    } else if (newLspConfig) {
-      // Start using Sorbet
-      startSorbet();
-    }
-  }
 
   // Start the extension.
-  handleConfigChange({
-    oldLspConfig: undefined,
-    newLspConfig: sorbetExtensionConfig.activeLspConfig,
-  });
+  return sorbetExtensionContext.statusProvider.startSorbet();
 }

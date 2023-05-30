@@ -1,31 +1,52 @@
 import * as Spinner from "elegant-spinner";
-import { Disposable, OutputChannel, StatusBarAlignment, window } from "vscode";
+import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
-import { SorbetExtensionConfig } from "./config";
 import { ShowOperationParams, ServerStatus, RestartReason } from "./types";
+import { SorbetExtensionContext } from "./sorbetExtensionContext";
+import { StatusChangedEvent } from "./sorbetStatusProvider";
 
 export default class SorbetStatusBarEntry implements Disposable {
-  private readonly _statusBarItem = window.createStatusBarItem(
-    StatusBarAlignment.Left,
-    10,
-  );
-
-  private _operationStack: ShowOperationParams[] = [];
-  private _serverStatus: ServerStatus = ServerStatus.DISABLED;
-  private _lastError = "";
-  private readonly _spinner = Spinner();
+  private readonly _context: SorbetExtensionContext;
+  private readonly _disposable: Disposable;
+  private _lastError?: string;
+  private _operationStack: ShowOperationParams[];
+  private _serverStatus: ServerStatus;
+  private readonly _spinner: () => string;
   private _spinnerTimer?: NodeJS.Timer;
+  private readonly _statusBarItem: StatusBarItem;
 
-  constructor(
-    private readonly _outputChannel: OutputChannel,
-    private readonly _extensionConfig: SorbetExtensionConfig,
-    private readonly _restartSorbet: (reason: RestartReason) => Thenable<void>,
-  ) {
+  constructor(context: SorbetExtensionContext) {
+    this._context = context;
+    this._operationStack = [];
+    this._serverStatus = ServerStatus.DISABLED;
+    this._spinner = Spinner();
+    this._statusBarItem = window.createStatusBarItem(
+      StatusBarAlignment.Left,
+      10,
+    );
     this._statusBarItem.command = SHOW_ACTIONS_COMMAND_ID;
+
+    this._disposable = Disposable.from(
+      this._context.config.onLspConfigChange(() => this._render()),
+      this._context.statusProvider.onStatusChanged((e) =>
+        this.onServerStatusChanged(e),
+      ),
+      this._context.statusProvider.onShowOperation((params) =>
+        this.onServerShowOperation(params),
+      ),
+      this._statusBarItem,
+    );
+
     this._render();
     this._statusBarItem.show();
-    _extensionConfig.onLspConfigChange(() => this._render());
+  }
+
+  /**
+   * Dispose and free associated resources.
+   */
+  public dispose() {
+    this._disposable.dispose();
   }
 
   /**
@@ -35,21 +56,23 @@ export default class SorbetStatusBarEntry implements Disposable {
     return this._serverStatus;
   }
 
-  public async changeServerStatus(
-    status: ServerStatus,
-    lastError: string = "",
-  ): Promise<void> {
+  private async onServerStatusChanged(e: StatusChangedEvent): Promise<void> {
     const isError =
-      this._serverStatus !== status && status === ServerStatus.ERROR;
-    this._serverStatus = status;
-    this._lastError = lastError;
+      this._serverStatus !== e.status && e.status === ServerStatus.ERROR;
+    this._serverStatus = e.status;
+    this._lastError = e.error;
+    if (e.stopped) {
+      this._operationStack = [];
+    }
     this._render();
     if (isError) {
-      await this._restartSorbet(RestartReason.CRASH_EXT_ERROR);
+      await this._context.statusProvider.restartSorbet(
+        RestartReason.CRASH_EXT_ERROR,
+      );
     }
   }
 
-  public handleShowOperation(p: ShowOperationParams) {
+  private onServerShowOperation(p: ShowOperationParams) {
     if (p.status === "end") {
       this._operationStack = this._operationStack.filter(
         (otherP) => otherP.operationName !== p.operationName,
@@ -58,15 +81,6 @@ export default class SorbetStatusBarEntry implements Disposable {
       this._operationStack.push(p);
     }
     this._render();
-  }
-
-  public clearOperations() {
-    this._operationStack = [];
-    this._render();
-  }
-
-  public dispose() {
-    this._statusBarItem.dispose();
   }
 
   private _getSpinner() {
@@ -80,8 +94,9 @@ export default class SorbetStatusBarEntry implements Disposable {
 
   private _render() {
     const numOperations = this._operationStack.length;
-    const { activeLspConfig } = this._extensionConfig;
-    const sorbetName = activeLspConfig ? activeLspConfig.name : "Sorbet";
+    const { activeLspConfig } = this._context.config;
+    const sorbetName = activeLspConfig?.name ?? "Sorbet";
+
     let text: string;
     let tooltip: string;
     // Errors should suppress operation animations / feedback.
@@ -101,7 +116,10 @@ export default class SorbetStatusBarEntry implements Disposable {
           break;
         case ServerStatus.ERROR:
           text = `${sorbetName}: Error`;
-          tooltip = `${this._lastError} Click for remediation items.`;
+          tooltip = "Click for remediation items.";
+          if (this._lastError) {
+            tooltip = `${this._lastError}\n${tooltip}`;
+          }
           break;
         case ServerStatus.INITIALIZING:
           text = `${sorbetName}: Initializing ${this._getSpinner()}`;
@@ -116,7 +134,7 @@ export default class SorbetStatusBarEntry implements Disposable {
           tooltip = "The Sorbet server is currently running.";
           break;
         default:
-          this._outputChannel.appendLine(
+          this._context.outputChannel.appendLine(
             `Invalid ServerStatus: ${this._serverStatus}`,
           );
           text = "";
