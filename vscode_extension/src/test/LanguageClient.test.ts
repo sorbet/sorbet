@@ -8,7 +8,7 @@ import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
 import { shimLanguageClient } from "../LanguageClient";
 import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
-import { setSorbetMetricsApi, Tags, MetricsEmitter } from "../veneur";
+import { MetricsEmitter, Tags } from "../metricsClient";
 
 const enum MetricType {
   Increment,
@@ -98,7 +98,6 @@ suite("LanguageClient", () => {
   suite("Metrics", () => {
     suiteSetup(() => {
       metricsEmitter = new RecordingMetricsEmitter();
-      setSorbetMetricsApi({ metricsEmitter });
     });
     test("Shims language clients and records latency metrics", async () => {
       const client = createLanguageClient();
