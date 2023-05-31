@@ -104,7 +104,7 @@ export class SorbetStatusProvider implements Disposable {
   public async restartSorbet(reason: RestartReason): Promise<void> {
     await this.stopSorbet(ServerStatus.RESTARTING);
     // `reason` is an enum type with a small and finite number of values.
-    this._context.emitCountMetric(`restart.${reason}`, 1);
+    this._context.metrics.emitCountMetric(`restart.${reason}`, 1);
     await this.startSorbet();
   }
 
