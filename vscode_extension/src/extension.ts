@@ -22,15 +22,15 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     sorbetExtensionContext,
     sorbetExtensionContext.config.onLspConfigChange(
-      ({ oldLspConfig, newLspConfig }) => {
+      async ({ oldLspConfig, newLspConfig }) => {
         const { statusProvider } = sorbetExtensionContext;
         if (oldLspConfig && newLspConfig) {
           // Something about the config changed, so restart
-          statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
+          await statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
         } else if (oldLspConfig) {
-          statusProvider.stopSorbet(ServerStatus.DISABLED);
+          await statusProvider.stopSorbet(ServerStatus.DISABLED);
         } else {
-          statusProvider.startSorbet();
+          await statusProvider.startSorbet();
         }
       },
     ),

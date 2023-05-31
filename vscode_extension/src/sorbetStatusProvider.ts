@@ -117,7 +117,7 @@ export class SorbetStatusProvider implements Disposable {
   /**
    * Start Sorbet.
    */
-  public async startSorbet() {
+  public async startSorbet(): Promise<void> {
     if (this._isStarting) {
       return;
     }
