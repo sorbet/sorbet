@@ -943,6 +943,22 @@ optional<core::TypePtr> getResultTypeWithSelfTypeParams(core::Context ctx, const
     }
 }
 
+void reportUnknownTypeSyntaxError(core::Context ctx, const ast::Send &s) {
+    if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+        auto klass = sendLooksLikeBadTypeApplication(ctx, s);
+        if (klass.exists()) {
+            auto scope =
+                s.recv.isSelfReference() ? "" : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
+            auto replacement =
+                fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
+            e.setHeader("Did you mean to use square brackets: `{}`", replacement);
+            e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
+        } else {
+            e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
+        }
+    }
+}
+
 optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core::Context ctx,
                                                                             const ast::ExpressionPtr &expr,
                                                                             const ParsedSig &sigBeingParsed,
@@ -1191,23 +1207,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
         auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv);
         if (recvi == nullptr) {
-            if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
-                if (klass.exists()) {
-                    auto scope = s.recv.isSelfReference()
-                                     ? ""
-                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
-                    auto replacement =
-                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
-                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
-                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
-                } else {
-                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
-                }
-            }
+            reportUnknownTypeSyntaxError(ctx, s);
             result.type = core::Types::untypedUntracked();
             return result;
         }
+
         auto recviSymbol = recvi->symbol;
         if (recviSymbol == core::Symbols::T()) {
             if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
@@ -1226,20 +1230,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
 
         if (s.fun != core::Names::squareBrackets()) {
-            if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                auto klass = sendLooksLikeBadTypeApplication(ctx, s);
-                if (klass.exists()) {
-                    auto scope = s.recv.isSelfReference()
-                                     ? ""
-                                     : fmt::format("{}::", ctx.locAt(s.recv.loc()).source(ctx).value());
-                    auto replacement =
-                        fmt::format("{}{}[{}]", scope, s.fun.show(ctx), ctx.locAt(s.argsLoc()).source(ctx).value());
-                    e.setHeader("Did you mean to use square brackets: `{}`", replacement);
-                    e.replaceWith("Use square brackets for type args", ctx.locAt(s.loc), "{}", replacement);
-                } else {
-                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
-                }
-            }
+            reportUnknownTypeSyntaxError(ctx, s);
             result.type = core::Types::untypedUntracked();
             return result;
         }
