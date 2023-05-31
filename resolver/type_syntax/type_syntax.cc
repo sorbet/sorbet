@@ -650,6 +650,64 @@ core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const 
     return klass;
 }
 
+optional<TypeSyntax::ResultType> parseTClassOf(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
+                                               TypeSyntaxArgs args) {
+    if (send.numPosArgs() != 1 || send.hasKwArgs()) {
+        unexpectedKwargs(ctx, send);
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+
+    auto *obj = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+    if (!obj) {
+        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            auto maybeType = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
+            if (!maybeType.has_value()) {
+                return nullopt;
+            }
+            auto type = move(maybeType.value());
+            std::vector<std::string> classes;
+            auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
+            if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
+                auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
+                e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of", "T.any");
+                e.replaceWith("Distribute `T.class_of`", ctx.locAt(send.loc), "{}", autocorrect);
+            } else {
+                e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
+            }
+        }
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+    auto maybeAliased = obj->symbol;
+    if (maybeAliased.isTypeAlias(ctx)) {
+        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("T.class_of can't be used with a T.type_alias");
+        }
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+    if (maybeAliased.isTypeMember()) {
+        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("T.class_of can't be used with a T.type_member");
+        }
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+    auto sym = maybeAliased.dealias(ctx);
+    if (sym.isStaticField(ctx)) {
+        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("T.class_of can't be used with a constant field");
+        }
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+
+    auto singleton = sym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+    if (!singleton.exists()) {
+        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            e.setHeader("Unknown class");
+        }
+        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+    }
+    return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noClassOrModule()};
+}
+
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
@@ -794,61 +852,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::classOf().rawId(): {
-            if (send.numPosArgs() != 1 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-
-            auto *obj = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
-            if (!obj) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    auto maybeType = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
-                    if (!maybeType.has_value()) {
-                        return nullopt;
-                    }
-                    auto type = move(maybeType.value());
-                    std::vector<std::string> classes;
-                    auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
-                    if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
-                        auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
-                        e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of",
-                                    "T.any");
-                        e.replaceWith("Distribute `T.class_of`", ctx.locAt(send.loc), "{}", autocorrect);
-                    } else {
-                        e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
-                    }
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-            auto maybeAliased = obj->symbol;
-            if (maybeAliased.isTypeAlias(ctx)) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of can't be used with a T.type_alias");
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-            if (maybeAliased.isTypeMember()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of can't be used with a T.type_member");
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-            auto sym = maybeAliased.dealias(ctx);
-            if (sym.isStaticField(ctx)) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of can't be used with a constant field");
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-
-            auto singleton = sym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
-            if (!singleton.exists()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Unknown class");
-                }
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-            }
-            return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noClassOrModule()};
+            return parseTClassOf(ctx, send, sig, args);
         }
         case core::Names::untyped().rawId():
             return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame),
