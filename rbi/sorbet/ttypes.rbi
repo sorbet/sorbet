@@ -49,6 +49,7 @@ class T::Types::ClassOf < T::Types::Base
   def subtype_of_single?(other); end
   def describe_obj(obj); end
   def type; end
+  def [](*types); end
 end
 
 class T::Types::FixedArray < T::Types::Base

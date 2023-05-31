@@ -38,5 +38,14 @@ module T::Types
     def describe_obj(obj)
       obj.inspect
     end
+
+    # So that `T.class_of(...)[...]` syntax is valid.
+    # Mirrors the definition of T::Generic#[] (generics are erased).
+    #
+    # We avoid simply writing `include T::Generic` because we don't want any of
+    # the other methods to appear (`T.class_of(A).type_member` doesn't make sense)
+    def [](*types)
+      self
+    end
   end
 end
