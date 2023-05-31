@@ -1,17 +1,23 @@
-import { isEqual } from "lodash";
 import {
-  workspace,
-  Event,
-  EventEmitter,
   ConfigurationChangeEvent,
   Disposable,
+  Event,
+  EventEmitter,
   ExtensionContext,
-  Memento,
   FileSystemWatcher,
+  Memento,
   Uri,
+  workspace,
   WorkspaceFolder,
 } from "vscode";
 import * as fs from "fs";
+
+/**
+ * Compare two `string` arrays for deep, in-order equality.
+ */
+export function deepEqual(a: ReadonlyArray<string>, b: ReadonlyArray<string>) {
+  return a.length === b.length && a.every((itemA, index) => itemA === b[index]);
+}
 
 interface ISorbetLspConfig {
   readonly id: string;
@@ -74,7 +80,7 @@ export class SorbetLspConfig {
     if (this.cwd !== other.cwd) {
       return false;
     }
-    if (!isEqual(this.command, other.command)) {
+    if (!deepEqual(this.command, other.command)) {
       return false;
     }
     return true;
@@ -294,7 +300,7 @@ export class SorbetExtensionConfig implements Disposable {
     const newLspConfig = this.activeLspConfig;
     if (
       !SorbetLspConfig.areEqual(oldLspConfig, newLspConfig) ||
-      !isEqual(oldConfigFilePatterns, this._configFilePatterns)
+      !deepEqual(oldConfigFilePatterns, this._configFilePatterns)
     ) {
       this._onLspConfigChangeEmitter.fire({
         oldLspConfig,

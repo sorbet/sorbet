@@ -298,14 +298,12 @@
   "dependencies": {
     "async": "^2.6.4",
     "elegant-spinner": "^2.0.0",
-    "lodash": "^4.17.21",
     "minimatch": "^3.0.5",
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
     "@types/elegant-spinner": "^1.0.0",
     "@types/glob": "^7.1.1",
-    "@types/lodash": "^4.14.144",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.11.7",
     "@types/sinon": "^7.5.0",
