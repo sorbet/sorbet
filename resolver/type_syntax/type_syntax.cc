@@ -650,11 +650,11 @@ core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const 
     return klass;
 }
 
-optional<TypeSyntax::ResultType> parseTClassOf(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
+optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                TypeSyntaxArgs args) {
     if (send.numPosArgs() != 1 || send.hasKwArgs()) {
         unexpectedKwargs(ctx, send);
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
 
     auto *obj = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
@@ -675,27 +675,27 @@ optional<TypeSyntax::ResultType> parseTClassOf(core::Context ctx, const ast::Sen
                 e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
             }
         }
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
     auto maybeAliased = obj->symbol;
     if (maybeAliased.isTypeAlias(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_alias");
         }
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
     if (maybeAliased.isTypeMember()) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_member");
         }
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
     auto sym = maybeAliased.dealias(ctx);
     if (sym.isStaticField(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a constant field");
         }
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
 
     auto singleton = sym.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
@@ -703,9 +703,9 @@ optional<TypeSyntax::ResultType> parseTClassOf(core::Context ctx, const ast::Sen
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("Unknown class");
         }
-        return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+        return core::Symbols::untyped();
     }
-    return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::Symbols::noClassOrModule()};
+    return singleton;
 }
 
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
@@ -852,7 +852,14 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::classOf().rawId(): {
-            return parseTClassOf(ctx, send, sig, args);
+            if (auto parseResult = parseTClassOf(ctx, send, sig, args)) {
+                return TypeSyntax::ResultType{
+                    parseResult.value().data(ctx)->externalType(),
+                    core::Symbols::noClassOrModule(),
+                };
+            } else {
+                return nullopt;
+            }
         }
         case core::Names::untyped().rawId():
             return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame),
