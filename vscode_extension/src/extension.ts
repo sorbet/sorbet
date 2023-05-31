@@ -11,7 +11,7 @@ import {
 import { ShowSorbetActions } from "./commands/showSorbetActions";
 import ShowSorbetConfigurationPicker from "./commands/showSorbetConfigurationPicker";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
-import SorbetStatusBarEntry from "./sorbetStatusBarEntry";
+import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
 
 /**
@@ -22,15 +22,15 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     sorbetExtensionContext,
     sorbetExtensionContext.config.onLspConfigChange(
-      ({ oldLspConfig, newLspConfig }) => {
+      async ({ oldLspConfig, newLspConfig }) => {
         const { statusProvider } = sorbetExtensionContext;
         if (oldLspConfig && newLspConfig) {
           // Something about the config changed, so restart
-          statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
+          await statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
         } else if (oldLspConfig) {
-          statusProvider.stopSorbet(ServerStatus.DISABLED);
+          await statusProvider.stopSorbet(ServerStatus.DISABLED);
         } else {
-          statusProvider.startSorbet();
+          await statusProvider.startSorbet();
         }
       },
     ),
@@ -69,7 +69,7 @@ export function activate(context: ExtensionContext) {
   // Register commands
   context.subscriptions.push(
     commands.registerCommand(SHOW_ACTIONS_COMMAND_ID, () =>
-      new ShowSorbetActions(statusBarEntry).execute(),
+      new ShowSorbetActions(sorbetExtensionContext).execute(),
     ),
     commands.registerCommand(SHOW_CONFIG_PICKER_COMMAND_ID, () =>
       new ShowSorbetConfigurationPicker(sorbetExtensionContext).execute(),
