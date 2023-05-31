@@ -42,7 +42,7 @@ export class SorbetStatusProvider implements Disposable {
   }
 
   /**
-   * Current Sorbet client.
+   * Current Sorbet client, if any.
    */
   public get activeSorbetLanguageClient(): SorbetLanguageClient | undefined {
     return this._activeSorbetLanguageClient;
@@ -98,6 +98,20 @@ export class SorbetStatusProvider implements Disposable {
     // `reason` is an enum type with a small and finite number of values.
     this._context.emitCountMetric(`restart.${reason}`, 1);
     await this.startSorbet();
+  }
+
+  /**
+   * Error information, if {@link serverStatus} is {@link ServerStatus.ERROR}
+   */
+  public get serverError(): string | undefined {
+    return this.activeSorbetLanguageClient?.lastError;
+  }
+
+  /**
+   * Return current {@link ServerStatus server status}.
+   */
+  public get serverStatus(): ServerStatus {
+    return this.activeSorbetLanguageClient?.status || ServerStatus.DISABLED;
   }
 
   /**

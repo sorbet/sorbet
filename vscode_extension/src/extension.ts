@@ -11,7 +11,7 @@ import {
 import { ShowSorbetActions } from "./commands/showSorbetActions";
 import ShowSorbetConfigurationPicker from "./commands/showSorbetConfigurationPicker";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
-import SorbetStatusBarEntry from "./sorbetStatusBarEntry";
+import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
 
 /**
@@ -69,7 +69,7 @@ export function activate(context: ExtensionContext) {
   // Register commands
   context.subscriptions.push(
     commands.registerCommand(SHOW_ACTIONS_COMMAND_ID, () =>
-      new ShowSorbetActions(statusBarEntry).execute(),
+      new ShowSorbetActions(sorbetExtensionContext).execute(),
     ),
     commands.registerCommand(SHOW_CONFIG_PICKER_COMMAND_ID, () =>
       new ShowSorbetConfigurationPicker(sorbetExtensionContext).execute(),
