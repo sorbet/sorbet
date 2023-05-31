@@ -1239,6 +1239,22 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
 
             appliedKlass = recvi->symbol;
+        } else if (auto *recvi = ast::cast_tree<ast::Send>(s.recv)) {
+            if (recvi->fun != core::Names::classOf() || s.fun != core::Names::squareBrackets()) {
+                return reportUnknownTypeSyntaxError(ctx, s, move(result));
+            }
+
+            auto recviRecvi = ast::cast_tree<ast::ConstantLit>(recvi->recv);
+            if (recviRecvi == nullptr || recviRecvi->symbol != core::Symbols::T()) {
+                return reportUnknownTypeSyntaxError(ctx, s, move(result));
+            }
+
+            auto tClassOfResult = parseTClassOf(ctx, *recvi, sigBeingParsed, args);
+            if (!tClassOfResult.has_value()) {
+                return nullopt;
+            }
+
+            appliedKlass = tClassOfResult.value();
         } else {
             return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
