@@ -1205,26 +1205,27 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             return result;
         }
 
-        auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv);
-        if (recvi == nullptr) {
+        core::SymbolRef recviSymbol;
+        if (auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
+            recviSymbol = recvi->symbol;
+
+            if (recviSymbol == core::Symbols::T()) {
+                if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
+                    return move(res.value());
+                } else {
+                    return nullopt;
+                }
+            }
+
+            if (recviSymbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
+                if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Malformed type declaration: splats cannot be used in types");
+                }
+                result.type = core::Types::untypedUntracked();
+                return result;
+            }
+        } else {
             reportUnknownTypeSyntaxError(ctx, s);
-            result.type = core::Types::untypedUntracked();
-            return result;
-        }
-
-        auto recviSymbol = recvi->symbol;
-        if (recviSymbol == core::Symbols::T()) {
-            if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
-                return move(res.value());
-            } else {
-                return nullopt;
-            }
-        }
-
-        if (recviSymbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
-            if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Malformed type declaration: splats cannot be used in types");
-            }
             result.type = core::Types::untypedUntracked();
             return result;
         }
