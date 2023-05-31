@@ -954,7 +954,8 @@ optional<core::TypePtr> getResultTypeWithSelfTypeParams(core::Context ctx, const
     }
 }
 
-void reportUnknownTypeSyntaxError(core::Context ctx, const ast::Send &s) {
+TypeSyntax::ResultType reportUnknownTypeSyntaxError(core::Context ctx, const ast::Send &s,
+                                                    TypeSyntax::ResultType &&result) {
     if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
         auto klass = sendLooksLikeBadTypeApplication(ctx, s);
         if (klass.exists()) {
@@ -968,6 +969,9 @@ void reportUnknownTypeSyntaxError(core::Context ctx, const ast::Send &s) {
             e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
         }
     }
+
+    result.type = core::Types::untypedUntracked();
+    return move(result);
 }
 
 optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core::Context ctx,
@@ -1236,15 +1240,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 return result;
             }
         } else {
-            reportUnknownTypeSyntaxError(ctx, s);
-            result.type = core::Types::untypedUntracked();
-            return result;
+            return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
 
         if (s.fun != core::Names::squareBrackets()) {
-            reportUnknownTypeSyntaxError(ctx, s);
-            result.type = core::Types::untypedUntracked();
-            return result;
+            return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
 
         InlinedVector<core::TypeAndOrigins, 2> holders;
