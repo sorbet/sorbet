@@ -112,6 +112,8 @@ TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     }
 }
 
+// ClassOrModule::resultType is computed by unsafeComputeExternalType,
+// so that it can be computed once and cached (see below).
 TypePtr ClassOrModule::externalType() const {
     ENFORCE_NO_TIMER(resultType);
     if (resultType == nullptr) {
@@ -2239,6 +2241,7 @@ TypeParameter TypeParameter::deepCopy(const GlobalState &to) const {
     return result;
 }
 
+// TODO(jez) Audit usages of typeArity--we might want to make this aware of <AttachedClass>
 int ClassOrModule::typeArity(const GlobalState &gs) const {
     int arity = 0;
     for (auto &tm : this->typeMembers()) {
