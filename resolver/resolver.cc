@@ -1965,12 +1965,10 @@ public:
                 }
             }
 
-            if (singlePackageRbiGeneration) {
-                for (auto &job : todoClassAliases) {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    for (auto &item : job.items) {
-                        resolveClassAliasJob(ctx, item);
-                    }
+            for (auto &job : todoClassAliases) {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                for (auto &item : job.items) {
+                    resolveClassAliasJob(ctx, item);
                 }
             }
 
