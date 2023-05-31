@@ -6,7 +6,8 @@ import {
   SORBET_ENABLE_COMMAND_ID,
   SORBET_RESTART_COMMAND_ID,
 } from "../commandIds";
-import SorbetStatusBarEntry from "../sorbetStatusBarEntry";
+import { SorbetExtensionContext } from "../sorbetExtensionContext";
+import { SorbetStatusProvider } from "../sorbetStatusProvider";
 import { RestartReason, ServerStatus } from "../types";
 
 export const enum Action {
@@ -21,10 +22,10 @@ export const enum Action {
  * Show available actions in a drop-down.
  */
 export class ShowSorbetActions {
-  private readonly _statusBarEntry: SorbetStatusBarEntry;
+  private readonly _statusProvider: SorbetStatusProvider;
 
-  constructor(statusProvider: SorbetStatusBarEntry) {
-    this._statusBarEntry = statusProvider;
+  constructor(context: SorbetExtensionContext) {
+    this._statusProvider = context.statusProvider;
   }
 
   public async execute(): Promise<void> {
@@ -62,7 +63,7 @@ export class ShowSorbetActions {
    */
   public getAvailableActions(): Action[] {
     const actions = [Action.ViewOutput];
-    switch (this._statusBarEntry.serverStatus) {
+    switch (this._statusProvider.serverStatus) {
       case ServerStatus.ERROR:
         actions.push(Action.RestartSorbet);
         break;

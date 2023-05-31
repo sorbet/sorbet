@@ -2,14 +2,13 @@ import * as Spinner from "elegant-spinner";
 import { Disposable, StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
-import { ShowOperationParams, ServerStatus, RestartReason } from "./types";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { StatusChangedEvent } from "./sorbetStatusProvider";
+import { ShowOperationParams, ServerStatus, RestartReason } from "./types";
 
-export default class SorbetStatusBarEntry implements Disposable {
+export class SorbetStatusBarEntry implements Disposable {
   private readonly _context: SorbetExtensionContext;
   private readonly _disposable: Disposable;
-  private _lastError?: string;
   private _operationStack: ShowOperationParams[];
   private _serverStatus: ServerStatus;
   private readonly _spinner: () => string;
@@ -49,18 +48,10 @@ export default class SorbetStatusBarEntry implements Disposable {
     this._disposable.dispose();
   }
 
-  /**
-   * Return current {@link ServerStatus server status}.
-   */
-  public get serverStatus(): ServerStatus {
-    return this._serverStatus;
-  }
-
   private async onServerStatusChanged(e: StatusChangedEvent): Promise<void> {
     const isError =
       this._serverStatus !== e.status && e.status === ServerStatus.ERROR;
     this._serverStatus = e.status;
-    this._lastError = e.error;
     if (e.stopped) {
       this._operationStack = [];
     }
@@ -88,7 +79,7 @@ export default class SorbetStatusBarEntry implements Disposable {
       clearTimeout(this._spinnerTimer);
     }
     // Animate the spinner with setTimeout.
-    this._spinnerTimer = setTimeout(() => this._render(), 100);
+    this._spinnerTimer = setTimeout(() => this._render(), 250);
     return this._spinner();
   }
 
@@ -117,8 +108,9 @@ export default class SorbetStatusBarEntry implements Disposable {
         case ServerStatus.ERROR:
           text = `${sorbetName}: Error`;
           tooltip = "Click for remediation items.";
-          if (this._lastError) {
-            tooltip = `${this._lastError}\n${tooltip}`;
+          const { serverError } = this._context.statusProvider;
+          if (serverError) {
+            tooltip = `${serverError}\n${tooltip}`;
           }
           break;
         case ServerStatus.INITIALIZING:
