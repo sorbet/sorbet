@@ -134,25 +134,20 @@ export class SorbetStatusProvider implements Disposable {
     }
     this._lastSorbetRetryTime = Date.now();
 
-    // Create client. Wait for `ready` before accessing it.
+    // Create client
     const newClient = new SorbetLanguageClient(
       this._context,
       (reason: RestartReason) => this.restartSorbet(reason),
     );
-    await newClient.languageClient.onReady();
-
-    // Use property-setter to ensure proper clean-up.
+    // Use property-setter to ensure proper setup.
     this.activeSorbetLanguageClient = newClient;
 
-    newClient.languageClient.onNotification(
-      "sorbet/showOperation",
-      (params: ShowOperationParams) => {
-        // Ignore event if this is not the current client (e.g. client is being shut down).
-        if (this.activeSorbetLanguageClient === newClient) {
-          this._onShowOperationEmitter.fire(params);
-        }
-      },
-    );
+    // Fire event to reflect initial state.
+    this._onStatusChangedEmitter.fire({
+      status: newClient.status,
+      error: newClient.lastError,
+    });
+
     newClient.onStatusChange = (status: ServerStatus) => {
       // Ignore event if this is not the current client (e.g. client is being shut down).
       if (this.activeSorbetLanguageClient !== newClient) {
@@ -163,10 +158,17 @@ export class SorbetStatusProvider implements Disposable {
       }
     };
 
-    this._onStatusChangedEmitter.fire({
-      status: newClient.status,
-      error: newClient.lastError,
-    });
+    // Wait for `ready` before accessing `languageClient`.
+    await newClient.languageClient.onReady();
+    newClient.languageClient.onNotification(
+      "sorbet/showOperation",
+      (params: ShowOperationParams) => {
+        // Ignore event if this is not the current client (e.g. client is being shut down).
+        if (this.activeSorbetLanguageClient === newClient) {
+          this._onShowOperationEmitter.fire(params);
+        }
+      },
+    );
   }
 
   /**
