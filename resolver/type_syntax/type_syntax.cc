@@ -1220,11 +1220,9 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             return result;
         }
 
-        core::SymbolRef recviSymbol;
+        core::SymbolRef appliedKlass;
         if (auto *recvi = ast::cast_tree<ast::ConstantLit>(s.recv)) {
-            recviSymbol = recvi->symbol;
-
-            if (recviSymbol == core::Symbols::T()) {
+            if (recvi->symbol == core::Symbols::T()) {
                 if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
                     return move(res.value());
                 } else {
@@ -1232,13 +1230,15 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 }
             }
 
-            if (recviSymbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
+            if (recvi->symbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
                 if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration: splats cannot be used in types");
                 }
                 result.type = core::Types::untypedUntracked();
                 return result;
             }
+
+            appliedKlass = recvi->symbol;
         } else {
             return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
@@ -1291,22 +1291,22 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
 
         core::SymbolRef corrected;
-        if (recviSymbol.isClassOrModule()) {
-            corrected = recviSymbol.asClassOrModuleRef().forwarderForBuiltinGeneric();
+        if (appliedKlass.isClassOrModule()) {
+            corrected = appliedKlass.asClassOrModuleRef().forwarderForBuiltinGeneric();
         }
         if (corrected.exists()) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
                 e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.show(ctx) + "[...]",
-                            recviSymbol.show(ctx) + "[...]", recviSymbol.show(ctx));
+                            appliedKlass.show(ctx) + "[...]", appliedKlass.show(ctx));
                 e.addErrorNote("`{}` will raise at runtime because this generic was defined in the standard library",
-                               recviSymbol.show(ctx) + "[...]");
-                e.replaceWith(fmt::format("Change `{}` to `{}`", recviSymbol.show(ctx), corrected.show(ctx)),
+                               appliedKlass.show(ctx) + "[...]");
+                e.replaceWith(fmt::format("Change `{}` to `{}`", appliedKlass.show(ctx), corrected.show(ctx)),
                               ctx.locAt(s.recv.loc()), "{}", corrected.show(ctx));
             }
             result.type = core::Types::untypedUntracked();
             return result;
         } else {
-            corrected = recviSymbol;
+            corrected = appliedKlass;
         }
         corrected = corrected.dealias(ctx);
 
