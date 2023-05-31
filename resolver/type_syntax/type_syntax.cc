@@ -1208,7 +1208,8 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             result.type = core::Types::untypedUntracked();
             return result;
         }
-        if (recvi->symbol == core::Symbols::T()) {
+        auto recviSymbol = recvi->symbol;
+        if (recviSymbol == core::Symbols::T()) {
             if (auto res = interpretTCombinator(ctx, s, sigBeingParsed, args)) {
                 return move(res.value());
             } else {
@@ -1216,7 +1217,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
         }
 
-        if (recvi->symbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
+        if (recviSymbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
             if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Malformed type declaration: splats cannot be used in types");
             }
@@ -1287,22 +1288,22 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
 
         core::SymbolRef corrected;
-        if (recvi->symbol.isClassOrModule()) {
-            corrected = recvi->symbol.asClassOrModuleRef().forwarderForBuiltinGeneric();
+        if (recviSymbol.isClassOrModule()) {
+            corrected = recviSymbol.asClassOrModuleRef().forwarderForBuiltinGeneric();
         }
         if (corrected.exists()) {
             if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
                 e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.show(ctx) + "[...]",
-                            recvi->symbol.show(ctx) + "[...]", recvi->symbol.show(ctx));
+                            recviSymbol.show(ctx) + "[...]", recviSymbol.show(ctx));
                 e.addErrorNote("`{}` will raise at runtime because this generic was defined in the standard library",
-                               recvi->symbol.show(ctx) + "[...]");
-                e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.show(ctx), corrected.show(ctx)),
+                               recviSymbol.show(ctx) + "[...]");
+                e.replaceWith(fmt::format("Change `{}` to `{}`", recviSymbol.show(ctx), corrected.show(ctx)),
                               ctx.locAt(recvi->loc), "{}", corrected.show(ctx));
             }
             result.type = core::Types::untypedUntracked();
             return result;
         } else {
-            corrected = recvi->symbol;
+            corrected = recviSymbol;
         }
         corrected = corrected.dealias(ctx);
 
