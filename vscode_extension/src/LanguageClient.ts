@@ -11,9 +11,9 @@ import {
 } from "vscode-languageclient/node";
 
 import { stopProcess } from "./connections";
+import { Tags } from "./metricsClient";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus, RestartReason } from "./types";
-import { Tags } from "./veneur";
 
 function nop() {}
 
@@ -132,7 +132,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
       },
     );
     shimLanguageClient(this.languageClient, (metric, value, tags) =>
-      this._context.emitTimingMetric(metric, value, tags),
+      this._context.metrics.emitTimingMetric(metric, value, tags),
     );
 
     this.languageClient.onReady().then(() => {
@@ -220,7 +220,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
      */
     const stopTimer = setTimeout(() => {
       stopped = true;
-      this._context.emitCountMetric("stop.timed_out", 1);
+      this._context.metrics.emitCountMetric("stop.timed_out", 1);
       stopProcess(this._sorbetProcess);
       this._sorbetProcess = null;
     }, 5000);
@@ -228,7 +228,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
     this.languageClient.stop().then(() => {
       if (!stopped) {
         clearTimeout(stopTimer);
-        this._context.emitCountMetric("stop.success", 1);
+        this._context.metrics.emitCountMetric("stop.success", 1);
         this._context.outputChannel.appendLine("Sorbet has stopped.");
       }
     });
@@ -280,7 +280,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
         this.status === ServerStatus.INITIALIZING &&
         err.code === "ENOENT"
       ) {
-        this._context.emitCountMetric("error.enoent", 1);
+        this._context.metrics.emitCountMetric("error.enoent", 1);
         // We failed to start the process. The path to Sorbet is likely incorrect.
         this._lastError = `Could not start Sorbet with command: '${command} ${args.join(
           " ",

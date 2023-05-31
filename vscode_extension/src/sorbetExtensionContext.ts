@@ -1,12 +1,13 @@
 import { Disposable, ExtensionContext, OutputChannel, window } from "vscode";
 import { DefaultSorbetWorkspaceContext, SorbetExtensionConfig } from "./config";
-import { Tags, emitCountMetric, emitTimingMetric } from "./veneur";
+import { MetricClient } from "./metricsClient";
 import { SorbetStatusProvider } from "./sorbetStatusProvider";
 
 export class SorbetExtensionContext implements Disposable {
   public readonly config: SorbetExtensionConfig;
   private readonly disposable: Disposable;
   public readonly extensionContext: ExtensionContext;
+  public readonly metrics: MetricClient;
   public readonly outputChannel: OutputChannel;
   public readonly statusProvider: SorbetStatusProvider;
 
@@ -15,6 +16,7 @@ export class SorbetExtensionContext implements Disposable {
       new DefaultSorbetWorkspaceContext(context),
     );
     this.extensionContext = context;
+    this.metrics = new MetricClient(this);
     this.outputChannel = window.createOutputChannel("Sorbet");
     this.statusProvider = new SorbetStatusProvider(this);
 
@@ -26,23 +28,5 @@ export class SorbetExtensionContext implements Disposable {
    */
   public dispose() {
     this.disposable.dispose();
-  }
-
-  /**
-   * Emit a count metric.
-   */
-  public emitCountMetric(metric: string, count: number) {
-    emitCountMetric(this.config, this.outputChannel, metric, count);
-  }
-
-  /**
-   * Emit a timing metric.
-   */
-  public emitTimingMetric(
-    metric: string,
-    time: number | Date,
-    extraTags: Tags = {},
-  ) {
-    emitTimingMetric(this.config, this.outputChannel, metric, time, extraTags);
   }
 }
