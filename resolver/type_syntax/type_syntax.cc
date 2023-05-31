@@ -1222,7 +1222,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         }
 
         if (recviSymbol == core::Symbols::Magic() && s.fun == core::Names::callWithSplat()) {
-            if (auto e = ctx.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            if (auto e = ctx.beginError(s.recv.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Malformed type declaration: splats cannot be used in types");
             }
             result.type = core::Types::untypedUntracked();
@@ -1289,7 +1289,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                 e.addErrorNote("`{}` will raise at runtime because this generic was defined in the standard library",
                                recviSymbol.show(ctx) + "[...]");
                 e.replaceWith(fmt::format("Change `{}` to `{}`", recviSymbol.show(ctx), corrected.show(ctx)),
-                              ctx.locAt(recvi->loc), "{}", corrected.show(ctx));
+                              ctx.locAt(s.recv.loc()), "{}", corrected.show(ctx));
             }
             result.type = core::Types::untypedUntracked();
             return result;
@@ -1308,7 +1308,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
         auto genericClass = corrected.asClassOrModuleRef();
         ENFORCE_NO_TIMER(genericClass.exists());
-        core::CallLocs locs{ctx.file, s.loc, recvi->loc, s.funLoc, argLocs};
+        core::CallLocs locs{ctx.file, s.loc, s.recv.loc(), s.funLoc, argLocs};
         auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass);
 
         if (out.isUntyped()) {
