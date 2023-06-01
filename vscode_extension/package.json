@@ -54,6 +54,12 @@
         "category": "Sorbet"
       },
       {
+        "command": "sorbet.copySymbolToClipboard",
+        "title": "Copy Symbol to Clipboard",
+        "category": "Sorbet",
+        "enablement": "editorLangId == ruby"
+      },
+      {
         "command": "sorbet.disable",
         "title": "Disable",
         "category": "Sorbet"
@@ -64,13 +70,14 @@
         "category": "Sorbet"
       },
       {
-        "command": "sorbet.restart",
-        "title": "Restart",
-        "category": "Sorbet"
+        "command": "sorbet.rename",
+        "title": "Rename Symbol",
+        "category": "Sorbet",
+        "enablement": "editorLangId == ruby"
       },
       {
-        "command": "sorbet.toggleHighlightUntyped",
-        "title": "Toggle highlighting untyped code",
+        "command": "sorbet.restart",
+        "title": "Restart",
         "category": "Sorbet"
       },
       {
@@ -79,14 +86,10 @@
         "category": "Sorbet"
       },
       {
-        "command": "sorbet.copySymbolToClipboard",
-        "title": "Copy Symbol to Clipboard",
-        "category": "Sorbet"
-      },
-      {
-        "command": "sorbet.rename",
-        "title": "Rename Symbol",
-        "category": "Sorbet"
+        "command": "sorbet.toggleHighlightUntyped",
+        "title": "Toggle highlighting untyped code",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
       }
     ],
     "configuration": {
@@ -269,12 +272,6 @@
       }
     },
     "menus": {
-      "commandPalette": [
-        {
-          "command": "sorbet.showOutput",
-          "when": "editorLangId == ruby"
-        }
-      ],
       "editor/context": [
         {
           "when": "resourceLangId == ruby",
