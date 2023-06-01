@@ -45,12 +45,10 @@ export function activate(context: ExtensionContext) {
       // URIs are of the form sorbet:[file_path]
       provideTextDocumentContent: async (uri: Uri): Promise<string> => {
         let content: string;
-        const {
-          activeLanguageClient: activeSorbetLanguageClient,
-        } = sorbetExtensionContext.statusProvider;
+        const { activeLanguageClient } = sorbetExtensionContext.statusProvider;
         console.log(`Opening sorbet: file. URI:${uri}`);
-        if (activeSorbetLanguageClient) {
-          const response: TextDocumentItem = await activeSorbetLanguageClient.languageClient.sendRequest(
+        if (activeLanguageClient) {
+          const response: TextDocumentItem = await activeLanguageClient.languageClient.sendRequest(
             "sorbet/readFile",
             {
               uri: uri.toString(),
