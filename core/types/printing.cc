@@ -488,22 +488,26 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     if (typeMembers.size() < targs.size()) {
         targs.erase(targs.begin() + typeMembers.size());
     }
+
+    if (this->klass.data(gs)->isSingletonClass(gs) && this->klass.data(gs)->typeArity(gs) == 1 &&
+        // We only want to hide the <AttachedClass> arg if it's the only arg and it's the same as
+        // the default (things like `T.all` can make this upper bound more narrow than the default).
+        //
+        // Relies on the fact that the common case is for the upperBound to be a
+        // ClassType (most classes are not generic), and ClassTypes can be compared with
+        // `==` because they are inlined (instead of being behind pointers).
+        (cast_type<LambdaParam>(typeMembers[0].data(gs)->resultType)->upperBound == targs[0] ||
+         // This side handles the selfType case, which is how we compute the initial type
+         // of <self> in builder_entry.
+         (isa_type<SelfTypeParam>(targs[0]) &&
+          cast_type_nonnull<SelfTypeParam>(targs[0]).definition == typeMembers[0]))) {
+        return to_string(buf);
+    }
+
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
-            it = targs.erase(it);
-        } else if (this->klass.data(gs)->isSingletonClass(gs) &&
-                   typeMember.data(gs)->name == core::Names::Constants::AttachedClass() &&
-                   // We only want to hide the <AttachedClass> arg if it's the same as the default.
-                   // (Things like `T.all` can make this upper bound more narrow than the default.)
-                   // Relies on the fact that the common case is for the upperBound to be a
-                   // ClassType (most classes are not generic), and ClassTypes can be compared with
-                   // `==` because they are inlined (instead of being behind pointers).
-                   (cast_type<LambdaParam>(typeMember.data(gs)->resultType)->upperBound == *it ||
-                    // This side handles the selfType case, which is how we compute the initial type
-                    // of <self> in builder_entry.
-                    (isa_type<SelfTypeParam>(*it) && cast_type_nonnull<SelfTypeParam>(*it).definition == typeMember))) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);
