@@ -6,8 +6,8 @@ import {
 } from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
-import { shimLanguageClient } from "../LanguageClient";
-import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
+import { shimLanguageClient } from "../languageClient";
+import { TestLanguageServerSpecialURIs } from "./TestLanguageServerSpecialURIs";
 import { MetricsEmitter, Tags } from "../metricsClient";
 
 const enum MetricType {

@@ -9,15 +9,15 @@ interface SorbetQuickPickItem extends QuickPickItem {
 /**
  * Show Sorbet Configuration picker.
  */
-export default class ShowSorbetConfigurationPicker {
-  private readonly _extensionConfig: SorbetExtensionConfig;
+export class ShowSorbetConfigurationPicker {
+  private readonly configuration: SorbetExtensionConfig;
 
   public constructor(context: SorbetExtensionContext) {
-    this._extensionConfig = context.config;
+    this.configuration = context.configuration;
   }
 
   public async execute(): Promise<void> {
-    const { activeLspConfig, lspConfigs } = this._extensionConfig;
+    const { activeLspConfig, lspConfigs } = this.configuration;
     const items: SorbetQuickPickItem[] = lspConfigs.map((config) => ({
       label: `${config.isEqualTo(activeLspConfig) ? "• " : ""}${config.name}`,
       description: config.description,
@@ -35,9 +35,9 @@ export default class ShowSorbetConfigurationPicker {
     if (selectedItem) {
       const { lspConfig } = selectedItem;
       if (lspConfig) {
-        this._extensionConfig.setActiveLspConfigId(lspConfig.id);
+        this.configuration.setActiveLspConfigId(lspConfig.id);
       } else {
-        this._extensionConfig.setEnabled(false);
+        this.configuration.setEnabled(false);
       }
     }
   }

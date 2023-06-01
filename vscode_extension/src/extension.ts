@@ -9,7 +9,7 @@ import {
   SORBET_RESTART_COMMAND_ID,
 } from "./commandIds";
 import { ShowSorbetActions } from "./commands/showSorbetActions";
-import ShowSorbetConfigurationPicker from "./commands/showSorbetConfigurationPicker";
+import { ShowSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
@@ -21,7 +21,7 @@ export function activate(context: ExtensionContext) {
   const sorbetExtensionContext = new SorbetExtensionContext(context);
   context.subscriptions.push(
     sorbetExtensionContext,
-    sorbetExtensionContext.config.onLspConfigChange(
+    sorbetExtensionContext.configuration.onLspConfigChange(
       async ({ oldLspConfig, newLspConfig }) => {
         const { statusProvider } = sorbetExtensionContext;
         if (oldLspConfig && newLspConfig) {
@@ -78,10 +78,10 @@ export function activate(context: ExtensionContext) {
       sorbetExtensionContext.outputChannel.show(),
     ),
     commands.registerCommand(SORBET_ENABLE_COMMAND_ID, () =>
-      sorbetExtensionContext.config.setEnabled(true),
+      sorbetExtensionContext.configuration.setEnabled(true),
     ),
     commands.registerCommand(SORBET_DISABLE_COMMAND_ID, () =>
-      sorbetExtensionContext.config.setEnabled(false),
+      sorbetExtensionContext.configuration.setEnabled(false),
     ),
     commands.registerCommand(
       SORBET_RESTART_COMMAND_ID,
@@ -89,8 +89,10 @@ export function activate(context: ExtensionContext) {
         sorbetExtensionContext.statusProvider.restartSorbet(reason),
     ),
     commands.registerCommand("sorbet.toggleHighlightUntyped", () =>
-      sorbetExtensionContext.config
-        .setHighlightUntyped(!sorbetExtensionContext.config.highlightUntyped)
+      sorbetExtensionContext.configuration
+        .setHighlightUntyped(
+          !sorbetExtensionContext.configuration.highlightUntyped,
+        )
         .then(() =>
           sorbetExtensionContext.statusProvider.restartSorbet(
             RestartReason.CONFIG_CHANGE,

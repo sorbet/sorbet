@@ -4,7 +4,6 @@ import {
   EventEmitter,
   ConfigurationTarget,
   ConfigurationChangeEvent,
-  Uri,
   WorkspaceFolder,
   extensions,
 } from "vscode";
@@ -20,7 +19,7 @@ import {
 
 /** Imitate the WorkspaceConfiguration. */
 class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
-  public _emitter = new EventEmitter<ConfigurationChangeEvent>();
+  private emitter = new EventEmitter<ConfigurationChangeEvent>();
   public backingStore: Map<String, any>;
   public defaults: Map<String, any>;
   constructor(public properties: Iterable<[String, any]> = []) {
@@ -68,16 +67,16 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
     }
     this.backingStore.set(section, value);
     return Promise.resolve(
-      this._emitter.fire({
-        affectsConfiguration: (s: string, _?: Uri) => {
-          return section.startsWith(`${s}.`);
+      this.emitter.fire({
+        affectsConfiguration: (scope: string) => {
+          return section.startsWith(`${scope}.`);
         },
       }),
     );
   }
 
   get onDidChangeConfiguration() {
-    return this._emitter.event;
+    return this.emitter.event;
   }
 
   workspaceFolders() {
