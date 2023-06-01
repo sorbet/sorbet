@@ -4,7 +4,7 @@ import { MetricClient } from "./metricsClient";
 import { SorbetStatusProvider } from "./sorbetStatusProvider";
 
 export class SorbetExtensionContext implements Disposable {
-  public readonly config: SorbetExtensionConfig;
+  public readonly configuration: SorbetExtensionConfig;
   private readonly disposable: Disposable;
   public readonly extensionContext: ExtensionContext;
   public readonly metrics: MetricClient;
@@ -12,7 +12,7 @@ export class SorbetExtensionContext implements Disposable {
   public readonly statusProvider: SorbetStatusProvider;
 
   constructor(context: ExtensionContext) {
-    this.config = new SorbetExtensionConfig(
+    this.configuration = new SorbetExtensionConfig(
       new DefaultSorbetWorkspaceContext(context),
     );
     this.extensionContext = context;
@@ -20,7 +20,7 @@ export class SorbetExtensionContext implements Disposable {
     this.outputChannel = window.createOutputChannel("Sorbet");
     this.statusProvider = new SorbetStatusProvider(this);
 
-    this.disposable = Disposable.from(this.config, this.outputChannel);
+    this.disposable = Disposable.from(this.configuration, this.outputChannel);
   }
 
   /**

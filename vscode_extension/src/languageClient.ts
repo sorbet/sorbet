@@ -72,79 +72,79 @@ export function shimLanguageClient(
   };
 }
 
-export default class SorbetLanguageClient implements ErrorHandler {
-  private readonly _context: SorbetExtensionContext;
+export class SorbetLanguageClient implements ErrorHandler {
+  private readonly context: SorbetExtensionContext;
   public readonly languageClient: LanguageClient;
-  private _status: ServerStatus;
+  private wrappedStatus: ServerStatus;
   public get status(): ServerStatus {
-    return this._status;
+    return this.wrappedStatus;
   }
 
   // If status is ERROR, contains the last error message encountered.
-  private _lastError: string;
+  private wrappedLastError: string;
   public get lastError(): string {
-    return this._lastError;
+    return this.wrappedLastError;
   }
 
   // Contains the Sorbet process.
-  private _sorbetProcess: ChildProcess | null = null;
+  private sorbetProcess: ChildProcess | null = null;
   // Note: sometimes this is actually an errno, not a process exit code.
   // This happens when set via the `.on("error")` handler, instead of the
   // `.on("exit")` handler.
-  private _sorbetProcessExitCode: number | null = null;
+  private sorbetProcessExitCode: number | null = null;
 
   // Tracks disposable subscriptions so we can clean them up when language client is disposed.
-  private _subscriptions: { dispose: () => void }[] = [];
+  private subscriptions: { dispose: () => void }[] = [];
 
   public onStatusChange: (status: ServerStatus) => void = nop;
 
   constructor(
     context: SorbetExtensionContext,
-    private readonly _restart: (reason: RestartReason) => void,
+    private readonly restart: (reason: RestartReason) => void,
   ) {
-    this._context = context;
-    this._lastError = "";
-    this._status = ServerStatus.INITIALIZING;
+    this.context = context;
+    this.wrappedLastError = "";
+    this.wrappedStatus = ServerStatus.INITIALIZING;
 
     // Create the language client and start the client.
     this.languageClient = new LanguageClient(
       "ruby",
       "Sorbet",
-      this._startSorbetProcess.bind(this),
+      this.startSorbetProcess.bind(this),
       {
         documentSelector: [
           { language: "ruby", scheme: "file" },
           // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
           { language: "ruby", scheme: "sorbet" },
         ],
-        outputChannel: this._context.outputChannel,
+        outputChannel: this.context.outputChannel,
         initializationOptions: {
           // Opt in to sorbet/showOperation notifications.
           supportsOperationNotifications: true,
           // Let Sorbet know that we can handle sorbet:// URIs for generated files.
           supportsSorbetURIs: true,
-          highlightUntyped: this._context.config.highlightUntyped,
+          highlightUntyped: this.context.configuration.highlightUntyped,
         },
         errorHandler: this,
-        revealOutputChannelOn: this._context.config.revealOutputOnError
+        revealOutputChannelOn: this.context.configuration.revealOutputOnError
           ? RevealOutputChannelOn.Error
           : RevealOutputChannelOn.Never,
       },
     );
     shimLanguageClient(this.languageClient, (metric, value, tags) =>
-      this._context.metrics.emitTimingMetric(metric, value, tags),
+      this.context.metrics.emitTimingMetric(metric, value, tags),
     );
 
     this.languageClient.onReady().then(() => {
       // Note: It's possible for `onReady` to fire after `stop()` is called on the language client. :(
       if (this.status !== ServerStatus.ERROR) {
         // Language client started successfully.
-        this._updateStatus(ServerStatus.RUNNING);
+        this.updateStatus(ServerStatus.RUNNING);
       }
 
       const caps: any = this.languageClient.initializeResult?.capabilities;
       if (caps.sorbetShowSymbolProvider) {
-        this._subscriptions.push(
+        this.subscriptions.push(
           commands.registerCommand("sorbet.copySymbolToClipboard", async () => {
             const editor = window.activeTextEditor;
             if (!editor) {
@@ -177,7 +177,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
       // Unfortunately, we need this command as a wrapper around `editor.action.rename`,
       // because VSCode doesn't allow calling it from the JSON RPC
       // https://github.com/microsoft/vscode/issues/146767
-      this._subscriptions.push(
+      this.subscriptions.push(
         commands.registerCommand(
           "sorbet.rename",
           (params: TextDocumentPositionParams) => {
@@ -195,7 +195,7 @@ export default class SorbetLanguageClient implements ErrorHandler {
         ),
       );
     });
-    this._subscriptions.push(this.languageClient.start());
+    this.subscriptions.push(this.languageClient.start());
   }
 
   /**
@@ -203,8 +203,8 @@ export default class SorbetLanguageClient implements ErrorHandler {
    * to keep it alive. Stops the language server and Sorbet processes, and removes UI items.
    */
   public dispose() {
-    this._subscriptions.forEach((s) => s.dispose());
-    this._subscriptions = [];
+    this.subscriptions.forEach((s) => s.dispose());
+    this.subscriptions = [];
 
     let stopped = false;
     /*
@@ -220,16 +220,16 @@ export default class SorbetLanguageClient implements ErrorHandler {
      */
     const stopTimer = setTimeout(() => {
       stopped = true;
-      this._context.metrics.emitCountMetric("stop.timed_out", 1);
-      stopProcess(this._sorbetProcess);
-      this._sorbetProcess = null;
+      this.context.metrics.emitCountMetric("stop.timed_out", 1);
+      stopProcess(this.sorbetProcess);
+      this.sorbetProcess = null;
     }, 5000);
 
     this.languageClient.stop().then(() => {
       if (!stopped) {
         clearTimeout(stopTimer);
-        this._context.metrics.emitCountMetric("stop.success", 1);
-        this._context.outputChannel.appendLine("Sorbet has stopped.");
+        this.context.metrics.emitCountMetric("stop.success", 1);
+        this.context.outputChannel.appendLine("Sorbet has stopped.");
       }
     });
   }
@@ -237,19 +237,19 @@ export default class SorbetLanguageClient implements ErrorHandler {
   /**
    * Updates the language client's server status. Verifies that the transition is legal.
    */
-  private _updateStatus(newStatus: ServerStatus) {
+  private updateStatus(newStatus: ServerStatus) {
     if (this.status === newStatus) {
       return;
     }
-    this._assertValid(this.status, newStatus);
-    this._status = newStatus;
+    this.assertValid(this.status, newStatus);
+    this.wrappedStatus = newStatus;
     this.onStatusChange(newStatus);
   }
 
-  private _assertValid(from: ServerStatus, to: ServerStatus) {
+  private assertValid(from: ServerStatus, to: ServerStatus) {
     const set = VALID_STATE_TRANSITIONS.get(from);
-    if (!set || !set.has(to)) {
-      this._context.outputChannel.appendLine(
+    if (!set?.has(to)) {
+      this.context.outputChannel.appendLine(
         `Invalid Sorbet server transition: ${from} => ${to}`,
       );
     }
@@ -258,41 +258,44 @@ export default class SorbetLanguageClient implements ErrorHandler {
   /**
    * Runs a Sorbet process using the current active configuration. Debounced so that it runs Sorbet at most every 3 seconds.
    */
-  private _startSorbetProcess(): Promise<ChildProcess> {
-    this._updateStatus(ServerStatus.INITIALIZING);
-    this._context.outputChannel.appendLine("Running Sorbet LSP with:");
-    const [command, ...args] = this._context.config.activeLspConfig!.command;
-    this._context.outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
-    this._sorbetProcess = spawn(command, args, {
+  private startSorbetProcess(): Promise<ChildProcess> {
+    this.updateStatus(ServerStatus.INITIALIZING);
+    this.context.outputChannel.appendLine("Running Sorbet LSP with:");
+    const [
+      command,
+      ...args
+    ] = this.context.configuration.activeLspConfig!.command;
+    this.context.outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
+    this.sorbetProcess = spawn(command, args, {
       cwd: workspace.rootPath,
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯
-    this._sorbetProcess.on(
+    this.sorbetProcess.on(
       "exit",
       (code: number | null, _signal: string | null) => {
-        this._sorbetProcessExitCode = code;
+        this.sorbetProcessExitCode = code;
       },
     );
-    this._sorbetProcess.on("error", (err?: NodeJS.ErrnoException) => {
+    this.sorbetProcess.on("error", (err?: NodeJS.ErrnoException) => {
       if (
         err &&
         this.status === ServerStatus.INITIALIZING &&
         err.code === "ENOENT"
       ) {
-        this._context.metrics.emitCountMetric("error.enoent", 1);
+        this.context.metrics.emitCountMetric("error.enoent", 1);
         // We failed to start the process. The path to Sorbet is likely incorrect.
-        this._lastError = `Could not start Sorbet with command: '${command} ${args.join(
+        this.wrappedLastError = `Could not start Sorbet with command: '${command} ${args.join(
           " ",
         )}'. Encountered error '${
           err.message
         }'. Is the path to Sorbet correct?`;
-        this._updateStatus(ServerStatus.ERROR);
+        this.updateStatus(ServerStatus.ERROR);
       }
-      this._sorbetProcess = null;
-      this._sorbetProcessExitCode = err?.errno ?? null;
+      this.sorbetProcess = null;
+      this.sorbetProcessExitCode = err?.errno ?? null;
     });
-    return Promise.resolve(this._sorbetProcess);
+    return Promise.resolve(this.sorbetProcess);
   }
 
   /** ErrorHandler interface */
@@ -305,8 +308,8 @@ export default class SorbetLanguageClient implements ErrorHandler {
    */
   public error(): ErrorAction {
     if (this.status !== ServerStatus.ERROR) {
-      this._updateStatus(ServerStatus.RESTARTING);
-      this._restart(RestartReason.CRASH_LC_ERROR);
+      this.updateStatus(ServerStatus.RESTARTING);
+      this.restart(RestartReason.CRASH_LC_ERROR);
     }
     return ErrorAction.Shutdown;
   }
@@ -316,9 +319,9 @@ export default class SorbetLanguageClient implements ErrorHandler {
    */
   public closed(): CloseAction {
     if (this.status !== ServerStatus.ERROR) {
-      this._updateStatus(ServerStatus.RESTARTING);
+      this.updateStatus(ServerStatus.RESTARTING);
       let reason = RestartReason.CRASH_LC_CLOSED;
-      if (this._sorbetProcessExitCode === 11) {
+      if (this.sorbetProcessExitCode === 11) {
         // 11 number chosen somewhat arbitrarily. Most important is that this doesn't
         // clobber the exit code of Sorbet itself (which means Sorbet cannot return 11).
         //
@@ -326,11 +329,11 @@ export default class SorbetLanguageClient implements ErrorHandler {
         // wrapper scripts that people use with Sorbet. If this number has to
         // change for some reason, we should announce that.
         reason = RestartReason.WRAPPER_REFUSED_SPAWN;
-      } else if (this._sorbetProcessExitCode === 143) {
+      } else if (this.sorbetProcessExitCode === 143) {
         // 143 = 128 + 15 and 15 is TERM signal
         reason = RestartReason.FORCIBLY_TERMINATED;
       }
-      this._restart(reason);
+      this.restart(reason);
     }
     return CloseAction.DoNotRestart;
   }
