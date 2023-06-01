@@ -88,7 +88,8 @@
       {
         "command": "sorbet.toggleHighlightUntyped",
         "title": "Toggle highlighting untyped code",
-        "category": "Sorbet"
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
       }
     ],
     "configuration": {
