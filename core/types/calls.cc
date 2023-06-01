@@ -1572,6 +1572,15 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             original.main.sendTp = wrapped;
             return original;
         }
+        case Names::squareBrackets().rawId(): {
+            auto *applied = cast_type<AppliedType>(this->wrapped);
+            if (applied == nullptr) {
+                return badMetaTypeCall(gs, args, errLoc, this->wrapped);
+            }
+
+            auto returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, applied->klass);
+            return DispatchResult(returnType, args.selfType, Symbols::T_Generic_squareBrackets());
+        }
         case Names::bind().rawId():
         case Names::returns().rawId():
         case Names::void_().rawId(): {
