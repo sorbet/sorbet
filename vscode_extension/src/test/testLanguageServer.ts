@@ -4,7 +4,7 @@ import {
   ProposedFeatures,
   TextDocumentSyncKind,
 } from "vscode-languageserver/node";
-import { TestLanguageServerSpecialURIs } from "./TestLanguageServerSpecialURIs";
+import { TestLanguageServerSpecialURIs } from "./testLanguageServerSpecialURIs";
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
