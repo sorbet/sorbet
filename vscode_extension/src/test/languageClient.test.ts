@@ -58,7 +58,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
 
 function createLanguageClient(): LanguageClient {
   // The server is implemented in node
-  const serverModule = require.resolve("./TestLanguageServer");
+  const serverModule = require.resolve("./testLanguageServer");
   // The debug options for the server
   const debugOptions = { execArgv: [] };
 
