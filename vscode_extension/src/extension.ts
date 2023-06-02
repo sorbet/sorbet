@@ -1,15 +1,10 @@
 import { commands, ExtensionContext, Uri, workspace } from "vscode";
 import { TextDocumentItem } from "vscode-languageclient";
-import {
-  SHOW_ACTIONS_COMMAND_ID,
-  SHOW_CONFIG_PICKER_COMMAND_ID,
-  SHOW_OUTPUT_COMMAND_ID,
-  SORBET_DISABLE_COMMAND_ID,
-  SORBET_ENABLE_COMMAND_ID,
-  SORBET_RESTART_COMMAND_ID,
-} from "./commandIds";
+import * as cmdIds from "./commandIds";
+import { SetLogLevel } from "./commands/setLogLevel";
 import { ShowSorbetActions } from "./commands/showSorbetActions";
 import { ShowSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
+import { getLogLevelFromEnvironment } from "./log";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
@@ -19,6 +14,8 @@ import { ServerStatus, RestartReason } from "./types";
  */
 export function activate(context: ExtensionContext) {
   const sorbetExtensionContext = new SorbetExtensionContext(context);
+  sorbetExtensionContext.log.level = getLogLevelFromEnvironment();
+
   context.subscriptions.push(
     sorbetExtensionContext,
     sorbetExtensionContext.configuration.onLspConfigChange(
@@ -46,7 +43,7 @@ export function activate(context: ExtensionContext) {
       provideTextDocumentContent: async (uri: Uri): Promise<string> => {
         let content: string;
         const { activeLanguageClient } = sorbetExtensionContext.statusProvider;
-        console.log(`Opening sorbet: file. URI:${uri}`);
+        sorbetExtensionContext.log.info(`Opening sorbet: file. URI:${uri}`);
         if (activeLanguageClient) {
           const response: TextDocumentItem = await activeLanguageClient.languageClient.sendRequest(
             "sorbet/readFile",
@@ -56,7 +53,9 @@ export function activate(context: ExtensionContext) {
           );
           content = response.text;
         } else {
-          console.log(" > Cannot retrieve file content, no active client.");
+          sorbetExtensionContext.log.warning(
+            " > Cannot retrieve file content, no active client.",
+          );
           content = "";
         }
         return content;
@@ -66,23 +65,26 @@ export function activate(context: ExtensionContext) {
 
   // Register commands
   context.subscriptions.push(
-    commands.registerCommand(SHOW_ACTIONS_COMMAND_ID, () =>
+    commands.registerCommand(cmdIds.SET_LOGLEVEL_COMMAND_ID, () =>
+      new SetLogLevel(sorbetExtensionContext).execute(),
+    ),
+    commands.registerCommand(cmdIds.SHOW_ACTIONS_COMMAND_ID, () =>
       new ShowSorbetActions(sorbetExtensionContext).execute(),
     ),
-    commands.registerCommand(SHOW_CONFIG_PICKER_COMMAND_ID, () =>
+    commands.registerCommand(cmdIds.SHOW_CONFIG_PICKER_COMMAND_ID, () =>
       new ShowSorbetConfigurationPicker(sorbetExtensionContext).execute(),
     ),
-    commands.registerCommand(SHOW_OUTPUT_COMMAND_ID, () =>
-      sorbetExtensionContext.outputChannel.show(),
+    commands.registerCommand(cmdIds.SHOW_OUTPUT_COMMAND_ID, () =>
+      sorbetExtensionContext.log.outputChannel.show(true),
     ),
-    commands.registerCommand(SORBET_ENABLE_COMMAND_ID, () =>
+    commands.registerCommand(cmdIds.SORBET_ENABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(true),
     ),
-    commands.registerCommand(SORBET_DISABLE_COMMAND_ID, () =>
+    commands.registerCommand(cmdIds.SORBET_DISABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(false),
     ),
     commands.registerCommand(
-      SORBET_RESTART_COMMAND_ID,
+      cmdIds.SORBET_RESTART_COMMAND_ID,
       (reason: RestartReason = RestartReason.COMMAND) =>
         sorbetExtensionContext.statusProvider.restartSorbet(reason),
     ),
