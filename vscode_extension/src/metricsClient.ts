@@ -76,7 +76,7 @@ export class MetricClient {
    */
   private buildTags(tags: Tags) {
     return {
-      config_id: this.context.config.activeLspConfig?.id ?? "disabled",
+      config_id: this.context.configuration.activeLspConfig?.id ?? "disabled",
       sorbet_extension_version: this.sorbetExtensionVersion,
       ...tags,
     };

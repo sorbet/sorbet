@@ -99,8 +99,8 @@ rules:
   'newline-per-chained-call': [2, {ignoreChainWithDepth: 5}]
   # Disallow multiple empty lines
   'no-multiple-empty-lines': 2
-  # Allow dangling underscores in identifiers
-  'no-underscore-dangle': 0
+  # Disallow dangling underscores
+  'no-underscore-dangle': [2, {enforceInMethodNames: true}]
   # Allow useless computed keys.
   # We disable useless computed _string_ keys in a forked version of this
   # rule, no-useless-computed-string-key. We allow computed number keys

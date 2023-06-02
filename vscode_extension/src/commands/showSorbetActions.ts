@@ -22,10 +22,10 @@ export const enum Action {
  * Show available actions in a drop-down.
  */
 export class ShowSorbetActions {
-  private readonly _statusProvider: SorbetStatusProvider;
+  private readonly statusProvider: SorbetStatusProvider;
 
   constructor(context: SorbetExtensionContext) {
-    this._statusProvider = context.statusProvider;
+    this.statusProvider = context.statusProvider;
   }
 
   public async execute(): Promise<void> {
@@ -63,7 +63,7 @@ export class ShowSorbetActions {
    */
   public getAvailableActions(): Action[] {
     const actions = [Action.ViewOutput];
-    switch (this._statusProvider.serverStatus) {
+    switch (this.statusProvider.serverStatus) {
       case ServerStatus.ERROR:
         actions.push(Action.RestartSorbet);
         break;
