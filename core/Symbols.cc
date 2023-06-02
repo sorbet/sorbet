@@ -2241,7 +2241,6 @@ TypeParameter TypeParameter::deepCopy(const GlobalState &to) const {
     return result;
 }
 
-// TODO(jez) Audit usages of typeArity--we might want to make this aware of <AttachedClass>
 int ClassOrModule::typeArity(const GlobalState &gs) const {
     int arity = 0;
     for (auto &tm : this->typeMembers()) {
