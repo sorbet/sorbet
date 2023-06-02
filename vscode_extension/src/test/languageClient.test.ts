@@ -6,8 +6,8 @@ import {
 } from "vscode-languageclient/node";
 import { RequestType } from "vscode-languageserver-protocol";
 import * as assert from "assert";
-import { shimLanguageClient } from "../LanguageClient";
-import TestLanguageServerSpecialURIs from "./TestLanguageServerSpecialURIs";
+import { shimLanguageClient } from "../languageClient";
+import { TestLanguageServerSpecialURIs } from "./testLanguageServerSpecialURIs";
 import { MetricsEmitter, Tags } from "../metricsClient";
 
 const enum MetricType {
@@ -58,7 +58,7 @@ class RecordingMetricsEmitter implements MetricsEmitter {
 
 function createLanguageClient(): LanguageClient {
   // The server is implemented in node
-  const serverModule = require.resolve("./TestLanguageServer");
+  const serverModule = require.resolve("./testLanguageServer");
   // The debug options for the server
   const debugOptions = { execArgv: [] };
 
