@@ -117,7 +117,7 @@ export class SorbetLanguageClient implements ErrorHandler {
           // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
           { language: "ruby", scheme: "sorbet" },
         ],
-        outputChannel: this.context.outputChannel,
+        outputChannel: this.context.log.outputChannel,
         initializationOptions: {
           // Opt in to sorbet/showOperation notifications.
           supportsOperationNotifications: true,
@@ -169,7 +169,9 @@ export class SorbetLanguageClient implements ErrorHandler {
 
             await env.clipboard.writeText(response.name);
 
-            console.log(`Copied ${response.name} to the clipboard.`);
+            this.context.log.debug(
+              `Copied symbol name to the clipboard. Name:${response.name}`,
+            );
           }),
         );
       }
@@ -187,8 +189,9 @@ export class SorbetLanguageClient implements ErrorHandler {
                 new Position(params.position.line, params.position.character),
               ]);
             } catch (error) {
-              console.log(
-                `Failed to rename symbol at ${params.textDocument.uri}:${params.position.line}:${params.position.character}, ${error}`,
+              this.context.log.error(
+                `Failed to rename symbol at ${params.textDocument.uri}:${params.position.line}:${params.position.character}`,
+                error instanceof Error ? error : undefined,
               );
             }
           },
@@ -221,7 +224,7 @@ export class SorbetLanguageClient implements ErrorHandler {
     const stopTimer = setTimeout(() => {
       stopped = true;
       this.context.metrics.emitCountMetric("stop.timed_out", 1);
-      stopProcess(this.sorbetProcess);
+      stopProcess(this.sorbetProcess, this.context.log);
       this.sorbetProcess = null;
     }, 5000);
 
@@ -229,7 +232,7 @@ export class SorbetLanguageClient implements ErrorHandler {
       if (!stopped) {
         clearTimeout(stopTimer);
         this.context.metrics.emitCountMetric("stop.success", 1);
-        this.context.outputChannel.appendLine("Sorbet has stopped.");
+        this.context.log.info("Sorbet has stopped.");
       }
     });
   }
@@ -248,8 +251,8 @@ export class SorbetLanguageClient implements ErrorHandler {
 
   private assertValid(from: ServerStatus, to: ServerStatus) {
     const set = VALID_STATE_TRANSITIONS.get(from);
-    if (!set?.has(to)) {
-      this.context.outputChannel.appendLine(
+    if (!set || !set.has(to)) {
+      this.context.log.error(
         `Invalid Sorbet server transition: ${from} => ${to}`,
       );
     }
@@ -260,12 +263,10 @@ export class SorbetLanguageClient implements ErrorHandler {
    */
   private startSorbetProcess(): Promise<ChildProcess> {
     this.updateStatus(ServerStatus.INITIALIZING);
-    this.context.outputChannel.appendLine("Running Sorbet LSP with:");
-    const [
-      command,
-      ...args
-    ] = this.context.configuration.activeLspConfig!.command;
-    this.context.outputChannel.appendLine(`    ${command} ${args.join(" ")}`);
+    this.context.log.info("Running Sorbet LSP.");
+    const [command, ...args] =
+      this.context.configuration.activeLspConfig?.command ?? [];
+    this.context.log.debug(` > ${command} ${args.join(" ")}`);
     this.sorbetProcess = spawn(command, args, {
       cwd: workspace.rootPath,
     });
