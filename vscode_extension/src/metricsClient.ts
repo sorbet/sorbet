@@ -89,17 +89,13 @@ export class MetricClient {
         "sorbet.metrics.getExportedApi",
       );
       if (api) {
-        this.context.outputChannel.appendLine("Metrics-gathering initialized.");
+        this.context.log.info("Metrics-gathering initialized.");
         sorbetMetricsApi = api as Api;
         if (!sorbetMetricsApi.metricsEmitter.timing) {
-          this.context.outputChannel.appendLine(
-            "  Timer metrics disabled (unsupported API).",
-          );
+          this.context.log.info("Timer metrics disabled (unsupported API).");
         }
       } else {
-        this.context.outputChannel.appendLine(
-          "Metrics-gathering disabled (no API)",
-        );
+        this.context.log.info("Metrics-gathering disabled (no API)");
         sorbetMetricsApi = NoOpApi.INSTANCE;
       }
     } catch (reason) {
@@ -110,7 +106,7 @@ export class MetricClient {
           ? "Define the 'sorbet.metrics.getExportedApi' command to enable metrics gathering"
           : (<any>reason).message;
 
-      this.context.outputChannel.appendLine(
+      this.context.log.error(
         `Metrics-gathering disabled (error): ${adjustedReason}`,
       );
     }

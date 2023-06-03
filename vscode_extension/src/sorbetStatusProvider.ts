@@ -133,7 +133,9 @@ export class SorbetStatusProvider implements Disposable {
       MIN_TIME_BETWEEN_RETRIES_MS - (Date.now() - this.lastSorbetRetryTime);
     if (sleepMS > 0) {
       // Wait timeToSleep ms. Use mutex, as this yields the event loop for future events.
-      console.log(`Waiting ${sleepMS.toFixed(0)}ms before restarting Sorbet…`);
+      this.context.log.debug(
+        `Waiting ${sleepMS.toFixed(0)}ms before restarting Sorbet…`,
+      );
       this.isStarting = true;
       await new Promise((res) => setTimeout(res, sleepMS));
       this.isStarting = false;

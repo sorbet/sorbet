@@ -6,6 +6,9 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
+            "env": {
+                "VSCODE_SORBETEXT_LOG_LEVEL": "trace"
+              },
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}"
             ],
