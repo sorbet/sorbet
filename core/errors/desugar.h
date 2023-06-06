@@ -9,7 +9,7 @@ constexpr ErrorClass UnsupportedNode{3003, StrictLevel::False};
 constexpr ErrorClass FloatOutOfRange{3004, StrictLevel::True};
 constexpr ErrorClass NoConstantReassignment{3005, StrictLevel::True};
 // constexpr ErrorClass SimpleSuperclass{3006, StrictLevel::True};
-constexpr ErrorClass UnnamedBlockParameter{3007, StrictLevel::True};
+constexpr ErrorClass UnnamedBlockParameter{3007, StrictLevel::Strict};
 constexpr ErrorClass UndefUsage{3008, StrictLevel::Strict};
 constexpr ErrorClass UnsupportedRestArgsDestructure{3009, StrictLevel::True};
 constexpr ErrorClass CodeInRBI{3010, StrictLevel::False};
