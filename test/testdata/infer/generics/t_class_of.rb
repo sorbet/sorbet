@@ -64,6 +64,9 @@ end
 sig do
   type_parameters(:U)
     .params(klass: T.class_of(A)[Integer])
+    #                            ^^^^^^^ error: Wrong number of type parameters for `T.class_of(A)`
+    #                            ^^^^^^^ error: Wrong number of type parameters for `T.class_of(A)`
+    #                            ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::<Class:A>::<AttachedClass>`
     #                            ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::<Class:A>::<AttachedClass>`
     .void
 end
@@ -169,7 +172,7 @@ T.reveal_type(instance) # error: `A`
 instance = example5(ChildA)
 T.reveal_type(instance) # error: `ChildA`
 instance = example5(ChildAFixedString)
-#                   ^^^^^^^^^^^^^^^^^ error: Expected `T.class_of(A)[T.all(A, T.type_parameter(:U)), Integer]` but found `T.class_of(ChildAFixedString)` for argument `klass`
+#                   ^^^^^^^^^^^^^^^^^ error: Expected `T.class_of(A)[T.type_parameter(:U), Integer]` but found `T.class_of(ChildAFixedString)` for argument `klass`
 T.reveal_type(instance) # error: `ChildAFixedString`
 
 

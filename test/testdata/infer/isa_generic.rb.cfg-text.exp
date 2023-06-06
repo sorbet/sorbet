@@ -90,8 +90,8 @@ method ::Object#f2 {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     x: T.any(Base, Other) = load_arg(x)
-    <cfgAlias>$6: T.class_of(Base)[T.untyped] = alias <C Base>
-    <ifTemp>$3: T::Boolean = x: T.any(Base, Other).is_a?(<cfgAlias>$6: T.class_of(Base)[T.untyped])
+    <cfgAlias>$6: T.class_of(Base)[Base, T.untyped] = alias <C Base>
+    <ifTemp>$3: T::Boolean = x: T.any(Base, Other).is_a?(<cfgAlias>$6: T.class_of(Base)[Base, T.untyped])
     <ifTemp>$3 -> (T::Boolean ? bb2 : bb4)
 
 # backedges
@@ -177,14 +177,14 @@ bb7[rubyRegionId=0, firstDead=18](<block-pre-call-temp>$25: Sorbet::Private::Sta
     <cfgAlias>$44: T.class_of(T) = alias <C T>
     <statTemp>$39: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$42: T.class_of(T::Sig))
     <cfgAlias>$49: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$51: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$47: Sorbet::Private::Static::Void = <cfgAlias>$49: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$51: T.class_of(Base)[T.untyped])
+    <cfgAlias>$51: T.class_of(Base)[Base, T.untyped] = alias <C Base>
+    <statTemp>$47: Sorbet::Private::Static::Void = <cfgAlias>$49: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$51: T.class_of(Base)[Base, T.untyped])
     <cfgAlias>$56: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$58: T.class_of(Concrete) = alias <C Concrete>
     <statTemp>$54: Sorbet::Private::Static::Void = <cfgAlias>$56: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$58: T.class_of(Concrete))
     <cfgAlias>$61: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$63: T.class_of(Base)[T.untyped] = alias <C Base>
-    <statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$63: T.class_of(Base)[T.untyped])
+    <cfgAlias>$63: T.class_of(Base)[Base, T.untyped] = alias <C Base>
+    <statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$63: T.class_of(Base)[Base, T.untyped])
     <cfgAlias>$68: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$70: T.class_of(Other) = alias <C Other>
     <statTemp>$66: Sorbet::Private::Static::Void = <cfgAlias>$68: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$70: T.class_of(Other))
@@ -198,9 +198,9 @@ bb9[rubyRegionId=2, firstDead=9](<self>: T.class_of(<root>), <block-pre-call-tem
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$30: Symbol(:x) = :x
     <cfgAlias>$33: T.class_of(T) = alias <C T>
-    <cfgAlias>$35: T.class_of(Base)[T.untyped] = alias <C Base>
+    <cfgAlias>$35: T.class_of(Base)[Base, T.untyped] = alias <C Base>
     <cfgAlias>$37: T.class_of(Other) = alias <C Other>
-    <hashTemp>$31: Runtime object representing type: T.any(Base, Other) = <cfgAlias>$33: T.class_of(T).any(<cfgAlias>$35: T.class_of(Base)[T.untyped], <cfgAlias>$37: T.class_of(Other))
+    <hashTemp>$31: Runtime object representing type: T.any(Base, Other) = <cfgAlias>$33: T.class_of(T).any(<cfgAlias>$35: T.class_of(Base)[Base, T.untyped], <cfgAlias>$37: T.class_of(Other))
     <statTemp>$28: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.params(<hashTemp>$30: Symbol(:x), <hashTemp>$31: Runtime object representing type: T.any(Base, Other))
     <blockReturnTemp>$27: T::Private::Methods::DeclBuilder = <statTemp>$28: T::Private::Methods::DeclBuilder.void()
     <blockReturnTemp>$38: T.noreturn = blockreturn<sig> <blockReturnTemp>$27: T::Private::Methods::DeclBuilder
@@ -212,11 +212,11 @@ method ::<Class:Base>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=7]():
     <C Klass>$10: Runtime object representing type: T.class_of(Base)::Klass = alias <C Klass>
-    <self>: T.class_of(Base)[T.class_of(Base)::Klass] = cast(<self>: NilClass, T.class_of(Base)[T.class_of(Base)::Klass]);
+    <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass] = cast(<self>: NilClass, T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass]);
     <cfgAlias>$6: T.class_of(T::Generic) = alias <C Generic>
     <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <statTemp>$3: T.class_of(Base)[T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))
-    <C Klass>$10: T::Types::TypeTemplate = <self>: T.class_of(Base)[T.class_of(Base)::Klass].type_template()
+    <statTemp>$3: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass] = <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass].extend(<cfgAlias>$6: T.class_of(T::Generic))
+    <C Klass>$10: T::Types::TypeTemplate = <self>: T.class_of(Base)[T.attached_class (of Base), T.class_of(Base)::Klass].type_template()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
