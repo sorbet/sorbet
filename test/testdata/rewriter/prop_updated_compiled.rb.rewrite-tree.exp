@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+      <self>.returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
     def updated<<todo method>>(&<blk>)
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)).returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Numeric>)).returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
     def updated=<<todo method>>(arg0, &<blk>)
