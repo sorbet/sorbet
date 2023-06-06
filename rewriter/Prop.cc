@@ -54,32 +54,17 @@ bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() && isT(struct_->scope);
 }
 
-bool isChalkODMDocument(const ast::ExpressionPtr &expr) {
-    auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
-        return false;
-    }
-    auto *odm = ast::cast_tree<ast::UnresolvedConstantLit>(document->scope);
-    if (odm == nullptr || odm->cnst != core::Names::Constants::ODM()) {
-        return false;
-    }
-    auto *chalk = ast::cast_tree<ast::UnresolvedConstantLit>(odm->scope);
-    return chalk != nullptr && chalk->cnst == core::Names::Constants::Chalk() && ast::MK::isRootScope(chalk->scope);
-}
-
 enum class SyntacticSuperClass {
     Unknown,
     TStruct,
     TInexactStruct,
-    ChalkODMDocument,
     TImmutableStruct,
 };
 
-bool knownNonModel(SyntacticSuperClass syntacticSuperClass) {
+bool wantSimpleIVarGet(SyntacticSuperClass syntacticSuperClass) {
     switch (syntacticSuperClass) {
         case SyntacticSuperClass::TStruct:
         case SyntacticSuperClass::TInexactStruct:
-        case SyntacticSuperClass::ChalkODMDocument:
         case SyntacticSuperClass::TImmutableStruct:
             return true;
         case SyntacticSuperClass::Unknown:
@@ -93,7 +78,6 @@ bool knownNonDocument(SyntacticSuperClass syntacticSuperClass) {
         case SyntacticSuperClass::TInexactStruct:
         case SyntacticSuperClass::TImmutableStruct:
             return true;
-        case SyntacticSuperClass::ChalkODMDocument:
         case SyntacticSuperClass::Unknown:
             return false;
     }
@@ -105,7 +89,6 @@ bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
         case SyntacticSuperClass::TImmutableStruct:
             return true;
         case SyntacticSuperClass::TInexactStruct:
-        case SyntacticSuperClass::ChalkODMDocument:
         case SyntacticSuperClass::Unknown:
             return false;
     }
@@ -388,7 +371,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
     } else if (ret.ifunset == nullptr) {
-        if (knownNonModel(propContext.syntacticSuperClass)) {
+        if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
             flags.isAttrReader = true;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
@@ -404,8 +387,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             flags.genericPropGetter = true;
 
             // Models have a custom decorator, which means we have to forward the prop get to it.
-            // If this is actually a T::InexactStruct or Chalk::ODM::Document sub-sub-class, this implementation is
-            // correct but does extra work.
+            // If this is actually a T::InexactStruct or Chalk::ODM::Base::Document sub-sub-class,
+            // this implementation is correct but does extra work.
 
             auto arg2 = ast::MK::Local(loc, core::Names::arg2());
 
@@ -618,8 +601,6 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             syntacticSuperClass = SyntacticSuperClass::TInexactStruct;
         } else if (isTImmutableStruct(superClass)) {
             syntacticSuperClass = SyntacticSuperClass::TImmutableStruct;
-        } else if (isChalkODMDocument(superClass)) {
-            syntacticSuperClass = SyntacticSuperClass::ChalkODMDocument;
         }
     }
     // The compiler is going to turn the bodies of rewritten prop methods into actual
