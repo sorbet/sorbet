@@ -1321,7 +1321,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // having written a sig. This usually manifests as `def foo(*_); end` with no sig in an RBI.)
         if (data->hasSig() && data->loc().exists()) {
             auto file = data->loc().file();
-            if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
+            if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::True &&
                 bspec.isSyntheticBlockArgument()) {
                 auto blockLoc = args.blockLoc(gs);
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
