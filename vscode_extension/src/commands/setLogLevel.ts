@@ -2,6 +2,10 @@ import { QuickPickItem, window } from "vscode";
 import { LogLevel } from "../log";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 
+export type LogLevelQuickPickItem = QuickPickItem & {
+  level: LogLevel;
+};
+
 /**
  * Set logging level on associated 'Log' instance.
  */
@@ -34,11 +38,7 @@ export class SetLogLevel {
       LogLevel.Critical,
       LogLevel.Off,
     ].map((logLevel) => {
-      const item = <
-        QuickPickItem & {
-          level: LogLevel;
-        }
-      >{
+      const item = <LogLevelQuickPickItem>{
         label: `${this.context.log.level === logLevel ? "• " : ""}${
           LogLevel[logLevel]
         }`,
