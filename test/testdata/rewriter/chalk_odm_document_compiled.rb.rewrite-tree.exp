@@ -17,7 +17,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method<<todo method>>(&<blk>)
-      <self>.instance_variable_get(:@my_parent_method)
+      begin
+        arg2 = <self>.instance_variable_get(:@my_parent_method)
+        <self>.class().decorator().prop_get_logic(<self>, :my_parent_method, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -33,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :attr_reader)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=, :normal)
   end
