@@ -10,8 +10,8 @@ import {
 } from "../../commands/showSorbetActions";
 import { LogLevel, OutputChannelLog } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
-import { ServerStatus } from "../../types";
 import { SorbetStatusProvider } from "../../sorbetStatusProvider";
+import { ServerStatus } from "../../types";
 
 suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
   let testRestorables: { restore: () => void }[];

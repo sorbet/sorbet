@@ -3,13 +3,10 @@ import * as assert from "assert";
 import * as path from "path";
 import * as sinon from "sinon";
 
-import {
-  LspConfigQuickPickItem,
-  showSorbetConfigurationPicker,
-} from "../../commands/showSorbetConfigurationPicker";
+import { showSorbetConfigurationPicker } from "../../commands/showSorbetConfigurationPicker";
+import { SorbetExtensionConfig, SorbetLspConfig } from "../../config";
 import { LogLevel, OutputChannelLog } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
-import { SorbetExtensionConfig, SorbetLspConfig } from "../../config";
 
 suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
   let testRestorables: { restore: () => void }[];
