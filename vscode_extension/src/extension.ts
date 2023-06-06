@@ -1,10 +1,10 @@
 import { commands, ExtensionContext, Uri, workspace } from "vscode";
 import { TextDocumentItem } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
-import { SetLogLevel } from "./commands/setLogLevel";
-import { ShowSorbetActions } from "./commands/showSorbetActions";
-import { ShowSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
-import { getLogLevelFromEnvironment } from "./log";
+import { setLogLevel } from "./commands/setLogLevel";
+import { showSorbetActions } from "./commands/showSorbetActions";
+import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
+import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
@@ -65,14 +65,15 @@ export function activate(context: ExtensionContext) {
 
   // Register commands
   context.subscriptions.push(
-    commands.registerCommand(cmdIds.SET_LOGLEVEL_COMMAND_ID, () =>
-      new SetLogLevel(sorbetExtensionContext).execute(),
+    commands.registerCommand(
+      cmdIds.SET_LOGLEVEL_COMMAND_ID,
+      (level?: LogLevel) => setLogLevel(sorbetExtensionContext, level),
     ),
     commands.registerCommand(cmdIds.SHOW_ACTIONS_COMMAND_ID, () =>
-      new ShowSorbetActions(sorbetExtensionContext).execute(),
+      showSorbetActions(sorbetExtensionContext),
     ),
     commands.registerCommand(cmdIds.SHOW_CONFIG_PICKER_COMMAND_ID, () =>
-      new ShowSorbetConfigurationPicker(sorbetExtensionContext).execute(),
+      showSorbetConfigurationPicker(sorbetExtensionContext),
     ),
     commands.registerCommand(cmdIds.SHOW_OUTPUT_COMMAND_ID, () =>
       sorbetExtensionContext.log.outputChannel.show(true),
