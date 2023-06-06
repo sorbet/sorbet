@@ -36,13 +36,6 @@ class A
   def noblock
   end
 
-  sig {returns(NilClass)}
-  def extra_block
-    noblock do |x|
-      x + 1 # Should be typed as untyped
-    end
-  end
-
   class NoConstructor
   end
 

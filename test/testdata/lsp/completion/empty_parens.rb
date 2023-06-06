@@ -2,7 +2,10 @@
 extend T::Sig
 
 module M
-  def aaa_only_on_m(x); end
+  extend T::Sig
+
+  sig { params(x: T.untyped, blk: T.nilable(Proc)).void }
+  def aaa_only_on_m(x, &blk); end
 end
 
 # These cases are not great at the moment.
@@ -14,11 +17,11 @@ end
 # might not be in scope. We should _probably_ fix that, but at least some
 # things get suggested there right now, even if it's not everything.
 
-sig {params(m: M, a: Integer, b: Integer).void}
-def AAA_example1(m, a, b)
+sig {params(m: M, a: Integer, b: Integer, blk: T.nilable(Proc)).void}
+def AAA_example1(m, a, b, &blk)
   AAA_example1()
   #           ^^ error: Not enough arguments
-  #            ^ completion: a, b, m, AAA_example1, ...
+  #            ^ completion: a, b, blk, m, AAA_example1, ...
 
   # No locals here because !isPrivateOk 🙃
   m.aaa_only_on_m()

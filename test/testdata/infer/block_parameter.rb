@@ -22,4 +22,3 @@ required_block(1)
 required_block(1) {}
 
 no_params()
-no_params() {}

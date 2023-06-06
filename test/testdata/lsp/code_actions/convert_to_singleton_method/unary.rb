@@ -14,9 +14,6 @@ class A
   def example
     unary # error: Not enough arguments provided
     unary(0)
-    unary(0) {}
-    unary(0) do
-    end
   end
 
   sig {params(other: A).returns(T.self_type)}
@@ -28,8 +25,6 @@ A.new.unary(0)
 A.new.unary(
   0
 )
-A.new.unary(0) do
-end
 
 (T.unsafe(A.new)).unary(0)
 

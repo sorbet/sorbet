@@ -8,9 +8,7 @@ T.reveal_type(my_proc) # error: type: `Proc`
 
 sig {params(f: T.proc.params(x: Integer).void).void}
 def example(f)
-  f.call(0) do
-    puts 'hello'
-  end
+  f.call(0)
 end
 
 f = ->(x, &blk) do

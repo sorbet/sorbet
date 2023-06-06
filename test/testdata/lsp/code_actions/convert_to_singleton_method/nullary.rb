@@ -14,22 +14,10 @@ class A
   def example
     nullary
     nullary()
-    nullary {}
-    nullary() {}
-    nullary do
-    end
-    nullary() do
-    end
   end
 
   sig {params(other: A).returns(T.self_type)}
   def +(other); self; end
-end
-
-A.new.nullary do
-end
-A.new.nullary {}
-A.new.nullary() do
 end
 
 (T.unsafe(A.new)).nullary
