@@ -19,7 +19,7 @@ class Test
   sig {params(arg: T.class_of(A)).void}
   def test(arg)
     if arg < A
-      T.reveal_type(arg) # error: Revealed type: `T.class_of(A)[T.untyped]`
+      T.reveal_type(arg) # error: Revealed type: `T.class_of(A)[A, T.untyped]`
     end
 
     # Exercise the `Object#class` intrinsic, ensuring that it calls

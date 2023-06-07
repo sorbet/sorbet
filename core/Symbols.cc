@@ -23,7 +23,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 213;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 49;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
@@ -112,6 +112,8 @@ TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     }
 }
 
+// ClassOrModule::resultType is computed by unsafeComputeExternalType,
+// so that it can be computed once and cached (see below).
 TypePtr ClassOrModule::externalType() const {
     ENFORCE_NO_TIMER(resultType);
     if (resultType == nullptr) {

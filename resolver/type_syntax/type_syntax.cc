@@ -853,6 +853,24 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         }
         case core::Names::classOf().rawId(): {
             if (auto parseResult = parseTClassOf(ctx, send, sig, args)) {
+                // TODO(jez) At some point, we will want to emit an error for not passing type args
+                // to a generic singleton class, like how we report a "Generic class without type arguments"
+                // error for normal classes.
+                //
+                // For the moment, we're punting on introducing that error because it would apply
+                // to every use of `T.class_of` on a class, because all class singleton classes are
+                // generic in <AttachedClass>. It would be redundant to have to write
+                // T.class_of(My::Long::Class::Name)[My::Long::Class::Name], but we also can't
+                // settle on a good set of rules for how default generic types should work (too many
+                // footguns).
+                //
+                // At the very least, this is not a _new_ problem--it's been there ever since we
+                // added `type_template`--so it can remain unfixed a little while longer.
+                //
+                // The call to `externalType` below implements certain defaulting rules (based on
+                // variance). It's worth noting that those defaulting rules were built at the same
+                // time that we added the `<AttachedClass>` type_template, designed to avoid making
+                // people provide type arguments for all `T.class_of`.
                 return TypeSyntax::ResultType{
                     parseResult.value().data(ctx)->externalType(),
                     core::Symbols::noClassOrModule(),
@@ -1239,6 +1257,22 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
 
             appliedKlass = recvi->symbol;
+        } else if (auto *recvi = ast::cast_tree<ast::Send>(s.recv)) {
+            if (recvi->fun != core::Names::classOf() || s.fun != core::Names::squareBrackets()) {
+                return reportUnknownTypeSyntaxError(ctx, s, move(result));
+            }
+
+            auto recviRecvi = ast::cast_tree<ast::ConstantLit>(recvi->recv);
+            if (recviRecvi == nullptr || recviRecvi->symbol != core::Symbols::T()) {
+                return reportUnknownTypeSyntaxError(ctx, s, move(result));
+            }
+
+            auto tClassOfResult = parseTClassOf(ctx, *recvi, sigBeingParsed, args);
+            if (!tClassOfResult.has_value()) {
+                return nullopt;
+            }
+
+            appliedKlass = tClassOfResult.value();
         } else {
             return reportUnknownTypeSyntaxError(ctx, s, move(result));
         }
