@@ -402,3 +402,90 @@ Feel free to replace `Class` with `T::Class[T.anything]` in type annotations
 where nothing is known about the class object. If there's an obvious more
 specific type, feel free to narrow `T.anything` to whatever the more specific
 type is.
+
+### `T.class_of(...)[...]`: Applying type arguments to a singleton class type
+
+For this entire discussion of `T.class_of`, we've been hiding something: Sorbet
+implicitly treats the singleton classes of classes (not modules) as generic
+classes. This means that just like how `T::Class[T.type_parameter(:Instance)]`
+is a valid type, so is `T.class_of(MyClass)[T.type_parameter(:Instance)]`.
+
+Normally, Sorbet hides this fact from users. Whenever it sees something like
+`T.class_of(MyClass)`, it implicitly assumes the type the user wanted to write
+was `T.class_of(MyClass)[MyClass]`. This type represents the singleton class of
+`MyClass`, and makes it clear that the attached class of this singleton class is
+`MyClass` explicitly.
+
+To further clarify, let's consider this method:
+
+```ruby
+class MyClass
+  def self.some_singleton_method; end
+end
+
+sig do
+  type_parameters(:Instance)
+    .params(klass: T::Class[T.type_parameter(:Instance)])
+    .returns(T.type_parameter(:Instance))
+end
+def example(klass)
+  klass.some_singleton_method
+  #     ^^^^^^^^^^^^^^^^^^^^^ error!
+  klass.new
+end
+```
+
+This snippet doesn't work because `T::Class` says "I'll take _any_ singleton
+class object" but says nothing about what methods might exist on that object.
+
+We can fix this error by using `T.class_of` with an explicit type application:
+
+```ruby
+class MyClass
+  def self.some_singleton_method; end
+end
+
+sig do
+  type_parameters(:Instance)
+    .params(
+      klass: T.class_of(MyClass)[T.all(MyClass, T.type_parameter(:Instance))]
+    )
+    .returns(T.type_parameter(:Instance))
+end
+def example(klass)
+  klass.some_singleton_method
+  #     ^^^^^^^^^^^^^^^^^^^^^ okay!
+  klass.new
+end
+```
+
+This works because the `T.class_of(...)` tells Sorbet what singleton class
+methods exist, and the `[...]` tells Sorbet what type of an object instantiated
+from that class has.
+
+The `T.all` is an [Intersection Type](intersection-types.md) and is needed
+because unlike `T::Class`, which allows being applied to any type, the type
+applied to `T.class_of(MyClass)` must be a subtype of `MyClass`. The
+intersection is a way to
+[approximate placing bounds on generic methods](generics.md#placing-bounds-on-generic-methods).
+
+This `T.class_of(...)[...]` syntax generalizes--it can be used to apply types to
+singleton classes with user-defined `type_template`s as well. Given a class like
+this:
+
+```ruby
+class AnotherClass
+  extend T::Generic
+  MyTypeTemplate = type_template
+end
+```
+
+It's possible to apply a type argument to `MyTypeTemplate` with code like
+
+```ruby
+T.class_of(AnotherClass)[AnotherClass, Integer]
+```
+
+Sorbet still requires that the first argument must be the type for the attached
+class, and then the remaining arguments apply to each `type_template` the class
+defines, in turn.

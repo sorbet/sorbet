@@ -104,6 +104,13 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &repeatedTopArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isRepeated = true;
+        arg.type = Types::top();
+        return *this;
+    }
+
     MethodBuilder &kwsplatArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isKeyword = true;
@@ -653,6 +660,9 @@ void GlobalState::initEmpty() {
 
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
     ENFORCE(klass == Symbols::T_Class());
+
+    method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
+    ENFORCE(method == Symbols::T_Generic_squareBrackets());
 
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);

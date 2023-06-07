@@ -1024,6 +1024,29 @@ module Opus::Types::Test
       end
     end
 
+    describe "T.class_of(...)[...]" do
+      it 'works if the type is right' do
+        type = T.class_of(Base)[Base]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'errors if the type is a subclass' do
+        type = T.class_of(Sub)[Sub]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_match(/Expected type T.class_of\(Opus::Types::Test::TypesTest::Sub\), got Opus::Types::Test::TypesTest::Base/, msg)
+      end
+
+      it 'does not error if the attached class is wrong (erased generics)' do
+        type = T.class_of(Base)[Sub]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+    end
+
     describe 'TypeAlias' do
       it 'delegates name' do
         type = T.type_alias {T.any(Integer, String)}
