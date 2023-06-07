@@ -3,7 +3,7 @@ import * as assert from "assert";
 import * as path from "path";
 import * as sinon from "sinon";
 
-import { LogLevelQuickPickItem, SetLogLevel } from "../../commands/setLogLevel";
+import { LogLevelQuickPickItem, setLogLevel } from "../../commands/setLogLevel";
 import { LogLevel, OutputChannelLog } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 
@@ -18,7 +18,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     testRestorables.forEach((r) => r.restore());
   });
 
-  test("Shows dropdown when target-level argument is NOT provided", async () => {
+  test("setLogLevel: Shows dropdown when target-level argument is NOT provided", async () => {
     const expectedLogLevel = LogLevel.Warning;
     const createOutputChannelStub = sinon
       .stub(vscode.window, "createOutputChannel")
@@ -38,8 +38,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const log = new OutputChannelLog("Test", LogLevel.Info);
     const context = <SorbetExtensionContext>{ log };
 
-    const command = new SetLogLevel(context);
-    await assert.doesNotReject(command.execute());
+    await assert.doesNotReject(setLogLevel(context));
     assert.strictEqual(log.level, expectedLogLevel);
 
     sinon.assert.calledWithExactly(
@@ -81,7 +80,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     sinon.assert.calledOnce(createOutputChannelStub);
   });
 
-  test("Shows no-dropdown when target-level argument is provided ", async () => {
+  test("setLogLevel: Shows no-dropdown when target-level argument is provided ", async () => {
     const expectedLogLevel = LogLevel.Warning;
     const createOutputChannelStub = sinon
       .stub(vscode.window, "createOutputChannel")
@@ -96,8 +95,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const log = new OutputChannelLog("Test", LogLevel.Info);
     const context = <SorbetExtensionContext>{ log };
 
-    const command = new SetLogLevel(context);
-    await assert.doesNotReject(command.execute(expectedLogLevel));
+    await assert.doesNotReject(setLogLevel(context, expectedLogLevel));
     assert.strictEqual(log.level, expectedLogLevel);
 
     sinon.assert.notCalled(showQuickPickSingleStub);
