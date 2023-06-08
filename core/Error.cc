@@ -197,6 +197,10 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
 }
 
 void ErrorBuilder::didYouMean(const std::string &replacement, Loc loc) {
+    if (!gs.didYouMean) {
+        return;
+    }
+
     std::string formatted = fmt::format("Replace with `{}`", replacement);
     auto isDidYouMean = true;
     addAutocorrect(
