@@ -35,10 +35,11 @@ module T::Private::Abstract::Declare
       # define_method because of the guard above
 
       mod.send(:define_singleton_method, :new) do |*args, &blk|
-        if T.unsafe(self) == mod
-          raise "#{mod} is declared as abstract; it cannot be instantiated"
+        super(*args, &blk).tap do |result|
+          if result.instance_of?(mod)
+            raise "#{mod} is declared as abstract; it cannot be instantiated"
+          end
         end
-        super(*args, &blk)
       end
 
       # Ruby doesn not emit "method redefined" warnings for aliased methods
