@@ -21,10 +21,6 @@ test.rb:9: Method `my_metho` does not exist on `A` https://srb.help/7003
     test.rb:9:
      9 |A.new.my_metho
         ^^^^^
-  Autocorrect: Done
-    test.rb:9: Replaced with `my_method`
-     9 |A.new.my_metho
-              ^^^^^^^^
     test.rb:5: Defined here
      5 |  def my_method
           ^^^^^^^^^^^^^
@@ -40,7 +36,7 @@ class A
   end
 end
 
-A.new.my_method
+A.new.my_metho
 
 sig {params(x: Integer).void}
 def takes_integer(x)
