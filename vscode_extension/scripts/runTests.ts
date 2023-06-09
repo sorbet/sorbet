@@ -66,6 +66,7 @@ async function main(extensionDir: string, extensionTests: string) {
       extensionTestsPath,
       launchArgs,
       vscodeExecutablePath,
+      version: '1.78.2'
     });
   } catch (err) {
     console.error('Failed to run tests');
