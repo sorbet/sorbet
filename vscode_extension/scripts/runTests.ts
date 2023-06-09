@@ -47,6 +47,7 @@ async function main(extensionDir: string, extensionTests: string) {
       '--disable-extensions',
       '--disable-telemetry',
       '--disable-updates',
+      '--no-sandbox',
     ];
     if (process.env.VSCODE_USER_DATA_DIR) {
       console.log(`Using user-data-dir ${process.env.VSCODE_USER_DATA_DIR}`);
