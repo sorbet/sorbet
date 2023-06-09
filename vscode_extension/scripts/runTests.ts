@@ -66,6 +66,7 @@ async function main(extensionDir: string, extensionTests: string) {
       extensionTestsPath,
       launchArgs,
       vscodeExecutablePath,
+      // https://github.com/microsoft/vscode-test/issues/221
       version: '1.78.2'
     });
   } catch (err) {
