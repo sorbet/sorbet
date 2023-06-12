@@ -83,7 +83,7 @@
                 {
                     "name": "bar",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 6,
@@ -109,7 +109,7 @@
                 {
                     "name": "bar=",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 6,
@@ -135,7 +135,7 @@
                 {
                     "name": "checked_qux",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 12,
@@ -161,7 +161,7 @@
                 {
                     "name": "checked_zap",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 15,
@@ -187,7 +187,7 @@
                 {
                     "name": "foo",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 5,
@@ -239,7 +239,7 @@
                 {
                     "name": "qux",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 8,
@@ -265,7 +265,7 @@
                 {
                     "name": "zap",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 9,
@@ -291,7 +291,7 @@
                 {
                     "name": "zap=",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 7,
                     "range": {
                         "start": {
                             "line": 9,
