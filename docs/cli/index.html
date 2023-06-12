@@ -174,6 +174,12 @@ have Sorbet apply autocorrects for all the mentioned error codes, but no others.
 <p>There is no way to have Sorbet <strong>only</strong> apply autocorrect suggestions in a given
 file. Instead, use a version control system to undo autocorrect changes Sorbet
 makes in files that should not be changed.</p>
+<p>Sometimes, Sorbet autocorrects include suggestions to rename a method, for
+example to fix a supposed typo. Sometimes these “did you mean” suggestions can
+accidentally change the meaning of a program. To disable these did you mean
+suggestions, use <code>--did-you-mean=false</code>:</p>
+<pre><code class="hljs">❯ srb tc <span class="hljs-comment">--autocorrect --did-you-mean=false</span>
+</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="silencing-errors-in-bulk"></a><a href="#silencing-errors-in-bulk" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Silencing errors in bulk</h3>
 <p>Sometimes, Sorbet doesn’t know how to <strong>fix</strong> an error, it only knows how to
 <strong>silence</strong> the error. Sorbet does not show these autocorrect suggestions by
