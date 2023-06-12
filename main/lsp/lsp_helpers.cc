@@ -259,7 +259,7 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     return resultType;
 }
 
-SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
+SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol, bool isAttr) {
     if (symbol.isClassOrModule()) {
         auto klass = symbol.asClassOrModuleRef();
         if (klass.data(gs)->isModule()) {
@@ -272,6 +272,8 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
         auto method = symbol.asMethodRef();
         if (method.data(gs)->name == core::Names::initialize()) {
             return SymbolKind::Constructor;
+        } else if (isAttr) {
+            return SymbolKind::Property;
         } else {
             return SymbolKind::Method;
         }

@@ -155,13 +155,17 @@ struct FoundMethod final {
     struct Flags {
         bool isSelfMethod : 1;
         bool isRewriterSynthesized : 1;
+        // Controls whether this gets compiled as a VM_METHOD_TYPE_IVAR method, for performance
         bool isAttrReader : 1;
+        // Controls whether to display this as an attr_*/prop-defined method in the LSP client
+        // This is best effort and thus UI-only! Should not be used for the sake of type checking.
+        bool isAttr : 1;
         bool discardDef : 1;
         bool genericPropGetter : 1;
 
         // In C++20 we can replace this with bit field initialzers
         Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), discardDef(false),
+            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), isAttr(false), discardDef(false),
               genericPropGetter(false) {}
     };
     Flags flags;
