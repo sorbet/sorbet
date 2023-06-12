@@ -1,6 +1,6 @@
-import { Disposable, ExtensionContext } from "vscode";
+import { Disposable, ExtensionContext, OutputChannel } from "vscode";
 import { DefaultSorbetWorkspaceContext, SorbetExtensionConfig } from "./config";
-import { OutputChannelLog } from "./log";
+import { Log, OutputChannelLog } from "./log";
 import { MetricClient } from "./metricsClient";
 import { SorbetStatusProvider } from "./sorbetStatusProvider";
 
@@ -8,23 +8,23 @@ export class SorbetExtensionContext implements Disposable {
   public readonly configuration: SorbetExtensionConfig;
   private readonly disposable: Disposable;
   public readonly extensionContext: ExtensionContext;
-  public readonly log: OutputChannelLog;
   public readonly metrics: MetricClient;
   public readonly statusProvider: SorbetStatusProvider;
+  private readonly wrappedLog: OutputChannelLog;
 
   constructor(context: ExtensionContext) {
     this.configuration = new SorbetExtensionConfig(
       new DefaultSorbetWorkspaceContext(context),
     );
     this.extensionContext = context;
-    this.log = new OutputChannelLog("Sorbet");
+    this.wrappedLog = new OutputChannelLog("Sorbet");
     this.metrics = new MetricClient(this);
     this.statusProvider = new SorbetStatusProvider(this);
 
     this.disposable = Disposable.from(
       this.configuration,
-      this.log,
       this.statusProvider,
+      this.wrappedLog,
     );
   }
 
@@ -33,5 +33,20 @@ export class SorbetExtensionContext implements Disposable {
    */
   public dispose() {
     this.disposable.dispose();
+  }
+
+  /**
+   * Logger.
+   */
+  public get log(): Log {
+    return this.wrappedLog;
+  }
+
+  /**
+   * Output channel used by {@link log}. This is exposed separately to promote
+   * use of the {@link Log} interface instead of accessing the UI component.
+   */
+  public get logOutputChannel(): OutputChannel {
+    return this.wrappedLog.outputChannel;
   }
 }
