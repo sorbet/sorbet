@@ -4,6 +4,10 @@ load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
 
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+
+rules_foreign_cc_dependencies()
+
 load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
 
 bazel_compdb_deps()

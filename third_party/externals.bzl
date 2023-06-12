@@ -354,6 +354,14 @@ def register_sorbet_dependencies():
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
     )
 
+    # Needed to build CMake projects
+    http_archive(
+        name = "rules_foreign_cc",
+        urls = _github_public_urls("bazelbuild/rules_foreign_cc/archive/refs/heads/main.zip"),
+        sha256 = "c1ec32b37bf802357356c5fc63f1de927ad080bffca4899af56816adf1d366e5",
+        strip_prefix = "rules_foreign_cc-main",
+    )
+
     register_ruby_dependencies()
 
 def _github_public_urls(path):
