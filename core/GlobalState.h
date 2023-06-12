@@ -231,6 +231,7 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
+    bool didYouMean = true;
     bool trackUntyped = false;
     bool printingFileTable = false;
 
