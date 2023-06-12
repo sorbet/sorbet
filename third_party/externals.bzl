@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
 load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repository")
 
@@ -111,6 +111,14 @@ def register_sorbet_dependencies():
         sha256 = "1cc1ec93701868691c73b371eb87e5452257996279a42303a91caad355374439",
         build_file = "@com_stripe_ruby_typer//third_party:jemalloc.BUILD",
         strip_prefix = "jemalloc-20f9802e4f25922884448d9581c66d76cc905c0c",
+    )
+
+    http_archive(
+        name = "mimalloc",
+        urls = _github_public_urls("microsoft/mimalloc/archive/refs/tags/v2.1.2.zip"),  # 2.1.2
+        sha256 = "86281c918921c1007945a8a31e5ad6ae9af77e510abfec20d000dd05d15123c7",
+        build_file = "@com_stripe_ruby_typer//third_party:mimalloc.BUILD",
+        strip_prefix = "mimalloc-v2.1.2",
     )
 
     http_archive(
