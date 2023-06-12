@@ -7,6 +7,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "mimalloc",
+    values = {
+        "define": "mimalloc=true",
+        "compilation_mode": "opt",
+    },
+    visibility = ["//visibility:public"],
+)
+
 cc_binary(
     name = "sorbet",
     srcs = [

@@ -51,11 +51,10 @@ MIMALLOC_BUILD_COMMAND = """
   # we need to include CFLAGS in CPPFLAGS so that the --sysroot flag makes it in
   export CPPFLAGS="$${CFLAGS}"
 
-  pushd $$(dirname $(location CMakeLists.txt)) > /dev/null
   mkdir -p $$(dirname $(location CMakeLists.txt))/out/release
-  cd $$(dirname $(location CMakeLists.txt))/out/release
+  pushd $$(dirname $(location CMakeLists.txt))/out/release
 
-  if compile_output=$$(cmake $$(dirname $(location CMakeLists.txt)) && make); then
+  if compile_output=$$(cmake ../.. && make); then
     popd > /dev/null
     mv $$(dirname $(location CMakeLists.txt))/out/release/libmimalloc.a $(location lib/libmimalloc.a)
   else
