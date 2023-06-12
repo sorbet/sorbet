@@ -34,7 +34,7 @@ cc_binary(
         "//conditions:default": 1,
     }),
     malloc = select({
-        # ":jemalloc": "@jemalloc//:jemalloc",
+        ":jemalloc": "@jemalloc//:jemalloc",
         ":mimalloc": "@mimalloc//:mimalloc",
         "//conditions:default": "@bazel_tools//tools/cpp:malloc",
     }),
