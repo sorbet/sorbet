@@ -319,6 +319,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "directory passed to Sorbet, if any.",
                                     cxxopts::value<string>()->default_value(empty.pathPrefix), "prefix");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
+    options.add_options("advanced")("did-you-mean", "Whether to include 'Did you mean' suggestions in autocorrects",
+                                    cxxopts::value<bool>()->default_value("true"));
     options.add_options("advanced")("P,progress", "Draw progressbar");
     options.add_options("advanced")("license", "Show license");
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
@@ -757,6 +759,7 @@ void readOptions(Options &opts,
 
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
+        opts.didYouMean = raw["did-you-mean"].as<bool>();
         opts.inlineInput = raw["e"].as<string>();
         if (opts.autocorrect && opts.silenceErrors) {
             logger->error("You may not use autocorrect when silencing errors.");

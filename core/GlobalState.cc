@@ -2036,6 +2036,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
+    result->didYouMean = this->didYouMean;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
@@ -2133,6 +2134,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->fileRefByPath = this->fileRefByPath;
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
+    result->didYouMean = this->didYouMean;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;

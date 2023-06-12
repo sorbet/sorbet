@@ -152,6 +152,7 @@ struct Options {
     bool traceParser = false;
     bool noErrorCount = false;
     bool autocorrect = false;
+    bool didYouMean = true;
     bool waitForDebugger = false;
     bool censorForSnapshotTests = false;
     bool forceHashing = false;

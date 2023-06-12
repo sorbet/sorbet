@@ -167,12 +167,7 @@ public:
         std::string formatted = fmt::format(replacement, std::forward<Args>(args)...);
         addAutocorrect(AutocorrectSuggestion{title, {AutocorrectSuggestion::Edit{loc, move(formatted)}}});
     }
-    void didYouMean(const std::string &replacement, Loc loc) {
-        std::string formatted = fmt::format("Replace with `{}`", replacement);
-        auto isDidYouMean = true;
-        addAutocorrect(
-            AutocorrectSuggestion{move(formatted), {AutocorrectSuggestion::Edit{loc, replacement}}, isDidYouMean});
-    }
+    void didYouMean(const std::string &replacement, Loc loc);
 
     // build() builds and returns the reported Error. Only valid if state ==
     // WillBuild. This passes ownership of the error to the caller; ErrorBuilder

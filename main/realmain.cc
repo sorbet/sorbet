@@ -468,9 +468,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
-    if (opts.autocorrect) {
-        gs->autocorrect = true;
-    }
+    gs->autocorrect = opts.autocorrect;
+    gs->didYouMean = opts.didYouMean;
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
