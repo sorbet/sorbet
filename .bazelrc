@@ -130,11 +130,13 @@ build:release-debug-mac --config=release-debug-common
 build:release-sanitized-linux --copt=-O2
 build:release-sanitized-linux --config=sanitize-linux
 build:release-sanitized-linux --define jemalloc=false
+build:release-sanitized-linux --define mimalloc=false
 build:release-sanitized-linux --config=release-debug-common
 
 build:release-sanitized-mac --copt=-O2
 build:release-sanitized-mac --config=sanitize-mac
 build:release-sanitized-mac --define jemalloc=false
+build:release-sanitized-mac --define mimalloc=false
 build:release-sanitized-linux --config=release-debug-common
 
 ##

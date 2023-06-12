@@ -52,7 +52,7 @@ MIMALLOC_BUILD_COMMAND = """
   export CPPFLAGS="$${CFLAGS}"
 
   mkdir -p $$(dirname $(location CMakeLists.txt))/out/release
-  pushd $$(dirname $(location CMakeLists.txt))/out/release
+  pushd $$(dirname $(location CMakeLists.txt))/out/release > /dev/null
 
   if compile_output=$$(cmake ../.. && make); then
     popd > /dev/null
