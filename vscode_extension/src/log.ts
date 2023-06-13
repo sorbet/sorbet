@@ -51,9 +51,56 @@ export function getLogLevelFromString(name: string): LogLevel | undefined {
 }
 
 /**
+ * Logger.
+ */
+export interface Log {
+  /**
+   * Appends a new debug message to the log.
+   * @param message Log message.
+   */
+  debug(message: string): void;
+
+  /**
+   * Appends a new error message to the log.
+   * @param message Log message.
+   * @param error Error.
+   */
+  error(message: string, error?: Error): void;
+
+  /**
+   * Appends a new error message to the log.
+   * @param errorOrMessage Error or log message.
+   */
+  error(errorOrMessage: string | Error): void;
+
+  /**
+   * Appends a new information message to the log.
+   * @param message Log message.
+   */
+  info(message: string): void;
+
+  /**
+   * Log level.
+   */
+  level: LogLevel;
+
+  /**
+   * Appends a new trace message to the log.
+   * @param message Log message.
+   */
+  trace(message: string): void;
+
+  /**
+   * Appends a new warning message to the log.
+   * @param message Log message.
+   */
+  warning(message: string): void;
+}
+
+/**
  * Output Channel-based implementation of logger.
  */
-export class OutputChannelLog implements Disposable {
+export class OutputChannelLog implements Log, Disposable {
   private wrappedLevel: LogLevel;
   public readonly outputChannel: OutputChannel;
 
