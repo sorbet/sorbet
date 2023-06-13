@@ -357,9 +357,9 @@ def register_sorbet_dependencies():
     # Needed to build CMake projects
     http_archive(
         name = "rules_foreign_cc",
-        urls = _github_public_urls("bazelbuild/rules_foreign_cc/archive/refs/heads/main.zip"),
-        sha256 = "c1ec32b37bf802357356c5fc63f1de927ad080bffca4899af56816adf1d366e5",
-        strip_prefix = "rules_foreign_cc-main",
+        urls = _github_public_urls("bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip"),
+        sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
+        strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
     register_ruby_dependencies()
