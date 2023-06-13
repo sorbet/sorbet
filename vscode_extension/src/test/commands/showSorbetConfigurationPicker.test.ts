@@ -3,9 +3,9 @@ import * as assert from "assert";
 import * as path from "path";
 import * as sinon from "sinon";
 
+import { createLogStub } from "../testUtils";
 import { showSorbetConfigurationPicker } from "../../commands/showSorbetConfigurationPicker";
 import { SorbetExtensionConfig, SorbetLspConfig } from "../../config";
-import { LogLevel, OutputChannelLog } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 
 suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
@@ -40,7 +40,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       .resolves(undefined); // User canceled
     testRestorables.push(showQuickPickSingleStub);
 
-    const log = new OutputChannelLog("Test", LogLevel.Info);
+    const log = createLogStub();
     const configuration = <SorbetExtensionConfig>(<unknown>{
       activeLspConfig,
       lspConfigs: [activeLspConfig, otherLspConfig],

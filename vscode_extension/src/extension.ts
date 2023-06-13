@@ -76,7 +76,7 @@ export function activate(context: ExtensionContext) {
       showSorbetConfigurationPicker(sorbetExtensionContext),
     ),
     commands.registerCommand(cmdIds.SHOW_OUTPUT_COMMAND_ID, () =>
-      sorbetExtensionContext.log.outputChannel.show(true),
+      sorbetExtensionContext.logOutputChannel.show(true),
     ),
     commands.registerCommand(cmdIds.SORBET_ENABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(true),

@@ -117,7 +117,7 @@ export class SorbetLanguageClient implements ErrorHandler {
           // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
           { language: "ruby", scheme: "sorbet" },
         ],
-        outputChannel: this.context.log.outputChannel,
+        outputChannel: this.context.logOutputChannel,
         initializationOptions: {
           // Opt in to sorbet/showOperation notifications.
           supportsOperationNotifications: true,

@@ -3,12 +3,12 @@ import * as assert from "assert";
 import * as path from "path";
 import * as sinon from "sinon";
 
+import { createLogStub } from "../testUtils";
 import {
   Action,
   getAvailableActions,
   showSorbetActions,
 } from "../../commands/showSorbetActions";
-import { LogLevel, OutputChannelLog } from "../../log";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetStatusProvider } from "../../sorbetStatusProvider";
 import { ServerStatus } from "../../types";
@@ -65,7 +65,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       .resolves(undefined); // User canceled
     testRestorables.push(showQuickPickSingleStub);
 
-    const log = new OutputChannelLog("Test", LogLevel.Info);
+    const log = createLogStub();
     const statusProvider = <SorbetStatusProvider>{
       serverStatus: ServerStatus.RUNNING,
     };

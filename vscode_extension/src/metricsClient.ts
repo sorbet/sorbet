@@ -29,7 +29,7 @@ export interface Api {
   readonly metricsEmitter: MetricsEmitter;
 }
 
-class NoOpMetricsEmitter implements MetricsEmitter {
+export class NoOpMetricsEmitter implements MetricsEmitter {
   async increment(
     _metricName: string,
     _count?: number,
@@ -51,7 +51,7 @@ class NoOpMetricsEmitter implements MetricsEmitter {
   async flush(): Promise<void> {} // eslint-disable-line no-empty-function
 }
 
-class NoOpApi implements Api {
+export class NoOpApi implements Api {
   readonly metricsEmitter: MetricsEmitter = new NoOpMetricsEmitter();
   static INSTANCE = new NoOpApi();
 }
@@ -61,8 +61,13 @@ export class MetricClient {
   private readonly context: SorbetExtensionContext;
   private readonly sorbetExtensionVersion: string;
 
-  constructor(context: SorbetExtensionContext) {
-    this.apiPromise = this.initSorbetMetricsApi();
+  /**
+   * Constructor.
+   * @param context Extension context.
+   * @param api API instance. This is intended for tests only.
+   */
+  constructor(context: SorbetExtensionContext, api?: Api) {
+    this.apiPromise = api ? Promise.resolve(api) : this.initSorbetMetricsApi();
     this.context = context;
     const sorbetExtension = extensions.getExtension("sorbet-vscode-extension");
     this.sorbetExtensionVersion =
@@ -154,13 +159,5 @@ export class MetricClient {
     const fullName = `${METRIC_PREFIX}${metric}`;
     const tags = this.buildTags(extraTags);
     api.metricsEmitter.timing(fullName, time, tags);
-  }
-
-  /**
-   * Set {@link API} instance to use. This is intended for tests only.
-   * @param api API instance
-   */
-  public setSorbetMetricsApi(api: Api): void {
-    this.apiPromise = Promise.resolve(api);
   }
 }
