@@ -1,8 +1,29 @@
 workspace(name = "com_stripe_ruby_typer")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//third_party:externals.bzl", "register_sorbet_dependencies")
 
 register_sorbet_dependencies()
+
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+
+# We need to explicitly pull in make here for rules_foreign_cc
+# to be able to build in CI.
+http_archive(
+    name = "gnumake_src",
+    build_file_content = """\
+filegroup(
+    name = "all_srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "581f4d4e872da74b3941c874215898a7d35802f03732bdccee1d4a7979105d18",
+    strip_prefix = "make-4.4",
+    urls = ["https://mirror.bazel.build/ftpmirror.gnu.org/gnu/make/make-4.4.tar.gz"],
+)
+
+rules_foreign_cc_dependencies()
 
 load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
 
