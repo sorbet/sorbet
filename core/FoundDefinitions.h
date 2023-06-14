@@ -159,14 +159,14 @@ struct FoundMethod final {
         bool isAttrReader : 1;
         // Controls whether to display this as an attr_*/prop-defined method in the LSP client
         // This is best effort and thus UI-only! Should not be used for the sake of type checking.
-        bool isAttr : 1;
+        bool isAttrBestEffortUIOnly : 1;
         bool discardDef : 1;
         bool genericPropGetter : 1;
 
         // In C++20 we can replace this with bit field initialzers
         Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), isAttr(false), discardDef(false),
-              genericPropGetter(false) {}
+            : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), isAttrBestEffortUIOnly(false),
+              discardDef(false), genericPropGetter(false) {}
     };
     Flags flags;
     CheckSize(Flags, 1, 1);

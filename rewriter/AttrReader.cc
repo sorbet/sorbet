@@ -298,7 +298,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             }
 
             ast::MethodDef::Flags flags;
-            flags.isAttr = true;
+            flags.isAttrBestEffortUIOnly = true;
             if (sigIsUnchecked(ctx, sig)) {
                 flags.isAttrReader = true;
             }
@@ -339,7 +339,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
             ast::MethodDef::Flags flags;
-            flags.isAttr = true;
+            flags.isAttrBestEffortUIOnly = true;
             stats.emplace_back(
                 ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
         }

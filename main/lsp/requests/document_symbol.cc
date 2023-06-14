@@ -26,7 +26,7 @@ namespace {
 struct ASTSymbolInfo {
     core::Loc loc;
     core::Loc declLoc;
-    bool isAttr;
+    bool isAttrBestEffortUIOnly;
 };
 
 class SymbolFileLocSaver {
@@ -43,8 +43,9 @@ public:
             return;
         }
 
-        auto isAttr = false;
-        mapping[klass.symbol] = ASTSymbolInfo{core::Loc{fref, klass.loc}, core::Loc{fref, klass.declLoc}, isAttr};
+        auto isAttrBestEffortUIOnly = false;
+        mapping[klass.symbol] =
+            ASTSymbolInfo{core::Loc{fref, klass.loc}, core::Loc{fref, klass.declLoc}, isAttrBestEffortUIOnly};
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &expr) {
@@ -53,8 +54,9 @@ public:
             return;
         }
 
-        auto isAttr = method.flags.isAttr;
-        mapping[method.symbol] = ASTSymbolInfo{core::Loc{fref, method.loc}, core::Loc{fref, method.declLoc}, isAttr};
+        auto isAttrBestEffortUIOnly = method.flags.isAttrBestEffortUIOnly;
+        mapping[method.symbol] =
+            ASTSymbolInfo{core::Loc{fref, method.loc}, core::Loc{fref, method.declLoc}, isAttrBestEffortUIOnly};
     }
 };
 
@@ -124,7 +126,7 @@ std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::Symb
 
 bool symbolIsAttr(core::SymbolRef symRef, const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping) {
     auto it = defMapping.find(symRef);
-    return it != defMapping.end() && it->second.isAttr;
+    return it != defMapping.end() && it->second.isAttrBestEffortUIOnly;
 }
 
 std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
