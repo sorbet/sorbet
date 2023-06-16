@@ -32,6 +32,7 @@ ruby(
     cppopts = [
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
+        "-DYJIT_STATS=1",
     ],
     extra_srcs = [],
     gems = [
