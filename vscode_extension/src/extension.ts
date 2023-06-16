@@ -5,6 +5,7 @@ import {
 } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
+import { renameSymbol } from "./commands/renameSymbol";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
@@ -12,7 +13,6 @@ import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
-import { renameSymbol } from "./commands/renameSymbol";
 
 /**
  * Extension entrypoint.

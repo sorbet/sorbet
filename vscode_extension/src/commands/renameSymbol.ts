@@ -17,8 +17,7 @@ export async function renameSymbol(
   context: SorbetExtensionContext,
   params: TextDocumentPositionParams,
 ): Promise<void> {
-  const { activeLanguageClient: client } = context.statusProvider;
-  if (client?.status !== ServerStatus.RUNNING) {
+  if (context.statusProvider.serverStatus !== ServerStatus.RUNNING) {
     context.log.warning("Sorbet LSP client is not ready.");
     return;
   }
