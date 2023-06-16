@@ -19,6 +19,11 @@ export const SHOW_CONFIG_PICKER_COMMAND_ID = "sorbet.configure";
 export const SHOW_OUTPUT_COMMAND_ID = "sorbet.showOutput";
 
 /**
+ * Copy Symbol to Clipboard.
+ */
+export const SORBET_COPY_SYMBOL_COMMAND_ID = "sorbet.copySymbolToClipboard";
+
+/**
  * Enable Sorbet.
  */
 export const SORBET_ENABLE_COMMAND_ID = "sorbet.enable";
@@ -27,6 +32,11 @@ export const SORBET_ENABLE_COMMAND_ID = "sorbet.enable";
  * Disable Sorbet.
  */
 export const SORBET_DISABLE_COMMAND_ID = "sorbet.disable";
+
+/**
+ * Rename Symbol at a given document position.
+ */
+export const SORBET_RENAME_SYMBOL_COMMAND_ID = "sorbet.rename";
 
 /**
  * Restart Sorbet.
