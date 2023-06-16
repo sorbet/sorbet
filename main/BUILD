@@ -87,6 +87,7 @@ cc_library(
         "//main/options",
         "//main/pipeline",
         "//payload:interface",
+        "@sqlite",
     ],
 )
 

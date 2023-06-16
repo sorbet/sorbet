@@ -362,6 +362,14 @@ def register_sorbet_dependencies():
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
+    http_archive(
+        name = "sqlite",
+        urls = ["https://www.sqlite.org/2023/sqlite-amalgamation-3420000.zip"],
+        sha256 = "1cc824d0f5e675829fa37018318fda833ea56f7e9de2b41eddd9f7643b5ec29e",
+        strip_prefix = "sqlite-amalgamation-3420000",
+        build_file = "@com_stripe_ruby_typer//third_party:sqlite.BUILD",
+    )
+
     register_ruby_dependencies()
 
 def _github_public_urls(path):
