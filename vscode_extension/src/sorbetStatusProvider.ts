@@ -150,26 +150,30 @@ export class SorbetStatusProvider implements Disposable {
     // Use property-setter to ensure proper setup.
     this.activeLanguageClient = newClient;
 
-    newClient.onStatusChange = (status: ServerStatus) => {
-      // Ignore event if this is not the current client (e.g. old client being shut down).
-      if (this.activeLanguageClient === newClient) {
-        this.onStatusChangedEmitter.fire({
-          status,
-          error: newClient.lastError,
-        });
-      }
-    };
+    this.disposables.push(
+      newClient.onStatusChange((status: ServerStatus) => {
+        // Ignore event if this is not the current client (e.g. old client being shut down).
+        if (this.activeLanguageClient === newClient) {
+          this.onStatusChangedEmitter.fire({
+            status,
+            error: newClient.lastError,
+          });
+        }
+      }),
+    );
 
     // Wait for `ready` before accessing `languageClient`.
     await newClient.languageClient.onReady();
-    newClient.languageClient.onNotification(
-      "sorbet/showOperation",
-      (params: ShowOperationParams) => {
-        // Ignore event if this is not the current client (e.g. old client being shut down).
-        if (this.activeLanguageClient === newClient) {
-          this.onShowOperationEmitter.fire(params);
-        }
-      },
+    this.disposables.push(
+      newClient.languageClient.onNotification(
+        "sorbet/showOperation",
+        (params: ShowOperationParams) => {
+          // Ignore event if this is not the current client (e.g. old client being shut down).
+          if (this.activeLanguageClient === newClient) {
+            this.onShowOperationEmitter.fire(params);
+          }
+        },
+      ),
     );
   }
 

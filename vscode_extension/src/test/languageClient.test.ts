@@ -100,8 +100,10 @@ suite("LanguageClient", () => {
       metricsEmitter = new RecordingMetricsEmitter();
     });
     test("Shims language clients and records latency metrics", async () => {
-      const client = createLanguageClient();
-      shimLanguageClient(client, metricsEmitter.timing.bind(metricsEmitter));
+      const client = shimLanguageClient(
+        createLanguageClient(),
+        metricsEmitter.timing.bind(metricsEmitter),
+      );
       await client.onReady();
       {
         const successResponse = await client.sendRequest("textDocument/hover", {
