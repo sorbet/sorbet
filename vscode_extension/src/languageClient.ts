@@ -1,13 +1,11 @@
 import { ChildProcess, spawn } from "child_process";
-import { commands, env, Position, Uri, window, workspace } from "vscode";
+import { workspace } from "vscode";
 import {
-  LanguageClient,
   CloseAction,
   ErrorAction,
   ErrorHandler,
+  LanguageClient,
   RevealOutputChannelOn,
-  SymbolInformation,
-  TextDocumentPositionParams,
 } from "vscode-languageclient/node";
 
 import { stopProcess } from "./connections";
@@ -141,62 +139,6 @@ export class SorbetLanguageClient implements ErrorHandler {
         // Language client started successfully.
         this.updateStatus(ServerStatus.RUNNING);
       }
-
-      const caps: any = this.languageClient.initializeResult?.capabilities;
-      if (caps.sorbetShowSymbolProvider) {
-        this.subscriptions.push(
-          commands.registerCommand("sorbet.copySymbolToClipboard", async () => {
-            const editor = window.activeTextEditor;
-            if (!editor) {
-              return;
-            }
-
-            if (!editor.selection.isEmpty) {
-              return; // something is selected, abort
-            }
-
-            const position = editor.selection.active;
-            const params: TextDocumentPositionParams = {
-              textDocument: {
-                uri: editor.document.uri.toString(),
-              },
-              position,
-            };
-            const response: SymbolInformation = await this.languageClient.sendRequest(
-              "sorbet/showSymbol",
-              params,
-            );
-
-            await env.clipboard.writeText(response.name);
-
-            this.context.log.debug(
-              `Copied symbol name to the clipboard. Name:${response.name}`,
-            );
-          }),
-        );
-      }
-
-      // Unfortunately, we need this command as a wrapper around `editor.action.rename`,
-      // because VSCode doesn't allow calling it from the JSON RPC
-      // https://github.com/microsoft/vscode/issues/146767
-      this.subscriptions.push(
-        commands.registerCommand(
-          "sorbet.rename",
-          (params: TextDocumentPositionParams) => {
-            try {
-              commands.executeCommand("editor.action.rename", [
-                Uri.parse(params.textDocument.uri),
-                new Position(params.position.line, params.position.character),
-              ]);
-            } catch (error) {
-              this.context.log.error(
-                `Failed to rename symbol at ${params.textDocument.uri}:${params.position.line}:${params.position.character}`,
-                error instanceof Error ? error : undefined,
-              );
-            }
-          },
-        ),
-      );
     });
     this.subscriptions.push(this.languageClient.start());
   }
