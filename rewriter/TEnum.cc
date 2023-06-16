@@ -145,7 +145,7 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
     auto singletonAsgn = ast::MK::Assign(
         statLocZero, std::move(asgn->lhs),
         ast::make_expression<ast::Cast>(statLocZero, core::Types::todo(),
-                                        selfNew->withNewBody(statLocZero, classCnst.deepCopy(), core::Names::new_()),
+                                        selfNew->withNewBody(selfNew->loc, classCnst.deepCopy(), core::Names::new_()),
                                         core::Names::uncheckedLet(), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
