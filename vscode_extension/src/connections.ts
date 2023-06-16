@@ -4,14 +4,7 @@ import { Log } from "./log";
 /**
  * Attempts to stop the given child process. Tries a SIGINT, then a SIGTERM, then a SIGKILL.
  */
-export async function stopProcess(
-  p: ChildProcess | null,
-  log: Log,
-): Promise<void> {
-  if (!p || !p.pid) {
-    // Process is already dead.
-    return;
-  }
+export async function stopProcess(p: ChildProcess, log: Log): Promise<void> {
   return new Promise<void>((res) => {
     let hasExited = false;
     log.debug(`Stopping process ${p.pid}`);
