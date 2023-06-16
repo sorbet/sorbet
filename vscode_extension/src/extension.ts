@@ -1,6 +1,10 @@
 import { commands, ExtensionContext, Uri, workspace } from "vscode";
-import { TextDocumentItem } from "vscode-languageclient";
+import {
+  TextDocumentItem,
+  TextDocumentPositionParams,
+} from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
+import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
@@ -8,6 +12,7 @@ import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
+import { renameSymbol } from "./commands/renameSymbol";
 
 /**
  * Extension entrypoint.
@@ -78,11 +83,19 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand(cmdIds.SHOW_OUTPUT_COMMAND_ID, () =>
       sorbetExtensionContext.logOutputChannel.show(true),
     ),
+    commands.registerCommand(cmdIds.SORBET_COPY_SYMBOL_COMMAND_ID, () =>
+      copySymbolToClipboard(sorbetExtensionContext),
+    ),
     commands.registerCommand(cmdIds.SORBET_ENABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(true),
     ),
     commands.registerCommand(cmdIds.SORBET_DISABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(false),
+    ),
+    commands.registerCommand(
+      cmdIds.SORBET_RENAME_SYMBOL_COMMAND_ID,
+      (params: TextDocumentPositionParams) =>
+        renameSymbol(sorbetExtensionContext, params),
     ),
     commands.registerCommand(
       cmdIds.SORBET_RESTART_COMMAND_ID,
