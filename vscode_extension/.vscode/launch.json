@@ -15,7 +15,10 @@
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
             ],
-            "preLaunchTask": "watch"
+            "preLaunchTask": "watch",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/out/**"
+            ],
         },
         {
             "name": "Run Extension Tests",
@@ -29,7 +32,10 @@
             "outFiles": [
                 "${workspaceFolder}/out/src/test/**/*.js"
             ],
-            "preLaunchTask": "watch"
+            "preLaunchTask": "watch",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/out/**"
+            ],
         }
     ]
 }
