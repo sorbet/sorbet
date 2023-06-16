@@ -13,8 +13,6 @@ import { ServerStatus } from "../types";
 export async function copySymbolToClipboard(
   context: SorbetExtensionContext,
 ): Promise<void> {
-  // eslint-disable-next-line no-debugger
-  debugger;
   const { activeLanguageClient: client } = context.statusProvider;
   if (client?.status !== ServerStatus.RUNNING) {
     context.log.warning("Sorbet LSP client is not ready.");
