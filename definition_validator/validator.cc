@@ -1,15 +1,21 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
+#include "core/lsp/helpers.h"
 
 #include "absl/algorithm/container.h"
 
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
+
+#include <regex>
 
 using namespace std;
 
@@ -901,6 +907,27 @@ private:
         }
     }
 
+    core::AutocorrectSuggestion suggestMethodDefinition(const core::GlobalState &gs,
+                                                        const core::Loc classOrModuleDefLoc,
+                                                        const core::MethodRef abstractMethodRef) {
+        auto [_, indentLength] = classOrModuleDefLoc.findStartOfLine(gs);
+        string indent(indentLength, ' ');
+
+        auto methodDefinition = core::lsp::prettyTypeForMethod(gs, abstractMethodRef, nullptr,
+                                                               abstractMethodRef.data(gs)->resultType, nullptr, true);
+
+        vector<string> reindentedMethodDefinitionLines;
+        absl::c_transform(absl::StrSplit(methodDefinition, "\n"), std::back_inserter(reindentedMethodDefinitionLines),
+                          [indent](auto &line) -> string { return absl::StrCat(fmt::format("{}  ", indent), line); });
+
+        auto reindentedMethodDefinition = absl::StrJoin(reindentedMethodDefinitionLines, "\n");
+
+        return core::AutocorrectSuggestion{
+            fmt::format("Define `{}`", abstractMethodRef.show(gs)),
+            {core::AutocorrectSuggestion::Edit(
+                {classOrModuleDefLoc.copyEndWithZeroLength(), fmt::format("\n{}", reindentedMethodDefinition)})}};
+    }
+
     void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         if (sym.data(gs)->flags.isAbstract) {
             return;
@@ -926,6 +953,7 @@ private:
                 if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
                     e.setHeader("Missing definition for abstract method `{}`", proto.show(gs));
                     e.addErrorLine(proto.data(gs)->loc(), "defined here");
+                    e.addAutocorrect(suggestMethodDefinition(gs, loc, proto));
                 }
             }
         }

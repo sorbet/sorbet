@@ -150,8 +150,6 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
             }
         } else if (argSym.flags.isBlock) {
             prefix = "&";
-        } else if (argSym.flags.isDefault && concretizeIfAbstract) {
-            suffix = fmt::format(" = {}", defaultArgumentPlaceholder);
         } else if (argSym.flags.isDefault) {
             suffix = fmt::format("={}", defaultArgumentPlaceholder);
         }

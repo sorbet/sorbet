@@ -1,0 +1,28 @@
+# typed: true
+# selective-apply-code-action: quickfix
+class Parent
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def foo; end
+
+  sig {abstract.void}
+  def bar; end
+
+  sig {abstract.void}
+  def baz; end
+end
+
+  class Child < Parent
+    sig {override.void}
+    def bar; end
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#bar`
+# ^ apply-code-action: [A] Define `Parent#bar`
+    sig {override.void}
+    def foo; end
+
+    sig {override.void}
+    def baz; end
+  end
