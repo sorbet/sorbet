@@ -9,7 +9,8 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
                             core::TypePtr receiver, const core::TypeConstraint *constr);
 
 std::string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                                const core::TypePtr &retType, const core::TypeConstraint *constraint);
+                                const core::TypePtr &retType, const core::TypeConstraint *constraint,
+                                const bool concretizeIfAbstract = false);
 
 } // namespace sorbet::core::lsp
 #endif // SORBET_CORE_LSP_HELPERS_H
