@@ -130,6 +130,19 @@ module Opus::Types::Test
           There might be a constant reloading problem in your application.
         MSG
       end
+
+      it "correctly handles a class that has overriden it's #name method" do
+        klass = Class.new do
+          def name
+            "String"
+          end
+        end
+
+        x = T::Types::Simple.new(String)
+        y = T::Types::Simple.new(klass)
+
+        refute_equal(x, y)
+      end
     end
 
     describe "Union" do
