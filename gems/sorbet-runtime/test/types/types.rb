@@ -131,7 +131,7 @@ module Opus::Types::Test
         MSG
       end
 
-      it "correctly handles a class that has overriden it's #name method" do
+      it "correctly handles a class that has overridden its #name method" do
         klass = Class.new do
           def name
             "String"
