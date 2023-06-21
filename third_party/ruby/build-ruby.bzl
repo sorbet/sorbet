@@ -56,7 +56,7 @@ done
 build_dir="$(mktemp -d)"
 
 # Add the compiler's directory the PATH, as this fixes builds with gcc
-export PATH="$(dirname "{cc}"):$PATH"
+export PATH="$(dirname "{cc}"):$(dirname $(realpath {rustc})):$PATH"
 
 # Copy everything to a separate directory to get rid of symlinks:
 # tool/rbinstall.rb will explicitly ignore symlinks when installing files,
@@ -93,12 +93,14 @@ run_cmd rm -f configure.bak
 # files that includes `-fvisibility=hidden`. To override it, our flag needs to
 # come after, so we inject a flag right before the `-o` option that comes near
 # the end of the command via OUTFLAG.
-OUTFLAG="-fvisibility=default -o" \
-CC="{cc}" \
-CFLAGS="{copts}" \
-CXXFLAGS="{copts}" \
-CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}" \
-LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}" \
+
+export OUTFLAG="-fvisibility=default -o"
+export CC="{cc}"
+export CFLAGS="{copts}"
+export CXXFLAGS="{copts}"
+export CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}"
+export LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}"
+
 run_cmd ./configure \
         {configure_flags} \
         --with-libyaml-source-dir=$libyaml_loc \
@@ -292,6 +294,7 @@ def _build_ruby_impl(ctx):
             install_append_srcs = "\n".join(install_append_srcs),
             install_gems = "\n".join(install_gems),
         )),
+        tools = [ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc],
     )
 
     return [
@@ -352,7 +355,7 @@ _build_ruby = rule(
         RubyInfo,
         DefaultInfo,
     ],
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type", "@rules_rust//rust:toolchain_type"],
     implementation = _build_ruby_impl,
 )
 
