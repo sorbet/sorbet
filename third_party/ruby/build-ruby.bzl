@@ -66,6 +66,8 @@ cp -aL "{src_dir}"/* "$build_dir"
 {install_extra_srcs}
 {install_append_srcs}
 
+libyaml_loc="$(realpath {libyaml})"
+
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
@@ -99,6 +101,7 @@ CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}" \
 LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}" \
 run_cmd ./configure \
         {configure_flags} \
+        --with-libyaml-source-dir=$libyaml_loc \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -267,7 +270,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -280,6 +283,8 @@ def _build_ruby_impl(ctx):
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
+            libyaml = ctx.files.libyaml[0].dirname,
+            rustc = ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc.path,
             configure_flags = " ".join(ctx.attr.configure_flags),
             sysroot_flag = ctx.attr.sysroot_flag,
             install_extra_srcs = "\n".join(install_extra_srcs),
@@ -314,6 +319,10 @@ _build_ruby = rule(
         ),
         "gems": attr.label_list(
             doc = "Additional ruby gems to install into the ruby build",
+        ),
+        "libyaml": attr.label(
+            default = Label("@libyaml//:libyaml"),
+            doc = "A filegroup containing the libyaml source, `configure` should be at the top level",
         ),
         "extra_srcs": attr.label_list(
             doc = "A list of *.c and *.h files to treat as extra source files to libruby",
