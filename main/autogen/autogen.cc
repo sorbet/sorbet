@@ -5,6 +5,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/strings/formatting.h"
 #include "main/autogen/crc_builder.h"
+#include "sqlite3.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -350,6 +351,18 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const Auto
     pf.cksum = crcBuilder.crc32(src);
     pf.tree = move(tree);
     return pf;
+}
+
+void Autogen::generateSqlite() {
+    sqlite3 *db;
+    int rc = sqlite3_open("depdb.sqlite", &db);
+    char *zErrMsg = 0;
+    rc = sqlite3_exec(db, "CREATE TABLE Persons ( \
+                      PersonID int, \
+                      LastName varchar(255), FirstName varchar(255), Address varchar(255), City varchar(255)); \
+    ",
+                      nullptr, 0, &zErrMsg);
+    sqlite3_close(db);
 }
 
 } // namespace sorbet::autogen

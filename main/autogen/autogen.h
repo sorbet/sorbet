@@ -11,6 +11,8 @@ class Autogen final {
 public:
     static ParsedFile generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
                                const CRCBuilder &crcBuilder);
+
+    static void generateSqlite();
     Autogen() = delete;
 };
 
