@@ -131,20 +131,21 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         }
     }
 
+    auto statLocZero = stat.loc().copyWithZeroLength();
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
-    auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
+    auto classCnst = ast::MK::UnresolvedConstant(statLocZero, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
     auto classDef =
-        ast::MK::Class(stat.loc(), stat.loc(), classCnst.deepCopy(), std::move(parent), std::move(classRhs));
+        ast::MK::Class(statLocZero, statLocZero, classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
-        stat.loc(), std::move(asgn->lhs),
-        ast::make_expression<ast::Cast>(stat.loc(), core::Types::todo(),
-                                        selfNew->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()),
+        statLocZero, std::move(asgn->lhs),
+        ast::make_expression<ast::Cast>(statLocZero, core::Types::todo(),
+                                        selfNew->withNewBody(selfNew->loc, classCnst.deepCopy(), core::Names::new_()),
                                         core::Names::uncheckedLet(), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
