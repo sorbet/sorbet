@@ -121,7 +121,8 @@ class Class < Module
   # to create a new object of *class*'s class, then invokes that object's
   # initialize method, passing it *args*. This is the method that ends up
   # getting called whenever an object is constructed using `.new`.
-  sig {params(args: T.untyped, blk: T.untyped).returns(T.attached_class)}
+  # TODO(jez) Should we skip arg matching on Class#new for performance?
+  sig {params(args: T.anything, blk: T.untyped).returns(T.attached_class)}
   def new(*args, &blk); end
 
   # Creates a new anonymous (unnamed) class with the given superclass (or

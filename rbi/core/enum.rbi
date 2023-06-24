@@ -82,7 +82,7 @@ class T::Enum
   ## Private implementation ##
 
 
-  sig {params(serialized_val: T.untyped).void}
+  sig {params(serialized_val: T.anything).void}
   def initialize(serialized_val=nil); end
 
   sig {params(const_name: Symbol).void}

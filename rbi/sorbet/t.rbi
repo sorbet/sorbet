@@ -22,7 +22,7 @@ module T
   # At runtime, returns the provided argument completely unchanged.
   #
   # For more, see https://sorbet.org/docs/troubleshooting#escape-hatches
-  sig {params(value: T.untyped).returns(T.untyped)}
+  sig {params(value: T.anything).returns(T.untyped)}
   def self.unsafe(value); end
 
   # These are implemented in C++ when they appear in type context; We
@@ -91,7 +91,7 @@ module T
   #
   # - https://sorbet.org/docs/nilable-types
   # - https://sorbet.org/docs/union-types
-  sig {params(type: T.untyped).returns(BasicObject)}
+  sig {params(type: T.anything).returns(BasicObject)}
   def self.nilable(type); end
 
   # Type syntax to declare the type of a block, proc, or lambda.
@@ -111,6 +111,7 @@ module T
   # (because classes in Ruby are proper values in their own right)
   #
   # For more information, see https://sorbet.org/docs/class-of
+  sig {params(klass: Module).returns(T.untyped)}
   def self.class_of(klass); end
 
   # Type syntax to declare the "bottom" type in Sorbet. Put another way,
@@ -141,7 +142,7 @@ module T
   # one type or another type.
   #
   # For more information, see https://sorbet.org/docs/union-types
-  sig {params(type_a: T.untyped, type_b: T.untyped, types: T.untyped).returns(BasicObject)}
+  sig {params(type_a: T.anything, type_b: T.anything, types: T.anything).returns(BasicObject)}
   def self.any(type_a, type_b, *types); end
 
   # Type syntax to declare an intersection type, which declares that a value
@@ -149,7 +150,7 @@ module T
   # one interface type and a second, unrelated interface type.
   #
   # For more information, see https://sorbet.org/docs/intersection-types
-  sig {params(type_a: T.untyped, type_b: T.untyped, types: T.untyped).returns(BasicObject)}
+  sig {params(type_a: T.anything, type_b: T.anything, types: T.anything).returns(BasicObject)}
   def self.all(type_a, type_b, *types); end
 
   # Utility to request that Sorbet report a static error showing the type of
@@ -163,6 +164,7 @@ module T
   # Type syntax to declare a generic type variable scoped to a single method.
   #
   # For more information, see https://sorbet.org/docs/generics#generic-methods
+  sig {params(name: Symbol).returns(T::Types::Base)}
   def self.type_parameter(name); end
 
   # Type syntax to declare a type equivalent to the receiver of the method
@@ -192,7 +194,7 @@ module T
   # To provide a custom message on failure, use `T.must_because`.
   #
   # For more, see https://sorbet.org/docs/type-assertions#tmust
-  sig {params(arg: T.untyped).returns(T.untyped)}
+  sig {params(arg: T.anything).returns(T.untyped)}
   def self.must(arg); end
 
   # Statically, declares to Sorbet that the argument is never `nil`, despite
@@ -206,7 +208,7 @@ module T
   # down well-behaved code.
   #
   # For more, see https://sorbet.org/docs/type-assertions#tmust_because
-  sig {params(arg: T.untyped, reason_blk: T.proc.returns(String)).returns(T.untyped)}
+  sig {params(arg: T.anything, reason_blk: T.proc.returns(String)).returns(T.untyped)}
   def self.must_because(arg, &reason_blk); end
 
   # A way to assert that a given branch of control flow is unreachable.
@@ -321,38 +323,47 @@ end
 
 module T::Array
   # Type syntax to specify the element type of a standard library Array
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Hash
   # Type syntax to specify the key and value types of a standard library Hash
+  sig {params(keys: T.anything, values: T.anything).returns(T::Types::Base)}
   def self.[](keys, values); end
 end
 module T::Set
   # Type syntax to specify the element type of a standard library Set
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Range
   # Type syntax to specify the element type of a standard library Range
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Class
   # Type syntax to specify the element type of a standard library Class
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Enumerable
   # Type syntax to specify the element type of a standard library Enumerable
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Enumerator
   # Type syntax to specify the element type of a standard library Enumerator
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Enumerator::Lazy
   # Type syntax to specify the element type of a standard library Enumerator::Lazy
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 module T::Enumerator::Chain
   # Type syntax to specify the element type of a standard library Enumerator::Chain
+  sig {params(type: T.anything).returns(T::Types::Base)}
   def self.[](type); end
 end
 
@@ -421,7 +432,7 @@ module T::Utils
 
   # Converts Sorbet type syntax into a T::Types::Base instance to provide
   # access to run-time Sorbet type information.
-  sig {params(val: T.untyped).returns(T::Types::Base)}
+  sig {params(val: T.anything).returns(T::Types::Base)}
   def self.coerce(val); end
 
   def self.resolve_alias(type); end
