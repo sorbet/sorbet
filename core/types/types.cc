@@ -274,10 +274,10 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     return tp;
 }
 
-TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
+TypePtr Types::lubAllDropLiteral(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
-        acc = Types::lub(gs, acc, el);
+        acc = Types::lub(gs, acc, Types::dropLiteral(gs, el));
     }
     return acc;
 }
@@ -506,7 +506,7 @@ TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
         return Types::arrayOfUntyped();
     } else {
-        return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
+        return Types::arrayOf(gs, Types::lubAllDropLiteral(gs, this->elems));
     }
 }
 

@@ -356,24 +356,25 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     if (auto *a2 = cast_type<TupleType>(t2)) {
                         if (a1.elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<TypePtr> elemLubs;
+                            elemLubs.reserve(a1.elems.size());
+                            bool isSubType1 = true;
+                            bool isSubType2 = true;
                             int i = -1;
-                            bool differ1 = false;
-                            bool differ2 = false;
                             for (auto &el2 : a2->elems) {
                                 ++i;
-                                auto &inserted = elemLubs.emplace_back(lub(gs, a1.elems[i], el2));
-                                differ1 = differ1 || inserted != a1.elems[i];
-                                differ2 = differ2 || inserted != el2;
+                                auto dl1 = Types::dropLiteral(gs, a1.elems[i]);
+                                auto dl2 = Types::dropLiteral(gs, el2);
+                                elemLubs.emplace_back(dl1);
+                                isSubType1 = isSubType1 && Types::isSubType(gs, dl1, dl2);
+                                isSubType2 = isSubType2 && Types::isSubType(gs, dl2, dl1);
                             }
-                            if (!differ1) {
-                                result = t1;
-                            } else if (!differ2) {
-                                result = t2;
-                            } else {
+                            if (isSubType1 && isSubType2) {
                                 result = make_type<TupleType>(move(elemLubs));
+                            } else {
+                                result = OrType::make_shared(t1, t2);
                             }
                         } else {
-                            result = Types::arrayOfUntyped();
+                            result = OrType::make_shared(t1, t2);
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
