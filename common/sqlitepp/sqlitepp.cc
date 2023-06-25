@@ -23,4 +23,5 @@ void SqliteDb::simpleExec(const std::string &query) {
         fprintf(stdout, "Table created successfully\n");
     }
 }
+
 } // namespace sorbet::sqlitepp

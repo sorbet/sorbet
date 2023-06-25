@@ -110,6 +110,10 @@ public:
         sqlite3_open(dbName.c_str(), &db);
     }
 
+    ~SqliteDb() {
+        sqlite3_close(db);
+    }
+
     void create(const SqliteTable table);
     void insert(const SqliteTable table, const std::vector<std::variant<int, float, std::string>> &values);
 };
