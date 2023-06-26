@@ -5,9 +5,9 @@ class A
 
   X = type_member
   X = type_member
-# ^ error: Duplciate type member `X`
+# ^ error: Duplicate type member `X`
   X = type_member
-# ^ error: Duplciate type member `X`
+# ^ error: Duplicate type member `X`
 end
 
 class B
@@ -15,7 +15,7 @@ class B
 
   Y = type_template
   Y = type_template
-# ^ error: Duplciate type member `Y`
+# ^ error: Duplicate type member `Y`
   Y = type_template
-# ^ error: Duplciate type member `Y`
+# ^ error: Duplicate type member `Y`
 end
