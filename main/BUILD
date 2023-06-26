@@ -76,6 +76,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//common/sqlitepp",
         "//common/statsd",
         "//core",
         "//core/proto",

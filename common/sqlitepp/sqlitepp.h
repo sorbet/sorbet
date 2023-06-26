@@ -111,7 +111,6 @@ struct SqliteTable {
 
 class SqliteDb {
     sqlite3 *db;
-    sqlite3_stmt *insertStatement;
     void simpleExec(const std::string &query);
 
 public:
@@ -125,6 +124,6 @@ public:
 
     void create(const SqliteTable table);
     void generateInsertStmt(SqliteTable &table);
-    void insert(const SqliteTable table, const std::vector<std::variant<int, double, std::string>> &values);
+    void insert(SqliteTable &table, const std::vector<std::variant<int, double, std::string>> &values);
 };
 } // namespace sorbet::sqlitepp

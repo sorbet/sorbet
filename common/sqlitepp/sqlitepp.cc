@@ -16,15 +16,17 @@ void SqliteDb::generateInsertStmt(SqliteTable &table) {
     absl::StrAppend(&qmarks, "?)");
     auto query =
         absl::StrCat("INSERT INTO ", table.tableName, " ", table.schema.toStringOnlyNames(), " VALUES ", qmarks, ";");
-
-    sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &table.insertStmt, NULL);
+    std::fprintf(stdout, "%s\n", query.c_str());
+    if (sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &table.insertStmt, NULL) != SQLITE_OK) {
+        std::fprintf(stdout, "ERROR PREPARING STATEMENT\n");
+    }
 }
 
 void SqliteDb::create(const SqliteTable table) {
     simpleExec(table.createStmt);
 }
 
-void SqliteDb::insert(const SqliteTable table, const std::vector<std::variant<int, double, std::string>> &values) {
+void SqliteDb::insert(SqliteTable &table, const std::vector<std::variant<int, double, std::string>> &values) {
     for (int i = 0; i < table.schema.columns.size(); i++) {
         auto colType = table.schema.columns[i].dataType;
         auto value = values[i];
@@ -45,8 +47,17 @@ void SqliteDb::insert(const SqliteTable table, const std::vector<std::variant<in
         }
     }
 
-    sqlite3_step(table.insertStmt);
-    sqlite3_reset(table.insertStmt);
+    if (auto rc = sqlite3_step(table.insertStmt) != SQLITE_DONE) {
+        std::fprintf(stdout, "ERROR EXECUTING INSERT %d\n", rc);
+    } else {
+        std::fprintf(stdout, "INSERT SUCCESS %d\n", rc);
+    }
+    if (auto rc = sqlite3_reset(table.insertStmt) != SQLITE_OK) {
+        std::fprintf(stdout, "ERROR EXECUTING RESET %d\n", rc);
+    }
+    if (auto rc = sqlite3_clear_bindings(table.insertStmt) != SQLITE_OK) {
+        std::fprintf(stdout, "ERROR EXECUTING CLEAR_BINDINGS %d\n", rc);
+    }
 }
 void SqliteDb::simpleExec(const std::string &query) {
     char *errMsg;

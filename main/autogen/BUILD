@@ -23,6 +23,7 @@ cc_library(
         "//ast",
         "//ast/desugar",
         "//ast/treemap",
+        "//common/sqlitepp",
         "//core",
         "//main/autogen/data",
         "//main/options",

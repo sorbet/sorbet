@@ -3,9 +3,9 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sqlitepp/sqlitepp.h"
 #include "common/strings/formatting.h"
 #include "main/autogen/crc_builder.h"
-#include "sqlite3.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -353,16 +353,9 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const Auto
     return pf;
 }
 
-void Autogen::generateSqlite() {
-    sqlite3 *db;
-    int rc = sqlite3_open("depdb.sqlite", &db);
-    char *zErrMsg = 0;
-    rc = sqlite3_exec(db, "CREATE TABLE Persons ( \
-                      PersonID int, \
-                      LastName varchar(255), FirstName varchar(255), Address varchar(255), City varchar(255)); \
-    ",
-                      nullptr, 0, &zErrMsg);
-    sqlite3_close(db);
+void Autogen::makeSqlDb(sqlitepp::SqliteDb &sqliteDb, sqlitepp::SqliteTable &table) {
+    sqliteDb.insert(table, {1, 2});
+    sqliteDb.insert(table, {2, 3});
+    sqliteDb.insert(table, {3, 4});
 }
-
 } // namespace sorbet::autogen

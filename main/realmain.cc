@@ -4,6 +4,7 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
+#include "common/sqlitepp/sqlitepp.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -211,6 +212,16 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         fileq->push(i, 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
+    sqlitepp::SqliteDb sqliteDb("test.db");
+    sqlitepp::SqliteSchema schema{{sqlitepp::SqliteColumn("foo", sqlitepp::SqliteColumnType::Integer),
+                                   sqlitepp::SqliteColumn("bar", sqlitepp::SqliteColumnType::Integer)}};
+    sqlitepp::SqliteTable table("TestTable", schema);
+
+    sqliteDb.create(table);
+    sqliteDb.generateInsertStmt(table);
+    for (int i = 0; i < 10000; i++) {
+        autogen::Autogen::makeSqlDb(sqliteDb, table);
+    }
 
     workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
@@ -232,7 +243,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
                 auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
-                autogen::Autogen::generateSqlite();
+
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
