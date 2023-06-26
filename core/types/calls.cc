@@ -625,7 +625,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType), Symbols::noMethod());
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
