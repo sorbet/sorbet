@@ -916,18 +916,6 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->pinnedTypes = other.pinnedTypes;
 }
 
-core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr &procType) {
-    if (!procType.derivesFrom(ctx, core::Symbols::Proc())) {
-        return core::Types::untypedUntracked();
-    }
-    auto *applied = core::cast_type<core::AppliedType>(procType);
-    if (applied == nullptr || applied->targs.empty()) {
-        return core::Types::untypedUntracked();
-    }
-    // Proc types have their return type as the first targ
-    return applied->targs.front();
-}
-
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
                           core::NameRef fun, const core::Loc &loc) {
     if (fun != core::Names::flatMap()) {
