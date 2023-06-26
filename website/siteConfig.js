@@ -193,7 +193,7 @@ const siteConfig = {
     algoliaOptions: {}, // Optional, if provided by Algolia
   },
 
-  gaTrackingId: 'UA-119877071-2',
+  gaGtag: 'G-5H7PQ9Z8KF',
 };
 
 module.exports = siteConfig;
