@@ -1104,10 +1104,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
-                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockReturnType = core::Types::untyped(retainedResult->main.method);
                     }
                     if (!retainedResult->main.blockPreType) {
-                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockPreType = core::Types::untyped(retainedResult->main.method);
                     }
                     ENFORCE(retainedResult->main.sendTp);
                 }
@@ -1198,7 +1198,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         tp.origins.emplace_back(symbol.loc(ctx));
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
-                        tp.type = core::Types::untyped(ctx, symbol);
+                        tp.type = core::Types::untyped(symbol);
                     }
                 } else if (symbol.isTypeAlias(ctx)) {
                     ENFORCE(symbol.resultType(ctx) != nullptr);

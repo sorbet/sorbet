@@ -106,7 +106,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
 
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
         typeMember.data(gs)->flags.isFixed = true;
-        auto untyped = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         typeAliases[sym.id()].emplace_back(parentTypeMember, typeMember);
         return false;
@@ -132,7 +132,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
         typeMember.data(gs)->flags.isFixed = true;
-        auto untyped = core::Types::untyped(gs, sym);
+        auto untyped = core::Types::untyped(sym);
         typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         typeAliases[sym.id()].emplace_back(parentTypeMember, typeMember);
         return false;

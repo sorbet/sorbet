@@ -80,7 +80,7 @@ struct MethodBuilder {
 
     MethodBuilder &untypedArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
-        arg.type = Types::untyped(gs, method);
+        arg.type = Types::untyped(method);
         return *this;
     }
 
@@ -100,7 +100,7 @@ struct MethodBuilder {
     MethodBuilder &repeatedUntypedArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isRepeated = true;
-        arg.type = Types::untyped(gs, method);
+        arg.type = Types::untyped(method);
         return *this;
     }
 
@@ -115,7 +115,7 @@ struct MethodBuilder {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isKeyword = true;
         arg.flags.isRepeated = true;
-        arg.type = Types::untyped(gs, method);
+        arg.type = Types::untyped(method);
         return *this;
     }
 
@@ -131,7 +131,7 @@ struct MethodBuilder {
     }
 
     MethodRef buildWithResultUntyped() {
-        return buildWithResult(Types::untyped(gs, method));
+        return buildWithResult(Types::untyped(method));
     }
 };
 

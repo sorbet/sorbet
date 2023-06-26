@@ -275,7 +275,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
-        expectedType = Types::untyped(gs, method);
+        expectedType = Types::untyped(method);
     }
 
     expectedType = Types::replaceSelfType(gs, expectedType, selfType);
@@ -333,7 +333,7 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
         auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
         if (expectedType == nullptr) {
-            expectedType = Types::untyped(gs, method);
+            expectedType = Types::untyped(method);
         }
         e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
                        expectedType.show(gs));
@@ -568,7 +568,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
         }
 
-        return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
+        return DispatchResult(Types::untyped(args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
@@ -1045,7 +1045,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto kwParamType =
                             Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
                         if (kwParamType == nullptr) {
-                            kwParamType = Types::untyped(gs, method);
+                            kwParamType = Types::untyped(method);
                         }
                         // TODO(jez) Highlight untyped code for this error
                         if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
@@ -1339,7 +1339,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
         if (!blockType) {
-            blockType = Types::untyped(gs, method);
+            blockType = Types::untyped(method);
         }
 
         component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
@@ -1401,7 +1401,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (!resultType) {
-        resultType = Types::untyped(gs, method);
+        resultType = Types::untyped(method);
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(gs, resultType, *constr);
     }
@@ -1434,7 +1434,7 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
             continue;
         }
         if (arg.type == nullptr) {
-            args.emplace_back(core::Types::untyped(gs, method));
+            args.emplace_back(core::Types::untyped(method));
             continue;
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
@@ -1456,14 +1456,14 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchAr
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
-        return Types::untyped(gs, Symbols::noSymbol());
+        return Types::untyped(Symbols::noSymbol());
     }
     return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
     // BlamedUntyped are always untyped.
-    return Types::untyped(gs, blame);
+    return Types::untyped(blame);
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
