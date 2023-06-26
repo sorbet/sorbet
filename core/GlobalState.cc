@@ -865,6 +865,15 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::proc());
     ENFORCE(field == Symbols::Magic_UntypedSource_proc());
 
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::ArrayOfUntyped());
+    ENFORCE(field == Symbols::Magic_UntypedSource_ArrayOfUntyped());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::RangeOfUntyped());
+    ENFORCE(field == Symbols::Magic_UntypedSource_RangeOfUntyped());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::HashOfUntyped());
+    ENFORCE(field == Symbols::Magic_UntypedSource_HashOfUntyped());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

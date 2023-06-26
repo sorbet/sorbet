@@ -77,19 +77,21 @@ TypePtr Types::Float() {
 }
 
 TypePtr Types::arrayOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
+    static vector<TypePtr> targs{Types::untyped(Symbols::Magic_UntypedSource_ArrayOfUntyped())};
     static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
     return res;
 }
 
 TypePtr Types::rangeOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
+    static vector<TypePtr> targs{Types::untyped(Symbols::Magic_UntypedSource_RangeOfUntyped())};
     static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
     return res;
 }
 
 TypePtr Types::hashOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
+    // TODO: is it okay that we are sharing this untyped object?
+    auto untypedWithBlame = Types::untyped(Symbols::Magic_UntypedSource_HashOfUntyped());
+    static vector<TypePtr> targs{untypedWithBlame, untypedWithBlame, untypedWithBlame};
     static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
     return res;
 }

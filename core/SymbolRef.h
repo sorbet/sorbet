@@ -1105,6 +1105,18 @@ public:
         return FieldRef::fromRaw(5);
     }
 
+    static FieldRef Magic_UntypedSource_ArrayOfUntyped() {
+        return FieldRef::fromRaw(6);
+    }
+
+    static FieldRef Magic_UntypedSource_RangeOfUntyped() {
+        return FieldRef::fromRaw(7);
+    }
+
+    static FieldRef Magic_UntypedSource_HashOfUntyped() {
+        return FieldRef::fromRaw(8);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
