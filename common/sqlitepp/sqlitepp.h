@@ -99,10 +99,19 @@ public:
 struct SqliteTable {
     const std::string tableName;
     const SqliteSchema schema;
+    const std::string createStmt;
+    sqlite3_stmt *insertStmt;
+
+    static std::string generateCreateStmt(const std::string name, const SqliteSchema schema);
+
+    SqliteTable(const std::string tableName, const SqliteSchema schema)
+        : tableName(tableName), schema(schema), createStmt(generateCreateStmt(tableName, schema)), insertStmt(nullptr) {
+    }
 };
 
 class SqliteDb {
     sqlite3 *db;
+    sqlite3_stmt *insertStatement;
     void simpleExec(const std::string &query);
 
 public:
@@ -115,6 +124,7 @@ public:
     }
 
     void create(const SqliteTable table);
-    void insert(const SqliteTable table, const std::vector<std::variant<int, float, std::string>> &values);
+    void generateInsertStmt(SqliteTable &table);
+    void insert(const SqliteTable table, const std::vector<std::variant<int, double, std::string>> &values);
 };
 } // namespace sorbet::sqlitepp
