@@ -856,6 +856,15 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
     klass.data(*this)->setIsModule(true);
 
+    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
+    ENFORCE(klass == Symbols::Magic_UntypedSource());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::super());
+    ENFORCE(field == Symbols::Magic_UntypedSource_super());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::proc());
+    ENFORCE(field == Symbols::Magic_UntypedSource_proc());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

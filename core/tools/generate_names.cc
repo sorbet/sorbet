@@ -501,6 +501,7 @@ NameDef names[] = {
     {"Rational", "Rational", true},
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
+    {"UntypedSource", "<UntypedSource>", true},
     // A magic non user-creatable class for binding procs to attached_class
     {"BindToAttachedClass", "<BindToAttachedClass>", true},
     // A magic non user-creatable class for binding procs to self_type

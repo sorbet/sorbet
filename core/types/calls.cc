@@ -625,7 +625,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType), Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
@@ -3908,7 +3908,8 @@ public:
             res.returnType = core::Types::procClass();
             return;
         }
-        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
+        auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
+        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, untypedWithBlame);
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.returnType = make_type<core::AppliedType>(procClass, move(targs));
     }

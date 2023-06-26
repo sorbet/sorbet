@@ -1093,6 +1093,18 @@ public:
         return MethodRef::fromRaw(16);
     }
 
+    static ClassOrModuleRef Magic_UntypedSource() {
+        return ClassOrModuleRef::fromRaw(101);
+    }
+
+    static FieldRef Magic_UntypedSource_super() {
+        return FieldRef::fromRaw(4);
+    }
+
+    static FieldRef Magic_UntypedSource_proc() {
+        return FieldRef::fromRaw(5);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
