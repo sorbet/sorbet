@@ -131,17 +131,47 @@ module Opus::Types::Test
         MSG
       end
 
-      it "correctly handles a class that has overridden its #name method" do
-        klass = Class.new do
-          def name
+      it "uses constant name for class with #name defined" do
+        NamedClass = Class.new do
+          def self.name
             "String"
           end
         end
 
-        x = T::Types::Simple.new(String)
-        y = T::Types::Simple.new(klass)
+        x = T::Types::Simple.new(NamedClass)
 
-        refute_equal(x, y)
+        assert_equal("#{TypesTest.name}::NamedClass", x.name)
+      ensure
+        TypesTest.send(:remove_const, :NamedClass)
+      end
+
+      it "uses #name for anonymous classes" do
+        klass = Class.new do
+          def self.name
+            "String"
+          end
+        end
+
+        x = T::Types::Simple.new(klass)
+
+        assert_equal("String", x.name)
+      end
+
+      it "handles equality with a class that has overridden its #name method" do
+        NamedClass = Class.new
+
+        klass = Class.new do
+          def self.name
+            "NamedClass"
+          end
+        end
+
+        x = T::Types::Simple.new(klass)
+        y = T::Types::Simple.new(NamedClass)
+
+        refute_equal(x.name, y.name)
+      ensure
+        TypesTest.send(:remove_const, :NamedClass)
       end
     end
 
