@@ -80,6 +80,9 @@ def register_ruby_dependencies():
         sha256 = "61843112389f02b735428b53bb64cf988ad9fb81858b8248e22e57336f24a83e",
         strip_prefix = "ruby-3.1.2",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:penelope_procc-3_1.patch",
+        ],
     )
 
 def _rubygems_urls(gem):
