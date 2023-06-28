@@ -11,7 +11,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
-    UnorderedSet<core::NameRef> typeMembers;
+    UnorderedMap<core::NameRef, core::LocOffsets> typeMembers;
 
     for (auto &expr : cdef->rhs) {
         auto assn = ast::cast_tree<ast::Assign>(expr);
@@ -20,7 +20,8 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         }
 
         auto rhs = ast::cast_tree<ast::Send>(assn->rhs);
-        if (!rhs || !rhs->recv.isSelfReference() || rhs->fun != core::Names::typeMember()) {
+        if (!rhs || !rhs->recv.isSelfReference() ||
+            (rhs->fun != core::Names::typeMember() && rhs->fun != core::Names::typeTemplate())) {
             continue;
         }
 
@@ -29,15 +30,19 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
             continue;
         }
 
-        if (typeMembers.contains(lhs->cnst)) {
+        auto it = typeMembers.find(lhs->cnst);
+        if (it != typeMembers.end()) {
             if (auto e = ctx.beginError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Duplicate type member `{}`", lhs->cnst.show(ctx));
+                auto memTem = rhs->fun == core::Names::typeMember() ? "member" : "template";
+                e.setHeader("Duplicate type {} `{}`", memTem, lhs->cnst.show(ctx));
+                e.addErrorLine(ctx.locAt(it->second), "Previous definition");
+                e.replaceWith(fmt::format("Delete duplicate type {}", memTem), ctx.locAt(expr.loc()), "");
             }
             expr = ast::MK::EmptyTree();
-            return;
+            continue;
         }
 
-        typeMembers.insert(lhs->cnst);
+        typeMembers[lhs->cnst] = expr.loc();
     }
 }
 
