@@ -901,7 +901,8 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::YieldLoadArg());
     ENFORCE(field == Symbols::Magic_UntypedSource_YieldLoadArg());
 
-    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::GetCurrentException());
+    field =
+        enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::GetCurrentException());
     ENFORCE(field == Symbols::Magic_UntypedSource_GetCurrentException());
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
