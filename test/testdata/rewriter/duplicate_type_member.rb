@@ -15,7 +15,7 @@ class B
 
   Y = type_template
   Y = type_template
-# ^ error: Duplicate type member `Y`
+# ^ error: Duplicate type template `Y`
   Y = type_template
-# ^ error: Duplicate type member `Y`
+# ^ error: Duplicate type template `Y`
 end
