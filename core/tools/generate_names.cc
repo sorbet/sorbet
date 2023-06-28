@@ -501,11 +501,16 @@ NameDef names[] = {
     {"Rational", "Rational", true},
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
+    // A magic non user-creatable class to attach symbols for blaming untyped to
     {"UntypedSource", "<UntypedSource>", true},
     {"tupleUnderlying", "<tupleUnderlying>", true},
     {"shapeUnderlying", "<shapeUnderlying>", true},
     {"tupleLub", "<tupleLub>", true},
     {"shapeLub", "<shapeLub>", true},
+    {"YieldLoadArg", "<YieldLoadArg>", true},
+    {"GetCurrentException", "<GetCurrentException>", true},
+    {"LoadYieldParams", "<LoadYieldParams>", true},
+    {"applyTypeArguments", "<applyTypeArguments>", true},
     // A magic non user-creatable class for binding procs to attached_class
     {"BindToAttachedClass", "<BindToAttachedClass>", true},
     // A magic non user-creatable class for binding procs to self_type

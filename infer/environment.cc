@@ -1327,7 +1327,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
-                    tp.type = core::Types::untypedUntracked();
+                    tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_LoadYieldParams());
                 } else {
                     tp.type = params;
                 }
@@ -1348,7 +1348,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
                         tp.type = argsType.type;
                     } else {
-                        tp.type = core::Types::untypedUntracked();
+                        tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_YieldLoadArg());
                     }
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
                     return;
@@ -1509,7 +1509,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
-                tp.type = core::Types::untypedUntracked();
+                tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_GetCurrentException());
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {

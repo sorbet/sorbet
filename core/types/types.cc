@@ -1031,7 +1031,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     }
 
     if (genericClass.data(gs)->typeMembers().empty()) {
-        return Types::untypedUntracked();
+        return Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments());
     }
 
     vector<TypePtr> targs;
@@ -1082,7 +1082,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             if (validBounds) {
                 targs.emplace_back(argType);
             } else {
-                targs.emplace_back(Types::untypedUntracked());
+                targs.emplace_back(Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments()));
             }
 
             ++it;
@@ -1090,7 +1090,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             auto tupleArgs = targs;
             targs.emplace_back(make_type<TupleType>(tupleArgs));
         } else {
-            targs.emplace_back(Types::untypedUntracked());
+            targs.emplace_back(Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments()));
         }
     }
 

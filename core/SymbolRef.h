@@ -1145,6 +1145,26 @@ public:
         return FieldRef::fromRaw(15);
     }
 
+    static FieldRef Magic_UntypedSource_squareBracketsEq() {
+        return FieldRef::fromRaw(16);
+    }
+
+    static FieldRef Magic_UntypedSource_YieldLoadArg() {
+        return FieldRef::fromRaw(17);
+    }
+
+    static FieldRef Magic_UntypedSource_GetCurrentException() {
+        return FieldRef::fromRaw(18);
+    }
+
+    static FieldRef Magic_UntypedSource_LoadYieldParams() {
+        return FieldRef::fromRaw(19);
+    }
+
+    static FieldRef Magic_UntypedSource_applyTypeArguments() {
+        return FieldRef::fromRaw(20);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

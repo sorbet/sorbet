@@ -895,6 +895,21 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeLub());
     ENFORCE(field == Symbols::Magic_UntypedSource_shapeLub());
 
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::squareBracketsEq());
+    ENFORCE(field == Symbols::Magic_UntypedSource_squareBracketsEq());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::YieldLoadArg());
+    ENFORCE(field == Symbols::Magic_UntypedSource_YieldLoadArg());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::GetCurrentException());
+    ENFORCE(field == Symbols::Magic_UntypedSource_GetCurrentException());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
+    ENFORCE(field == Symbols::Magic_UntypedSource_LoadYieldParams());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::applyTypeArguments());
+    ENFORCE(field == Symbols::Magic_UntypedSource_applyTypeArguments());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

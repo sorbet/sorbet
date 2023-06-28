@@ -3294,7 +3294,7 @@ public:
             // people's codebases to it.
             //
             // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
-            res.returnType = Types::untypedUntracked();
+            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_squareBracketsEq());
         }
     }
 } Shape_squareBracketsEq;
