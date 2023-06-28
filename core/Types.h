@@ -108,9 +108,10 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
-    static TypePtr arrayOfUntyped();
-    static TypePtr rangeOfUntyped();
+    static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
+    static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
+    static TypePtr hashOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr procClass();
     static TypePtr nilableProcClass();
     static TypePtr declBuilderForProcsSingletonClass();

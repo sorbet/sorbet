@@ -1105,16 +1105,44 @@ public:
         return FieldRef::fromRaw(5);
     }
 
-    static FieldRef Magic_UntypedSource_ArrayOfUntyped() {
+    static FieldRef Magic_UntypedSource_buildArray() {
         return FieldRef::fromRaw(6);
     }
 
-    static FieldRef Magic_UntypedSource_RangeOfUntyped() {
+    static FieldRef Magic_UntypedSource_buildRange() {
         return FieldRef::fromRaw(7);
     }
 
-    static FieldRef Magic_UntypedSource_HashOfUntyped() {
+    static FieldRef Magic_UntypedSource_buildHash() {
         return FieldRef::fromRaw(8);
+    }
+
+    static FieldRef Magic_UntypedSource_mergeHashValues() {
+        return FieldRef::fromRaw(9);
+    }
+
+    static FieldRef Magic_UntypedSource_expandSplat() {
+        return FieldRef::fromRaw(10);
+    }
+
+    static FieldRef Magic_UntypedSource_splat() {
+        return FieldRef::fromRaw(11);
+    }
+
+    static FieldRef Magic_UntypedSource_tupleUnderlying() {
+        return FieldRef::fromRaw(12);
+    }
+
+    static FieldRef Magic_UntypedSource_shapeUnderlying() {
+        return FieldRef::fromRaw(13);
+    }
+
+    static FieldRef Magic_UntypedSource_tupleLub() {
+        return FieldRef::fromRaw(14);
+    }
+
+    static FieldRef Magic_UntypedSource_shapeLub() {
+        return FieldRef::fromRaw(15);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

@@ -415,6 +415,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
         // If keyword args are present, interpret them as an untyped hash
         if (numPosArgs < args.size()) {
+            // TODO(neil): this should actually blame to an error recovery magic symbol
             checkArg(numPosArgs, Types::hashOfUntyped());
         }
     }
@@ -2100,7 +2101,7 @@ public:
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
-                res.returnType = Types::hashOfUntyped();
+                res.returnType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
                 return;
             }
         }
@@ -2144,7 +2145,7 @@ public:
         auto secondArgIsNil = other.isNilClass();
         if (firstArgIsNil) {
             if (secondArgIsNil) {
-                rangeElemType = Types::untypedUntracked();
+                rangeElemType = Types::untyped(Symbols::Magic_UntypedSource_buildArray());
             } else {
                 rangeElemType = Types::dropNil(gs, other);
             }
@@ -2184,12 +2185,12 @@ class Magic_expandSplat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 3) {
-            res.returnType = Types::arrayOfUntyped();
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto val = args.args.front()->type;
         if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
-            res.returnType = Types::untypedUntracked();
+            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto &beforeLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
@@ -2990,7 +2991,8 @@ public:
         if (!dispatched.main.errors.empty()) {
             // In case of an error, the splat is converted to an array with a single
             // element; be conservative in what we declare the element type to be.
-            res.returnType = Types::arrayOfUntyped();
+            // TODO(neil): this should actually blame to an error recovery magic symbol
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
         } else {
             res.returnType = dispatched.returnType;
         }
@@ -3467,7 +3469,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
             // Guard shape construction on keys being valid, falling back on T::Hash[T.untyped, T.untyped] if it's
             // invalid.
             if (!isa_type<NamedLiteralType>(key->type)) {
-                argType = Types::hashOfUntyped();
+                argType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_mergeHashValues());
                 break;
             }
 

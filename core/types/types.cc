@@ -76,21 +76,26 @@ TypePtr Types::Float() {
     return make_type<ClassType>(Symbols::Float());
 }
 
-TypePtr Types::arrayOfUntyped() {
-    static vector<TypePtr> targs{Types::untyped(Symbols::Magic_UntypedSource_ArrayOfUntyped())};
+TypePtr Types::arrayOfUntyped(sorbet::core::SymbolRef blame) {
+    static vector<TypePtr> targs{Types::untyped(blame)};
     static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
     return res;
 }
 
-TypePtr Types::rangeOfUntyped() {
-    static vector<TypePtr> targs{Types::untyped(Symbols::Magic_UntypedSource_RangeOfUntyped())};
+TypePtr Types::rangeOfUntyped(sorbet::core::SymbolRef blame) {
+    static vector<TypePtr> targs{Types::untyped(blame)};
     static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
     return res;
 }
 
 TypePtr Types::hashOfUntyped() {
-    // TODO: is it okay that we are sharing this untyped object?
-    auto untypedWithBlame = Types::untyped(Symbols::Magic_UntypedSource_HashOfUntyped());
+    static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
+    return res;
+}
+
+TypePtr Types::hashOfUntyped(sorbet::core::SymbolRef blame) {
+    auto untypedWithBlame = Types::untyped(blame);
     static vector<TypePtr> targs{untypedWithBlame, untypedWithBlame, untypedWithBlame};
     static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
     return res;
@@ -443,7 +448,7 @@ ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(k
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return Types::hashOfUntyped();
+    return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
 }
 
 std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
@@ -506,7 +511,7 @@ std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const 
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
-        return Types::arrayOfUntyped();
+        return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleUnderlying());
     } else {
         return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
     }

@@ -685,18 +685,18 @@ void GlobalState::initEmpty() {
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash())
                  .repeatedUntypedArg(Names::arg0())
-                 .buildWithResult(Types::hashOfUntyped());
+                 .buildWithResult(Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash()));
     // Synthesize <Magic>.<build-array>(*vs : T.untyped) => Array
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildArray())
                  .repeatedUntypedArg(Names::arg0())
-                 .buildWithResult(Types::arrayOfUntyped());
+                 .buildWithResult(Types::arrayOfUntyped(Symbols::Magic_UntypedSource_buildArray()));
 
     // Synthesize <Magic>.<build-range>(from: T.untyped, to: T.untyped) => Range
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildRange())
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
-                 .buildWithResult(Types::rangeOfUntyped());
+                 .buildWithResult(Types::rangeOfUntyped(Symbols::Magic_UntypedSource_buildRange()));
 
     // Synthesize <Magic>.<regex-backref>(arg0: T.untyped) => T.nilable(String)
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::regexBackref())
@@ -865,14 +865,35 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::proc());
     ENFORCE(field == Symbols::Magic_UntypedSource_proc());
 
-    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::ArrayOfUntyped());
-    ENFORCE(field == Symbols::Magic_UntypedSource_ArrayOfUntyped());
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::buildArray());
+    ENFORCE(field == Symbols::Magic_UntypedSource_buildArray());
 
-    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::RangeOfUntyped());
-    ENFORCE(field == Symbols::Magic_UntypedSource_RangeOfUntyped());
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::buildRange());
+    ENFORCE(field == Symbols::Magic_UntypedSource_buildRange());
 
-    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::HashOfUntyped());
-    ENFORCE(field == Symbols::Magic_UntypedSource_HashOfUntyped());
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::buildHash());
+    ENFORCE(field == Symbols::Magic_UntypedSource_buildHash());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::mergeHashValues());
+    ENFORCE(field == Symbols::Magic_UntypedSource_mergeHashValues());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::expandSplat());
+    ENFORCE(field == Symbols::Magic_UntypedSource_expandSplat());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::splat());
+    ENFORCE(field == Symbols::Magic_UntypedSource_splat());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::tupleUnderlying());
+    ENFORCE(field == Symbols::Magic_UntypedSource_tupleUnderlying());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeUnderlying());
+    ENFORCE(field == Symbols::Magic_UntypedSource_shapeUnderlying());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::tupleLub());
+    ENFORCE(field == Symbols::Magic_UntypedSource_tupleLub());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeLub());
+    ENFORCE(field == Symbols::Magic_UntypedSource_shapeLub());
 
     int reservedCount = 0;
 
