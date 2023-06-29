@@ -133,21 +133,21 @@ module T::Props
         if !nilable_type
           case default
           when NilClass
-            "self.class.decorator.raise_nil_deserialize_error(#{serialized_form.inspect})"
+            "raise_nil_deserialize_error(#{serialized_form.inspect})"
           when ApplyPrimitiveDefault
             literal = default.default
             case literal
             when String, Integer, Symbol, Float, TrueClass, FalseClass, NilClass
               literal.inspect
             else
-              "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
+              "props_with_defaults.fetch(#{prop.inspect}).default"
             end
           when ApplyEmptyArrayDefault
             '[]'
           when ApplyEmptyHashDefault
             '{}'
           else
-            "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
+            "props_with_defaults.fetch(#{prop.inspect}).default"
           end
         elsif raise_on_nil_write
           "required_prop_missing_from_deserialize(#{prop.inspect})"
