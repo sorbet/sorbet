@@ -57,10 +57,10 @@ class T::Private::Methods::Signature
     @defined_raw = defined_raw
 
     # Use T.unsafe in lieu of T.let(..., T.nilable(...))
-    arg_types = T.unsafe(nil)
-    kwarg_types = T.unsafe(nil)
+    arg_types = T.let(nil, T.untyped)
+    kwarg_types = T.let(nil, T.untyped)
     req_arg_count = 0
-    req_kwarg_names = T.unsafe(nil)
+    req_kwarg_names = T.let(nil, T.untyped)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
@@ -122,14 +122,14 @@ class T::Private::Methods::Signature
           # see this error. The simplest resolution is to rename your method.
           raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}"
         end
-        (arg_types ||= T.unsafe([])) << [param_name, type]
+        (arg_types ||= []) << [param_name, type]
         req_arg_count += 1
       when :opt
-        (arg_types ||= T.unsafe([])) << [param_name, type]
+        (arg_types ||= []) << [param_name, type]
       when :key, :keyreq
-        (kwarg_types ||= T.unsafe({}))[param_name] = type
+        (kwarg_types ||= {})[param_name] = type
         if param_kind == :keyreq
-          (req_kwarg_names ||= T.unsafe([])) << param_name
+          (req_kwarg_names ||= []) << param_name
         end
       when :block
         @block_name = param_name
