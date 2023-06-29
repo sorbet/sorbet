@@ -165,7 +165,8 @@ module T::Props::Serializable
       "for more details). If this is already the case, you probably "\
       "omitted a required prop from the `fields:` option when doing a "\
       "partial load."
-    storytime = {prop: hkey, klass: self.class.name}
+    decorated_class = self.class
+    storytime = {prop: hkey, klass: decorated_class.name}
 
     # Notify the model owner if it exists, and always notify the API owner.
     begin
