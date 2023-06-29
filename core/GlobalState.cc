@@ -895,7 +895,8 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeLub());
     ENFORCE(field == Symbols::Magic_UntypedSource_shapeLub());
 
-    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeSquareBracketsEq());
+    field =
+        enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::shapeSquareBracketsEq());
     ENFORCE(field == Symbols::Magic_UntypedSource_shapeSquareBracketsEq());
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::YieldLoadArg());
