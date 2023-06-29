@@ -66,7 +66,7 @@ module T::Props
         <<~RUBY
           def __t_props_generated_serialize(strict)
             h = {}
-            #{parts.join("\n\n")}
+            #{parts.join("\n")}
             h
           end
         RUBY
