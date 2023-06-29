@@ -510,7 +510,7 @@ NameDef names[] = {
     {"YieldLoadArg", "<YieldLoadArg>", true},
     {"GetCurrentException", "<GetCurrentException>", true},
     {"LoadYieldParams", "<LoadYieldParams>", true},
-    {"applyTypeArguments", "<applyTypeArguments>", true},
+    {"shapeSquareBracketsEq", "<shapeSquareBracketsEq>", true},
     // A magic non user-creatable class for binding procs to attached_class
     {"BindToAttachedClass", "<BindToAttachedClass>", true},
     // A magic non user-creatable class for binding procs to self_type

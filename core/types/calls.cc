@@ -415,7 +415,6 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
         // If keyword args are present, interpret them as an untyped hash
         if (numPosArgs < args.size()) {
-            // TODO(neil): this should actually blame to an error recovery magic symbol
             checkArg(numPosArgs, Types::hashOfUntyped());
         }
     }
@@ -2145,7 +2144,7 @@ public:
         auto secondArgIsNil = other.isNilClass();
         if (firstArgIsNil) {
             if (secondArgIsNil) {
-                rangeElemType = Types::untyped(Symbols::Magic_UntypedSource_buildArray());
+                rangeElemType = Types::untyped(Symbols::Magic_UntypedSource_buildRange());
             } else {
                 rangeElemType = Types::dropNil(gs, other);
             }
@@ -2991,7 +2990,6 @@ public:
         if (!dispatched.main.errors.empty()) {
             // In case of an error, the splat is converted to an array with a single
             // element; be conservative in what we declare the element type to be.
-            // TODO(neil): this should actually blame to an error recovery magic symbol
             res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
         } else {
             res.returnType = dispatched.returnType;
@@ -3294,7 +3292,7 @@ public:
             // people's codebases to it.
             //
             // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
-            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_squareBracketsEq());
+            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_shapeSquareBracketsEq());
         }
     }
 } Shape_squareBracketsEq;

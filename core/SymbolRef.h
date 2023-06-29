@@ -1145,7 +1145,7 @@ public:
         return FieldRef::fromRaw(15);
     }
 
-    static FieldRef Magic_UntypedSource_squareBracketsEq() {
+    static FieldRef Magic_UntypedSource_shapeSquareBracketsEq() {
         return FieldRef::fromRaw(16);
     }
 
@@ -1159,10 +1159,6 @@ public:
 
     static FieldRef Magic_UntypedSource_LoadYieldParams() {
         return FieldRef::fromRaw(19);
-    }
-
-    static FieldRef Magic_UntypedSource_applyTypeArguments() {
-        return FieldRef::fromRaw(20);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

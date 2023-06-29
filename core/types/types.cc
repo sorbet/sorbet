@@ -1031,7 +1031,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     }
 
     if (genericClass.data(gs)->typeMembers().empty()) {
-        return Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments());
+        // TODO(neil): this should actually blame to an error recovery magic symbol
+        return Types::untypedUntracked();
     }
 
     vector<TypePtr> targs;
@@ -1082,7 +1083,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             if (validBounds) {
                 targs.emplace_back(argType);
             } else {
-                targs.emplace_back(Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments()));
+                // TODO(neil): this should actually blame to an error recovery magic symbol
+                targs.emplace_back(Types::untypedUntracked());
             }
 
             ++it;
@@ -1090,7 +1092,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             auto tupleArgs = targs;
             targs.emplace_back(make_type<TupleType>(tupleArgs));
         } else {
-            targs.emplace_back(Types::untyped(Symbols::Magic_UntypedSource_applyTypeArguments()));
+            // TODO(neil): this should actually blame to an error recovery magic symbol
+            targs.emplace_back(Types::untypedUntracked());
         }
     }
 
