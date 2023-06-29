@@ -158,6 +158,29 @@ module T::Props::Serializable
     nil
   end
 
+  private def raise_nil_deserialize_error(hkey)
+    msg = "Tried to deserialize a required prop from a nil value. It's "\
+      "possible that a nil value exists in the database, so you should "\
+      "provide a `default: or factory:` for this prop (see go/optional "\
+      "for more details). If this is already the case, you probably "\
+      "omitted a required prop from the `fields:` option when doing a "\
+      "partial load."
+    storytime = {prop: hkey, klass: decorated_class.name}
+
+    # Notify the model owner if it exists, and always notify the API owner.
+    begin
+      if T::Configuration.class_owner_finder && (owner = T::Configuration.class_owner_finder.call(decorated_class))
+        T::Configuration.hard_assert_handler(
+          msg,
+          storytime: storytime,
+          project: owner
+        )
+      end
+    ensure
+      T::Configuration.hard_assert_handler(msg, storytime: storytime)
+    end
+  end
+
   private def raise_deserialization_error(prop_name, value, orig_error)
     T::Configuration.soft_assert_handler(
       'Deserialization error (probably unexpected stored type)',
@@ -276,29 +299,6 @@ module T::Props::Serializable::DecoratorMethods
       at line #{line_num - previous_blank - 1} in:
       #{context}
     MSG
-  end
-
-  def raise_nil_deserialize_error(hkey)
-    msg = "Tried to deserialize a required prop from a nil value. It's "\
-      "possible that a nil value exists in the database, so you should "\
-      "provide a `default: or factory:` for this prop (see go/optional "\
-      "for more details). If this is already the case, you probably "\
-      "omitted a required prop from the `fields:` option when doing a "\
-      "partial load."
-    storytime = {prop: hkey, klass: decorated_class.name}
-
-    # Notify the model owner if it exists, and always notify the API owner.
-    begin
-      if T::Configuration.class_owner_finder && (owner = T::Configuration.class_owner_finder.call(decorated_class))
-        T::Configuration.hard_assert_handler(
-          msg,
-          storytime: storytime,
-          project: owner
-        )
-      end
-    ensure
-      T::Configuration.hard_assert_handler(msg, storytime: storytime)
-    end
   end
 
   def prop_validate_definition!(name, cls, rules, type)
