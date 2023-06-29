@@ -140,14 +140,14 @@ module T::Props
             when String, Integer, Symbol, Float, TrueClass, FalseClass, NilClass
               literal.inspect
             else
-              "props_with_defaults.fetch(#{prop.inspect}).default"
+              "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
             end
           when ApplyEmptyArrayDefault
             '[]'
           when ApplyEmptyHashDefault
             '{}'
           else
-            "props_with_defaults.fetch(#{prop.inspect}).default"
+            "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
           end
         elsif raise_on_nil_write
           "required_prop_missing_from_deserialize(#{prop.inspect})"
