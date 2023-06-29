@@ -252,7 +252,7 @@ module T::Private::Methods
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
     unless current_declaration.raw
-      T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
+      T::Private::ClassUtils.replace_method(mod, method_name, true) do |*args, &blk|
         method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
@@ -501,19 +501,37 @@ module T::Private::Methods
       return
     end
     if is_enabled
-      @old_hooks.each(&:restore)
+      # A cut-down version of T::Private::ClassUtils::ReplacedMethod#restore, because we
+      # should only be resetting final hooks during tests.
+      T::Configuration.without_ruby_warnings do
+        Module.define_method(:included, @old_hooks[0])
+        Module.define_method(:extended, @old_hooks[1])
+        Class.define_method(:inherited, @old_hooks[2])
+      end
       @old_hooks = nil
     else
-      old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
-        old_included.bind(self).call(arg)
+      old_included = T::Private::ClassUtils.replace_method(Module, :included, true) do |arg|
+        if T::Configuration::AT_LEAST_RUBY_2_7
+          old_included.bind_call(self, arg)
+        else
+          old_included.bind(self).call(arg)
+        end
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
-      old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
-        old_extended.bind(self).call(arg)
+      old_extended = T::Private::ClassUtils.replace_method(Module, :extended, true) do |arg|
+        if T::Configuration::AT_LEAST_RUBY_2_7
+          old_extended.bind_call(self, arg)
+        else
+          old_extended.bind(self).call(arg)
+        end
         ::T::Private::Methods._hook_impl(arg, true, self)
       end
-      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
-        old_inherited.bind(self).call(arg)
+      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited, true) do |arg|
+        if T::Configuration::AT_LEAST_RUBY_2_7
+          old_inherited.bind_call(self, arg)
+        else
+          old_inherited.bind(self).call(arg)
+        end
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
       @old_hooks = [old_included, old_extended, old_inherited]
