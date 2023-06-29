@@ -56,10 +56,11 @@ class T::Private::Methods::Signature
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
 
-    arg_types = nil
-    kwarg_types = nil
+    # Use T.unsafe in lieu of T.let(..., T.nilable(...))
+    arg_types = T.unsafe(nil)
+    kwarg_types = T.unsafe(nil)
     req_arg_count = 0
-    req_kwarg_names = nil
+    req_kwarg_names = T.unsafe(nil)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
