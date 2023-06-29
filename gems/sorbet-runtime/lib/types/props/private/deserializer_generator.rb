@@ -57,11 +57,7 @@ module T::Props
               begin
                 #{transformation}
               rescue NoMethodError => e
-                raise_deserialization_error(
-                  #{prop.inspect},
-                  val,
-                  e,
-                )
+                raise_deserialization_error(#{prop.inspect}, val, e)
                 val
               end
             RUBY
