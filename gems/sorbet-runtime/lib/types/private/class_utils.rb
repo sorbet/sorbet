@@ -91,10 +91,13 @@ module T::Private::ClassUtils
   end
 
   # Replaces a method, either by overwriting it (if it is defined directly on `mod`) or by
-  # overriding it (if it is defined by one of mod's ancestors). Returns a ReplacedMethod instance
-  # on which you can call `bind(...).call(...)` to call the original method, or `restore` to
-  # restore the original method (by overwriting or removing the override).
-  def self.replace_method(mod, name, &blk)
+  # overriding it (if it is defined by one of mod's ancestors).  If `original_only` is
+  # false, returns a ReplacedMethod instance on which you can call `bind(...).call(...)`
+  # to call the original method, or `restore` to restore the original method (by
+  # overwriting or removing the override).
+  #
+  # If `original_only` is true, return the `UnboundMethod` representing the original method.
+  def self.replace_method(mod, name, original_only=false, &blk)
     original_method = mod.instance_method(name)
     original_visibility = visibility_method_name(mod, name)
     original_owner = original_method.owner
@@ -120,8 +123,12 @@ module T::Private::ClassUtils
         def_with_visibility(mod, name, original_visibility, &blk)
       end
     end
-    new_method = mod.instance_method(name)
 
-    ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)
+    if original_only
+      original_method
+    else
+      new_method = mod.instance_method(name)
+      ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)
+    end
   end
 end
