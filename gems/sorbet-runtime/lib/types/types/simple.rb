@@ -4,6 +4,9 @@
 module T::Types
   # Validates that an object belongs to the specified class.
   class Simple < Base
+    NAME_METHOD = Module.instance_method(:name)
+    private_constant(:NAME_METHOD)
+
     attr_reader :raw_type
 
     def initialize(raw_type)
@@ -16,7 +19,7 @@ module T::Types
       #
       # `name` isn't normally a hot path for types, but it is used in initializing a T::Types::Union,
       # and so in `T.nilable`, and so in runtime constructions like `x = T.let(nil, T.nilable(Integer))`.
-      @name ||= @raw_type.name.freeze
+      @name ||= (NAME_METHOD.bind(@raw_type).call || @raw_type.name).freeze
     end
 
     # overrides Base
