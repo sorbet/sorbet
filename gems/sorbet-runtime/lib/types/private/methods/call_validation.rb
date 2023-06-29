@@ -92,11 +92,11 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
-      CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, blk)
+      CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, &blk)
     end
   end
 
-  def self.validate_call_skip_block_type(instance, original_method, method_sig, args, blk)
+  def self.validate_call_skip_block_type(instance, original_method, method_sig, args, &blk)
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
 
