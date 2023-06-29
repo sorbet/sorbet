@@ -62,6 +62,11 @@ export PATH="$(dirname "{cc}"):$(dirname $(realpath {rustc})):$PATH"
 # tool/rbinstall.rb will explicitly ignore symlinks when installing files,
 # and this feels more maintainable than patching it.
 cp -aL "{src_dir}"/* "$build_dir"
+# Manually copy over .bundle as bundled gems are no longer installed
+# https://github.com/ruby/ruby/pull/6234
+if [[ -d "{src_dir}/.bundle" ]]; then
+  cp -raL "{src_dir}/.bundle" "$build_dir"
+fi
 
 {install_extra_srcs}
 {install_append_srcs}
@@ -237,7 +242,7 @@ def _build_ruby_impl(ctx):
     # Outputs
     binaries = [
         ctx.actions.declare_file("toolchain/bin/{}".format(binary))
-        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri", "bundle", "bundler"]
+        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri", "bundle", "bundler", "rake"]
     ]
 
     libdir = ctx.actions.declare_directory("toolchain/lib")
