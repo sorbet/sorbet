@@ -1,6 +1,16 @@
 # compiled: true
 # typed: true
 
+module Opus
+  module Account
+    module Model
+      module Merchant
+        
+      end
+    end
+  end
+end
+
 module Opus::Autogen::Tokens::AccountModelMerchant
   # This isn't exactly right; this would actually be more like a type alias to
   # a String, but we're using a class to make sure that the Prop.cc logic is
