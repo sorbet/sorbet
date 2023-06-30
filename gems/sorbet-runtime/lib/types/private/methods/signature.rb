@@ -56,7 +56,7 @@ class T::Private::Methods::Signature
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
 
-    # Use T.unsafe in lieu of T.let(..., T.nilable(...))
+    # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
     arg_types = T.let(nil, T.untyped)
     kwarg_types = T.let(nil, T.untyped)
     req_arg_count = 0
