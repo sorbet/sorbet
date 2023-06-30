@@ -3,12 +3,12 @@ class TestUntyped
   extend T::Sig
   
   sig { returns(T.untyped) }
-  def test2
+  def test
     2
   end
 
   def local_call
-    a = test2
+    a = test
   end
 
   def unsafe
