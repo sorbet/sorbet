@@ -39,8 +39,6 @@ class T::Private::Methods::Signature
   def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
     @method = method
     @method_name = method_name
-    @arg_types = []
-    @kwarg_types = {}
     @block_type = nil
     @block_name = nil
     @rest_type = nil
@@ -51,14 +49,18 @@ class T::Private::Methods::Signature
     @bind = bind ? T::Utils.coerce(bind) : bind
     @mode = mode
     @check_level = check_level
-    @req_arg_count = 0
-    @req_kwarg_names = []
     @has_rest = false
     @has_keyrest = false
     @parameters = parameters
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
+
+    # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
+    arg_types = T.let(nil, T.untyped)
+    kwarg_types = T.let(nil, T.untyped)
+    req_arg_count = 0
+    req_kwarg_names = T.let(nil, T.untyped)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
@@ -109,7 +111,7 @@ class T::Private::Methods::Signature
 
       case param_kind
       when :req
-        if @arg_types.length > @req_arg_count
+        if (arg_types ? arg_types.length : 0) > req_arg_count
           # Note that this is actually is supported by Ruby, but it would add complexity to
           # support it here, and I'm happy to discourage its use anyway.
           #
@@ -120,14 +122,14 @@ class T::Private::Methods::Signature
           # see this error. The simplest resolution is to rename your method.
           raise "Required params after optional params are not supported in method declarations. Method: #{method_desc}"
         end
-        @arg_types << [param_name, type]
-        @req_arg_count += 1
+        (arg_types ||= []) << [param_name, type]
+        req_arg_count += 1
       when :opt
-        @arg_types << [param_name, type]
+        (arg_types ||= []) << [param_name, type]
       when :key, :keyreq
-        @kwarg_types[param_name] = type
+        (kwarg_types ||= {})[param_name] = type
         if param_kind == :keyreq
-          @req_kwarg_names << param_name
+          (req_kwarg_names ||= []) << param_name
         end
       when :block
         @block_name = param_name
@@ -146,6 +148,11 @@ class T::Private::Methods::Signature
 
       i += 1
     end
+
+    @arg_types = arg_types || EMPTY_LIST
+    @kwarg_types = kwarg_types || EMPTY_HASH
+    @req_arg_count = req_arg_count
+    @req_kwarg_names = req_kwarg_names || EMPTY_LIST
   end
 
   attr_writer :method_name
@@ -238,5 +245,6 @@ class T::Private::Methods::Signature
     "#{@method} at #{loc}"
   end
 
+  EMPTY_LIST = [].freeze
   EMPTY_HASH = {}.freeze
 end
