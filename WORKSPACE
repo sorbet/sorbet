@@ -76,6 +76,17 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
 
 node_repositories()
 
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = "2021",
+    versions = [
+        "1.58.1",
+    ],
+)
+
 BAZEL_VERSION = "5.2.0"
 
 BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "7d9ef51beab5726c55725fb36675c6fed0518576d3ba51fb4067580ddf7627c4"
