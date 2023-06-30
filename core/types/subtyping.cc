@@ -373,7 +373,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<TupleType>(move(elemLubs));
                             }
                         } else {
-                            result = Types::arrayOfUntyped();
+                            result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
@@ -392,7 +392,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 ++i;
                                 auto optind = h1.indexForKey(el2);
                                 if (!optind.has_value()) {
-                                    result = Types::hashOfUntyped();
+                                    result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                                     return;
                                 }
                                 auto &inserted =
@@ -408,7 +408,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<ShapeType>(h2->keys, move(valueLubs));
                             }
                         } else {
-                            result = Types::hashOfUntyped();
+                            result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                         }
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);

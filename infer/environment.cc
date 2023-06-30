@@ -916,18 +916,6 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->pinnedTypes = other.pinnedTypes;
 }
 
-core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr &procType) {
-    if (!procType.derivesFrom(ctx, core::Symbols::Proc())) {
-        return core::Types::untypedUntracked();
-    }
-    auto *applied = core::cast_type<core::AppliedType>(procType);
-    if (applied == nullptr || applied->targs.empty()) {
-        return core::Types::untypedUntracked();
-    }
-    // Proc types have their return type as the first targ
-    return applied->targs.front();
-}
-
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
                           core::NameRef fun, const core::Loc &loc) {
     if (fun != core::Names::flatMap()) {
@@ -1116,10 +1104,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
-                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockReturnType = core::Types::untyped(retainedResult->main.method);
                     }
                     if (!retainedResult->main.blockPreType) {
-                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockPreType = core::Types::untyped(retainedResult->main.method);
                     }
                     ENFORCE(retainedResult->main.sendTp);
                 }
@@ -1210,7 +1198,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         tp.origins.emplace_back(symbol.loc(ctx));
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
-                        tp.type = core::Types::untyped(ctx, symbol);
+                        tp.type = core::Types::untyped(symbol);
                     }
                 } else if (symbol.isTypeAlias(ctx)) {
                     ENFORCE(symbol.resultType(ctx) != nullptr);
@@ -1339,7 +1327,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
-                    tp.type = core::Types::untypedUntracked();
+                    tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_LoadYieldParams());
                 } else {
                     tp.type = params;
                 }
@@ -1360,7 +1348,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
                         tp.type = argsType.type;
                     } else {
-                        tp.type = core::Types::untypedUntracked();
+                        tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_YieldLoadArg());
                     }
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
                     return;
@@ -1521,7 +1509,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
-                tp.type = core::Types::untypedUntracked();
+                tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_GetCurrentException());
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {

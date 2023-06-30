@@ -60,7 +60,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else if (cfg->symbol.data(ctx)->name.isAnyStaticInitName(ctx)) {
             methodReturnType = core::Types::top();
         } else {
-            methodReturnType = core::Types::untyped(ctx, cfg->symbol);
+            methodReturnType = core::Types::untyped(cfg->symbol);
         }
     } else {
         auto enclosingClass = cfg->symbol.enclosingClass(ctx);

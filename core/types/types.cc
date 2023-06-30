@@ -39,7 +39,7 @@ TypePtr Types::untypedUntracked() {
     return make_type<ClassType>(Symbols::untyped());
 }
 
-TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
+TypePtr Types::untyped(sorbet::core::SymbolRef blame) {
     if constexpr (!sorbet::track_untyped_blame_mode && !sorbet::debug_mode) {
         return untypedUntracked();
     }
@@ -76,20 +76,27 @@ TypePtr Types::Float() {
     return make_type<ClassType>(Symbols::Float());
 }
 
-TypePtr Types::arrayOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
+TypePtr Types::arrayOfUntyped(sorbet::core::SymbolRef blame) {
+    static vector<TypePtr> targs{Types::untyped(blame)};
     static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
     return res;
 }
 
-TypePtr Types::rangeOfUntyped() {
-    static vector<TypePtr> targs{Types::untypedUntracked()};
+TypePtr Types::rangeOfUntyped(sorbet::core::SymbolRef blame) {
+    static vector<TypePtr> targs{Types::untyped(blame)};
     static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
     return res;
 }
 
 TypePtr Types::hashOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
+    return res;
+}
+
+TypePtr Types::hashOfUntyped(sorbet::core::SymbolRef blame) {
+    auto untypedWithBlame = Types::untyped(blame);
+    static vector<TypePtr> targs{untypedWithBlame, untypedWithBlame, untypedWithBlame};
     static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
     return res;
 }
@@ -441,7 +448,7 @@ ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(k
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return Types::hashOfUntyped();
+    return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
 }
 
 std::optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {
@@ -504,7 +511,7 @@ std::optional<size_t> ShapeType::indexForKey(const FloatLiteralType &lit) const 
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
-        return Types::arrayOfUntyped();
+        return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleUnderlying());
     } else {
         return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
     }
@@ -1024,6 +1031,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
     }
 
     if (genericClass.data(gs)->typeMembers().empty()) {
+        // TODO(neil): this should actually blame to an error recovery magic symbol
         return Types::untypedUntracked();
     }
 
@@ -1075,6 +1083,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             if (validBounds) {
                 targs.emplace_back(argType);
             } else {
+                // TODO(neil): this should actually blame to an error recovery magic symbol
                 targs.emplace_back(Types::untypedUntracked());
             }
 
@@ -1083,6 +1092,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             auto tupleArgs = targs;
             targs.emplace_back(make_type<TupleType>(tupleArgs));
         } else {
+            // TODO(neil): this should actually blame to an error recovery magic symbol
             targs.emplace_back(Types::untypedUntracked());
         }
     }

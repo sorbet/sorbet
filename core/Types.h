@@ -97,7 +97,7 @@ public:
     static TypePtr top();
     static TypePtr bottom();
     static TypePtr nilClass();
-    static TypePtr untyped(const core::GlobalState &gs, core::SymbolRef blame);
+    static TypePtr untyped(core::SymbolRef blame);
     static TypePtr untypedUntracked();
     static TypePtr void_();
     static TypePtr trueClass();
@@ -108,9 +108,10 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
-    static TypePtr arrayOfUntyped();
-    static TypePtr rangeOfUntyped();
+    static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
+    static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
+    static TypePtr hashOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr procClass();
     static TypePtr nilableProcClass();
     static TypePtr declBuilderForProcsSingletonClass();

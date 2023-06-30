@@ -880,8 +880,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             }
         }
         case core::Names::untyped().rawId():
-            return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame),
-                                          core::Symbols::noClassOrModule()};
+            return TypeSyntax::ResultType{core::Types::untyped(args.untypedBlame), core::Symbols::noClassOrModule()};
         case core::Names::selfType().rawId():
             if (args.allowSelfType) {
                 return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};

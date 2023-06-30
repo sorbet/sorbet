@@ -700,7 +700,7 @@ private:
                         e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
                     }
 
-                    resolvedField.data(gs)->resultType = core::Types::untyped(ctx, resolved);
+                    resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
                 }
             }
             job.out->symbol = resolved;
@@ -931,7 +931,7 @@ private:
                 e.setHeader("Type aliases are not allowed in generic classes");
                 e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
             }
-            job.lhs.setResultType(ctx, core::Types::untyped(ctx, job.lhs));
+            job.lhs.setResultType(ctx, core::Types::untyped(job.lhs));
             return true;
         }
         if (isFullyResolved(ctx, rhs)) {
@@ -3691,7 +3691,7 @@ private:
                 }
 
                 if (arg.type == nullptr) {
-                    arg.type = core::Types::untyped(ctx, method);
+                    arg.type = core::Types::untyped(method);
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
