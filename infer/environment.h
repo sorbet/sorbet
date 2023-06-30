@@ -186,10 +186,6 @@ class Environment {
     void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
                          const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
-    // Extract the return value type from a proc. This should potentially be a
-    // method on `Type` or otherwise handled there.
-    core::TypePtr getReturnType(core::Context ctx, const core::TypePtr &procType);
-
     void cloneFrom(const Environment &rhs);
 
     core::TypeAndOrigins getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,

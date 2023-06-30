@@ -22,9 +22,9 @@ namespace sorbet::core {
 
 using namespace std;
 
-const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 213;
+const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
-const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
+const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
 
@@ -146,14 +146,14 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
 
             if (ref.isLegacyStdlibGeneric()) {
                 // Instantiate certain covariant stdlib generics with T.untyped, instead of <top>
-                targs.emplace_back(Types::untyped(gs, ref));
+                targs.emplace_back(Types::untyped(ref));
             } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
                 // Default fixed or covariant parameters to their upper bound.
                 targs.emplace_back(lambdaParam->upperBound);
             } else if (tmData->flags.isInvariant) {
                 // We instantiate Invariant type members as T.untyped as this will behave a bit like
                 // a unification variable with Types::glb.
-                targs.emplace_back(Types::untyped(gs, ref));
+                targs.emplace_back(Types::untyped(ref));
             } else {
                 // The remaining case is a contravariant parameter, which gets defaulted to its lower bound.
                 targs.emplace_back(lambdaParam->lowerBound);
@@ -457,7 +457,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
-        instantiated = core::Types::untyped(ctx, owner);
+        instantiated = core::Types::untyped(owner);
     }
     if (owner.data(ctx)->flags.isGenericMethod) {
         instantiated = core::Types::instantiate(ctx, instantiated, constr);

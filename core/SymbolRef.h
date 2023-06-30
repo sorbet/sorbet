@@ -1093,6 +1093,74 @@ public:
         return MethodRef::fromRaw(16);
     }
 
+    static ClassOrModuleRef Magic_UntypedSource() {
+        return ClassOrModuleRef::fromRaw(101);
+    }
+
+    static FieldRef Magic_UntypedSource_super() {
+        return FieldRef::fromRaw(4);
+    }
+
+    static FieldRef Magic_UntypedSource_proc() {
+        return FieldRef::fromRaw(5);
+    }
+
+    static FieldRef Magic_UntypedSource_buildArray() {
+        return FieldRef::fromRaw(6);
+    }
+
+    static FieldRef Magic_UntypedSource_buildRange() {
+        return FieldRef::fromRaw(7);
+    }
+
+    static FieldRef Magic_UntypedSource_buildHash() {
+        return FieldRef::fromRaw(8);
+    }
+
+    static FieldRef Magic_UntypedSource_mergeHashValues() {
+        return FieldRef::fromRaw(9);
+    }
+
+    static FieldRef Magic_UntypedSource_expandSplat() {
+        return FieldRef::fromRaw(10);
+    }
+
+    static FieldRef Magic_UntypedSource_splat() {
+        return FieldRef::fromRaw(11);
+    }
+
+    static FieldRef Magic_UntypedSource_tupleUnderlying() {
+        return FieldRef::fromRaw(12);
+    }
+
+    static FieldRef Magic_UntypedSource_shapeUnderlying() {
+        return FieldRef::fromRaw(13);
+    }
+
+    static FieldRef Magic_UntypedSource_tupleLub() {
+        return FieldRef::fromRaw(14);
+    }
+
+    static FieldRef Magic_UntypedSource_shapeLub() {
+        return FieldRef::fromRaw(15);
+    }
+
+    static FieldRef Magic_UntypedSource_shapeSquareBracketsEq() {
+        return FieldRef::fromRaw(16);
+    }
+
+    static FieldRef Magic_UntypedSource_YieldLoadArg() {
+        return FieldRef::fromRaw(17);
+    }
+
+    static FieldRef Magic_UntypedSource_GetCurrentException() {
+        return FieldRef::fromRaw(18);
+    }
+
+    static FieldRef Magic_UntypedSource_LoadYieldParams() {
+        return FieldRef::fromRaw(19);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

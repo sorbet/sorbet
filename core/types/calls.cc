@@ -275,7 +275,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
-        expectedType = Types::untyped(gs, method);
+        expectedType = Types::untyped(method);
     }
 
     expectedType = Types::replaceSelfType(gs, expectedType, selfType);
@@ -333,7 +333,7 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
         e.setHeader("Missing required keyword argument `{}` for method `{}`", argName, method.show(gs));
         auto expectedType = Types::resultTypeAsSeenFrom(gs, arg.type, method.data(gs)->owner, inClass, targs);
         if (expectedType == nullptr) {
-            expectedType = Types::untyped(gs, method);
+            expectedType = Types::untyped(method);
         }
         e.addErrorLine(arg.loc, "Keyword argument `{}` declared to expect type `{}` here:", argName,
                        expectedType.show(gs));
@@ -568,7 +568,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
         }
 
-        return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
+        return DispatchResult(Types::untyped(args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
@@ -625,7 +625,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
@@ -1045,7 +1046,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto kwParamType =
                             Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
                         if (kwParamType == nullptr) {
-                            kwParamType = Types::untyped(gs, method);
+                            kwParamType = Types::untyped(method);
                         }
                         // TODO(jez) Highlight untyped code for this error
                         if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
@@ -1339,7 +1340,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
         if (!blockType) {
-            blockType = Types::untyped(gs, method);
+            blockType = Types::untyped(method);
         }
 
         component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
@@ -1401,7 +1402,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (!resultType) {
-        resultType = Types::untyped(gs, method);
+        resultType = Types::untyped(method);
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(gs, resultType, *constr);
     }
@@ -1434,7 +1435,7 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
             continue;
         }
         if (arg.type == nullptr) {
-            args.emplace_back(core::Types::untyped(gs, method));
+            args.emplace_back(core::Types::untyped(method));
             continue;
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
@@ -1456,14 +1457,14 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchAr
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
     if (symbol == core::Symbols::untyped()) {
-        return Types::untyped(gs, Symbols::noSymbol());
+        return Types::untyped(Symbols::noSymbol());
     }
     return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
     // BlamedUntyped are always untyped.
-    return Types::untyped(gs, blame);
+    return Types::untyped(blame);
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -2099,7 +2100,7 @@ public:
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
-                res.returnType = Types::hashOfUntyped();
+                res.returnType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
                 return;
             }
         }
@@ -2143,7 +2144,7 @@ public:
         auto secondArgIsNil = other.isNilClass();
         if (firstArgIsNil) {
             if (secondArgIsNil) {
-                rangeElemType = Types::untypedUntracked();
+                rangeElemType = Types::untyped(Symbols::Magic_UntypedSource_buildRange());
             } else {
                 rangeElemType = Types::dropNil(gs, other);
             }
@@ -2183,12 +2184,12 @@ class Magic_expandSplat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 3) {
-            res.returnType = Types::arrayOfUntyped();
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto val = args.args.front()->type;
         if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
-            res.returnType = Types::untypedUntracked();
+            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto &beforeLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
@@ -2989,7 +2990,7 @@ public:
         if (!dispatched.main.errors.empty()) {
             // In case of an error, the splat is converted to an array with a single
             // element; be conservative in what we declare the element type to be.
-            res.returnType = Types::arrayOfUntyped();
+            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
         } else {
             res.returnType = dispatched.returnType;
         }
@@ -3291,7 +3292,7 @@ public:
             // people's codebases to it.
             //
             // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
-            res.returnType = Types::untypedUntracked();
+            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_shapeSquareBracketsEq());
         }
     }
 } Shape_squareBracketsEq;
@@ -3466,7 +3467,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
             // Guard shape construction on keys being valid, falling back on T::Hash[T.untyped, T.untyped] if it's
             // invalid.
             if (!isa_type<NamedLiteralType>(key->type)) {
-                argType = Types::hashOfUntyped();
+                argType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_mergeHashValues());
                 break;
             }
 
@@ -3908,7 +3909,8 @@ public:
             res.returnType = core::Types::procClass();
             return;
         }
-        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, core::Types::untypedUntracked());
+        auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
+        vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, untypedWithBlame);
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.returnType = make_type<core::AppliedType>(procClass, move(targs));
     }
