@@ -1,0 +1,24 @@
+No errors! Great job.
+[
+  {
+    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/method.rbi",
+    "package": "<none>",
+    "owner": "Method",
+    "name": "call",
+    "count": 1
+  },
+  {
+    "path": "test/cli/untyped-blames/a.rb",
+    "package": "<none>",
+    "owner": "TestUntyped",
+    "name": "test",
+    "count": 1
+  },
+  {
+    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi",
+    "package": "<none>",
+    "owner": "T.class_of(T)",
+    "name": "unsafe",
+    "count": 1
+  }
+]
