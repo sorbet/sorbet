@@ -1,12 +1,2 @@
-No errors! Great job.
-Name or service not known
 Exception::raise(): statsd initialization failed: host: f4K#l1N&.com port: 8200 prefix: foo.bar.counters
-
-Backtrace:
-  #3 0xef93fc sorbet::StatsD::submitCounters()
-  #4 0xb8be92 sorbet::realmain::realmain()
-  #5 0xb85662 main
-  #6 0x7fa6cf576083 __libc_start_main
-  #7 0xb8556e _start
-
 caught N6sorbet15SorbetExceptionE: statsd initialization failed: host: f4K#l1N&.com port: 8200 prefix: foo.bar.counters
