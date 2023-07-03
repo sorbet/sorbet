@@ -77,8 +77,7 @@ public:
     StatsdClientWrapper(string host, int port, string prefix)
         : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {
         if (link == nullptr) {
-            Exception::raise("statsd initialization failed: link == nullptr. host: {} port: {} prefix: {}", host, port,
-                             prefix);
+            Exception::raise("statsd initialization failed: host: {} port: {} prefix: {}", host, port, prefix);
         }
     }
 
