@@ -9,7 +9,6 @@ extern "C" {
 
 #if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
-#define TRACK_UNTYPED_BLAME_MODE
 #else
 #undef DEBUG_MODE
 #endif
