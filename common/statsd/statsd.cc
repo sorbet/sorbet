@@ -49,6 +49,8 @@ class StatsdClientWrapper {
     }
 
     void addMetric(string_view name, size_t value, string_view type, vector<pair<const char *, const char *>> tags) {
+        ENFORCE(link != nullptr);
+
         for (const auto &[key, value] : extraGlobalTags) {
             tags.emplace_back(key.c_str(), value.c_str());
         }
@@ -73,7 +75,11 @@ class StatsdClientWrapper {
 
 public:
     StatsdClientWrapper(string host, int port, string prefix)
-        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {}
+        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {
+        if (link == nullptr) {
+            Exception::raise("statsd initialization failed: host={} port={} prefix={}", host, port, prefix);
+        }
+    }
 
     ~StatsdClientWrapper() {
         if (!packet.empty()) {
