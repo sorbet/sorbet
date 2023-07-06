@@ -58,8 +58,10 @@ module Main
     #
     # which has the effect of recording the `B` in the type parameter, instead
     # of dropping it.
+    #
+    # Ideally, this would reveal `T.all(M1, A, M2)` or something similar
     inferred = remove_the_b(x)
-    T.reveal_type(inferred) # error: `T.all(M1, A, M2)`
+    T.reveal_type(inferred) # error: `T.all(M1, T.any(A, B), M2)`
   end
 
   sig do

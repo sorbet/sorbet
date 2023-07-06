@@ -11,7 +11,7 @@ module Main
 
   sig {params(x: T.all(M1, T.any(M2, T.all(M1, T.any(A, B))))).void}
   def self.test(x)
-    T.reveal_type(x)
+    T.reveal_type(x) # error: `T.all(M1, T.any(M2, T.all(M1, T.any(A, B))))`
   end
 end
 
