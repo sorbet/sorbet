@@ -1388,8 +1388,6 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     auto *a1 = cast_type<AndType>(t1);
     auto *o2 = cast_type<OrType>(t2);
 
-    // TODO(jez) With the fallthrough case below, do we still need this? Is it a "performance
-    // optimization" to keep?
     if (a1 != nullptr) {
         // If the left is an And of an Or, then we can reorder it to be an Or of
         // an And, which lets us recurse on smaller types
