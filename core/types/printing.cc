@@ -221,8 +221,8 @@ string AliasType::show(const GlobalState &gs, ShowOptions options) const {
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<OrType>(this->left);
-    bool rightBrace = isa_type<OrType>(this->right);
+    bool leftBrace = isa_type<OrType>(this->left) || isa_type<AndType>(this->left);
+    bool rightBrace = isa_type<OrType>(this->right) || isa_type<AndType>(this->right);
 
     return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
@@ -250,8 +250,8 @@ string AndType::show(const GlobalState &gs, ShowOptions options) const {
 }
 
 string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<AndType>(this->left);
-    bool rightBrace = isa_type<AndType>(this->right);
+    bool leftBrace = isa_type<OrType>(this->left) || isa_type<AndType>(this->left);
+    bool rightBrace = isa_type<OrType>(this->right) || isa_type<AndType>(this->right);
 
     return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
