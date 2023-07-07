@@ -6,7 +6,6 @@ import {
   ExtensionContext,
   FileSystemWatcher,
   Memento,
-  Uri,
   workspace,
   WorkspaceFolder,
 } from "vscode";
@@ -44,16 +43,6 @@ export class SorbetLspConfig {
     this.command = [...command];
   }
 
-  public toJSON(): ISorbetLspConfig {
-    return {
-      id: this.id,
-      name: this.name,
-      description: this.description,
-      cwd: this.cwd,
-      command: this.command,
-    };
-  }
-
   public toString(): string {
     return `${this.name}: ${this.description} [cmd: "${this.command.join(
       " ",
@@ -62,27 +51,18 @@ export class SorbetLspConfig {
 
   /** Deep equality. */
   public isEqualTo(other: any): boolean {
-    if (this === other) {
-      return true;
-    }
-    if (!(other instanceof SorbetLspConfig)) {
+    if (
+      this !== other &&
+      (!(other instanceof SorbetLspConfig) ||
+        this.id !== other.id ||
+        this.name !== other.name ||
+        this.description !== other.description ||
+        this.cwd !== other.cwd ||
+        !deepEqual(this.command, other.command))
+    ) {
       return false;
     }
-    if (this.id !== other.id) {
-      return false;
-    }
-    if (this.name !== other.name) {
-      return false;
-    }
-    if (this.description !== other.description) {
-      return false;
-    }
-    if (this.cwd !== other.cwd) {
-      return false;
-    }
-    if (!deepEqual(this.command, other.command)) {
-      return false;
-    }
+
     return true;
   }
 
@@ -91,11 +71,7 @@ export class SorbetLspConfig {
     left: SorbetLspConfig | undefined | null,
     right: SorbetLspConfig | undefined | null,
   ) {
-    if (left) {
-      return left.isEqualTo(right);
-    } else {
-      return left === right;
-    }
+    return left ? left.isEqualTo(right) : left === right;
   }
 }
 
@@ -110,7 +86,7 @@ export class SorbetLspConfigChangeEvent {
  * `workspace.onDidChangeConfiguration` for the "sorbet" section
  * to make it easier to stub out behavior in tests.
  */
-export interface ISorbetWorkspaceContext {
+export interface ISorbetWorkspaceContext extends Disposable {
   /** See `vscode.Memento.get`. */
   get<T>(section: string, defaultValue: T): T;
 
@@ -128,27 +104,43 @@ export interface ISorbetWorkspaceContext {
 
 /** Default implementation accesses `workspace` directly. */
 export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
-  static workspaceStateChangeEmitter = new EventEmitter<string>();
-  private workspaceState: Memento;
-  private cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
-  private onConfigurationChangeEmitter = new EventEmitter<
+  private cachedSorbetConfiguration;
+  private readonly disposable: Disposable;
+  private readonly workspaceStateChangeEmitter: EventEmitter<string>;
+  private readonly workspaceState: Memento;
+  private readonly onConfigurationChangeEmitter: EventEmitter<
     ConfigurationChangeEvent
-  >();
+  >;
 
   constructor(extensionContext: ExtensionContext) {
+    this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
+    this.onConfigurationChangeEmitter = new EventEmitter<
+      ConfigurationChangeEvent
+    >();
     this.workspaceState = extensionContext.workspaceState;
-    workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration("sorbet")) {
-        // update the cached configuration before firing
-        this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
-        this.onConfigurationChangeEmitter.fire(e);
-      }
-    });
-    DefaultSorbetWorkspaceContext.workspaceStateChangeEmitter.event((k) => {
-      this.onConfigurationChangeEmitter.fire({
-        affectsConfiguration: () => k.startsWith("sorbet."),
-      });
-    });
+    this.workspaceStateChangeEmitter = new EventEmitter<string>();
+
+    this.disposable = Disposable.from(
+      workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("sorbet")) {
+          // update the cached configuration before firing
+          this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
+          this.onConfigurationChangeEmitter.fire(e);
+        }
+      }),
+      this.workspaceStateChangeEmitter.event((k) => {
+        this.onConfigurationChangeEmitter.fire({
+          affectsConfiguration: () => k.startsWith("sorbet."),
+        });
+      }),
+    );
+  }
+
+  /**
+   * Dispose and free associated resources.
+   */
+  public dispose() {
+    this.disposable.dispose();
   }
 
   public get<T>(section: string, defaultValue: T): T {
@@ -159,13 +151,10 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
     return this.cachedSorbetConfiguration.get(section, defaultValue);
   }
 
-  public update(section: string, value: any): Thenable<void> {
+  public async update(section: string, value: any): Promise<void> {
     const key = `sorbet.${section}`;
-    return this.workspaceState
-      .update(key, value)
-      .then(() =>
-        DefaultSorbetWorkspaceContext.workspaceStateChangeEmitter.fire(key),
-      );
+    await this.workspaceState.update(key, value);
+    this.workspaceStateChangeEmitter.fire(key);
   }
 
   public get onDidChangeConfiguration(): Event<ConfigurationChangeEvent> {
@@ -187,87 +176,114 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
    * configuration other than the `defaultValue`. If that's the case, then we can update the workspace state and enable
    * Sorbet on first launch.
    */
-  public initializeEnabled(enabled: boolean) {
-    const stateEnabled = this.workspaceState.get("sorbet.enabled");
+  public async initializeEnabled(enabled: boolean): Promise<void> {
+    const stateEnabled = this.workspaceState.get<boolean>("sorbet.enabled");
 
     if (stateEnabled === undefined) {
-      const cachedConfig = this.cachedSorbetConfiguration.inspect("enabled");
+      const cachedConfig = this.cachedSorbetConfiguration.inspect<boolean>(
+        "enabled",
+      );
 
       if (
-        cachedConfig?.globalValue === undefined &&
-        cachedConfig?.workspaceValue === undefined &&
-        cachedConfig?.workspaceFolderValue === undefined &&
-        cachedConfig?.globalLanguageValue === undefined &&
-        cachedConfig?.workspaceFolderLanguageValue === undefined &&
-        cachedConfig?.workspaceLanguageValue === undefined
+        cachedConfig === undefined ||
+        (cachedConfig.globalValue === undefined &&
+          cachedConfig.workspaceValue === undefined &&
+          cachedConfig.workspaceFolderValue === undefined &&
+          cachedConfig.globalLanguageValue === undefined &&
+          cachedConfig.workspaceFolderLanguageValue === undefined &&
+          cachedConfig.workspaceLanguageValue === undefined)
       ) {
-        this.update("enabled", enabled);
+        await this.update("enabled", enabled);
       }
     }
   }
 }
 
 export class SorbetExtensionConfig implements Disposable {
-  private sorbetWorkspaceContext: ISorbetWorkspaceContext;
-  private readonly onLspConfigChangeEmitter = new EventEmitter<
+  private configFilePatterns: ReadonlyArray<string>;
+  private configFileWatchers: ReadonlyArray<FileSystemWatcher>;
+  private readonly disposables: Disposable[];
+  private readonly onLspConfigChangeEmitter: EventEmitter<
     SorbetLspConfigChangeEvent
-  >();
+  >;
 
+  private selectedLspConfigId?: string;
+  private readonly sorbetWorkspaceContext: ISorbetWorkspaceContext;
   /** "Standard" LSP configs. */
-  private wrappedLspConfigs: ReadonlyArray<SorbetLspConfig> = [];
-  /**
-   * "Custom" LSP configs that override/supplement "standard" LSP configs.
-   *
-   * If there is a '_lspConfig' and a '_userLspConfigs'
-   */
-  private userLspConfigs: ReadonlyArray<SorbetLspConfig> = [];
-  private selectedLspConfigId: string | undefined = undefined;
-
+  private standardLspConfigs: ReadonlyArray<SorbetLspConfig>;
+  /** "Custom" LSP configs that override/supplement "standard" LSP configs. */
+  private userLspConfigs: ReadonlyArray<SorbetLspConfig>;
   private wrappedEnabled: boolean;
-  private wrappedRevealOutputOnError: boolean = false;
-  private wrappedHighlightUntyped: boolean = false;
-  private configFilePatterns: ReadonlyArray<string> = [];
-  private configFileWatchers: ReadonlyArray<FileSystemWatcher> = [];
+  private wrappedHighlightUntyped: boolean;
+  private wrappedRevealOutputOnError: boolean;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
+    this.configFilePatterns = [];
+    this.configFileWatchers = [];
+    this.onLspConfigChangeEmitter = new EventEmitter<
+      SorbetLspConfigChangeEvent
+    >();
     this.sorbetWorkspaceContext = sorbetWorkspaceContext;
-    this.sorbetWorkspaceContext.onDidChangeConfiguration((_) => this.refresh());
+    this.standardLspConfigs = [];
+    this.userLspConfigs = [];
+    this.wrappedHighlightUntyped = false;
+    this.wrappedRevealOutputOnError = false;
 
-    const workspaceFolders = sorbetWorkspaceContext.workspaceFolders();
-    this.wrappedEnabled = workspaceFolders
+    const workspaceFolders = this.sorbetWorkspaceContext.workspaceFolders();
+    this.wrappedEnabled = workspaceFolders?.length
       ? fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`)
       : false;
 
-    this.sorbetWorkspaceContext.initializeEnabled(this.wrappedEnabled);
+    this.disposables = [
+      this.onLspConfigChangeEmitter,
+      this.sorbetWorkspaceContext.onDidChangeConfiguration(() =>
+        this.refresh(),
+      ),
+      {
+        dispose: () => Disposable.from(...this.configFileWatchers).dispose(),
+      },
+    ];
 
+    this.sorbetWorkspaceContext.initializeEnabled(this.wrappedEnabled);
     this.refresh();
   }
 
   /**
-   * Refreshes the configuration from this._sorbetWorkspaceConfiguration,
+   * Dispose and free associated resources.
+   */
+  public dispose() {
+    Disposable.from(...this.disposables).dispose();
+  }
+
+  /**
+   * Refreshes the configuration from {@link sorbetWorkspaceContext},
    * emitting change events as necessary.
    */
   private refresh(): void {
     const oldLspConfig = this.activeLspConfig;
-    const workspaceContext = this.sorbetWorkspaceContext;
-    this.wrappedEnabled = workspaceContext.get("enabled", this.wrappedEnabled);
-    this.wrappedRevealOutputOnError = workspaceContext.get(
+    const oldConfigFilePatterns = this.configFilePatterns;
+
+    this.configFilePatterns = this.sorbetWorkspaceContext.get(
+      "configFilePatterns",
+      this.configFilePatterns,
+    );
+    this.wrappedEnabled = this.sorbetWorkspaceContext.get(
+      "enabled",
+      this.enabled,
+    );
+    this.wrappedRevealOutputOnError = this.sorbetWorkspaceContext.get(
       "revealOutputOnError",
       this.revealOutputOnError,
     );
-    this.wrappedHighlightUntyped = workspaceContext.get(
+    this.wrappedHighlightUntyped = this.sorbetWorkspaceContext.get(
       "highlightUntyped",
       this.highlightUntyped,
     );
 
-    const oldConfigFilePatterns = this.configFilePatterns;
-    this.configFilePatterns = [
-      ...workspaceContext.get("configFilePatterns", this.configFilePatterns),
-    ];
     Disposable.from(...this.configFileWatchers).dispose();
     this.configFileWatchers = this.configFilePatterns.map((pattern) => {
       const watcher = workspace.createFileSystemWatcher(pattern);
-      const onConfigChange = (_uri: Uri) => {
+      const onConfigChange = () => {
         const c = this.activeLspConfig;
         this.onLspConfigChangeEmitter.fire({
           oldLspConfig: c,
@@ -279,23 +295,24 @@ export class SorbetExtensionConfig implements Disposable {
       watcher.onDidDelete(onConfigChange);
       return watcher;
     });
-    const iLspConfigs = workspaceContext.get("lspConfigs", []);
-    this.wrappedLspConfigs = iLspConfigs.map((c) => new SorbetLspConfig(c));
-    const iUserLspConfigs = workspaceContext.get("userLspConfigs", []);
-    this.userLspConfigs = iUserLspConfigs.map((c) => new SorbetLspConfig(c));
-    let configId = workspaceContext.get<string | undefined>(
-      "selectedLspConfigId",
-      undefined,
-    );
-    if (!configId) {
-      const configs = this.lspConfigs;
-      if (configs.length > 0) {
-        // If no selectedLspConfigId has been explicitly set, but there
-        // are configurations, default to the first one.
-        configId = configs[0].id;
-      }
+
+    this.standardLspConfigs = this.sorbetWorkspaceContext
+      .get<ISorbetLspConfig[]>("lspConfigs", [])
+      .map((c) => new SorbetLspConfig(c));
+
+    this.userLspConfigs = this.sorbetWorkspaceContext
+      .get<ISorbetLspConfig[]>("userLspConfigs", [])
+      .map((c) => new SorbetLspConfig(c));
+
+    this.selectedLspConfigId = this.sorbetWorkspaceContext.get<
+      string | undefined
+    >("selectedLspConfigId", undefined);
+    if (this.selectedLspConfigId === undefined) {
+      // If no selectedLspConfigId has been explicitly set, but there
+      // are configurations, default to the first one.
+      this.selectedLspConfigId = this.lspConfigs[0]?.id;
     }
-    this.selectedLspConfigId = configId;
+
     const newLspConfig = this.activeLspConfig;
     if (
       !SorbetLspConfig.areEqual(oldLspConfig, newLspConfig) ||
@@ -321,7 +338,7 @@ export class SorbetExtensionConfig implements Disposable {
   public get lspConfigs(): ReadonlyArray<SorbetLspConfig> {
     const results: Array<SorbetLspConfig> = [];
     const resultIds = new Set<String>();
-    [...this.userLspConfigs, ...this.wrappedLspConfigs].forEach((c) => {
+    [...this.userLspConfigs, ...this.standardLspConfigs].forEach((c) => {
       if (!resultIds.has(c.id)) {
         results.push(c);
         resultIds.add(c.id);
@@ -356,10 +373,9 @@ export class SorbetExtensionConfig implements Disposable {
    * (Note that if the extension is disabled, this does not *enable* the
    * configuration.)
    */
-  public setSelectedLspConfigId(id: string): Thenable<void> {
-    return this.sorbetWorkspaceContext
-      .update("selectedLspConfigId", id)
-      .then(this.refresh.bind(this));
+  public async setSelectedLspConfigId(id: string): Promise<void> {
+    await this.sorbetWorkspaceContext.update("selectedLspConfigId", id);
+    this.refresh();
   }
 
   /**
@@ -368,11 +384,12 @@ export class SorbetExtensionConfig implements Disposable {
    *
    * This is equivalent to calling `selectedLspConfigId = id; enabled=true`.
    */
-  public setActiveLspConfigId(id: string): Thenable<void> {
-    return Promise.all([
+  public async setActiveLspConfigId(id: string): Promise<void> {
+    await Promise.all([
       this.sorbetWorkspaceContext.update("selectedLspConfigId", id),
       this.sorbetWorkspaceContext.update("enabled", true),
-    ]).then(this.refresh.bind(this));
+    ]);
+    this.refresh();
   }
 
   public get revealOutputOnError(): boolean {
@@ -387,19 +404,13 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedEnabled;
   }
 
-  public setEnabled(b: boolean): Thenable<void> {
-    return this.sorbetWorkspaceContext
-      .update("enabled", b)
-      .then(this.refresh.bind(this));
+  public async setEnabled(b: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update("enabled", b);
+    this.refresh();
   }
 
-  public setHighlightUntyped(b: boolean): Thenable<void> {
-    return this.sorbetWorkspaceContext
-      .update("highlightUntyped", b)
-      .then(this.refresh.bind(this));
-  }
-
-  dispose() {
-    Disposable.from(...this.configFileWatchers).dispose();
+  public async setHighlightUntyped(b: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update("highlightUntyped", b);
+    this.refresh();
   }
 }
