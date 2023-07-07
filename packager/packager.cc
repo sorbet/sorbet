@@ -182,6 +182,10 @@ public:
         return exportAll_;
     }
 
+    bool visibleToTests() const {
+        return visibleToTests_;
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
     PackageName name;
@@ -206,6 +210,9 @@ public:
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     vector<PackageName> visibleTo_;
+
+    // Whether `visible_to` directives should be ignored for test code
+    bool visibleToTests_;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1041,7 +1048,17 @@ struct PackageInfoFinder {
         }
 
         if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
-            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+            if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
+                // the only valid literal here is `visible_to "tests"`; others should be rejected
+                if (!target->isString() || target->asString() != core::Names::tests()) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                    send.fun.show(ctx), "\"tests\"");
+                    }
+                    return;
+                }
+                info->visibleToTests_ = true;
+            } else if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
                 ENFORCE(name.mangledName.exists());
 
@@ -1349,7 +1366,11 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
             }
 
             const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty()) {
+            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+                continue;
+            }
+
+            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
                 continue;
             }
 
