@@ -1366,7 +1366,7 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
             }
 
             const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty()) {
+            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
                 continue;
             }
 
