@@ -13,15 +13,15 @@ export class SorbetExtensionContext implements Disposable {
   private readonly wrappedLog: OutputChannelLog;
 
   constructor(context: ExtensionContext) {
-    this.configuration = new SorbetExtensionConfig(
-      new DefaultSorbetWorkspaceContext(context),
-    );
+    const sorbetWorkspaceContext = new DefaultSorbetWorkspaceContext(context);
+    this.configuration = new SorbetExtensionConfig(sorbetWorkspaceContext);
     this.extensionContext = context;
     this.wrappedLog = new OutputChannelLog("Sorbet");
     this.metrics = new MetricClient(this);
     this.statusProvider = new SorbetStatusProvider(this);
 
     this.disposable = Disposable.from(
+      sorbetWorkspaceContext,
       this.configuration,
       this.statusProvider,
       this.wrappedLog,
