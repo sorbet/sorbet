@@ -1,8 +1,5 @@
-import { commands, ExtensionContext, Uri, workspace } from "vscode";
-import {
-  TextDocumentItem,
-  TextDocumentPositionParams,
-} from "vscode-languageclient";
+import { commands, ExtensionContext, workspace } from "vscode";
+import { TextDocumentPositionParams } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
 import { renameSymbol } from "./commands/renameSymbol";
@@ -10,6 +7,7 @@ import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
+import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
 import { ServerStatus, RestartReason } from "./types";
@@ -43,29 +41,10 @@ export function activate(context: ExtensionContext) {
 
   // Register providers
   context.subscriptions.push(
-    workspace.registerTextDocumentContentProvider("sorbet", {
-      // URIs are of the form sorbet:[file_path]
-      provideTextDocumentContent: async (uri: Uri): Promise<string> => {
-        let content: string;
-        const { activeLanguageClient } = sorbetExtensionContext.statusProvider;
-        sorbetExtensionContext.log.info(`Opening sorbet: file. URI:${uri}`);
-        if (activeLanguageClient) {
-          const response: TextDocumentItem = await activeLanguageClient.languageClient.sendRequest(
-            "sorbet/readFile",
-            {
-              uri: uri.toString(),
-            },
-          );
-          content = response.text;
-        } else {
-          sorbetExtensionContext.log.warning(
-            " > Cannot retrieve file content, no active client.",
-          );
-          content = "";
-        }
-        return content;
-      },
-    }),
+    workspace.registerTextDocumentContentProvider(
+      SORBET_SCHEME,
+      new SorbetContentProvider(sorbetExtensionContext),
+    ),
   );
 
   // Register commands
