@@ -1,16 +1,7 @@
-From 80d052697a460ba0b2327bdd69625b29e89694c7 Mon Sep 17 00:00:00 2001
-From: maruth <maruth@stripe.com>
-Date: Mon, 10 Jul 2023 23:06:35 +0000
-Subject: [PATCH] patch
-
----
- gc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/gc.c b/gc.c
+diff --git gc.c gc.c
 index 67a709ff79..55c36ef322 100644
---- a/gc.c
-+++ b/gc.c
+--- gc.c
++++ gc.c
 @@ -5185,7 +5185,7 @@ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
      if (LIKELY(objspace->mark_func_data == NULL)) {
  	rgengc_check_relation(objspace, obj);
@@ -20,6 +11,3 @@ index 67a709ff79..55c36ef322 100644
  	gc_aging(objspace, obj);
  	gc_grey(objspace, obj);
      }
--- 
-2.41.0
-
