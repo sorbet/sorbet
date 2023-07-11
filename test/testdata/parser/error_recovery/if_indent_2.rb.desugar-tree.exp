@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def test0<<todo method>>(&<blk>)
+    def test0<<todo method>>(&&blk)
       begin
         x = nil
         if <self>.puts("after")
@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def test1<<todo method>>(&<blk>)
+    def test1<<todo method>>(&&blk)
       begin
         x = nil
         if x
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def test2<<todo method>>(&<blk>)
+    def test2<<todo method>>(&&blk)
       begin
         x = nil
         if x.puts("after")
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def test3<<todo method>>(&<blk>)
+    def test3<<todo method>>(&&blk)
       begin
         x = nil
         if x.f()
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def test4<<todo method>>(&<blk>)
+    def test4<<todo method>>(&&blk)
       begin
         x = nil
         if x.f()

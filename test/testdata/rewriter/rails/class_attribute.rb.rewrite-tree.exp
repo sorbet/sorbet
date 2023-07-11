@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def read_write_predicate<<todo method>>(&<blk>)
+    def read_write_predicate<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.read_write_predicate<<todo method>>(&<blk>)
+    def self.read_write_predicate<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def read_write_predicate=<<todo method>>(arg0, &<blk>)
+    def read_write_predicate=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.read_write_predicate=<<todo method>>(arg0, &<blk>)
+    def self.read_write_predicate=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def read_write_predicate?<<todo method>>(&<blk>)
+    def read_write_predicate?<<todo method>>(&&blk)
       false
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def self.read_write_predicate?<<todo method>>(&<blk>)
+    def self.read_write_predicate?<<todo method>>(&&blk)
       false
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.foo<<todo method>>(&<blk>)
+    def self.foo<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def foo=<<todo method>>(arg0, &<blk>)
+    def foo=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.foo=<<todo method>>(arg0, &<blk>)
+    def self.foo=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def foo?<<todo method>>(&<blk>)
+    def foo?<<todo method>>(&&blk)
       false
     end
 
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def self.foo?<<todo method>>(&<blk>)
+    def self.foo?<<todo method>>(&&blk)
       false
     end
 
@@ -100,7 +100,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_instance<<todo method>>(&<blk>)
+    def self.no_instance<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -108,7 +108,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.no_instance=<<todo method>>(arg0, &<blk>)
+    def self.no_instance=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def self.no_instance?<<todo method>>(&<blk>)
+    def self.no_instance?<<todo method>>(&&blk)
       false
     end
 
@@ -124,7 +124,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_instance_reader<<todo method>>(&<blk>)
+    def self.no_instance_reader<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -132,7 +132,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def no_instance_reader=<<todo method>>(arg0, &<blk>)
+    def no_instance_reader=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -140,7 +140,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.no_instance_reader=<<todo method>>(arg0, &<blk>)
+    def self.no_instance_reader=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -148,7 +148,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def self.no_instance_reader?<<todo method>>(&<blk>)
+    def self.no_instance_reader?<<todo method>>(&&blk)
       false
     end
 
@@ -156,7 +156,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def no_instance_writer<<todo method>>(&<blk>)
+    def no_instance_writer<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_instance_writer<<todo method>>(&<blk>)
+    def self.no_instance_writer<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -172,7 +172,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.no_instance_writer=<<todo method>>(arg0, &<blk>)
+    def self.no_instance_writer=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -180,7 +180,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def no_instance_writer?<<todo method>>(&<blk>)
+    def no_instance_writer?<<todo method>>(&&blk)
       false
     end
 
@@ -188,7 +188,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T::<C Boolean>)
     end
 
-    def self.no_instance_writer?<<todo method>>(&<blk>)
+    def self.no_instance_writer?<<todo method>>(&&blk)
       false
     end
 
@@ -196,7 +196,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -204,7 +204,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.bar<<todo method>>(&<blk>)
+    def self.bar<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -212,7 +212,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def bar=<<todo method>>(arg0, &<blk>)
+    def bar=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -220,7 +220,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.bar=<<todo method>>(arg0, &<blk>)
+    def self.bar=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -228,7 +228,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def no_predicate<<todo method>>(&<blk>)
+    def no_predicate<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -236,7 +236,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_predicate<<todo method>>(&<blk>)
+    def self.no_predicate<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -244,7 +244,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def no_predicate=<<todo method>>(arg0, &<blk>)
+    def no_predicate=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -252,7 +252,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def self.no_predicate=<<todo method>>(arg0, &<blk>)
+    def self.no_predicate=<<todo method>>(arg0, &&blk)
       <emptyTree>
     end
 
@@ -260,7 +260,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def usages<<todo method>>(&<blk>)
+    def usages<<todo method>>(&&blk)
       begin
         <self>.read_write_predicate()
         <self>.read_write_predicate?()

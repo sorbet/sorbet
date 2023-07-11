@@ -14,7 +14,7 @@ InsSeq{
           flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
-              localVariable = <U <blk>>
+              localVariable = <U &blk>
             }]
           rhs = InsSeq{
             stats = [
@@ -196,7 +196,7 @@ InsSeq{
           flags = {self}
           name = <U <static-init>><<U <static-init>>>
           args = [Local{
-              localVariable = <U <blk>>
+              localVariable = <U &blk>
             }]
           rhs = <runtime method definition of take_arguments>
         }

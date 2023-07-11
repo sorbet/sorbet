@@ -59,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   ::Kernel.Complex(0, "1.5")
 
-  def self.classmeth<<todo method>>(&<blk>)
+  def self.classmeth<<todo method>>(&&blk)
     <emptyTree>
   end
 
@@ -102,7 +102,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.<super>(ZSuperArgs)
 
-  def kwfoo<<todo method>>(x:, y: = 1, *z:, &<blk>)
+  def kwfoo<<todo method>>(x:, y: = 1, *z:, &&blk)
     <emptyTree>
   end
 
@@ -166,7 +166,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   4
 
-  def optfoo<<todo method>>(x = 1, *y, &<blk>)
+  def optfoo<<todo method>>(x = 1, *y, &&blk)
     <emptyTree>
   end
 
@@ -217,16 +217,16 @@ rescue <emptyTree>::<C E> => x
       <emptyTree>
     end)
 
-  def sfoo<<todo method>>(**$2, &<blk>)
+  def sfoo<<todo method>>(**$2, &&blk)
     <emptyTree>
   end
 
-  def ssfoo<<todo method>>(***$3:, &<blk>)
+  def ssfoo<<todo method>>(***$3:, &&blk)
     <emptyTree>
   end
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       <emptyTree>::<C Kernel>.lambda() do |a, b|
         a.+(b)
       end

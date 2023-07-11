@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestSig)
@@ -10,11 +10,11 @@ begin
     end
   end
   class ::TestSig<<C TestSig>> < (::<todo sym>)
-    def test_resolve(<blk>)
+    def test_resolve(&blk)
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::T2)
@@ -29,7 +29,7 @@ end
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         begin
           <emptyTree>
@@ -42,7 +42,7 @@ begin
     end
   end
   class ::T1<<C T1>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <emptyTree>
     end
   end

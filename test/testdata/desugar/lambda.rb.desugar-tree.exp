@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test_lambda<<todo method>>(&<blk>)
+  def test_lambda<<todo method>>(&&blk)
     <emptyTree>::<C Kernel>.lambda() do |x|
       x.*(x)
     end

@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
-    def self.supported_methods<<todo method>>(&<blk>)
+    def self.supported_methods<<todo method>>(&&blk)
       begin
         if @@supported_methods
           @@supported_methods
@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.suggest_t_let_method<<todo method>>(&<blk>)
+    def self.suggest_t_let_method<<todo method>>(&&blk)
       if @@suggest_t_let_method
         @@suggest_t_let_method
       else

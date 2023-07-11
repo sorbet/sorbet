@@ -1,12 +1,12 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
-    def self.info<<todo method>>(&<blk>)
+    def self.info<<todo method>>(&&blk)
       <emptyTree>
     end
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def g<<todo method>>(&<blk>)
+    def g<<todo method>>(&&blk)
       begin
         t = <emptyTree>::<C T>.let(true, <emptyTree>::<C T>::<C Boolean>)
         f = <emptyTree>::<C T>.let(false, <emptyTree>::<C T>::<C Boolean>)

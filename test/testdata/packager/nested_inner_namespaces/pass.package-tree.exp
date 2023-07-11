@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:a, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
-    def main<<todo method>>(a, &<blk>)
+    def main<<todo method>>(a, &&blk)
       if a.>(10)
         <emptyTree>::<C RootPackage>::<C Foo>::<C Constant>
       else

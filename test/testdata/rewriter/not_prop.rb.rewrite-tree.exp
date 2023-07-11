@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Array>)
     end
 
-    def array_of_explicit<<todo method>>(&<blk>)
+    def array_of_explicit<<todo method>>(&&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C Array>).returns(<emptyTree>::<C Array>)
     end
 
-    def array_of_explicit=<<todo method>>(arg0, &<blk>)
+    def array_of_explicit=<<todo method>>(arg0, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 

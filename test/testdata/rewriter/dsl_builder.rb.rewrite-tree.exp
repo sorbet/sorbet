@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:opt_string, <emptyTree>::<C String>).returns(::NilClass)
     end
 
-    def self.opt_string<<todo method>>(opt_string, &<blk>)
+    def self.opt_string<<todo method>>(opt_string, &&blk)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def self.get_opt_string<<todo method>>(&<blk>)
+    def self.get_opt_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def opt_string<<todo method>>(&<blk>)
+    def opt_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:opt_int_defaulted, <emptyTree>::<C Integer>).returns(::NilClass)
     end
 
-    def self.opt_int_defaulted<<todo method>>(opt_int_defaulted, &<blk>)
+    def self.opt_int_defaulted<<todo method>>(opt_int_defaulted, &&blk)
       <emptyTree>
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.get_opt_int_defaulted<<todo method>>(&<blk>)
+    def self.get_opt_int_defaulted<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def opt_int_defaulted<<todo method>>(&<blk>)
+    def opt_int_defaulted<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:req_string, <emptyTree>::<C String>).returns(::NilClass)
     end
 
-    def self.req_string<<todo method>>(req_string, &<blk>)
+    def self.req_string<<todo method>>(req_string, &&blk)
       <emptyTree>
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def self.get_req_string<<todo method>>(&<blk>)
+    def self.get_req_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def req_string<<todo method>>(&<blk>)
+    def req_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:implied_string, <emptyTree>::<C String>).returns(::NilClass)
     end
 
-    def self.implied_string<<todo method>>(implied_string = ::T.unsafe(nil), &<blk>)
+    def self.implied_string<<todo method>>(implied_string = ::T.unsafe(nil), &&blk)
       <emptyTree>
     end
 
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def self.get_implied_string<<todo method>>(&<blk>)
+    def self.get_implied_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def implied_string<<todo method>>(&<blk>)
+    def implied_string<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -100,7 +100,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:no_getter, <emptyTree>::<C String>).returns(::NilClass)
     end
 
-    def self.no_getter<<todo method>>(no_getter, &<blk>)
+    def self.no_getter<<todo method>>(no_getter, &&blk)
       <emptyTree>
     end
 
@@ -108,7 +108,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def self.get_no_setter<<todo method>>(&<blk>)
+    def self.get_no_setter<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C String>))
     end
 
-    def no_setter<<todo method>>(&<blk>)
+    def no_setter<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -124,7 +124,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:class_of, <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)).returns(::NilClass)
     end
 
-    def self.class_of<<todo method>>(class_of, &<blk>)
+    def self.class_of<<todo method>>(class_of, &&blk)
       <emptyTree>
     end
 
@@ -132,7 +132,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
     end
 
-    def self.get_class_of<<todo method>>(&<blk>)
+    def self.get_class_of<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -140,7 +140,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)))
     end
 
-    def class_of<<todo method>>(&<blk>)
+    def class_of<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -148,7 +148,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:root_const, ::<root>::<C Integer>).returns(::NilClass)
     end
 
-    def self.root_const<<todo method>>(root_const, &<blk>)
+    def self.root_const<<todo method>>(root_const, &&blk)
       <emptyTree>
     end
 
@@ -156,7 +156,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(::<root>::<C Integer>))
     end
 
-    def self.get_root_const<<todo method>>(&<blk>)
+    def self.get_root_const<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(::<root>::<C Integer>))
     end
 
-    def root_const<<todo method>>(&<blk>)
+    def root_const<<todo method>>(&&blk)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -188,7 +188,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C TestDSLBuilder>)
-    def test_instance_methods<<todo method>>(&<blk>)
+    def test_instance_methods<<todo method>>(&&blk)
       begin
         <cast:assert_type!>(<self>.opt_string(), <todo sym>, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
         <cast:assert_type!>(<self>.opt_int_defaulted(), <todo sym>, <emptyTree>::<C Integer>)

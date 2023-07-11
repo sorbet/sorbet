@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::OpEq)
@@ -10,23 +10,23 @@ begin
     end
   end
   class ::OpEq<<C OpEq>> < (::<todo sym>)
-    def b(<blk>)
+    def b(&blk)
       <emptyTree>
     end
 
-    def b=(_, <blk>)
+    def b=(_, &blk)
       <emptyTree>
     end
 
-    def y(<blk>)
+    def y(&blk)
       <emptyTree>
     end
 
-    def z(<blk>)
+    def z(&blk)
       <emptyTree>
     end
 
-    def example(a, <blk>)
+    def example(a, &blk)
       begin
         if a
           a = :a
@@ -81,7 +81,7 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <runtime method definition of b>
         <runtime method definition of b=>

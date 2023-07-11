@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test_ops<<todo method>>(&<blk>)
+  def test_ops<<todo method>>(&&blk)
     begin
       begin
         ||$2 = <self>.a()

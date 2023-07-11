@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         begin
           <emptyTree>
@@ -14,10 +14,10 @@ begin
     end
   end
   class ::Main<<C Main>> < (::<todo sym>)
-    def yielder(<blk>)
+    def yielder(&blk)
       begin
-        a = <blk>.call(1)
-        <blk>.call(a)
+        a = &blk.call(1)
+        &blk.call(a)
       end
     end
 
@@ -35,13 +35,13 @@ begin
       end
     end
 
-    def blockyield(<blk>)
+    def blockyield(&blk)
       <self>.yielder() do |i$1|
-        <blk>.call(i$1)
+        &blk.call(i$1)
       end
     end
 
-    def main(<blk>)
+    def main(&blk)
       begin
         l = <self>.lambda() do |x$1|
           begin
@@ -56,7 +56,7 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <runtime method definition of yielder>
         <runtime method definition of blockpass>

@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         begin
           <emptyTree>
@@ -25,37 +25,37 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def foo(<blk>)
+    def foo(&blk)
       begin
         <runtime method definition of food>
         <runtime method definition of self.foos>
       end
     end
 
-    def food(<blk>)
+    def food(&blk)
       <emptyTree>
     end
 
-    def foos(<blk>)
+    def foos(&blk)
       <emptyTree>
     end
 
-    def self.sfoo(<blk>)
+    def self.sfoo(&blk)
       begin
         <runtime method definition of sfood>
         <runtime method definition of self.sfoos>
       end
     end
 
-    def sfood(<blk>)
+    def sfood(&blk)
       <emptyTree>
     end
 
-    def self.sfoos(<blk>)
+    def self.sfoos(&blk)
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <runtime method definition of foo>
         <runtime method definition of self.sfoo>

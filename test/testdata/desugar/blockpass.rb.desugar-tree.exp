@@ -1,18 +1,18 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C HasMeth><<C <todo sym>>> < (::<todo sym>)
-    def meth<<todo method>>(&<blk>)
+    def meth<<todo method>>(&&blk)
       "meth"
     end
   end
 
-  def returns_lambda<<todo method>>(&<blk>)
+  def returns_lambda<<todo method>>(&&blk)
     <self>.lambda() do |x|
       "returns_lambda"
     end
   end
 
   class <emptyTree>::<C HasToProc><<C <todo sym>>> < (::<todo sym>)
-    def to_proc<<todo method>>(&<blk>)
+    def to_proc<<todo method>>(&&blk)
       <self>.returns_lambda()
     end
   end

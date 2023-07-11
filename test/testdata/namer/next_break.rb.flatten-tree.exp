@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::Test)
@@ -10,7 +10,7 @@ begin
     end
   end
   class ::Test<<C Test>> < (::<todo sym>)
-    def test_next_break(<blk>)
+    def test_next_break(&blk)
       <self>.each() do ||
         begin
           if <self>.rand()
@@ -27,7 +27,7 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of test_next_break>
     end
   end

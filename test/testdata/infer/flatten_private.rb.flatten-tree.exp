@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::A)
@@ -10,31 +10,31 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def self.private(arg0, <blk>)
+    def self.private(arg0, &blk)
       <emptyTree>
     end
 
-    def self.private_class_method(arg0, <blk>)
+    def self.private_class_method(arg0, &blk)
       <emptyTree>
     end
 
-    def self.outer_static(<blk>)
+    def self.outer_static(&blk)
       <self>.private_class_method(<runtime method definition of self.inner_static>)
     end
 
-    def self.inner_static(<blk>)
+    def self.inner_static(&blk)
       <emptyTree>
     end
 
-    def outer_instance(<blk>)
+    def outer_instance(&blk)
       <self>.class().private(<runtime method definition of inner_instance>)
     end
 
-    def inner_instance(<blk>)
+    def inner_instance(&blk)
       <emptyTree>
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:arg0, ::Integer).void()

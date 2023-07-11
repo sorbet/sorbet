@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:foo, <emptyTree>::<C Integer>).void()
     end
 
-    def initialize<<todo method>>(foo: = 3, &<blk>)
+    def initialize<<todo method>>(foo: = 3, &&blk)
       begin
         @foo = <cast:let>(foo, <todo sym>, <emptyTree>::<C Integer>)
         nil
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       @foo
     end
 
@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
-    def foo=<<todo method>>(arg0, &<blk>)
+    def foo=<<todo method>>(arg0, &&blk)
       @foo = arg0
     end
 
@@ -49,7 +49,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def initialize<<todo method>>(&&blk)
       nil
     end
 

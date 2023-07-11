@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def my_parent_method<<todo method>>(&<blk>)
+    def my_parent_method<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@my_parent_method)
         <self>.class().decorator().prop_get_logic(<self>, :my_parent_method, arg2)
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def my_parent_method=<<todo method>>(arg0, &<blk>)
+    def my_parent_method=<<todo method>>(arg0, &&blk)
       begin
         ::T::Configuration.prop_freeze_handler().call(<self>, :my_parent_method)
         <self>.instance_variable_set(:@my_parent_method, arg0)
@@ -46,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def my_child_method<<todo method>>(&<blk>)
+    def my_child_method<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@my_child_method)
         <self>.class().decorator().prop_get_logic(<self>, :my_child_method, arg2)
@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
-    def my_child_method=<<todo method>>(arg0, &<blk>)
+    def my_child_method=<<todo method>>(arg0, &&blk)
       begin
         ::T::Configuration.prop_freeze_handler().call(<self>, :my_child_method)
         <self>.instance_variable_set(:@my_child_method, arg0)

@@ -2,15 +2,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   module <emptyTree>::<C M><<C <todo sym>>> < ()
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       <emptyTree>
     end
 
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       <emptyTree>
     end
 
-    def qux<<todo method>>(&<blk>)
+    def qux<<todo method>>(&&blk)
       <emptyTree>
     end
   end
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_completion_after_method<<todo method>>(x, &<blk>)
+  def test_completion_after_method<<todo method>>(x, &&blk)
     begin
       <self>.puts("before")
       x.<method-name-missing>()
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_completion_between_keywords<<todo method>>(x, &<blk>)
+  def test_completion_between_keywords<<todo method>>(x, &&blk)
     begin
       <emptyTree>
       x.<method-name-missing>()
@@ -48,14 +48,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_completion_before_method<<todo method>>(x, &<blk>)
+  def test_completion_before_method<<todo method>>(x, &&blk)
     x.puts("after")
   end
 
   class <emptyTree>::<C TestClass1><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    def before<<todo method>>(&<blk>)
+    def before<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -63,11 +63,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:x, <emptyTree>::<C M>).void()
     end
 
-    def test_method_in_class<<todo method>>(x, &<blk>)
+    def test_method_in_class<<todo method>>(x, &&blk)
       x.<method-name-missing>()
     end
 
-    def after<<todo method>>(&<blk>)
+    def after<<todo method>>(&&blk)
       <emptyTree>
     end
   end
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_lonely_dot<<todo method>>(x, &<blk>)
+  def test_lonely_dot<<todo method>>(x, &&blk)
     x.<method-name-missing>()
   end
 
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_inside_parens<<todo method>>(x, &<blk>)
+  def test_inside_parens<<todo method>>(x, &&blk)
     <self>.puts(x.<method-name-missing>())
   end
 
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_first_arg_no_parens<<todo method>>(x, &<blk>)
+  def test_first_arg_no_parens<<todo method>>(x, &&blk)
     <self>.puts(x.<method-name-missing>())
   end
 
@@ -100,7 +100,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_before_var_assign<<todo method>>(x, &<blk>)
+  def test_before_var_assign<<todo method>>(x, &&blk)
     x.y=(nil)
   end
 
@@ -108,7 +108,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_before_constant_lit<<todo method>>(x, &<blk>)
+  def test_before_constant_lit<<todo method>>(x, &&blk)
     begin
       x.Outer()
       x.Outer()::<C Inner>
@@ -119,7 +119,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:x, <emptyTree>::<C M>).void()
   end
 
-  def test_csend<<todo method>>(x, &<blk>)
+  def test_csend<<todo method>>(x, &&blk)
     begin
       <assignTemp>$2 = x
       if ::NilClass.===(<assignTemp>$2)

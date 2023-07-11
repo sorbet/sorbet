@@ -4,11 +4,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.method1<<todo method>>(&<blk>)
+    def self.method1<<todo method>>(&&blk)
       <emptyTree>
     end
 
-    def self.method2<<todo method>>(&<blk>)
+    def self.method2<<todo method>>(&&blk)
       <self>.puts("hello")
     end
   end

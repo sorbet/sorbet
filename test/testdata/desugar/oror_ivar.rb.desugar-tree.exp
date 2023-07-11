@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Boolean>)
     end
 
-    def self.expensively_compute_boolean<<todo method>>(&<blk>)
+    def self.expensively_compute_boolean<<todo method>>(&&blk)
       false
     end
 
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
     end
 
-    def self.two_tuple_looks_like_array<<todo method>>(&<blk>)
+    def self.two_tuple_looks_like_array<<todo method>>(&&blk)
       [123, "foo"]
     end
 
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
     end
 
-    def self.supported_methods<<todo method>>(&<blk>)
+    def self.supported_methods<<todo method>>(&&blk)
       begin
         if @supported_methods
           @supported_methods
@@ -42,7 +42,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def self.initialized_to_nilable<<todo method>>(&<blk>)
+    def self.initialized_to_nilable<<todo method>>(&&blk)
       if @initialized_to_nilable
         @initialized_to_nilable
       else
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Boolean>)
     end
 
-    def self.lazy_boolean<<todo method>>(&<blk>)
+    def self.lazy_boolean<<todo method>>(&&blk)
       if @lazy_boolean
         @lazy_boolean
       else
@@ -74,7 +74,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.suggest_t_let<<todo method>>(&<blk>)
+    def self.suggest_t_let<<todo method>>(&&blk)
       if @suggest_t_let
         @suggest_t_let
       else
@@ -86,7 +86,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.needs_cast<<todo method>>(&<blk>)
+    def self.needs_cast<<todo method>>(&&blk)
       if @needs_cast
         @needs_cast
       else
@@ -102,7 +102,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.allows_cast<<todo method>>(&<blk>)
+    def self.allows_cast<<todo method>>(&&blk)
       if @allows_cast
         @allows_cast
       else
@@ -118,7 +118,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def self.accidentally_untyped<<todo method>>(&<blk>)
+    def self.accidentally_untyped<<todo method>>(&&blk)
       begin
         if @accidentally_untyped
           @accidentally_untyped
@@ -137,7 +137,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.main<<todo method>>(&<blk>)
+    def self.main<<todo method>>(&&blk)
       <emptyTree>::<C T>.reveal_type(@accidentally_untyped)
     end
   end

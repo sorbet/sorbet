@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C ShardByMerchant><<C <todo sym>>> < ()
-    def merchant_prop<<todo method>>(name: = :merchant, override: = false, without_accessors: = false, &<blk>)
+    def merchant_prop<<todo method>>(name: = :merchant, override: = false, without_accessors: = false, &&blk)
       <emptyTree>
     end
 
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C ShardByMerchantBase><<C <todo sym>>> < ()
-    def merchant_token_prop<<todo method>>(name: = :merchant, override: = false, without_accessors: = false, &<blk>)
+    def merchant_token_prop<<todo method>>(name: = :merchant, override: = false, without_accessors: = false, &&blk)
       <emptyTree>
     end
 
@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::String)
     end
 
-    def merchant<<todo method>>(&<blk>)
+    def merchant<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@merchant)
         <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>))
     end
 
-    def merchant_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def merchant_<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>)
     end
 
-    def merchant_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def merchant_!<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -71,7 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchant>::<C Token>)
     end
 
-    def merchant<<todo method>>(&<blk>)
+    def merchant<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@merchant)
         <self>.class().decorator().prop_get_logic(<self>, :merchant, arg2)

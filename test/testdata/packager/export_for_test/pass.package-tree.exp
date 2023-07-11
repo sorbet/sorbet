@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def self.stub_stuff!<<todo method>>(&<blk>)
+      def self.stub_stuff!<<todo method>>(&&blk)
         <emptyTree>
       end
 
@@ -157,7 +157,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def self.nesting_method<<todo method>>(&<blk>)
+      def self.nesting_method<<todo method>>(&&blk)
         <emptyTree>
       end
 
@@ -173,7 +173,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <self>.void()
         end
 
-        def self.public_method<<todo method>>(&<blk>)
+        def self.public_method<<todo method>>(&&blk)
           <emptyTree>
         end
 

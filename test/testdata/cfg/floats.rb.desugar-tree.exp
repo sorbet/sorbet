@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test_large_float<<todo method>>(&<blk>)
+  def test_large_float<<todo method>>(&&blk)
     begin
       a = 3.141593
       a = 0.000001

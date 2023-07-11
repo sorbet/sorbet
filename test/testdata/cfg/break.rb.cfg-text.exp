@@ -41,8 +41,8 @@ bb4[rubyRegionId=0, firstDead=3](target: T.any(T::Array[T.noreturn], Integer), <
 bb5[rubyRegionId=1, firstDead=-1](<self>: Object, <selfRestore>$9: Object):
     # outerLoops: 1
     <self>: Object = loadSelf(map)
-    <blk>$10: [Integer] = load_yield_params(map)
-    x$1: Integer = yield_load_arg(0, <blk>$10: [Integer])
+    &blk$10: [Integer] = load_yield_params(map)
+    x$1: Integer = yield_load_arg(0, &blk$10: [Integer])
     <returnTemp>$14: Integer = x$1
     <block-break-assign>$15: Integer = x$1
     <magic>$16: T.class_of(<Magic>) = alias <C <Magic>>
@@ -150,8 +150,8 @@ bb8[rubyRegionId=0, firstDead=-1](a: T.any(String, Integer), <selfRestore>$41: T
 bb9[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$40: Sorbet::Private::Static::Void, <selfRestore>$41: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(bar)
-    <blk>$42: [Integer] = load_yield_params(bar)
-    x$2: Integer = yield_load_arg(0, <blk>$42: [Integer])
+    &blk$42: [Integer] = load_yield_params(bar)
+    x$2: Integer = yield_load_arg(0, &blk$42: [Integer])
     <statTemp>$47: Integer(5) = 5
     <ifTemp>$45: T::Boolean = x$2: Integer.>(<statTemp>$47: Integer(5))
     <ifTemp>$45 -> (T::Boolean ? bb10 : bb11)
@@ -201,8 +201,8 @@ bb14[rubyRegionId=0, firstDead=-1](b: T.nilable(String), <selfRestore>$60: T.cla
 bb15[rubyRegionId=3, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$59: Sorbet::Private::Static::Void, <selfRestore>$60: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(bar)
-    <blk>$61: [Integer] = load_yield_params(bar)
-    x$3: Integer = yield_load_arg(0, <blk>$61: [Integer])
+    &blk$61: [Integer] = load_yield_params(bar)
+    x$3: Integer = yield_load_arg(0, &blk$61: [Integer])
     <statTemp>$66: Integer(5) = 5
     <ifTemp>$64: T::Boolean = x$3: Integer.>(<statTemp>$66: Integer(5))
     <ifTemp>$64 -> (T::Boolean ? bb16 : bb17)

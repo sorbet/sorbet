@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def foreign_lazy<<todo method>>(&<blk>)
+    def foreign_lazy<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@foreign_lazy)
         <self>.class().decorator().prop_get_logic(<self>, :foreign_lazy, arg2)
@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def foreign_lazy=<<todo method>>(arg0, &<blk>)
+    def foreign_lazy=<<todo method>>(arg0, &&blk)
       begin
         ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_lazy)
         <self>.instance_variable_set(:@foreign_lazy, arg0)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
-    def foreign_lazy_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_lazy_<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
-    def foreign_lazy_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_lazy_!<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -45,7 +45,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def foreign_proc<<todo method>>(&<blk>)
+    def foreign_proc<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@foreign_proc)
         <self>.class().decorator().prop_get_logic(<self>, :foreign_proc, arg2)
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def foreign_proc=<<todo method>>(arg0, &<blk>)
+    def foreign_proc=<<todo method>>(arg0, &&blk)
       begin
         ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_proc)
         <self>.instance_variable_set(:@foreign_proc, arg0)
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
-    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -75,7 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
     end
 
-    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -83,7 +83,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def foreign_invalid<<todo method>>(&<blk>)
+    def foreign_invalid<<todo method>>(&&blk)
       begin
         arg2 = <self>.instance_variable_get(:@foreign_invalid)
         <self>.class().decorator().prop_get_logic(<self>, :foreign_invalid, arg2)
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def foreign_invalid=<<todo method>>(arg0, &<blk>)
+    def foreign_invalid=<<todo method>>(arg0, &&blk)
       begin
         ::T::Configuration.prop_freeze_handler().call(<self>, :foreign_invalid)
         <self>.instance_variable_set(:@foreign_invalid, arg0)
@@ -105,7 +105,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 
-    def foreign_invalid_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_invalid_<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -113,7 +113,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
     end
 
-    def foreign_invalid_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_invalid_!<<todo method>>(allow_direct_mutation: = nil, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 

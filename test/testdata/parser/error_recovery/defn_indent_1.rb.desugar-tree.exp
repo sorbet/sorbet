@@ -1,10 +1,10 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def method1<<todo method>>(&<blk>)
+    def method1<<todo method>>(&&blk)
       <emptyTree>
     end
 
-    def method2<<todo method>>(&<blk>)
+    def method2<<todo method>>(&&blk)
       <emptyTree>
     end
   end

@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def main(<blk>)
+    def main(&blk)
       begin
         <self>.puts(::A.a())
         <self>.puts(::B.b())
@@ -14,7 +14,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         begin
           <emptyTree>
@@ -59,12 +59,12 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <emptyTree>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         <emptyTree>
@@ -72,16 +72,16 @@ begin
     end
   end
   class <singleton class><<Class:B>> < ()
-    def b(<blk>)
+    def b(&blk)
       "b"
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of b>
     end
   end
   class ::D<<C D>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         <emptyTree>
@@ -89,7 +89,7 @@ begin
     end
   end
   class <singleton class><<Class:D>> < ()
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         <emptyTree>
@@ -97,16 +97,16 @@ begin
     end
   end
   class <singleton class><<Class:<Class:D>>> < ()
-    def d(<blk>)
+    def d(&blk)
       "d"
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of d>
     end
   end
   class ::E<<C E>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         begin
           <emptyTree>
@@ -118,20 +118,20 @@ begin
     end
   end
   class <singleton class><<Class:E>> < ()
-    def wrapper(<blk>)
+    def wrapper(&blk)
       <runtime method definition of e>
     end
 
-    def e(<blk>)
+    def e(&blk)
       "e"
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of wrapper>
     end
   end
   class ::F<<C F>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         <emptyTree>
@@ -139,15 +139,15 @@ begin
     end
   end
   class <singleton class><<Class:F>> < ()
-    def initialize(<blk>)
+    def initialize(&blk)
       @f = <cast:let>(0, Integer, ::Integer)
     end
 
-    def f=(f, <blk>)
+    def f=(f, &blk)
       @f = f
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:f, ::Integer).returns(::Integer)
@@ -160,15 +160,15 @@ begin
     end
   end
   class ::G<<C G>> < (::<todo sym>)
-    def wrapper(<blk>)
+    def wrapper(&blk)
       <self>.inner()
     end
 
-    def self.g(<blk>)
+    def self.g(&blk)
       "g"
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         begin
           <emptyTree>
@@ -181,16 +181,16 @@ begin
     end
   end
   class <singleton class><<Class:G>> < ()
-    def inner(<blk>)
+    def inner(&blk)
       ::T.reveal_type(<self>)
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of inner>
     end
   end
   class ::H<<C H>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         <emptyTree>
@@ -198,7 +198,7 @@ begin
     end
   end
   class <singleton class><<Class:H>> < ()
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::<Class:H>::H2)
@@ -207,11 +207,11 @@ begin
     end
   end
   class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
-    def self.h(<blk>)
+    def self.h(&blk)
       "h"
     end
 
-    def self.<static-init>(<blk>)
+    def self.<static-init>(&blk)
       <runtime method definition of self.h>
     end
   end

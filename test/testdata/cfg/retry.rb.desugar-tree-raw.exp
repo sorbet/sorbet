@@ -12,7 +12,7 @@ ClassDef{
       name = <U main><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = InsSeq{
         stats = [

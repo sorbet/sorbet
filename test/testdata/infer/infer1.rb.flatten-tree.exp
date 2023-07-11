@@ -1,29 +1,29 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def baz1(<blk>)
+    def baz1(&blk)
       begin
         a = "foo"
         b = a.getbyte(a)
       end
     end
 
-    def baz2(<blk>)
+    def baz2(&blk)
       begin
         a = "foo"
         b = a.getbyte("foo")
       end
     end
 
-    def baz3(<blk>)
+    def baz3(&blk)
       b = "foo".getbyte("foo")
     end
 
-    def baz4(<blk>)
+    def baz4(&blk)
       b = <self>.a().getbyte("foo")
     end
 
-    def baz5(cond, <blk>)
+    def baz5(cond, &blk)
       begin
         if cond
           b = 1
@@ -34,7 +34,7 @@ begin
       end
     end
 
-    def baz6(cond, <blk>)
+    def baz6(cond, &blk)
       begin
         if cond
           b = 1
@@ -45,7 +45,7 @@ begin
       end
     end
 
-    def baz7(cond, <blk>)
+    def baz7(cond, &blk)
       begin
         if cond
           b = 1
@@ -56,13 +56,13 @@ begin
       end
     end
 
-    def baz8(<blk>)
+    def baz8(&blk)
       while true
         b = 1
       end
     end
 
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(&blk)
       begin
         <runtime method definition of baz1>
         <runtime method definition of baz2>

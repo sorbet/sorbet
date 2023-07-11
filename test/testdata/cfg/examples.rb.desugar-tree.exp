@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Examples><<C <todo sym>>> < (::<todo sym>)
-    def i_like_ifs<<todo method>>(&<blk>)
+    def i_like_ifs<<todo method>>(&&blk)
       if true
         return 1
       else
@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def i_like_exps<<todo method>>(&<blk>)
+    def i_like_exps<<todo method>>(&&blk)
       if true
         1
       else
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def return_in_one_branch1<<todo method>>(&<blk>)
+    def return_in_one_branch1<<todo method>>(&&blk)
       if true
         return 1
       else
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def return_in_one_branch2<<todo method>>(&<blk>)
+    def return_in_one_branch2<<todo method>>(&&blk)
       if true
         1
       else
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def variables<<todo method>>(&<blk>)
+    def variables<<todo method>>(&&blk)
       begin
         if true
           a = 1
@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def variables_and_loop<<todo method>>(cond, &<blk>)
+    def variables_and_loop<<todo method>>(cond, &&blk)
       begin
         if true
           a = 1
@@ -66,7 +66,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def variables_loop_if<<todo method>>(cond, &<blk>)
+    def variables_loop_if<<todo method>>(cond, &&blk)
       begin
         while true
           if cond
@@ -79,7 +79,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def take_arguments<<todo method>>(i, &<blk>)
+    def take_arguments<<todo method>>(i, &&blk)
       if false
         2
       else

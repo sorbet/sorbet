@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def test_csend<<todo method>>(&<blk>)
+  def test_csend<<todo method>>(&&blk)
     begin
       begin
         <assignTemp>$2 = <self>.foo()
@@ -89,7 +89,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:x, <emptyTree>::<C T>.any(<emptyTree>::<C FalseClass>, <emptyTree>::<C NilClass>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C TrueClass>))
     end
 
-    def foo<<todo method>>(x, &<blk>)
+    def foo<<todo method>>(x, &&blk)
       begin
         <assignTemp>$2 = x
         if ::NilClass.===(<assignTemp>$2)

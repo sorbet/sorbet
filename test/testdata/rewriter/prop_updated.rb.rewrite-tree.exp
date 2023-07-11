@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:opts, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.untyped(), <emptyTree>::<C T>.untyped())).void()
     end
 
-    def self.updated_prop<<todo method>>(opts = {}, &<blk>)
+    def self.updated_prop<<todo method>>(opts = {}, &&blk)
       begin
         opts.[]=(:extra, opts.fetch(:extra, {}).merge(:DEPRECATED_dynamic_prop, true))
         <self>.prop(:updated, <emptyTree>::<C T>.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>), opts)
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
-    def updated<<todo method>>(&<blk>)
+    def updated<<todo method>>(&&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Numeric>)).returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
-    def updated=<<todo method>>(arg0, &<blk>)
+    def updated=<<todo method>>(arg0, &&blk)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 

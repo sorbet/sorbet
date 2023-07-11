@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
     end
 
-    def self.subpkg_class<<todo method>>(&<blk>)
+    def self.subpkg_class<<todo method>>(&&blk)
       <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>.new()
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
     end
 
-    def self.package_class<<todo method>>(&<blk>)
+    def self.package_class<<todo method>>(&&blk)
       return <emptyTree>::<C Package>::<C PackageClass>.new()
     end
 

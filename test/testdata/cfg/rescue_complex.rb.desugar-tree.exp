@@ -2,27 +2,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    def meth<<todo method>>(&<blk>)
+    def meth<<todo method>>(&&blk)
       0
     end
 
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       1
     end
 
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       2
     end
 
-    def baz<<todo method>>(&<blk>)
+    def baz<<todo method>>(&&blk)
       3
     end
 
-    def take_arg<<todo method>>(x, &<blk>)
+    def take_arg<<todo method>>(x, &&blk)
       x
     end
 
-    def untyped_exceptions<<todo method>>(&<blk>)
+    def untyped_exceptions<<todo method>>(&&blk)
       [<emptyTree>::<C Exception>]
     end
 
@@ -30,15 +30,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.class_of(<emptyTree>::<C Exception>)))
     end
 
-    def typed_exceptions<<todo method>>(&<blk>)
+    def typed_exceptions<<todo method>>(&&blk)
       [<emptyTree>::<C Exception>]
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def initialize<<todo method>>(&&blk)
       @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
     end
 
-    def multiple_rescue<<todo method>>(&<blk>)
+    def multiple_rescue<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       <self>.baz()
@@ -46,13 +46,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.bar()
     end
 
-    def multiple_rescue_classes<<todo method>>(&<blk>)
+    def multiple_rescue_classes<<todo method>>(&&blk)
       <self>.meth()
     rescue <emptyTree>::<C Foo>, <emptyTree>::<C Bar> => baz
       baz
     end
 
-    def multiple_rescue_classes_varuse<<todo method>>(&<blk>)
+    def multiple_rescue_classes_varuse<<todo method>>(&&blk)
       begin
         <self>.meth()
       rescue <emptyTree>::<C LoadError>, <emptyTree>::<C SocketError> => baz
@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def rescue_loop<<todo method>>(&<blk>)
+    def rescue_loop<<todo method>>(&&blk)
       begin
         ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
         <self>.loop() do ||
@@ -75,19 +75,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def rescue_untyped_splat<<todo method>>(&<blk>)
+    def rescue_untyped_splat<<todo method>>(&&blk)
       <self>.meth()
     rescue ::<Magic>.<splat>(<self>.untyped_exceptions()) => e
       <emptyTree>::<C T>.reveal_type(e)
     end
 
-    def rescue_typed_splat<<todo method>>(&<blk>)
+    def rescue_typed_splat<<todo method>>(&&blk)
       <self>.meth()
     rescue ::<Magic>.<splat>(<self>.typed_exceptions()) => e
       <emptyTree>::<C T>.reveal_type(e)
     end
 
-    def parse_rescue_ensure<<todo method>>(&<blk>)
+    def parse_rescue_ensure<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       <self>.baz()
@@ -95,31 +95,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.bar()
     end
 
-    def parse_bug_rescue_empty_else<<todo method>>(&<blk>)
+    def parse_bug_rescue_empty_else<<todo method>>(&&blk)
       <emptyTree>
     rescue <emptyTree>::<C LoadError> => <rescueTemp>$2
       <emptyTree>
     end
 
-    def parse_ruby_bug_12686<<todo method>>(&<blk>)
+    def parse_ruby_bug_12686<<todo method>>(&&blk)
       <self>.take_arg(<self>.bar()
       rescue => <rescueTemp>$2
         nil)
     end
 
-    def parse_rescue_mod<<todo method>>(&<blk>)
+    def parse_rescue_mod<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       <self>.bar()
     end
 
-    def parse_resbody_list_var<<todo method>>(&<blk>)
+    def parse_resbody_list_var<<todo method>>(&&blk)
       <self>.meth()
     rescue <self>.foo() => ex
       <self>.bar()
     end
 
-    def parse_rescue_else_ensure<<todo method>>(&<blk>)
+    def parse_rescue_else_ensure<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       <self>.baz()
@@ -129,19 +129,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.bar()
     end
 
-    def parse_rescue<<todo method>>(&<blk>)
+    def parse_rescue<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       <self>.foo()
     end
 
-    def parse_resbody_var<<todo method>>(&<blk>)
+    def parse_resbody_var<<todo method>>(&&blk)
       <self>.meth()
     rescue => ex
       <self>.bar()
     end
 
-    def parse_resbody_var_1<<todo method>>(&<blk>)
+    def parse_resbody_var_1<<todo method>>(&&blk)
       <self>.meth()
     rescue => <rescueTemp>$2
       begin
@@ -150,25 +150,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def parse_rescue_mod_op_assign<<todo method>>(&<blk>)
+    def parse_rescue_mod_op_assign<<todo method>>(&&blk)
       foo = foo.+(<self>.meth()
       rescue => <rescueTemp>$2
         <self>.bar())
     end
 
-    def parse_ruby_bug_12402<<todo method>>(&<blk>)
+    def parse_ruby_bug_12402<<todo method>>(&&blk)
       foo = <self>.raise(<self>.bar())
     rescue => <rescueTemp>$2
       nil
     end
 
-    def parse_ruby_bug_12402_1<<todo method>>(&<blk>)
+    def parse_ruby_bug_12402_1<<todo method>>(&&blk)
       foo = foo.+(<self>.raise(<self>.bar())
       rescue => <rescueTemp>$2
         nil)
     end
 
-    def parse_ruby_bug_12402_2<<todo method>>(&<blk>)
+    def parse_ruby_bug_12402_2<<todo method>>(&&blk)
       begin
         []$3 = <self>.foo()
         []$4 = 0

@@ -1,27 +1,27 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def baz1<<todo method>>(&<blk>)
+  def baz1<<todo method>>(&&blk)
     begin
       a = "foo"
       b = a.getbyte(a)
     end
   end
 
-  def baz2<<todo method>>(&<blk>)
+  def baz2<<todo method>>(&&blk)
     begin
       a = "foo"
       b = a.getbyte("foo")
     end
   end
 
-  def baz3<<todo method>>(&<blk>)
+  def baz3<<todo method>>(&&blk)
     b = "foo".getbyte("foo")
   end
 
-  def baz4<<todo method>>(&<blk>)
+  def baz4<<todo method>>(&&blk)
     b = <self>.a().getbyte("foo")
   end
 
-  def baz5<<todo method>>(cond, &<blk>)
+  def baz5<<todo method>>(cond, &&blk)
     begin
       if cond
         b = 1
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz6<<todo method>>(cond, &<blk>)
+  def baz6<<todo method>>(cond, &&blk)
     begin
       if cond
         b = 1
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz7<<todo method>>(cond, &<blk>)
+  def baz7<<todo method>>(cond, &&blk)
     begin
       if cond
         b = 1
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def baz8<<todo method>>(&<blk>)
+  def baz8<<todo method>>(&&blk)
     while true
       b = 1
     end

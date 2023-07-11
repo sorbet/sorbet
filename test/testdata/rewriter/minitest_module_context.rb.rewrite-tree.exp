@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'adds a method'><<todo method>>(&<blk>)
+      def <it 'adds a method'><<todo method>>(&&blk)
         <emptyTree>
       end
 
@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <self>.void()
           end
 
-          def <it 'inner test'><<todo method>>(&<blk>)
+          def <it 'inner test'><<todo method>>(&&blk)
             <emptyTree>
           end
 
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
-    def test_method<<todo method>>(&<blk>)
+    def test_method<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'adds a method'><<todo method>>(&<blk>)
+      def <it 'adds a method'><<todo method>>(&&blk)
         <self>.test_method()
       end
 

@@ -16,7 +16,7 @@ InsSeq{
           args = [Local{
               localVariable = <U a>
             }, Local{
-              localVariable = <U <blk>>
+              localVariable = <U &blk>
             }]
           rhs = Assign{
             lhs = UnresolvedIdent{
@@ -33,7 +33,7 @@ InsSeq{
           flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
-              localVariable = <U <blk>>
+              localVariable = <U &blk>
             }]
           rhs = <runtime method definition of foo>
         }

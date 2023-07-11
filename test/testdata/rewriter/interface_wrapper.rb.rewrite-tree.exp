@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def testit<<todo method>>(&<blk>)
+  def testit<<todo method>>(&&blk)
     begin
       s = <emptyTree>::<C SomeClass>.new()
       wrap = <cast:let>(s, <todo sym>, <emptyTree>::<C Interface>)
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C Interface><<C <todo sym>>> < ()
-    def some_method<<todo method>>(&<blk>)
+    def some_method<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
-    def other_method<<todo method>>(&<blk>)
+    def other_method<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Other><<C <todo sym>>> < (::<todo sym>)
-    def self.wrap_instance<<todo method>>(x, y = nil, &<blk>)
+    def self.wrap_instance<<todo method>>(x, y = nil, &&blk)
       <emptyTree>
     end
 

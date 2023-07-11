@@ -12,7 +12,7 @@ ClassDef{
       name = <U main><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = Rescue{
         body = Send{
@@ -77,7 +77,7 @@ ClassDef{
       name = <U a><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = EmptyTree
     }
@@ -87,7 +87,7 @@ ClassDef{
       name = <U b><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = EmptyTree
     }
@@ -97,7 +97,7 @@ ClassDef{
       name = <U c><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = EmptyTree
     }
@@ -107,7 +107,7 @@ ClassDef{
       name = <U d><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U &blk>
         } }]
       rhs = EmptyTree
     }

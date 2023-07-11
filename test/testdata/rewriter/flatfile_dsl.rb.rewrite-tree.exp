@@ -1,18 +1,18 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Record><<C <todo sym>>> < (::<todo sym>)
-    def self.flatfile<<todo method>>(&<blk>)
+    def self.flatfile<<todo method>>(&&blk)
       <emptyTree>
     end
 
-    def self.from<<todo method>>(*_, &<blk>)
+    def self.from<<todo method>>(*_, &&blk)
       <emptyTree>
     end
 
-    def self.pattern<<todo method>>(*_, &<blk>)
+    def self.pattern<<todo method>>(*_, &&blk)
       <emptyTree>
     end
 
-    def self.field<<todo method>>(*_, &<blk>)
+    def self.field<<todo method>>(*_, &&blk)
       <emptyTree>
     end
 
@@ -30,7 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       nil
     end
 
@@ -38,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def foo=<<todo method>>(arg0, &<blk>)
+    def foo=<<todo method>>(arg0, &&blk)
       nil
     end
 
@@ -46,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       nil
     end
 
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def bar=<<todo method>>(arg0, &<blk>)
+    def bar=<<todo method>>(arg0, &&blk)
       nil
     end
 
@@ -62,7 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def baz<<todo method>>(&<blk>)
+    def baz<<todo method>>(&&blk)
       nil
     end
 
@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
-    def baz=<<todo method>>(arg0, &<blk>)
+    def baz=<<todo method>>(arg0, &&blk)
       nil
     end
 

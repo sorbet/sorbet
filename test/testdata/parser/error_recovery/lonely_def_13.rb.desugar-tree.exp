@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def self.<method-def-name-missing><<todo method>>(&<blk>)
+    def self.<method-def-name-missing><<todo method>>(&&blk)
       <emptyTree>
     end
   end

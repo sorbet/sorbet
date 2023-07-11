@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def foo<<todo method>>(&<blk>)
+    def foo<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       0
     end
 
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.qux<<todo method>>(&<blk>)
+    def self.qux<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <cast:let>(<emptyTree>::<C E>.new(), <todo sym>, <emptyTree>::<C Top>::<C Parent>)
 
   class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
-    def self.foo<<todo method>>(&<blk>)
+    def self.foo<<todo method>>(&&blk)
       <emptyTree>
     end
 
@@ -109,7 +109,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
-    def bar<<todo method>>(&<blk>)
+    def bar<<todo method>>(&&blk)
       <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
         begin
           <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
@@ -118,7 +118,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.bar<<todo method>>(&<blk>)
+    def self.bar<<todo method>>(&&blk)
       <emptyTree>::<C Class>.new(<emptyTree>::<C Foo>) do ||
         begin
           <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C Foo>))
