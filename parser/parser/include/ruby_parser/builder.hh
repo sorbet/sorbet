@@ -116,7 +116,7 @@ struct builder {
     ForeignPtr (*keywordZsuper)(SelfPtr builder, const token *keyword);
     ForeignPtr (*kwarg)(SelfPtr builder, const token *name);
     ForeignPtr (*kwoptarg)(SelfPtr builder, const token *name, ForeignPtr value);
-    ForeignPtr (*kwnilarg)(SelfPtr builder, const token *dstar, const token *nil);
+    ForeignPtr (*kwnilarg)(SelfPtr builder, ForeignPtr node);
     ForeignPtr (*kwrestarg)(SelfPtr builder, const token *dstar, const token *name);
     ForeignPtr (*kwsplat)(SelfPtr builder, const token *dstar, ForeignPtr arg);
     ForeignPtr (*line_literal)(SelfPtr builder, const token *tok);
