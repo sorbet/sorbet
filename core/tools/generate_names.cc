@@ -343,7 +343,8 @@ NameDef names[] = {
     {"blockBreakAssign", "<block-break-assign>"},
     {"arg", "<arg>"},
     {"kwargs", "<kwargs>"},
-    {"blkArg", "&blk"},
+    {"blkArg", "<blk>"},
+    {"ampersandBlockArg", "&blk"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 

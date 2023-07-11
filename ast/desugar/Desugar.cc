@@ -21,11 +21,11 @@ namespace {
 struct DesugarContext final {
     core::MutableContext ctx;
     uint32_t &uniqueCounter;
-    core::NameRef enclosingBlockArg;
+    core::NameRef &enclosingBlockArg;
     core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
 
-    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockArg,
+    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef &enclosingBlockArg,
                    core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
@@ -33,13 +33,22 @@ struct DesugarContext final {
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
     }
-};
 
-core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
-    auto blkIdent = cast_tree<UnresolvedIdent>(blkArg.expr);
-    ENFORCE(blkIdent != nullptr, "BlockArg must wrap UnresolvedIdent in desugar.");
-    return blkIdent->name;
-}
+    void ensureRealBlockArg() {
+        ENFORCE(enclosingBlockArg.exists(), "Can only call this inside a method. yield can also exist at top level");
+        if (enclosingBlockArg == core::Names::blkArg()) {
+            // This is a synthetic block arg, which exists only to ensure that all methods have a
+            // block arg. If the method is actually going to make use of its block arg, let's change
+            // the name to `&blk` (where the `&` is actually in the variable name).
+            //
+            // This lets us tell whether a method actually uses its block arg, and lets people use
+            // `yield` without mentioning a block arg in a `# typed: strict` file.
+
+            // Overwrite the existing reference in the context.
+            enclosingBlockArg = core::Names::ampersandBlockArg();
+        }
+    }
+};
 
 // Get the num from the name of the Node if it's a LVar.
 // Return -1 otherwise.
@@ -304,21 +313,22 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
                           unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
+    auto enclosingBlockArg = core::Names::blkArg();
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, enclosingBlockArg, declLoc, name);
+    // TODO(jez) Make sure we have a test for if `yield` is in default arg
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
-
-    if (args.empty() || !isa_tree<BlockArg>(args.back())) {
-        auto blkLoc = core::LocOffsets::none();
-        args.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
-    }
-
-    const auto &blkArg = cast_tree<BlockArg>(args.back());
-    ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
-    auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
+
+    if (args.empty() || !isa_tree<BlockArg>(args.back())) {
+        auto blkLoc = core::LocOffsets::none();
+        args.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, enclosingBlockArg)));
+    }
+
+    const auto &blkArg = cast_tree<BlockArg>(args.back());
+    ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
 
     auto mdef = MK::Method(loc, declLoc, name, std::move(args), std::move(desugaredBody));
     cast_tree<MethodDef>(mdef)->flags.isSelfMethod = isSelf;
@@ -948,6 +958,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     if (send->method == core::Names::blockGiven_p() && dctx.enclosingBlockArg.exists()) {
+                        dctx.ensureRealBlockArg();
                         auto if_ = MK::If(loc, MK::Local(loc, dctx.enclosingBlockArg), std::move(res), MK::False(loc));
                         result = std::move(if_);
                     } else {
@@ -1996,18 +2007,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 ExpressionPtr recv;
                 if (dctx.enclosingBlockArg.exists()) {
-                    // we always want to report an error if we're using yield with a synthesized name in
-                    // strict mode
-                    auto blockArgName = dctx.enclosingBlockArg;
-                    if (blockArgName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.beginError(dctx.enclosingMethodLoc,
-                                                         core::errors::Desugar::UnnamedBlockParameter)) {
-                            e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
-                                        dctx.enclosingMethodName.show(dctx.ctx), "yield");
-                            e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body", "yield");
-                        }
-                    }
-
+                    dctx.ensureRealBlockArg();
                     recv = MK::Local(loc, dctx.enclosingBlockArg);
                 } else {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
@@ -2354,8 +2354,8 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what)
     try {
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
-        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
-                            core::NameRef::noName());
+        auto enclosingBlockArg = core::NameRef::noName();
+        DesugarContext dctx(ctx, uniqueCounter, enclosingBlockArg, core::LocOffsets::none(), core::NameRef::noName());
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
         result = liftTopLevel(dctx, loc, std::move(result));
