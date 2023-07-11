@@ -1,0 +1,13 @@
+diff --git gc.c gc.c
+index 73faf46b12..c4452e6be7 100644
+--- gc.c
++++ gc.c
+@@ -5172,7 +5172,7 @@ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
+     if (LIKELY(objspace->mark_func_data == NULL)) {
+ 	rgengc_check_relation(objspace, obj);
+ 	if (!gc_mark_set(objspace, obj)) return; /* already marked */
+-        if (RB_TYPE_P(obj, T_NONE)) rb_bug("try to mark T_NONE object"); /* check here will help debugging */
++        if (RB_TYPE_P(obj, T_NONE)) rb_bug("try to mark T_NONE object, id=%d", (int)rb_obj_id(obj)); /* check here will help debugging */
+ 	gc_aging(objspace, obj);
+ 	gc_grey(objspace, obj);
+     }
