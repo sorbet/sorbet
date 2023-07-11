@@ -330,6 +330,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
     auto enclosingBlockArg = blockArgName(argnode);
+    ENFORCE(enclosingBlockArg.exists());
     DesugarContext dctx1(dctx.ctx, uniqueCounter, enclosingBlockArg, declLoc, name);
     // TODO(jez) Make sure we have a test for if `yield` is in default arg
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
@@ -339,7 +340,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
     if (args.empty() || !isa_tree<BlockArg>(args.back())) {
-        auto blkLoc = core::LocOffsets::none();
+        auto blkLoc = declLoc.copyEndWithZeroLength();
         args.emplace_back(MK::BlockArg(blkLoc, MK::Local(blkLoc, enclosingBlockArg)));
     }
 
