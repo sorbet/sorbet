@@ -2136,7 +2136,7 @@ SymbolRef TypeParameter::dealias(const GlobalState &gs, int depthLimit) const {
 
 bool ArgInfo::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
-    return flags.isBlock && !loc.exists();
+    return flags.isBlock && !loc.exists() && name == core::Names::blkArg();
 }
 
 ArgInfo ArgInfo::deepCopy() const {
