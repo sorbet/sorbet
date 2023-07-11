@@ -50,6 +50,22 @@ struct DesugarContext final {
     }
 };
 
+core::NameRef blockArgName(const unique_ptr<parser::Node> &argnode) {
+    auto result = core::Names::blkArg();
+
+    auto *oargs = parser::cast_node<parser::Args>(argnode.get());
+    if (oargs == nullptr || oargs->args.empty()) {
+        return result;
+    }
+
+    auto *blkArgNode = parser::cast_node<parser::Blockarg>(oargs->args.back().get());
+    if (blkArgNode == nullptr) {
+        return result;
+    }
+
+    return blkArgNode->name;
+}
+
 // Get the num from the name of the Node if it's a LVar.
 // Return -1 otherwise.
 int numparamNum(DesugarContext dctx, parser::Node *decl) {
@@ -313,7 +329,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
                           unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
-    auto enclosingBlockArg = core::Names::blkArg();
+    auto enclosingBlockArg = blockArgName(argnode);
     DesugarContext dctx1(dctx.ctx, uniqueCounter, enclosingBlockArg, declLoc, name);
     // TODO(jez) Make sure we have a test for if `yield` is in default arg
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
