@@ -17,7 +17,7 @@ ClassDef{
         }, Local{
           localVariable = <U z>
         }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -36,7 +36,7 @@ ClassDef{
               }
               Literal{ value = :<super> }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
               Local{
                 localVariable = <U x>
@@ -94,7 +94,7 @@ ClassDef{
       args = [RestArg{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -141,7 +141,7 @@ ClassDef{
               }
               Literal{ value = nil }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -218,7 +218,7 @@ ClassDef{
         }, Local{
           localVariable = <U q>
         }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -283,7 +283,7 @@ ClassDef{
               }
               Literal{ value = nil }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -380,7 +380,7 @@ ClassDef{
         }, RestArg{ expr = Local{
           localVariable = <U foo>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -448,7 +448,7 @@ ClassDef{
               }
               Literal{ value = nil }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -552,7 +552,7 @@ ClassDef{
         }, Local{
           localVariable = <U q>
         }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -638,7 +638,7 @@ ClassDef{
               }
               Literal{ value = nil }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -1495,7 +1495,7 @@ ClassDef{
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -1514,7 +1514,7 @@ ClassDef{
               }
               Literal{ value = :<super> }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
               Local{
                 localVariable = <U x>
@@ -1592,7 +1592,7 @@ ClassDef{
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -1650,7 +1650,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -1742,7 +1742,7 @@ ClassDef{
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -1818,7 +1818,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -1930,7 +1930,7 @@ ClassDef{
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2009,7 +2009,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -2128,7 +2128,7 @@ ClassDef{
         } }, KeywordArg{ expr = Local{
           localVariable = <U k>
         } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2225,7 +2225,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -2354,7 +2354,7 @@ ClassDef{
         }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2373,7 +2373,7 @@ ClassDef{
               }
               Literal{ value = :<super> }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
               Local{
                 localVariable = <U x>
@@ -2463,7 +2463,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2528,7 +2528,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -2625,7 +2625,7 @@ ClassDef{
         }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2708,7 +2708,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -2825,7 +2825,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -2911,7 +2911,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -3035,7 +3035,7 @@ ClassDef{
         }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -3139,7 +3139,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -3279,7 +3279,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -3298,7 +3298,7 @@ ClassDef{
               }
               Literal{ value = :<super> }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
               Local{
                 localVariable = <U x>
@@ -3440,7 +3440,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -3529,7 +3529,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -3654,7 +3654,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -3761,7 +3761,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -3906,7 +3906,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -4016,7 +4016,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }
@@ -4168,7 +4168,7 @@ ClassDef{
         } }, RestArg{ expr = KeywordArg{ expr = Local{
           localVariable = <U bar>
         } } }, BlockArg{ expr = Local{
-          localVariable = <U &blk>
+          localVariable = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -4296,7 +4296,7 @@ ClassDef{
                 ]
               }
               Local{
-                localVariable = <U &blk>
+                localVariable = <U <blk>>
               }
             ]
           }

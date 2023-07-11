@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def a_class_method<<todo method>>(&&blk)
+      def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C A>.new().a_class_method()
 
   module <emptyTree>::<C Bar><<C <todo sym>>> < ()
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -48,11 +48,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def a_class_method<<todo method>>(&&blk)
+      def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
-      def another_class_method<<todo method>>(&&blk)
+      def another_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -83,12 +83,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C B>.new().a_class_method()
 
   module <emptyTree>::<C Baz><<C <todo sym>>> < ()
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-      def a_class_method<<todo method>>(&&blk)
+      def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def a_class_method_2<<todo method>>(&&blk)
+      def a_class_method_2<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -125,16 +125,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C C>.a_class_method_2()
 
   module <emptyTree>::<C Qux><<C <todo sym>>> < ()
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-      def a_class_method<<todo method>>(&&blk)
+      def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
-      def a_class_method_2<<todo method>>(&&blk)
+      def a_class_method_2<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -161,7 +161,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C D>.a_class_method_2()
 
   module <emptyTree>::<C Quux><<C <todo sym>>> < ()
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -177,11 +177,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C E>.new().instance_method()
 
   module <emptyTree>::<C Corge><<C <todo sym>>> < ()
-    def a_class_method<<todo method>>(&&blk)
+    def a_class_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def instance_method<<todo method>>(&&blk)
+    def instance_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -202,11 +202,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Grault><<C <todo sym>>> < ()
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
-      def a_class_method<<todo method>>(&&blk)
+      def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
-      def another_class_method<<todo method>>(&&blk)
+      def another_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 

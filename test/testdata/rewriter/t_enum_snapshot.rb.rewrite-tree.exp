@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
-    def something_outside<<todo method>>(&&blk)
+    def something_outside<<todo method>>(&<blk>)
       <emptyTree>
     end
 

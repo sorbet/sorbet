@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           <emptyTree>
@@ -31,21 +31,21 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    def initialize(&blk)
+    def initialize(<blk>)
       begin
         @ivar = <cast:let>(1, Integer, ::Integer)
         @ivar2 = <cast:let>(2, Integer, ::Integer)
       end
     end
 
-    def hi(&blk)
+    def hi(<blk>)
       begin
         @ivar = 1
         @ivar2
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <runtime method definition of initialize>
         @@class_var = <cast:let>("hi", String, ::String)
@@ -55,7 +55,7 @@ begin
     end
   end
   module ::Mixin<<C Mixin>> < ()
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         @@mixin_cvar = <cast:let>(3, Integer, ::Integer)
         @@mixin_cvar
@@ -64,7 +64,7 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
-    def child_method(&blk)
+    def child_method(<blk>)
       begin
         @@class_var
         @@mixin_cvar
@@ -73,7 +73,7 @@ begin
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <self>.include(::Mixin)
         @@class_var
@@ -85,7 +85,7 @@ begin
     end
   end
   class ::Child1<<C Child1>> < (::Alias)
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       @@class_var
     end
   end

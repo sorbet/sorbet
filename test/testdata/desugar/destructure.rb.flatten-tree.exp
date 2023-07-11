@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::Destructure)
@@ -10,7 +10,7 @@ begin
     end
   end
   class ::Destructure<<C Destructure>> < (::<todo sym>)
-    def f((x,y), z, &blk)
+    def f((x,y), z, <blk>)
       begin
         begin
           <assignTemp>$3 = <destructure>$2
@@ -37,7 +37,7 @@ begin
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of f>
     end
   end

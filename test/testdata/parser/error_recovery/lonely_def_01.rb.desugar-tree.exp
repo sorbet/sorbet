@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <method-def-name-missing><<todo method>>(&&blk)
+    def <method-def-name-missing><<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def example<<todo method>>(&&blk)
+    def example<<todo method>>(&<blk>)
       <emptyTree>
     end
   end

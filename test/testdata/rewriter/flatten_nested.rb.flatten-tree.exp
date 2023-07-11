@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           <emptyTree>
@@ -37,54 +37,54 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def outer_method(&blk)
+    def outer_method(<blk>)
       <runtime method definition of inner_method>
     end
 
-    def inner_method(&blk)
+    def inner_method(<blk>)
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of outer_method>
     end
   end
   class ::B<<C B>> < (::<todo sym>)
-    def outer_method(&blk)
+    def outer_method(<blk>)
       <runtime method definition of self.inner_method>
     end
 
-    def inner_method(&blk)
+    def inner_method(<blk>)
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of outer_method>
     end
   end
   class ::C<<C C>> < (::<todo sym>)
-    def self.outer_method(&blk)
+    def self.outer_method(<blk>)
       <runtime method definition of inner_method>
     end
 
-    def inner_method(&blk)
+    def inner_method(<blk>)
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of self.outer_method>
     end
   end
   class ::D<<C D>> < (::<todo sym>)
-    def self.outer_method(&blk)
+    def self.outer_method(<blk>)
       <runtime method definition of self.inner_method>
     end
 
-    def self.inner_method(&blk)
+    def self.inner_method(<blk>)
       <self>.puts(<self>)
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of self.outer_method>
     end
   end

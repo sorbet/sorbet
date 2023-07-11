@@ -1,6 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C Opus>::<C Log><<C <todo sym>>> < ()
-    def self.info<<todo method>>(msg, &&blk)
+    def self.info<<todo method>>(msg, &<blk>)
       <emptyTree>
     end
   end
@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C B> = nil
 
-    def self.test1<<todo method>>(x, &&blk)
+    def self.test1<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
         begin
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.test2<<todo method>>(x, &&blk)
+    def self.test2<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
         begin
@@ -38,7 +38,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.test3<<todo method>>(x, &&blk)
+    def self.test3<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
         begin
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.test4<<todo method>>(x, &&blk)
+    def self.test4<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
         begin

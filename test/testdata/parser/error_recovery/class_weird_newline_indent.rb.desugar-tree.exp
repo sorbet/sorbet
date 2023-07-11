@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("hello")
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end
@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("hello")
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts("hello")
     end
 
-    def method2<<todo method>>(&&blk)
+    def method2<<todo method>>(&<blk>)
       <emptyTree>
     end
   end

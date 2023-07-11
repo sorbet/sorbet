@@ -9,17 +9,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C E><<C <todo sym>>> < (::<todo sym>)
-    def self.e=<<todo method>>(e, &&blk)
+    def self.e=<<todo method>>(e, &<blk>)
       @e = e
     end
 
-    def self.e<<todo method>>(&&blk)
+    def self.e<<todo method>>(&<blk>)
       @e
     end
   end
 
   class <emptyTree>::<C Main><<C <todo sym>>> < (::<todo sym>)
-    def self.main<<todo method>>(&&blk)
+    def self.main<<todo method>>(&<blk>)
       begin
         <emptyTree>::<C A>.each() do |a|
           <self>.puts(a.inspect())

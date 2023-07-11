@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <cast:cast>(nil, T.untyped, ::T.nilable())
         <cast:cast>(nil, T.untyped, ::T.nilable(::Integer, ::Integer))

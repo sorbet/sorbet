@@ -12,7 +12,7 @@ ClassDef{
       name = <U main><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <U &blk>
+          name = <U <blk>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -1081,7 +1081,7 @@ ClassDef{
               name = <U args>
             } }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -1386,7 +1386,7 @@ ClassDef{
           name = <U foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -1459,7 +1459,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -1527,7 +1527,7 @@ ClassDef{
           name = <U foo2><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Cast{
               cast = <U cast>,
@@ -1620,7 +1620,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Cast{
               cast = <U cast>,
@@ -1768,7 +1768,7 @@ ClassDef{
           name = <U default><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -1841,7 +1841,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -1910,7 +1910,7 @@ ClassDef{
           name = <U t_nilable><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2007,7 +2007,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2064,7 +2064,7 @@ ClassDef{
           name = <U array><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2137,7 +2137,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2209,7 +2209,7 @@ ClassDef{
           name = <U t_array><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2312,7 +2312,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2388,7 +2388,7 @@ ClassDef{
           name = <U hash_of><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2499,7 +2499,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2556,7 +2556,7 @@ ClassDef{
           name = <U const_explicit><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2613,7 +2613,7 @@ ClassDef{
           name = <U const><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2670,7 +2670,7 @@ ClassDef{
           name = <U enum_prop><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2743,7 +2743,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2800,7 +2800,7 @@ ClassDef{
           name = <U foreign><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2873,7 +2873,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -2976,7 +2976,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3067,7 +3067,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3124,7 +3124,7 @@ ClassDef{
           name = <U foreign_lazy><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3197,7 +3197,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3300,7 +3300,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3391,7 +3391,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3448,7 +3448,7 @@ ClassDef{
           name = <U foreign_proc><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3521,7 +3521,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3624,7 +3624,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3715,7 +3715,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3772,7 +3772,7 @@ ClassDef{
           name = <U foreign_invalid><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3845,7 +3845,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -3944,7 +3944,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4043,7 +4043,7 @@ ClassDef{
               default_ = Literal{ value = nil }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4100,7 +4100,7 @@ ClassDef{
           name = <U ifunset><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4173,7 +4173,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4242,7 +4242,7 @@ ClassDef{
           name = <U ifunset_nilable><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4339,7 +4339,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4396,7 +4396,7 @@ ClassDef{
           name = <U empty_hash_rules><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4469,7 +4469,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4526,7 +4526,7 @@ ClassDef{
           name = <U hash_rules><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -4599,7 +4599,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5181,7 +5181,7 @@ ClassDef{
               }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -5200,7 +5200,7 @@ ClassDef{
               }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -5245,7 +5245,7 @@ ClassDef{
           name = <U token><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5318,7 +5318,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5375,7 +5375,7 @@ ClassDef{
           name = <U created><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5448,7 +5448,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5552,7 +5552,7 @@ ClassDef{
               }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -5571,7 +5571,7 @@ ClassDef{
               }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -5616,7 +5616,7 @@ ClassDef{
           name = <U token><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5689,7 +5689,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5746,7 +5746,7 @@ ClassDef{
           name = <U created><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -5907,7 +5907,7 @@ ClassDef{
               }
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = EmptyTree
         }
@@ -5964,7 +5964,7 @@ ClassDef{
           name = <U foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -6060,7 +6060,7 @@ ClassDef{
           name = <U encrypted_foo><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -6169,7 +6169,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -6308,7 +6308,7 @@ ClassDef{
               name = <U arg0>
             }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -6389,7 +6389,7 @@ ClassDef{
           name = <U bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}
@@ -6485,7 +6485,7 @@ ClassDef{
           name = <U encrypted_bar><<U <todo method>>>
           args = [BlockArg{ expr = UnresolvedIdent{
               kind = Local
-              name = <U &blk>
+              name = <U <blk>>
             } }]
           rhs = Send{
             flags = {rewriterSynthesized}

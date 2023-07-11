@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
-    def some_method<<todo method>>(array, &&blk)
+    def some_method<<todo method>>(array, &<blk>)
       begin
         begin
           <assignTemp>$2 = array

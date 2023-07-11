@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.make<<todo method>>(&&blk)
+    def self.make<<todo method>>(&<blk>)
       begin
         _cls = <emptyTree>::<C Class>.new() do ||
           begin

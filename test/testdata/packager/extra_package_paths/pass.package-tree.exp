@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def bar1<<todo method>>(&&blk)
+    def bar1<<todo method>>(&<blk>)
       begin
         <emptyTree>::<C Project>::<C Foo>::<C B>.b()
         <emptyTree>::<C Project>::<C Foo>::<C D>.d()
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def bar2<<todo method>>(&&blk)
+    def bar2<<todo method>>(&<blk>)
       begin
         <emptyTree>::<C Project>::<C Baz>::<C Package>::<C C>.c()
         <emptyTree>::<C Project>::<C Baz>::<C Package>::<C E>.e()
@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def self.c<<todo method>>(&&blk)
+      def self.c<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -74,7 +74,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.b<<todo method>>(&&blk)
+    def self.b<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -91,7 +91,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def self.e<<todo method>>(&&blk)
+      def self.e<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -108,7 +108,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.d<<todo method>>(&&blk)
+    def self.d<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -124,7 +124,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.z<<todo method>>(&&blk)
+    def self.z<<todo method>>(&<blk>)
       <emptyTree>
     end
 

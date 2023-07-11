@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:test, <emptyTree>::<C T>.untyped()).returns(<emptyTree>::<C T>::<C Boolean>)
     end
 
-    def assert<<todo method>>(test, &&blk)
+    def assert<<todo method>>(test, &<blk>)
       if test
         true
       else
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def test_valid_method_call<<todo method>>(&&blk)
+    def test_valid_method_call<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -35,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def test_block_is_evaluated_in_the_context_of_an_instance<<todo method>>(&&blk)
+    def test_block_is_evaluated_in_the_context_of_an_instance<<todo method>>(&<blk>)
       <self>.assert(true)
     end
 
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&&blk)
+    def initialize<<todo method>>(&<blk>)
       begin
         @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
         <self>.foo()
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&&blk)
+    def initialize<<todo method>>(&<blk>)
       <self>.bar()
     end
 
@@ -62,7 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def teardown<<todo method>>(&&blk)
+    def teardown<<todo method>>(&<blk>)
       <self>.fiz()
     end
 
@@ -70,7 +70,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def teardown<<todo method>>(&&blk)
+    def teardown<<todo method>>(&<blk>)
       <self>.baz()
     end
 
@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:a, <emptyTree>::<C T>.untyped(), :b, <emptyTree>::<C T>.untyped()).void()
     end
 
-    def assert_equal<<todo method>>(a, b, &&blk)
+    def assert_equal<<todo method>>(a, b, &<blk>)
       <emptyTree>
     end
 
@@ -172,7 +172,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def test_it_works<<todo method>>(&&blk)
+    def test_it_works<<todo method>>(&<blk>)
       <self>.assert_equal(1, @a)
     end
 
@@ -180,7 +180,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&&blk)
+    def initialize<<todo method>>(&<blk>)
       @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
 
@@ -188,7 +188,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def teardown<<todo method>>(&&blk)
+    def teardown<<todo method>>(&<blk>)
       @a = 5
     end
 

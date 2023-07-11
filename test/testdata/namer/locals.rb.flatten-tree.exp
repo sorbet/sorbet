@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestLocals)
@@ -10,7 +10,7 @@ begin
     end
   end
   class ::TestLocals<<C TestLocals>> < (::<todo sym>)
-    def method(&blk)
+    def method(<blk>)
       begin
         a = 1
         c = 4
@@ -30,7 +30,7 @@ begin
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of method>
     end
   end

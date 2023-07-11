@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           <emptyTree>
@@ -19,15 +19,15 @@ begin
     end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    def self.takes_integer_static(x, &blk)
+    def self.takes_integer_static(x, <blk>)
       <emptyTree>
     end
 
-    def takes_integer_instance(x, &blk)
+    def takes_integer_instance(x, <blk>)
       <emptyTree>
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.params(:x, ::Integer).void()
@@ -43,23 +43,23 @@ begin
     end
   end
   class ::Child<<C Child>> < (::Parent)
-    def self.outer_static(&blk)
+    def self.outer_static(<blk>)
       <self>.takes_integer_static(<runtime method definition of self.inner_static>)
     end
 
-    def self.inner_static(&blk)
+    def self.inner_static(<blk>)
       <emptyTree>
     end
 
-    def outer_instance(&blk)
+    def outer_instance(<blk>)
       <self>.takes_integer_instance(<runtime method definition of inner_instance>)
     end
 
-    def inner_instance(&blk)
+    def inner_instance(<blk>)
       <emptyTree>
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <self>.takes_integer_static(<runtime method definition of self.outer_static>)
         <self>.takes_integer_static(<runtime method definition of outer_instance>)

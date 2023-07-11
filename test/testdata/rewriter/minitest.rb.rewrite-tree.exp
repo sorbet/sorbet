@@ -1,10 +1,10 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def junk<<todo method>>(&&blk)
+  def junk<<todo method>>(&<blk>)
     <emptyTree>
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    def outside_method<<todo method>>(&&blk)
+    def outside_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'works outside'><<todo method>>(&&blk)
+    def <it 'works outside'><<todo method>>(&<blk>)
       <self>.outside_method()
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'allows constants inside of IT'><<todo method>>(&&blk)
+    def <it 'allows constants inside of IT'><<todo method>>(&<blk>)
       ::Module.const_set(:CONST, 10)
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'allows let-ed constants inside of IT'><<todo method>>(&&blk)
+    def <it 'allows let-ed constants inside of IT'><<todo method>>(&<blk>)
       ::Module.const_set(:C2, <cast:let>(10, <todo sym>, <emptyTree>::<C Integer>))
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'allows path constants inside of IT'><<todo method>>(&&blk)
+    def <it 'allows path constants inside of IT'><<todo method>>(&<blk>)
       <emptyTree>::<C C3>.new()
     end
 
@@ -44,11 +44,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<todo method>>(&&blk)
+    def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def instance_helper<<todo method>>(&&blk)
+    def instance_helper<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&&blk)
+    def initialize<<todo method>>(&<blk>)
       begin
         @foo = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <after><<todo method>>(&&blk)
+    def <after><<todo method>>(&<blk>)
       begin
         @foo = nil
         <self>.instance_helper()
@@ -78,18 +78,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'can read foo'><<todo method>>(&&blk)
+    def <it 'can read foo'><<todo method>>(&<blk>)
       begin
         <cast:assert_type!>(@foo, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
       end
     end
 
-    def self.random_method<<todo method>>(&&blk)
+    def self.random_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def self.it<<todo method>>(*args, &&blk)
+    def self.it<<todo method>>(*args, &<blk>)
       <emptyTree>
     end
 
@@ -130,7 +130,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
-      def inside_method<<todo method>>(&&blk)
+      def inside_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -138,7 +138,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'works inside'><<todo method>>(&&blk)
+      def <it 'works inside'><<todo method>>(&<blk>)
         begin
           <self>.outside_method()
           <self>.inside_method()
@@ -176,7 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'Object'><<todo method>>(&&blk)
+      def <it 'Object'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -184,7 +184,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'Object'><<todo method>>(&&blk)
+      def <it 'Object'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -213,7 +213,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'contains nested describes'><<todo method>>(&&blk)
+      def <it 'contains nested describes'><<todo method>>(&<blk>)
         <emptyTree>
       end
 

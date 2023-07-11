@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::Examples)
@@ -10,7 +10,7 @@ begin
     end
   end
   class ::Examples<<C Examples>> < (::<todo sym>)
-    def i_like_ifs(&blk)
+    def i_like_ifs(<blk>)
       if true
         return 1
       else
@@ -18,7 +18,7 @@ begin
       end
     end
 
-    def i_like_exps(&blk)
+    def i_like_exps(<blk>)
       if true
         1
       else
@@ -26,7 +26,7 @@ begin
       end
     end
 
-    def return_in_one_branch1(&blk)
+    def return_in_one_branch1(<blk>)
       if true
         return 1
       else
@@ -34,7 +34,7 @@ begin
       end
     end
 
-    def return_in_one_branch2(&blk)
+    def return_in_one_branch2(<blk>)
       if true
         1
       else
@@ -42,7 +42,7 @@ begin
       end
     end
 
-    def variables(&blk)
+    def variables(<blk>)
       begin
         if true
           a = 1
@@ -58,7 +58,7 @@ begin
       end
     end
 
-    def variables_and_loop(cond, &blk)
+    def variables_and_loop(cond, <blk>)
       begin
         if true
           a = 1
@@ -76,7 +76,7 @@ begin
       end
     end
 
-    def variables_loop_if(cond, &blk)
+    def variables_loop_if(cond, <blk>)
       begin
         while true
           if cond
@@ -89,7 +89,7 @@ begin
       end
     end
 
-    def take_arguments(i, &blk)
+    def take_arguments(i, <blk>)
       if false
         2
       else
@@ -97,7 +97,7 @@ begin
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <runtime method definition of i_like_ifs>
         <runtime method definition of i_like_exps>

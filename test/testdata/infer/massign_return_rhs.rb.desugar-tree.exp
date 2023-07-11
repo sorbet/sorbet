@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C Integer>)))
   end
 
-  def foo<<todo method>>(&&blk)
+  def foo<<todo method>>(&<blk>)
     nil
   end
 

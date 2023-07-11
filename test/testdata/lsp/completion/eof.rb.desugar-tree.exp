@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:x, <emptyTree>::<C A>).void()
     end
 
-    def example<<todo method>>(x, &&blk)
+    def example<<todo method>>(x, &<blk>)
       x.<method-name-missing>()
     end
   end

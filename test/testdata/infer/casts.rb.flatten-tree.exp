@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::TestCasts)
@@ -10,11 +10,11 @@ begin
     end
   end
   class ::TestCasts<<C TestCasts>> < (::<todo sym>)
-    def untyped(&blk)
+    def untyped(<blk>)
       <emptyTree>
     end
 
-    def test_casts(&blk)
+    def test_casts(<blk>)
       begin
         t = <cast:assert_type!>(<self>.untyped(), Integer, ::Integer)
         t.+(4)
@@ -36,7 +36,7 @@ begin
       end
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <runtime method definition of untyped>
         <runtime method definition of test_casts>

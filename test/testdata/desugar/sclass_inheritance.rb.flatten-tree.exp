@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def main(&blk)
+    def main(<blk>)
       begin
         <self>.puts(::A.newer())
         <self>.puts(::B.newer())
@@ -9,7 +9,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>$CENSORED>(&blk)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           <emptyTree>
@@ -39,12 +39,12 @@ begin
     end
   end
   module ::MM<<C MM>> < ()
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <emptyTree>
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         ::Sorbet::Private::Static.keep_for_ide(::MM)
@@ -53,11 +53,11 @@ begin
     end
   end
   class <singleton class><<Class:A>> < (::MM)
-    def newer(&blk)
+    def newer(<blk>)
       <self>.new()
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <self>.include(::MM)
         <runtime method definition of newer>
@@ -66,11 +66,11 @@ begin
     end
   end
   class ::B<<C B>> < (::<todo sym>)
-    def self.newer(&blk)
+    def self.newer(<blk>)
       <self>.new()
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <self>.extend(::MM)
         <runtime method definition of self.newer>
@@ -79,7 +79,7 @@ begin
     end
   end
   class ::C<<C C>> < (::A)
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       begin
         <emptyTree>
         <emptyTree>
@@ -87,11 +87,11 @@ begin
     end
   end
   class <singleton class><<Class:C>> < ()
-    def newerer(&blk)
+    def newerer(<blk>)
       <self>.newer()
     end
 
-    def self.<static-init>(&blk)
+    def self.<static-init>(<blk>)
       <runtime method definition of newerer>
     end
   end
