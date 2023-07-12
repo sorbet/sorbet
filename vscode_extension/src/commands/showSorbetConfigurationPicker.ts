@@ -8,6 +8,7 @@ export interface LspConfigQuickPickItem extends QuickPickItem {
 
 /**
  * Show Sorbet Configuration picker.
+ * @param context Sorbet extension context.
  */
 export async function showSorbetConfigurationPicker(
   context: SorbetExtensionContext,

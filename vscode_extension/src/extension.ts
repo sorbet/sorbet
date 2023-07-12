@@ -6,6 +6,7 @@ import { renameSymbol } from "./commands/renameSymbol";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
+import { toggleUntypedCodeHighlighting } from "./commands/toggleUntypedCodeHighlighting";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
@@ -49,6 +50,14 @@ export function activate(context: ExtensionContext) {
 
   // Register commands
   context.subscriptions.push(
+    commands.registerCommand(cmdIds.COPY_SYMBOL_COMMAND_ID, () =>
+      copySymbolToClipboard(sorbetExtensionContext),
+    ),
+    commands.registerCommand(
+      cmdIds.RENAME_SYMBOL_COMMAND_ID,
+      (params: TextDocumentPositionParams) =>
+        renameSymbol(sorbetExtensionContext, params),
+    ),
     commands.registerCommand(
       cmdIds.SET_LOGLEVEL_COMMAND_ID,
       (level?: LogLevel) => setLogLevel(sorbetExtensionContext, level),
@@ -62,9 +71,6 @@ export function activate(context: ExtensionContext) {
     commands.registerCommand(cmdIds.SHOW_OUTPUT_COMMAND_ID, () =>
       sorbetExtensionContext.logOutputChannel.show(true),
     ),
-    commands.registerCommand(cmdIds.SORBET_COPY_SYMBOL_COMMAND_ID, () =>
-      copySymbolToClipboard(sorbetExtensionContext),
-    ),
     commands.registerCommand(cmdIds.SORBET_ENABLE_COMMAND_ID, () =>
       sorbetExtensionContext.configuration.setEnabled(true),
     ),
@@ -72,25 +78,12 @@ export function activate(context: ExtensionContext) {
       sorbetExtensionContext.configuration.setEnabled(false),
     ),
     commands.registerCommand(
-      cmdIds.SORBET_RENAME_SYMBOL_COMMAND_ID,
-      (params: TextDocumentPositionParams) =>
-        renameSymbol(sorbetExtensionContext, params),
-    ),
-    commands.registerCommand(
       cmdIds.SORBET_RESTART_COMMAND_ID,
       (reason: RestartReason = RestartReason.COMMAND) =>
         sorbetExtensionContext.statusProvider.restartSorbet(reason),
     ),
-    commands.registerCommand("sorbet.toggleHighlightUntyped", () =>
-      sorbetExtensionContext.configuration
-        .setHighlightUntyped(
-          !sorbetExtensionContext.configuration.highlightUntyped,
-        )
-        .then(() =>
-          sorbetExtensionContext.statusProvider.restartSorbet(
-            RestartReason.CONFIG_CHANGE,
-          ),
-        ),
+    commands.registerCommand(cmdIds.TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID, () =>
+      toggleUntypedCodeHighlighting(sorbetExtensionContext),
     ),
   );
 
