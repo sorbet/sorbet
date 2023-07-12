@@ -7,8 +7,8 @@ import { SorbetExtensionContext } from "../sorbetExtensionContext";
 import { ServerStatus } from "../types";
 
 /**
- * Copy symbol at current
- * @param context Context
+ * Copy symbol at current.
+ * @param context Sorbet extension context.
  */
 export async function copySymbolToClipboard(
   context: SorbetExtensionContext,
