@@ -10,7 +10,7 @@ import { ServerStatus } from "../types";
  * because VSCode doesn't allow calling it from the JSON RPC
  * https://github.com/microsoft/vscode/issues/146767
  *
- * @param context Context.
+ * @param context Sorbet extension context.
  * @param params Document position.
  */
 export async function renameSymbol(
