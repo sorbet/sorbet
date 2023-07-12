@@ -139,7 +139,7 @@ export class SorbetStatusBarEntry implements Disposable {
     function getRunningTooltip() {
       let txt = "The Sorbet server is currently running.";
       if (highlightUntyped) {
-        txt += "\n  Highlight untyped code";
+        txt += "\n  - Highlight untyped code";
       }
       return txt;
     }
