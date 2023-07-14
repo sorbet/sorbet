@@ -1,4 +1,8 @@
 # Version history
+## 0.3.21
+- Provide UI hints on state of untyped code highlighting.
+- Internal code clean-up.
+
 ## 0.3.20
 - `Sorbet` status bar item shows a quick-pick drop down instead of a notification dialog when clicked.
 - `Sorbet: Set Log Level…` command allows to control what messages are logged to the `Sorbet` output pane. 
