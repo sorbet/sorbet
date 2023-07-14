@@ -1,6 +1,6 @@
 # Version history
 ## 0.3.21
-- Provide UI hints on state of untyped code highlightings.
+- Provide UI hints on state of untyped code highlighting.
 - Internal code clean-up.
 
 ## 0.3.20
