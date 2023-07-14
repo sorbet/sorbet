@@ -29,10 +29,12 @@ export async function toggleUntypedCodeHighlighting(
   );
 
   if (response !== context.configuration.highlightUntyped) {
-    // TODO: This would internally call `resfresh` which is not right anymore. This can
+    // TODO: This would internally call `refresh` which is not right anymore. This can
     // really be changed to simple getter/setter.
     // TODO: if changed to a simple prop, can we read this from Sorbet?  This is why it was preserved as a Memento
     // (I think) so rather than read current value from Sorbet, the memento value is actually forced on it.
+    // TODO: Unexpectedly, `refresh` does not fire any event because old/new configurations
+    // are equal (toggle is not part of them), so the new logic actually would be an improvement as a simple setter.
     context.configuration.setHighlightUntyped(response);
   }
 
