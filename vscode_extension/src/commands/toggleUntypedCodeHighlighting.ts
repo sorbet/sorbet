@@ -1,5 +1,6 @@
+import { DidChangeConfigurationParams } from "vscode-languageclient/node";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
-import { RestartReason } from "../types";
+import { ServerStatus } from "../types";
 
 /**
  * Toggle highlighting of untyped code.
@@ -9,12 +10,31 @@ import { RestartReason } from "../types";
 export async function toggleUntypedCodeHighlighting(
   context: SorbetExtensionContext,
 ): Promise<boolean> {
-  const targetState = !context.configuration.highlightUntyped;
-  await context.configuration.setHighlightUntyped(targetState);
-  context.log.info(
-    `Untyped code highlighting: ${targetState ? "enabled" : "disabled"}`,
+  const { activeLanguageClient: client } = context.statusProvider;
+  if (client?.status !== ServerStatus.RUNNING) {
+    context.log.warning("Sorbet LSP client is not ready.");
+    return false;
+  }
+
+  const params: DidChangeConfigurationParams = {
+    settings: {
+      toggleUntypedCodeHighlighting: !context.configuration.highlightUntyped,
+    },
+  };
+
+  // TODO: this is not very OO - this should be `await client.setXXXX(value)`
+  const response: boolean = await client.languageClient.sendRequest(
+    "workspace/didChangeConfiguration", // This could also be "sorbet/toggleUntypedCodeHighlighting", no params
+    params,
   );
 
-  await context.statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
+  if (response !== context.configuration.highlightUntyped) {
+    // TODO: This would internally call `resfresh` which is not right anymore. This can
+    // really be changed to simple getter/setter.
+    // TODO: if changed to a simple prop, can we read this from Sorbet?  This is why it was preserved as a Memento
+    // (I think) so rather than read current value from Sorbet, the memento value is actually forced on it.
+    context.configuration.setHighlightUntyped(response);
+  }
+
   return context.configuration.highlightUntyped;
 }
