@@ -210,8 +210,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   }
 
   /**
-   *
-   * @returns
+   * Resolves when client is ready to serve requests.
    */
   public onReady(): Promise<void> {
     return this.languageClient.onReady();
@@ -239,10 +238,14 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    */
   public sendRequest<TResponse>(
     method: string,
-    params: any,
+    param: any,
     token?: CancellationToken,
   ): Promise<TResponse> {
-    return this.languageClient.sendRequest<TResponse>(method, params, token);
+    // Do not pass `token` if undefined, otherwise `param` ends up being passed
+    // as `[...param, undefined]` instead of `param`.
+    return token
+      ? this.languageClient.sendRequest<TResponse>(method, param, token)
+      : this.languageClient.sendRequest<TResponse>(method, param);
   }
 
   /**
