@@ -3,7 +3,6 @@ import * as assert from "assert";
 import * as path from "path";
 import * as sinon from "sinon";
 
-import { LanguageClient } from "vscode-languageclient/node";
 import { createLogStub } from "./testUtils";
 import { SorbetLanguageClient } from "../languageClient";
 import { LogLevel } from "../log";
@@ -30,11 +29,9 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       text: expectedContents,
     }));
     const statusProvider = <SorbetStatusProvider>{
-      activeLanguageClient: <SorbetLanguageClient>{
-        languageClient: <LanguageClient>(<unknown>{
-          sendRequest: sendRequestSpy,
-        }),
-      },
+      activeLanguageClient: <SorbetLanguageClient>(<unknown>{
+        sendRequest: sendRequestSpy,
+      }),
     };
     const context = <SorbetExtensionContext>{
       log: createLogStub(LogLevel.Info),
