@@ -19,10 +19,7 @@ export async function copySymbolToClipboard(
     return;
   }
 
-  const capabilities = <any>(
-    client.languageClient.initializeResult?.capabilities
-  );
-  if (!capabilities?.sorbetShowSymbolProvider) {
+  if (!client.capabilities?.sorbetShowSymbolProvider) {
     context.log.warning(
       'Sorbet LSP client does not support "show symbol" capability.',
     );
@@ -49,7 +46,7 @@ export async function copySymbolToClipboard(
     },
     position,
   };
-  const response: SymbolInformation = await client.languageClient.sendRequest(
+  const response = await client.sendRequest<SymbolInformation>(
     "sorbet/showSymbol",
     params,
   );

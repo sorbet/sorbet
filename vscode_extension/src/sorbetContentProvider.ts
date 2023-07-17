@@ -25,12 +25,10 @@ export class SorbetContentProvider implements TextDocumentContentProvider {
     token?: CancellationToken,
   ): Promise<string> {
     let content: string;
-    const { activeLanguageClient } = this.context.statusProvider;
-    if (activeLanguageClient) {
+    const { activeLanguageClient: client } = this.context.statusProvider;
+    if (client) {
       this.context.log.info(`Retrieving file contents. URI:${uri}`);
-      const response = await activeLanguageClient.languageClient.sendRequest<
-        TextDocumentItem
-      >(
+      const response = await client.sendRequest<TextDocumentItem>(
         "sorbet/readFile",
         {
           uri: uri.toString(),

@@ -215,9 +215,9 @@ export class SorbetStatusProvider implements Disposable {
     );
 
     // Wait for `ready` before accessing `languageClient`.
-    await newClient.languageClient.onReady();
+    await newClient.onReady();
     this.disposables.push(
-      newClient.languageClient.onNotification(
+      newClient.onNotification(
         "sorbet/showOperation",
         (params: ShowOperationParams) => {
           // Ignore event if this is not the current client (e.g. old client being shut down).

@@ -78,14 +78,10 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     const statusProvider = <SorbetStatusProvider>{
       activeLanguageClient: <SorbetLanguageClient>{
-        status: ServerStatus.RUNNING,
-        languageClient: <vsclc.LanguageClient>{
-          initializeResult: <any>{
-            capabilities: {
-              sorbetShowSymbolProvider: false,
-            },
-          },
+        capabilities: {
+          sorbetShowSymbolProvider: false,
         },
+        status: ServerStatus.RUNNING,
       },
     };
 
@@ -98,7 +94,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     sinon.assert.notCalled(writeTextSpy);
   });
 
-  test("copySymbolToClipboard: copies symbol to clipbaord whne there is a valid selection", async () => {
+  test("copySymbolToClipboard: copies symbol to clipboard whne there is a valid selection", async () => {
     const expectedUri = vscode.Uri.parse("file://workspace/test.rb");
     const expectedSymbolName = "test_symbol_name";
 
@@ -132,15 +128,11 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     const statusProvider = <SorbetStatusProvider>{
       activeLanguageClient: <SorbetLanguageClient>{
-        status: ServerStatus.RUNNING,
-        languageClient: <vsclc.LanguageClient>{
-          initializeResult: <any>{
-            capabilities: {
-              sorbetShowSymbolProvider: true,
-            },
-          },
-          sendRequest: <any>sendRequestSpy,
+        capabilities: {
+          sorbetShowSymbolProvider: true,
         },
+        sendRequest: <any>sendRequestSpy,
+        status: ServerStatus.RUNNING,
       },
     };
     const context = <SorbetExtensionContext>{
