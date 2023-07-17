@@ -1,4 +1,7 @@
 # Version history
+## 0.3.23
+- Fix: Sorbet extension fails when opening a project containing Ruby code but no active configuration.
+
 ## 0.3.22
 - Fix: 0.3.21 introduced an unintended behavior change: empty configurations Ids are treated the same as stale ones, causing Sorbet to stay in `Disabled` state until a new configuration is selected.
 
