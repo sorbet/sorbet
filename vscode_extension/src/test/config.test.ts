@@ -331,6 +331,28 @@ suite("SorbetExtensionConfig", async () => {
         );
       });
 
+      [undefined, ""].forEach((configId) => {
+        test(`when \`sorbet.selectedLspConfigId\` is '${configId}', picks first available configuration`, async () => {
+          const workspaceConfig = new FakeWorkspaceConfiguration([
+            ["enabled", true],
+            ["lspConfigs", [fooLspConfig, barLspConfig]],
+            ["selectedLspConfigId", configId],
+          ]);
+          const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
+          assert.strictEqual(sorbetConfig.enabled, true, "should be enabled");
+          assert.strictEqual(
+            sorbetConfig.selectedLspConfig,
+            sorbetConfig.lspConfigs[0],
+            "selectedLspConfig should be undefined",
+          );
+          assert.strictEqual(
+            sorbetConfig.activeLspConfig,
+            sorbetConfig.lspConfigs[0],
+            "activeLspConfig should be undefined",
+          );
+        });
+      });
+
       test("when `sorbet.selectedLspConfigId` matches none of the defined `sorbet.lspConfigs`", async () => {
         const workspaceConfig = new FakeWorkspaceConfiguration([
           ["enabled", true],
