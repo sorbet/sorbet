@@ -18,6 +18,7 @@ export class SorbetStatusProvider implements Disposable {
   /** Mutex for startSorbet. Prevents us from starting multiple processes at once. */
   private isStarting: boolean;
   private lastSorbetRetryTime: number;
+  private operationStack: ShowOperationParams[];
   private readonly onShowOperationEmitter: EventEmitter<ShowOperationParams>;
   private readonly onStatusChangedEmitter: EventEmitter<StatusChangedEvent>;
 
@@ -25,6 +26,7 @@ export class SorbetStatusProvider implements Disposable {
     this.context = context;
     this.isStarting = false;
     this.lastSorbetRetryTime = 0;
+    this.operationStack = [];
     this.onShowOperationEmitter = new EventEmitter<ShowOperationParams>();
     this.onStatusChangedEmitter = new EventEmitter<StatusChangedEvent>();
 
@@ -74,11 +76,55 @@ export class SorbetStatusProvider implements Disposable {
 
     // State might have changed based on new client.
     if (this.wrappedActiveLanguageClient) {
-      this.onStatusChangedEmitter.fire({
+      this.fireOnStatusChanged({
         status: this.wrappedActiveLanguageClient.status,
         error: this.wrappedActiveLanguageClient.lastError,
       });
     }
+  }
+
+  /**
+   * Raise {@link onShowOperation} event. Prefer this over calling
+   * {@link EventEmitter.fire} directly so known state is updated before
+   * event listeners are notified. Spurious events are filtered out.
+   */
+  private fireOnShowOperation(data: ShowOperationParams): void {
+    let changed: boolean = false;
+    if (data.status === "end") {
+      const filteredOps = this.operationStack.filter(
+        (otherP) => otherP.operationName !== data.operationName,
+      );
+      if (filteredOps.length !== this.operationStack.length) {
+        this.operationStack = filteredOps;
+        changed = true;
+      }
+    } else {
+      this.operationStack.push(data);
+      changed = true;
+    }
+
+    if (changed) {
+      this.onShowOperationEmitter.fire(data);
+    }
+  }
+
+  /**
+   * Raise {@link onServerStatusChanged} event. Prefer this over calling
+   * {@link EventEmitter.fire} directly so known state is updated before
+   * event listeners are notified.
+   */
+  private fireOnStatusChanged(data: StatusChangedEvent): void {
+    if (data.stopped) {
+      this.operationStack = [];
+    }
+    this.onStatusChangedEmitter.fire(data);
+  }
+
+  /**
+   * Sorbet client current operation stack.
+   */
+  public get operations(): ReadonlyArray<Readonly<ShowOperationParams>> {
+    return this.operationStack;
   }
 
   /**
@@ -154,7 +200,7 @@ export class SorbetStatusProvider implements Disposable {
       newClient.onStatusChange((status: ServerStatus) => {
         // Ignore event if this is not the current client (e.g. old client being shut down).
         if (this.activeLanguageClient === newClient) {
-          this.onStatusChangedEmitter.fire({
+          this.fireOnStatusChanged({
             status,
             error: newClient.lastError,
           });
@@ -170,7 +216,7 @@ export class SorbetStatusProvider implements Disposable {
         (params: ShowOperationParams) => {
           // Ignore event if this is not the current client (e.g. old client being shut down).
           if (this.activeLanguageClient === newClient) {
-            this.onShowOperationEmitter.fire(params);
+            this.fireOnShowOperation(params);
           }
         },
       ),
@@ -184,6 +230,6 @@ export class SorbetStatusProvider implements Disposable {
   public async stopSorbet(newStatus: ServerStatus): Promise<void> {
     // Use property-setter to ensure proper clean-up.
     this.activeLanguageClient = undefined;
-    this.onStatusChangedEmitter.fire({ status: newStatus, stopped: true });
+    this.fireOnStatusChanged({ status: newStatus, stopped: true });
   }
 }
