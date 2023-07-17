@@ -1,11 +1,19 @@
 import { ChildProcess, spawn } from "child_process";
-import { Disposable, Event, EventEmitter, workspace } from "vscode";
+import {
+  CancellationToken,
+  Disposable,
+  Event,
+  EventEmitter,
+  workspace,
+} from "vscode";
 import {
   CloseAction,
   ErrorAction,
   ErrorHandler,
+  GenericNotificationHandler,
   LanguageClient,
   RevealOutputChannelOn,
+  ServerCapabilities,
   ServerOptions,
 } from "vscode-languageclient/node";
 
@@ -35,6 +43,37 @@ const VALID_STATE_TRANSITIONS: ReadonlyMap<
   // Error is a terminal state for this class.
   [ServerStatus.ERROR, new Set()],
 ]);
+
+/**
+ * Create Sorbet Language Client.
+ */
+function createClient(
+  context: SorbetExtensionContext,
+  serverOptions: ServerOptions,
+  errorHandler: ErrorHandler,
+) {
+  const client = new LanguageClient("ruby", "Sorbet", serverOptions, {
+    documentSelector: [
+      { language: "ruby", scheme: "file" },
+      // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
+      { language: "ruby", scheme: "sorbet" },
+    ],
+    outputChannel: context.logOutputChannel,
+    initializationOptions: {
+      // Opt in to sorbet/showOperation notifications.
+      supportsOperationNotifications: true,
+      // Let Sorbet know that we can handle sorbet:// URIs for generated files.
+      supportsSorbetURIs: true,
+      highlightUntyped: context.configuration.highlightUntyped,
+    },
+    errorHandler,
+    revealOutputChannelOn: context.configuration.revealOutputOnError
+      ? RevealOutputChannelOn.Error
+      : RevealOutputChannelOn.Never,
+  });
+
+  return client;
+}
 
 /**
  * Shims the language client object so that all requests sent get timed. Exported for tests.
@@ -70,10 +109,14 @@ export function shimLanguageClient(
   return client;
 }
 
+export type SorbetServerCapabilities = ServerCapabilities & {
+  sorbetShowSymbolProvider: boolean;
+};
+
 export class SorbetLanguageClient implements Disposable, ErrorHandler {
   private readonly context: SorbetExtensionContext;
   private readonly disposables: Disposable[];
-  public readonly languageClient: LanguageClient;
+  private readonly languageClient: LanguageClient;
   private readonly onStatusChangeEmitter: EventEmitter<ServerStatus>;
   private readonly restart: (reason: RestartReason) => void;
   private sorbetProcess?: ChildProcess;
@@ -93,11 +136,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     this.wrappedStatus = ServerStatus.INITIALIZING;
 
     this.languageClient = shimLanguageClient(
-      SorbetLanguageClient.createClient(
-        context,
-        () => this.startSorbetProcess(),
-        this,
-      ),
+      createClient(context, () => this.startSorbetProcess(), this),
       (metric, value, tags) =>
         this.context.metrics.emitTimingMetric(metric, value, tags),
     );
@@ -153,39 +192,38 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     });
   }
 
-  private static createClient(
-    context: SorbetExtensionContext,
-    serverOptions: ServerOptions,
-    errorHandler: ErrorHandler,
-  ) {
-    const client = new LanguageClient("ruby", "Sorbet", serverOptions, {
-      documentSelector: [
-        { language: "ruby", scheme: "file" },
-        // Support queries on generated files with sorbet:// URIs that do not exist editor-side.
-        { language: "ruby", scheme: "sorbet" },
-      ],
-      outputChannel: context.logOutputChannel,
-      initializationOptions: {
-        // Opt in to sorbet/showOperation notifications.
-        supportsOperationNotifications: true,
-        // Let Sorbet know that we can handle sorbet:// URIs for generated files.
-        supportsSorbetURIs: true,
-        highlightUntyped: context.configuration.highlightUntyped,
-      },
-      errorHandler,
-      revealOutputChannelOn: context.configuration.revealOutputOnError
-        ? RevealOutputChannelOn.Error
-        : RevealOutputChannelOn.Never,
-    });
-
-    return client;
+  /**
+   * Sorbet language server {@link SorbetServerCapabilities capabilities}. Only
+   * available if the server has been initialized.
+   */
+  public get capabilities(): SorbetServerCapabilities | undefined {
+    return <SorbetServerCapabilities | undefined>(
+      this.languageClient.initializeResult?.capabilities
+    );
   }
 
   /**
    * Contains error message when {@link status} is {@link ServerStatus.ERROR}.
    */
-  public get lastError(): string {
-    return this.wrappedLastError ?? "";
+  public get lastError(): string | undefined {
+    return this.wrappedLastError;
+  }
+
+  /**
+   * Resolves when client is ready to serve requests.
+   */
+  public onReady(): Promise<void> {
+    return this.languageClient.onReady();
+  }
+
+  /**
+   * Register a handler for a language server notification. See {@link LanguageClient.onNotification}.
+   */
+  public onNotification(
+    method: string,
+    handler: GenericNotificationHandler,
+  ): Disposable {
+    return this.languageClient.onNotification(method, handler);
   }
 
   /**
@@ -193,6 +231,21 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    */
   public get onStatusChange(): Event<ServerStatus> {
     return this.onStatusChangeEmitter.event;
+  }
+
+  /**
+   * Send a request to language server. See {@link LanguageClient.sendRequest}.
+   */
+  public sendRequest<TResponse>(
+    method: string,
+    param: any,
+    token?: CancellationToken,
+  ): Promise<TResponse> {
+    // Do not pass `token` if undefined, otherwise `param` ends up being passed
+    // as `[...param, undefined]` instead of `param`.
+    return token
+      ? this.languageClient.sendRequest<TResponse>(method, param, token)
+      : this.languageClient.sendRequest<TResponse>(method, param);
   }
 
   /**
