@@ -332,7 +332,7 @@ suite("SorbetExtensionConfig", async () => {
       });
 
       [undefined, ""].forEach((configId) => {
-        test(`when \`sorbet.selectedLspConfigId\` is ${configId}, picks first available`, async () => {
+        test(`when \`sorbet.selectedLspConfigId\` is '${configId}', picks first available configuration`, async () => {
           const workspaceConfig = new FakeWorkspaceConfiguration([
             ["enabled", true],
             ["lspConfigs", [fooLspConfig, barLspConfig]],
