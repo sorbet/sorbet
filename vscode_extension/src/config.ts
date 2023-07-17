@@ -307,9 +307,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.selectedLspConfigId = this.sorbetWorkspaceContext.get<
       string | undefined
     >("selectedLspConfigId", undefined);
-    if (this.selectedLspConfigId === undefined) {
-      // If no selectedLspConfigId has been explicitly set, but there
-      // are configurations, default to the first one.
+
+    // Ensure `selectedLspConfigId` points to an existing configuration - loaded
+    // Id could be `undefined, empty or stale.
+    if (!this.selectedLspConfigId || !this.selectedLspConfig) {
       this.selectedLspConfigId = this.lspConfigs[0]?.id;
     }
 
