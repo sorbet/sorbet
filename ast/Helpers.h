@@ -430,11 +430,6 @@ public:
         return Constant(loc, core::Symbols::Magic());
     }
 
-    static ExpressionPtr SelfNew(core::LocOffsets loc, core::LocOffsets funLoc, int numPosArgs,
-                                 ast::Send::ARGS_store args, Send::Flags flags = {}) {
-        return Send(loc, Magic(loc), core::Names::selfNew(), funLoc, numPosArgs, std::move(args), flags);
-    }
-
     static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
@@ -481,11 +476,7 @@ public:
     }
 
     static bool isSelfNew(ast::Send *send) {
-        if (send->fun != core::Names::selfNew()) {
-            return false;
-        }
-
-        return isMagicClass(send->recv);
+        return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {

@@ -15,9 +15,9 @@ class Box
   sig {params(new_val: Elem).returns(T.self_type)}
   def copy_with(new_val)
     klass = self.class
-    T.reveal_type(klass) # error: `T.class_of(Box)`
+    T.reveal_type(klass) # error: `T.class_of(Box)[Box[Box::Elem]]`
     new_box = self.class.new(new_val)
-    T.reveal_type(new_box) # error: `Box[T.untyped]`
+    T.reveal_type(new_box) # error: `Box[Box::Elem]`
 
     box_elem_class = self.class[Elem]
     T.reveal_type(box_elem_class) # error: Runtime object representing type: Box[Box::Elem]

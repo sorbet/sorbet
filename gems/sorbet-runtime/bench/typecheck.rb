@@ -57,6 +57,32 @@ module SorbetBenchmarks
         false.is_a?(Integer)
       end
 
+      time_block("T.unsafe", iterations_in_block: 10) do
+        T.unsafe(0)
+        T.unsafe(1)
+        T.unsafe(2)
+        T.unsafe(3)
+        T.unsafe(nil)
+        T.unsafe(0)
+        T.unsafe(1)
+        T.unsafe(2)
+        T.unsafe(3)
+        T.unsafe(nil)
+      end
+
+      time_block("T.must on non-nil", iterations_in_block: 10) do
+        T.must(0)
+        T.must(1)
+        T.must(2)
+        T.must(3)
+        T.must(false)
+        T.must(0)
+        T.must(1)
+        T.must(2)
+        T.must(3)
+        T.must(false)
+      end
+
       type = T::Utils.coerce(Integer)
       time_block("T::Types::Simple#valid?", iterations_in_block: 10) do
         type.valid?(0)

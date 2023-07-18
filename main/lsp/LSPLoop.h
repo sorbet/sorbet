@@ -99,7 +99,7 @@ std::string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef met
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr);
-SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym);
+SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
 // Returns all subclasses of ClassOrModuleRef (including itself)
 //

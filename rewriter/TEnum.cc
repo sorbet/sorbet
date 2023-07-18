@@ -57,14 +57,14 @@ vector<ast::ExpressionPtr> badConst(core::MutableContext ctx, core::LocOffsets h
     return {};
 }
 
-ast::Send *findMagicSelfNew(ast::ExpressionPtr &assignRhs) {
+ast::Send *findSelfNew(ast::ExpressionPtr &assignRhs) {
     auto *rhs = ast::cast_tree<ast::Send>(assignRhs);
     if (rhs != nullptr) {
-        if (rhs->fun != core::Names::selfNew() && rhs->fun != core::Names::let()) {
+        if (rhs->fun != core::Names::new_() && rhs->fun != core::Names::let()) {
             return nullptr;
         }
 
-        if (rhs->fun == core::Names::selfNew() && !ast::MK::isMagicClass(rhs->recv)) {
+        if (rhs->fun == core::Names::new_() && !rhs->recv.isSelfReference()) {
             return nullptr;
         }
 
@@ -97,7 +97,7 @@ ast::Send *findMagicSelfNew(ast::ExpressionPtr &assignRhs) {
         return nullptr;
     }
 
-    return findMagicSelfNew(cast->arg);
+    return findSelfNew(cast->arg);
 }
 
 vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
@@ -112,14 +112,14 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         return {};
     }
 
-    auto *magicSelfNew = findMagicSelfNew(asgn->rhs);
-    if (magicSelfNew == nullptr) {
+    auto *selfNew = findSelfNew(asgn->rhs);
+    if (selfNew == nullptr) {
         return badConst(ctx, stat.loc(), klass->loc);
     }
 
     // By this point, we have something that looks like
     //
-    //   A = Magic.<self-new>(self) | T.let(Magic.<self-new>(self), ...)
+    //   A = <self>.new(...) | T.let(<self>.new(...))
     //
     // So we're good to process this thing as a new T::Enum value.
 
@@ -131,25 +131,22 @@ vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *
         }
     }
 
+    auto statLocZero = stat.loc().copyWithZeroLength();
     auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
-    auto classCnst = ast::MK::UnresolvedConstant(lhs->loc, ast::MK::EmptyTree(), name);
+    auto classCnst = ast::MK::UnresolvedConstant(statLocZero, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
     auto classDef =
-        ast::MK::Class(stat.loc(), stat.loc(), classCnst.deepCopy(), std::move(parent), std::move(classRhs));
-
-    // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
-    magicSelfNew->removePosArg(0);
+        ast::MK::Class(statLocZero, statLocZero, classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
-    auto singletonAsgn =
-        ast::MK::Assign(stat.loc(), std::move(asgn->lhs),
-                        ast::make_expression<ast::Cast>(
-                            stat.loc(), core::Types::todo(),
-                            magicSelfNew->withNewBody(stat.loc(), classCnst.deepCopy(), core::Names::new_()),
-                            core::Names::uncheckedLet(), std::move(classCnst)));
+    auto singletonAsgn = ast::MK::Assign(
+        statLocZero, std::move(asgn->lhs),
+        ast::make_expression<ast::Cast>(statLocZero, core::Types::todo(),
+                                        selfNew->withNewBody(selfNew->loc, classCnst.deepCopy(), core::Names::new_()),
+                                        core::Names::uncheckedLet(), std::move(classCnst)));
     vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));

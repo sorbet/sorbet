@@ -29,13 +29,13 @@ end
 b = baz
 
 # use an untyped variable
-  b.length
-# ^ untyped: Call to method `length` on `T.untyped`
+b.length
+# ^^^^^^ untyped: Call to method `length` on `T.untyped`
 
-  b.foo(0).bar(1).baz(2)
-# ^ untyped: Call to method `foo` on `T.untyped`
-# ^^^^^^^^ untyped: Call to method `bar` on `T.untyped`
-# ^^^^^^^^^^^^^^^ untyped: Call to method `baz` on `T.untyped`
+b.foo(0).bar(1).baz(2)
+# ^^^ untyped: Call to method `foo` on `T.untyped`
+#        ^^^ untyped: Call to method `bar` on `T.untyped`
+#               ^^^ untyped: Call to method `baz` on `T.untyped`
 
 T.let(b, Integer) == 6
 

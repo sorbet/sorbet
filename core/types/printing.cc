@@ -221,8 +221,8 @@ string AliasType::show(const GlobalState &gs, ShowOptions options) const {
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<OrType>(this->left);
-    bool rightBrace = isa_type<OrType>(this->right);
+    bool leftBrace = isa_type<OrType>(this->left) || isa_type<AndType>(this->left);
+    bool rightBrace = isa_type<OrType>(this->right) || isa_type<AndType>(this->right);
 
     return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
@@ -250,8 +250,8 @@ string AndType::show(const GlobalState &gs, ShowOptions options) const {
 }
 
 string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<AndType>(this->left);
-    bool rightBrace = isa_type<AndType>(this->right);
+    bool leftBrace = isa_type<OrType>(this->left) || isa_type<AndType>(this->left);
+    bool rightBrace = isa_type<OrType>(this->right) || isa_type<AndType>(this->right);
 
     return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
@@ -441,6 +441,8 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
         fmt::format_to(std::back_inserter(buf), "T::Range");
     } else if (this->klass == Symbols::Set()) {
         fmt::format_to(std::back_inserter(buf), "T::Set");
+    } else if (this->klass == Symbols::Class()) {
+        fmt::format_to(std::back_inserter(buf), "T::Class");
     } else {
         if (std::optional<int> procArity = Types::getProcArity(*this)) {
             fmt::format_to(std::back_inserter(buf), "T.proc");
@@ -486,13 +488,26 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     if (typeMembers.size() < targs.size()) {
         targs.erase(targs.begin() + typeMembers.size());
     }
+
+    if (this->klass.data(gs)->isSingletonClass(gs) && this->klass.data(gs)->typeArity(gs) == 1 &&
+        // We only want to hide the <AttachedClass> arg if it's the only arg and it's the same as
+        // the default (things like `T.all` can make this upper bound more narrow than the default).
+        //
+        // Relies on the fact that the common case is for the upperBound to be a
+        // ClassType (most classes are not generic), and ClassTypes can be compared with
+        // `==` because they are inlined (instead of being behind pointers).
+        (cast_type<LambdaParam>(typeMembers[0].data(gs)->resultType)->upperBound == targs[0] ||
+         // This side handles the selfType case, which is how we compute the initial type
+         // of <self> in builder_entry.
+         (isa_type<SelfTypeParam>(targs[0]) &&
+          cast_type_nonnull<SelfTypeParam>(targs[0]).definition == typeMembers[0]))) {
+        return to_string(buf);
+    }
+
     auto it = targs.begin();
     for (auto typeMember : typeMembers) {
         auto tm = typeMember;
         if (tm.data(gs)->flags.isFixed) {
-            it = targs.erase(it);
-        } else if (this->klass.data(gs)->isClass() &&
-                   typeMember.data(gs)->name == core::Names::Constants::AttachedClass()) {
             it = targs.erase(it);
         } else if (this->klass == Symbols::Hash() && typeMember == typeMembers.back()) {
             it = targs.erase(it);

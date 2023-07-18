@@ -75,6 +75,7 @@ class Footer extends React.Component {
             <a href="https://twitter.com/sorbet_ruby">Twitter</a>
           </p>
         </div>
+        <div id="csat-extension-config" data-notify="#sorbet-team" />
       </footer>
     );
   }

@@ -11,15 +11,28 @@ begin
   end
   class ::A<<C A>> < (::<todo sym>)
     def self.make(<blk>)
-      cls = ::Class.new(::A) do ||
-        begin
-          <cast:<synthetic bind>>(<self>, AppliedType {
-            klass = <S <C <U A>> $1>
-            targs = [
-              <C <U <AttachedClass>>> = A
-            ]
-          }, ::T.class_of(::A))
-          <emptyTree>
+      begin
+        _cls = ::Class.new() do ||
+          begin
+            <cast:<synthetic bind>>(<self>, AppliedType {
+              klass = <C <U Class>>
+              targs = [
+                <C <U <AttachedClass>>> = Object
+              ]
+            }, ::T::Class.[](::Object))
+            <emptyTree>
+          end
+        end
+        _cls = ::Class.new(::A) do ||
+          begin
+            <cast:<synthetic bind>>(<self>, AppliedType {
+              klass = <S <C <U A>> $1>
+              targs = [
+                <C <U <AttachedClass>>> = A
+              ]
+            }, ::T.class_of(::A))
+            <emptyTree>
+          end
         end
       end
     end

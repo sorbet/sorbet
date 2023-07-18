@@ -123,7 +123,7 @@ module T
   #  .returns(T::Array[T.type_parameter(:U)])
   #  def map(&blk); end
   def self.type_parameter(name)
-    T::Types::TypeParameter.new(name)
+    T::Types::TypeParameter.make(name)
   end
 
   # Tells the typechecker that `value` is of type `type`. Use this to get additional checking after
@@ -352,6 +352,18 @@ module T
         T::Types::TypedSet::Untyped.new
       else
         T::Types::TypedSet.new(type)
+      end
+    end
+  end
+
+  module Class
+    def self.[](type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedClass::Untyped::Private::INSTANCE
+      elsif type.is_a?(T::Types::Anything)
+        T::Types::TypedClass::Anything::Private::INSTANCE
+      else
+        T::Types::TypedClass::Private::Pool.type_for_module(type)
       end
     end
   end

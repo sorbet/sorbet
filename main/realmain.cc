@@ -7,7 +7,6 @@
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
-#include "main/autogen/autoloader.h"
 #include "main/autogen/cache.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
@@ -199,53 +198,10 @@ struct AutogenResult {
     };
     CounterState counters;
     vector<pair<int, Serialized>> prints;
-    unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
-bool canSkipAutoloadGenerationForFile(const core::GlobalState &gs, const string_view rootDir, std::string_view file) {
-    auto fref = gs.findFileByPath(file);
-    auto &pkg = gs.packageDB().getPackageForFile(gs, fref);
-
-    // False if a file is *not* in a path-based-autoloading-compatible package; in this case
-    // we will need autoload generation.
-    if (pkg.legacyAutoloaderCompatibility()) {
-        return false;
-    }
-
-    // If we get here, the file is in a path-based-autoloaded package. We can skip it if it is
-    // reachable from the root of the autoload tree by an existing package-local path-based autoloading shim.
-    auto dirPath = std::string{rootDir};
-    std::string fullPath;
-
-    // Iterate over the package name parts (assume package is called Foo::Bar::Baz).
-    // Then, we don't need autoload regeneration if:
-    // - Foo.rb exists and Foo/ does not exist, OR
-    // - Foo/Bar.rb exists and Foo/Bar/ does not exist, OR
-    // - Foo/Bar/Baz.rb exists and Foo/Bar/Baz/ does not exist.
-    for (auto &pkgNamePart : pkg.fullName()) {
-        absl::StrAppend(&dirPath, "/", pkgNamePart.show(gs));
-
-        fullPath.clear();
-        absl::StrAppend(&fullPath, dirPath, ".rb");
-
-        if (!FileOps::dirExists(dirPath) && FileOps::exists(fullPath)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool canSkipAutoloadGeneration(const core::GlobalState &gs, const string_view rootDir,
-                               const vector<std::string> &files) {
-    // Return true if we can skip autoload generation for every file.
-    return absl::c_all_of(
-        files, [&gs, &rootDir](const auto &file) { return canSkipAutoloadGenerationForFile(gs, rootDir, file); });
-}
-
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutoloaderConfig &autoloaderCfg,
-                const autogen::AutogenConfig &autogenCfg, WorkerPool &workers, vector<ast::ParsedFile> &indexed,
-                const vector<std::string> &changedFiles) {
+void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
+                WorkerPool &workers, vector<ast::ParsedFile> &indexed, const vector<std::string> &changedFiles) {
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
@@ -256,68 +212,58 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
     auto crcBuilder = autogen::CRCBuilder::create();
 
-    bool generateAutoloads =
-        opts.print.AutogenAutoloader.enabled &&
-        (changedFiles.empty() || !canSkipAutoloadGeneration(gs, opts.print.AutogenAutoloader.outputPath, changedFiles));
+    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
+        AutogenResult out;
+        int n = 0;
+        int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
+        {
+            Timer timeit(logger, "autogenWorker");
+            int idx = 0;
 
-    workers.multiplexJob(
-        "runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, &autogenCfg, crcBuilder, fileq, resultq]() {
-            AutogenResult out;
-            int n = 0;
-            int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
-            {
-                Timer timeit(logger, "autogenWorker");
-                int idx = 0;
-
-                for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
-                    ++n;
-                    auto &tree = indexed[idx];
-                    if (tree.file.data(gs).isPackage()) {
-                        continue;
-                    }
-                    if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
-                        continue;
-                    }
-
-                    core::Context ctx(gs, core::Symbols::root(), tree.file);
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
-                    tree = move(pf.tree);
-
-                    AutogenResult::Serialized serialized;
-
-                    if (opts.print.Autogen.enabled) {
-                        Timer timeit(logger, "autogenToString");
-                        serialized.strval = pf.toString(ctx, autogenVersion);
-                    }
-                    if (opts.print.AutogenMsgPack.enabled) {
-                        Timer timeit(logger, "autogenToMsgpack");
-                        serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
-                    }
-
-                    if (!tree.file.data(gs).isRBI()) {
-                        // Exclude RBI files because they are not loadable and should not appear in
-                        // auto-loader related output.
-                        if (opts.print.AutogenSubclasses.enabled) {
-                            Timer timeit(logger, "autogenSubclasses");
-                            serialized.subclasses = autogen::Subclasses::listAllSubclasses(
-                                ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                opts.autogenSubclassesRelativeIgnorePatterns);
-                        }
-                        if (opts.print.AutogenAutoloader.enabled) {
-                            Timer timeit(logger, "autogenNamedDefs");
-                            autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
-                        }
-                    }
-
-                    out.prints.emplace_back(idx, move(serialized));
+            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+                ++n;
+                auto &tree = indexed[idx];
+                if (tree.file.data(gs).isPackage()) {
+                    continue;
                 }
+                if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
+                    continue;
+                }
+
+                core::Context ctx(gs, core::Symbols::root(), tree.file);
+                auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
+                tree = move(pf.tree);
+
+                AutogenResult::Serialized serialized;
+
+                if (opts.print.Autogen.enabled) {
+                    Timer timeit(logger, "autogenToString");
+                    serialized.strval = pf.toString(ctx, autogenVersion);
+                }
+                if (opts.print.AutogenMsgPack.enabled) {
+                    Timer timeit(logger, "autogenToMsgpack");
+                    serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
+                }
+
+                if (!tree.file.data(gs).isRBI()) {
+                    // Exclude RBI files because they are not loadable and should not appear in
+                    // auto-loader related output.
+                    if (opts.print.AutogenSubclasses.enabled) {
+                        Timer timeit(logger, "autogenSubclasses");
+                        serialized.subclasses = autogen::Subclasses::listAllSubclasses(
+                            ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                            opts.autogenSubclassesRelativeIgnorePatterns);
+                    }
+                }
+
+                out.prints.emplace_back(idx, move(serialized));
             }
+        }
 
-            out.counters = getAndClearThreadCounters();
-            resultq->push(move(out), n);
-        });
+        out.counters = getAndClearThreadCounters();
+        resultq->push(move(out), n);
+    });
 
-    autogen::DefTree root;
     AutogenResult out;
     for (auto res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger); !res.done();
          res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger)) {
@@ -327,10 +273,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         counterConsume(move(out.counters));
         for (auto &print : out.prints) {
             merged[print.first] = move(print.second);
-        }
-        if (generateAutoloads) {
-            Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
 
@@ -345,22 +287,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                     opts.print.AutogenMsgPack.print(elem.msgpack);
                 }
             }
-        }
-    }
-
-    if (generateAutoloads) {
-        {
-            Timer timeit(logger, "autogenMarkPackages");
-            autogen::DefTreeBuilder::markPackages(gs, root, autoloaderCfg);
-        }
-        {
-            Timer timeit(logger, "autogenAutoloaderPrune");
-            autogen::DefTreeBuilder::collapseSameFileDefs(gs, autoloaderCfg, root);
-        }
-        {
-            Timer timeit(logger, "autogenAutoloaderWrite");
-            autogen::AutoloadWriter::writeAutoloads(gs, workers, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
-                                                    root);
         }
     }
 
@@ -542,9 +468,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
-    if (opts.autocorrect) {
-        gs->autocorrect = true;
-    }
+    gs->autocorrect = opts.autocorrect;
+    gs->didYouMean = opts.didYouMean;
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }
@@ -804,25 +729,21 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
             gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
-            indexed = pipeline::package(*gs, move(indexed), opts, *workers);
             // Only need to compute FoundMethodHashes when running to compute a FileHash
             auto foundMethodHashes = nullptr;
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers, foundMethodHashes).result());
 
-            autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
 
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
-                autoloaderCfg = autogen::AutoloaderConfig::enterConfig(*gs, opts.autoloaderConfig);
             }
 
             autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
                                                      std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
 
-            runAutogen(*gs, opts, autoloaderCfg, autogenCfg, *workers, indexed,
-                       opts.autogenConstantCacheConfig.changedFiles);
+            runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
             // Only need to compute hashes when running to compute a FileHash
@@ -950,20 +871,9 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
-        auto untypedSources = getAndClearHistogram("untyped.sources");
-        if (opts.suggestSig) {
-            ENFORCE(sorbet::debug_mode);
-            vector<pair<string, int>> withNames;
-            long sum = 0;
-            for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).showFullName(*gs), e.second);
-                sum += e.second;
-            }
-            fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-            for (auto &p : withNames) {
-                logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
-                              p.second, sum);
-            }
+        auto untypedBlames = getAndClearHistogram("untyped.blames");
+        if constexpr (sorbet::track_untyped_blame_mode) {
+            pipeline::printUntypedBlames(*gs, untypedBlames, opts);
         }
     }
 

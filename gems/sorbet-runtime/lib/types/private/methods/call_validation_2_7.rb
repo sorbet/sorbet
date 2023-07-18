@@ -11,26 +11,28 @@ module T::Private::Methods::CallValidation
       raise 'Should have used create_validator_procedure_fast'
     end
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.empty?
+    arg_types = method_sig.arg_types
+    case arg_types.length
+    when 0
       create_validator_method_fast0(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type)
-    elsif method_sig.arg_types.length == 1
+    when 1
       create_validator_method_fast1(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
-                                    method_sig.arg_types[0][1].raw_type)
-    elsif method_sig.arg_types.length == 2
+                                    arg_types[0][1].raw_type)
+    when 2
       create_validator_method_fast2(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type)
-    elsif method_sig.arg_types.length == 3
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type)
+    when 3
       create_validator_method_fast3(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type,
-                                    method_sig.arg_types[2][1].raw_type)
-    elsif method_sig.arg_types.length == 4
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type,
+                                    arg_types[2][1].raw_type)
+    when 4
       create_validator_method_fast4(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type,
-                                    method_sig.arg_types[2][1].raw_type,
-                                    method_sig.arg_types[3][1].raw_type)
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type,
+                                    arg_types[2][1].raw_type,
+                                    arg_types[3][1].raw_type)
     else
       raise 'should not happen'
     end
@@ -343,26 +345,28 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.empty?
+    arg_types = method_sig.arg_types
+    case arg_types.length
+    when 0
       create_validator_procedure_fast0(mod, original_method, method_sig, original_visibility)
-    elsif method_sig.arg_types.length == 1
+    when 1
       create_validator_procedure_fast1(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1].raw_type)
-    elsif method_sig.arg_types.length == 2
+                                    arg_types[0][1].raw_type)
+    when 2
       create_validator_procedure_fast2(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type)
-    elsif method_sig.arg_types.length == 3
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type)
+    when 3
       create_validator_procedure_fast3(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type,
-                                    method_sig.arg_types[2][1].raw_type)
-    elsif method_sig.arg_types.length == 4
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type,
+                                    arg_types[2][1].raw_type)
+    when 4
       create_validator_procedure_fast4(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1].raw_type,
-                                    method_sig.arg_types[1][1].raw_type,
-                                    method_sig.arg_types[2][1].raw_type,
-                                    method_sig.arg_types[3][1].raw_type)
+                                    arg_types[0][1].raw_type,
+                                    arg_types[1][1].raw_type,
+                                    arg_types[2][1].raw_type,
+                                    arg_types[3][1].raw_type)
     else
       raise 'should not happen'
     end
@@ -608,26 +612,28 @@ module T::Private::Methods::CallValidation
       raise 'Should have used create_validator_procedure_medium'
     end
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.empty?
+    arg_types = method_sig.arg_types
+    case arg_types.length
+    when 0
       create_validator_method_medium0(mod, original_method, method_sig, original_visibility, method_sig.return_type)
-    elsif method_sig.arg_types.length == 1
+    when 1
       create_validator_method_medium1(mod, original_method, method_sig, original_visibility, method_sig.return_type,
-                                    method_sig.arg_types[0][1])
-    elsif method_sig.arg_types.length == 2
+                                    arg_types[0][1])
+    when 2
       create_validator_method_medium2(mod, original_method, method_sig, original_visibility, method_sig.return_type,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1])
-    elsif method_sig.arg_types.length == 3
+                                    arg_types[0][1],
+                                    arg_types[1][1])
+    when 3
       create_validator_method_medium3(mod, original_method, method_sig, original_visibility, method_sig.return_type,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1],
-                                    method_sig.arg_types[2][1])
-    elsif method_sig.arg_types.length == 4
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1])
+    when 4
       create_validator_method_medium4(mod, original_method, method_sig, original_visibility, method_sig.return_type,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1],
-                                    method_sig.arg_types[2][1],
-                                    method_sig.arg_types[3][1])
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1])
     else
       raise 'should not happen'
     end
@@ -940,26 +946,28 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.empty?
+    arg_types = method_sig.arg_types
+    case arg_types.length
+    when 0
       create_validator_procedure_medium0(mod, original_method, method_sig, original_visibility)
-    elsif method_sig.arg_types.length == 1
+    when 1
       create_validator_procedure_medium1(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1])
-    elsif method_sig.arg_types.length == 2
+                                    arg_types[0][1])
+    when 2
       create_validator_procedure_medium2(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1])
-    elsif method_sig.arg_types.length == 3
+                                    arg_types[0][1],
+                                    arg_types[1][1])
+    when 3
       create_validator_procedure_medium3(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1],
-                                    method_sig.arg_types[2][1])
-    elsif method_sig.arg_types.length == 4
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1])
+    when 4
       create_validator_procedure_medium4(mod, original_method, method_sig, original_visibility,
-                                    method_sig.arg_types[0][1],
-                                    method_sig.arg_types[1][1],
-                                    method_sig.arg_types[2][1],
-                                    method_sig.arg_types[3][1])
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1])
     else
       raise 'should not happen'
     end

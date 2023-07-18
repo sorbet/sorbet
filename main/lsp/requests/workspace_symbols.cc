@@ -91,10 +91,14 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation
         if (location == nullptr) {
             continue;
         }
+        // To be able to get this information, we'd have to walk the tree. It's not that important for
+        // this method, so let's just fall back to treating attributes as methods.
+        auto isAttr = false;
+
         // VSCode does its own internal ranking based on comparing the query string against the result name.
         // Therefore have the name be the fully qualified name if it makes sense (e.g. Foo::Bar instead of Bar)
-        auto result =
-            make_unique<SymbolInformation>(symRef.show(gs), symbolRef2SymbolKind(gs, symRef), std::move(location));
+        auto result = make_unique<SymbolInformation>(symRef.show(gs), symbolRef2SymbolKind(gs, symRef, isAttr),
+                                                     std::move(location));
         auto container = symRef.owner(gs);
         if (container != core::Symbols::root()) {
             result->containerName = container.show(gs);

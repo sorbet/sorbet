@@ -97,6 +97,8 @@ private:
 
     const std::string FORWARD_ARGS = "FORWARD_ARGS";
     const std::string ANONYMOUS_BLOCKARG = "ANONYMOUS_BLOCKARG";
+    const std::string ANONYMOUS_RESTARG = "ANONYMOUS_RESTARG";
+    const std::string ANONYMOUS_KWRESTARG = "ANONYMOUS_KWRESTARG";
 
     // State before =begin / =end block comment
     int cs_before_block_comment;
@@ -234,6 +236,10 @@ public:
     bool is_declared_forward_args();
     void declare_anonymous_args();
     bool is_declared_anonymous_args();
+    void declare_anonymous_restarg();
+    bool is_declared_anonymous_restarg();
+    void declare_anonymous_kwrestarg();
+    bool is_declared_anonymous_kwrestarg();
 
     optional_size dedentLevel();
 };

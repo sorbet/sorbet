@@ -1264,4 +1264,63 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
 #endif
 }
 
+void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
+                        const options::Options &opts) {
+#ifndef SORBET_REALMAIN_MIN
+
+    if (!opts.print.UntypedBlame.enabled) {
+        return;
+    }
+
+    rapidjson::StringBuffer result;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(result);
+
+    writer.StartArray();
+
+    for (auto &[symId, count] : untypedBlames) {
+        auto sym = core::SymbolRef::fromRaw(symId);
+
+        writer.StartObject();
+
+        writer.String("path");
+        if (sym.exists() && sym.loc(gs).exists()) {
+            writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+
+        } else {
+            writer.String("<none>");
+        }
+
+        writer.String("package");
+        if (sym.exists() && sym.loc(gs).exists()) {
+            const auto file = sym.loc(gs).file();
+            const auto pkg = gs.packageDB().getPackageNameForFile(file);
+            if (pkg == core::NameRef::noName()) {
+                writer.String("<none>");
+            } else {
+                writer.String(pkg.show(gs));
+            }
+
+        } else {
+            writer.String("<none>");
+        }
+
+        writer.String("owner");
+        auto owner = sym.owner(gs).show(gs);
+        writer.String(owner);
+
+        writer.String("name");
+        writer.String(sym.name(gs).show(gs));
+
+        writer.String("count");
+        writer.Int64(count);
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    opts.print.UntypedBlame.print(result.GetString());
+#endif
+}
+
 } // namespace sorbet::realmain::pipeline

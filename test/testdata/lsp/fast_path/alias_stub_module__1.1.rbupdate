@@ -1,0 +1,4 @@
+# typed: true
+# assert-fast-path: alias_stub_module__1.rb,alias_stub_module__2.rb
+
+DoesNotExist = 1

@@ -97,7 +97,7 @@ public:
     static TypePtr top();
     static TypePtr bottom();
     static TypePtr nilClass();
-    static TypePtr untyped(const core::GlobalState &gs, core::SymbolRef blame);
+    static TypePtr untyped(core::SymbolRef blame);
     static TypePtr untypedUntracked();
     static TypePtr void_();
     static TypePtr trueClass();
@@ -108,12 +108,12 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
-    static TypePtr arrayOfUntyped();
-    static TypePtr rangeOfUntyped();
+    static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
+    static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
+    static TypePtr hashOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr procClass();
     static TypePtr nilableProcClass();
-    static TypePtr classClass();
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
     static TypePtr todo();
@@ -156,6 +156,8 @@ public:
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr setOf(const TypePtr &elem);
+    static TypePtr tClass(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */

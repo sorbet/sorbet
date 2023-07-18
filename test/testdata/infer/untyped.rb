@@ -22,8 +22,8 @@ else
   x = 0
 end
 
-  x.foo
-# ^ error: Call to method `foo` on `T.untyped`
+x.foo
+# ^^^ error: Call to method `foo` on `T.untyped`
 
 y = T.let(x, A)
 y.foo

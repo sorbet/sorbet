@@ -234,15 +234,10 @@ NameDef names[] = {
     {"factory"},
     {"InexactStruct", "InexactStruct", true},
     {"ImmutableStruct", "ImmutableStruct", true},
-    {"Chalk", "Chalk", true},
-    {"ODM", "ODM", true},
-    {"Document", "Document", true},
-    {"DeprecatedNumeric", "DeprecatedNumeric", true},
     {"Private", "Private", true},
     {"Types", "Types", true},
     {"Methods", "Methods", true},
     {"DeclBuilder", "DeclBuilder", true},
-    {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
 
     {"prefix"},
     {"to"},
@@ -446,7 +441,6 @@ NameDef names[] = {
     {"callWithSplatAndBlock", "<call-with-splat-and-block>"},
     {"enumerableToH", "enumerable_to_h"},
     {"blockBreak", "<block-break>"},
-    {"selfNew", "<self-new>"},
     {"stringInterpolate", "<string-interpolate>"},
 
     // Packager
@@ -458,6 +452,7 @@ NameDef names[] = {
     {"legacy"},
     {"strict"},
     {"visible_to"},
+    {"tests"},
     {"exportAll", "export_all!"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
@@ -475,6 +470,7 @@ NameDef names[] = {
     {"String", "String", true},
     {"Integer", "Integer", true},
     {"Float", "Float", true},
+    {"Numeric", "Numeric", true},
     {"Symbol", "Symbol", true},
     {"Array", "Array", true},
     {"Hash", "Hash", true},
@@ -506,6 +502,16 @@ NameDef names[] = {
     {"Rational", "Rational", true},
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
+    // A magic non user-creatable class to attach symbols for blaming untyped to
+    {"UntypedSource", "<UntypedSource>", true},
+    {"tupleUnderlying", "<tupleUnderlying>", true},
+    {"shapeUnderlying", "<shapeUnderlying>", true},
+    {"tupleLub", "<tupleLub>", true},
+    {"shapeLub", "<shapeLub>", true},
+    {"YieldLoadArg", "<YieldLoadArg>", true},
+    {"GetCurrentException", "<GetCurrentException>", true},
+    {"LoadYieldParams", "<LoadYieldParams>", true},
+    {"shapeSquareBracketsEq", "<shapeSquareBracketsEq>", true},
     // A magic non user-creatable class for binding procs to attached_class
     {"BindToAttachedClass", "<BindToAttachedClass>", true},
     // A magic non user-creatable class for binding procs to self_type
@@ -564,6 +570,8 @@ NameDef names[] = {
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
     {"Token", "Token", true},
+    {"Account", "Account", true},
+    {"Merchant", "Merchant", true},
 
     // Typos
     {"Int", "Int", true},

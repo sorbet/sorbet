@@ -84,7 +84,7 @@ build:dbg-linux --config=dbg --platforms=@//tools/platforms:linux_x86_64
 ##
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
-build:release-common --define jemalloc=true
+build:release-common --define mimalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
@@ -93,6 +93,16 @@ build:release-common --config=versioned
 build:release-debug-common --config=forcedebug
 build:release-debug-common --config=debugsymbols
 build:release-debug-common --config=skipslowenforce
+
+# This mode has been added to allow tracking the symbols
+# which are to blame for usages of untyped code in a codebase.
+# This allows identifying what symbols would be the highest impact
+# to type.
+#
+# Earlier, we allowed for such statistic collection only in DEBUG mode
+# However, that was far too slow for our purposes. Thus, this mode allows
+# you to build in release mode and track these statistics.
+build:untyped-blame --copt=-DTRACK_UNTYPED_BLAME_MODE
 
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now

@@ -259,7 +259,7 @@ class Method < Object
   # ```ruby
   # (1..3).method(:map).owner #=> Enumerable
   # ```
-  sig {returns(T.any(Class, Module))}
+  sig {returns(Module)}
   def owner; end
 
   # Returns the parameter information of this method.

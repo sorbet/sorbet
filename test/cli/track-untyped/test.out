@@ -1,6 +1,6 @@
 a.rb:6: Call to method `foo` on `T.untyped` https://srb.help/7018
      6 |  result = arg0.foo
-                   ^^^^
+                        ^^^
   Got `T.untyped` originating from:
     a.rb:5:
      5 |def example_untyped(arg0)
@@ -50,7 +50,7 @@ a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
 
 b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
      4 |T.unsafe(nil).foo
-        ^^^^^^^^^^^^^
+                      ^^^
   Got `T.untyped` originating from:
     b.rb:4:
      4 |T.unsafe(nil).foo

@@ -55,18 +55,18 @@ end
 sig {params(x: T.any(T.class_of(C), T.class_of(D))).void}
 def test5(x)
   if x == C
-    T.reveal_type(x) # error: `T.class_of(C)[T.untyped]`
+    T.reveal_type(x) # error: `T.class_of(C)[C, T.untyped]`
   else
-    T.reveal_type(x) # error: `T.class_of(D)[T.untyped]`
+    T.reveal_type(x) # error: `T.class_of(D)[D, T.untyped]`
   end
 end
 
 sig {params(x: T.any(T.class_of(C), T.class_of(D))).void}
 def test6(x)
   if C == x
-    T.reveal_type(x) # error: `T.class_of(C)[T.untyped]`
+    T.reveal_type(x) # error: `T.class_of(C)[C, T.untyped]`
   else
-    T.reveal_type(x) # error: `T.class_of(D)[T.untyped]`
+    T.reveal_type(x) # error: `T.class_of(D)[D, T.untyped]`
   end
 end
 

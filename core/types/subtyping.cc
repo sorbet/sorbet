@@ -286,8 +286,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass);
-        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -373,7 +373,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<TupleType>(move(elemLubs));
                             }
                         } else {
-                            result = Types::arrayOfUntyped();
+                            result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
@@ -392,7 +392,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 ++i;
                                 auto optind = h1.indexForKey(el2);
                                 if (!optind.has_value()) {
-                                    result = Types::hashOfUntyped();
+                                    result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                                     return;
                                 }
                                 auto &inserted =
@@ -408,7 +408,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<ShapeType>(h2->keys, move(valueLubs));
                             }
                         } else {
-                            result = Types::hashOfUntyped();
+                            result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                         }
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);
@@ -1397,14 +1397,14 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (isa_type<OrType>(r)) {
             swap(r, l);
         }
-        auto *a2o = cast_type<OrType>(l);
-        if (a2o != nullptr) {
+        auto *a1o = cast_type<OrType>(l);
+        if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
 
             // this could be using glb, but we _know_ that we alredy tried to collapse it(prior
             // construction of types did). Thus we use AndType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a2o->left, r), t2, mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a2o->right, r), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, r), t2, mode) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, r), t2, mode);
         }
     }
     if (o2 != nullptr) {

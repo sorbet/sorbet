@@ -32,6 +32,7 @@ message File {
     CompiledLevel compiled = 5;
     // Note: a value of zero and an unset field look the same.
     int32 untyped_usages = 6;
+    string pkg = 7;
 }
 
 message FileTable {

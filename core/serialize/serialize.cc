@@ -418,7 +418,10 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
     switch (what.tag()) {
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::UnresolvedClassType:
-        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::BlamedUntyped: {
+            p.putU4(what.untypedBlame().rawId());
+            break;
+        }
         case TypePtr::Tag::ClassType: {
             auto c = cast_type_nonnull<ClassType>(what);
             p.putU4(c.symbol.id());
@@ -521,7 +524,10 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 
     switch (static_cast<TypePtr::Tag>(tag)) {
-        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::BlamedUntyped: {
+            SymbolRef blame = SymbolRef::fromRaw(p.getU4());
+            return make_type<BlamedUntyped>(blame);
+        }
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::ClassType:

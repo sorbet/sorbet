@@ -81,11 +81,11 @@ struct Printers {
     PrinterConfig MissingConstants;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
-    PrinterConfig AutogenAutoloader;
     PrinterConfig AutogenSubclasses;
     PrinterConfig Packager;
     PrinterConfig MinimizeRBI;
     PrinterConfig PayloadSources;
+    PrinterConfig UntypedBlame;
     // Ensure everything here is in PrinterConfig::printers().
 
     std::vector<std::reference_wrapper<PrinterConfig>> printers();
@@ -103,21 +103,6 @@ enum class Phase {
     RESOLVER,
     CFG,
     INFERENCER,
-};
-
-struct AutoloaderConfig {
-    // Top-level modules to include in autoloader output
-    std::vector<std::string> modules;
-    std::string rootDir;
-    std::string preamble;
-    std::string registryModule;
-    std::string rootObject;
-    std::vector<std::string> requireExcludes;
-    std::vector<std::vector<std::string>> sameFileModules;
-    std::vector<std::string> stripPrefixes;
-
-    std::vector<std::string> absoluteIgnorePatterns;
-    std::vector<std::string> relativeIgnorePatterns;
 };
 
 struct AutogenConstCacheConfig {
@@ -140,7 +125,6 @@ constexpr size_t MAX_CACHE_SIZE_BYTES = 1L * 1024 * 1024 * 1024; // 1 GiB
 
 struct Options {
     Printers print;
-    AutoloaderConfig autoloaderConfig;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 
@@ -168,6 +152,7 @@ struct Options {
     bool traceParser = false;
     bool noErrorCount = false;
     bool autocorrect = false;
+    bool didYouMean = true;
     bool waitForDebugger = false;
     bool censorForSnapshotTests = false;
     bool forceHashing = false;

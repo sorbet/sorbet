@@ -226,7 +226,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         result = targetClass.data(gs)->externalType();
     } else {
         auto resultType = constant.resultType(gs);
-        result = resultType == nullptr ? core::Types::untyped(gs, constant) : resultType;
+        result = resultType == nullptr ? core::Types::untyped(constant) : resultType;
     }
 
     if (constant.isTypeAlias(gs)) {
@@ -259,7 +259,7 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     return resultType;
 }
 
-SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
+SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol, bool isAttrBestEffortUIOnly) {
     if (symbol.isClassOrModule()) {
         auto klass = symbol.asClassOrModuleRef();
         if (klass.data(gs)->isModule()) {
@@ -272,6 +272,8 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
         auto method = symbol.asMethodRef();
         if (method.data(gs)->name == core::Names::initialize()) {
             return SymbolKind::Constructor;
+        } else if (isAttrBestEffortUIOnly) {
+            return SymbolKind::Property;
         } else {
             return SymbolKind::Method;
         }

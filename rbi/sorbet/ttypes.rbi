@@ -49,6 +49,7 @@ class T::Types::ClassOf < T::Types::Base
   def subtype_of_single?(other); end
   def describe_obj(obj); end
   def type; end
+  def [](*types); end
 end
 
 class T::Types::FixedArray < T::Types::Base
@@ -70,6 +71,17 @@ end
 class T::Types::Untyped < T::Types::Base
   def initialize; end
   def name; end
+  def valid?(obj); end
+end
+
+class T::Types::Anything < T::Types::Base
+  sig {void}
+  def initialize; end
+
+  sig {returns(String)}
+  def name; end
+
+  sig {params(obj: T.anything).returns(T::Boolean)}
   def valid?(obj); end
 end
 
@@ -130,6 +142,7 @@ class T::Types::TypeParameter < T::Types::Base
   def valid?(obj); end
   def subtype_of_single?(type); end
   def name; end
+  def self.make(name); end
 end
 
 # --- stdlib generics ---
@@ -191,3 +204,19 @@ class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
   def type; end
 end
 
+class T::Types::TypedClass < T::Types::Base
+  sig {params(type: T.untyped).void}
+  def initialize(type); end
+
+  sig {returns(String)}
+  def name; end
+
+  sig {params(obj: T.anything).returns(T::Boolean)}
+  def valid?(obj); end
+
+  sig {returns(T::Types::Base)}
+  def type; end
+
+  sig {returns(T.class_of(Class))}
+  def underlying_class; end
+end

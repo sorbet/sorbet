@@ -161,6 +161,15 @@ There is no way to have Sorbet **only** apply autocorrect suggestions in a given
 file. Instead, use a version control system to undo autocorrect changes Sorbet
 makes in files that should not be changed.
 
+Sometimes, Sorbet autocorrects include suggestions to rename a method, for
+example to fix a supposed typo. Sometimes these "did you mean" suggestions can
+accidentally change the meaning of a program. To disable these did you mean
+suggestions, use `--did-you-mean=false`:
+
+```
+❯ srb tc --autocorrect --did-you-mean=false
+```
+
 ### Silencing errors in bulk
 
 Sometimes, Sorbet doesn't know how to **fix** an error, it only knows how to

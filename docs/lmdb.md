@@ -62,6 +62,9 @@ Be sure to cross reference with the [command line tools] docs for further usage
 info.
 
 ```bash
+# Install the command line tools
+pip3 install lmdb
+
 # Reads unnamed database from /tmp/sorbet-cache/data.mdb
 # Writes into ./main.cdbmake
 # Will list all the "flavors" in the Sorbet cache
@@ -93,6 +96,21 @@ python -mlmdb --env example-cache shell
 # ...
 # {'psize': 4096, 'depth': 2, 'branch_pages': 1, 'leaf_pages': 20, 'overflow_pages': 699, 'entries': 90}
 
+# Print a list of key<TAB>len(val) pairs to out.txt:
+cd /tmp/sorbet-cache
+python -mlmdb --env . shell
+# Python 3.9.12 (main, Mar 23 2022, 21:36:19)
+# [GCC 5.4.0 20160609] on linux
+# Type "help", "copyright", "credits" or "license" for more information.
+# (InteractiveConsole)
+# >>> with open('/tmp/out.txt', 'wb') as f:
+# ...   with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+# ...       cursor = txn.cursor()
+# ...       for key, val in cursor:
+# ...           f.write(key)
+# ...           f.write(b'\t')
+# ...           f.write(str(len(val)).encode())
+# ...           f.write(b'\n')
 ```
 
 

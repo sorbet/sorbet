@@ -916,18 +916,6 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->pinnedTypes = other.pinnedTypes;
 }
 
-core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr &procType) {
-    if (!procType.derivesFrom(ctx, core::Symbols::Proc())) {
-        return core::Types::untypedUntracked();
-    }
-    auto *applied = core::cast_type<core::AppliedType>(procType);
-    if (applied == nullptr || applied->targs.empty()) {
-        return core::Types::untypedUntracked();
-    }
-    // Proc types have their return type as the first targ
-    return applied->targs.front();
-}
-
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
                           core::NameRef fun, const core::Loc &loc) {
     if (fun != core::Names::flatMap()) {
@@ -1116,10 +1104,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
-                        retainedResult->main.blockReturnType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockReturnType = core::Types::untyped(retainedResult->main.method);
                     }
                     if (!retainedResult->main.blockPreType) {
-                        retainedResult->main.blockPreType = core::Types::untyped(ctx, retainedResult->main.method);
+                        retainedResult->main.blockPreType = core::Types::untyped(retainedResult->main.method);
                     }
                     ENFORCE(retainedResult->main.sendTp);
                 }
@@ -1210,7 +1198,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         tp.origins.emplace_back(symbol.loc(ctx));
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
-                        tp.type = core::Types::untyped(ctx, symbol);
+                        tp.type = core::Types::untyped(symbol);
                     }
                 } else if (symbol.isTypeAlias(ctx)) {
                     ENFORCE(symbol.resultType(ctx) != nullptr);
@@ -1339,7 +1327,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
-                    tp.type = core::Types::untypedUntracked();
+                    tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_LoadYieldParams());
                 } else {
                     tp.type = params;
                 }
@@ -1360,7 +1348,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         const core::TypeAndOrigins &argsType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
                         tp.type = argsType.type;
                     } else {
-                        tp.type = core::Types::untypedUntracked();
+                        tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_YieldLoadArg());
                     }
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
                     return;
@@ -1369,36 +1357,47 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // Fetch the type for the argument out of the parameters for the block
                 // by simulating a blockParam[i] call.
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, i.yieldParam);
-                core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
-                core::TypeAndOrigins arg{argType, recvType.origins};
-                InlinedVector<const core::TypeAndOrigins *, 2> args;
-                args.emplace_back(&arg);
+                if (recvType.type.isUntyped()) {
+                    // This avoids reporting an untyped usage for ->(x) { 0 }. Sorbet would
+                    // initialize the type of the local `x` by calling <blk>.[](0), which makes it
+                    // look like we're "using" an untyped value, but that's purely internal to
+                    // Sorbet. By early returning here, we'll only report an untyped usage if that
+                    // real argument ends up then getting used.
+                    tp.type = recvType.type;
+                } else {
+                    core::TypePtr argType = core::make_type<core::IntegerLiteralType>((int64_t)i.argId);
 
-                InlinedVector<core::LocOffsets, 2> argLocs;
-                argLocs.emplace_back(bind.loc);
-                core::CallLocs locs{
-                    ctx.file, bind.loc, bind.loc, bind.loc, argLocs,
-                };
+                    core::TypeAndOrigins arg{argType, recvType.origins};
+                    InlinedVector<const core::TypeAndOrigins *, 2> args;
+                    args.emplace_back(&arg);
 
-                const auto numPosArgs = 1;
-                const auto suppressErrors = true;
-                const auto isPrivateOk = true;
-                const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
-                core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
-                                                locs,
-                                                numPosArgs,
-                                                args,
-                                                recvType.type,
-                                                recvType,
-                                                recvType.type,
-                                                block,
-                                                ctx.locAt(bind.loc),
-                                                isPrivateOk,
-                                                suppressErrors};
-                auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
-                tp.type = dispatched.returnType;
+                    InlinedVector<core::LocOffsets, 2> argLocs;
+                    argLocs.emplace_back(bind.loc);
+                    core::CallLocs locs{
+                        ctx.file, bind.loc, bind.loc, bind.loc, argLocs,
+                    };
+
+                    const auto numPosArgs = 1;
+                    const auto suppressErrors = true;
+                    const auto isPrivateOk = true;
+                    const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
+                    core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
+                                                    locs,
+                                                    numPosArgs,
+                                                    args,
+                                                    recvType.type,
+                                                    recvType,
+                                                    recvType.type,
+                                                    block,
+                                                    ctx.locAt(bind.loc),
+                                                    isPrivateOk,
+                                                    suppressErrors};
+                    auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
+                    tp.type = dispatched.returnType;
+                }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
+
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), bind.bind.variable.data(inWhat), tp,
@@ -1432,7 +1431,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     }
                 } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from method is `{}`", "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
@@ -1470,7 +1469,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
                     }
                 } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
-                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                    auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
                     if (auto e = ctx.beginError(bind.loc, what)) {
                         e.setHeader("Value returned from block is `{}`", "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
@@ -1510,7 +1509,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::GetCurrentException &i) {
-                tp.type = core::Types::untypedUntracked();
+                tp.type = core::Types::untyped(core::Symbols::Magic_UntypedSource_GetCurrentException());
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
@@ -1582,6 +1581,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                                 e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, ctx.locAt(c.valueLoc), constr,
+                                                                             castType, ty.type);
                             }
                         }
                     }
@@ -1768,7 +1769,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 
             result.type = lambdaParam->upperBound;
         } else {
-            result.type = rebind.data(ctx)->externalType();
+            result.type = rebind.data(ctx)->selfType(ctx);
         }
 
         result.origins.emplace_back(main.blockSpec.loc);

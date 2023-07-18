@@ -533,9 +533,9 @@ type `T.untyped` (along with all other values).
 
 ## 3513
 
-The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
-Ruby `class`. For more, see the docs for
-[`T.attached_class`](attached-class.md).
+This error code is from an old Sorbet version. It's equivalent to error 4023:
+
+[→ 4023](#4023)
 
 ## 3514
 
@@ -1274,6 +1274,11 @@ assignment and a class definition for a given constant, you can either:
     itself, and mark that file `# typed: ignore` (possibly also using an `RBI`
     file to declare anything that can't be factored out of the ignored file but
     should still be visible to Sorbet).
+
+## 4023
+
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
+Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
 
 ## 5001
 
@@ -3960,7 +3965,7 @@ Or if it's imperative to continue using `is_a?`, change the type to
 ## 7039
 
 For more information, see how to place
-[bounds on type members](generics.md#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower).
+[bounds on type members](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower).
 
 Consider this example:
 

@@ -6,14 +6,63 @@ module T::Private::Methods::SignatureValidation
   Modes = Methods::Modes
 
   def self.validate(signature)
+    # Constructors in any language are always a bit weird: they're called in a
+    # static context, but their bodies are implemented by instance methods. So
+    # a mix of the rules that apply to instance methods and class methods
+    # apply.
+    #
+    # In languages like Java and Scala, static methods/companion object methods
+    # are never inherited. (In Java it almost looks like you can inherit them,
+    # because `Child.static_parent_method` works, but this method is simply
+    # resolved statically to `Parent.static_parent_method`). Even though most
+    # instance methods overrides have variance checking done, constructors are
+    # not treated like this, because static methods are never
+    # inherited/overridden, and the constructor can only ever be called
+    # indirectly by way of the static method. (Note: this is only a mental
+    # model--there's not actually a static method for the constructor in Java,
+    # there's an `invokespecial` JVM instruction that handles this).
+    #
+    # But Ruby is not like Java: singleton class methods in Ruby *are*
+    # inherited, unlike static methods in Java. In fact, this is similar to how
+    # JavaScript works. TypeScript simply then sidesteps the issue with
+    # structural typing: `typeof Parent` is not compatible with `typeof Child`
+    # if their constructors are different. (In a nominal type system, simply
+    # having Child descend from Parent should be the only factor in determining
+    # whether those types are compatible).
+    #
+    # Flow has nominal subtyping for classes. When overriding (static and
+    # instance) methods in a child class, the overrides must satisfy variance
+    # constraints. But it still carves out an exception for constructors,
+    # because then literally every class would have to have the same
+    # constructor. This is simply unsound. Hack does a similar thing--static
+    # method overrides are checked, but not constructors. Though what Hack
+    # *does* have is a way to opt into override checking for constructors with
+    # a special annotation.
+    #
+    # It turns out, Sorbet already has this special annotation: either
+    # `abstract` or `overridable`. At time of writing, *no* static override
+    # checking happens unless marked with these keywords (though at runtime, it
+    # always happens). Getting the static system to parity with the runtime by
+    # always checking overrides would be a great place to get to one day, but
+    # for now we can take advantage of it by only doing override checks for
+    # constructors if they've opted in.
+    #
+    # (When we get around to more widely checking overrides statically, we will
+    # need to build a matching special case for constructors statically.)
+    #
+    # Note that this breaks with tradition: normally, constructors are not
+    # allowed to be abstract. But that's kind of a side-effect of everything
+    # above: in Java/Scala, singleton class methods are never abstract because
+    # they're not inherited, and this extends to constructors. TypeScript
+    # simply rejects `new klass()` entirely if `klass` is
+    # `typeof AbstractClass`, requiring instead that you write
+    # `{ new(): AbstractClass }`. We may want to consider building some
+    # analogue to `T.class_of` in the future that works like this `{new():
+    # ...}` type.
     if signature.method_name == :initialize && signature.method.owner.is_a?(Class)
-      # Constructors are special. They look like overrides in terms of a super_method existing,
-      # but in practice, you never call them polymorphically. Conceptually, they're standard
-      # methods (this is consistent with how they're treated in other languages, e.g. Java)
-      if signature.mode != Modes.standard
-        raise "`initialize` should not use `.abstract` or `.implementation` or any other inheritance modifiers."
+      if signature.mode == Modes.standard
+        return
       end
-      return
     end
 
     super_method = signature.method.super_method

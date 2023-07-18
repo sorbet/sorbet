@@ -59,7 +59,11 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
-    auto symInfo = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym),
+    // To be able to get this information, we'd have to walk the tree. It's not that important for
+    // this method, so let's just fall back to treating attributes as methods.
+    auto isAttrBestEffortUIOnly = false;
+
+    auto symInfo = make_unique<SymbolInformation>(sym.show(gs), symbolRef2SymbolKind(gs, sym, isAttrBestEffortUIOnly),
                                                   config.loc2Location(gs, sym.loc(gs)));
 
     auto container = sym.owner(gs);

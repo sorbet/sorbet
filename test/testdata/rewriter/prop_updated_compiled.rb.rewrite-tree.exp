@@ -28,15 +28,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+      <self>.returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
     def updated<<todo method>>(&<blk>)
-      <self>.instance_variable_get(:@updated)
+      begin
+        arg2 = <self>.instance_variable_get(:@updated)
+        <self>.class().decorator().prop_get_logic(<self>, :updated, arg2)
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)).returns(::T.nilable(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>))
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Numeric>)).returns(::T.nilable(<emptyTree>::<C Numeric>))
     end
 
     def updated=<<todo method>>(arg0, &<blk>)
@@ -52,7 +55,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.updated_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :updated, :attr_reader)
+    ::Sorbet::Private::Static.keep_def(<self>, :updated, :genericPropGetter)
 
     ::Sorbet::Private::Static.keep_def(<self>, :updated=, :normal)
   end
