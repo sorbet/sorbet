@@ -171,12 +171,14 @@ export class SorbetStatusProvider implements Disposable {
    */
   public async startSorbet(): Promise<void> {
     if (this.isStarting) {
-      this.context.log.trace("Ignoring start request, already starting.");
+      this.context.log.trace("Ignored start request, already starting.");
       return;
     }
 
     if (!this.context.configuration.activeLspConfig) {
-      this.context.log.info("Ignoring start request, no active configuration.");
+      this.context.log.info(
+        "Ignored start request, no active configuration. See https://sorbet.org/docs/vscode",
+      );
       return;
     }
 
