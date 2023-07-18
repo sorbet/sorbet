@@ -177,7 +177,7 @@ export class SorbetStatusProvider implements Disposable {
 
     if (!this.context.configuration.activeLspConfig) {
       this.context.log.info(
-        "Ignored start request, no active configuration. If you want to use Sorbet in this project, you need to add a sorbet/config file.",
+        "Ignored start request, no active configuration. If you want to use Sorbet in this project, add a sorbet/config file.",
       );
       return;
     }
