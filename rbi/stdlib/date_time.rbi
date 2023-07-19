@@ -653,7 +653,7 @@ class DateTime < Date
   #
   # See also strptime(3) and
   # [`strftime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html#method-i-strftime).
-  sig {params(str: String, fmt: String, sg: Integer).returns(DateTime)}
+  sig {params(str: String, fmt: String, sg: Integer).returns(T.attached_class)}
   def self.strptime(str="-4712-01-01T00:00:00+00:00", fmt="%FT%T%z", sg=Date::ITALY); end
 
   # Creates a new
