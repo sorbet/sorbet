@@ -224,9 +224,14 @@ class Child < Parent
 end
 ```
 
-It no longer makes sense to ask whether `T.class_of(Child) <:
-T.class_of(Parent)`, because those are bare generics. But both `upper` and
-`lower` are hard to stomach as defaults.
+Suddenly, `Parent` and `Child` need to have defaults (because of all the
+situations we had before, like if they appear as class literals in a method
+body, or as the result type of a call to `self.class`). We might want to pick
+defaults such that we maintain the relationship that held previously, namely that
+`T.class_of(Child) <: T.class_of(Parent)`. (Those types are meaningless now that
+those are bare generic classes, but the intuition of wanting it to still hold
+remains). The problem is that both `upper` and `lower` are hard to stomach as
+defaults.
 
 Consider if we pick `upper`. Then we'd have that:
 
