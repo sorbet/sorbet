@@ -234,9 +234,10 @@ Consider if we pick `upper`. Then we'd have that:
 - `Child` has type `T.class_of(Child)[Integer]`
 
 `T.class_of(Child)[Integer]` is not a subtype of `T.class_of(Parent)[Numeric]`
-because `Elem` is invariant! This would be the sound thing to do: it's possible
-to draw a contradiction if we assume that `Child` is an instance of
-`T.class_of(Parent)[Numeric]`:
+because `Elem` is invariant! As unintuitive as this sounds, this subtyping
+outcome is actually the desirable, sound outcome: if we both pick the upper
+bound as the default **and** treat `Child` as a valid value of type
+`T.class_of(Parent)`, it's possible to draw a contradiction:
 
 ```ruby
 # typed: strong
@@ -297,7 +298,7 @@ So Sorbet gives up and accepts the unsoundness by simply defaulting to
 The takeaway? Type members in well-typed code should always either:
 
 - be fixed, and accept the limitations that come with that (basically: makes the
-  class final in practice), or
+  class final in practice[^final]), or
 - be either co- or contravariant
 - be carefully reviewed to ensure that `T.untyped` isn't sneaking in
   ([highlighting untyped code](https://sorbet.org/docs/highlight-untyped) is a
@@ -308,7 +309,7 @@ having `T.untyped` sneak in, due to a combination of unavoidable and intentional
 choices in the type system. Mitigating `T.untyped` means looking at the list of
 cases where Sorbet defaults type arguments, and doing the opposite.
 
-- Use `# typed: strict`, So Sorbet will treat bare stdlib generics as errors.
+- Use `# typed: strict`, so Sorbet will treat bare stdlib generics as errors.
 
   For generic singleton classes, note that `T.class_of(...)[...]` is valid
   syntax for applying type arguments to a generic singleton class. (Sorbet does
@@ -341,7 +342,7 @@ cases where Sorbet defaults type arguments, and doing the opposite.
     abstract_class.thing # OK
   end
 
-  AbstractClass.foo # 💥 bad, untyped
+  AbstractClass.thing # 💥 bad, untyped
   ```
 
 - Always provide types when instantiating a generic class.
@@ -370,6 +371,18 @@ treat the constructor as a generic **method**, where the type is something like
 generic _methods_, not the class, like `Box.new[Integer](0)` or
 `Box.make[Integer](0)`.
 
+[^final]: I say "final in practice" here because while you'll still be able to
+subclass this class, those subclasses will be forced to repeat the exact same
+`fixed` annotation as the parent. This means that if, for example, you're using
+a type member to track an associated `Result` type of a class that implements an
+AbstractRPCCommand (like the [example in our generics docs]), you'll find that
+child classes must have the same `Result` type as the parent. In rare cases
+that's fine, but usually when you're making a subclass, you want to use set the
+type member to something else entirely, which is no longer possible after a
+bound is `fixed`.
+
 [`unsafeComputeExternalType`]: https://github.com/sorbet/sorbet/blob/f47b4a5c61130bbd97695d4efa4287b0cd84a1f6/core/Symbols.cc#L128
+
+[example in our generics docs]: https://sorbet.org/docs/generics#a-type_template-example
 
 [175ce0f1]: https://github.com/sorbet/sorbet/commits/175ce0f1b7c910cc035aeccf2aec5907866178bb
