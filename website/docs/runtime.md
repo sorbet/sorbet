@@ -306,7 +306,7 @@ or not until the block is evaluated. So even if a sig is marked
 is called, Sorbet will discover the `.checked(:never)` and put back the original
 method.
 
-Sometimes even this tiny amount of runtime metaprogramming is unnacceptable at
+Sometimes even this tiny amount of runtime metaprogramming is unacceptable at
 runtime. To completely eliminate all runtime side effects when defining a
 signature, replace `sig` with `T::Sig::WithoutRuntime.sig` when annotating
 methods:
@@ -328,6 +328,27 @@ class Foo
   def bar(x); end
 end
 ```
+
+**Note**: For consistency in large codebases, it's best to avoid
+`T::Sig::WithoutRuntime` unless it can't be avoided, because the performance win
+versus simply using `.checked(:never)` is marginal. Some examples:
+
+- Circumstances make it impossible to put `extend T::Sig` in the class, but
+  `sorbet-runtime` is still loaded.
+- The method is `method_missing` or `respond_to_missing?`, as `sorbet-runtime`
+  does not support wrapping these methods.
+- Some code not under your control is trying to reflect on the result of
+  `.parameters` or `.arity` of the sig'ed method. (Note that this precludes code
+  under _your_ control: Sorbet provides [`T::Utils.signature_for_method`], which
+  exposes the arity of the underlying method.)
+- After careful measurements, even the first call to a method is performance
+  sensitive. This is rare, but can happen when trying to optimize speed of code
+  loading specifically.
+
+If none of these reasons apply, it's best to avoid `T::Sig::WithoutRuntime`,
+because it will stand out versus most other usages of `sig` in a codebase.
+
+[`T::Utils.signature_for_method`]: https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68
 
 ## T.let, T.cast, T.must, T.bind
 
