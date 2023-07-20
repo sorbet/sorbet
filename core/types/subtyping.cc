@@ -608,7 +608,6 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    TypePtr result;
     // 1 :-)
     auto c1 = cast_type_nonnull<ClassType>(t1);
     auto c2 = cast_type_nonnull<ClassType>(t2);
