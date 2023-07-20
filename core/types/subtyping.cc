@@ -1391,37 +1391,37 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     if (a1 != nullptr) {
         // If the left is an And of an Or, then we can reorder it to be an Or of
         // an And, which lets us recurse on smaller types
-        auto l = a1->left;
-        auto r = a1->right;
-        if (isa_type<OrType>(r)) {
+        const auto *l = &a1->left;
+        const auto *r = &a1->right;
+        if (isa_type<OrType>(*r)) {
             swap(r, l);
         }
-        auto *a1o = cast_type<OrType>(l);
+        auto *a1o = cast_type<OrType>(*l);
         if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
 
             // this could be using glb, but we _know_ that we alredy tried to collapse it(prior
             // construction of types did). Thus we use AndType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, r), t2, mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, r), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, *r), t2, mode);
         }
     }
     if (o2 != nullptr) {
         // Simiarly to above, if the right is an Or of an And, then we can reorder it to be an And of
         // an Or, which lets us recurse on smaller types
-        auto l = o2->left;
-        auto r = o2->right;
-        if (isa_type<AndType>(r)) {
+        const auto *l = &o2->left;
+        const auto *r = &o2->right;
+        if (isa_type<AndType>(*r)) {
             swap(r, l);
         }
-        auto *o2a = cast_type<AndType>(l);
+        auto *o2a = cast_type<AndType>(*l);
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
 
             // this could be using lub, but we _know_ that we alredy tried to collapse it(prior
             // construction of types did). Thus we use OrType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, r), mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, r), mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode);
         }
     }
 
