@@ -348,7 +348,8 @@ versus simply using `.checked(:never)` is marginal. Some examples:
 If none of these reasons apply, it's best to avoid `T::Sig::WithoutRuntime`,
 because it will stand out versus most other usages of `sig` in a codebase.
 
-[`T::Utils.signature_for_method`]: https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68
+[`T::Utils.signature_for_method`]:
+  https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68
 
 ## T.let, T.cast, T.must, T.bind
 
