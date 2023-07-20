@@ -17,10 +17,6 @@ ruby(
         # speed up the build.)
         "@com_stripe_ruby_typer//tools/config:release": ["--with-baseruby=no"],
         "//conditions:default": [],
-    }) + select({
-        # Do not enable the JIT unless opted in.
-        "@com_stripe_ruby_typer//tools/config:jit_enabled": [],
-        "//conditions:default": ["--disable-jit-support"],
     }),
     copts = [
         "-g",
