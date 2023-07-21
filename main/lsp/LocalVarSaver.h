@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "common/common.h"
 #include "core/core.h"
-#include "main/sig_finder/sig_finder.h"
+#include "core/sig_finder/sig_finder.h"
 
 namespace sorbet::realmain::lsp {
 

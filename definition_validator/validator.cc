@@ -9,7 +9,7 @@
 #include "absl/algorithm/container.h"
 
 #include "definition_validator/variance.h"
-#include "main/sig_finder/sig_finder.h"
+#include "core/sig_finder/sig_finder.h"
 
 using namespace std;
 

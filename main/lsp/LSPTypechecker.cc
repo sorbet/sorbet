@@ -27,7 +27,7 @@
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
-#include "main/sig_finder/sig_finder.h"
+#include "core/sig_finder/sig_finder.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
