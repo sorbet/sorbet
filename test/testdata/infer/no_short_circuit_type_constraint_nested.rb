@@ -45,9 +45,9 @@ module Main
     #
     #   X & Y  <:  A | B
     #
-    # It needs to decide which comparison to do first: split the AndType:
+    # It needs to decide which comparison to do first: split the OrType:
     #   X & Y <: A   ||   X & Y <: B
-    # or split the OrType:
+    # or split the AndType:
     #   X <: A | B   ||   Y <: A | B
     # Since Sorbet's inference algorithm is greedy, one of the two choices will
     # always be wrong. In our case, `A` is actually `T.type_parameter(:U)`, and

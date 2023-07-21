@@ -1458,6 +1458,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (a1 == nullptr) {
             // If neither t1 <: o2->left nor t1 <: o2->right, it might mean that we tried to split
             // up an OrType when we weren't meant to. It could be that t1 is an AndType of an OrType
+            //
+            // Note: This is deliberately a case where the code to handle an OrType is not
+            // symmetric (nor even anti-symmetric) with the code to handle an AndType. (There is no
+            // corresponding logic in the `a1 != nullptr` condition below.)
             return false;
         }
     }
