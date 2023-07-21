@@ -1,6 +1,6 @@
 #include "main/lsp/MoveMethod.h"
-#include "main/lsp/AbstractRewriter.h"
 #include "core/sig_finder/sig_finder.h"
+#include "main/lsp/AbstractRewriter.h"
 using namespace std;
 
 namespace sorbet::realmain::lsp {

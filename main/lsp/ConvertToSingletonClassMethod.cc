@@ -1,7 +1,7 @@
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "absl/strings/match.h"
-#include "main/lsp/AbstractRewriter.h"
 #include "core/sig_finder/sig_finder.h"
+#include "main/lsp/AbstractRewriter.h"
 
 using namespace std;
 
