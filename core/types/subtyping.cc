@@ -1399,7 +1399,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         auto *a1o = cast_type<OrType>(*l);
         if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
- 
+
             // this could be using glb, but we _know_ that we alredy tried to collapse it (prior
             // construction of types did). Thus we use AndType::make_shared instead
             return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode) &&
