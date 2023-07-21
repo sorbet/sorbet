@@ -3,7 +3,7 @@
 #include "ast/treemap/treemap.h"
 #include "core/core.h"
 
-#include "main/sig_finder/sig_finder.h"
+#include "core/sig_finder/sig_finder.h"
 
 using namespace std;
 
