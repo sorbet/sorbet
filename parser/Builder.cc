@@ -1119,8 +1119,8 @@ public:
                                      std::move(value));
     }
 
-    unique_ptr<Node> kwnilarg(const token *dstar, const token *nil) {
-        return make_unique<Kwnilarg>(tokLoc(dstar).join(tokLoc(nil)));
+    unique_ptr<Node> kwnilarg(unique_ptr<Node> node) {
+        return make_unique<Kwnilarg>(node->loc);
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
@@ -2332,9 +2332,9 @@ ForeignPtr kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) {
     return build->toForeign(build->kwoptarg(name, build->cast_node(value)));
 }
 
-ForeignPtr kwnilarg(SelfPtr builder, const token *dstar, const token *nil) {
+ForeignPtr kwnilarg(SelfPtr builder, ForeignPtr node) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->kwnilarg(dstar, nil));
+    return build->toForeign(build->kwnilarg(build->cast_node(node)));
 }
 
 ForeignPtr kwrestarg(SelfPtr builder, const token *dstar, const token *name) {

@@ -4166,9 +4166,9 @@ f_opt_paren_args: f_paren_args
 
      kwrest_mark: tPOW | tDSTAR
 
-      f_no_kwarg: kwrest_mark kNIL
+      f_no_kwarg: p_kwnorest
                     {
-                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1, $2));
+                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1->at(0)));
                     }
 
         f_kwrest: kwrest_mark tIDENTIFIER
