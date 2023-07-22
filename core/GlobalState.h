@@ -335,7 +335,11 @@ private:
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeArguments;
-    std::vector<std::pair<unsigned int, uint32_t>> namesByHash;
+    struct Bucket {
+        unsigned int hash;
+        uint32_t rawId;
+    };
+    std::vector<Bucket> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
@@ -355,6 +359,7 @@ private:
     bool fileTableFrozen = true;
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
+    void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
 

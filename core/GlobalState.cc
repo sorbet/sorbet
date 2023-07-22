@@ -1471,10 +1471,10 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0u) {
+    while (namesByHash[bucketId].rawId != 0u) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
                 counterInc("names.utf8.hit");
                 return name;
@@ -1496,10 +1496,10 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0u) {
+    while (namesByHash[bucketId].rawId != 0u) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
                 counterInc("names.utf8.hit");
                 return name;
@@ -1520,7 +1520,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
         mask = hashTableSize - 1;
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].second != 0) {
+        while (namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
@@ -1528,8 +1528,8 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
     auto name = NameRef(*this, NameKind::UTF8, utf8Names.size());
     auto &bucket = namesByHash[bucketId];
-    bucket.first = hs;
-    bucket.second = name.rawId();
+    bucket.hash = hs;
+    bucket.rawId = name.rawId();
     utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
     ENFORCE(hashNameRef(*this, name) == hs);
@@ -1549,10 +1549,10 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
                 counterInc("names.constant.hit");
                 return name;
@@ -1575,7 +1575,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].second != 0) {
+        while (namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
@@ -1583,8 +1583,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     auto name = NameRef(*this, NameKind::CONSTANT, constantNames.size());
     auto &bucket = namesByHash[bucketId];
-    bucket.first = hs;
-    bucket.second = name.rawId();
+    bucket.hash = hs;
+    bucket.rawId = name.rawId();
 
     constantNames.emplace_back(ConstantName{original});
     ENFORCE(hashNameRef(*this, name) == hs);
@@ -1609,10 +1609,10 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
                 counterInc("names.constant.hit");
                 return name;
@@ -1635,18 +1635,17 @@ NameRef GlobalState::lookupNameConstant(string_view original) const {
     return lookupNameConstant(utf8);
 }
 
-void moveNames(pair<unsigned int, uint32_t> *from, pair<unsigned int, uint32_t> *to, unsigned int szFrom,
-               unsigned int szTo) {
+void GlobalState::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     ENFORCE((szTo & (szTo - 1)) == 0, "name hash table size corruption");
     ENFORCE((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");
     unsigned int mask = szTo - 1;
     for (unsigned int orig = 0; orig < szFrom; orig++) {
-        if (from[orig].second != 0u) {
-            auto hs = from[orig].first;
+        if (from[orig].rawId != 0u) {
+            auto hs = from[orig].hash;
             unsigned int probe = 1;
             auto bucketId = hs & mask;
-            while (to[bucketId].second != 0) {
+            while (to[bucketId].rawId != 0) {
                 bucketId = (bucketId + probe) & mask;
                 probe++;
             }
@@ -1664,7 +1663,7 @@ void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, 
     uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > namesByHash.size()) {
-        vector<pair<unsigned int, unsigned int>> new_namesByHash(hashTableSize);
+        vector<Bucket> new_namesByHash(hashTableSize);
         moveNames(namesByHash.data(), new_namesByHash.data(), namesByHash.size(), new_namesByHash.capacity());
         namesByHash.swap(new_namesByHash);
     }
@@ -1678,10 +1677,10 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
                 name.dataUnique(*this)->num == num && name.dataUnique(*this)->original == original) {
                 counterInc("names.unique.hit");
@@ -1704,10 +1703,10 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     auto bucketId = hs & mask;
     unsigned int probeCount = 1;
 
-    while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
+    while (namesByHash[bucketId].rawId != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
-        if (bucket.first == hs) {
-            auto name = NameRef::fromRaw(*this, bucket.second);
+        if (bucket.hash == hs) {
+            auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
                 name.dataUnique(*this)->num == num && name.dataUnique(*this)->original == original) {
                 counterInc("names.unique.hit");
@@ -1731,7 +1730,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
         bucketId = hs & mask; // look for place in the new size
         probeCount = 1;
-        while (namesByHash[bucketId].second != 0) {
+        while (namesByHash[bucketId].rawId != 0) {
             bucketId = (bucketId + probeCount) & mask;
             probeCount++;
         }
@@ -1739,8 +1738,8 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
     auto name = NameRef(*this, NameKind::UNIQUE, uniqueNames.size());
     auto &bucket = namesByHash[bucketId];
-    bucket.first = hs;
-    bucket.second = name.rawId();
+    bucket.hash = hs;
+    bucket.rawId = name.rawId();
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(hashNameRef(*this, name) == hs);
@@ -2038,10 +2037,10 @@ void GlobalState::sanityCheck() const {
         }
     }
     for (auto &ent : namesByHash) {
-        if (ent.second == 0) {
+        if (ent.rawId == 0) {
             continue;
         }
-        ENFORCE_NO_TIMER(ent.first == hashNameRef(*this, NameRef::fromRaw(*this, ent.second)),
+        ENFORCE_NO_TIMER(ent.hash == hashNameRef(*this, NameRef::fromRaw(*this, ent.rawId)),
                          "name hash table corruption");
     }
 }

@@ -885,8 +885,8 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
 
     result.putU4(gs.namesByHash.size());
     for (const auto &s : gs.namesByHash) {
-        result.putU4(s.first);
-        result.putU4(s.second);
+        result.putU4(s.hash);
+        result.putU4(s.rawId);
     }
     return result;
 }
@@ -925,7 +925,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     typeArguments.clear();
     vector<TypeParameter> typeMembers(std::move(result.typeMembers));
     typeMembers.clear();
-    vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
+    vector<GlobalState::Bucket> namesByHash(std::move(result.namesByHash));
     namesByHash.clear();
     {
         Timer timeit(result.tracer(), "readFiles");
@@ -1010,7 +1010,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesByHashSize; i++) {
             auto hash = p.getU4();
             auto value = p.getU4();
-            namesByHash.emplace_back(make_pair(hash, value));
+            namesByHash.emplace_back(GlobalState::Bucket{hash, value});
         }
     }
 
