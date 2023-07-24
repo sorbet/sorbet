@@ -74,8 +74,8 @@ DispatchResult FloatLiteralType::dispatchCall(const GlobalState &gs, const Dispa
 
 DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
-    auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
+    auto leftRet = left.dispatchCall(gs, args.withSelfAndThisRef(left));
+    auto rightRet = right.dispatchCall(gs, args.withSelfAndThisRef(right));
     return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
 }
 
