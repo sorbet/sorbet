@@ -105,42 +105,35 @@ export interface ISorbetWorkspaceContext extends Disposable {
 /** Default implementation accesses `workspace` directly. */
 export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   private cachedSorbetConfiguration;
-  private readonly disposable: Disposable;
-  private readonly workspaceStateChangeEmitter: EventEmitter<string>;
+  private readonly disposables: Disposable[];
   private readonly workspaceState: Memento;
-  private readonly onConfigurationChangeEmitter: EventEmitter<
+  private readonly onDidChangeConfigurationEmitter: EventEmitter<
     ConfigurationChangeEvent
   >;
 
   constructor(extensionContext: ExtensionContext) {
     this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
-    this.onConfigurationChangeEmitter = new EventEmitter<
+    this.onDidChangeConfigurationEmitter = new EventEmitter<
       ConfigurationChangeEvent
     >();
     this.workspaceState = extensionContext.workspaceState;
-    this.workspaceStateChangeEmitter = new EventEmitter<string>();
 
-    this.disposable = Disposable.from(
+    this.disposables = [
       workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration("sorbet")) {
           // update the cached configuration before firing
           this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
-          this.onConfigurationChangeEmitter.fire(e);
+          this.onDidChangeConfigurationEmitter.fire(e);
         }
       }),
-      this.workspaceStateChangeEmitter.event((k) => {
-        this.onConfigurationChangeEmitter.fire({
-          affectsConfiguration: () => k.startsWith("sorbet."),
-        });
-      }),
-    );
+    ];
   }
 
   /**
    * Dispose and free associated resources.
    */
   public dispose() {
-    this.disposable.dispose();
+    Disposable.from(...this.disposables).dispose();
   }
 
   public get<T>(section: string, defaultValue: T): T {
@@ -154,11 +147,13 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   public async update(section: string, value: any): Promise<void> {
     const key = `sorbet.${section}`;
     await this.workspaceState.update(key, value);
-    this.workspaceStateChangeEmitter.fire(key);
+    this.onDidChangeConfigurationEmitter.fire({
+      affectsConfiguration: () => true,
+    });
   }
 
   public get onDidChangeConfiguration(): Event<ConfigurationChangeEvent> {
-    return this.onConfigurationChangeEmitter.event;
+    return this.onDidChangeConfigurationEmitter.event;
   }
 
   public workspaceFolders(): readonly WorkspaceFolder[] | undefined {
