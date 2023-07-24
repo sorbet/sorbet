@@ -1115,7 +1115,7 @@ Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
     return blockLoc;
 }
 
-DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {
+DispatchArgs DispatchArgs::withSelfAndThisRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{
         name,        locs,          numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized,
         isPrivateOk, suppressErrors};
