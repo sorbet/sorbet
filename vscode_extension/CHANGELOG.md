@@ -1,4 +1,7 @@
 # Version history
+## 0.3.24
+- Disable the `Copy Symbol to Clipboard` command when there is a text selection.
+
 ## 0.3.23
 - Fix: Sorbet extension fails when opening a project containing Ruby code but no active configuration.
 
