@@ -192,12 +192,16 @@ NameDef names[] = {
     {"typeAlias", "type_alias"},
     {"typeMember", "type_member"},
     {"typeTemplate", "type_template"},
+    // TODO(jez) Pick a better name
+    {"linkedGenericTypePair", "linked_generic_type_pair"},
     {"covariant", "out"},
     {"contravariant", "in"},
     {"fixed"},
     {"lower"},
     {"upper"},
     {"declareHasAttachedClass", "has_attached_class!"},
+    // TODO(jez) Delete this; temporary for prototyping
+    {"LinkedGenericTypePair", "LinkedGenericTypePair", true},
 
     {"prop"},
     {"tokenProp", "token_prop"},

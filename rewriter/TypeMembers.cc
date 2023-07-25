@@ -30,6 +30,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
             continue;
         }
 
+        // TODO(jez) Update this to check for duplicate linkedGenericTypePair
         auto it = typeMembers.find(lhs->cnst);
         if (it != typeMembers.end()) {
             if (auto e = ctx.beginError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {

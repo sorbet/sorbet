@@ -298,12 +298,25 @@ public:
         bool isContravariant : 1;
         bool isFixed : 1;
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        // Type-member-specific flags
+        bool isLinkedGenericPair_ : 1;
+
+        constexpr static uint8_t NUMBER_OF_FLAGS = 7;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isTypeArgument(false), isTypeMember(false), isCovariant(false), isInvariant(false),
-              isContravariant(false), isFixed(false) {}
+              isContravariant(false), isFixed(false), isLinkedGenericPair_(false) {}
+
+        bool isLinkedGenericPair() {
+            ENFORCE(isTypeMember);
+            return isLinkedGenericPair_;
+        }
+
+        void setIsLinkedGenericPair(bool isLinkedGenericPair) {
+            ENFORCE(isTypeMember);
+            this->isLinkedGenericPair_ = isLinkedGenericPair;
+        }
 
         uint8_t serialize() const {
             // Can replace this with std::bit_cast in C++20
