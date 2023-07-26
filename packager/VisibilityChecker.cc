@@ -549,7 +549,7 @@ class ImportCheckerPass final {
 public:
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.fun != core::Names::import() && send.fun != core::Names::test_import()) {
+        if (send.fun != core::Names::import() && send.fun != core::Names::testImport()) {
             return;
         }
 
