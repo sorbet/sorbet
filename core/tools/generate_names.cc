@@ -445,13 +445,13 @@ NameDef names[] = {
 
     // Packager
     {"import"},
-    {"test_import"},
+    {"testImport", "test_import"},
     {"export_", "export"},
-    {"restrict_to_service"},
-    {"autoloader_compatibility"},
+    {"restrictToService", "restrict_to_service"},
+    {"autoloaderCompatibility", "autoloader_compatibility"},
     {"legacy"},
     {"strict"},
-    {"visible_to"},
+    {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
     {"PackageSpec", "PackageSpec", true},
