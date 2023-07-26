@@ -589,7 +589,7 @@ void GlobalState::initEmpty() {
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::test_import())
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
                  .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_test_import());
@@ -597,7 +597,7 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
     method =
-        enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrict_to_service()).arg(Names::arg0()).build();
+        enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrictToService()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
 
     klass = synthesizeClass(core::Names::Constants::Encoding());
@@ -617,12 +617,12 @@ void GlobalState::initEmpty() {
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
     ENFORCE(method == Symbols::rootStaticInit());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::autoloader_compatibility())
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::autoloaderCompatibility())
                  .arg(Names::arg0())
                  .build();
     ENFORCE(method == Symbols::PackageSpec_autoloader_compatibility());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visible_to()).arg(Names::arg0()).build();
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visibleTo()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_visible_to());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();

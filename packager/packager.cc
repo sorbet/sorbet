@@ -972,7 +972,7 @@ struct PackageInfoFinder {
             }
         }
 
-        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.numPosArgs() == 1) {
+        if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
@@ -994,7 +994,7 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::restrict_to_service() && send.numPosArgs() == 1) {
+        if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
             auto importArg = move(send.getPosArg(0));
             send.removePosArg(0);
@@ -1006,7 +1006,7 @@ struct PackageInfoFinder {
             info->exportAll_ = true;
         }
 
-        if (send.fun == core::Names::autoloader_compatibility() && send.numPosArgs() == 1) {
+        if (send.fun == core::Names::autoloaderCompatibility() && send.numPosArgs() == 1) {
             // Parse autoloader_compatibility DSL and set strict bit on PackageInfoImpl if configured
             auto *compatibilityAnnotationLit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
             if (compatibilityAnnotationLit == nullptr || !compatibilityAnnotationLit->isString()) {
@@ -1047,7 +1047,7 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
+        if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
             if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
                 // the only valid literal here is `visible_to "tests"`; others should be rejected
                 if (!target->isString() || target->asString() != core::Names::tests()) {
@@ -1191,11 +1191,11 @@ struct PackageInfoFinder {
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-            case core::Names::test_import().rawId():
+            case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
-            case core::Names::restrict_to_service().rawId():
-            case core::Names::autoloader_compatibility().rawId():
-            case core::Names::visible_to().rawId():
+            case core::Names::restrictToService().rawId():
+            case core::Names::autoloaderCompatibility().rawId():
+            case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
                 return true;
             default:
@@ -1207,7 +1207,7 @@ struct PackageInfoFinder {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
                 return ImportType::Normal;
-            case core::Names::test_import().rawId():
+            case core::Names::testImport().rawId():
                 return ImportType::Test;
             default:
                 ENFORCE(false);
