@@ -58,7 +58,7 @@
         "command": "sorbet.copySymbolToClipboard",
         "title": "Copy Symbol to Clipboard",
         "category": "Sorbet",
-        "enablement": "editorLangId == ruby"
+        "enablement": "editorLangId == ruby && !editorHasSelection"
       },
       {
         "command": "sorbet.disable",
