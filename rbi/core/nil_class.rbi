@@ -60,7 +60,7 @@ class NilClass < Object
   # ```ruby
   # nil.to_h   #=> {}
   # ```
-  sig {returns(T::Hash[T.untyped, T.untyped])}
+  sig {returns(T::Hash[T.noreturn, T.noreturn])}
   def to_h(); end
 
   # Always returns zero.
