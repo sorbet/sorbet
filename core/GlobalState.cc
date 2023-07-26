@@ -596,8 +596,7 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
-    method =
-        enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrictToService()).arg(Names::arg0()).build();
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::restrictToService()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_restrict_to_service());
 
     klass = synthesizeClass(core::Names::Constants::Encoding());
