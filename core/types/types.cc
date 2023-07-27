@@ -305,6 +305,12 @@ TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
+TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &key, const TypePtr &val) {
+    vector<TypePtr> tupleArgs{key, val};
+    vector<TypePtr> targs{key, val, make_type<TupleType>(move(tupleArgs))};
+    return make_type<AppliedType>(Symbols::Hash(), move(targs));
+}
+
 TypePtr Types::setOf(const TypePtr &elem) {
     vector<TypePtr> targs{elem};
     return make_type<AppliedType>(Symbols::Set(), move(targs));

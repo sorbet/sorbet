@@ -2097,12 +2097,27 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
+        bool allNonLiteralKeys = true;
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
-                res.returnType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
-                return;
+                allNonLiteralKeys = false;
+                break;
             }
+        }
+
+        if (!allNonLiteralKeys) {
+            ENFORCE(!args.args.empty());
+            auto keyType = Types::bottom();
+            auto valType = Types::bottom();
+
+            for (int i = 0; i < args.args.size(); i += 2) {
+                keyType = Types::any(gs, keyType, Types::dropLiteral(gs, args.args[i + 0]->type));
+                valType = Types::any(gs, valType, Types::dropLiteral(gs, args.args[i + 1]->type));
+            }
+
+            res.returnType = Types::hashOf(gs, keyType, valType);
+            return;
         }
 
         vector<TypePtr> keys;
