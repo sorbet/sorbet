@@ -2,6 +2,6 @@
 
 class S
   include Enumerable
-  sig { void }
-  def each; end
+  sig { params(blk: Proc).void }
+  def each(&blk); end
 end
