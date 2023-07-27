@@ -15,8 +15,6 @@
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
 
-#include <regex>
-
 using namespace std;
 
 namespace sorbet::definition_validator {
