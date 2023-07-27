@@ -504,6 +504,17 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
             !method.data(ctx)->flags.isRewriterSynthesized) {
             validateCompatibleOverride(ctx, overridenMethod, method);
         }
+        auto superMethod = overridenMethod;
+        auto left = decomposeSignature(ctx, superMethod);
+        auto right = decomposeSignature(ctx, method);
+        const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
+        if (!left.syntheticBlk && right.syntheticBlk && !core::Types::isSubType(ctx, core::Types::nilClass(), superMethodBlkArg.type)) {
+            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                e.setHeader("{} method `{}` must explicitly name a block argument", implementationOf(ctx, superMethod),
+                            superMethod.show(ctx));
+                e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
+            }
+        }
     }
 }
 
