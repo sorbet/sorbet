@@ -1,6 +1,6 @@
 #include "main/lsp/requests/signature_help.h"
 #include "core/lsp/QueryResponse.h"
-#include "core/lsp/helpers.h"
+#include "core/source_generator/source_generator.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
@@ -38,7 +38,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
         if (i != args.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter->documentation = core::lsp::getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver,
+        parameter->documentation = core::source_generator::getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver,
                                                             resp.dispatchResult->main.constr.get())
                                        .show(gs);
         parameters.push_back(move(parameter));

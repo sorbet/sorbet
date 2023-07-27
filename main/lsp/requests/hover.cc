@@ -3,7 +3,7 @@
 #include "absl/strings/str_join.h"
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
-#include "core/lsp/helpers.h"
+#include "core/source_generator/source_generator.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
@@ -24,7 +24,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(contents, core::lsp::prettyTypeForMethod(gs, component.method, component.receiver,
+            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver,
                                                                              retType, constraint.get()));
         }
         start = start->secondary.get();
@@ -114,7 +114,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
         }
     } else if (auto defResp = resp->isMethodDef()) {
-        typeString = core::lsp::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
+        typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
     } else if (auto constResp = resp->isConstant()) {
         typeString = prettyTypeForConstant(gs, constResp->symbol);
     } else {

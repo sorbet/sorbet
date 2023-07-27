@@ -8,7 +8,7 @@
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
-#include "core/lsp/helpers.h"
+#include "core/source_generator/source_generator.h"
 #include "main/lsp/FieldFinder.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
@@ -341,7 +341,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
             fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
         }
         if (argSym.type) {
-            auto resultType = core::lsp::getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
+            auto resultType = core::source_generator::getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
             fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
@@ -367,7 +367,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
                                           auto resultType =
-                                              core::lsp::getResultType(gs, targ, method, receiverType, constraint);
+                                              core::source_generator::getResultType(gs, targ, method, receiverType, constraint);
                                           return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
@@ -1060,7 +1060,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = core::lsp::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
+    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {

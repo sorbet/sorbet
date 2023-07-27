@@ -8,7 +8,7 @@
 #include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
-#include "core/lsp/helpers.h"
+#include "core/source_generator/source_generator.h"
 
 #include "absl/algorithm/container.h"
 
@@ -911,7 +911,7 @@ private:
         auto [_, indentLength] = classOrModuleDefLoc.findStartOfLine(gs);
         string indent(indentLength, ' ');
 
-        auto methodDefinition = core::lsp::prettyTypeForMethod(gs, abstractMethodRef, nullptr,
+        auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr,
                                                                abstractMethodRef.data(gs)->resultType, nullptr, true);
 
         vector<string> reindentedMethodDefinitionLines;

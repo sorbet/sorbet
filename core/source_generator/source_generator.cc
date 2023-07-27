@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace sorbet::core::lsp {
+namespace sorbet::core::source_generator {
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
@@ -186,4 +186,4 @@ string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, 
         prettyDefForMethod(gs, method, concretizeIfAbstract));
 }
 
-} // namespace sorbet::core::lsp
+} // namespace sorbet::core::source_generator
