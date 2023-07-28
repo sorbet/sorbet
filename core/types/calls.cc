@@ -200,7 +200,7 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
             {{definition.loc(gs), ""}}));
 
     } else {
-        auto showOptions = ShowOptions().withShowForRBI();
+        auto showOptions = ShowOptions().withUseValidSyntax();
         auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
         e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
     }

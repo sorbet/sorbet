@@ -1062,7 +1062,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     }
 
     auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint,
-                                                                  core::ShowOptions().withShowForRBI());
+                                                                  core::ShowOptions().withUseValidSyntax());
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {

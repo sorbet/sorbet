@@ -5,15 +5,15 @@ namespace sorbet::core {
 
 // Options for controlling how the various `show` methods work.
 struct ShowOptions final {
-    bool showForRBI : 1;
+    bool useValidSyntax : 1;
     bool concretizeIfAbstract : 1;
 
-    ShowOptions() : showForRBI{false}, concretizeIfAbstract{false} {}
+    ShowOptions() : useValidSyntax{false}, concretizeIfAbstract{false} {}
 
-    // Show types for printing out to an rbi file.
-    ShowOptions withShowForRBI() {
+    // Only generate generate or suggest syntactically valid code.
+    ShowOptions withUseValidSyntax() {
         ShowOptions res{*this};
-        res.showForRBI = true;
+        res.useValidSyntax = true;
         return res;
     }
 

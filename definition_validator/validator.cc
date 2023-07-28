@@ -910,10 +910,10 @@ private:
                                                         const core::MethodRef abstractMethodRef) {
         auto [_, indentLength] = classOrModuleDefLoc.findStartOfLine(gs);
         string indent(indentLength, ' ');
+        auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
 
         auto methodDefinition = core::source_generator::prettyTypeForMethod(
-            gs, abstractMethodRef, nullptr, abstractMethodRef.data(gs)->resultType, nullptr,
-            core::ShowOptions().withShowForRBI().withConcretizeIfAbstract());
+            gs, abstractMethodRef, nullptr, abstractMethodRef.data(gs)->resultType, nullptr, showOptions);
 
         vector<string> reindentedMethodDefinitionLines;
         absl::c_transform(absl::StrSplit(methodDefinition, "\n"), std::back_inserter(reindentedMethodDefinitionLines),
