@@ -698,13 +698,45 @@ int realmain(int argc, char *argv[]) {
         }
 
         {
-            if (!opts.storeState.empty() || opts.forceHashing) {
-                // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
-                indexed = hashing::Hashing::indexAndComputeFileHashes(
-                    gs, opts, *logger, absl::Span<core::FileRef>(inputFiles), *workers, kvstore);
-            } else {
-                indexed = pipeline::index(*gs, absl::Span<core::FileRef>(inputFiles), opts, *workers, kvstore);
+            // ----- index -----
+
+            auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
+            if (opts.stripePackages) {
+                // c_partition does not maintain relative ordering of the elements, which means that
+                // the sort order of the file paths is not preserved.
+                //
+                // index doesn't depend on this order, because it is already indexes files in
+                // parallel and sorts the resulting parsed files at the end. For that reason, I've
+                // chosen not to use stable_partition here.
+                auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.data(*gs).isPackage(); });
+                auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+                auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
+                inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
+
+                if (!opts.storeState.empty() || opts.forceHashing) {
+                    indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputPackageFiles,
+                                                                          *workers, kvstore);
+                } else {
+                    indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
+                }
             }
+
+            auto nonPackageIndexed =
+                (!opts.storeState.empty() || opts.forceHashing)
+                    // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
+                    ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
+                    : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
+
+            if (indexed.empty()) {
+                // Performance optimization--if it's already empty, no need to move one-by-one
+                indexed = move(nonPackageIndexed);
+            } else {
+                // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
+                // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
+                indexed.reserve(indexed.size() + nonPackageIndexed.size());
+                absl::c_move(nonPackageIndexed, back_inserter(indexed));
+            }
+
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
