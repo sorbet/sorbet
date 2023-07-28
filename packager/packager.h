@@ -42,8 +42,7 @@ const core::NameRef TEST_NAME = core::Names::Constants::Test();
  */
 class Packager final {
 public:
-    static std::vector<ast::ParsedFile> findPackages(core::GlobalState &gs, WorkerPool &workers,
-                                                     std::vector<ast::ParsedFile> files);
+    static std::vector<ast::ParsedFile> findPackages(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
 
     static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
                                             std::vector<ast::ParsedFile> files);
