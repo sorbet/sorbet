@@ -589,7 +589,7 @@ int realmain(int argc, char *argv[]) {
             hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
-        { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
+        inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames);
 
         if (opts.packageRBIGeneration) {
 #ifdef SORBET_REALMAIN_MIN
