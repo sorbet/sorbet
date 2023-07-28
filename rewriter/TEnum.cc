@@ -130,7 +130,7 @@ std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::Clas
 
     core::TypePtr serializeType = core::Types::untypedUntracked();
 
-    if (selfNew->numPosArgs() == 0) {
+    if (selfNew->numPosArgs() == 0 && selfNew->onlyPosArgs()) {
         serializeType = core::Types::String();
     } else if (selfNew->numPosArgs() == 1) {
         if (auto *selfNewArg = ast::cast_tree<ast::Literal>(selfNew->getPosArg(0))) {

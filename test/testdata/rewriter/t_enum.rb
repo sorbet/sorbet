@@ -53,3 +53,12 @@ class EnumWithNonLiterals < T::Enum
 end
 
 T.reveal_type(EnumWithNonLiterals::X.serialize) # error: Revealed type: `T.untyped`
+
+class EnumWithKwargs < T::Enum
+  enums do
+    X = new(a: 1, b: 2)
+    Y = new(a: 3, b: 4)
+  end
+end
+
+T.reveal_type(EnumWithKwargs::X.serialize) # error: Revealed type: `T.untyped`
