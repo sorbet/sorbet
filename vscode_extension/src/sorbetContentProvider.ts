@@ -22,7 +22,7 @@ export class SorbetContentProvider implements TextDocumentContentProvider {
    */
   public async provideTextDocumentContent(
     uri: Uri,
-    token?: CancellationToken,
+    _token?: CancellationToken,
   ): Promise<string> {
     let content: string;
     const { activeLanguageClient: client } = this.context.statusProvider;
@@ -33,7 +33,6 @@ export class SorbetContentProvider implements TextDocumentContentProvider {
         {
           uri: uri.toString(),
         },
-        token,
       );
       content = response.text;
     } else {

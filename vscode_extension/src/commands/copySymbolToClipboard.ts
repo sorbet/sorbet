@@ -1,4 +1,4 @@
-import { env, window } from "vscode";
+import { env, ProgressLocation, window } from "vscode";
 import {
   SymbolInformation,
   TextDocumentPositionParams,
@@ -14,29 +14,35 @@ export async function copySymbolToClipboard(
   context: SorbetExtensionContext,
 ): Promise<void> {
   const { activeLanguageClient: client } = context.statusProvider;
-  if (client?.status !== ServerStatus.RUNNING) {
-    context.log.warning("Sorbet LSP client is not ready.");
+
+  if (!client) {
+    context.log.warning("CopySymbol: No active Sorbet LSP.");
     return;
   }
 
   if (!client.capabilities?.sorbetShowSymbolProvider) {
     context.log.warning(
-      'Sorbet LSP client does not support "show symbol" capability.',
+      "CopySymbol: Sorbet LSP does not support 'showSymbol' capability.",
     );
     return;
   }
 
   const editor = window.activeTextEditor;
   if (!editor) {
-    context.log.debug("No active editor to copy symbol from.");
+    context.log.debug("CopySymbol: No active editor, no target symbol.");
     return;
   }
 
   if (!editor.selection.isEmpty) {
     context.log.debug(
-      "Cannot determine target symbol from a non-empty selection.",
+      "CopySymbol: Non-empty selection, cannot determine target symbol.",
     );
-    return; // something is selected, abort
+    return;
+  }
+
+  if (client.status !== ServerStatus.RUNNING) {
+    context.log.warning("CopySymbol: Sorbet LSP is not ready.");
+    return;
   }
 
   const position = editor.selection.active;
@@ -46,13 +52,42 @@ export async function copySymbolToClipboard(
     },
     position,
   };
-  const response = await client.sendRequest<SymbolInformation>(
-    "sorbet/showSymbol",
-    params,
-  );
 
-  await env.clipboard.writeText(response.name);
-  context.log.debug(
-    `Copied symbol name to the clipboard. Name:${response.name}`,
-  );
+  let response: SymbolInformation | undefined;
+  if (context.statusProvider.operations.length) {
+    response = await window.withProgress(
+      {
+        cancellable: true,
+        location: ProgressLocation.Notification,
+      },
+      async (progress, token) => {
+        progress.report({ message: `Querying Sorbet …` });
+        const r = await client.sendRequest<SymbolInformation>(
+          "sorbet/showSymbol",
+          params,
+        );
+
+        if (token.isCancellationRequested) {
+          context.log.debug(
+            `CopySymbol: Ignored canceled operation result. Symbol:${r.name}`,
+          );
+          return undefined;
+        } else {
+          return r;
+        }
+      },
+    );
+  } else {
+    response = await client.sendRequest<SymbolInformation>(
+      "sorbet/showSymbol",
+      params,
+    );
+  }
+
+  if (response) {
+    await env.clipboard.writeText(response.name);
+    context.log.debug(
+      `CopySymbol: Copied symbol name. Symbol:${response.name}`,
+    );
+  }
 }

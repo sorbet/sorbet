@@ -1,11 +1,5 @@
 import { ChildProcess, spawn } from "child_process";
-import {
-  CancellationToken,
-  Disposable,
-  Event,
-  EventEmitter,
-  workspace,
-} from "vscode";
+import { Disposable, Event, EventEmitter, workspace } from "vscode";
 import {
   CloseAction,
   ErrorAction,
@@ -239,13 +233,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   public sendRequest<TResponse>(
     method: string,
     param: any,
-    token?: CancellationToken,
   ): Promise<TResponse> {
-    // Do not pass `token` if undefined, otherwise `param` ends up being passed
-    // as `[...param, undefined]` instead of `param`.
-    return token
-      ? this.languageClient.sendRequest<TResponse>(method, param, token)
-      : this.languageClient.sendRequest<TResponse>(method, param);
+    return this.languageClient.sendRequest<TResponse>(method, param);
   }
 
   /**
