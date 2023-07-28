@@ -322,10 +322,7 @@ To upgrade a patch level (e.g., from 0.4.4314 to 0.4.4358):
 
 ```
 bundle update sorbet sorbet-runtime
-# also update plugins like sorbet-rails, if any
-
-# For plugins like sorbet-rails, see their docs, eg.
-https://github.com/chanzuckerberg/sorbet-rails#initial-setup
+# also update plugins, if any
 
 # Optional: Suggest new, stronger sigils (per-file strictness
 # levels) when possible. Currently, the suggestion process is
@@ -393,13 +390,8 @@ RUN wget -nv -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/
 Sorbet doesn't support Rails, but
 [Tapioca can generate RBI files for it](https://github.com/Shopify/tapioca#generating-rbi-files-for-rails-and-other-dsls).
 
-If you're not using Tapioca, you could use [sorbet-rails], a
-community-maintained project which can help generate RBI files for certain Rails
-constructs.
-
 Also see the [Community] page for more community-maintained projects!
 
-[sorbet-rails]: https://github.com/chanzuckerberg/sorbet-rails
 [community]: /en/community
 
 ## Can I convert from YARD docs to Sorbet signatures?
