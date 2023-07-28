@@ -247,6 +247,10 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
                                                 ast::MK::RaiseTypedUnimplemented(klass->declLoc));
         klass->rhs.emplace_back(std::move(sig));
         klass->rhs.emplace_back(std::move(method));
+    } else {
+        if (auto e = ctx.beginError(klass->loc, core::errors::Rewriter::BadEnumSerialize)) {
+            e.setHeader("All serialized values must be constants");
+        }
     }
 }
 }; // namespace sorbet::rewriter
