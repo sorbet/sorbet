@@ -15,7 +15,7 @@ module Opus
   end
 end
 
-class Opus::Types::Test::Wholesome::TEnumOj < MiniTest::Spec
+class Opus::Types::Test::Wholesome::TEnumOj < Minitest::Spec
   class MyEnum < T::Enum
     enums do
       X = new
