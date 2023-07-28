@@ -1432,8 +1432,8 @@ class Array < Object
   # a.include?("z")   #=> false
   # ```
   sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
+    params(
+        arg0: Elem,
     )
     .returns(T::Boolean)
   end
