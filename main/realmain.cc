@@ -641,7 +641,7 @@ int realmain(int argc, char *argv[]) {
             // only the package files that we know we need to load, it would cut down command-line rbi generation by
             // seconds.
             auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
-            auto packages = pipeline::index(*gs, packageFileRefs, opts, *workers, nullptr);
+            auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
@@ -700,9 +700,10 @@ int realmain(int argc, char *argv[]) {
         {
             if (!opts.storeState.empty() || opts.forceHashing) {
                 // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
-                indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFiles, *workers, kvstore);
+                indexed = hashing::Hashing::indexAndComputeFileHashes(
+                    gs, opts, *logger, absl::Span<core::FileRef>(inputFiles), *workers, kvstore);
             } else {
-                indexed = pipeline::index(*gs, inputFiles, opts, *workers, kvstore);
+                indexed = pipeline::index(*gs, absl::Span<core::FileRef>(inputFiles), opts, *workers, kvstore);
             }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);

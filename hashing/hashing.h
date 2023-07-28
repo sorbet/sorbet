@@ -50,7 +50,7 @@ public:
      */
     static std::vector<ast::ParsedFile>
     indexAndComputeFileHashes(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
-                              spdlog::logger &logger, std::vector<core::FileRef> &files, WorkerPool &workers,
+                              spdlog::logger &logger, absl::Span<core::FileRef> files, WorkerPool &workers,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 };
 } // namespace sorbet::hashing
