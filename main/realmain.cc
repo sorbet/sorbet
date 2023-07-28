@@ -708,7 +708,7 @@ int realmain(int argc, char *argv[]) {
                 // index doesn't depend on this order, because it is already indexes files in
                 // parallel and sorts the resulting parsed files at the end. For that reason, I've
                 // chosen not to use stable_partition here.
-                auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.data(*gs).isPackage(); });
+                auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(*gs); });
                 auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
