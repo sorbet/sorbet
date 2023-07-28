@@ -126,7 +126,14 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    auto defaultArgumentPlaceholder = options.concretizeIfAbstract ? "T.let(T.unsafe(nil), T.untyped)" : "…";
+
+    string defaultArgumentPlaceholder = "…";
+    if (options.useValidSyntax && gs.suggestUnsafe.has_value()) {
+        defaultArgumentPlaceholder = "T.unsafe(nil)";
+    } else if (options.useValidSyntax) {
+        defaultArgumentPlaceholder = "";
+    }
+
     const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments;
     ENFORCE(!arguments.empty(), "Should have at least a block arg");
     for (const auto &argSym : arguments) {
@@ -143,14 +150,14 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
                 prefix = "*"; // rest args
             }
         } else if (argSym.flags.isKeyword) {
-            if (argSym.flags.isDefault) {
+            if (argSym.flags.isDefault && !defaultArgumentPlaceholder.empty()) {
                 suffix = fmt::format(": {}", defaultArgumentPlaceholder); // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
             }
         } else if (argSym.flags.isBlock) {
             prefix = "&";
-        } else if (argSym.flags.isDefault) {
+        } else if (argSym.flags.isDefault && !defaultArgumentPlaceholder.empty()) {
             suffix = fmt::format("={}", defaultArgumentPlaceholder);
         }
         prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));

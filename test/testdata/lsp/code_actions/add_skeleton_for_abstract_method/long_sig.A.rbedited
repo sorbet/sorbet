@@ -25,14 +25,7 @@ end
       )
       .returns(T.nilable(T::Hash[Symbol, T.untyped]))
     end
-    def foo(
-      bar,
-      baz,
-      qux,
-      quux=T.let(T.unsafe(nil), T.untyped),
-      corge: T.let(T.unsafe(nil), T.untyped)
-    )
-    end
+    def foo(bar, baz, qux, quux, corge:); end
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
 # ^ apply-code-action: [A] Define `Parent#foo`
   end
