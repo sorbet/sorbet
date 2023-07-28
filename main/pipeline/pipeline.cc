@@ -529,7 +529,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     return ret;
 }
 
-vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
+vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<core::FileRef> files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
@@ -572,7 +572,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
     return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
 }
 
-vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files, const options::Options &opts,
+vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, const options::Options &opts,
                               WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs.tracer(), "index");
     vector<ast::ParsedFile> ret;

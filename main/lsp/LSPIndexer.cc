@@ -304,8 +304,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         // which one it will be.
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
-        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, frefs,
-                                                                 workers, kvstore);
+        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                 absl::Span<core::FileRef>(frefs), workers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file];
