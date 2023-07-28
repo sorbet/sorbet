@@ -911,8 +911,9 @@ private:
         auto [_, indentLength] = classOrModuleDefLoc.findStartOfLine(gs);
         string indent(indentLength, ' ');
 
-        auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr,
-                                                               abstractMethodRef.data(gs)->resultType, nullptr, true);
+        auto methodDefinition = core::source_generator::prettyTypeForMethod(
+            gs, abstractMethodRef, nullptr, abstractMethodRef.data(gs)->resultType, nullptr,
+            core::ShowOptions().withShowForRBI().withConcretizeIfAbstract());
 
         vector<string> reindentedMethodDefinitionLines;
         absl::c_transform(absl::StrSplit(methodDefinition, "\n"), std::back_inserter(reindentedMethodDefinitionLines),

@@ -36,8 +36,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 constexpr int MAX_PRETTY_WIDTH = 80;
 
 string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                          core::TypePtr retType, const core::TypeConstraint *constraint,
-                          const bool concretizeIfAbstract = false) {
+                          core::TypePtr retType, const core::TypeConstraint *constraint, const ShowOptions options) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is mis-used
@@ -49,7 +48,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
     }
     string methodReturnType =
-        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs), ")");
+        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
     vector<string> typeAndArgNames;
 
     vector<string> flags;
@@ -58,7 +57,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (sym->flags.isFinal) {
         sigCall = "sig(:final)";
     }
-    if (sym->flags.isAbstract && concretizeIfAbstract) {
+    if (sym->flags.isAbstract && options.concretizeIfAbstract) {
         flags.emplace_back("override");
     } else if (sym->flags.isAbstract) {
         flags.emplace_back("abstract");
@@ -72,8 +71,9 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     for (auto &argSym : method.data(gs)->arguments) {
         // Don't display synthetic arguments (like blk).
         if (!argSym.isSyntheticBlockArgument()) {
-            typeAndArgNames.emplace_back(absl::StrCat(
-                argSym.argumentName(gs), ": ", getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
+            typeAndArgNames.emplace_back(
+                absl::StrCat(argSym.argumentName(gs), ": ",
+                             getResultType(gs, argSym.type, method, receiver, constraint).show(gs, options)));
         }
     }
 
@@ -100,7 +100,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
 }
 
-string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, const bool concretizeIfAbstract) {
+string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, const ShowOptions options) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -126,7 +126,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    auto defaultArgumentPlaceholder = concretizeIfAbstract ? "T.let(T.unsafe(nil), T.untyped)" : "…";
+    auto defaultArgumentPlaceholder = options.concretizeIfAbstract ? "T.let(T.unsafe(nil), T.untyped)" : "…";
     const auto &arguments = methodData->dealiasMethod(gs).data(gs)->arguments;
     ENFORCE(!arguments.empty(), "Should have at least a block arg");
     for (const auto &argSym : arguments) {
@@ -179,11 +179,10 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
                            const core::TypePtr &retType, const core::TypeConstraint *constraint,
-                           const bool concretizeIfAbstract = false) {
+                           const ShowOptions options) {
     return fmt::format(
-        "{}\n{}",
-        prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, constraint, concretizeIfAbstract),
-        prettyDefForMethod(gs, method, concretizeIfAbstract));
+        "{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, constraint, options),
+        prettyDefForMethod(gs, method, options));
 }
 
 } // namespace sorbet::core::source_generator
