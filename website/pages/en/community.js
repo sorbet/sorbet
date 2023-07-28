@@ -130,12 +130,6 @@ class Index extends React.Component {
                     'A central repository for sharing type definitions for Ruby gems',
                 },
                 {
-                  title: 'sorbet-rails',
-                  link: 'https://github.com/chanzuckerberg/sorbet-rails',
-                  description:
-                    'A set of tools to make Sorbet work with Rails seamlessly',
-                },
-                {
                   title: 'Sord',
                   link: 'https://github.com/AaronC81/sord',
                   description:
