@@ -403,7 +403,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
+            packageTrees = packager::Packager::findPackages(*rbiGenGs, move(packageTrees));
 
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
