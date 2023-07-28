@@ -71,7 +71,7 @@ public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
+    /** Lower upper bound: the narrowest type that is super type of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /**

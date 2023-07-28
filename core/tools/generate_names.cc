@@ -131,6 +131,7 @@ NameDef names[] = {
     {"enum_", "enum"},
     {"deprecatedEnum", "deprecated_enum"},
     {"enums"},
+    {"serialize"},
     {"nilable"},
     {"proc"},
     {"untyped"},

@@ -102,6 +102,8 @@ class RBIGen::Public::MyEnum < T::Enum
   abstract!
   sealed!
   sig {returns(String)}
+  def serialize; end
+  sig {returns(String)}
   def to_string; end
   extend T::Sig
   extend T::Helpers
