@@ -1,3 +1,4 @@
+# -- test/testdata/definition_validator/missing_abstract_method_short_sig.rb --
 # typed: true
 # selective-apply-code-action: quickfix
 class Parent
@@ -10,6 +11,8 @@ class Parent
 end
 
   class Child < Parent
+    sig {override.params(bar: Integer).returns(String)}
+    def foo(bar); end
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
-# ^ apply-code-action: [A] Define `Parent#foo`
   end
+# ------------------------------

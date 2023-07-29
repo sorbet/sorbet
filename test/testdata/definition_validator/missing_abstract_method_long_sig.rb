@@ -14,18 +14,5 @@ class Parent
 end
 
   class Child < Parent
-    sig do
-      override
-      .params(
-        bar: T::Array[Integer],
-        baz: Symbol,
-        qux: String,
-        quux: T.nilable(Float),
-        corge: T.nilable(T::Boolean)
-      )
-      .returns(T.nilable(T::Hash[Symbol, T.untyped]))
-    end
-    def foo(bar, baz, qux, quux, corge:); end
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
-# ^ apply-code-action: [A] Define `Parent#foo`
   end

@@ -10,8 +10,5 @@ class Parent
 end
 
   class Child < Parent
-    sig {override.params(bar: Integer).returns(String)}
-    def foo(bar); end
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
-# ^ apply-code-action: [A] Define `Parent#foo`
   end

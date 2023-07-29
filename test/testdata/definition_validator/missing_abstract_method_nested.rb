@@ -21,5 +21,4 @@ end
 
   class Child < Parent
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Grandparent#bar`
-# ^ apply-code-action: [A] Define `Grandparent#bar`
   end
