@@ -360,7 +360,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
 
         // Packager runs over all trees.
-        trees = packager::Packager::run(*gs, *workers, move(trees));
+        packager::Packager::run(*gs, *workers, absl::Span<ast::ParsedFile>(trees));
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
@@ -403,8 +403,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            packageTrees = packager::Packager::findPackages(*rbiGenGs, move(packageTrees));
-
+            packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
 

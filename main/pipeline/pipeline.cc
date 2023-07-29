@@ -674,11 +674,11 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 } // namespace
 
-vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                WorkerPool &workers) {
+void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+             WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
     if (!opts.stripePackages) {
-        return what;
+        return;
     }
 
     try {
@@ -690,7 +690,7 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                 opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
                 opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
         }
-        what = packager::Packager::run(gs, workers, move(what));
+        packager::Packager::run(gs, workers, what);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
@@ -704,7 +704,6 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
         }
     }
 #endif
-    return what;
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
@@ -796,7 +795,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
     // packager intentionally runs outside of rewriter so that its output does not get cached.
-    what = package(*gs, move(what), opts, workers);
+    package(*gs, absl::Span<ast::ParsedFile>(what), opts, workers);
 
     try {
         auto result = name(*gs, move(what), opts, workers, foundHashes);

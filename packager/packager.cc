@@ -1452,7 +1452,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
     return files;
 }
 
-vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
@@ -1501,11 +1501,9 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, vector<ast
             }
         }
     }
-
-    return files;
 }
 
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
     mapping.reserve(files.size());
 
@@ -1529,18 +1527,14 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::Pa
             packages.db.setPackageNameForFile(file, package);
         }
     }
-
-    return;
 }
 
-// NOTE: we use `dataAllowingUnsafe` here, as determining the package for a file is something that can be done from its
-// path alone.
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::FileRef> &files) {
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
     std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
-    // no symbols will be allocated.
+    // Step 1a, add package references to every file.
+    // This could be parallel if needed, file access will be unique and no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1563,12 +1557,12 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::F
     return;
 }
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
     ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
 
     Timer timeit(gs.tracer(), "packager");
 
-    files = findPackages(gs, std::move(files));
+    findPackages(gs, files);
     setPackageNameOnFiles(gs, files);
 
     // Step 2:
@@ -1606,8 +1600,6 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
         barrier.Wait();
     }
-
-    return files;
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
