@@ -142,14 +142,17 @@ public:
     // value to be returned, which may be different than returnValue e.g. in the case of a
     // void-returning method.
     static llvm::Value *maybeCheckReturnValue(CompilerState &cs, cfg::CFG &cfg, llvm::IRBuilderBase &build,
-                                              const IREmitterContext &irctx, llvm::Value *returnValue);
+                                              const IREmitterContext &irctx, int rubyRegionId,
+                                              llvm::Value *returnValue);
 
     // Emit a type test.  The insertion point of the builder is set to the start of
     // the block following a successful test.
-    static void emitTypeTest(CompilerState &gs, llvm::IRBuilderBase &builder, llvm::Value *value,
-                             const core::TypePtr &expectedType, std::string_view description);
-    static void emitTypeTestForRestArg(CompilerState &gs, llvm::IRBuilderBase &builder, llvm::Value *value,
-                                       const core::TypePtr &expectedType, std::string_view description);
+    static void emitTypeTest(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                             int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType,
+                             std::string_view description);
+    static void emitTypeTestForRestArg(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                       int rubyRegionId, llvm::Value *value, const core::TypePtr &expectedType,
+                                       std::string_view description);
 
     // Return a value representing the literalish thing, which is either a NamedLiteralType
     // or a type representing nil, false, or true.

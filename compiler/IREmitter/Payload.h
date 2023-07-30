@@ -61,6 +61,9 @@ public:
                                  core::ClassOrModuleRef sym);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
+    static llvm::Value *sorbetRuntimeTypeTest(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                              const IREmitterContext &irctx, int rubyRegionId, llvm::Value *val,
+                                              const core::TypePtr &type);
 
     static void assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                            core::ClassOrModuleRef sym);

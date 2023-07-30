@@ -748,16 +748,19 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         return;
                     }
 
-                    auto local = irctx.rubyBlockArgs[0][i.argId];
-                    auto var = Payload::varGet(cs, local, builder, irctx, 0);
+                    auto rubyRegionId = 0;
+                    auto local = irctx.rubyBlockArgs[rubyRegionId][i.argId];
+                    auto var = Payload::varGet(cs, local, builder, irctx, rubyRegionId);
                     if (auto &expectedType = argInfo.type) {
                         auto description = fmt::format("Parameter '{}'", bind.bind.variable.toString(cs, cfg));
                         if (argInfo.flags.isRepeated && !argInfo.flags.isKeyword) {
                             // Signature types for rest arguments apply to each individual element of
                             // the rest arg, not the actual argument itself.
-                            IREmitterHelpers::emitTypeTestForRestArg(cs, builder, var, expectedType, description);
+                            IREmitterHelpers::emitTypeTestForRestArg(cs, builder, irctx, rubyRegionId, var,
+                                                                     expectedType, description);
                         } else {
-                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, description);
+                            IREmitterHelpers::emitTypeTest(cs, builder, irctx, rubyRegionId, var, expectedType,
+                                                           description);
                         }
                     }
                 },
@@ -784,7 +787,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                                         i.cast == core::Names::assumeType();
 
                     if (!skipTypeTest) {
-                        IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
+                        IREmitterHelpers::emitTypeTest(cs, builder, irctx, bb->rubyRegionId, val, bind.bind.type,
                                                        fmt::format("T.{}", i.cast.shortName(cs)));
                     }
 
@@ -889,7 +892,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     auto rubyRegionId = 0;
 
     auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyRegionId);
-    auto *maybeChecked = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, var);
+    auto *maybeChecked = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, rubyRegionId, var);
 
     IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyRegionId, maybeChecked);
 }
@@ -1036,7 +1039,8 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     builder.CreateCondBr(builder.CreateICmpEQ(wasThrown, builder.getInt8(1)), typecheckBlock, exitBlock);
 
     builder.SetInsertPoint(typecheckBlock);
-    auto *checkedValue = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, returnValue);
+    const auto rubyRegionId = 0;
+    auto *checkedValue = IREmitterHelpers::maybeCheckReturnValue(cs, cfg, builder, irctx, rubyRegionId, returnValue);
     typecheckBlock = builder.GetInsertBlock();
     builder.CreateBr(exitBlock);
 
