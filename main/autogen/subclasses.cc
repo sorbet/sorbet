@@ -102,6 +102,8 @@ void Subclasses::patchChildMap(Subclasses::Map &childMap) {
 vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                 const vector<string> &parentNames, const bool showPaths) {
     vector<string> descendantsMapSerialized;
+    const auto classFormatString = showPaths ? " class {} {}" : " class {}";
+    const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
 
     for (const string &parentName : parentNames) {
         auto fnd = descendantsMap.find(parentName);
@@ -112,9 +114,6 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
 
         auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
-
-        const auto classFormatString = showPaths ? " class {} {}" : " class {}";
-        const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
 
         auto subclassesStart = descendantsMapSerialized.size();
         for (const auto &[name, type, _path] : children.entries) {
