@@ -361,7 +361,7 @@ class Proc < Object
   # proc = proc_from { "hello" }
   # proc.call   #=> "hello"
   # ```
-  sig {params(blk: T.untyped).returns(T.attached_class)}
+  sig {params(blk: Proc).returns(T.attached_class)}
   def self.new(&blk); end
 
   # Invokes the block with `obj` as the proc's parameter like
