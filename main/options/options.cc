@@ -427,6 +427,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("autogen-behavior-allowed-in-rbi-files-paths",
                                "RBI files defined in these paths can be considered by autogen as behavior-defining.",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("autogen-subclasses-show-paths", "Show paths alongside subclasses output",
+                               cxxopts::value<bool>());
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -782,6 +784,13 @@ void readOptions(Options &opts,
         // Certain features only need certain passes
         if (opts.print.isAutogen() && (opts.stopAfterPhase != Phase::NAMER)) {
             logger->error("-p autogen{-msgpack,-classlist,-subclasses} must also include --stop-after=namer");
+            throw EarlyReturnWithCode(1);
+        }
+
+        opts.autogenSubclassesShowPaths = raw["autogen-subclasses-show-paths"].as<bool>();
+
+        if (!opts.print.AutogenSubclasses.enabled && opts.autogenSubclassesShowPaths) {
+            logger->error("autogen-subclasses-show-paths must be used with -p autogen-subclasses");
             throw EarlyReturnWithCode(1);
         }
 

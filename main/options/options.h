@@ -236,6 +236,7 @@ struct Options {
     // Allow RBI files to define behavior if they are in one of these paths.
     std::vector<std::string> autogenBehaviorAllowedInRBIFilesPaths;
     AutogenConstCacheConfig autogenConstantCacheConfig;
+    bool autogenSubclassesShowPaths = false;
 
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
