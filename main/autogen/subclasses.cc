@@ -63,7 +63,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
                                             "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
         auto &mapEntry = out[parentName];
-        mapEntry.entries.insert(make_pair(childName, defn.data(pf).type));
+        mapEntry.entries.insert(make_tuple(childName, defn.data(pf).type, pf.path));
         mapEntry.classKind = ref.parentKind;
     }
 
@@ -82,7 +82,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &[name, _type] : children) {
+    for (const auto &[name, _type, _path] : children) {
         auto descendants = Subclasses::descendantsOf(childMap, name);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
@@ -100,7 +100,7 @@ void Subclasses::patchChildMap(Subclasses::Map &childMap) {
 }
 
 vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                const vector<string> &parentNames) {
+                                                const vector<string> &parentNames, const bool showPaths) {
     vector<string> descendantsMapSerialized;
 
     for (const string &parentName : parentNames) {
@@ -113,13 +113,21 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
+        const auto classFormatString = showPaths ? " class {} {}" : " class {}";
+        const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
+
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &[name, type] : children.entries) {
+        for (const auto &[name, type, _path] : children.entries) {
+            string_view path = _path;
+            // Strip initial "./" from path
+            if (path.find("./") == 0)
+                path = path.substr(2);
             // Ignore Modules
             if (type == autogen::Definition::Type::Class) {
-                descendantsMapSerialized.emplace_back(fmt::format(" class {}", name));
+                // Note: fmt ignores excess arguments
+                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, name, path));
             } else {
-                descendantsMapSerialized.emplace_back(fmt::format(" module {}", name));
+                descendantsMapSerialized.emplace_back(fmt::format(moduleFormatString, name, path));
             }
         }
 
@@ -140,7 +148,8 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
 //
 // This effectively replaces pay-server's `DescendantsMap` in `InheritedClassesStep` with a much
 // faster implementation.
-vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<string> &parentNames) {
+vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<string> &parentNames,
+                                             const bool showPaths) {
     Subclasses::patchChildMap(childMap);
 
     // Generate descendants for each passed-in superclass
@@ -163,7 +172,7 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
         }
     }
 
-    return Subclasses::serializeSubclassMap(descendantsMap, parentNames);
+    return Subclasses::serializeSubclassMap(descendantsMap, parentNames, showPaths);
 };
 
 } // namespace sorbet::autogen

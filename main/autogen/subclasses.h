@@ -7,7 +7,8 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    using Entry = std::pair<std::string, Definition::Type>;
+    // (name, type, path)
+    using Entry = std::tuple<std::string, Definition::Type, std::string>;
     using Entries = UnorderedSet<Entry>;
     struct SubclassInfo {
         ClassKind classKind = ClassKind::Module;
@@ -20,8 +21,9 @@ public:
 
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
-                                                            const std::vector<std::string> &relativeIgnorePatterns);
-    static std::vector<std::string> genDescendantsMap(Subclasses::Map &childMap, std::vector<std::string> &parentNames);
+                                                            const std::vector<std::string> &relativeIgnorePattern);
+    static std::vector<std::string> genDescendantsMap(Subclasses::Map &childMap, std::vector<std::string> &parentNames,
+                                                      const bool showPaths);
 
 private:
     static void patchChildMap(Subclasses::Map &childMap);
@@ -29,7 +31,8 @@ private:
                               const std::vector<std::string> &relativeIgnorePatterns);
     static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const std::string &parents);
     static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                         const std::vector<std::string> &parentNames);
+                                                         const std::vector<std::string> &parentNames,
+                                                         const bool showPaths);
 };
 
 } // namespace sorbet::autogen

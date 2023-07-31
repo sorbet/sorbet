@@ -310,8 +310,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             }
         }
 
-        vector<string> serializedDescendantsMap =
-            autogen::Subclasses::genDescendantsMap(childMap, opts.autogenSubclassesParents);
+        vector<string> serializedDescendantsMap = autogen::Subclasses::genDescendantsMap(
+            childMap, opts.autogenSubclassesParents, opts.autogenSubclassesShowPaths);
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
