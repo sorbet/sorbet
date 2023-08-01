@@ -62,7 +62,7 @@ struct TestPackageFile {
         {
             // and then finally the packager!
             auto workers = WorkerPool::create(0, gs.tracer());
-            parsedFiles = packager::Packager::run(gs, *workers, move(parsedFiles));
+            packager::Packager::run(gs, *workers, absl::Span<ast::ParsedFile>(parsedFiles));
         }
 
         TestPackageFile pkgFile(move(parsedFiles.front()), move(parsedFiles[1]));
