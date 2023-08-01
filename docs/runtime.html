@@ -307,7 +307,7 @@ or not until the block is evaluated. So even if a sig is marked
 <code>.checked(:never)</code>, Sorbet will still wrap the method. The first time the method
 is called, Sorbet will discover the <code>.checked(:never)</code> and put back the original
 method.</p>
-<p>Sometimes even this tiny amount of runtime metaprogramming is unnacceptable at
+<p>Sometimes even this tiny amount of runtime metaprogramming is unacceptable at
 runtime. To completely eliminate all runtime side effects when defining a
 signature, replace <code>sig</code> with <code>T::Sig::WithoutRuntime.sig</code> when annotating
 methods:</p>
@@ -327,6 +327,24 @@ methods:</p>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p><strong>Note</strong>: For consistency in large codebases, it’s best to avoid
+<code>T::Sig::WithoutRuntime</code> unless it can’t be avoided, because the performance win
+versus simply using <code>.checked(:never)</code> is marginal. Some examples:</p>
+<ul>
+<li>Circumstances make it impossible to put <code>extend T::Sig</code> in the class, but
+<code>sorbet-runtime</code> is still loaded.</li>
+<li>The method is <code>method_missing</code> or <code>respond_to_missing?</code>, as <code>sorbet-runtime</code>
+does not support wrapping these methods.</li>
+<li>Some code not under your control is trying to reflect on the result of
+<code>.parameters</code> or <code>.arity</code> of the sig’ed method. (Note that this precludes code
+under <em>your</em> control: Sorbet provides <a href="https://github.com/sorbet/sorbet/blob/0dbaf2c465314556b5acecec6ec63937f2b9e836/gems/sorbet-runtime/lib/types/utils.rb#L63-L68"><code>T::Utils.signature_for_method</code></a>, which
+exposes the arity of the underlying method.)</li>
+<li>After careful measurements, even the first call to a method is performance
+sensitive. This is rare, but can happen when trying to optimize speed of code
+loading specifically.</li>
+</ul>
+<p>If none of these reasons apply, it’s best to avoid <code>T::Sig::WithoutRuntime</code>,
+because it will stand out versus most other usages of <code>sig</code> in a codebase.</p>
 <h2><a class="anchor" aria-hidden="true" id="tlet-tcast-tmust-tbind"></a><a href="#tlet-tcast-tmust-tbind" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T.let, T.cast, T.must, T.bind</h2>
 <p>Type assertions like <code>T.let</code>, <code>T.cast</code>, <code>T.must</code>, and <code>T.bind</code> are normally
 checked at runtime, just like <code>sig</code> annotations on methods, unless runtime
