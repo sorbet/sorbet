@@ -62,3 +62,11 @@ class EnumWithKwargs < T::Enum
 end
 
 T.reveal_type(EnumWithKwargs::X.serialize) # error: Revealed type: `T.untyped`
+
+class EnumWithNil < T::Enum
+  enums do
+    X = new(nil)
+  end
+end
+
+T.reveal_type(EnumWithNil::X.serialize) # error: Revealed type: `NilClass`
