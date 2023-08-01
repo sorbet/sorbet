@@ -134,9 +134,9 @@ std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::Clas
         serializeType = core::Types::String();
     } else if (selfNew->numPosArgs() == 1) {
         if (auto *selfNewArg = ast::cast_tree<ast::Literal>(selfNew->getPosArg(0))) {
-            // If the enum has exactly one variant that as a literal passed (ex. "a"),
+            // If the enum has exactly one variant that has a literal passed (ex. "a"),
             // then its type will be String("a"), but we want a ClassType as the return type.
-            serializeType = selfNewArg->value.underlying(ctx);
+            serializeType = core::Types::dropLiteral(ctx, selfNewArg->value);
         }
     }
 
