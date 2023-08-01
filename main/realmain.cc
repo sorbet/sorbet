@@ -459,6 +459,7 @@ int realmain(int argc, char *argv[]) {
     gs->errorUrlBase = opts.errorUrlBase;
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
+    size_t numPackageFiles = SIZE_MAX;
 
     gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
 
@@ -701,6 +702,9 @@ int realmain(int argc, char *argv[]) {
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
             if (opts.stripePackages) {
+                // TODO(jez) Move this partitioning code to pipeline
+                // Maybe into the call to pipeline::package itself?
+                //
                 // c_partition does not maintain relative ordering of the elements, which means that
                 // the sort order of the file paths is not preserved.
                 //
@@ -708,7 +712,7 @@ int realmain(int argc, char *argv[]) {
                 // parallel and sorts the resulting parsed files at the end. For that reason, I've
                 // chosen not to use stable_partition here.
                 auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(*gs); });
-                auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+                numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
@@ -719,6 +723,12 @@ int realmain(int argc, char *argv[]) {
                     indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
                 }
             }
+
+            // pipeline::package(*gs, );
+
+            // #ifndef SORBET_REALMAIN_MIN
+            //             packager::Packager::jezPrototype(*gs, indexed, opts.jezExperimentalRootPackages);
+            // #endif
 
             auto nonPackageIndexed =
                 (!opts.storeState.empty() || opts.forceHashing)
@@ -778,6 +788,13 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
+            // TODO(jez) While you're going to need to index all the package files, you're not going
+            // to resolve + infer __package.rb files that are not needed (so that you don't get
+            // unresolved constant errors in their `export` stanzas)
+            //
+            // Of course, if the user opens such a package, then you're going to have to treat it as
+            // a root and expand the input files.
+
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());

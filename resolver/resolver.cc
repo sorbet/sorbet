@@ -761,7 +761,7 @@ private:
         // If a package exports a name that does not exist only one error should appear at the
         // export site. Ignore resolution failures in the aliases/modules created by packaging to
         // avoid this resulting in duplicate errors.
-        if (!constantNameMissing && !alreadyReported) {
+        if (!constantNameMissing && !alreadyReported && !ctx.file.data(gs).isPackage()) {
             if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
                 auto foundCommonTypo = false;

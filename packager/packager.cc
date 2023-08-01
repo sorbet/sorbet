@@ -17,6 +17,7 @@
 #include "core/packages/PackageInfo.h"
 #include <algorithm>
 #include <cctype>
+#include <queue>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -1677,6 +1678,70 @@ public:
 };
 
 } // namespace
+
+void Packager::jezPrototype(const core::GlobalState &gs, const vector<ast::ParsedFile> &files,
+                            const vector<string> &rootPackages) {
+    if (rootPackages.empty()) {
+        // TODO(jez) Build this into a proper mode, where this doesn't just print things
+        return;
+    }
+
+    // TODO(jez) Don't have package IDs, so we can't easily make this vector<bool>
+    auto requiredPackages = UnorderedSet<core::NameRef>{};
+
+    queue<core::NameRef> bfsFrontier;
+    // TODO(jez) the name root package is bad, because "root package" has another meaning (the root
+    // of a workspace, not the root of a BFS search)
+    for (const auto &rootPackageName : rootPackages) {
+        auto &rootPackage = gs.packageDB().getPackageInfo(gs, rootPackageName);
+        if (!rootPackage.exists()) {
+            Exception::raise("Unknown package: {}", rootPackageName);
+        }
+
+        bfsFrontier.emplace(rootPackage.mangledName());
+    }
+
+    // TODO(jez) Can parallelize BFS if you need
+    while (!bfsFrontier.empty()) {
+        auto curPackageName = bfsFrontier.front();
+        bfsFrontier.pop();
+
+        if (requiredPackages.find(curPackageName) != requiredPackages.end()) {
+            continue;
+        }
+        requiredPackages.emplace(curPackageName);
+
+        auto &curPackageAbstract = gs.packageDB().getPackageInfo(curPackageName);
+        auto &curPackage = PackageInfoImpl::from(curPackageAbstract);
+
+        for (auto &importedPackageName : curPackage.importedPackageNames) {
+            if (importedPackageName.type != ImportType::Normal) {
+                // TODO(jez) Figure out what to do about test code
+                continue;
+            }
+            if (!importedPackageName.name.mangledName.exists()) {
+                // TODO(jez) Does this happen? Error recovery?
+                continue;
+            }
+            bfsFrontier.emplace(importedPackageName.name.mangledName);
+        }
+    }
+
+    for (auto &pf : files) {
+        if (!pf.file.data(gs).isPackaged()) {
+            fmt::print("{}\n", pf.file.data(gs).path());
+            continue;
+        }
+
+        auto packageNameForFile = gs.packageDB().getPackageNameForFile(pf.file);
+        if (!packageNameForFile.exists()) {
+            // TODO(jez) What does this mean? Can this happen?
+        } else if (requiredPackages.find(packageNameForFile) != requiredPackages.end() &&
+                   !pf.file.data(gs).isPackagedTest()) {
+            fmt::print("{}\n", pf.file.data(gs).path());
+        }
+    }
+}
 
 void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFile) {
     const auto &pkgDB = gs.packageDB();

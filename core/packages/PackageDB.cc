@@ -143,6 +143,7 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
+// TODO(jez) This will say that a `# packaged: false` file is actually packaged... that seems wrong?
 const NameRef PackageDB::getPackageNameForFile(FileRef file) const {
     if (this->packageForFile_.size() <= file.id()) {
         return NameRef::noName();

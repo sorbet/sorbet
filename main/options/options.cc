@@ -486,6 +486,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "function in LMDB API docs.",
                                cxxopts::value<size_t>()->default_value(to_string(empty.maxCacheSizeBytes)), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
+    options.add_options("dev")("jez-experimental-root-package", "TODO(jez)", cxxopts::value<vector<string>>(),
+                               "package");
 
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -815,6 +817,10 @@ void readOptions(Options &opts,
             }
             opts.autogenBehaviorAllowedInRBIFilesPaths =
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
+        }
+
+        if (raw.count("jez-experimental-root-package") > 0) {
+            opts.jezExperimentalRootPackages = raw["jez-experimental-root-package"].as<vector<string>>();
         }
 
         if (opts.print.UntypedBlame.enabled && !opts.trackUntyped) {
