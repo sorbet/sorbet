@@ -612,7 +612,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // TODO: confirm 100 and true params
         SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
         if (sym.exists() && sym.isMethod()) {
-            if (symbol.data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict && sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
+            if (symbol.data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict &&
+                sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
                 mayBeOverloaded = sym.asMethodRef();
             } else {
                 return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
@@ -622,7 +623,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (!mayBeOverloaded.exists()) {
-        if (args.name == Names::initialize()) {
+        if (args.name == Names::initialize() || (args.name == core::Names::super() && args.enclosingMethodForSuper == Names::initialize())) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
@@ -654,15 +655,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            // TODO: this should show enclosingMethodForSuper instead of args.name for super
-            // and mention that it does not exist on the ancestors
-            if (args.fullType.type != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                            args.fullType.type.show(gs));
+            if (args.name == Names::super()) {
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Method `{}` does not exist on anscestors of `{}` component of `{}`", args.enclosingMethodForSuper.show(gs), thisStr,
+                                args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Method `{}` does not exist on anscestors of `{}`", args.enclosingMethodForSuper.show(gs), thisStr);
+                }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized)); // TODO: version of this in the super case?
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                                args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
+                }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized)); // TODO: version of this in the super case?
             }
-            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
             // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
             // suggest adding `extend T::Helpers`.
