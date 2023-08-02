@@ -393,7 +393,7 @@ class LocalNameInserter {
                 original.fun = core::Names::callWithSplatAndBlock();
                 original.addPosArg(std::move(blockArg));
             }
-        } else if (originalBlock == nullptr) {
+        } else if (originalBlock == nullptr && (blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict)) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
@@ -421,6 +421,7 @@ class LocalNameInserter {
             original.fun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
+            // or no block arg in sig.
             original.reserveArguments(posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
 
@@ -438,7 +439,9 @@ class LocalNameInserter {
                 }
             }
             // Re-add original block
-            original.setBlock(std::move(originalBlock));
+            if (originalBlock) {
+                original.setBlock(std::move(originalBlock));
+            }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
         }
