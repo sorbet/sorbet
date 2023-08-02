@@ -638,7 +638,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             return result;
-        } else if (args.name == core::Names::super() && !symbol.data(gs)->isClass()) {
+        } else if (args.name == core::Names::super() && (!symbol.data(gs)->isClass() || symbol.data(gs)->loc().file().data(gs).strictLevel < core::StrictLevel::Strict)) {
             return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                                   Symbols::noMethod());
         }
