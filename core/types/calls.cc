@@ -612,7 +612,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // TODO: confirm 100 and true params
         SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
         if (sym.exists() && sym.isMethod()) {
-            mayBeOverloaded = sym.asMethodRef();
+            if (symbol.data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict && sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
+                mayBeOverloaded = sym.asMethodRef();
+            } else {
+                return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
+            }
         }
     }
 
