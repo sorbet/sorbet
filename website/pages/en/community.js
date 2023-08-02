@@ -185,6 +185,11 @@ class Index extends React.Component {
                   link: 'https://github.com/Shopify/spoom',
                   description: 'Useful tools for Sorbet enthusiasts',
                 },
+                {
+                  title: 'rubymine-sorbet-lsp',
+                  link: 'https://github.com/simoleone/rubymine-sorbet-lsp',
+                  description: 'RubyMine plugin for error highlights and fixes powered by Sorbet language server',
+                },
               ]}
             />
             <p>
