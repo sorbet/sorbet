@@ -188,7 +188,8 @@ class Index extends React.Component {
                 {
                   title: 'rubymine-sorbet-lsp',
                   link: 'https://github.com/simoleone/rubymine-sorbet-lsp',
-                  description: 'RubyMine plugin for error highlights and fixes powered by Sorbet language server',
+                  description:
+                    'RubyMine plugin for error highlights and fixes powered by Sorbet language server',
                 },
               ]}
             />
