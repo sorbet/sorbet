@@ -249,6 +249,10 @@ bool NameRef::isAnyStaticInitName(const GlobalState &gs) const {
     }
 }
 
+bool NameRef::isUniqueNameOf(const GlobalState &gs, NameRef name) const {
+    return this->kind() == NameKind::UNIQUE && this->dataUnique(gs)->original == name;
+}
+
 bool NameRef::isUpdateKnowledgeName() const {
     switch (this->rawId()) {
         case Names::bang().rawId():
