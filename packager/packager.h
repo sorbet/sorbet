@@ -42,11 +42,9 @@ const core::NameRef TEST_NAME = core::Names::Constants::Test();
  */
 class Packager final {
 public:
-    static std::vector<ast::ParsedFile> findPackages(core::GlobalState &gs, WorkerPool &workers,
-                                                     std::vector<ast::ParsedFile> files);
+    static void findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files);
 
-    static std::vector<ast::ParsedFile> run(core::GlobalState &gs, WorkerPool &workers,
-                                            std::vector<ast::ParsedFile> files);
+    static void run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);
 
     // Run packager incrementally. Note: `files` must contain all packages files. Does not support package changes.
     static std::vector<ast::ParsedFile> runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> files);
@@ -54,10 +52,10 @@ public:
     static void dumpPackageInfo(const core::GlobalState &gs, std::string output);
 
     // For each file, set its package name.
-    static void setPackageNameOnFiles(core::GlobalState &gs, const std::vector<ast::ParsedFile> &files);
+    static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
 
     // For each file, set its package name.
-    static void setPackageNameOnFiles(core::GlobalState &gs, const std::vector<core::FileRef> &files);
+    static void setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files);
 
     static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
