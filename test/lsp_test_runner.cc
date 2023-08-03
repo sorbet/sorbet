@@ -607,8 +607,8 @@ TEST_CASE("LSPTest") {
         sorbetInitOptions->enableTypecheckInfo = true;
         sorbetInitOptions->highlightUntyped =
             BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
-        sorbetInitOptions->enableNudges =
-            BooleanPropertyAssertion::getValue("enable-nudges", assertions).value_or(true);
+        sorbetInitOptions->enableTypedFalseCompletionNudges =
+            BooleanPropertyAssertion::getValue("enable-typed-false-completion-nudges", assertions).value_or(true);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");

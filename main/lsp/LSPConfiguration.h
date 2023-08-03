@@ -38,7 +38,7 @@ public:
     bool enableHighlightUntyped = false;
 
     /** If false, nudges in `typed: false` files are disabled */
-    bool enableNudges = true;
+    bool enableTypedFalseCompletionNudges = true;
 
     /**
      * Whether or not the active client has support for snippets in CompletionItems.

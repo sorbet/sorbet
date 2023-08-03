@@ -1256,8 +1256,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             }
         }
 
-        auto enableNudges = config.getClientConfig().enableNudges;
-        if (enableNudges) {
+        auto enableTypedFalseCompletionNudges = config.getClientConfig().enableTypedFalseCompletionNudges;
+        if (enableTypedFalseCompletionNudges) {
             ENFORCE(fref.exists());
             auto level = fref.data(gs).strictLevel;
             if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {

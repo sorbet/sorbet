@@ -1,6 +1,6 @@
 # typed: false
 
-# enable-nudges: false
+# enable-typed-false-completion-nudges: false
 
 class AnImportantClass
   def important_method(important_parameter)

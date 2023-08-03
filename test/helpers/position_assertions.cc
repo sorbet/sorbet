@@ -276,7 +276,7 @@ const UnorderedMap<
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
         {"show-symbol", ShowSymbolAssertion::make},
-        {"enable-nudges", BooleanPropertyAssertion::make},
+        {"enable-typed-false-completion-nudges", BooleanPropertyAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
