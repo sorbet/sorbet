@@ -104,6 +104,7 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
         enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
         enableHighlightUntyped = initOptions->highlightUntyped.value_or(false);
+        enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
     }
 }
 
