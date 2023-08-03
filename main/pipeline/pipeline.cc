@@ -629,7 +629,12 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-    if (f.data(ctx).isRBI()) {
+    if (f.data(ctx).isRBI() && ctx.state.lspQuery.isEmpty()) {
+        // If this is an RBI file but isEmpty is not set, we want to run inference just so that we
+        // can get hover, completion, and definition requests.
+        //
+        // There may be type errors in the file (e.g., you don't need `extend T::Sig` to write `sig`
+        // in an RBI file), but we already ignore errors produced in service of an LSPQuery.
         if (intentionallyLeakASTs) {
             intentionallyLeakMemory(resolved.tree.release());
         }
@@ -650,6 +655,9 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         CFGCollectorAndTyper collector(opts);
         {
             ast::ShallowWalk::apply(ctx, collector, resolved.tree);
+            if (f.data(ctx).isRBI()) {
+                return;
+            }
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
