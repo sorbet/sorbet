@@ -674,10 +674,14 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 } // namespace
 
-vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                WorkerPool &workers) {
+void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+             WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.stripePackages) {
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    try {
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
@@ -686,16 +690,20 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
                 opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
                 opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
         }
-        what = packager::Packager::run(gs, workers, move(what));
+        packager::Packager::run(gs, workers, what);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
         }
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
     }
 #endif
-    return what;
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
@@ -786,10 +794,10 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
-    try {
-        // packager intentionally runs outside of rewriter so that its output does not get cached.
-        what = package(*gs, move(what), opts, workers);
+    // packager intentionally runs outside of rewriter so that its output does not get cached.
+    package(*gs, absl::Span<ast::ParsedFile>(what), opts, workers);
 
+    try {
         auto result = name(*gs, move(what), opts, workers, foundHashes);
         if (!result.hasResult()) {
             return result;

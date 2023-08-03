@@ -651,8 +651,7 @@ int realmain(int argc, char *argv[]) {
                     opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
             }
 
-            packages = packager::Packager::findPackages(*gs, *workers, move(packages));
-
+            packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));
             packager::Packager::setPackageNameOnFiles(*gs, packages);
             packager::Packager::setPackageNameOnFiles(*gs, inputFiles);
 
