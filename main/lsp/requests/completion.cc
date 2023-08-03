@@ -1256,12 +1256,15 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             }
         }
 
-        ENFORCE(fref.exists());
-        auto level = fref.data(gs).strictLevel;
-        if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
-            items.emplace_back(getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
-            response->result = make_unique<CompletionList>(false, move(items));
-            return response;
+        auto enableNudges = config.getClientConfig().enableNudges;
+        if (enableNudges) {
+            ENFORCE(fref.exists());
+            auto level = fref.data(gs).strictLevel;
+            if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
+                items.emplace_back(getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
+                response->result = make_unique<CompletionList>(false, move(items));
+                return response;
+            }
         }
 
         response->result = std::move(emptyResult);

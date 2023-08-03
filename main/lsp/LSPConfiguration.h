@@ -37,6 +37,9 @@ public:
     /** If true, then LSP outputs a warning for untyped values */
     bool enableHighlightUntyped = false;
 
+    /** If false, nudges in `typed: false` files are disabled */
+    bool enableNudges = true;
+
     /**
      * Whether or not the active client has support for snippets in CompletionItems.
      * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are
