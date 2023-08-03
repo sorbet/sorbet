@@ -70,3 +70,19 @@ class EnumWithNil < T::Enum
 end
 
 T.reveal_type(EnumWithNil::X.serialize) # error: Revealed type: `NilClass`
+
+
+class EnumWithPrivate < T::Enum
+  extend T::Sig
+
+  enums do
+    X = new(nil)
+  end
+
+  private
+
+  sig { void }
+  def unrelated_method; end
+end
+
+EnumWithPrivate::X.serialize
