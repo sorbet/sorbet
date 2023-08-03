@@ -318,7 +318,13 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     core::TypePtr guessedReturnType;
-    if (!constr.isEmpty()) {
+    if (ctx.file.data(ctx).isRBI()) {
+        // We will always infer a return type of `NilClass` in an RBI file, because all RBI files
+        // have empty bodies. That's not useful--we'd rather infer `T.untyped` so that LSP
+        // replaces it with a tabstop the user can cycle through.
+        guessedReturnType = core::Types::untypedUntracked();
+
+    } else if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
             return nullopt;
         }
