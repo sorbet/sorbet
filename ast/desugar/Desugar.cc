@@ -177,6 +177,24 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     return res;
 }
 
+ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec &stmts) {
+    if (stmts.empty()) {
+        return MK::Nil(loc);
+    } else {
+        InsSeq::STATS_store stats;
+        stats.reserve(stmts.size() - 1);
+        auto end = stmts.end();
+        --end;
+        for (auto it = stmts.begin(); it != end; ++it) {
+            auto &stat = *it;
+            stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
+        };
+        auto &last = stmts.back();
+        auto expr = node2TreeImpl(dctx, std::move(last));
+        return MK::InsSeq(loc, std::move(stats), std::move(expr));
+    }
+}
+
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
     Literal *lit;
     return (lit = cast_tree<Literal>(expr)) && lit->isString();
@@ -1094,25 +1112,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Block *block) {
                 result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
             },
-            [&](parser::Begin *begin) {
-                if (!begin->stmts.empty()) {
-                    InsSeq::STATS_store stats;
-                    stats.reserve(begin->stmts.size() - 1);
-                    auto end = begin->stmts.end();
-                    --end;
-                    for (auto it = begin->stmts.begin(); it != end; ++it) {
-                        auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
-                    };
-                    auto &last = begin->stmts.back();
-                    auto expr = node2TreeImpl(dctx, std::move(last));
-                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
-                    result = std::move(block);
-                } else {
-                    ExpressionPtr res = MK::Nil(loc);
-                    result = std::move(res);
-                }
-            },
+            [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, std::move(asgn->lhs));
                 auto rhs = node2TreeImpl(dctx, std::move(asgn->rhs));
@@ -1477,25 +1477,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
                 result = std::move(res);
             },
-            [&](parser::Kwbegin *kwbegin) {
-                if (!kwbegin->stmts.empty()) {
-                    InsSeq::STATS_store stats;
-                    stats.reserve(kwbegin->stmts.size() - 1);
-                    auto end = kwbegin->stmts.end();
-                    --end;
-                    for (auto it = kwbegin->stmts.begin(); it != end; ++it) {
-                        auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
-                    };
-                    auto &last = kwbegin->stmts.back();
-                    auto expr = node2TreeImpl(dctx, std::move(last));
-                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
-                    result = std::move(block);
-                } else {
-                    ExpressionPtr res = MK::EmptyTree();
-                    result = std::move(res);
-                }
-            },
+            [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
