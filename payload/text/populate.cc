@@ -24,6 +24,9 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
     auto indexed =
         realmain::pipeline::index(*gs, absl::Span<core::FileRef>(payloadFiles), emptyOpts, *workers, kvstore);
+
+    // We don't run the payload with any packager options, so we can skip pipeline::package()
+
     // While we want the FoundMethodHashes to end up in the payload, these hashes (including
     // LocalGlobalStateHashes and UsageHash) are not computed until `computeFileHashes` is called in
     // realmain when the `storeState` flag is passed. This means that e.g. sorbet-orig -e
