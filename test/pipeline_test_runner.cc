@@ -378,12 +378,23 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
+    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
-    auto trees = index(gs, absl::Span<core::FileRef>(files), handler, test);
+    vector<ast::ParsedFile> trees;
+    auto filesSpan = absl::Span<core::FileRef>(files);
+    if (enablePackager) {
+        auto numPackageFiles = packager::Packager::partitionFiles(*gs, filesSpan);
+        auto inputPackageFiles = filesSpan.first(numPackageFiles);
+        filesSpan = filesSpan.subspan(numPackageFiles);
+
+        trees = index(gs, inputPackageFiles, handler, test);
+    }
+
+    auto nonPackageTrees = index(gs, filesSpan, handler, test);
+    packager::Packager::unpartitionFiles(trees, move(nonPackageTrees));
 
     package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
 
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
     if (enablePackager) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
