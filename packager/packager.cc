@@ -695,7 +695,7 @@ public:
         ENFORCE(pkg.exists());
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -706,7 +706,7 @@ public:
             return;
         }
 
-        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -728,7 +728,7 @@ public:
         }
     }
 
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
@@ -745,7 +745,7 @@ public:
             }
         }
 
-        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -753,7 +753,7 @@ public:
         popConstantLit(constantLit);
     }
 
-    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -776,13 +776,13 @@ public:
         }
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -791,13 +791,13 @@ public:
         checkBehaviorLoc(ctx, def.declLoc);
     }
 
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -805,7 +805,7 @@ public:
         checkBehaviorLoc(ctx, original.loc());
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
@@ -839,7 +839,7 @@ public:
     }
 
 private:
-    void pushConstantLit(core::Context ctx, ast::UnresolvedConstantLit *lit) {
+    void pushConstantLit(core::Context ctx, const ast::UnresolvedConstantLit *lit) {
         ENFORCE(tmpNameParts.empty());
         auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
@@ -866,7 +866,7 @@ private:
         tmpNameParts.clear();
     }
 
-    void popConstantLit(ast::UnresolvedConstantLit *lit) {
+    void popConstantLit(const ast::UnresolvedConstantLit *lit) {
         while (lit != nullptr) {
             if (rootConsts == 0) {
                 namespaces.popName();
