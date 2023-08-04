@@ -38,9 +38,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def test_completion_between_keywords<<todo method>>(x, &<blk>)
     begin
-      <emptyTree>
+      nil
       x.<method-name-missing>()
-      <emptyTree>
+      nil
     end
   end
 

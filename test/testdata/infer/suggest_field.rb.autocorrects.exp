@@ -11,7 +11,7 @@ class A
   def initialize
     @x = T.let(0, Integer)
   # ^^ error: The instance variable `@x` must be declared using `T.let` when specifying `# typed: strict`
-    @y = begin; end
+    @y = T.let(begin; end, NilClass)
   # ^^ error: The instance variable `@y` must be declared using `T.let` when specifying `# typed: strict`
     @z = T.let(returns_integer, Integer)
   # ^^ error: The instance variable `@z` must be declared using `T.let` when specifying `# typed: strict`
