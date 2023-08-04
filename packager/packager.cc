@@ -1453,8 +1453,10 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
 }
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
-    // Ensure files are in canonical order.
-    fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
+    // We want them sorted in a stable order so that "redefinition of package" errors always show up
+    // in the same file across runs.
+    ENFORCE(absl::c_is_sorted(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; }),
+            "pipeline::index should have sorted the files already");
 
     // Step 1: Find packages and determine their imports/exports.
     {
