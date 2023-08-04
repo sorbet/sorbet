@@ -256,6 +256,53 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     return trees;
 }
 
+void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+             ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
+    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+
+    if (enablePackager) {
+        vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
+        vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+        vector<std::string> skipRBIExportEnforcementDirs;
+        vector<std::string> skipImportVisibilityCheckFor;
+
+        auto extraDirUnderscore =
+            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+        if (extraDirUnderscore.has_value()) {
+            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+        }
+
+        auto extraDirSlash =
+            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+        if (extraDirSlash.has_value()) {
+            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+        }
+
+        auto skipImportVisibility =
+            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+        if (skipImportVisibility.has_value()) {
+            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+        }
+
+        {
+            core::UnfreezeNameTable packageNS(*gs);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
+            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                                   "PACKAGE_ERROR_HINT");
+        }
+
+        // Packager runs over all trees.
+        packager::Packager::run(*gs, *workers, trees);
+        for (auto &tree : trees) {
+            handler.addObserved(*gs, "package-tree", [&]() {
+                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+            });
+        }
+    }
+}
+
 TEST_CASE("PerPhaseTest") { // NOLINT
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -333,50 +380,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     auto trees = index(gs, files, handler, test);
 
+    package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-    if (enablePackager) {
-        vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-        vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
-        vector<std::string> skipRBIExportEnforcementDirs;
-        vector<std::string> skipImportVisibilityCheckFor;
-
-        auto extraDirUnderscore =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-        if (extraDirUnderscore.has_value()) {
-            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-        }
-
-        auto extraDirSlash =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-        if (extraDirSlash.has_value()) {
-            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-        }
-
-        auto skipImportVisibility =
-            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
-        if (skipImportVisibility.has_value()) {
-            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
-        }
-
-        {
-            core::UnfreezeNameTable packageNS(*gs);
-            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
-                                   "PACKAGE_ERROR_HINT");
-        }
-
-        // Packager runs over all trees.
-        packager::Packager::run(*gs, *workers, absl::Span<ast::ParsedFile>(trees));
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
-    }
-
     if (enablePackager) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
