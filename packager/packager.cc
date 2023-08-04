@@ -1610,8 +1610,6 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     files = rewriteFilesFast(gs, move(files));
     ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
-    Packager::setPackageNameOnFiles(gs, files);
-    return files;
 }
 
 namespace {
