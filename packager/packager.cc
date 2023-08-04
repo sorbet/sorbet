@@ -1452,6 +1452,18 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
     return files;
 }
 
+size_t Packager::partitionFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
+    // c_partition does not maintain relative ordering of the elements, which means that
+    // the sort order of the file paths is not preserved.
+    //
+    // index doesn't depend on this order, because it is already indexes files in
+    // parallel and sorts the resulting parsed files at the end. For that reason, I've
+    // chosen not to use stable_partition here.
+    auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(gs); });
+    auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+    return numPackageFiles;
+}
+
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });

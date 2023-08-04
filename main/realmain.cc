@@ -701,14 +701,7 @@ int realmain(int argc, char *argv[]) {
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
             if (opts.stripePackages) {
-                // c_partition does not maintain relative ordering of the elements, which means that
-                // the sort order of the file paths is not preserved.
-                //
-                // index doesn't depend on this order, because it is already indexes files in
-                // parallel and sorts the resulting parsed files at the end. For that reason, I've
-                // chosen not to use stable_partition here.
-                auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(*gs); });
-                auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+                auto numPackageFiles = packager::Packager::partitionFiles(*gs, inputFilesSpan);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
