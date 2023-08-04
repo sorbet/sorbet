@@ -42,10 +42,6 @@ const core::NameRef TEST_NAME = core::Names::Constants::Test();
  */
 class Packager final {
 public:
-    static size_t partitionFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
-    static void unpartitionFiles(std::vector<ast::ParsedFile> &indexed,
-                                 std::vector<ast::ParsedFile> &&nonPackageIndexed);
-
     static void findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files);
 
     static void run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files);

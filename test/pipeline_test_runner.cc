@@ -33,6 +33,7 @@
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
+#include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
@@ -383,7 +384,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (enablePackager) {
-        auto numPackageFiles = packager::Packager::partitionFiles(*gs, filesSpan);
+        auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
@@ -391,7 +392,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto nonPackageTrees = index(gs, filesSpan, handler, test);
-    packager::Packager::unpartitionFiles(trees, move(nonPackageTrees));
+    realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
 

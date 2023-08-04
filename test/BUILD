@@ -28,6 +28,7 @@ cc_binary(
         "//main/autogen",
         "//main/lsp",
         "//main/minimize",
+        "//main/pipeline",
         "//main/pipeline/semantic_extension:none",
         "//namer",
         "//packager",

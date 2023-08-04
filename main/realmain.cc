@@ -701,7 +701,7 @@ int realmain(int argc, char *argv[]) {
 
             auto inputFilesSpan = absl::Span<core::FileRef>(inputFiles);
             if (opts.stripePackages) {
-                auto numPackageFiles = packager::Packager::partitionFiles(*gs, inputFilesSpan);
+                auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
                 auto inputPackageFiles = inputFilesSpan.first(numPackageFiles);
                 inputFilesSpan = inputFilesSpan.subspan(numPackageFiles);
 
@@ -719,7 +719,7 @@ int realmain(int argc, char *argv[]) {
                     ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
 
-            packager::Packager::unpartitionFiles(indexed, move(nonPackageIndexed));
+            pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
 
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
