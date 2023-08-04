@@ -719,15 +719,7 @@ int realmain(int argc, char *argv[]) {
                     ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
 
-            if (indexed.empty()) {
-                // Performance optimization--if it's already empty, no need to move one-by-one
-                indexed = move(nonPackageIndexed);
-            } else {
-                // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
-                // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
-                indexed.reserve(indexed.size() + nonPackageIndexed.size());
-                absl::c_move(nonPackageIndexed, back_inserter(indexed));
-            }
+            packager::Packager::unpartitionFiles(indexed, move(nonPackageIndexed));
 
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
