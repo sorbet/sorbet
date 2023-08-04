@@ -183,7 +183,7 @@ public:
     }
 };
 
-vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> &files,
+vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core::FileRef> files,
                               ExpectationHandler &handler, Expectations &test) {
     vector<ast::ParsedFile> trees;
     for (auto file : files) {
@@ -379,7 +379,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     ExpectationHandler handler(test, errorQueue, errorCollector);
 
-    auto trees = index(gs, files, handler, test);
+    auto trees = index(gs, absl::Span<core::FileRef>(files), handler, test);
 
     package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
 
