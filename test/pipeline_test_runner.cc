@@ -59,6 +59,9 @@ using namespace std;
 
 string singleTest;
 
+constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+constexpr string_view packageFileName = "__package.rb"sv;
+
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
@@ -180,83 +183,9 @@ public:
     }
 };
 
-TEST_CASE("PerPhaseTest") { // NOLINT
-    Expectations test = Expectations::getExpectations(singleTest);
-
-    auto inputPath = test.folder + test.basename;
-    auto rbName = test.basename + ".rb";
-
-    for (auto &exp : test.expectations) {
-        if (!knownExpectations.contains(exp.first)) {
-            FAIL_CHECK("Unknown pass: " << exp.first);
-        }
-    }
-
-    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
-    auto errorCollector = make_shared<core::ErrorCollector>();
-    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
-    auto gs = make_unique<core::GlobalState>(errorQueue);
-
-    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
-        gs->semanticExtensions.emplace_back(provider->defaultInstance());
-    }
-
-    gs->censorForSnapshotTests = true;
-    auto workers = WorkerPool::create(0, gs->tracer());
-
-    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
-    gs->requiresAncestorEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    gs->ruby3KeywordArgs =
-        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-
-    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-    }
-
-    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
-
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
-    }
-
-    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
-    }
-
-    unique_ptr<core::GlobalState> emptyGs;
-    if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
-        // Copy GlobalState after initializing it, but before rest of pipeline, so that it
-        // represents an "empty" GlobalState.
-        emptyGs = gs->deepCopy();
-    }
-
-    // Parser
-    vector<core::FileRef> files;
-    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
-    constexpr string_view packageFileName = "__package.rb"sv;
-    {
-        core::UnfreezeFileTable fileTableAccess(*gs);
-
-        for (auto &sourceFile : test.sourceFiles) {
-            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
-            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
-                fref.data(*gs).strictLevel = core::StrictLevel::False;
-            }
-            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
-                fref.data(*gs).strictLevel = core::StrictLevel::False;
-            }
-            files.emplace_back(fref);
-        }
-    }
+vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> &files,
+                              ExpectationHandler &handler, Expectations &test) {
     vector<ast::ParsedFile> trees;
-    ExpectationHandler handler(test, errorQueue, errorCollector);
-
     for (auto file : files) {
         auto fileName = FileOps::getFileName(file.data(*gs).path());
         if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
@@ -323,6 +252,86 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         trees.emplace_back(move(localNamed));
     }
+
+    return trees;
+}
+
+TEST_CASE("PerPhaseTest") { // NOLINT
+    Expectations test = Expectations::getExpectations(singleTest);
+
+    auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
+
+    for (auto &exp : test.expectations) {
+        if (!knownExpectations.contains(exp.first)) {
+            FAIL_CHECK("Unknown pass: " << exp.first);
+        }
+    }
+
+    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
+    auto gs = make_unique<core::GlobalState>(errorQueue);
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs->semanticExtensions.emplace_back(provider->defaultInstance());
+    }
+
+    gs->censorForSnapshotTests = true;
+    auto workers = WorkerPool::create(0, gs->tracer());
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+
+    gs->requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    gs->ruby3KeywordArgs =
+        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+
+    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
+
+    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
+    }
+
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+    }
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        gs->suggestUnsafe = "T.unsafe";
+    }
+
+    unique_ptr<core::GlobalState> emptyGs;
+    if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
+        // Copy GlobalState after initializing it, but before rest of pipeline, so that it
+        // represents an "empty" GlobalState.
+        emptyGs = gs->deepCopy();
+    }
+
+    // Read files
+    vector<core::FileRef> files;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+
+        for (auto &sourceFile : test.sourceFiles) {
+            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
+        }
+    }
+
+    ExpectationHandler handler(test, errorQueue, errorCollector);
+
+    auto trees = index(gs, files, handler, test);
 
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
