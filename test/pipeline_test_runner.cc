@@ -260,46 +260,47 @@ void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers,
              ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
-    if (enablePackager) {
-        vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-        vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
-        vector<std::string> skipRBIExportEnforcementDirs;
-        vector<std::string> skipImportVisibilityCheckFor;
+    if (!enablePackager) {
+        return;
+    }
 
-        auto extraDirUnderscore =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-        if (extraDirUnderscore.has_value()) {
-            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-        }
+    vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    vector<std::string> extraPackageFilesDirectorySlashPrefixes;
+    vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+    vector<std::string> skipRBIExportEnforcementDirs;
+    vector<std::string> skipImportVisibilityCheckFor;
 
-        auto extraDirSlash =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-        if (extraDirSlash.has_value()) {
-            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-        }
+    auto extraDirUnderscore =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+    if (extraDirUnderscore.has_value()) {
+        extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
 
-        auto skipImportVisibility =
-            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
-        if (skipImportVisibility.has_value()) {
-            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
-        }
+    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+    if (extraDirSlash.has_value()) {
+        extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+    }
 
-        {
-            core::UnfreezeNameTable packageNS(*gs);
-            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
-                                   "PACKAGE_ERROR_HINT");
-        }
+    auto skipImportVisibility =
+        StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+    if (skipImportVisibility.has_value()) {
+        skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+    }
 
-        // Packager runs over all trees.
-        packager::Packager::run(*gs, *workers, trees);
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
+    {
+        core::UnfreezeNameTable packageNS(*gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
+        gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
+                               extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                               "PACKAGE_ERROR_HINT");
+    }
+
+    // Packager runs over all trees.
+    packager::Packager::run(*gs, *workers, trees);
+    for (auto &tree : trees) {
+        handler.addObserved(*gs, "package-tree", [&]() {
+            return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+        });
     }
 }
 
