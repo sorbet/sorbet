@@ -21,6 +21,9 @@ std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, 
 std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, const options::Options &opts,
                                    WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
+size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
+void unpartitionPackageFiles(std::vector<ast::ParsedFile> &indexed, std::vector<ast::ParsedFile> &&nonPackageIndexed);
+
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 

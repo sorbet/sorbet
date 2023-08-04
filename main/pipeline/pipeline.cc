@@ -682,6 +682,30 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 } // namespace
 
+size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
+    // c_partition does not maintain relative ordering of the elements, which means that
+    // the sort order of the file paths is not preserved.
+    //
+    // index doesn't depend on this order, because it is already indexes files in
+    // parallel and sorts the resulting parsed files at the end. For that reason, I've
+    // chosen not to use stable_partition here.
+    auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(gs); });
+    auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+    return numPackageFiles;
+}
+
+void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::ParsedFile> &&nonPackageIndexed) {
+    if (indexed.empty()) {
+        // Performance optimization--if it's already empty, no need to move one-by-one
+        indexed = move(nonPackageIndexed);
+    } else {
+        // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
+        // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
+        indexed.reserve(indexed.size() + nonPackageIndexed.size());
+        absl::c_move(nonPackageIndexed, back_inserter(indexed));
+    }
+}
+
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
