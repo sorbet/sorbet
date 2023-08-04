@@ -375,7 +375,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
             });
         }
+    }
 
+    if (enablePackager) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
