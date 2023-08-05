@@ -38,9 +38,10 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
         if (i != args.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter->documentation = core::source_generator::getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver,
-                                                            resp.dispatchResult->main.constr.get())
-                                       .show(gs);
+        parameter->documentation =
+            core::source_generator::getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver,
+                                                  resp.dispatchResult->main.constr.get())
+                .show(gs);
         parameters.push_back(move(parameter));
         i += 1;
     }
