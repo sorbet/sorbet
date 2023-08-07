@@ -211,6 +211,7 @@ class LocalNameInserter {
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         ENFORCE(original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0)));
+        ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::superInBlock());
 
         ast::ExpressionPtr originalBlock;
         if (auto *rawBlock = original.rawBlock()) {
@@ -343,12 +344,13 @@ class LocalNameInserter {
         }
 
         auto method = ast::MK::Literal(
-            original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), core::Names::super()));
+            original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
+            // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
             original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
             original.addPosArg(std::move(method));
 
@@ -389,6 +391,8 @@ class LocalNameInserter {
                 // Re-add block argument
                 original.setBlock(std::move(originalBlock));
             } else {
+                // TODO: need to handle this case too
+                // (ie. not pass in implicit block for strict mode)
                 // <call-with-splat-and-block>(..., &blk)
                 original.fun = core::Names::callWithSplatAndBlock();
                 original.addPosArg(std::move(blockArg));
@@ -488,8 +492,30 @@ public:
 
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
-            tree = lowerZSuperArgs(ctx, std::move(tree));
+        // TODO: explain this
+        if (original.fun == core::Names::callWithBlock() ||
+            original.fun == core::Names::callWithSplat() ||
+            original.fun == core::Names::callWithSplatAndBlock()) {
+            ENFORCE(ast::isa_tree<ast::Literal>(original.getPosArg(1)));
+            auto literal = ast::cast_tree_nonnull<ast::Literal>(original.getPosArg(1));
+
+            ENFORCE(core::isa_type<core::NamedLiteralType>(literal.value));
+            auto methodName = core::cast_type_nonnull<core::NamedLiteralType>(literal.value).asName();
+
+            auto newMethodName = scopeStack.back().insideBlock ? core::Names::superInBlock() : core::Names::super();
+            auto newMethod = ast::MK::Literal(
+                literal.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), newMethodName));
+
+            if (methodName == core::Names::super()) {
+                original.removePosArg(1);
+                original.insertPosArg(1, std::move(newMethod));
+            }
+        } else if (original.fun == core::Names::super()) {
+            auto newMethodName = scopeStack.back().insideBlock ? core::Names::superInBlock() : core::Names::super();
+            original.fun = newMethodName;
+            if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
+                tree = lowerZSuperArgs(ctx, std::move(tree));
+            }
         }
     }
 

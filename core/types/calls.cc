@@ -641,6 +641,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.name == core::Names::super() && (!symbol.data(gs)->isClass() || symbol.data(gs)->loc().file().data(gs).strictLevel < core::StrictLevel::Strict)) {
             return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                                   Symbols::noMethod());
+        } else if (args.name == core::Names::superInBlock()) {
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
@@ -657,10 +660,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             string thisStr = args.thisType.show(gs);
             if (args.name == Names::super()) {
                 if (args.fullType.type != args.thisType) {
-                    e.setHeader("Method `{}` does not exist on anscestors of `{}` component of `{}`", args.enclosingMethodForSuper.show(gs), thisStr,
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}` component of `{}`", args.enclosingMethodForSuper.show(gs), thisStr,
                                 args.fullType.type.show(gs));
                 } else {
-                    e.setHeader("Method `{}` does not exist on anscestors of `{}`", args.enclosingMethodForSuper.show(gs), thisStr);
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}`", args.enclosingMethodForSuper.show(gs), thisStr);
                 }
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized)); // TODO: version of this in the super case?
             } else {
