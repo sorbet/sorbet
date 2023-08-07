@@ -229,6 +229,14 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
+            // For simplicity, we still call Packager::runIncremental here, even though
+            // pipeline::resolve no longer calls Packager::run.
+            //
+            // TODO(jez) We may want to revisit this. At the moment, the only thing that
+            // runIncremental does is validate that files have the right package prefix. We could
+            // split `pipeline::package` into something like "populate the package DB" and "verify
+            // the package prefixes" with the later living in `pipeline::resolve` once again (thus
+            // restoring the symmetry).
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
@@ -826,9 +834,6 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
-    // packager intentionally runs outside of rewriter so that its output does not get cached.
-    package(*gs, absl::Span<ast::ParsedFile>(what), opts, workers);
-
     try {
         auto result = name(*gs, move(what), opts, workers, foundHashes);
         if (!result.hasResult()) {

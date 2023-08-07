@@ -418,6 +418,8 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
 
+    pipeline::package(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers);
+
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
     rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers, foundHashes).result());
