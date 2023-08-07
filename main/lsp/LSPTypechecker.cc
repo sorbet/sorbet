@@ -718,6 +718,10 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     slowPathBlocked = blocked;
 }
 
+void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    this->gs->trackUntyped = options.settings->highlightUntyped.value_or(this->gs->trackUntyped);
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
@@ -761,6 +765,9 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
+}
+void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    typechecker.updateGsFromOptions(options);
 }
 
 } // namespace sorbet::realmain::lsp

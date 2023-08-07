@@ -229,6 +229,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<SorbetResumeTask>(*config);
             case LSPMethod::SorbetError:
                 return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)));
+            case LSPMethod::WorkspaceDidChangeConfiguration:
+                return make_unique<DidChangeConfigurationTask>(
+                    *config, move(get<unique_ptr<DidChangeConfigurationParams>>(rawParams)));
             default:
                 return make_unique<SorbetErrorTask>(
                     *config, make_unique<SorbetErrorParams>(

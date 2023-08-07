@@ -22,6 +22,7 @@ namespace sorbet::realmain::lsp {
 class ResponseError;
 class InitializedTask;
 class TaskQueue;
+class DidChangeConfigurationParams;
 
 struct LSPQueryResult {
     std::vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
@@ -143,6 +144,12 @@ public:
      * this flag to `false` will immediately unblock any currently blocked slow paths.
      */
     void setSlowPathBlocked(bool blocked);
+
+    /**
+     * Exposes very limited mutability to typechecker's global state in order to support the client changing
+     * options (such as highlighting untyped code) without doing a full restart of Sorbet.
+     */
+    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
 };
 
 /**
@@ -182,6 +189,8 @@ public:
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
     const core::GlobalState &state() const;
+
+    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif
