@@ -12,10 +12,10 @@ public:
         core::FileRef file;
 
         bool operator==(const Entry &rhs) const {
-            return (def == rhs.def && file == rhs.file);
+            return (def.sym == rhs.def.sym && file == rhs.file);
         }
         template <typename H> friend H AbslHashValue(H h, const Entry &m) {
-            return H::combine(std::move(h), m.def.id.id(), m.file.id());
+            return H::combine(std::move(h), m.def.sym, m.file);
         }
     };
     using Entries = UnorderedSet<Entry>;

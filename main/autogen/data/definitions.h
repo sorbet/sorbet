@@ -63,9 +63,6 @@ struct DefinitionRef {
     }
 
     const Definition &data(const ParsedFile &pf) const;
-    bool operator==(const DefinitionRef &rhs) const {
-        return _id == rhs._id;
-    }
 };
 
 // A reference to a specific `Reference` inside of a `ParsedFile`.
@@ -83,9 +80,6 @@ struct ReferenceRef {
     }
 
     const Reference &data(const ParsedFile &pf) const;
-    bool operator==(const ReferenceRef &rhs) const {
-        return _id == rhs._id;
-    }
 };
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
@@ -116,10 +110,6 @@ struct Definition {
     // which ref is the one that corresponds to this definition? I (gdritter) _believe_ that this will always be defined
     // once `AutogenWalk` has completed; please update this comment if that ever turns out to be false
     ReferenceRef defining_ref;
-
-    bool operator==(const Definition &rhs) const {
-        return id == rhs.id;
-    }
 };
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
@@ -160,10 +150,6 @@ struct Reference {
     // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
     // this is being `include`d or `extend`ed
     DefinitionRef parent_of;
-
-    bool operator==(const Reference &rhs) const {
-        return id == rhs.id;
-    }
 };
 
 struct AutogenConfig {
