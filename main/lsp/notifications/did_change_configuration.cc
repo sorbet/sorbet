@@ -1,4 +1,5 @@
 #include "main/lsp/notifications/did_change_configuration.h"
+#include "main/lsp/LSPIndexer.h"
 #include "main/lsp/LSPPreprocessor.h"
 
 namespace sorbet::realmain::lsp {
@@ -11,10 +12,12 @@ LSPTask::Phase DidChangeConfigurationTask::finalPhase() const {
 }
 
 void DidChangeConfigurationTask::preprocess(LSPPreprocessor &preprocessor) {
-    preprocessor.resume();
+    // preprocessor.resume();
 }
 
-void DidChangeConfigurationTask::index(LSPIndexer &indexer) {}
+void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
+    indexer.updateGsFromOptions(*params);
+}
 
 void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
     tc.updateGsFromOptions(*params);

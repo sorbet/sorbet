@@ -418,8 +418,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "IgnoresNotificationsThatDontTypecheck") {
 // Ensures that unrecognized requests are responded to.
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
     assertDiagnostics(initializeLSP(), {});
-    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
-                             "didChangeConfiguration\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"sorbet/"
+                             "fooBar\",\"id\":9001,\"params\":{\"settings\":{\"highlightUntyped\": false}}}");
     REQUIRE_EQ(responses.size(), 1);
     auto &response = responses.at(0);
     REQUIRE(response->isResponse());
