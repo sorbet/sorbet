@@ -13,8 +13,6 @@ public:
 
     LSPTask::Phase finalPhase() const override;
 
-    void preprocess(LSPPreprocessor &preprocessor) override;
-
     void index(LSPIndexer &indexer) override;
 
     void run(LSPTypecheckerDelegate &tc) override;
