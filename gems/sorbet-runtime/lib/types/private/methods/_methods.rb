@@ -38,7 +38,6 @@ module T::Private::Methods
   end
 
   private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name)
-    # TODO(jez) Verify that method exists on mod, and 
     previous_declaration = T::Private::DeclState.current.previous_declaration
     if previous_declaration.nil?
       raise "You must call `#{dsl_name} #{method.inspect}` immediately after defining the method, before defining any further methods or signatures"
@@ -52,7 +51,8 @@ module T::Private::Methods
       raise ""
     end
 
-    # We know that method must exist, because previous_declaration
+    # TODO(jez) Verify that method exists on mod
+    # TODO(jez) Verify that method_name is the name the previous_declaration
 
     previous_declaration
   end
