@@ -717,6 +717,9 @@ int realmain(int argc, char *argv[]) {
                 } else {
                     indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
                 }
+
+                // First run: only the __package.rb files. This populates the packageDB
+                pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
             }
 
             auto nonPackageIndexed =
@@ -724,6 +727,9 @@ int realmain(int argc, char *argv[]) {
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
                     ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
+
+            // Second run: all the other files (the packageDB shouldn't change)
+            pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
 
@@ -769,9 +775,6 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
-            // packager intentionally runs outside of rewriter so that its output does not get cached.
-            pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
-
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());

@@ -461,6 +461,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
             }
         }
 
+        // TODO(jez) Splitting this like how the pipeline intersperses this with indexing is going
+        // to take more work. Punting for now.
         pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers);
 
         // Only need to compute FoundDefHashes when running to compute a FileHash

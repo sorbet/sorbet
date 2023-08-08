@@ -714,6 +714,8 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::Parse
     }
 }
 
+// packager intentionally runs outside of rewriter so that its output does not get cached.
+// TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers) {
 #ifndef SORBET_REALMAIN_MIN
