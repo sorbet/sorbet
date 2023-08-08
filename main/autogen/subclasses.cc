@@ -66,7 +66,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const
         }
 
         auto &mapEntry = out[ref.sym];
-        mapEntry.entries.insert({defn.data(pf), pf.file});
+        mapEntry.entries.insert({defn.data(pf).sym, defn.data(pf).type});
         mapEntry.classKind = ref.parentKind;
     }
 
@@ -85,8 +85,8 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &[def, _file] : children) {
-        auto descendants = Subclasses::descendantsOf(childMap, def.sym);
+    for (const auto &[sym, _type] : children) {
+        auto descendants = Subclasses::descendantsOf(childMap, sym);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
         }
@@ -135,18 +135,19 @@ vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Sub
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &[def, file] : children.entries) {
-            string_view path = file.data(gs).path();
+        for (const auto &[sym, type] : children.entries) {
+            string_view path = sym.loc(gs).file().data(gs).path();
             // Strip initial "./" from path
             if (path.find("./") == 0)
                 path = path.substr(2);
 
-            string childName = fmt::format(
-                "{}", fmt::map_join(symbolName(gs, def.sym),
-                                    "::", [&gs](const core::NameRef &nm) -> string { return nm.show(gs); }));
+            string childName =
+                fmt::format("{}", fmt::map_join(symbolName(gs, sym), "::", [&gs](const core::NameRef &nm) -> string {
+                                return nm.show(gs);
+                            }));
 
             // Ignore Modules
-            if (def.type == autogen::Definition::Type::Class) {
+            if (type == autogen::Definition::Type::Class) {
                 // Note: fmt ignores excess arguments
                 descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, path));
             } else {

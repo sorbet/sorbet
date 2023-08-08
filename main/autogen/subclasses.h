@@ -8,14 +8,14 @@ namespace sorbet::autogen {
 class Subclasses final {
 public:
     struct Entry {
-        Definition def;
-        core::FileRef file;
+        core::SymbolRef sym;
+        Definition::Type type;
 
         bool operator==(const Entry &rhs) const {
-            return (def.sym == rhs.def.sym && file == rhs.file);
+            return (sym == rhs.sym && type == rhs.type);
         }
         template <typename H> friend H AbslHashValue(H h, const Entry &m) {
-            return H::combine(std::move(h), m.def.sym, m.file);
+            return H::combine(std::move(h), m.sym, m.type);
         }
     };
     using Entries = UnorderedSet<Entry>;
