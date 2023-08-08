@@ -7,18 +7,7 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    struct Entry {
-        core::SymbolRef sym;
-        Definition::Type type;
-
-        bool operator==(const Entry &rhs) const {
-            return (sym == rhs.sym && type == rhs.type);
-        }
-        template <typename H> friend H AbslHashValue(H h, const Entry &m) {
-            return H::combine(std::move(h), m.sym, m.type);
-        }
-    };
-    using Entries = UnorderedSet<Entry>;
+    using Entries = UnorderedSet<core::SymbolRef>;
     struct SubclassInfo {
         ClassKind classKind = ClassKind::Module;
         Entries entries;

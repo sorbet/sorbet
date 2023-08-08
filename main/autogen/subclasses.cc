@@ -66,7 +66,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const
         }
 
         auto &mapEntry = out[ref.sym];
-        mapEntry.entries.insert({defn.data(pf).sym, defn.data(pf).type});
+        mapEntry.entries.insert(defn.data(pf).sym);
         mapEntry.classKind = ref.parentKind;
     }
 
@@ -85,7 +85,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &[sym, _type] : children) {
+    for (const auto &sym : children) {
         auto descendants = Subclasses::descendantsOf(childMap, sym);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
@@ -135,7 +135,7 @@ vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Sub
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &[sym, type] : children.entries) {
+        for (const auto &sym : children.entries) {
             string_view path = sym.loc(gs).file().data(gs).path();
             // Strip initial "./" from path
             if (path.find("./") == 0)
@@ -147,7 +147,7 @@ vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Sub
                             }));
 
             // Ignore Modules
-            if (type == autogen::Definition::Type::Class) {
+            if (sym.asClassOrModuleRef().data(gs)->isClass()) {
                 // Note: fmt ignores excess arguments
                 descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, path));
             } else {
