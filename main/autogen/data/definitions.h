@@ -166,10 +166,6 @@ struct Reference {
     }
 };
 
-template <typename H> H AbslHashValue(H h, const Reference &m) {
-    return H::combine(std::move(h), m.id);
-}
-
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
 };
