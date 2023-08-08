@@ -22,8 +22,7 @@ public:
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePattern);
-    static std::vector<std::string> genDescendantsMap(Subclasses::Map &childMap, std::vector<std::string> &parentNames,
-                                                      const bool showPaths);
+    static const core::SymbolRef getConstantRef(core::GlobalState &gs, std::string rawName);
 
 private:
     static void patchChildMap(Subclasses::Map &childMap);
@@ -33,6 +32,7 @@ private:
     static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
                                                          const std::vector<std::string> &parentNames,
                                                          const bool showPaths);
+    static std::vector<core::NameRef> symbolName(core::GlobalState &gs, core::SymbolRef sym);
 };
 
 } // namespace sorbet::autogen

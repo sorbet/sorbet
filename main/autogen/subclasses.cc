@@ -34,6 +34,17 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
     return false;
 };
 
+// Convert a symbol name into a fully qualified name
+vector<core::NameRef> Subclasses::symbolName(core::GlobalState &gs, core::SymbolRef sym) {
+    vector<core::NameRef> out;
+    while (sym.exists() && sym != core::Symbols::root()) {
+        out.emplace_back(sym.name(gs));
+        sym = sym.owner(gs);
+    }
+    reverse(out.begin(), out.end());
+    return out;
+}
+
 // Get all subclasses defined in a particular ParsedFile
 optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, ParsedFile &pf,
                                                         const vector<string> &absoluteIgnorePatterns,
@@ -90,6 +101,17 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     }
 
     return SubclassInfo(fnd->second.classKind, std::move(out));
+}
+
+const core::SymbolRef Subclasses::getConstantRef(core::GlobalState &gs, string rawName) {
+    core::UnfreezeNameTable nameTableAccess(gs);
+    core::UnfreezeSymbolTable symbolTableAccess(gs);
+    core::ClassOrModuleRef sym = core::Symbols::root();
+
+    for (auto &n : absl::StrSplit(rawName, "::")) {
+        sym = gs.enterClassSymbol(core::Loc(), sym, gs.enterNameConstant(gs.enterNameUTF8(n)));
+    }
+    return sym;
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`

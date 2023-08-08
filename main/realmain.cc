@@ -310,6 +310,11 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             }
         }
 
+        auto autogenSubclassesParentsRefs = vector<core::SymbolRef>();
+        for (auto &parent : opts.autogenSubclassesParents) {
+            autogenSubclassesParentsRefs.emplace_back(autogen::Subclasses::getConstantRef(gs, parent));
+        }
+
         vector<string> serializedDescendantsMap = autogen::Subclasses::genDescendantsMap(
             childMap, opts.autogenSubclassesParents, opts.autogenSubclassesShowPaths);
 
