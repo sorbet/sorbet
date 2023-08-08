@@ -63,6 +63,9 @@ struct DefinitionRef {
     }
 
     const Definition &data(const ParsedFile &pf) const;
+    bool operator==(const DefinitionRef &rhs) const {
+        return _id == rhs._id;
+    }
 };
 
 // A reference to a specific `Reference` inside of a `ParsedFile`.
@@ -80,6 +83,9 @@ struct ReferenceRef {
     }
 
     const Reference &data(const ParsedFile &pf) const;
+    bool operator==(const ReferenceRef &rhs) const {
+        return _id == rhs._id;
+    }
 };
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
@@ -90,6 +96,9 @@ struct Definition {
     // should always be the case that
     //   definition.id.data(pf) == definition
     DefinitionRef id;
+
+    // The symbol reference for this reference
+    core::SymbolRef sym;
 
     // is this a class, module, constant, or alias
     Type type;
@@ -107,6 +116,10 @@ struct Definition {
     // which ref is the one that corresponds to this definition? I (gdritter) _believe_ that this will always be defined
     // once `AutogenWalk` has completed; please update this comment if that ever turns out to be false
     ReferenceRef defining_ref;
+
+    bool operator==(const Definition &rhs) const {
+        return id == rhs.id;
+    }
 };
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
@@ -116,6 +129,9 @@ struct Reference {
     // should always be the case that
     //   reference.id.data(pf) == reference
     ReferenceRef id;
+
+    // The symbol reference for this reference
+    core::SymbolRef sym;
 
     // In which class or module was this reference used?
     DefinitionRef scope;
@@ -144,7 +160,15 @@ struct Reference {
     // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
     // this is being `include`d or `extend`ed
     DefinitionRef parent_of;
+
+    bool operator==(const Reference &rhs) const {
+        return id == rhs.id;
+    }
 };
+
+template <typename H> H AbslHashValue(H h, const Reference &m) {
+    return H::combine(std::move(h), m.id);
+}
 
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
