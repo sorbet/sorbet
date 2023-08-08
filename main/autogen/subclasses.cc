@@ -85,7 +85,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &[def, file] : children) {
+    for (const auto &[def, _file] : children) {
         auto descendants = Subclasses::descendantsOf(childMap, def.sym);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
