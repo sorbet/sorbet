@@ -191,6 +191,8 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
+    std::vector<std::unique_ptr<core::Error>>
+    retypecheckFromPaths(std::unique_ptr<std::vector<std::string_view>> paths) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif

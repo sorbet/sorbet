@@ -750,6 +750,15 @@ std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(st
     return typechecker.retypecheck(frefs, workers);
 }
 
+std::vector<std::unique_ptr<core::Error>>
+LSPTypecheckerDelegate::retypecheckFromPaths(std::unique_ptr<std::vector<std::string_view>> paths) const {
+    std::vector<core::FileRef> openFileRefs;
+    for (auto const &path : *paths) {
+        openFileRefs.push_back(state().findFileByPath(path));
+    }
+    return retypecheck(openFileRefs);
+}
+
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
                                              const std::vector<core::FileRef> &filesForQuery) const {
     return typechecker.query(q, filesForQuery, workers);

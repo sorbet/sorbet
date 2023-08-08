@@ -174,6 +174,8 @@ public:
     std::optional<std::string_view> maybeGetFileContents(std::string_view path) const;
 
     std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
+
+    const std::unique_ptr<std::vector<std::string_view>> openFilePaths() const;
 };
 
 } // namespace sorbet::realmain::lsp

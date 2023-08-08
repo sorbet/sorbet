@@ -506,5 +506,12 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
+const std::unique_ptr<std::vector<std::string_view>> LSPPreprocessor::openFilePaths() const {
+    auto paths = make_unique<std::vector<std::string_view>>();
+    for (auto const &[path, file] : openFiles) {
+        paths->emplace_back(path);
+    }
+    return paths;
+}
 
 } // namespace sorbet::realmain::lsp
