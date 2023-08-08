@@ -34,9 +34,10 @@ module T::Helpers
   end
 
   # TODO(jez) Consider whether to make this n-ary instead of unary
-  # TODO(jez) `allow_incompatible: false` somehow?
-  def override(method)
-    T::Private::Methods.declare_override(self, method)
+  def override(method, allow_incompatible: false)
+    raise TypeError.new("override accepts a Symbol, got #{method.class}") unless method.is_a?(Symbol)
+
+    T::Private::Methods.declare_override(self, method, allow_incompatible)
 
     # Return the method, so that it can be chained with `private` etc.
     method
@@ -44,6 +45,8 @@ module T::Helpers
 
   # TODO(jez) Consider whether to make this n-ary instead of unary
   def abstract(method)
+    raise TypeError.new("override accepts a Symbol, got #{method.class}") unless method.is_a?(Symbol)
+
     T::Private::Methods.declare_abstract(self, method)
 
     # Return the method, so that it can be chained with `private` etc.

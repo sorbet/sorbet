@@ -16,7 +16,6 @@ module T::Private::Methods
     end
 
     def initialize(mod, raw, override, abstract)
-      # TODO(jez) Assert that if mod == PROC_TYPE, that override == false
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
@@ -33,12 +32,14 @@ module T::Private::Methods
 
       # Call the methods after the fact (instead of setting them in the constructor)
       # so we get the BuilderError's, if applicable
+
       if abstract
         self.abstract
       end
 
-      if override
-        # TODO(jez) How to support allow_incompatible?
+      if override == :allow_incompatible
+        self.override(allow_incompatible: true)
+      elsif override
         self.override
       end
     end

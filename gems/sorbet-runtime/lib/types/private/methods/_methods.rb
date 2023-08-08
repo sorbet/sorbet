@@ -29,7 +29,7 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :override, :abstract, :raw)
+  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk, :final, :override, :abstract, :raw)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
@@ -37,30 +37,52 @@ module T::Private::Methods
     nil
   end
 
-  def self.declare_override(mod, method)
-    if (previous_declaration = T::Private::DeclState.current.previous_declaration)
-      # TODO(jez) Some way to determine that previous_declaration.blk hasn't been forced yet
-      # TODO(jez) Some way to determine that setting this thing to override is allowed
-      # TODO(jez) Validate that `override :foo` is only called once
-      previous_declaration.override = true
-    else
-      # TODO(jez) Error if `previous_declaration` is not set
+  private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name)
+    # TODO(jez) Verify that method exists on mod, and 
+    previous_declaration = T::Private::DeclState.current.previous_declaration
+    if previous_declaration.nil?
+      raise "You must call `#{dsl_name} #{method.inspect}` immediately after defining the method, before defining any further methods or signatures"
     end
 
-    
+    if previous_declaration.blk.nil?
+      raise "Cannot call `#{dsl_name} #{method.inspect}` after the sig block has already run once"
+    end
+
+    if previous_declaration.mod != mod || previous_declaration.method_name
+      raise ""
+    end
+
+    # We know that method must exist, because previous_declaration
+
+    previous_declaration
+  end
+
+  def self.declare_override(mod, method_name, allow_incompatible)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, "override")
+    return unless previous_declaration
+
+    if previous_declaration.override
+      raise "Cannot call `override` twice for the method #{method}"
+    end
+
+    if allow_incompatible
+      previous_declaration.override = :allow_incompatible
+    else
+      previous_declaration.override = true
+    end
 
     nil
   end
 
-  def self.declare_abstract(mod, method)
-    if (previous_declaration = T::Private::DeclState.current.previous_declaration)
-      # TODO(jez) Some way to determine that previous_declaration.blk hasn't been forced yet
-      # TODO(jez) Some way to determine that setting this thing to override is allowed
-      # TODO(jez) Validate that `abstract :foo` is only called once
-      previous_declaration.abstract = true
-    else
-      # TODO(jez) Error if `previous_declaration` is not set
+  def self.declare_abstract(mod, method_name)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, "abstract")
+    return unless previous_declaration
+
+    if previous_declaration.abstract
+      raise "Cannot call `abstract` twice for the method #{method}"
     end
+
+    previous_declaration.abstract = true
 
     nil
   end
@@ -393,10 +415,15 @@ module T::Private::Methods
       declaration_block.override,
       declaration_block.abstract
     )
-    builder
+    decl = builder
       .instance_exec(&declaration_block.blk)
       .finalize!
       .decl
+
+    # Record that we've already used `blk` to construct a Declaration
+    declaration_block.blk = nil
+
+    decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
