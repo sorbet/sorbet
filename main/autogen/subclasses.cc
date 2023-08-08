@@ -1,8 +1,10 @@
 #include "main/autogen/subclasses.h"
+#include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
+#include "core/Unfreeze.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -46,7 +48,7 @@ vector<core::NameRef> Subclasses::symbolName(core::GlobalState &gs, core::Symbol
 }
 
 // Get all subclasses defined in a particular ParsedFile
-optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, ParsedFile &pf,
+optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                         const vector<string> &absoluteIgnorePatterns,
                                                         const vector<string> &relativeIgnorePatterns) {
     // Prepend "/" because absoluteIgnorePatterns and relativeIgnorePatterns are always "/"-prefixed
@@ -63,18 +65,8 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
             continue;
         }
 
-        // Get fully-qualified parent name as string
-        string parentName =
-            fmt::format("{}", fmt::map_join(ref.resolved.nameParts,
-                                            "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
-
-        // Add child class to the set identified by its parent
-        string childName =
-            fmt::format("{}", fmt::map_join(pf.showFullName(ctx, defn),
-                                            "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
-
-        auto &mapEntry = out[parentName];
-        mapEntry.entries.insert(make_tuple(childName, defn.data(pf).type, pf.path));
+        auto &mapEntry = out[ref.sym];
+        mapEntry.entries.insert({defn.data(pf), pf.file});
         mapEntry.classKind = ref.parentKind;
     }
 
@@ -84,8 +76,8 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 // Generate all descendants of a parent class
 // Recursively walks `childMap`, which stores the IMMEDIATE children of subclassed class.
 optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::Map &childMap,
-                                                             const string &parentName) {
-    auto fnd = childMap.find(parentName);
+                                                             const core::SymbolRef &parentRef) {
+    auto fnd = childMap.find(parentRef);
     if (fnd == childMap.end()) {
         return nullopt;
     }
@@ -93,8 +85,8 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &[name, _type, _path] : children) {
-        auto descendants = Subclasses::descendantsOf(childMap, name);
+    for (const auto &[def, file] : children) {
+        auto descendants = Subclasses::descendantsOf(childMap, def.sym);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
         }
@@ -116,39 +108,49 @@ const core::SymbolRef Subclasses::getConstantRef(core::GlobalState &gs, string r
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
-void Subclasses::patchChildMap(Subclasses::Map &childMap) {
-    childMap["Opus::SafeMachine"].entries.insert(childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].entries.begin(),
-                                                 childMap["Opus::Risk::Model::Mixins::RiskSafeMachine"].entries.end());
+void Subclasses::patchChildMap(core::GlobalState &gs, Subclasses::Map &childMap) {
+    auto riskSafeMachineRef = getConstantRef(gs, "Opus::Risk::Model::Mixins::RiskSafeMachine");
+    childMap[getConstantRef(gs, "Opus::SafeMachine")].entries.insert(childMap[riskSafeMachineRef].entries.begin(),
+                                                                     childMap[riskSafeMachineRef].entries.end());
 }
 
-vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                const vector<string> &parentNames, const bool showPaths) {
+vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Subclasses::Map &descendantsMap,
+                                                const vector<core::SymbolRef> &parentNames, const bool showPaths) {
     vector<string> descendantsMapSerialized;
     const auto classFormatString = showPaths ? " class {} {}" : " class {}";
     const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
 
-    for (const string &parentName : parentNames) {
-        auto fnd = descendantsMap.find(parentName);
+    for (const auto &parentRef : parentNames) {
+        auto fnd = descendantsMap.find(parentRef);
         if (fnd == descendantsMap.end()) {
             continue;
         }
         const Subclasses::SubclassInfo &children = fnd->second;
 
+        string parentName =
+            fmt::format("{}", fmt::map_join(symbolName(gs, parentRef),
+                                            "::", [&gs](const core::NameRef &nm) -> string { return nm.show(gs); }));
+
         auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &[name, type, _path] : children.entries) {
-            string_view path = _path;
+        for (const auto &[def, file] : children.entries) {
+            string_view path = file.data(gs).path();
             // Strip initial "./" from path
             if (path.find("./") == 0)
                 path = path.substr(2);
+
+            string childName = fmt::format(
+                "{}", fmt::map_join(symbolName(gs, def.sym),
+                                    "::", [&gs](const core::NameRef &nm) -> string { return nm.show(gs); }));
+
             // Ignore Modules
-            if (type == autogen::Definition::Type::Class) {
+            if (def.type == autogen::Definition::Type::Class) {
                 // Note: fmt ignores excess arguments
-                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, name, path));
+                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, path));
             } else {
-                descendantsMapSerialized.emplace_back(fmt::format(moduleFormatString, name, path));
+                descendantsMapSerialized.emplace_back(fmt::format(moduleFormatString, childName, path));
             }
         }
 
@@ -169,31 +171,31 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
 //
 // This effectively replaces pay-server's `DescendantsMap` in `InheritedClassesStep` with a much
 // faster implementation.
-vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<string> &parentNames,
-                                             const bool showPaths) {
-    Subclasses::patchChildMap(childMap);
+vector<string> Subclasses::genDescendantsMap(core::GlobalState &gs, Subclasses::Map &childMap,
+                                             vector<core::SymbolRef> &parentRefs, const bool showPaths) {
+    Subclasses::patchChildMap(gs, childMap);
 
     // Generate descendants for each passed-in superclass
-    fast_sort(parentNames);
+    fast_sort(parentRefs, [&gs](const auto &left, const auto &right) { return left.show(gs) < right.show(gs); });
     Subclasses::Map descendantsMap;
-    for (const string &parentName : parentNames) {
+    for (const auto &parentRef : parentRefs) {
         // Skip parents that the user asked for but which don't
         // exist or are never subclassed.
-        auto fnd = childMap.find(parentName);
+        auto fnd = childMap.find(parentRef);
         if (fnd == childMap.end()) {
             continue;
         }
 
-        auto descendants = Subclasses::descendantsOf(childMap, parentName);
+        auto descendants = Subclasses::descendantsOf(childMap, parentRef);
         if (!descendants) {
             // Initialize an empty entry associated with parentName.
-            descendantsMap[parentName];
+            descendantsMap[parentRef];
         } else {
-            descendantsMap.emplace(parentName, std::move(*descendants));
+            descendantsMap.emplace(parentRef, std::move(*descendants));
         }
     }
 
-    return Subclasses::serializeSubclassMap(descendantsMap, parentNames, showPaths);
+    return Subclasses::serializeSubclassMap(gs, descendantsMap, parentRefs, showPaths);
 };
 
 } // namespace sorbet::autogen

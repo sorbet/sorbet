@@ -7,8 +7,17 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    // (name, type, path)
-    using Entry = std::tuple<std::string, Definition::Type, std::string>;
+    struct Entry {
+        Definition def;
+        core::FileRef file;
+
+        bool operator==(const Entry &rhs) const {
+            return (def == rhs.def && file == rhs.file);
+        }
+        template <typename H> friend H AbslHashValue(H h, const Entry &m) {
+            return H::combine(std::move(h), m.def.id.id(), m.file.id());
+        }
+    };
     using Entries = UnorderedSet<Entry>;
     struct SubclassInfo {
         ClassKind classKind = ClassKind::Module;
@@ -17,20 +26,22 @@ public:
         SubclassInfo() = default;
         SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(std::move(entries)){};
     };
-    using Map = UnorderedMap<std::string, SubclassInfo>;
+    using Map = UnorderedMap<core::SymbolRef, SubclassInfo>;
 
-    static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, ParsedFile &pf,
+    static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePattern);
+    static std::vector<std::string> genDescendantsMap(core::GlobalState &gs, Subclasses::Map &childMap,
+                                                      std::vector<core::SymbolRef> &parentRefs, const bool showPaths);
     static const core::SymbolRef getConstantRef(core::GlobalState &gs, std::string rawName);
 
 private:
-    static void patchChildMap(Subclasses::Map &childMap);
+    static void patchChildMap(core::GlobalState &gs, Subclasses::Map &childMap);
     static bool isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
                               const std::vector<std::string> &relativeIgnorePatterns);
-    static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const std::string &parents);
-    static std::vector<std::string> serializeSubclassMap(const Subclasses::Map &descendantsMap,
-                                                         const std::vector<std::string> &parentNames,
+    static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const core::SymbolRef &parentRef);
+    static std::vector<std::string> serializeSubclassMap(core::GlobalState &gs, const Subclasses::Map &descendantsMap,
+                                                         const std::vector<core::SymbolRef> &parentNames,
                                                          const bool showPaths);
     static std::vector<core::NameRef> symbolName(core::GlobalState &gs, core::SymbolRef sym);
 };

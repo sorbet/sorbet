@@ -200,7 +200,7 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
+void runAutogen(core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed, const vector<std::string> &changedFiles) {
     Timer timeit(logger, "autogen");
 
@@ -301,9 +301,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 continue;
             }
 
-            for (const auto &[parentName, children] : *el.subclasses) {
-                if (!parentName.empty()) {
-                    auto &childEntry = childMap[parentName];
+            for (const auto &[parentRef, children] : *el.subclasses) {
+                if (parentRef.exists()) {
+                    auto &childEntry = childMap[parentRef];
                     childEntry.entries.insert(children.entries.begin(), children.entries.end());
                     childEntry.classKind = children.classKind;
                 }
@@ -316,7 +316,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
 
         vector<string> serializedDescendantsMap = autogen::Subclasses::genDescendantsMap(
-            childMap, opts.autogenSubclassesParents, opts.autogenSubclassesShowPaths);
+            gs, childMap, autogenSubclassesParentsRefs, opts.autogenSubclassesShowPaths);
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
