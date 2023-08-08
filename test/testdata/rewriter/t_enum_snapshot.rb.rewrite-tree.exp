@@ -29,6 +29,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    <self>.public()
+
     <runtime method definition of serialize>
   end
 
@@ -77,6 +79,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of something_outside>
 
+    <self>.public()
+
     <runtime method definition of serialize>
   end
 
@@ -120,6 +124,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C StaticField3> = 3
 
     <emptyTree>::<C StaticField4> = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+
+    <self>.public()
 
     <runtime method definition of serialize>
   end

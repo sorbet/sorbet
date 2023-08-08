@@ -110,8 +110,10 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-te
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(MyEnum)):
+bb7[rubyRegionId=0, firstDead=4](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(MyEnum)):
     <statTemp>$23: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$25, enums>
+    <self>: T.class_of(MyEnum) = <selfRestore>$26
+    <statTemp>$87: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -340,8 +342,10 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-ca
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(EnumsDoEnum)):
+bb7[rubyRegionId=0, firstDead=4](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(EnumsDoEnum)):
     <statTemp>$23: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$25, enums>
+    <self>: T.class_of(EnumsDoEnum) = <selfRestore>$26
+    <statTemp>$88: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -526,8 +530,9 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=20](<block-pre-call-temp>$46: Sorbet::Private::Static::Void, <selfRestore>$47: T.class_of(BadConsts), <C After>$84: BadConsts::After, <C StaticField3>$91: Integer, <C StaticField4>$93: Integer):
+bb7[rubyRegionId=0, firstDead=22](<block-pre-call-temp>$46: Sorbet::Private::Static::Void, <selfRestore>$47: T.class_of(BadConsts), <C After>$84: BadConsts::After, <C StaticField3>$91: Integer, <C StaticField4>$93: Integer):
     <statTemp>$44: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$46, enums>
+    <self>: T.class_of(BadConsts) = <selfRestore>$47
     <cfgAlias>$75: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$77: T.class_of(BadConsts::After) = alias <C After$1>
     <statTemp>$73: Sorbet::Private::Static::Void = <cfgAlias>$75: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$77: T.class_of(BadConsts::After))
@@ -546,6 +551,7 @@ bb7[rubyRegionId=0, firstDead=20](<block-pre-call-temp>$46: Sorbet::Private::Sta
     keep_for_ide$94: T.untyped = <keep-alive> keep_for_ide$94
     <castTemp>$96: Integer(1) = 1
     <C StaticField4>$93: Integer = cast(<castTemp>$96: Integer(1), Integer);
+    <statTemp>$97: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).public()
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
