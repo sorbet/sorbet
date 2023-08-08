@@ -25,20 +25,19 @@ bool isOperator(string_view name) {
 
 vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                                       const vector<core::AutocorrectSuggestion::Edit> &edits) {
-    UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
+    UnorderedMap<core::FileRef, vector<unique_ptr<TextEdit>>> editsByFile;
     for (auto &edit : edits) {
         auto range = Range::fromLoc(gs, edit.loc);
         if (range != nullptr) {
-            editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
-                make_unique<TextEdit>(move(range), edit.replacement));
+            editsByFile[edit.loc.file()].emplace_back(make_unique<TextEdit>(move(range), edit.replacement));
         }
     }
 
     vector<unique_ptr<TextDocumentEdit>> documentEdits;
-    for (auto &it : editsByFile) {
+    for (auto &[file, edits] : editsByFile) {
         // TODO: Document version
         documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-            make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
+            make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits)));
     }
     return documentEdits;
 }
