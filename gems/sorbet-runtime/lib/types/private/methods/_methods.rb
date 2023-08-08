@@ -48,6 +48,7 @@ module T::Private::Methods
     end
 
     if previous_declaration.mod != mod || previous_declaration.method_name
+      # TODO(jez) ...
       raise ""
     end
 
