@@ -33,6 +33,23 @@ module T::Helpers
     Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(':')&.first)
   end
 
+  # TODO(jez) Consider whether to make this n-ary instead of unary
+  # TODO(jez) `allow_incompatible: false` somehow?
+  def override(method)
+    T::Private::Methods.declare_override(self, method)
+
+    # Return the method, so that it can be chained with `private` etc.
+    method
+  end
+
+  # TODO(jez) Consider whether to make this n-ary instead of unary
+  def abstract(method)
+    T::Private::Methods.declare_abstract(self, method)
+
+    # Return the method, so that it can be chained with `private` etc.
+    method
+  end
+
   # Causes a mixin to also mix in class methods from the named module.
   #
   # Nearly equivalent to

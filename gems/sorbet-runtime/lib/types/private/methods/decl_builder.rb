@@ -15,7 +15,8 @@ module T::Private::Methods
       end
     end
 
-    def initialize(mod, raw)
+    def initialize(mod, raw, override, abstract)
+      # TODO(jez) Assert that if mod == PROC_TYPE, that override == false
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
@@ -29,6 +30,17 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # type_parameters
         raw
       )
+
+      # Call the methods after the fact (instead of setting them in the constructor)
+      # so we get the BuilderError's, if applicable
+      if abstract
+        self.abstract
+      end
+
+      if override
+        # TODO(jez) How to support allow_incompatible?
+        self.override
+      end
     end
 
     def params(*unused_positional_params, **params)

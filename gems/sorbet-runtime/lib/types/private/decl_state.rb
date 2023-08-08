@@ -12,8 +12,15 @@ class T::Private::DeclState
 
   attr_accessor :active_declaration
   attr_accessor :skip_on_method_added
+  attr_reader :previous_declaration
 
   def reset!
+    self.active_declaration = nil
+    @previous_declaration = nil
+  end
+
+  def consume!
+    @previous_declaration = self.active_declaration
     self.active_declaration = nil
   end
 

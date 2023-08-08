@@ -29,10 +29,38 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :override, :abstract, :raw)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
+
+    nil
+  end
+
+  def self.declare_override(mod, method)
+    if (previous_declaration = T::Private::DeclState.current.previous_declaration)
+      # TODO(jez) Some way to determine that previous_declaration.blk hasn't been forced yet
+      # TODO(jez) Some way to determine that setting this thing to override is allowed
+      # TODO(jez) Validate that `override :foo` is only called once
+      previous_declaration.override = true
+    else
+      # TODO(jez) Error if `previous_declaration` is not set
+    end
+
+    
+
+    nil
+  end
+
+  def self.declare_abstract(mod, method)
+    if (previous_declaration = T::Private::DeclState.current.previous_declaration)
+      # TODO(jez) Some way to determine that previous_declaration.blk hasn't been forced yet
+      # TODO(jez) Some way to determine that setting this thing to override is allowed
+      # TODO(jez) Validate that `abstract :foo` is only called once
+      previous_declaration.abstract = true
+    else
+      # TODO(jez) Error if `previous_declaration` is not set
+    end
 
     nil
   end
@@ -54,7 +82,9 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+    override = false
+    abstract = false
+    DeclarationBlock.new(mod, loc, blk, arg == :final, override, abstract, raw)
   end
 
   def self._with_declared_signature(mod, declblock, &blk)
@@ -73,7 +103,10 @@ module T::Private::Methods
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE, false)
+    # override doesn't make sense on a proc
+    override = false
+    abstract = false
+    DeclBuilder.new(PROC_TYPE, false, override, abstract)
   end
 
   def self.finalize_proc(decl)
@@ -230,9 +263,10 @@ module T::Private::Methods
     end
 
     if current_declaration.nil?
+      # TODO(jez) Some way to allow `abstract` and `override` even if there was no `sig` (can be future work)
       return
     end
-    T::Private::DeclState.current.reset!
+    T::Private::DeclState.current.consume!
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(
@@ -353,7 +387,12 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
+    builder = DeclBuilder.new(
+      declaration_block.mod,
+      declaration_block.raw,
+      declaration_block.override,
+      declaration_block.abstract
+    )
     builder
       .instance_exec(&declaration_block.blk)
       .finalize!
