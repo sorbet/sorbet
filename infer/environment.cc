@@ -1587,7 +1587,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                 } else if (!bind.value.isSynthetic()) {
-                    if (castType.isUntyped()) {
+                    if (castType.isUntyped() && bind.bind.variable != cfg::LocalRef::selfVariable()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
                             auto argLoc = core::Loc{ctx.file, c.valueLoc};
