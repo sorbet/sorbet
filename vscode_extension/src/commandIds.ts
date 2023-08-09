@@ -44,6 +44,11 @@ export const SORBET_ENABLE_COMMAND_ID = "sorbet.enable";
 export const SORBET_RESTART_COMMAND_ID = "sorbet.restart";
 
 /**
+ * Save all open __package.rb files.
+ */
+export const SORBET_SAVE_PACKAGE_FILES = "sorbet.savePackageFiles";
+
+/**
  * Toggle highlighting of untyped code.
  */
 export const TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID =

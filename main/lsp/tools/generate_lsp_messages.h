@@ -393,7 +393,7 @@ public:
         // context.
         fmt::format_to(std::back_inserter(out), "{{\n");
         fmt::format_to(std::back_inserter(out), "rapidjson::Value {}(rapidjson::kArrayType);\n", arrayVar);
-        fmt::format_to(std::back_inserter(out), "for (auto &element : {}) {{\n", from);
+        fmt::format_to(std::back_inserter(out), "for (const auto &element : {}) {{\n", from);
         componentType->emitToJSONValue(out, "element", AssignSerializedElementValue, fieldName);
         fmt::format_to(std::back_inserter(out), "}}\n");
         assign(out, arrayVar);

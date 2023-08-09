@@ -3,6 +3,7 @@ import { TextDocumentPositionParams } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
 import { renameSymbol } from "./commands/renameSymbol";
+import { savePackageFiles } from "./commands/savePackageFiles";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
@@ -81,6 +82,9 @@ export function activate(context: ExtensionContext) {
       cmdIds.SORBET_RESTART_COMMAND_ID,
       (reason: RestartReason = RestartReason.COMMAND) =>
         sorbetExtensionContext.statusProvider.restartSorbet(reason),
+    ),
+    commands.registerCommand(cmdIds.SORBET_SAVE_PACKAGE_FILES, () =>
+      savePackageFiles(sorbetExtensionContext),
     ),
     commands.registerCommand(cmdIds.TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID, () =>
       toggleUntypedCodeHighlighting(sorbetExtensionContext),
