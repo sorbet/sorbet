@@ -175,16 +175,15 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                      makeField("position", Position),
                                                  },
                                                  classTypes);
-    auto Command = makeObject(
-        "Command",
-        {
-            makeField("title", JSONString),
-            makeField("command", JSONString),
-            // the `arguments` field is declared as `LSPAny` in the LSP spec,
-            // but we use it only to call `sorbet.rename` so the type is limited to TextDocumentPositionParams
-            makeField("arguments", makeOptional(makeArray(TextDocumentPositionParams))),
-        },
-        classTypes);
+    auto Command = makeObject("Command",
+                              {
+                                  makeField("title", JSONString),
+                                  makeField("command", JSONString),
+                                  // The only thing we use this for does not require arguments, so it's null.
+                                  // The LSP spec has `arguments?: LSPAny[]` here, so feel free to expand
+                                  makeField("arguments", makeOptional(makeArray(JSONBool))),
+                              },
+                              classTypes);
 
     auto TextEdit = makeObject("TextEdit",
                                {
