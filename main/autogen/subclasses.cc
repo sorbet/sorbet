@@ -131,10 +131,10 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
             string childName = sym.show(gs);
             // Ignore Modules
             if (sym.asClassOrModuleRef().data(gs)->isClass()) {
-                // Note: fmt ignores excess arguments
-                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, path));
+                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, showPaths ? path : ""));
             } else {
-                descendantsMapSerialized.emplace_back(fmt::format(moduleFormatString, childName, path));
+                descendantsMapSerialized.emplace_back(
+                    fmt::format(moduleFormatString, childName, showPaths ? path : ""));
             }
         }
 
