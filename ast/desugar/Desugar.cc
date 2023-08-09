@@ -1167,9 +1167,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         thenp = std::move(rhs);
                     }
                     auto lhsLoc = lhs.loc();
+                    auto condLoc = lhsLoc.exists() && thenp.loc().exists()
+                                       ? core::LocOffsets{lhsLoc.endPos(), thenp.loc().beginPos()}
+                                       : lhsLoc;
                     auto temp = MK::Assign(loc, andAndTemp, std::move(lhs));
                     auto iff =
-                        MK::If(loc, MK::Local(lhsLoc, andAndTemp), std::move(thenp), MK::Local(lhsLoc, andAndTemp));
+                        MK::If(loc, MK::Local(condLoc, andAndTemp), std::move(thenp), MK::Local(lhsLoc, andAndTemp));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }
@@ -1184,8 +1187,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 } else {
                     core::NameRef tempName = dctx.freshNameUnique(core::Names::orOr());
                     auto lhsLoc = lhs.loc();
+                    auto condLoc = lhsLoc.exists() && rhs.loc().exists()
+                                       ? core::LocOffsets{lhsLoc.endPos(), rhs.loc().beginPos()}
+                                       : lhsLoc;
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(lhsLoc, tempName), MK::Local(lhsLoc, tempName), std::move(rhs));
+                    auto iff = MK::If(loc, MK::Local(condLoc, tempName), MK::Local(lhsLoc, tempName), std::move(rhs));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }

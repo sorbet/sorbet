@@ -177,11 +177,14 @@ suggest-sig.rb:85: This code is unreachable https://srb.help/7006
                             ^^^^
     suggest-sig.rb:85: This condition was always `truthy` (`TrueClass`)
     85 |  if true || qux || blah
-             ^^^^^^^^^^^
+             ^^^^
   Got `TrueClass` originating from:
     suggest-sig.rb:85:
     85 |  if true || qux || blah
              ^^^^
+    suggest-sig.rb:85:
+    85 |  if true || qux || blah
+                 ^^^^
 
 suggest-sig.rb:88: This code is unreachable https://srb.help/7006
     88 |    takesString(x)
@@ -195,7 +198,10 @@ suggest-sig.rb:88: This code is unreachable https://srb.help/7006
              ^^^^
     suggest-sig.rb:85:
     85 |  if true || qux || blah
-             ^^^^^^^^^^^
+                 ^^^^
+    suggest-sig.rb:85:
+    85 |  if true || qux || blah
+                        ^^^^
 
 suggest-sig.rb:84: The method `dead` does not have a `sig` https://srb.help/7017
     84 |def dead(x)
