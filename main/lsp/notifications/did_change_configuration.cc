@@ -24,6 +24,6 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
 
 void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
     tc.updateGsFromOptions(*params);
-    tc.retypecheckFromPaths(std::move(openFilePaths));
+    tc.retypecheckFromPathsAndFlush(std::move(openFilePaths));
 }
 } // namespace sorbet::realmain::lsp

@@ -78,6 +78,12 @@ class LSPTypechecker final {
      * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
      * doesn't actually change anything.
      */
+    LSPFileUpdates getNoopUpdateWithEpoch(std::vector<core::FileRef> frefs, uint32_t epoch) const;
+
+    /**
+     * Special-case of the above with an epoch that
+     * ensures errors cannot be flushed
+     */
     LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 
     /** Deep copy all entries in `indexed` that contain ASTs, except for those with IDs in the ignore set. Returns true
@@ -109,6 +115,11 @@ public:
      * Re-typechecks the provided files to re-produce error messages.
      */
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
+
+    /**
+     * Re-typechecks the provided files and flushes error messages to client.
+     */
+    void retypecheckAndFlush(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
@@ -191,8 +202,8 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
-    std::vector<std::unique_ptr<core::Error>>
-    retypecheckFromPaths(std::unique_ptr<std::vector<std::string_view>> paths) const;
+    void retypecheckAndFlush(std::vector<core::FileRef> frefs) const;
+    void retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif
