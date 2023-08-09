@@ -8,6 +8,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.import(::<PackageSpecRegistry>::<C Project>::<C FooBar>)
   end
 end
+# -- test/testdata/packager/extra_package_paths/baz/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C Baz>::<C Package>::<C C>)
+
+    <self>.export(::<root>::<C Project>::<C Baz>::<C Package>::<C E>)
+  end
+end
+# -- test/testdata/packager/extra_package_paths/foo/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C Foo>::<C B>)
+
+    <self>.export(::<root>::<C Project>::<C Foo>::<C D>)
+  end
+end
+# -- test/testdata/packager/extra_package_paths/foo_bar/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Project>::<C FooBar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C FooBar>::<C Z>)
+  end
+end
 # -- test/testdata/packager/extra_package_paths/bar/bar.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C Bar>::<C Bar><<C <todo sym>>> < (::<todo sym>)
@@ -39,14 +61,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of bar1>
 
     <runtime method definition of bar2>
-  end
-end
-# -- test/testdata/packager/extra_package_paths/baz/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(::<root>::<C Project>::<C Baz>::<C Package>::<C C>)
-
-    <self>.export(::<root>::<C Project>::<C Baz>::<C Package>::<C E>)
   end
 end
 # -- test/testdata/packager/extra_package_paths/extra/Project_Baz_Package/c.rb --
@@ -131,19 +145,5 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of self.z>
-  end
-end
-# -- test/testdata/packager/extra_package_paths/foo/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(::<root>::<C Project>::<C Foo>::<C B>)
-
-    <self>.export(::<root>::<C Project>::<C Foo>::<C D>)
-  end
-end
-# -- test/testdata/packager/extra_package_paths/foo_bar/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C FooBar><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(::<root>::<C Project>::<C FooBar>::<C Z>)
   end
 end
