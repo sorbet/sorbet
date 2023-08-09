@@ -13,7 +13,7 @@ export async function savePackageFiles(
   context.log.trace("savePackageFiles");
   const allSaved = await Promise.all(
     workspace.textDocuments.map(async (document) => {
-      context.log.warning(`editor.document.filename: ${document.fileName}`);
+      context.log.trace(`savePackageFiles: saving ${document.fileName}`);
       if (document.fileName.endsWith("/__package.rb")) {
         return document.save();
       }
