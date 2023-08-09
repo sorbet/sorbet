@@ -17,6 +17,7 @@
 #include "core/packages/PackageInfo.h"
 #include <algorithm>
 #include <cctype>
+#include <queue>
 #include <sstream>
 #include <sys/stat.h>
 
@@ -1675,6 +1676,75 @@ public:
 };
 
 } // namespace
+
+absl::Span<core::FileRef> Packager::jezPrototype(const core::GlobalState &gs, absl::Span<core::FileRef> files,
+                                                 const vector<string> &rootPackages) {
+    if (rootPackages.empty()) {
+        // TODO(jez) Build this into a proper mode, where this doesn't just print things
+        return files;
+    }
+
+    // TODO(jez) Don't have package IDs, so we can't easily make this vector<bool>
+    auto requiredPackages = UnorderedSet<core::NameRef>{};
+
+    queue<core::NameRef> bfsFrontier;
+    // TODO(jez) the name root package is bad, because "root package" has another meaning (the root
+    // of a workspace, not the root of a BFS search)
+    for (const auto &rootPackageName : rootPackages) {
+        auto &rootPackage = gs.packageDB().getPackageInfo(gs, rootPackageName);
+        if (!rootPackage.exists()) {
+            Exception::raise("Unknown package: {}", rootPackageName);
+        }
+
+        bfsFrontier.emplace(rootPackage.mangledName());
+    }
+
+    // TODO(jez) Can parallelize BFS if you need
+    while (!bfsFrontier.empty()) {
+        auto curPackageName = bfsFrontier.front();
+        bfsFrontier.pop();
+
+        if (requiredPackages.find(curPackageName) != requiredPackages.end()) {
+            continue;
+        }
+        requiredPackages.emplace(curPackageName);
+
+        auto &curPackageAbstract = gs.packageDB().getPackageInfo(curPackageName);
+        auto &curPackage = PackageInfoImpl::from(curPackageAbstract);
+
+        for (auto &importedPackageName : curPackage.importedPackageNames) {
+            if (importedPackageName.type != ImportType::Normal) {
+                // TODO(jez) Figure out what to do about test code
+                continue;
+            }
+            if (!importedPackageName.name.mangledName.exists()) {
+                // TODO(jez) Does this happen? Error recovery?
+                continue;
+            }
+            bfsFrontier.emplace(importedPackageName.name.mangledName);
+        }
+    }
+
+    // index doesn't depend on the order of the files because it already indexes files in parallel
+    // and sorts the resulting parsed files at the end. For that reason, I've chosen not to use
+    // stable_partition here.
+    auto it = absl::c_partition(files, [&](auto file) {
+        if (!file.data(gs).isPackaged()) {
+            return true;
+        }
+
+        auto packageNameForFile = gs.packageDB().getPackageNameForFile(file);
+        if (!packageNameForFile.exists()) {
+            // TODO(jez) What does this mean? Can this happen?
+            return false;
+        } else if (requiredPackages.find(packageNameForFile) != requiredPackages.end() &&
+                   !file.data(gs).isPackagedTest()) {
+            return true;
+        }
+    });
+
+    return files.first(distance(files.begin(), it));
+}
 
 void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFile) {
     const auto &pkgDB = gs.packageDB();

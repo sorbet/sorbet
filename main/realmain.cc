@@ -723,6 +723,21 @@ int realmain(int argc, char *argv[]) {
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
             }
 
+#ifndef SORBET_REALMAIN_MIN
+            // Possibly cut down the list of input files to just the ones that are reachable from
+            // the package graph.
+            //
+            // Note that we will still have reserved a bunch of (now-unread) files in the file
+            // table, so the size of the file table will not be the same as the number of indexed
+            // files.
+            //
+            // We don't rely on that invariant anywhere (and in fact, for LSP fast path, we
+            // definitely don't rely on it), but it does suggest another optimization: we could opt
+            // to skip scanning the filesystem for non-__package.rb files, and only reserve those
+            // files after having populated the packageDB.
+            inputFilesSpan = packager::Packager::jezPrototype(*gs, inputFilesSpan, opts.jezExperimentalRootPackages);
+#endif
+
             auto nonPackageIndexed =
                 (!opts.storeState.empty() || opts.forceHashing)
                     // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
