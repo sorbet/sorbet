@@ -21,7 +21,7 @@ public:
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePattern);
     static std::vector<std::string> genDescendantsMap(const core::GlobalState &gs, Subclasses::Map &childMap,
-                                                      std::vector<core::SymbolRef> &parentRefs, const bool showPaths);
+                                                      std::vector<core::SymbolRef> &parentRefs);
     static const core::SymbolRef getConstantRef(const core::GlobalState &gs, std::string rawName);
 
 private:
@@ -31,8 +31,7 @@ private:
     static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const core::SymbolRef &parentRef);
     static std::vector<std::string> serializeSubclassMap(const core::GlobalState &gs,
                                                          const Subclasses::Map &descendantsMap,
-                                                         const std::vector<core::SymbolRef> &parentNames,
-                                                         const bool showPaths);
+                                                         const std::vector<core::SymbolRef> &parentNames);
 };
 
 } // namespace sorbet::autogen

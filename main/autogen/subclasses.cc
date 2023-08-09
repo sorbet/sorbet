@@ -108,7 +108,7 @@ void Subclasses::patchChildMap(const core::GlobalState &gs, Subclasses::Map &chi
 }
 
 vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, const Subclasses::Map &descendantsMap,
-                                                const vector<core::SymbolRef> &parentNames, const bool showPaths) {
+                                                const vector<core::SymbolRef> &parentNames) {
     vector<string> descendantsMapSerialized;
     for (const auto &parentRef : parentNames) {
         auto fnd = descendantsMap.find(parentRef);
@@ -127,11 +127,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
             string_view path = gs.getPrintablePath(childRef.data(gs)->loc().file().data(gs).path());
             string childName = childRef.show(gs);
             auto type = childRef.data(gs)->isClass() ? "class" : "module";
-            if (showPaths) {
-                descendantsMapSerialized.emplace_back(fmt::format(" {} {} {}", type, childName, path));
-            } else {
-                descendantsMapSerialized.emplace_back(fmt::format(" {} {}", type, childName));
-            }
+            descendantsMapSerialized.emplace_back(fmt::format(" {} {} {}", type, childName, path));
         }
 
         fast_sort_range(descendantsMapSerialized.begin() + subclassesStart, descendantsMapSerialized.end());
@@ -152,7 +148,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
 // This effectively replaces pay-server's `DescendantsMap` in `InheritedClassesStep` with a much
 // faster implementation.
 vector<string> Subclasses::genDescendantsMap(const core::GlobalState &gs, Subclasses::Map &childMap,
-                                             vector<core::SymbolRef> &parentRefs, const bool showPaths) {
+                                             vector<core::SymbolRef> &parentRefs) {
     Subclasses::patchChildMap(gs, childMap);
 
     // Generate descendants for each passed-in superclass
@@ -175,7 +171,7 @@ vector<string> Subclasses::genDescendantsMap(const core::GlobalState &gs, Subcla
         }
     }
 
-    return Subclasses::serializeSubclassMap(gs, descendantsMap, parentRefs, showPaths);
+    return Subclasses::serializeSubclassMap(gs, descendantsMap, parentRefs);
 };
 
 } // namespace sorbet::autogen

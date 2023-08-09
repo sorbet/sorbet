@@ -1,5 +1,0 @@
---- autogen-subclasses-paths ---
-class Opus::Parent
- class Opus::Child child.rb
- class Opus::ChildAgain child_again.rb
- class Opus::ChildOfChild child_of_child.rb

@@ -1,5 +1,5 @@
 # typed: true
 
-module Opus
+module Bopus
   class Parent; end
 end

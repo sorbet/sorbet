@@ -1,10 +1,14 @@
 --- autogen-subclasses ---
+class Bopus::Parent
+ class Bopus::Child child.rb
+ class Bopus::ChildAgain child_again.rb
+ class Bopus::ChildOfChild child_of_child.rb
 module MyMixin
- class MyClass
+ class MyClass a.rb
 module Opus::Mixin
- class Opus::Mixed
- class Opus::MixedDescendant
- module Opus::MixedModule
+ class Opus::Mixed a.rb
+ class Opus::MixedDescendant a.rb
+ module Opus::MixedModule a.rb
 class Opus::Parent
- class Opus::Child
- class Opus::DupChild
+ class Opus::Child a.rb
+ class Opus::DupChild a.rb

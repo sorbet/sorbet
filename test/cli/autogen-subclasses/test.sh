@@ -8,4 +8,5 @@ main/sorbet --silence-dev-message --stop-after=namer -p autogen-subclasses \
   --autogen-subclasses-parent=Opus::IDontExist \
   --autogen-subclasses-parent=Opus::NeverSubclassed \
   --autogen-subclasses-parent=MyMixin \
-  test/cli/autogen-subclasses/a.rb
+  --autogen-subclasses-parent=Bopus::Parent \
+  test/cli/autogen-subclasses/

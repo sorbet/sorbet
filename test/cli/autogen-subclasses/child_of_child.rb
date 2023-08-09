@@ -2,6 +2,6 @@
 
 require_relative './child'
 
-module Opus
+module Bopus
   class ChildOfChild < Child; end
 end
