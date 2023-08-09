@@ -302,11 +302,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             }
 
             for (const auto &[parentRef, children] : *el.subclasses) {
-                if (parentRef.exists()) {
-                    auto &childEntry = childMap[parentRef];
-                    childEntry.entries.insert(children.entries.begin(), children.entries.end());
-                    childEntry.classKind = children.classKind;
-                }
+                auto &childEntry = childMap[parentRef];
+                childEntry.entries.insert(children.entries.begin(), children.entries.end());
+                childEntry.classKind = children.classKind;
             }
         }
 
