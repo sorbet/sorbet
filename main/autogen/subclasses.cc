@@ -37,7 +37,7 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
 };
 
 // Convert a symbol name into a fully qualified name
-vector<core::NameRef> Subclasses::symbolName(core::GlobalState &gs, core::SymbolRef sym) {
+vector<core::NameRef> Subclasses::symbolName(const core::GlobalState &gs, core::SymbolRef sym) {
     vector<core::NameRef> out;
     while (sym.exists() && sym != core::Symbols::root()) {
         out.emplace_back(sym.name(gs));
@@ -95,26 +95,27 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     return SubclassInfo(fnd->second.classKind, std::move(out));
 }
 
-const core::SymbolRef Subclasses::getConstantRef(core::GlobalState &gs, string rawName) {
-    core::UnfreezeNameTable nameTableAccess(gs);
-    core::UnfreezeSymbolTable symbolTableAccess(gs);
+const core::SymbolRef Subclasses::getConstantRef(const core::GlobalState &gs, string rawName) {
     core::ClassOrModuleRef sym = core::Symbols::root();
 
     for (auto &n : absl::StrSplit(rawName, "::")) {
-        sym = gs.enterClassSymbol(core::Loc(), sym, gs.enterNameConstant(gs.enterNameUTF8(n)));
+        const auto &nameRef = gs.lookupNameUTF8(n);
+        if (!nameRef.exists())
+            return core::Symbols::noSymbol();
+        sym = gs.lookupClassSymbol(sym, gs.lookupNameConstant(nameRef));
     }
     return sym;
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
-void Subclasses::patchChildMap(core::GlobalState &gs, Subclasses::Map &childMap) {
+void Subclasses::patchChildMap(const core::GlobalState &gs, Subclasses::Map &childMap) {
     auto riskSafeMachineRef = getConstantRef(gs, "Opus::Risk::Model::Mixins::RiskSafeMachine");
     childMap[getConstantRef(gs, "Opus::SafeMachine")].entries.insert(childMap[riskSafeMachineRef].entries.begin(),
                                                                      childMap[riskSafeMachineRef].entries.end());
 }
 
-vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Subclasses::Map &descendantsMap,
+vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, const Subclasses::Map &descendantsMap,
                                                 const vector<core::SymbolRef> &parentNames, const bool showPaths) {
     vector<string> descendantsMapSerialized;
     const auto classFormatString = showPaths ? " class {} {}" : " class {}";
@@ -122,7 +123,7 @@ vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Sub
 
     for (const auto &parentRef : parentNames) {
         auto fnd = descendantsMap.find(parentRef);
-        if (fnd == descendantsMap.end()) {
+        if (fnd == descendantsMap.end() || !parentRef.exists()) {
             continue;
         }
         const Subclasses::SubclassInfo &children = fnd->second;
@@ -172,7 +173,7 @@ vector<string> Subclasses::serializeSubclassMap(core::GlobalState &gs, const Sub
 //
 // This effectively replaces pay-server's `DescendantsMap` in `InheritedClassesStep` with a much
 // faster implementation.
-vector<string> Subclasses::genDescendantsMap(core::GlobalState &gs, Subclasses::Map &childMap,
+vector<string> Subclasses::genDescendantsMap(const core::GlobalState &gs, Subclasses::Map &childMap,
                                              vector<core::SymbolRef> &parentRefs, const bool showPaths) {
     Subclasses::patchChildMap(gs, childMap);
 
@@ -183,7 +184,7 @@ vector<string> Subclasses::genDescendantsMap(core::GlobalState &gs, Subclasses::
         // Skip parents that the user asked for but which don't
         // exist or are never subclassed.
         auto fnd = childMap.find(parentRef);
-        if (fnd == childMap.end()) {
+        if (fnd == childMap.end() || !parentRef.exists()) {
             continue;
         }
 

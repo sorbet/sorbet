@@ -20,19 +20,20 @@ public:
     static std::optional<Subclasses::Map> listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                             const std::vector<std::string> &absoluteIgnorePatterns,
                                                             const std::vector<std::string> &relativeIgnorePattern);
-    static std::vector<std::string> genDescendantsMap(core::GlobalState &gs, Subclasses::Map &childMap,
+    static std::vector<std::string> genDescendantsMap(const core::GlobalState &gs, Subclasses::Map &childMap,
                                                       std::vector<core::SymbolRef> &parentRefs, const bool showPaths);
-    static const core::SymbolRef getConstantRef(core::GlobalState &gs, std::string rawName);
+    static const core::SymbolRef getConstantRef(const core::GlobalState &gs, std::string rawName);
 
 private:
-    static void patchChildMap(core::GlobalState &gs, Subclasses::Map &childMap);
+    static void patchChildMap(const core::GlobalState &gs, Subclasses::Map &childMap);
     static bool isFileIgnored(const std::string &path, const std::vector<std::string> &absoluteIgnorePatterns,
                               const std::vector<std::string> &relativeIgnorePatterns);
     static std::optional<SubclassInfo> descendantsOf(const Subclasses::Map &childMap, const core::SymbolRef &parentRef);
-    static std::vector<std::string> serializeSubclassMap(core::GlobalState &gs, const Subclasses::Map &descendantsMap,
+    static std::vector<std::string> serializeSubclassMap(const core::GlobalState &gs,
+                                                         const Subclasses::Map &descendantsMap,
                                                          const std::vector<core::SymbolRef> &parentNames,
                                                          const bool showPaths);
-    static std::vector<core::NameRef> symbolName(core::GlobalState &gs, core::SymbolRef sym);
+    static std::vector<core::NameRef> symbolName(const core::GlobalState &gs, core::SymbolRef sym);
 };
 
 } // namespace sorbet::autogen

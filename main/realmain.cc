@@ -200,7 +200,7 @@ struct AutogenResult {
     vector<pair<int, Serialized>> prints;
 };
 
-void runAutogen(core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
+void runAutogen(const core::GlobalState &gs, options::Options &opts, const autogen::AutogenConfig &autogenCfg,
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed, const vector<std::string> &changedFiles) {
     Timer timeit(logger, "autogen");
 
