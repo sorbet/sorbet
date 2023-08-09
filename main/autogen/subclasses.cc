@@ -99,9 +99,12 @@ const core::SymbolRef Subclasses::getConstantRef(const core::GlobalState &gs, st
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
 // Please do not add to this list.
 void Subclasses::patchChildMap(const core::GlobalState &gs, Subclasses::Map &childMap) {
+    auto safeMachineRef = getConstantRef(gs, "Opus::SafeMachine");
     auto riskSafeMachineRef = getConstantRef(gs, "Opus::Risk::Model::Mixins::RiskSafeMachine");
-    childMap[getConstantRef(gs, "Opus::SafeMachine")].entries.insert(childMap[riskSafeMachineRef].entries.begin(),
-                                                                     childMap[riskSafeMachineRef].entries.end());
+    if (!safeMachineRef.exists() || !riskSafeMachineRef.exists())
+        return;
+    childMap[safeMachineRef].entries.insert(childMap[riskSafeMachineRef].entries.begin(),
+                                            childMap[riskSafeMachineRef].entries.end());
 }
 
 vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, const Subclasses::Map &descendantsMap,
@@ -111,9 +114,6 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
     const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
 
     for (const auto &parentRef : parentNames) {
-        if (!parentRef.exists()) {
-            continue;
-        }
         auto fnd = descendantsMap.find(parentRef);
         if (fnd == descendantsMap.end()) {
             continue;
@@ -163,9 +163,6 @@ vector<string> Subclasses::genDescendantsMap(const core::GlobalState &gs, Subcla
     fast_sort(parentRefs, [&gs](const auto &left, const auto &right) { return left.show(gs) < right.show(gs); });
     Subclasses::Map descendantsMap;
     for (const auto &parentRef : parentRefs) {
-        if (!parentRef.exists()) {
-            continue;
-        }
         // Skip parents that the user asked for but which don't
         // exist or are never subclassed.
         auto fnd = childMap.find(parentRef);
