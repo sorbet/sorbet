@@ -137,10 +137,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
 
         auto subclassesStart = descendantsMapSerialized.size();
         for (const auto &sym : children.entries) {
-            string_view path = sym.loc(gs).file().data(gs).path();
-            // Strip initial "./" from path
-            if (path.find("./") == 0)
-                path = path.substr(2);
+            string_view path = gs.getPrintablePath(sym.loc(gs).file().data(gs).path());
 
             string childName =
                 fmt::format("{}", fmt::map_join(symbolName(gs, sym), "::", [&gs](const core::NameRef &nm) -> string {
