@@ -82,6 +82,11 @@
         "category": "Sorbet"
       },
       {
+        "command": "sorbet.savePackageFiles",
+        "title": "Save open __package.rb files",
+        "category": "Sorbet"
+      },
+      {
         "command": "sorbet.setLogLevel",
         "title": "Set Log Level…",
         "category": "Sorbet"

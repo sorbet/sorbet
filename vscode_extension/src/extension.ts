@@ -7,6 +7,7 @@ import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
 import { toggleUntypedCodeHighlighting } from "./commands/toggleUntypedCodeHighlighting";
+import { savePackageFiles } from "./commands/savePackageFiles";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
@@ -81,6 +82,9 @@ export function activate(context: ExtensionContext) {
       cmdIds.SORBET_RESTART_COMMAND_ID,
       (reason: RestartReason = RestartReason.COMMAND) =>
         sorbetExtensionContext.statusProvider.restartSorbet(reason),
+    ),
+    commands.registerCommand(cmdIds.SORBET_SAVE_PACKAGE_FILES, () =>
+      savePackageFiles(sorbetExtensionContext),
     ),
     commands.registerCommand(cmdIds.TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID, () =>
       toggleUntypedCodeHighlighting(sorbetExtensionContext),
