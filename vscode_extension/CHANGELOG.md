@@ -1,8 +1,11 @@
 # Version history
+
 ## 0.3.24
+
 - `Copy Symbol to Clipboard`
   - Disable command when there is a text selection.
   - Show a progress dialog when Sorbet is not ready to process commands.
+- Auto-save `__package.rb` files when edited by a quickfix
 
 ## 0.3.23
 - Fix: Sorbet extension fails when opening a project containing Ruby code but no active configuration.
