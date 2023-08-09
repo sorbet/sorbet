@@ -55,7 +55,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const
         }
 
         auto &mapEntry = out[ref.sym];
-        mapEntry.entries.insert(defn.data(pf).sym);
+        mapEntry.entries.insert(defn.data(pf).sym.asClassOrModuleRef());
         mapEntry.classKind = ref.parentKind;
     }
 
@@ -74,8 +74,8 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
-    for (const auto &sym : children) {
-        auto descendants = Subclasses::descendantsOf(childMap, sym);
+    for (const auto &childRef : children) {
+        auto descendants = Subclasses::descendantsOf(childMap, childRef);
         if (descendants) {
             out.insert(descendants->entries.begin(), descendants->entries.end());
         }
@@ -126,10 +126,10 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
-        for (const auto &sym : children.entries) {
-            string_view path = gs.getPrintablePath(sym.loc(gs).file().data(gs).path());
-            string childName = sym.show(gs);
-            if (sym.asClassOrModuleRef().data(gs)->isClass()) {
+        for (const auto &childRef : children.entries) {
+            string_view path = gs.getPrintablePath(childRef.data(gs)->loc().file().data(gs).path());
+            string childName = childRef.show(gs);
+            if (childRef.data(gs)->isClass()) {
                 descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, showPaths ? path : ""));
             } else {
                 descendantsMapSerialized.emplace_back(

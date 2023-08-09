@@ -7,7 +7,7 @@ namespace sorbet::autogen {
 
 class Subclasses final {
 public:
-    using Entries = UnorderedSet<core::SymbolRef>;
+    using Entries = UnorderedSet<core::ClassOrModuleRef>;
     struct SubclassInfo {
         ClassKind classKind = ClassKind::Module;
         Entries entries;
