@@ -1587,7 +1587,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                 } else if (!bind.value.isSynthetic()) {
-                    if (castType.isUntyped()) {
+                    // The bind.bind.variable check is to detect a T.bind call on self.
+                    // Since T.bind has already been desugared to a T.cast, we can't check that directly.
+                    // However, self = ... is not valid ruby syntax, so if the target of this binding is self,
+                    // we know if actually came from a T.bind that was desugared to a T.cast
+                    if (castType.isUntyped() && bind.bind.variable != cfg::LocalRef::selfVariable()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
                             auto argLoc = core::Loc{ctx.file, c.valueLoc};
