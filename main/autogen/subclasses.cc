@@ -129,7 +129,6 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         for (const auto &sym : children.entries) {
             string_view path = gs.getPrintablePath(sym.loc(gs).file().data(gs).path());
             string childName = sym.show(gs);
-            // Ignore Modules
             if (sym.asClassOrModuleRef().data(gs)->isClass()) {
                 descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, showPaths ? path : ""));
             } else {
