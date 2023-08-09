@@ -107,8 +107,8 @@ public:
     }
 };
 
-ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
-    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(expr.loc(), {}), std::move(expr));
+ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr, ast::Send::ARGS_store args = {}) {
+    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(expr.loc(), std::move(args)), std::move(expr));
 }
 } // namespace
 
@@ -352,12 +352,24 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         }
     }
 
-    if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
-        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
+    if (send->numPosArgs() == 0 && send->fun == core::Names::after()) {
+        auto name = core::Names::afterAngles();
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto method = addSigVoid(
             ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, isClass, std::move(block->body))));
+        return constantMover.addConstantsToExpression(send->loc, move(method));
+    }
+
+    if (send->numPosArgs() == 0 && send->fun == core::Names::before()) {
+        auto name = core::Names::initialize();
+        ConstantMover constantMover;
+        ast::TreeWalk::apply(ctx, constantMover, block->body);
+        auto restArg = ast::MK::RestArg(send->loc, ast::MK::Local(send->loc, core::Names::arg0()));
+        auto sendArgs = ast::MK::SendArgs(ast::MK::Symbol(send->loc, core::Names::arg0()), ast::MK::Untyped(send->loc));
+        auto method = addSigVoid(ast::MK::SyntheticMethod1(send->loc, send->loc, name, std::move(restArg),
+                                                           prepareBody(ctx, isClass, std::move(block->body))),
+                                 std::move(sendArgs));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
