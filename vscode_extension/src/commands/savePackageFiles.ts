@@ -10,7 +10,7 @@ import { SorbetExtensionContext } from "../sorbetExtensionContext";
 export async function savePackageFiles(
   context: SorbetExtensionContext,
 ): Promise<boolean> {
-  context.log.warning("savePackageFiles");
+  context.log.trace("savePackageFiles");
   const allSaved = await Promise.all(
     workspace.textDocuments.map(async (document) => {
       context.log.warning(`editor.document.filename: ${document.fileName}`);
