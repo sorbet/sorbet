@@ -9,11 +9,11 @@ class A
 
   sig {void}
   def initialize
-    @x = T.let(0, Integer)
+    @x = T.let(0, T.nilable(Integer))
   # ^^ error: The instance variable `@x` must be declared using `T.let` when specifying `# typed: strict`
     @y = T.let(begin; end, NilClass)
   # ^^ error: The instance variable `@y` must be declared using `T.let` when specifying `# typed: strict`
-    @z = T.let(returns_integer, Integer)
+    @z = T.let(returns_integer, T.nilable(Integer))
   # ^^ error: The instance variable `@z` must be declared using `T.let` when specifying `# typed: strict`
   end
 

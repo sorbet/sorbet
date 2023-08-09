@@ -53,10 +53,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
+      <self>.params(:arg0, ::T.untyped()).void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def initialize<<todo method>>(*arg0, &<blk>)
       begin
         @foo = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
