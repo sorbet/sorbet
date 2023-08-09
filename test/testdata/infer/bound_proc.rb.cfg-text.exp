@@ -54,7 +54,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-te
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=17](<block-pre-call-temp>$79: Sorbet::Private::Static::Void, <selfRestore>$80: T.class_of(<root>)):
+bb3[rubyRegionId=0, firstDead=20](<block-pre-call-temp>$79: Sorbet::Private::Static::Void, <selfRestore>$80: T.class_of(<root>)):
     <statTemp>$76: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$79, class_helper>
     <self>: T.class_of(<root>) = <selfRestore>$80
     <cfgAlias>$94: T.class_of(T) = alias <C T>
@@ -71,6 +71,9 @@ bb3[rubyRegionId=0, firstDead=17](<block-pre-call-temp>$79: Sorbet::Private::Sta
     <cfgAlias>$121: T.class_of(Sorbet::Private::Static) = alias <C Static>
     <cfgAlias>$123: T.class_of(Rescues) = alias <C Rescues>
     <statTemp>$119: Sorbet::Private::Static::Void = <cfgAlias>$121: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$123: T.class_of(Rescues))
+    <cfgAlias>$128: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$130: T.class_of(UntypedBind) = alias <C UntypedBind>
+    <statTemp>$126: Sorbet::Private::Static::Void = <cfgAlias>$128: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$130: T.class_of(UntypedBind))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -1103,6 +1106,51 @@ bb13[rubyRegionId=1, firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorb
     # outerLoops: 1
     <blockReturnTemp>$27: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$8: Integer
     <unconditional> -> bb2
+
+}
+
+method ::UntypedBind#foo {
+
+bb0[rubyRegionId=0, firstDead=18]():
+    <self>: UntypedBind = cast(<self>: NilClass, UntypedBind);
+    <cfgAlias>$5: T.class_of(T) = alias <C T>
+    <statTemp>$3: UntypedBind = <cfgAlias>$5: T.class_of(T).reveal_type(<self>: UntypedBind)
+    <cfgAlias>$10: T.class_of(T) = alias <C T>
+    keep_for_ide$8: Runtime object representing type: T.untyped = <cfgAlias>$10: T.class_of(T).untyped()
+    keep_for_ide$8: T.untyped = <keep-alive> keep_for_ide$8
+    <castTemp>$11: UntypedBind = <self>
+    <self>: T.untyped = cast(<castTemp>$11: UntypedBind, T.untyped);
+    <cfgAlias>$14: T.class_of(T) = alias <C T>
+    <statTemp>$12: T.untyped = <cfgAlias>$14: T.class_of(T).reveal_type(<self>: T.untyped)
+    <cfgAlias>$18: T.class_of(UntypedBind) = alias <C UntypedBind>
+    keep_for_ide$17: T.class_of(UntypedBind) = <cfgAlias>$18
+    keep_for_ide$17: T.untyped = <keep-alive> keep_for_ide$17
+    <castTemp>$19: T.untyped = <self>
+    <self>: UntypedBind = cast(<castTemp>$19: T.untyped, UntypedBind);
+    <cfgAlias>$21: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: UntypedBind = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: UntypedBind)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: UntypedBind
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:UntypedBind>#<static-init> {
+
+bb0[rubyRegionId=0, firstDead=3]():
+    <self>: T.class_of(UntypedBind) = cast(<self>: NilClass, T.class_of(UntypedBind));
+    <returnMethodTemp>$2: Symbol(:foo) = :foo
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
+    <unconditional> -> bb1
 
 }
 
