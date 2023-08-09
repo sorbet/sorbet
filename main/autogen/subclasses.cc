@@ -128,9 +128,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         }
         const Subclasses::SubclassInfo &children = fnd->second;
 
-        string parentName =
-            fmt::format("{}", fmt::map_join(symbolName(gs, parentRef),
-                                            "::", [&gs](const core::NameRef &nm) -> string { return nm.show(gs); }));
+        string parentName = parentRef.show(gs);
 
         auto type = children.classKind == ClassKind::Class ? "class" : "module";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
@@ -138,12 +136,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         auto subclassesStart = descendantsMapSerialized.size();
         for (const auto &sym : children.entries) {
             string_view path = gs.getPrintablePath(sym.loc(gs).file().data(gs).path());
-
-            string childName =
-                fmt::format("{}", fmt::map_join(symbolName(gs, sym), "::", [&gs](const core::NameRef &nm) -> string {
-                                return nm.show(gs);
-                            }));
-
+            string childName = sym.show(gs);
             // Ignore Modules
             if (sym.asClassOrModuleRef().data(gs)->isClass()) {
                 // Note: fmt ignores excess arguments
