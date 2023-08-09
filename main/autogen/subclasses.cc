@@ -110,9 +110,6 @@ void Subclasses::patchChildMap(const core::GlobalState &gs, Subclasses::Map &chi
 vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, const Subclasses::Map &descendantsMap,
                                                 const vector<core::SymbolRef> &parentNames, const bool showPaths) {
     vector<string> descendantsMapSerialized;
-    const auto classFormatString = showPaths ? " class {} {}" : " class {}";
-    const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
-
     for (const auto &parentRef : parentNames) {
         auto fnd = descendantsMap.find(parentRef);
         if (fnd == descendantsMap.end()) {
@@ -129,11 +126,11 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
         for (const auto &childRef : children.entries) {
             string_view path = gs.getPrintablePath(childRef.data(gs)->loc().file().data(gs).path());
             string childName = childRef.show(gs);
-            if (childRef.data(gs)->isClass()) {
-                descendantsMapSerialized.emplace_back(fmt::format(classFormatString, childName, showPaths ? path : ""));
+            auto type = childRef.data(gs)->isClass() ? "class" : "module";
+            if (showPaths) {
+                descendantsMapSerialized.emplace_back(fmt::format(" {} {} {}", type, childName, path));
             } else {
-                descendantsMapSerialized.emplace_back(
-                    fmt::format(moduleFormatString, childName, showPaths ? path : ""));
+                descendantsMapSerialized.emplace_back(fmt::format(" {} {}", type, childName));
             }
         }
 
