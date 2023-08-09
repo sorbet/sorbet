@@ -111,8 +111,11 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
     const auto moduleFormatString = showPaths ? " module {} {}" : " module {}";
 
     for (const auto &parentRef : parentNames) {
+        if (!parentRef.exists()) {
+            continue;
+        }
         auto fnd = descendantsMap.find(parentRef);
-        if (fnd == descendantsMap.end() || !parentRef.exists()) {
+        if (fnd == descendantsMap.end()) {
             continue;
         }
         const Subclasses::SubclassInfo &children = fnd->second;
@@ -160,10 +163,13 @@ vector<string> Subclasses::genDescendantsMap(const core::GlobalState &gs, Subcla
     fast_sort(parentRefs, [&gs](const auto &left, const auto &right) { return left.show(gs) < right.show(gs); });
     Subclasses::Map descendantsMap;
     for (const auto &parentRef : parentRefs) {
+        if (!parentRef.exists()) {
+            continue;
+        }
         // Skip parents that the user asked for but which don't
         // exist or are never subclassed.
         auto fnd = childMap.find(parentRef);
-        if (fnd == childMap.end() || !parentRef.exists()) {
+        if (fnd == childMap.end()) {
             continue;
         }
 
