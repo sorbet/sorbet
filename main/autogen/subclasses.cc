@@ -36,17 +36,6 @@ bool Subclasses::isFileIgnored(const std::string &path, const std::vector<std::s
     return false;
 };
 
-// Convert a symbol name into a fully qualified name
-vector<core::NameRef> Subclasses::symbolName(const core::GlobalState &gs, core::SymbolRef sym) {
-    vector<core::NameRef> out;
-    while (sym.exists() && sym != core::Symbols::root()) {
-        out.emplace_back(sym.name(gs));
-        sym = sym.owner(gs);
-    }
-    reverse(out.begin(), out.end());
-    return out;
-}
-
 // Get all subclasses defined in a particular ParsedFile
 optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, const ParsedFile &pf,
                                                         const vector<string> &absoluteIgnorePatterns,

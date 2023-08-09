@@ -33,7 +33,6 @@ private:
                                                          const Subclasses::Map &descendantsMap,
                                                          const std::vector<core::SymbolRef> &parentNames,
                                                          const bool showPaths);
-    static std::vector<core::NameRef> symbolName(const core::GlobalState &gs, core::SymbolRef sym);
 };
 
 } // namespace sorbet::autogen
