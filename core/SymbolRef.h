@@ -973,6 +973,18 @@ public:
         return ClassOrModuleRef::fromRaw(82);
     }
 
+    static MethodRef T_Private_Methods_DeclBuilder_abstract() {
+        return MethodRef::fromRaw(4);
+    }
+
+    static MethodRef T_Private_Methods_DeclBuilder_overridable() {
+        return MethodRef::fromRaw(5);
+    }
+
+    static MethodRef T_Private_Methods_DeclBuilder_override() {
+        return MethodRef::fromRaw(6);
+    }
+
     static ClassOrModuleRef T_Sig_WithoutRuntimeSingleton() {
         return ClassOrModuleRef::fromRaw(83);
     }
