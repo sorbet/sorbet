@@ -11,11 +11,10 @@ class DidChangeConfigurationTask final : public LSPTask {
     uint32_t epoch;
 
 public:
-    DidChangeConfigurationTask(const LSPConfiguration &config, std::unique_ptr<DidChangeConfigurationParams> params);
+    DidChangeConfigurationTask(const LSPConfiguration &config, std::unique_ptr<DidChangeConfigurationParams> params,
+                               std::unique_ptr<std::vector<std::string_view>> openFiles, uint32_t epoch);
 
     LSPTask::Phase finalPhase() const override;
-
-    void preprocess(LSPPreprocessor &preprocessor) override;
 
     void index(LSPIndexer &indexer) override;
 

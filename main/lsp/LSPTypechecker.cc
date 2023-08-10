@@ -647,11 +647,11 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
-LSPFileUpdates LSPTypechecker::getNoopUpdateWithEpoch(std::vector<core::FileRef> frefs, uint32_t epoch) const {
+LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
     LSPFileUpdates noop;
     noop.typecheckingPath = TypecheckingPath::Fast;
     // Epoch isn't important for this update.
-    noop.epoch = epoch;
+    noop.epoch = 0;
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
         ENFORCE(fref.id() < indexed.size());
@@ -662,9 +662,6 @@ LSPFileUpdates LSPTypechecker::getNoopUpdateWithEpoch(std::vector<core::FileRef>
     }
     return noop;
 }
-LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {
-    return getNoopUpdateWithEpoch(frefs, 0);
-}
 
 std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef> frefs,
                                                                       WorkerPool &workers) const {
@@ -674,16 +671,6 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
     runFastPath(updates, workers, errorCollector, isNoopUpdateForRetypecheck);
 
     return errorCollector->drainErrors();
-}
-
-void LSPTypechecker::retypecheckAndFlush(vector<core::FileRef> frefs, WorkerPool &workers, uint32_t epoch) const {
-    LSPFileUpdates updates = getNoopUpdateWithEpoch(move(frefs), epoch);
-    ErrorEpoch errorEpoch(*errorReporter, updates.epoch, true, {});
-    auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-
-    bool isNoopUpdateForRetypecheck = true;
-    runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
-    errorEpoch.committed = true;
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
@@ -763,19 +750,6 @@ std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(st
     return typechecker.retypecheck(frefs, workers);
 }
 
-void LSPTypecheckerDelegate::retypecheckAndFlush(std::vector<core::FileRef> frefs, uint32_t epoch) const {
-    typechecker.retypecheckAndFlush(frefs, workers, epoch);
-}
-
-void LSPTypecheckerDelegate::retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths,
-                                                          uint32_t epoch) const {
-    std::vector<core::FileRef> openFileRefs;
-    for (auto const &path : *paths) {
-        openFileRefs.push_back(state().findFileByPath(path));
-    }
-    retypecheckAndFlush(openFileRefs, epoch);
-}
-
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
                                              const std::vector<core::FileRef> &filesForQuery) const {
     return typechecker.query(q, filesForQuery, workers);
@@ -794,6 +768,10 @@ const core::GlobalState &LSPTypecheckerDelegate::state() const {
 }
 void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
     typechecker.updateGsFromOptions(options);
+}
+
+LSPFileUpdates LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    return typechecker.getNoopUpdate(frefs);
 }
 
 } // namespace sorbet::realmain::lsp

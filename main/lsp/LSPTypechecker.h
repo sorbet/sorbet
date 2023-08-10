@@ -74,18 +74,6 @@ class LSPTypechecker final {
     /** Commits the given file updates to LSPTypechecker. Does not send diagnostics. */
     void commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanceled);
 
-    /**
-     * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
-     * doesn't actually change anything.
-     */
-    LSPFileUpdates getNoopUpdateWithEpoch(std::vector<core::FileRef> frefs, uint32_t epoch) const;
-
-    /**
-     * Special-case of the above with an epoch that
-     * ensures errors cannot be flushed
-     */
-    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
-
     /** Deep copy all entries in `indexed` that contain ASTs, except for those with IDs in the ignore set. Returns true
      * on success, false if the operation was canceled. */
     bool copyIndexed(WorkerPool &workers, const UnorderedSet<int> &ignore, std::vector<ast::ParsedFile> &out) const;
@@ -161,6 +149,12 @@ public:
      * options (such as highlighting untyped code) without doing a full restart of Sorbet.
      */
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
+
+    /**
+     * Get an LSPFileUpdates containing the latest versions of the given files. It's a "no-op" file update because it
+     * doesn't actually change anything.
+     */
+    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 };
 
 /**
@@ -202,8 +196,7 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
-    void retypecheckAndFlush(std::vector<core::FileRef> frefs, uint32_t epoch) const;
-    void retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths, uint32_t epoch) const;
+    LSPFileUpdates getNoopUpdate(std::vector<core::FileRef> frefs) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif
