@@ -5,9 +5,8 @@
 namespace sorbet::realmain::lsp {
 DidChangeConfigurationTask::DidChangeConfigurationTask(const LSPConfiguration &config,
                                                        std::unique_ptr<DidChangeConfigurationParams> params,
-                                                       std::unique_ptr<std::vector<std::string_view>> openFiles,
-                                                       uint32_t epoch)
-    : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(move(openFiles)),
+                                                       std::vector<std::string_view> openFiles, uint32_t epoch)
+    : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(openFiles),
       epoch(epoch) {}
 
 LSPTask::Phase DidChangeConfigurationTask::finalPhase() const {
@@ -23,7 +22,7 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
 void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
     tc.updateGsFromOptions(*params);
     std::vector<core::FileRef> openFileRefs;
-    for (auto const &path : *openFilePaths) {
+    for (auto const &path : openFilePaths) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
     }
     auto updates = tc.getNoopUpdate(openFileRefs);
