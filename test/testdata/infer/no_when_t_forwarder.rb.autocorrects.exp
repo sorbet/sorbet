@@ -2,11 +2,11 @@
 # typed: true
 
 case T.unsafe(nil)
-when T::Array
+when Array
   #  ^^^^^^^^ error: Use `Array` without any `T::` prefix to match on a stdlib generic type
-when T::Hash
+when Hash
   #  ^^^^^^^ error: Use `Hash` without any `T::` prefix to match on a stdlib generic type
-when T::Set
+when Set
   #  ^^^^^^ error: Use `Set` without any `T::` prefix to match on a stdlib generic type
 end
 # ------------------------------
