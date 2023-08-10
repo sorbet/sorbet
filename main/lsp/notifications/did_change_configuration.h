@@ -8,6 +8,7 @@ class DidChangeConfigurationParams;
 class DidChangeConfigurationTask final : public LSPTask {
     const std::unique_ptr<DidChangeConfigurationParams> params;
     std::unique_ptr<std::vector<std::string_view>> openFilePaths;
+    uint32_t epoch;
 
 public:
     DidChangeConfigurationTask(const LSPConfiguration &config, std::unique_ptr<DidChangeConfigurationParams> params);

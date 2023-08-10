@@ -514,4 +514,8 @@ const std::unique_ptr<std::vector<std::string_view>> LSPPreprocessor::openFilePa
     return paths;
 }
 
+const uint32_t LSPPreprocessor::incNextVersion() {
+    return nextVersion++;
+}
+
 } // namespace sorbet::realmain::lsp

@@ -5,7 +5,7 @@
 namespace sorbet::realmain::lsp {
 DidChangeConfigurationTask::DidChangeConfigurationTask(const LSPConfiguration &config,
                                                        std::unique_ptr<DidChangeConfigurationParams> params)
-    : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths() {}
+    : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(), epoch(1) {}
 
 LSPTask::Phase DidChangeConfigurationTask::finalPhase() const {
     // We want this to run all the way so that the changes to
@@ -16,6 +16,7 @@ LSPTask::Phase DidChangeConfigurationTask::finalPhase() const {
 void DidChangeConfigurationTask::preprocess(LSPPreprocessor &preprocessor) {
     auto tmp = preprocessor.openFilePaths();
     openFilePaths = std::move(tmp);
+    epoch = preprocessor.incNextVersion();
 }
 
 void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
@@ -24,6 +25,6 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
 
 void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
     tc.updateGsFromOptions(*params);
-    tc.retypecheckFromPathsAndFlush(std::move(openFilePaths));
+    tc.retypecheckFromPathsAndFlush(std::move(openFilePaths), epoch);
 }
 } // namespace sorbet::realmain::lsp

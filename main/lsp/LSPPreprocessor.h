@@ -176,6 +176,8 @@ public:
     std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
 
     const std::unique_ptr<std::vector<std::string_view>> openFilePaths() const;
+
+    const uint32_t incNextVersion();
 };
 
 } // namespace sorbet::realmain::lsp

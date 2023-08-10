@@ -119,7 +119,7 @@ public:
     /**
      * Re-typechecks the provided files and flushes error messages to client.
      */
-    void retypecheckAndFlush(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
+    void retypecheckAndFlush(std::vector<core::FileRef> frefs, WorkerPool &workers, uint32_t epoch) const;
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
@@ -202,8 +202,8 @@ public:
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
-    void retypecheckAndFlush(std::vector<core::FileRef> frefs) const;
-    void retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths) const;
+    void retypecheckAndFlush(std::vector<core::FileRef> frefs, uint32_t epoch) const;
+    void retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths, uint32_t epoch) const;
 };
 } // namespace sorbet::realmain::lsp
 #endif

@@ -676,20 +676,8 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
     return errorCollector->drainErrors();
 }
 
-void LSPTypechecker::retypecheckAndFlush(vector<core::FileRef> frefs, WorkerPool &workers) const {
-    /*
-     * This is a hack to get the errors to actually flush to the client
-     * Incrementing the epoch is troublesome since we would have to sync
-     * with nextVersion in LSPPreprocessor.
-     */
-    auto byEpoch = [&](const core::FileRef &a, const core::FileRef &b) {
-        auto epochA = errorReporter->lastDiagnosticEpochForFile(a);
-        auto epochB = errorReporter->lastDiagnosticEpochForFile(b);
-        return epochA < epochB;
-    };
-    auto maxEpoch = errorReporter->lastDiagnosticEpochForFile(*absl::c_max_element(frefs, byEpoch));
-
-    LSPFileUpdates updates = getNoopUpdateWithEpoch(move(frefs), maxEpoch);
+void LSPTypechecker::retypecheckAndFlush(vector<core::FileRef> frefs, WorkerPool &workers, uint32_t epoch) const {
+    LSPFileUpdates updates = getNoopUpdateWithEpoch(move(frefs), epoch);
     auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
 
     bool isNoopUpdateForRetypecheck = true;
@@ -773,16 +761,17 @@ std::vector<std::unique_ptr<core::Error>> LSPTypecheckerDelegate::retypecheck(st
     return typechecker.retypecheck(frefs, workers);
 }
 
-void LSPTypecheckerDelegate::retypecheckAndFlush(std::vector<core::FileRef> frefs) const {
-    typechecker.retypecheckAndFlush(frefs, workers);
+void LSPTypecheckerDelegate::retypecheckAndFlush(std::vector<core::FileRef> frefs, uint32_t epoch) const {
+    typechecker.retypecheckAndFlush(frefs, workers, epoch);
 }
 
-void LSPTypecheckerDelegate::retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths) const {
+void LSPTypecheckerDelegate::retypecheckFromPathsAndFlush(std::unique_ptr<std::vector<std::string_view>> paths,
+                                                          uint32_t epoch) const {
     std::vector<core::FileRef> openFileRefs;
     for (auto const &path : *paths) {
         openFileRefs.push_back(state().findFileByPath(path));
     }
-    retypecheckAndFlush(openFileRefs);
+    retypecheckAndFlush(openFileRefs, epoch);
 }
 
 LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
