@@ -131,6 +131,10 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
     if (options.useValidSyntax && gs.suggestUnsafe.has_value()) {
         defaultArgumentPlaceholder = "T.unsafe(nil)";
     } else if (options.useValidSyntax) {
+        // Setting this variable to the empty string will cause us to omit the default value for certain arguments.
+        // When this method is called to generate an autocorrect, this will produce a further error that the user must
+        // resolve manually. This is the best alternative we have given that we've been specifically asked not to
+        // generate syntactically invalid code.
         defaultArgumentPlaceholder = "";
     }
 
