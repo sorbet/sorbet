@@ -917,7 +917,7 @@ private:
 
         vector<string> reindentedMethodDefinitionLines;
         absl::c_transform(absl::StrSplit(methodDefinition, "\n"), std::back_inserter(reindentedMethodDefinitionLines),
-                          [indent](auto &line) -> string { return absl::StrCat(fmt::format("{}  ", indent), line); });
+                          [indent](auto &line) -> string { return fmt::format("{}  {}", indent, line); });
 
         auto reindentedMethodDefinition = absl::StrJoin(reindentedMethodDefinitionLines, "\n");
 
