@@ -1,5 +1,4 @@
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
-import { RestartReason } from "../types";
 
 /**
  * Toggle highlighting of untyped code.
@@ -14,7 +13,13 @@ export async function toggleUntypedCodeHighlighting(
   context.log.info(
     `Untyped code highlighting: ${targetState ? "enabled" : "disabled"}`,
   );
-
-  await context.statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
+  
+  await context.statusProvider.activeLanguageClient?.sendNotification("workspace/didChangeConfiguration",
+    {
+      "settings": {
+        "highlightUntyped": targetState
+      }
+    }
+  );
   return context.configuration.highlightUntyped;
 }

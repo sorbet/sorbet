@@ -236,6 +236,16 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   ): Promise<TResponse> {
     return this.languageClient.sendRequest<TResponse>(method, param);
   }
+  
+  /**
+   * Send a notification to language server. See {@link LanguageClient.sendNotification}.
+   */
+  public sendNotification<TResponse>(
+    method: string,
+    param: any,
+  ): Promise<TResponse> {
+    return this.languageClient.sendNotification<TResponse>(method, param);
+  }
 
   /**
    * Language client status.
