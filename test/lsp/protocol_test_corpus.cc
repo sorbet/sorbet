@@ -694,4 +694,31 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "changed_definition"), 0);
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighlightUntypedSetting") {
+    assertDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                               "class A\n"
+                                               "def foo; end\n"
+                                               "end\n"
+                                               "\n")),
+                      {});
+    auto settings = make_unique<SorbetInitializationOptions>();
+    settings->highlightUntyped = true;
+    auto config = make_unique<DidChangeConfigurationParams>(move(settings));
+    send(*makeConfigurationChange(move(config)));
+
+    assertDiagnostics(send(*changeFile("foo.rb",
+                                       "# typed: true\n"
+                                       "class A\n"
+                                       "  def foo(x)\n;"
+                                       "    x.foo\n"
+                                       "  end\n"
+                                       "end\n"
+                                       "\n",
+                                       2)),
+                      {});
+}
+
 } // namespace sorbet::test::lsp
