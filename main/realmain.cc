@@ -301,17 +301,23 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 continue;
             }
 
-            for (const auto &[parentName, children] : *el.subclasses) {
-                if (!parentName.empty()) {
-                    auto &childEntry = childMap[parentName];
-                    childEntry.entries.insert(children.entries.begin(), children.entries.end());
-                    childEntry.classKind = children.classKind;
-                }
+            for (const auto &[parentRef, children] : *el.subclasses) {
+                auto &childEntry = childMap[parentRef];
+                childEntry.entries.insert(children.entries.begin(), children.entries.end());
+                childEntry.classKind = children.classKind;
             }
         }
 
+        auto autogenSubclassesParentsRefs = vector<core::SymbolRef>();
+        for (auto &parent : opts.autogenSubclassesParents) {
+            auto parentRef = autogen::Subclasses::getConstantRef(gs, parent);
+            if (!parentRef.exists())
+                continue;
+            autogenSubclassesParentsRefs.emplace_back(parentRef);
+        }
+
         vector<string> serializedDescendantsMap =
-            autogen::Subclasses::genDescendantsMap(childMap, opts.autogenSubclassesParents);
+            autogen::Subclasses::genDescendantsMap(gs, childMap, autogenSubclassesParentsRefs);
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
