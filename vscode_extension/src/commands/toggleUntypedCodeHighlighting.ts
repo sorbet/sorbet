@@ -14,7 +14,7 @@ export async function toggleUntypedCodeHighlighting(
     `Untyped code highlighting: ${targetState ? "enabled" : "disabled"}`,
   );
   
-  await context.statusProvider.activeLanguageClient?.sendNotification("workspace/didChangeConfiguration",
+  context.statusProvider.activeLanguageClient?.sendNotification("workspace/didChangeConfiguration",
     {
       "settings": {
         "highlightUntyped": targetState

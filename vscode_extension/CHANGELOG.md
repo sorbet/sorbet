@@ -1,4 +1,6 @@
 # Version history
+## 0.3.25
+- `Toggle untyped highlight without restart`
 
 ## 0.3.24
 
