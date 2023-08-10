@@ -678,10 +678,12 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
 
 void LSPTypechecker::retypecheckAndFlush(vector<core::FileRef> frefs, WorkerPool &workers, uint32_t epoch) const {
     LSPFileUpdates updates = getNoopUpdateWithEpoch(move(frefs), epoch);
+    ErrorEpoch errorEpoch(*errorReporter, updates.epoch, true, {});
     auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
 
     bool isNoopUpdateForRetypecheck = true;
     runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
+    errorEpoch.committed = true;
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
