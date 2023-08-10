@@ -322,38 +322,56 @@ end
 module T::Array
   # Type syntax to specify the element type of a standard library Array
   def self.[](type); end
+  # Don't use case/when on T::Array--just use `when Array` instead.
+  def self.===(arg0); end
 end
 module T::Hash
   # Type syntax to specify the key and value types of a standard library Hash
   def self.[](keys, values); end
+  # Don't use case/when on T::Hash--just use `when Hash` instead.
+  def self.===(arg0); end
 end
 module T::Set
   # Type syntax to specify the element type of a standard library Set
   def self.[](type); end
+  # Don't use case/when on T::Set--just use `when Set` instead.
+  def self.===(arg0); end
 end
 module T::Range
   # Type syntax to specify the element type of a standard library Range
   def self.[](type); end
+  # Don't use case/when on T::Range--just use `when Range` instead.
+  def self.===(arg0); end
 end
 module T::Class
   # Type syntax to specify the element type of a standard library Class
   def self.[](type); end
+  # Don't use case/when on T::Class--just use `when Class` instead.
+  def self.===(arg0); end
 end
 module T::Enumerable
   # Type syntax to specify the element type of a standard library Enumerable
   def self.[](type); end
+  # Don't use case/when on T::Enumerable--just use `when Enumerable` instead.
+  def self.===(arg0); end
 end
 module T::Enumerator
   # Type syntax to specify the element type of a standard library Enumerator
   def self.[](type); end
+  # Don't use case/when on T::Enumerator--just use `when Enumerator` instead.
+  def self.===(arg0); end
 end
 module T::Enumerator::Lazy
   # Type syntax to specify the element type of a standard library Enumerator::Lazy
   def self.[](type); end
+  # Don't use case/when on T::Enumerator::Lazy--just use `when Enumerator::Lazy` instead.
+  def self.===(arg0); end
 end
 module T::Enumerator::Chain
   # Type syntax to specify the element type of a standard library Enumerator::Chain
   def self.[](type); end
+  # Don't use case/when on T::Enumerator::Chain--just use `when Enumerator::Chain` instead.
+  def self.===(arg0); end
 end
 
 # Type syntax for either a `true` or `false` value.
