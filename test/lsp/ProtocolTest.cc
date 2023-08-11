@@ -241,18 +241,12 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
-void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
-                                          vector<ExpectedDiagnostic> expected) {
-    assertDiagnostics<ErrorAssertion>(std::move(messages), expected);
-}
-
-void ProtocolTest::assertUntypedDiagnostics(vector<unique_ptr<LSPMessage>> messages,
-                                            vector<ExpectedDiagnostic> expected) {
-    assertDiagnostics<UntypedAssertion>(std::move(messages), expected);
-}
+namespace {
 
 template <typename T>
-void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
+void assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected,
+                       const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                       map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
         if (!isTypecheckRun(*msg) && !isSorbetFence(*msg)) {
@@ -269,6 +263,17 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
 
     // Use same logic as main test runner.
     T::checkAll(sourceFileContents, errorAssertions, diagnostics);
+}
+} // namespace
+
+void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                          vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<ErrorAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
+}
+
+void ProtocolTest::assertUntypedDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                            vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<UntypedAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
 }
 
 const CounterStateDatabase ProtocolTest::getCounters() {
