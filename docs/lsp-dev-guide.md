@@ -22,10 +22,10 @@ There are two main things you might want to do:
 
 There are two main kinds of LSP tests you're likely to interact with:
 
-- The LSP tests in `test/testdata/`.
+- The LSP tests in `test/testdata/lsp/`.
 
-  Each file in `test/testdata/` is both a test of Sorbet via LSP and Sorbet's
-  standalone pipeline.
+  Each file in `test/testdata/lsp/` is both a test of Sorbet via LSP and
+  Sorbet's standalone pipeline.
 
   These tests are documented in [Sorbet's README]. In particular, when running
   as LSP tests, there are a bunch more annotations you can use to test LSP
