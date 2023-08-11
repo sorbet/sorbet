@@ -241,6 +241,17 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
+void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                          vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<ErrorAssertion>(std::move(messages), expected);
+}
+
+void ProtocolTest::assertUntypedDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                            vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<UntypedAssertion>(std::move(messages), expected);
+}
+
+template <typename T>
 void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
@@ -250,14 +261,14 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
     }
 
     // Convert ExpectedDiagnostic into ErrorAssertion objects.
-    vector<shared_ptr<ErrorAssertion>> errorAssertions;
+    vector<shared_ptr<T>> errorAssertions;
     for (auto e : expected) {
         auto range = RangeAssertion::makeRange(e.line);
-        errorAssertions.push_back(ErrorAssertion::make(e.path, range, e.line, e.message, "error"));
+        errorAssertions.push_back(T::make(e.path, range, e.line, e.message, "error"));
     }
 
     // Use same logic as main test runner.
-    ErrorAssertion::checkAll(sourceFileContents, errorAssertions, diagnostics);
+    T::checkAll(sourceFileContents, errorAssertions, diagnostics);
 }
 
 const CounterStateDatabase ProtocolTest::getCounters() {
