@@ -128,6 +128,8 @@ class LSPPreprocessor final {
 
     std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
 
+    std::vector<std::string_view> openFilePaths() const;
+
 public:
     LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<TaskQueue> taskQueue,
                     uint32_t initialVersion = 0);

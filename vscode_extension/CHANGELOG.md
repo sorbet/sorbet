@@ -1,4 +1,7 @@
 # Version history
+## 0.3.25
+- Toggling highlighting of untyped code does not require a restart now
+  - Sends workspace/didChangeConfiguration notification to LSP server instead
 
 ## 0.3.24
 

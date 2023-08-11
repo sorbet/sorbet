@@ -718,6 +718,22 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     slowPathBlocked = blocked;
 }
 
+void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    this->gs->trackUntyped = options.settings->highlightUntyped.value_or(this->gs->trackUntyped);
+
+    if (options.settings->enableTypecheckInfo.has_value() ||
+        options.settings->enableTypedFalseCompletionNudges.has_value() ||
+        options.settings->supportsOperationNotifications.has_value() ||
+        options.settings->supportsSorbetURIs.has_value()) {
+        auto msg =
+            "Currently `highlightUntyped` is the only updateable setting using the workspace/didChangeConfiguration "
+            "notification";
+        auto params = make_unique<ShowMessageParams>(MessageType::Warning, msg);
+        config->output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+    }
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
@@ -761,6 +777,13 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
+}
+void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    typechecker.updateGsFromOptions(options);
+}
+
+LSPFileUpdates LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    return typechecker.getNoopUpdate(frefs);
 }
 
 } // namespace sorbet::realmain::lsp

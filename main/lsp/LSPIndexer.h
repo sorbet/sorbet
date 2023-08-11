@@ -103,6 +103,8 @@ public:
      * out in a context that's not the InitializedTask's index function.
      */
     void transferInitializeState(InitializedTask &task);
+
+    void updateGsFromOptions(const DidChangeConfigurationParams &options) const;
 };
 
 } // namespace sorbet::realmain::lsp
