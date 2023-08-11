@@ -2095,6 +2095,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->trackUntyped = this->trackUntyped;
+    result->enableTypedFalseCompletionNudges = this->enableTypedFalseCompletionNudges;
     result->printingFileTable = this->printingFileTable;
 
     if (keepId) {
@@ -2193,6 +2194,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndex() const {
     result->requiresAncestorEnabled = this->requiresAncestorEnabled;
     result->ruby3KeywordArgs = this->ruby3KeywordArgs;
     result->trackUntyped = this->trackUntyped;
+    result->enableTypedFalseCompletionNudges = this->enableTypedFalseCompletionNudges;
     result->kvstoreUuid = this->kvstoreUuid;
     result->errorUrlBase = this->errorUrlBase;
     result->suppressedErrorClasses = this->suppressedErrorClasses;

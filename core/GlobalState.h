@@ -233,6 +233,7 @@ public:
     bool autocorrect = false;
     bool didYouMean = true;
     bool trackUntyped = false;
+    bool enableTypedFalseCompletionNudges = true;
     bool printingFileTable = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
