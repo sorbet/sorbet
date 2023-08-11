@@ -216,6 +216,7 @@ class LocalNameInserter {
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         ENFORCE(original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0)));
+        ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::untypedSuper());
 
         ast::ExpressionPtr originalBlock;
         if (auto *rawBlock = original.rawBlock()) {
@@ -350,6 +351,8 @@ class LocalNameInserter {
         auto method = ast::MK::Literal(
             original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
+        auto shouldForwardBlockArg = blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
+
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
@@ -394,11 +397,16 @@ class LocalNameInserter {
                 // Re-add block argument
                 original.setBlock(std::move(originalBlock));
             } else {
-                // <call-with-splat-and-block>(..., &blk)
-                original.fun = core::Names::callWithSplatAndBlock();
-                original.addPosArg(std::move(blockArg));
+                if (shouldForwardBlockArg) {
+                    // <call-with-splat-and-block>(..., &blk)
+                    original.fun = core::Names::callWithSplatAndBlock();
+                    original.addPosArg(std::move(blockArg));
+                } else {
+                    // <call-with-splat>(...)
+                    original.fun = core::Names::callWithSplat();
+                }
             }
-        } else if (originalBlock == nullptr) {
+        } else if (originalBlock == nullptr && shouldForwardBlockArg) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
@@ -426,6 +434,7 @@ class LocalNameInserter {
             original.fun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
+            // Or no block arg in sig, and in strict mode.
             original.reserveArguments(posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
 
@@ -443,7 +452,9 @@ class LocalNameInserter {
                 }
             }
             // Re-add original block
-            original.setBlock(std::move(originalBlock));
+            if (originalBlock) {
+                original.setBlock(std::move(originalBlock));
+            }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
         }
