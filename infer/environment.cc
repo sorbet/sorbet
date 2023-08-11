@@ -1591,28 +1591,30 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // Since T.bind has already been desugared to a T.cast, we can't check that directly.
                     // However, self = ... is not valid ruby syntax, so if the target of this binding is self,
                     // we know if actually came from a T.bind that was desugared to a T.cast
-                    if (castType.isUntyped() && bind.bind.variable != cfg::LocalRef::selfVariable()) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
-                            e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
-                            auto argLoc = core::Loc{ctx.file, c.valueLoc};
-                            if (argLoc.exists()) {
-                                e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
-                                              argLoc.source(ctx).value());
-                            }
-                        }
-                    } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
-                            e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
-                                        ty.type.show(ctx), castType.show(ctx));
-                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
-                            auto argLoc = ctx.locAt(c.valueLoc);
-                            if (argLoc.exists()) {
-                                if (ctx.state.suggestUnsafe.has_value()) {
-                                    e.replaceWith("Convert to `T.unsafe`", ctx.locAt(bind.loc), "{}({})",
-                                                  ctx.state.suggestUnsafe.value(), argLoc.source(ctx).value());
-                                } else {
-                                    e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}",
+                    if (bind.bind.variable != cfg::LocalRef::selfVariable()) {
+                        if (castType.isUntyped()) {
+                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
+                                e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
+                                auto argLoc = core::Loc{ctx.file, c.valueLoc};
+                                if (argLoc.exists()) {
+                                    e.replaceWith("Replace with `T.unsafe`", ctx.locAt(bind.loc), "T.unsafe({})",
                                                   argLoc.source(ctx).value());
+                                }
+                            }
+                        } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
+                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
+                                e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
+                                            ty.type.show(ctx), castType.show(ctx));
+                                e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                auto argLoc = ctx.locAt(c.valueLoc);
+                                if (argLoc.exists()) {
+                                    if (ctx.state.suggestUnsafe.has_value()) {
+                                        e.replaceWith("Convert to `T.unsafe`", ctx.locAt(bind.loc), "{}({})",
+                                                      ctx.state.suggestUnsafe.value(), argLoc.source(ctx).value());
+                                    } else {
+                                        e.replaceWith("Delete `T.cast`", ctx.locAt(bind.loc), "{}",
+                                                      argLoc.source(ctx).value());
+                                    }
                                 }
                             }
                         }
