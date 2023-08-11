@@ -945,7 +945,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     };
 
     core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
-                                    recvType.type,          nullptr, loc, true, false};
+                                    recvType.type,          nullptr, loc, true, false,         core::NameRef::noName()};
 
     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
     if (dispatched.main.errors.empty()) {
@@ -998,9 +998,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // This is the main place where we type check a method, so we default by assuming
                 // that we want to report all errors (supressing nothing).
                 auto suppressErrors = false;
-                core::DispatchArgs dispatchArgs{
-                    send.fun,  locs,     send.numPosArgs,  args,          recvType.type, recvType, recvType.type,
-                    send.link, ownerLoc, send.isPrivateOk, suppressErrors};
+                auto funName = send.fun.show(ctx);
+                core::DispatchArgs dispatchArgs{send.fun,        locs,
+                                                send.numPosArgs, args,
+                                                recvType.type,   recvType,
+                                                recvType.type,   send.link,
+                                                ownerLoc,        send.isPrivateOk,
+                                                suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
@@ -1392,7 +1396,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     block,
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
-                                                    suppressErrors};
+                                                    suppressErrors, core::NameRef::noName()};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
                 }

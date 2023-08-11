@@ -1118,18 +1118,18 @@ Loc DispatchArgs::blockLoc(const GlobalState &gs) const {
 DispatchArgs DispatchArgs::withSelfAndThisRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{
         name,        locs,          numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized,
-        isPrivateOk, suppressErrors};
+        isPrivateOk, suppressErrors, enclosingMethodForSuper};
 }
 
 DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
     return DispatchArgs{
         name,        locs,          numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized,
-        isPrivateOk, suppressErrors};
+        isPrivateOk, suppressErrors, enclosingMethodForSuper};
 }
 
 DispatchArgs DispatchArgs::withErrorsSuppressed() const {
     return DispatchArgs{
-        name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized, isPrivateOk, true};
+        name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized, isPrivateOk, true, enclosingMethodForSuper};
 }
 
 DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,
