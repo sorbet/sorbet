@@ -104,11 +104,6 @@ public:
      */
     std::vector<std::unique_ptr<core::Error>> retypecheck(std::vector<core::FileRef> frefs, WorkerPool &workers) const;
 
-    /**
-     * Re-typechecks the provided files and flushes error messages to client.
-     */
-    void retypecheckAndFlush(std::vector<core::FileRef> frefs, WorkerPool &workers, uint32_t epoch) const;
-
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
                          WorkerPool &workers) const;

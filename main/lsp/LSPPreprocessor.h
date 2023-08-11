@@ -128,6 +128,8 @@ class LSPPreprocessor final {
 
     std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
 
+    std::vector<std::string_view> openFilePaths() const;
+
 public:
     LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<TaskQueue> taskQueue,
                     uint32_t initialVersion = 0);
@@ -174,8 +176,6 @@ public:
     std::optional<std::string_view> maybeGetFileContents(std::string_view path) const;
 
     std::unique_ptr<Joinable> runPreprocessor(MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex);
-
-    std::vector<std::string_view> openFilePaths() const;
 };
 
 } // namespace sorbet::realmain::lsp

@@ -728,7 +728,6 @@ void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &opt
         auto msg =
             "Currently `highlightUntyped` is the only updateable setting using the workspace/didChangeConfiguration "
             "notification";
-        config->logger->error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Warning, msg);
         config->output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
