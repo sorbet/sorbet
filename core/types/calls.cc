@@ -613,6 +613,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    if (!mayBeOverloaded.exists() && args.name == core::Names::untypedSuper()) {
+        return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                              Symbols::noMethod());
+    }
+
     if (!mayBeOverloaded.exists()) {
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
