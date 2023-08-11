@@ -13,13 +13,14 @@ export async function toggleUntypedCodeHighlighting(
   context.log.info(
     `Untyped code highlighting: ${targetState ? "enabled" : "disabled"}`,
   );
-  
-  context.statusProvider.activeLanguageClient?.sendNotification("workspace/didChangeConfiguration",
+
+  context.statusProvider.activeLanguageClient?.sendNotification(
+    "workspace/didChangeConfiguration",
     {
-      "settings": {
-        "highlightUntyped": targetState
-      }
-    }
+      settings: {
+        highlightUntyped: targetState,
+      },
+    },
   );
   return context.configuration.highlightUntyped;
 }
