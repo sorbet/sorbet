@@ -720,6 +720,19 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
 
 void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
     this->gs->trackUntyped = options.settings->highlightUntyped.value_or(this->gs->trackUntyped);
+
+    if (options.settings->enableTypecheckInfo.has_value() ||
+        options.settings->enableTypedFalseCompletionNudges.has_value() ||
+        options.settings->supportsOperationNotifications.has_value() ||
+        options.settings->supportsSorbetURIs.has_value()) {
+        auto msg =
+            "Currently `highlightUntyped` is the only updateable setting using the workspace/didChangeConfiguration "
+            "notification";
+        config->logger->error(msg);
+        auto params = make_unique<ShowMessageParams>(MessageType::Warning, msg);
+        config->output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+    }
 }
 
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
