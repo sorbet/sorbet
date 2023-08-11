@@ -613,9 +613,33 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    /* Super is only checked for the following cases for now:
+     * - The receiver is a class
+     * - The super call and parent method are both in a typed: strict file
+     * - The super call is not inside a block
+     */
     if (!mayBeOverloaded.exists() && args.name == core::Names::untypedSuper()) {
         return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                               Symbols::noMethod());
+    }
+
+    if (!mayBeOverloaded.exists() && args.name == core::Names::super()) {
+        if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
+        }
+
+        // TODO: confirm 100 and true params
+        SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
+
+        if (sym.exists() && sym.isMethod()) {
+            if (sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
+                mayBeOverloaded = sym.asMethodRef();
+            } else {
+                return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                      Symbols::noMethod());
+            }
+        }
     }
 
     if (!mayBeOverloaded.exists()) {
@@ -1562,7 +1586,8 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.block,
                                           args.originForUninitialized,
                                           /* isPrivateOk */ true,
-                                          args.suppressErrors, args.enclosingMethodForSuper};
+                                          args.suppressErrors,
+                                          args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             original.main.sendTp = wrapped;
@@ -1998,7 +2023,8 @@ public:
                                args.block,
                                args.originForUninitialized,
                                /* isPrivateOk */ true,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
         if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
@@ -2310,7 +2336,8 @@ public:
                                args.block,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
@@ -2366,7 +2393,8 @@ private:
                                nullptr,
                                originForUninitialized,
                                IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                               suppressErrors, core::NameRef::noName()};
+                               suppressErrors,
+                               core::NameRef::noName()};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
@@ -2574,7 +2602,8 @@ public:
                                link,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(2), args.callLoc(),
                                           res);
@@ -2688,7 +2717,8 @@ public:
                                link,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(4), args.callLoc(),
                                           res);
@@ -2854,19 +2884,18 @@ public:
         auto recvLoc = args.locs.args[0];
         CallLocs sendLocs{args.locs.file, args.locs.call, recvLoc, args.locs.fun, sendArgLocs};
 
-        DispatchArgs innerArgs{
-            fun,
-            sendLocs,
-            numPosArgs,
-            sendArgStore,
-            selfTy.type,
-            selfTy,
-            selfTy.type,
-            args.block,
-            args.originForUninitialized,
-            args.isPrivateOk,
-            args.suppressErrors, args.enclosingMethodForSuper
-        };
+        DispatchArgs innerArgs{fun,
+                               sendLocs,
+                               numPosArgs,
+                               sendArgStore,
+                               selfTy.type,
+                               selfTy,
+                               selfTy.type,
+                               args.block,
+                               args.originForUninitialized,
+                               args.isPrivateOk,
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
         auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
 
         auto multipleComponents = dispatched.secondary != nullptr;
@@ -2881,20 +2910,10 @@ public:
             }
 
             if (unknownMethodOnNilClassErrors == 1 && !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type)) {
-                DispatchArgs newInnerArgs{
-                    fun,
-                    sendLocs,
-                    numPosArgs,
-                    sendArgStore,
-                    selfTyAndAnd.type,
-                    selfTyAndAnd,
-                    selfTyAndAnd.type,
-                    args.block,
-                    args.originForUninitialized,
-                    // We already reported one visibility error, if relevant
-                    /* isPrivateOk */ true,
-                    args.suppressErrors, args.enclosingMethodForSuper
-                };
+                DispatchArgs newInnerArgs{fun, sendLocs, numPosArgs, sendArgStore, selfTyAndAnd.type, selfTyAndAnd,
+                                          selfTyAndAnd.type, args.block, args.originForUninitialized,
+                                          // We already reported one visibility error, if relevant
+                                          /* isPrivateOk */ true, args.suppressErrors, args.enclosingMethodForSuper};
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
 
                 auto foundErrorOnRetry = false;
@@ -2977,7 +2996,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                              args.suppressErrors, args.enclosingMethodForSuper};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         auto dispatched = arg->type.dispatchCall(gs, dispatch);
 
         // The VM handles the case of an error when dispatching to_a, so the only
@@ -3388,7 +3408,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                              args.suppressErrors, args.enclosingMethodForSuper};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         res = arg->type.dispatchCall(gs, dispatch);
     }
 
@@ -3428,7 +3449,8 @@ class Magic_mergeHash : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         res = accType.dispatchCall(gs, mergeArgs);
     }
@@ -3497,7 +3519,8 @@ class Magic_mergeHashValues : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         res = accType.dispatchCall(gs, mergeArgs);
     }
@@ -3520,12 +3543,10 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     };
     auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
     baseCaseArgTypes.emplace_back(args.args[0]);
-    auto baseCaseArgs = DispatchArgs{
-        methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
-        baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
-        args.selfType,    args.block,          args.originForUninitialized,
-        args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper
-    };
+    auto baseCaseArgs = DispatchArgs{methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
+                                     baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
+                                     args.selfType,    args.block,          args.originForUninitialized,
+                                     args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper};
 
     auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
     for (auto &err : dispatched.main.errors) {
@@ -3584,19 +3605,18 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     }
     fullTypeOrigins.emplace_back(args.argLoc(0));
     auto newFullType = TypeAndOrigins{newSelfType, fullTypeOrigins};
-    DispatchArgs digArgs{
-        Names::dig(),
-        digLocs,
-        newNumPosArgs,
-        digArgTypes,
-        newSelfType,
-        newFullType,
-        newSelfType,
-        args.block,
-        args.originForUninitialized,
-        false, /* isPrivateOk */
-        args.suppressErrors, args.enclosingMethodForSuper
-    };
+    DispatchArgs digArgs{Names::dig(),
+                         digLocs,
+                         newNumPosArgs,
+                         digArgTypes,
+                         newSelfType,
+                         newFullType,
+                         newSelfType,
+                         args.block,
+                         args.originForUninitialized,
+                         false, /* isPrivateOk */
+                         args.suppressErrors,
+                         args.enclosingMethodForSuper};
 
     auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
 
@@ -3648,7 +3668,8 @@ class Array_flatten : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                               args.suppressErrors, args.enclosingMethodForSuper};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         auto dispatched = type.dispatchCall(gs, innerArgs);
         if (dispatched.main.errors.empty()) {
@@ -3958,19 +3979,18 @@ public:
             newSendArgs.emplace_back(args.args[1]);
         }
 
-        DispatchArgs newArgs{
-            Names::new_(),
-            newCallLocs,
-            newNumPosArgs,
-            newSendArgs,
-            classArg->type,
-            *classArg,
-            classArg->type,
-            /* block */ nullptr,
-            args.originForUninitialized,
-            IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-            args.suppressErrors, args.enclosingMethodForSuper
-        };
+        DispatchArgs newArgs{Names::new_(),
+                             newCallLocs,
+                             newNumPosArgs,
+                             newSendArgs,
+                             classArg->type,
+                             *classArg,
+                             classArg->type,
+                             /* block */ nullptr,
+                             args.originForUninitialized,
+                             IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
+                             args.suppressErrors,
+                             args.enclosingMethodForSuper};
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
@@ -4013,7 +4033,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               args.isPrivateOk,
-                              args.suppressErrors, args.enclosingMethodForSuper};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         auto dispatched = hash.dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
