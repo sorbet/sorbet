@@ -608,13 +608,37 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    /* Super is only checked for the following cases for now:
+     * - The receiver is a class
+     * - The super call and parent method are both in a typed: strict file
+     * - The super call is not inside a block
+     */
     if (!mayBeOverloaded.exists() && args.name == core::Names::untypedSuper()) {
         return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                               Symbols::noMethod());
     }
 
+    if (!mayBeOverloaded.exists() && args.name == core::Names::super()) {
+        if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
+        }
+
+        // TODO: confirm 100 and true params
+        SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
+
+        if (sym.exists() && sym.isMethod()) {
+            if (sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
+                mayBeOverloaded = sym.asMethodRef();
+            } else {
+                return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                      Symbols::noMethod());
+            }
+        }
+    }
+
     if (!mayBeOverloaded.exists()) {
-        if (args.name == Names::initialize()) {
+        if (args.name == Names::initialize() || (args.name == core::Names::super() && args.enclosingMethodForSuper == Names::initialize())) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
@@ -629,9 +653,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             return result;
-        } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
