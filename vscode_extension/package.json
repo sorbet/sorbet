@@ -296,7 +296,7 @@
     "test": "yarn compile && ./scripts/run_tests.sh .",
     "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
     "generate-package": "yarn install && yarn compile && yarn vsce package --out sorbet.vsix",
-    "vscode-install": "yarn generate-package && code --force --install-extension sorbet.vsix"
+    "launch": "VSCODE_SORBETEXT_LOG_LEVEL=trace code --extensionDevelopmentPath=$PWD"
   },
   "dependencies": {
     "async": "^2.6.4",
