@@ -9,4 +9,7 @@ when Hash
 when Set
   #  ^^^^^^ error: Use `Set` without any `T::` prefix to match on a stdlib generic type
 end
+
+Array.===([])
+#        ^^^ error: Use `Array` without any `T::` prefix to match on a stdlib generic type
 # ------------------------------

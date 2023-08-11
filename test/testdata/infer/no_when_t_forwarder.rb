@@ -8,3 +8,6 @@ when T::Hash
 when T::Set
   #  ^^^^^^ error: Use `Set` without any `T::` prefix to match on a stdlib generic type
 end
+
+T::Array.===([])
+#        ^^^ error: Use `Array` without any `T::` prefix to match on a stdlib generic type
