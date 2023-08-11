@@ -170,6 +170,8 @@ end
 # h.fetch("baz") #=> KeyError: key not found: "baz"
 # ```
 class KeyError < IndexError
+  sig { params(msg: T.untyped, receiver: T.untyped, key: T.untyped).void }
+  def initialize(msg = nil, receiver: nil, key: nil); end
   # Return the key caused this
   # [`KeyError`](https://docs.ruby-lang.org/en/2.7.0/KeyError.html) exception.
   def key; end

@@ -357,7 +357,7 @@ class T::Enum
     @fully_initialized = true
   end
 
-  sig {params(child_class: Module).void}
+  sig {params(child_class: T::Class[T.anything]).void}
   def self.inherited(child_class)
     super
 
