@@ -714,6 +714,22 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::Parse
     }
 }
 
+void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                              opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
+    }
+#endif
+}
+
 // packager intentionally runs outside of rewriter so that its output does not get cached.
 // TODO(jez) How much of this still needs to be outside of rewriter?
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
@@ -724,14 +740,6 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     }
 
     try {
-        {
-            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
-            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-            gs.setPackagerOptions(
-                opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
-        }
         packager::Packager::run(gs, workers, what);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
@@ -742,7 +750,7 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception resolving (backtrace is above)");
+            e.setHeader("Exception packaging (backtrace is above)");
         }
     }
 #endif

@@ -719,6 +719,7 @@ int realmain(int argc, char *argv[]) {
                 }
 
                 // First run: only the __package.rb files. This populates the packageDB
+                pipeline::setPackagerOptions(*gs, opts);
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
             }
 
