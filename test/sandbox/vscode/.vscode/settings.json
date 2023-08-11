@@ -12,5 +12,9 @@
                 "--dir=.",
             ]
         }
+    ],
+    // Sorbet will restart when any of these files change.
+    "sorbet.configFilePatterns": [
+      "../../../bazel-bin/main/sorbet",
     ]
 }
