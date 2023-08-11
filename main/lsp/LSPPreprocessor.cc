@@ -230,9 +230,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
             case LSPMethod::SorbetError:
                 return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)));
             case LSPMethod::WorkspaceDidChangeConfiguration: {
-                auto tmp = this->openFilePaths();
                 return make_unique<DidChangeConfigurationTask>(
-                    *config, move(get<unique_ptr<DidChangeConfigurationParams>>(rawParams)), move(tmp), nextVersion++);
+                    *config, move(get<unique_ptr<DidChangeConfigurationParams>>(rawParams)), this->openFilePaths(),
+                    nextVersion++);
             }
             default:
                 return make_unique<SorbetErrorTask>(
@@ -510,6 +510,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
 }
 const std::vector<std::string_view> LSPPreprocessor::openFilePaths() const {
     std::vector<std::string_view> paths;
+    paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);
     }

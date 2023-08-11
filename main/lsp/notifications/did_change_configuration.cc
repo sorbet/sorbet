@@ -5,7 +5,8 @@
 namespace sorbet::realmain::lsp {
 DidChangeConfigurationTask::DidChangeConfigurationTask(const LSPConfiguration &config,
                                                        std::unique_ptr<DidChangeConfigurationParams> params,
-                                                       std::vector<std::string_view> openFiles, uint32_t epoch)
+                                                       const std::vector<std::string_view> &openFiles,
+                                                       const uint32_t epoch)
     : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(openFiles),
       epoch(epoch) {}
 
