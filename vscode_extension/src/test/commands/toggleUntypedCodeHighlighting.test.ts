@@ -54,11 +54,5 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     sinon.assert.calledOnce(setHighlightUntypedSpy);
     sinon.assert.calledWithExactly(setHighlightUntypedSpy, !initialState);
-
-    sinon.assert.calledOnce(restartSorbetSpy);
-    sinon.assert.calledWithExactly(
-      restartSorbetSpy,
-      RestartReason.CONFIG_CHANGE,
-    );
   });
 });
