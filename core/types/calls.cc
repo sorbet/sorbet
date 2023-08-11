@@ -4143,6 +4143,32 @@ public:
     }
 } T_Enum_tripleEq;
 
+class GenericForwarder_tripleEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto forwarderSingleton = Symbols::noClassOrModule();
+        if (auto *app = cast_type<AppliedType>(args.thisType)) {
+            forwarderSingleton = app->klass;
+        } else {
+            forwarderSingleton = cast_type_nonnull<ClassType>(args.thisType).symbol;
+        }
+        auto forwarderSym = forwarderSingleton.data(gs)->attachedClass(gs);
+
+        auto funLoc = args.funLoc();
+        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+        if (auto e = gs.beginError(errLoc, core::errors::Infer::MetaTypeDispatchCall)) {
+            auto realSym = forwarderSym.maybeUnwrapBuiltinGenericForwarder();
+            ENFORCE(realSym.exists());
+            auto realStr = realSym.show(gs);
+            e.setHeader("Use `{}` without any `{}` prefix to match on a stdlib generic type", realStr, "T::");
+            auto receiverLoc = args.receiverLoc();
+            if (receiverLoc.exists()) {
+                e.replaceWith(fmt::format("Replace with {}", realStr), receiverLoc, "{}", realStr);
+            }
+        }
+    }
+} GenericForwarder_tripleEq;
+
 const vector<Intrinsic> intrinsics{
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::untyped(), &T_untyped},
     {Symbols::T(), Intrinsic::Kind::Singleton, Names::must(), &T_must},
@@ -4238,6 +4264,16 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
     {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
+
+    {Symbols::T_Array(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Hash(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Enumerable(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Enumerator(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Enumerator_Lazy(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Enumerator_Chain(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
+    {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::tripleEq(), &GenericForwarder_tripleEq},
 };
 
 UnorderedMap<NameRef, const vector<NameRef>> computeIntrinsicsDispatchMap() {
