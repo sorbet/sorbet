@@ -412,6 +412,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("check-out-of-order-constant-references",
                                     "Enable out-of-order constant reference checks (error 5027)");
     options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output");
+    options.add_options("advanced")("enable-typed-false-completion-nudges",
+                                    "Enable auto-completion nudges in `typed: false` files");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
@@ -735,6 +737,7 @@ void readOptions(Options &opts,
             (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
         opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
         opts.trackUntyped = raw["track-untyped"].as<bool>();
+        opts.enableTypedFalseCompletionNudges = raw["enable-typed-false-completion-nudges"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
