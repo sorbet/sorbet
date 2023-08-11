@@ -361,6 +361,7 @@ NameDef names[] = {
     {"present_p", "present?"},
     {"nil"},
     {"super", "<super>"},
+    {"untypedSuper", "<untypedSuper>"},
     {"empty", ""},
 
     {"buildHash", "<build-hash>"},

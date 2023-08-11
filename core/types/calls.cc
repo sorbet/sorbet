@@ -608,6 +608,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    if (!mayBeOverloaded.exists() && args.name == core::Names::untypedSuper()) {
+        return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                              Symbols::noMethod());
+    }
+
     if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
