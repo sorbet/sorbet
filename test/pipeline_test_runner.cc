@@ -787,6 +787,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
     if (enablePackager) {
+        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {
