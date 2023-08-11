@@ -745,6 +745,32 @@ MethodRef ClassOrModule::findConcreteMethodTransitive(const GlobalState &gs, Nam
     return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
 }
 
+SymbolRef ClassOrModule::findMemberTransitiveAncestors(const GlobalState &gs, NameRef name, int maxDepth,
+                                                       bool dealias) const {
+    SymbolRef result;
+    if (flags.isLinearizationComputed) {
+        for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
+            ENFORCE(it->exists());
+            result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
+            if (result.exists()) {
+                return result;
+            }
+        }
+    } else {
+        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
+            ENFORCE(it->exists());
+            result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
+            if (result.exists()) {
+                return result;
+            }
+        }
+    }
+    if (this->superClass().exists()) {
+        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
+    }
+    return Symbols::noSymbol();
+}
+
 SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth,
                                                       bool dealias) const {
     if (maxDepth == 0) {
@@ -774,28 +800,8 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
     if (result.exists()) {
         return result;
     }
-    if (flags.isLinearizationComputed) {
-        for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
-            ENFORCE(it->exists());
-            result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
-            if (result.exists()) {
-                return result;
-            }
-            result = core::Symbols::noSymbol();
-        }
-    } else {
-        for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
-            ENFORCE(it->exists());
-            result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
-            if (result.exists()) {
-                return result;
-            }
-        }
-    }
-    if (this->superClass().exists()) {
-        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
-    }
-    return Symbols::noSymbol();
+
+    return findMemberTransitiveAncestors(gs, name, maxDepth, dealias);
 }
 
 vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
