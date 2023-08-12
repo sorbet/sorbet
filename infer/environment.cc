@@ -917,7 +917,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
 }
 
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
-                          core::NameRef fun, const core::Loc &loc) {
+                          core::NameRef fun, const core::Loc &loc, const core::NameRef currentMethodName) {
     if (fun != core::Names::flatMap()) {
         return returnType;
     }
@@ -945,7 +945,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     };
 
     core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
-                                    recvType.type,          nullptr, loc, true, false,         core::NameRef::noName()};
+                                    recvType.type,          nullptr, loc, true, false,         currentMethodName};
 
     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
     if (dispatched.main.errors.empty()) {
@@ -1250,7 +1250,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     type = i.link->result->returnType;
                 }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc);
+                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
             },
@@ -1397,7 +1397,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
                                                     suppressErrors,
-                                                    core::NameRef::noName()};
+                                                    inWhat.symbol.data(ctx)->name};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
                 }

@@ -52,7 +52,8 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
 
 void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, cfg::Send *snd,
                                   const UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals,
-                                  UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements) {
+                                  UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements,
+                                  const core::NameRef currentMethodName) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
     InlinedVector<const core::TypeAndOrigins *, 2> args;
 
@@ -88,7 +89,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     originForUninitialized,
                                     snd->isPrivateOk,
                                     suppressErrors,
-                                    core::NameRef::noName()};
+                                    currentMethodName};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
     // See if we can learn what types should they have
@@ -207,7 +208,9 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
                 }
 
                 if (shouldFindArgumentTypes) {
-                    extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements);
+                    auto currentMethodName = cfg->symbol.data(ctx)->name;
+                    extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements,
+                                                 currentMethodName);
                 }
             }
 
