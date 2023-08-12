@@ -10,6 +10,6 @@ end
 class A
   def foo
     self.y # error: does not exist
-    #     ^ completion: yield_self, ...
+    #     ^ completion: initialize_copy, yield_self, ...
   end
 end

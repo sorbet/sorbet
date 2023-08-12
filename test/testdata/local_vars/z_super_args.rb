@@ -70,3 +70,9 @@ class Child < Parent
     end
   end
 end
+
+module M
+  def super_inside_module
+    super
+  end
+end
