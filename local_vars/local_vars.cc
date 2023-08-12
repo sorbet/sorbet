@@ -357,6 +357,7 @@ class LocalNameInserter {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
+            // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
             original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
             original.addPosArg(std::move(method));
 
