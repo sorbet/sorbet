@@ -87,7 +87,8 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->link,
                                     originForUninitialized,
                                     snd->isPrivateOk,
-                                    suppressErrors, core::NameRef::noName()};
+                                    suppressErrors,
+                                    core::NameRef::noName()};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
     // See if we can learn what types should they have
