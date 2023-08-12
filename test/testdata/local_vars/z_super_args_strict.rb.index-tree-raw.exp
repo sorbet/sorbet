@@ -1,0 +1,1392 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U Parent>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [ConstantLit{
+          symbol = (class ::<todo sym>)
+          orig = nullptr
+        }]
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_positional><<U <todo method>>>
+          args = [Local{
+              localVariable = <U arg0>
+            }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U p>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U arg0>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_keyword><<U <todo method>>>
+          args = [KeywordArg{ expr = Local{
+              localVariable = <U arg0>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U p>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U arg0>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                  Literal{ value = :arg1 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_two_keyword><<U <todo method>>>
+          args = [KeywordArg{ expr = Local{
+              localVariable = <U arg0>
+            } }, KeywordArg{ expr = Local{
+              localVariable = <U arg1>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = InsSeq{
+            stats = [
+              Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U p>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Local{
+                    localVariable = <U arg0>
+                  }
+                ]
+              }
+            ],
+            expr = Send{
+              flags = {privateOk}
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U p>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Local{
+                  localVariable = <U arg1>
+                }
+              ]
+            }
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                  Literal{ value = :arg1 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_positional_then_keyword><<U <todo method>>>
+          args = [Local{
+              localVariable = <U arg0>
+            }, KeywordArg{ expr = Local{
+              localVariable = <U arg1>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = InsSeq{
+            stats = [
+              Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U p>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Local{
+                    localVariable = <U arg0>
+                  }
+                ]
+              }
+            ],
+            expr = Send{
+              flags = {privateOk}
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U p>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Local{
+                  localVariable = <U arg1>
+                }
+              ]
+            }
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :args }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_rest><<U <todo method>>>
+          args = [RestArg{ expr = Local{
+              localVariable = <U args>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U p>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U args>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :args }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_keyword_rest><<U <todo method>>>
+          args = [RestArg{ expr = KeywordArg{ expr = Local{
+              localVariable = <U args>
+            } } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U p>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U args>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :blk }
+                  Send{
+                    flags = {}
+                    recv = Send{
+                      flags = {}
+                      recv = UnresolvedConstantLit{
+                        cnst = <C <U T>>
+                        scope = EmptyTree
+                      }
+                      fun = <U proc>
+                      block = nullptr
+                      pos_args = 0
+                      args = [
+                      ]
+                    }
+                    fun = <U void>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U blk>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U p>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U blk>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {privateOk}
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U zsuper_inside_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = EmptyTree
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        <runtime method definition of takes_positional>
+
+        <runtime method definition of takes_keyword>
+
+        <runtime method definition of takes_two_keyword>
+
+        <runtime method definition of takes_positional_then_keyword>
+
+        <runtime method definition of takes_rest>
+
+        <runtime method definition of takes_keyword_rest>
+
+        <runtime method definition of takes_block>
+
+        <runtime method definition of zsuper_inside_block>
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
+        cnst = <C <U Child>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = [UnresolvedConstantLit{
+          cnst = <C <U Parent>>
+          scope = EmptyTree
+        }]
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_positional><<U <todo method>>>
+          args = [Local{
+              localVariable = <U arg0>
+            }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U arg0>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_keyword><<U <todo method>>>
+          args = [KeywordArg{ expr = Local{
+              localVariable = <U arg0>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 0
+            args = [
+              Literal{ value = :arg0 }
+              Local{
+                localVariable = <U arg0>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                  Literal{ value = :arg1 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_two_keyword><<U <todo method>>>
+          args = [KeywordArg{ expr = Local{
+              localVariable = <U arg0>
+            } }, KeywordArg{ expr = Local{
+              localVariable = <U arg1>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 0
+            args = [
+              Literal{ value = :arg0 }
+              Local{
+                localVariable = <U arg0>
+              }
+              Literal{ value = :arg1 }
+              Local{
+                localVariable = <U arg1>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                  Literal{ value = :arg1 }
+                  UnresolvedConstantLit{
+                    cnst = <C <U Integer>>
+                    scope = EmptyTree
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_positional_then_keyword><<U <todo method>>>
+          args = [Local{
+              localVariable = <U arg0>
+            }, KeywordArg{ expr = Local{
+              localVariable = <U arg1>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Local{
+                localVariable = <U arg0>
+              }
+              Literal{ value = :arg1 }
+              Local{
+                localVariable = <U arg1>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :args }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_rest><<U <todo method>>>
+          args = [RestArg{ expr = Local{
+              localVariable = <U args>
+            } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <call-with-splat>>
+            block = nullptr
+            pos_args = 4
+            args = [
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (module ::T)
+                  orig = nullptr
+                }
+                fun = <U unsafe>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                ]
+              }
+              Literal{ value = :<super> }
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <splat>>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Local{
+                    localVariable = <U args>
+                  }
+                ]
+              }
+              Literal{ value = nil }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :args }
+                  Send{
+                    flags = {}
+                    recv = UnresolvedConstantLit{
+                      cnst = <C <U T>>
+                      scope = EmptyTree
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_keyword_rest><<U <todo method>>>
+          args = [RestArg{ expr = KeywordArg{ expr = Local{
+              localVariable = <U args>
+            } } }, BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <super>>
+            block = nullptr
+            pos_args = 0
+            args = [
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <to-hash-dup>>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Local{
+                    localVariable = <U args>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :blk }
+                  Send{
+                    flags = {}
+                    recv = Send{
+                      flags = {}
+                      recv = UnresolvedConstantLit{
+                        cnst = <C <U T>>
+                        scope = EmptyTree
+                      }
+                      fun = <U proc>
+                      block = nullptr
+                      pos_args = 0
+                      args = [
+                      ]
+                    }
+                    fun = <U void>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U takes_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U blk>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <call-with-block>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U blk>
+              }
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {privateOk}
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U zsuper_inside_block><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {}
+            recv = Literal{ value = 1 }
+            fun = <U times>
+            block = Block {
+              args = [
+                Local{
+                  localVariable = <U i>$1
+                }
+              ]
+              body = Send{
+                flags = {privateOk}
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U <untypedSuper>>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        <runtime method definition of takes_positional>
+
+        <runtime method definition of takes_keyword>
+
+        <runtime method definition of takes_two_keyword>
+
+        <runtime method definition of takes_positional_then_keyword>
+
+        <runtime method definition of takes_rest>
+
+        <runtime method definition of takes_keyword_rest>
+
+        <runtime method definition of takes_block>
+
+        <runtime method definition of zsuper_inside_block>
+      ]
+    }
+
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U M>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        Send{
+          flags = {privateOk}
+          recv = ConstantLit{
+            symbol = (module ::Sorbet::Private::Static)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              flags = {privateOk}
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U void>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {}
+          name = <U super_inside_module><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = Local{
+              localVariable = <U <self>>
+            }
+            fun = <U <untypedSuper>>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        <runtime method definition of super_inside_module>
+      ]
+    }
+  ]
+}
