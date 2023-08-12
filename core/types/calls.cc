@@ -667,13 +667,22 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            if (args.fullType.type != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                            args.fullType.type.show(gs));
+            if (args.name == Names::super()) {
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}` component of `{}`", args.enclosingMethodForSuper.show(gs), thisStr,
+                                args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}`", args.enclosingMethodForSuper.show(gs), thisStr);
+                }
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
+                if (args.fullType.type != args.thisType) {
+                    e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                                args.fullType.type.show(gs));
+                } else {
+                    e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
+                }
+                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized)); // TODO: version of this in the super case?
             }
-            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
             // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
             // suggest adding `extend T::Helpers`.
@@ -720,6 +729,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
+                // TODO: special case super for suggestions
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
                 for (auto alternative : alternatives) {
                     auto possibleSymbol = alternative.symbol;
