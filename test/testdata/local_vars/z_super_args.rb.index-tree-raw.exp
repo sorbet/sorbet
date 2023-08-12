@@ -563,7 +563,7 @@ ClassDef{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :<super> }
+                  Literal{ value = :<untypedSuper> }
                   Local{
                     localVariable = <U <blk>>
                   }
@@ -591,6 +591,46 @@ ClassDef{
         <runtime method definition of takes_block>
 
         <runtime method definition of zsuper_inside_block>
+      ]
+    }
+
+    ClassDef{
+      kind = module
+      name = UnresolvedConstantLit{
+        cnst = <C <U M>>
+        scope = EmptyTree
+      }
+      symbol = <C <U <todo sym>>>
+      ancestors = []
+      rhs = [
+        MethodDef{
+          flags = {}
+          name = <U super_inside_module><<U <todo method>>>
+          args = [BlockArg{ expr = Local{
+              localVariable = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {privateOk}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <call-with-block>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<untypedSuper> }
+              Local{
+                localVariable = <U <blk>>
+              }
+            ]
+          }
+        }
+
+        <runtime method definition of super_inside_module>
       ]
     }
   ]

@@ -56,25 +56,6 @@ when "y"
   "y"
 end
 
-# use of super
-class Base
-  extend T::Sig
-
-  sig { overridable.returns(String) }
-  def foo
-    "foo"
-  end
-end
-
-class Derived < Base
-  extend T::Sig
-  sig { override.returns(String) }
-  def foo
-    super
-#   ^^^^^ error: Value returned from method is `T.untyped`
-  end
-end
-
 # untyped varargs
 sig { params(args: T.untyped).void }
 def args_fn(*args)
