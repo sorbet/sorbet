@@ -921,7 +921,7 @@ private:
         auto reindentedMethodDefinition = absl::StrJoin(reindentedMethodDefinitionLines, "\n");
 
         return core::AutocorrectSuggestion{
-            fmt::format("Define `{}`", abstractMethodRef.show(gs)),
+            fmt::format("Define `{}`", abstractMethodRef.data(gs)->name.show(gs)),
             {core::AutocorrectSuggestion::Edit(
                 {classOrModuleDefLoc.copyEndWithZeroLength(), fmt::format("\n{}", reindentedMethodDefinition)})}};
     }
