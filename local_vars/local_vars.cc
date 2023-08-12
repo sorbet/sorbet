@@ -298,31 +298,30 @@ class LocalNameInserter {
 
                 posArgsArray = ast::MK::Splat(arg.loc, ast::make_expression<ast::Local>(arg.loc, arg.arg));
                 if (!posArgsEntries.empty()) {
-                    posArgsArray = ast::MK::Send1(arg.loc, ast::MK::Array(arg.loc, std::move(posArgsEntries)),
-                                                  core::Names::concat(), arg.loc.copyWithZeroLength(),
-                                                  std::move(posArgsArray));
+                    posArgsArray =
+                        ast::MK::Send1(arg.loc, ast::MK::Array(arg.loc, std::move(posArgsEntries)),
+                                       core::Names::concat(), arg.loc.copyWithZeroLength(), std::move(posArgsArray));
                     posArgsEntries.clear();
                 }
             } else if (arg.flags.isKeyword()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
 
                 auto name = arg.arg._name;
-                kwArgKeyEntries.emplace_back(ast::MK::Literal(
-                    arg.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
+                kwArgKeyEntries.emplace_back(
+                    ast::MK::Literal(arg.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
                 kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(arg.loc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
-                kwArgsHash = ast::MK::Send1(arg.loc, ast::MK::Magic(arg.loc), core::Names::toHashDup(),
-                                            arg.loc.copyWithZeroLength(),
-                                            ast::make_expression<ast::Local>(arg.loc, arg.arg));
+                kwArgsHash =
+                    ast::MK::Send1(arg.loc, ast::MK::Magic(arg.loc), core::Names::toHashDup(),
+                                   arg.loc.copyWithZeroLength(), ast::make_expression<ast::Local>(arg.loc, arg.arg));
                 if (!kwArgKeyEntries.empty()) {
                     // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
                     // <Magic>::<merge-hash>, which is what's done in the desugarer.
                     kwArgsHash = ast::MK::Send1(
-                        arg.loc,
-                        ast::MK::Hash(arg.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
+                        arg.loc, ast::MK::Hash(arg.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
                         core::Names::merge(), arg.loc.copyWithZeroLength(), std::move(kwArgsHash));
                     kwArgKeyEntries.clear();
                     kwArgValueEntries.clear();
@@ -348,10 +347,11 @@ class LocalNameInserter {
             posArgsEntries.clear();
         }
 
-        auto method = ast::MK::Literal(
-            original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
+        auto method = ast::MK::Literal(original.loc,
+                                       core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
-        auto shouldForwardBlockArg = blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
+        auto shouldForwardBlockArg =
+            blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
@@ -509,8 +509,7 @@ public:
         if (scopeStack.back().insideBlock || scopeStack.back().insideModule) {
             newMethodName = core::Names::untypedSuper();
         }
-        if (original.fun == core::Names::callWithBlock() ||
-            original.fun == core::Names::callWithSplat() ||
+        if (original.fun == core::Names::callWithBlock() || original.fun == core::Names::callWithSplat() ||
             original.fun == core::Names::callWithSplatAndBlock()) {
             ENFORCE(ast::isa_tree<ast::Literal>(original.getPosArg(1)));
             auto literal = ast::cast_tree_nonnull<ast::Literal>(original.getPosArg(1));

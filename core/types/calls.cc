@@ -658,10 +658,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             string thisStr = args.thisType.show(gs);
             if (args.name == Names::super()) {
                 if (args.fullType.type != args.thisType) {
-                    e.setHeader("Method `{}` does not exist on ancestors of `{}` component of `{}`", args.enclosingMethodForSuper.show(gs), thisStr,
-                                args.fullType.type.show(gs));
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}` component of `{}`",
+                                args.enclosingMethodForSuper.show(gs), thisStr, args.fullType.type.show(gs));
                 } else {
-                    e.setHeader("Method `{}` does not exist on ancestors of `{}`", args.enclosingMethodForSuper.show(gs), thisStr);
+                    e.setHeader("Method `{}` does not exist on ancestors of `{}`",
+                                args.enclosingMethodForSuper.show(gs), thisStr);
                 }
             } else {
                 if (args.fullType.type != args.thisType) {
@@ -670,7 +671,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 } else {
                     e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
                 }
-                e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized)); // TODO: version of this in the super case?
+                e.addErrorSection(args.fullType.explainGot(
+                    gs, args.originForUninitialized)); // TODO: version of this in the super case?
             }
 
             // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and

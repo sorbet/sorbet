@@ -1396,7 +1396,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     block,
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
-                                                    suppressErrors, core::NameRef::noName()};
+                                                    suppressErrors,
+                                                    core::NameRef::noName()};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
                 }
