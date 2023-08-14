@@ -401,6 +401,7 @@ public:
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             lit.symbol.show(ctx));
             }
+            return;
         }
 
         auto &db = ctx.state.packageDB();
