@@ -456,7 +456,7 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest();
+                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
                 if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
                     e.addAutocorrect(std::move(exp.value()));
