@@ -211,6 +211,7 @@ export class SorbetExtensionConfig implements Disposable {
   private wrappedEnabled: boolean;
   private wrappedHighlightUntyped: boolean;
   private wrappedRevealOutputOnError: boolean;
+  private wrappedEnableTypedFalseCompletionNudges: boolean;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
     this.configFilePatterns = [];
@@ -223,6 +224,7 @@ export class SorbetExtensionConfig implements Disposable {
     this.userLspConfigs = [];
     this.wrappedHighlightUntyped = false;
     this.wrappedRevealOutputOnError = false;
+    this.wrappedEnableTypedFalseCompletionNudges = true;
 
     const workspaceFolders = this.sorbetWorkspaceContext.workspaceFolders();
     this.wrappedEnabled = workspaceFolders?.length
@@ -273,6 +275,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedHighlightUntyped = this.sorbetWorkspaceContext.get(
       "highlightUntyped",
       this.highlightUntyped,
+    );
+    this.wrappedEnableTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
+      "enableTypedFalseCompletionNudges",
+      this.enableTypedFalseCompletionNudges,
     );
 
     Disposable.from(...this.configFileWatchers).dispose();
@@ -399,6 +405,10 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedEnabled;
   }
 
+  public get enableTypedFalseCompletionNudges(): boolean {
+    return this.wrappedEnableTypedFalseCompletionNudges;
+  }
+
   public async setEnabled(b: boolean): Promise<void> {
     await this.sorbetWorkspaceContext.update("enabled", b);
     this.refresh();
@@ -406,6 +416,14 @@ export class SorbetExtensionConfig implements Disposable {
 
   public async setHighlightUntyped(b: boolean): Promise<void> {
     await this.sorbetWorkspaceContext.update("highlightUntyped", b);
+    this.refresh();
+  }
+
+  public async setEnableTypedFalseCompletionNudges(b: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update(
+      "enableTypedFalseCompletionNudges",
+      b,
+    );
     this.refresh();
   }
 }

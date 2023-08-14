@@ -258,6 +258,11 @@
           "description": "Shows warning for untyped values.",
           "default": false
         },
+        "sorbet.enableTypedFalseCompletionNudges": {
+          "type": "boolean",
+          "description": "Enable \"file is not `#typed: true` or higher\" completion nudges",
+          "default": true
+        },
         "sorbet.configFilePatterns": {
           "type": "array",
           "description": "List of workspace file patterns that contribute to Sorbet's configuration.  Changes to any of those files should trigger a restart of any actively running Sorbet language server.",
