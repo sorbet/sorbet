@@ -3,7 +3,8 @@
 ints = T::Array[Integer].new
 strings = T::Array[String].new
 
-ints + strings
+x = ints + strings
+T.reveal_type(x)
 
 ints + (strings)
 ints + ((strings))

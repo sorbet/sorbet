@@ -1,196 +1,23 @@
-autocorrect_array_plus.rb:6: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-     6 |ints + strings
-               ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:6: Replaced with `.concat(strings)`
-     6 |ints + strings
-            ^^^^^^^^^^
-
-autocorrect_array_plus.rb:8: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-     8 |ints + (strings)
-                ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:8: Replaced with `.concat(strings)`
-     8 |ints + (strings)
-            ^^^^^^^^^^^^
-
-autocorrect_array_plus.rb:9: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-     9 |ints + ((strings))
-                 ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:9: Replaced with `.concat(strings)`
-     9 |ints + ((strings))
+autocorrect_array_plus.rb:7: Revealed type: `T::Array[T.any(Integer, String)]` https://srb.help/7014
+     7 |T.reveal_type(x)
+        ^^^^^^^^^^^^^^^^
+  Got `T::Array[T.any(Integer, String)]` originating from:
+    autocorrect_array_plus.rb:6:
+     6 |x = ints + strings
             ^^^^^^^^^^^^^^
 
-autocorrect_array_plus.rb:10: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    10 |ints.+(strings)
-               ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:10: Replaced with `.concat(strings)`
-    10 |ints.+(strings)
-            ^^^^^^^^^^^
-
-autocorrect_array_plus.rb:13: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    13 |  strings
-          ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:12: Replaced with `.concat(strings)`
-    12 |ints.+(
-    13 |  strings
-    14 |)
-
-autocorrect_array_plus.rb:16: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    16 |ints + strings
-               ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:16: Replaced with `.concat(strings)`
-    16 |ints + strings
-            ^^^^^^^^^^
-
-autocorrect_array_plus.rb:18: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    18 |ints += strings
-                ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:18: Replaced with `= ints.concat(strings)`
-    18 |ints += strings
-            ^^^^^^^^^^^
-
-autocorrect_array_plus.rb:19: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    19 |ints += strings
-                ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:19: Replaced with `= ints.concat(strings)`
-    19 |ints += strings
-            ^^^^^^^^^^^
-
-autocorrect_array_plus.rb:20: Expected `T::Enumerable[Integer]` but found `T::Array[String]` for argument `arg0` https://srb.help/7002
-    20 |ints += strings
-                ^^^^^^^
-  Expected `T::Enumerable[Integer]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `T::Array[String]` originating from:
-    autocorrect_array_plus.rb:4:
-     4 |strings = T::Array[String].new
-                  ^^^^^^^^^^^^^^^^^^^^
-  Note:
-    If the desired behavior is to widen the type to `T::Array[T.any(Integer, String)]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:20: Replaced with `= ints.concat(strings)`
-    20 |ints += strings
-            ^^^^^^^^^^^
-
-autocorrect_array_plus.rb:22: Expected `T::Enumerable[{String("foo") => String("bar")}]` but found `[{}]` for argument `arg0` https://srb.help/7002
-    22 |[{"foo" => "bar"}] + [{}]
-                             ^^^^
-  Expected `T::Enumerable[{String("foo") => String("bar")}]` for argument `arg0` of method `Array#+`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
-                  ^^^^
-  Got `[{}] (1-tuple)` originating from:
-    autocorrect_array_plus.rb:22:
-    22 |[{"foo" => "bar"}] + [{}]
-                             ^^^^
-  Note:
-    If the desired behavior is to widen the type to `[{String("foo") => String("bar")}, {}]`, use `Array#concat` instead
-  Autocorrect: Done
-    autocorrect_array_plus.rb:22: Replaced with `.concat([{}])`
-    22 |[{"foo" => "bar"}] + [{}]
-                          ^^^^^^^
-
-autocorrect_array_plus.rb:24: Expected `T::Enumerable[String]` but found `String("")` for argument `arg0` https://srb.help/7002
-    24 |strings + ""
+autocorrect_array_plus.rb:25: Expected `T::Enumerable[T.type_parameter(:T)]` but found `String("")` for argument `arg0` https://srb.help/7002
+    25 |strings + ""
                   ^^
-  Expected `T::Enumerable[String]` for argument `arg0` of method `Array#+`:
+  Expected `T::Enumerable[T.type_parameter(:T)]` for argument `arg0` of method `Array#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi#LCENSORED:
-      NN |        arg0: T::Enumerable[Elem],
+      NN |        arg0: T::Enumerable[T.type_parameter(:T)],
                   ^^^^
   Got `String("")` originating from:
-    autocorrect_array_plus.rb:24:
-    24 |strings + ""
+    autocorrect_array_plus.rb:25:
+    25 |strings + ""
                   ^^
-Errors: 11
+Errors: 2
 
 --------------------------------------------------------------------------
 
@@ -199,20 +26,23 @@ Errors: 11
 ints = T::Array[Integer].new
 strings = T::Array[String].new
 
-ints.concat(strings)
+x = ints + strings
+T.reveal_type(x)
 
-ints.concat(strings)
-ints.concat(strings)
-ints.concat(strings)
+ints + (strings)
+ints + ((strings))
+ints.+(strings)
 
-ints.concat(strings)
+ints.+(
+  strings
+)
 
-ints.concat(strings)
+ints + strings
 
-ints = ints.concat(strings)
-ints = ints.concat(strings)
-ints = ints.concat(strings)
+ints += strings
+ints += strings
+ints += strings
 
-[{"foo" => "bar"}].concat([{}])
+[{"foo" => "bar"}] + [{}]
 
 strings + ""

@@ -484,7 +484,7 @@ module Opus::Types::Test
             if signature.on_failure
               T::Configuration.soft_assert_handler(
                 "TypeError: #{opts[:pretty_message]}",
-                {notify: signature.on_failure[1][:notify]}
+                notify: signature.on_failure[1][:notify]
               )
             else
               raise 'test failed'

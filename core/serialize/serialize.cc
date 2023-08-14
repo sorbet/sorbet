@@ -418,7 +418,10 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
     switch (what.tag()) {
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::UnresolvedClassType:
-        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::BlamedUntyped: {
+            p.putU4(what.untypedBlame().rawId());
+            break;
+        }
         case TypePtr::Tag::ClassType: {
             auto c = cast_type_nonnull<ClassType>(what);
             p.putU4(c.symbol.id());
@@ -521,7 +524,10 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 
     switch (static_cast<TypePtr::Tag>(tag)) {
-        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::BlamedUntyped: {
+            SymbolRef blame = SymbolRef::fromRaw(p.getU4());
+            return make_type<BlamedUntyped>(blame);
+        }
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::ClassType:
@@ -879,8 +885,8 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
 
     result.putU4(gs.namesByHash.size());
     for (const auto &s : gs.namesByHash) {
-        result.putU4(s.first);
-        result.putU4(s.second);
+        result.putU4(s.hash);
+        result.putU4(s.rawId);
     }
     return result;
 }
@@ -919,7 +925,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     typeArguments.clear();
     vector<TypeParameter> typeMembers(std::move(result.typeMembers));
     typeMembers.clear();
-    vector<pair<unsigned int, unsigned int>> namesByHash(std::move(result.namesByHash));
+    vector<GlobalState::Bucket> namesByHash(std::move(result.namesByHash));
     namesByHash.clear();
     {
         Timer timeit(result.tracer(), "readFiles");
@@ -1004,7 +1010,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         for (int i = 0; i < namesByHashSize; i++) {
             auto hash = p.getU4();
             auto value = p.getU4();
-            namesByHash.emplace_back(make_pair(hash, value));
+            namesByHash.emplace_back(GlobalState::Bucket{hash, value});
         }
     }
 

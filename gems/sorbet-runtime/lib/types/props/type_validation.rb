@@ -16,6 +16,7 @@ module T::Props::TypeValidation
       super || key == :DEPRECATED_underspecified_type
     end
 
+    # checked(:never) - Rules hash is expensive to check
     sig do
       params(
         name: T.any(Symbol, String),
@@ -24,12 +25,13 @@ module T::Props::TypeValidation
         type: T.any(T::Types::Base, Module)
       )
       .void
+      .checked(:never)
     end
     def prop_validate_definition!(name, _cls, rules, type)
       super
 
       if !rules[:DEPRECATED_underspecified_type]
-        validate_type(type, field_name: name)
+        validate_type(type, name)
       elsif rules[:DEPRECATED_underspecified_type] && find_invalid_subtype(type).nil?
         raise ArgumentError.new("DEPRECATED_underspecified_type set unnecessarily for #{@class.name}.#{name} - #{type} is a valid type")
       end
@@ -41,8 +43,9 @@ module T::Props::TypeValidation
         field_name: T.any(Symbol, String),
       )
       .void
+      .checked(:never)
     end
-    private def validate_type(type, field_name:)
+    private def validate_type(type, field_name)
       if (invalid_subtype = find_invalid_subtype(type))
         raise UnderspecifiedType.new(type_error_message(invalid_subtype, field_name, type))
       end

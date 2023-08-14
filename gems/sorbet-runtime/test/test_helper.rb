@@ -17,9 +17,9 @@ require_relative '../lib/sorbet-runtime'
 
 module Critic; end
 module Critic::Unit; end
-module MiniTest; end
-class MiniTest::Spec; end
-class Critic::Unit::UnitTest < MiniTest::Spec; end
+module Minitest; end
+class Minitest::Spec; end
+class Critic::Unit::UnitTest < Minitest::Spec; end
 module Critic::Extensions; end
 module Critic::Extensions::TypeExt
   def self.unpatch_types; end

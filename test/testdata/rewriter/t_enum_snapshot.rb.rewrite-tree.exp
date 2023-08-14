@@ -1,5 +1,13 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C MyEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def serialize<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()
@@ -20,13 +28,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         nil
       end
     end
+
+    <self>.public()
+
+    <runtime method definition of serialize>
   end
 
   class <emptyTree>::<C NotAnEnum><<C <todo sym>>> < (::<todo sym>)
     <self>.enums() do ||
       begin
-        <emptyTree>::<C X> = ::<Magic>.<self-new>(<self>)
-        <emptyTree>::<C Y> = <cast:let>(::<Magic>.<self-new>(<self>), <todo sym>, <self>)
+        <emptyTree>::<C X> = <self>.new()
+        <emptyTree>::<C Y> = <cast:let>(<self>.new(), <todo sym>, <self>)
       end
     end
   end
@@ -34,6 +46,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
     def something_outside<<todo method>>(&<blk>)
       <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def serialize<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.extend(::T::Helpers)
@@ -58,9 +78,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <runtime method definition of something_outside>
+
+    <self>.public()
+
+    <runtime method definition of serialize>
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::String)
+    end
+
+    def serialize<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.extend(::T::Helpers)
 
     <self>.abstract!()
@@ -92,5 +124,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C StaticField3> = 3
 
     <emptyTree>::<C StaticField4> = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+
+    <self>.public()
+
+    <runtime method definition of serialize>
   end
 end

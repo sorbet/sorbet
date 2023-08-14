@@ -4,7 +4,6 @@
 module T::Types
   # The bottom type
   class NoReturn < Base
-
     def initialize; end
 
     # overrides Base

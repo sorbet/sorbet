@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/lsp/QueryResponse.h"
 #include <optional>
 
@@ -10,51 +11,6 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
-
-bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
-    ENFORCE(enclosingClass.exists());
-    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
-    ENFORCE(enclosingSingletonClass.exists());
-    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
-}
-
-optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
-    auto method = methodSymbol.data(ctx);
-
-    auto enclosingClass = methodSymbol.enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
-    if (extendsTSig(ctx, enclosingClass)) {
-        // No need to suggest here, because it already has 'extend T::Sig'
-        return nullopt;
-    }
-
-    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == method->loc().file(); };
-    auto &classLocs = enclosingClass.data(ctx)->locs();
-    auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
-
-    if (classLoc == classLocs.end()) {
-        // Couldn't a loc for the enclosing class in this file, give up.
-        // An alternative heuristic here might be "found a file that we can write to"
-        return nullopt;
-    }
-
-    auto [classStart, classEnd] = classLoc->position(ctx);
-
-    core::Loc::Detail thisLineStart = {classStart.line, 1};
-    auto thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
-    ENFORCE(thisLineLoc.has_value());
-    auto [_, thisLinePadding] = thisLineLoc.value().findStartOfLine(ctx);
-
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
-    if (!nextLineLoc.has_value()) {
-        return nullopt;
-    }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfLine(ctx);
-
-    // Preserve the indentation of the line below us.
-    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Sig\n", prefix)};
-}
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                              optional<core::NameRef> keyword, int argId) {
@@ -362,7 +318,13 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     core::TypePtr guessedReturnType;
-    if (!constr.isEmpty()) {
+    if (ctx.file.data(ctx).isRBI()) {
+        // We will always infer a return type of `NilClass` in an RBI file, because all RBI files
+        // have empty bodies. That's not useful--we'd rather infer `T.untyped` so that LSP
+        // replaces it with a tabstop the user can cycle through.
+        guessedReturnType = core::Types::untypedUntracked();
+
+    } else if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
             return nullopt;
         }
@@ -474,7 +436,11 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         }
         fmt::format_to(std::back_inserter(ss), ").");
     }
-    if (!guessedSomethingUseful) {
+    if (!guessedSomethingUseful && !ctx.state.suggestUnsafe.has_value()) {
+        // We don't want to condition people to start inserting a bunch of useless signatures filled
+        // with `T.untyped`, unless they've explicitly opted into the behavior with
+        // `--suggest-unsafe` (which usually suggests that they're doing some sort of codemod and
+        // they know what they're asking for).
         return nullopt;
     }
 
@@ -485,7 +451,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");
     } else {
-        fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx));
+        auto options = core::ShowOptions().withShowForRBI();
+        fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx, options));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);
@@ -511,8 +478,15 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             ctx, core::lsp::EditResponse(replacementLoc, std::move(replacementContents)));
     }
 
-    if (auto edit = maybeSuggestExtendTSig(ctx, methodSymbol)) {
-        edits.emplace_back(edit.value());
+    auto topAttachedClass = enclosingClass.data(ctx)->topAttachedClass(ctx);
+    if (auto edit = core::TypeErrorDiagnostics::editForDSLMethod(ctx, ctx.file, replacementLoc, topAttachedClass,
+                                                                 core::Symbols::T_Sig(), "")) {
+        if (edit->loc == edits.back().loc) {
+            // Merge edits if we need to insert the `extend T::Sig` at the same point as the `sig`,
+            edits.back().replacement = edit->replacement + edits.back().replacement;
+        } else {
+            edits.emplace_back(edit.value());
+        }
     }
 
     return core::AutocorrectSuggestion{fmt::format("Add `{}`", sig), edits};

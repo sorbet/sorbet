@@ -533,9 +533,9 @@ type `T.untyped` (along with all other values).
 
 ## 3513
 
-The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
-Ruby `class`. For more, see the docs for
-[`T.attached_class`](attached-class.md).
+This error code is from an old Sorbet version. It's equivalent to error 4023:
+
+[→ 4023](#4023)
 
 ## 3514
 
@@ -883,8 +883,14 @@ are reported when encountered.
 
 ## 4002
 
-Sorbet requires that every `include` references a constant literal. For example,
-this is an error, even in `# typed: false` files:
+Sorbet requires seeing the complete inheritance hierarchy in a codebase. To do
+this, it must be able to statically resolve a class's superclass and any mixins,
+declared with `include` or `extend`.
+
+To make this possible, Sorbet requires that every superclass, `include`, and
+`extend` references a constant literal. It's not possible to use an arbitrary
+expression (like a method call that produces a class or module) as an ancestor.
+This restriction holds even in `# typed: false` files.
 
 ```ruby
 module A; end
@@ -899,14 +905,17 @@ class C
 end
 ```
 
-Non-constant literals make it hard to impossible to determine the complete
-inheritance hierarchy in a codebase. Sorbet must know the complete inheritance
-hierarchy of a codebase in order to check that a variable is a valid instance of
-a type.
+(For some intuition why this restriction is in place: Sorbet requires resolving
+the inheritance hierarchy before it can run inference. Inference is when it
+assigns types to every expression in the codebase. Therefore inheritance
+resolution cannot depend on inference, as otherwise there would be a logical
+cycle in the order Sorbet has to type check a codebase. Similar restrictions
+appear throughout Sorbet: see [Why type annotations?](why-type-annotations.md)
+for more examples.)
 
-It is possible to silence this error with `T.unsafe`, but it should be done with
-**utmost caution**, as Sorbet will not consider the include and provide a less
-accurate analysis:
+For module mixins, it is possible to silence this error with `T.unsafe`, but it
+should be done with **utmost caution**, as Sorbet will not consider the include
+and provide a less accurate analysis:
 
 ```ruby
 module A; end
@@ -932,6 +941,8 @@ c.b # error: Method `b` does not exist on `C`
 T.let(C, A) # error: Argument does not have asserted type `A`
 T.let(C, B) # error: Argument does not have asserted type `B`
 ```
+
+There is no such workaround for superclasses.
 
 ## 4003
 
@@ -1263,6 +1274,11 @@ assignment and a class definition for a given constant, you can either:
     itself, and mark that file `# typed: ignore` (possibly also using an `RBI`
     file to declare anything that can't be factored out of the ignored file but
     should still be visible to Sorbet).
+
+## 4023
+
+The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
+Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
 
 ## 5001
 
@@ -3467,14 +3483,21 @@ See also: [5028](#5028), [6002](#6002), [7028](#7028), [7043](#7043).
 
 ## 7018
 
-At `typed: strong`, Sorbet no longer allows `T.untyped` as the intermediate
-result of any method call. This effectively means that Sorbet knew the type
-statically for 100% of calls within a file. This sigil is rarely used—usually
-the only files that are `# typed: strong` are RBI files and files with empty
-class definitions. Most Ruby files that actually do interesting things will have
-errors in `# typed: strong`. Support for `typed: strong` files is minimal, as
-Sorbet changes regularly and new features often bring new `T.untyped`
-intermediate values.
+At `# typed: strong`, Sorbet no longer allows using `T.untyped` values. To fix
+errors of this class, add type annotations to the code until Sorbet has enough
+context to know the static type of a value. Usually this means adding
+[method signatures](sigs.md) or [type assertions](type-assertions.md) to declare
+types to Sorbet that it couldn't infer.
+
+**Note**: this strictness level should be considered a beta feature: the errors
+at this level are still being developed. Most Ruby files that actually do
+interesting things will have errors in `# typed: strong`. As such, an
+alternative solution to fixing these errors is simply to downgrade the file to
+`# typed: strict` or below, which will silence all these `T.untyped` errors.
+
+For more information on `# typed: strong`, strategies for dealing with errors
+that arise from using `T.untyped`, and current known limitations, see the docs
+for [`# typed: strong`](strong.md).
 
 ## 7019
 
@@ -3942,7 +3965,7 @@ Or if it's imperative to continue using `is_a?`, change the type to
 ## 7039
 
 For more information, see how to place
-[bounds on type members](generics.md#bounds-on-type-member-s-and-type-template-s-fixed-upper-lower).
+[bounds on type members](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower).
 
 Consider this example:
 

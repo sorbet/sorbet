@@ -21,7 +21,10 @@ extend T::Sig
 
 T.assert_type!([1].lazy, T::Enumerator::Lazy[Integer])
 T.assert_type!([1, 2].filter_map { |x| x.odd? ? x.to_f : x.to_s }, T::Array[T.any(Float, String)])
+
 T.assert_type!([1, 2, "3", nil].tally, T::Hash[T.nilable(T.any(Integer, String)), Integer])
+T.assert_type!([1, 2, "3", nil].tally(T::Hash[T.nilable(T.any(Integer, String)), Integer].new),
+               T::Hash[T.nilable(T.any(Integer, String)), Integer])
 
 # There are 3 different ways to call all?, any? and none?
 a = [1, 3, 20]

@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//third_party:ruby_externals.bzl", "register_ruby_dependencies")
 load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repository")
 
@@ -111,6 +111,14 @@ def register_sorbet_dependencies():
         sha256 = "1cc1ec93701868691c73b371eb87e5452257996279a42303a91caad355374439",
         build_file = "@com_stripe_ruby_typer//third_party:jemalloc.BUILD",
         strip_prefix = "jemalloc-20f9802e4f25922884448d9581c66d76cc905c0c",
+    )
+
+    http_archive(
+        name = "mimalloc",
+        urls = _github_public_urls("microsoft/mimalloc/archive/refs/tags/v2.1.2.zip"),  # 2.1.2
+        sha256 = "86281c918921c1007945a8a31e5ad6ae9af77e510abfec20d000dd05d15123c7",
+        build_file = "@com_stripe_ruby_typer//third_party:mimalloc.BUILD",
+        strip_prefix = "mimalloc-2.1.2",
     )
 
     http_archive(
@@ -344,6 +352,14 @@ def register_sorbet_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
         sha256 = "e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634",
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
+    )
+
+    # Needed to build CMake projects
+    http_archive(
+        name = "rules_foreign_cc",
+        urls = _github_public_urls("bazelbuild/rules_foreign_cc/archive/d74623f0ad47f4e375de81baa454eb106715a416.zip"),
+        sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
+        strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
     )
 
     register_ruby_dependencies()

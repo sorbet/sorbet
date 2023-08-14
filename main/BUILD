@@ -7,6 +7,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "mimalloc",
+    values = {
+        "define": "mimalloc=true",
+        "compilation_mode": "opt",
+    },
+    visibility = ["//visibility:public"],
+)
+
 cc_binary(
     name = "sorbet",
     srcs = [
@@ -26,6 +35,7 @@ cc_binary(
     }),
     malloc = select({
         ":jemalloc": "@jemalloc//:jemalloc",
+        ":mimalloc": "@mimalloc//:mimalloc",
         "//conditions:default": "@bazel_tools//tools/cpp:malloc",
     }),
     visibility = ["//visibility:public"],

@@ -1,0 +1,15 @@
+# -- test/testdata/infer/no_when_t_forwarder.rb --
+# typed: true
+
+case T.unsafe(nil)
+when Array
+  #  ^^^^^^^^ error: Use `Array` without any `T::` prefix to match on a stdlib generic type
+when Hash
+  #  ^^^^^^^ error: Use `Hash` without any `T::` prefix to match on a stdlib generic type
+when Set
+  #  ^^^^^^ error: Use `Set` without any `T::` prefix to match on a stdlib generic type
+end
+
+Array.===([])
+#        ^^^ error: Use `Array` without any `T::` prefix to match on a stdlib generic type
+# ------------------------------

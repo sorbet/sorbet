@@ -130,6 +130,49 @@ module Opus::Types::Test
           There might be a constant reloading problem in your application.
         MSG
       end
+
+      it "uses constant name for class with #name defined" do
+        NamedClass = Class.new do
+          def self.name
+            "String"
+          end
+        end
+
+        x = T::Types::Simple.new(NamedClass)
+
+        assert_equal("#{TypesTest.name}::NamedClass", x.name)
+      ensure
+        TypesTest.send(:remove_const, :NamedClass)
+      end
+
+      it "uses #name for anonymous classes" do
+        klass = Class.new do
+          def self.name
+            "String"
+          end
+        end
+
+        x = T::Types::Simple.new(klass)
+
+        assert_equal("String", x.name)
+      end
+
+      it "handles equality with a class that has overridden its #name method" do
+        NamedClass = Class.new
+
+        klass = Class.new do
+          def self.name
+            "NamedClass"
+          end
+        end
+
+        x = T::Types::Simple.new(klass)
+        y = T::Types::Simple.new(NamedClass)
+
+        refute_equal(x.name, y.name)
+      ensure
+        TypesTest.send(:remove_const, :NamedClass)
+      end
     end
 
     describe "Union" do
@@ -977,6 +1020,76 @@ module Opus::Types::Test
       end
     end
 
+    describe "TypedClass" do
+      it 'works if the type is right' do
+        type = T::Class[Base]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'works if the type is wrong, but a class' do
+        type = T::Class[Sub]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'cannot have its metatype instantiated' do
+        # People might assume that this creates a class with a supertype of
+        # `Base`. It doesn't, because generics are erased, and also `[...]` can
+        # hold an arbitrary type, not necessarily a class type.
+        #
+        # Also, `Class.new` already has a sig that infers a _better_ type:
+        # Class.new(Base) has an inferred type of `T.class_of(Base)`, which is
+        # more narrow.
+        assert_raises(NoMethodError) do
+          T::Class[Base].new
+        end
+      end
+
+      it 'is not coerced from plain class literal' do
+        # This is for backwards compatibility. If this poses problems for the
+        # sake of runtime checking and reflection, we may want to make this
+        # behavior more like the static system, where `::Class` has type
+        # `T.class_of(Class)`. It looks like we already don't treat `::A` as
+        # coercing to `T.class_of(A)`, which is why I don't know whether it
+        # particularly matters.
+        #
+        # (It's also worth noting: Sorbet doesn't have a separate notion of
+        # `T::Types::Simple` and `T::Types::ClassOf`. A ClassType is used to
+        # model `T::Types::Simple` and _was_ used to model `T.class_of(...)`
+        # until we made all singleton classes generic with `<AttachedClass>`,
+        # when they became AppliedType.)
+        type = T::Utils.coerce(::Class)
+        assert_instance_of(T::Types::Simple, type)
+        assert_equal(::Class, type.raw_type)
+      end
+    end
+
+    describe "T.class_of(...)[...]" do
+      it 'works if the type is right' do
+        type = T.class_of(Base)[Base]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+
+      it 'errors if the type is a subclass' do
+        type = T.class_of(Sub)[Sub]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_match(/Expected type T.class_of\(Opus::Types::Test::TypesTest::Sub\), got Opus::Types::Test::TypesTest::Base/, msg)
+      end
+
+      it 'does not error if the attached class is wrong (erased generics)' do
+        type = T.class_of(Base)[Sub]
+        value = Base
+        msg = check_error_message_for_obj(type, value)
+        assert_nil(msg)
+      end
+    end
+
     describe 'TypeAlias' do
       it 'delegates name' do
         type = T.type_alias {T.any(Integer, String)}
@@ -1520,6 +1633,47 @@ module Opus::Types::Test
         end
       end
 
+      describe 'noreturn' do
+        it 'is a subtype of things' do
+          assert_subtype(T.noreturn, Integer)
+          assert_subtype(T.noreturn, Numeric)
+          assert_subtype(T.noreturn, [String, String])
+          assert_subtype(T.noreturn, T::Array[Integer])
+          assert_subtype(T.noreturn, T.untyped)
+        end
+
+        it 'other things are not a subtype of it' do
+          refute_subtype(Integer, T.noreturn)
+          refute_subtype(Numeric, T.noreturn)
+          refute_subtype([String, String], T.noreturn)
+          refute_subtype(T::Array[Integer], T.noreturn)
+
+          # except this one
+          assert_subtype(T.untyped, T.noreturn)
+        end
+      end
+
+      describe 'anything' do
+        it 'is not a subtype of things' do
+          refute_subtype(T.anything, Integer)
+          refute_subtype(T.anything, Numeric)
+          refute_subtype(T.anything, [String, String])
+          refute_subtype(T.anything, T::Array[Integer])
+
+          # except this one
+          assert_subtype(T.anything, T.untyped)
+        end
+
+        it 'other things are a subtype of it' do
+          assert_subtype(Integer, T.anything)
+          assert_subtype(Numeric, T.anything)
+          assert_subtype([String, String], T.anything)
+          assert_subtype(T::Array[Integer], T.anything)
+
+          assert_subtype(T.untyped, T.anything)
+        end
+      end
+
       describe 'type variables' do
         it 'type members are subtypes of everything' do
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)
@@ -1540,6 +1694,12 @@ module Opus::Types::Test
           assert_subtype(T::Types::TypeParameter.new(:T), String)
           assert_subtype(T::Types::TypeParameter.new(:T),
                          T::Types::TypeParameter.new(:V))
+        end
+
+        it 'pools' do
+          assert_equal(T.type_parameter(:T).object_id, T.type_parameter(:T).object_id)
+          refute_equal(T.type_parameter(:T).object_id, T.type_parameter(:U).object_id)
+          refute_equal(T::Types::TypeParameter.new(:T).object_id, T::Types::TypeParameter.new(:T).object_id)
         end
       end
 

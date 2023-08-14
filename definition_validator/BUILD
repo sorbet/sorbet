@@ -23,7 +23,7 @@ cc_library(
         "//ast/desugar",
         "//ast/treemap",
         "//core",
-        "//main/sig_finder",
+        "//core/sig_finder",
         "@com_google_absl//absl/strings",
     ],
 )

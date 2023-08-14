@@ -4,7 +4,6 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/strings/formatting.h"
-#include "main/autogen/autoloader.h"
 #include "main/autogen/crc_builder.h"
 
 using namespace std;
@@ -103,6 +102,8 @@ public:
         ENFORCE(it != refMap.end());
         // ...so we can use that reference as the 'defining reference'
         def.defining_ref = it->second;
+        // ...we also grab the symbol reference of the defining reference
+        def.sym = refs[it->second.id()].sym;
         // update that reference with the relevant metadata so we know 1. it's the defining ref and 2. it encompasses
         // the entire class, not just the constant name
         refs[it->second.id()].is_defining_ref = true;
@@ -228,6 +229,7 @@ public:
         ref.definitionLoc = original.loc;
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original.symbol;
+        ref.sym = sym;
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
@@ -291,6 +293,8 @@ public:
         auto &ref = refs[refMap[original.lhs.get()].id()];
         // ...and mark that this is the defining ref for that one
         def.defining_ref = ref.id;
+        // ...we also store the new symbol reference
+        def.sym = ref.sym;
         ref.is_defining_ref = true;
         ref.definitionLoc = original.loc;
 

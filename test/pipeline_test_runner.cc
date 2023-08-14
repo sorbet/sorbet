@@ -33,6 +33,7 @@
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
+#include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "packager/rbi_gen.h"
@@ -58,6 +59,9 @@ namespace sorbet::test {
 using namespace std;
 
 string singleTest;
+
+constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+constexpr string_view packageFileName = "__package.rb"sv;
 
 class CFGCollectorAndTyper {
 public:
@@ -180,83 +184,9 @@ public:
     }
 };
 
-TEST_CASE("PerPhaseTest") { // NOLINT
-    Expectations test = Expectations::getExpectations(singleTest);
-
-    auto inputPath = test.folder + test.basename;
-    auto rbName = test.basename + ".rb";
-
-    for (auto &exp : test.expectations) {
-        if (!knownExpectations.contains(exp.first)) {
-            FAIL_CHECK("Unknown pass: " << exp.first);
-        }
-    }
-
-    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
-    auto errorCollector = make_shared<core::ErrorCollector>();
-    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
-    auto gs = make_unique<core::GlobalState>(errorQueue);
-
-    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
-        gs->semanticExtensions.emplace_back(provider->defaultInstance());
-    }
-
-    gs->censorForSnapshotTests = true;
-    auto workers = WorkerPool::create(0, gs->tracer());
-
-    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-
-    gs->requiresAncestorEnabled =
-        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
-    gs->ruby3KeywordArgs =
-        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
-
-    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
-    }
-
-    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
-        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
-    }
-
-    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
-        gs->initEmpty();
-    } else {
-        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
-    }
-
-    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
-        gs->suggestUnsafe = "T.unsafe";
-    }
-
-    unique_ptr<core::GlobalState> emptyGs;
-    if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
-        // Copy GlobalState after initializing it, but before rest of pipeline, so that it
-        // represents an "empty" GlobalState.
-        emptyGs = gs->deepCopy();
-    }
-
-    // Parser
-    vector<core::FileRef> files;
-    constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
-    constexpr string_view packageFileName = "__package.rb"sv;
-    {
-        core::UnfreezeFileTable fileTableAccess(*gs);
-
-        for (auto &sourceFile : test.sourceFiles) {
-            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
-            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
-                fref.data(*gs).strictLevel = core::StrictLevel::False;
-            }
-            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
-                fref.data(*gs).strictLevel = core::StrictLevel::False;
-            }
-            files.emplace_back(fref);
-        }
-    }
+vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core::FileRef> files,
+                              ExpectationHandler &handler, Expectations &test) {
     vector<ast::ParsedFile> trees;
-    ExpectationHandler handler(test, errorQueue, errorCollector);
-
     for (auto file : files) {
         auto fileName = FileOps::getFileName(file.data(*gs).path());
         if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
@@ -324,49 +254,149 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees.emplace_back(move(localNamed));
     }
 
+    return trees;
+}
+
+void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+             ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
     auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
 
+    if (!enablePackager) {
+        return;
+    }
+
+    vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    vector<std::string> extraPackageFilesDirectorySlashPrefixes;
+    vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+    vector<std::string> skipRBIExportEnforcementDirs;
+    vector<std::string> skipImportVisibilityCheckFor;
+
+    auto extraDirUnderscore =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
+    if (extraDirUnderscore.has_value()) {
+        extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
+    if (extraDirSlash.has_value()) {
+        extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
+    }
+
+    auto skipImportVisibility =
+        StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+    if (skipImportVisibility.has_value()) {
+        skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+    }
+
+    {
+        core::UnfreezeNameTable packageNS(*gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
+        gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
+                               extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                               "PACKAGE_ERROR_HINT");
+    }
+
+    // Packager runs over all trees.
+    packager::Packager::run(*gs, *workers, trees);
+    for (auto &tree : trees) {
+        handler.addObserved(*gs, "package-tree", [&]() {
+            return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
+        });
+    }
+}
+
+TEST_CASE("PerPhaseTest") { // NOLINT
+    Expectations test = Expectations::getExpectations(singleTest);
+
+    auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
+
+    for (auto &exp : test.expectations) {
+        if (!knownExpectations.contains(exp.first)) {
+            FAIL_CHECK("Unknown pass: " << exp.first);
+        }
+    }
+
+    auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
+    auto gs = make_unique<core::GlobalState>(errorQueue);
+
+    for (auto provider : sorbet::pipeline::semantic_extension::SemanticExtensionProvider::getProviders()) {
+        gs->semanticExtensions.emplace_back(provider->defaultInstance());
+    }
+
+    gs->censorForSnapshotTests = true;
+    auto workers = WorkerPool::create(0, gs->tracer());
+
+    auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
+
+    gs->requiresAncestorEnabled =
+        BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
+    gs->ruby3KeywordArgs =
+        BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+
+    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
+    }
+
+    if (!BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false)) {
+        gs->suppressErrorClass(core::errors::Resolver::OutOfOrderConstantAccess.code);
+    }
+
+    if (BooleanPropertyAssertion::getValue("no-stdlib", assertions).value_or(false)) {
+        gs->initEmpty();
+    } else {
+        core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
+    }
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        gs->suggestUnsafe = "T.unsafe";
+    }
+
+    unique_ptr<core::GlobalState> emptyGs;
+    if (!test.minimizeRBI.empty() || test.expectations.contains("rbi-gen")) {
+        // Copy GlobalState after initializing it, but before rest of pipeline, so that it
+        // represents an "empty" GlobalState.
+        emptyGs = gs->deepCopy();
+    }
+
+    // Read files
+    vector<core::FileRef> files;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+
+        for (auto &sourceFile : test.sourceFiles) {
+            auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
+            if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            files.emplace_back(fref);
+        }
+    }
+
+    ExpectationHandler handler(test, errorQueue, errorCollector);
+    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+
+    vector<ast::ParsedFile> trees;
+    auto filesSpan = absl::Span<core::FileRef>(files);
     if (enablePackager) {
-        vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
-        vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-        vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
-        vector<std::string> skipRBIExportEnforcementDirs;
-        vector<std::string> skipImportVisibilityCheckFor;
+        auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
+        auto inputPackageFiles = filesSpan.first(numPackageFiles);
+        filesSpan = filesSpan.subspan(numPackageFiles);
 
-        auto extraDirUnderscore =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-        if (extraDirUnderscore.has_value()) {
-            extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-        }
+        trees = index(gs, inputPackageFiles, handler, test);
+    }
 
-        auto extraDirSlash =
-            StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
-        if (extraDirSlash.has_value()) {
-            extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
-        }
+    auto nonPackageTrees = index(gs, filesSpan, handler, test);
+    realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
-        auto skipImportVisibility =
-            StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
-        if (skipImportVisibility.has_value()) {
-            skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
-        }
+    package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
 
-        {
-            core::UnfreezeNameTable packageNS(*gs);
-            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-            gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
-                                   "PACKAGE_ERROR_HINT");
-        }
-
-        // Packager runs over all trees.
-        trees = packager::Packager::run(*gs, *workers, move(trees));
-        for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() {
-                return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
-            });
-        }
-
+    if (enablePackager) {
         if (test.expectations.contains("rbi-gen")) {
             auto rbiGenGs = emptyGs->deepCopy();
             rbiGenGs->errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
@@ -403,8 +433,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             // Initialize the package DB
-            packageTrees = packager::Packager::findPackages(*rbiGenGs, *workers, move(packageTrees));
-
+            packager::Packager::findPackages(*rbiGenGs, absl::Span<ast::ParsedFile>(packageTrees));
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, packageTrees);
             packager::Packager::setPackageNameOnFiles(*rbiGenGs, trees);
 

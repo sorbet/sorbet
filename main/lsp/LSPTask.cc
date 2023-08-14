@@ -198,6 +198,8 @@ ConstExprStr LSPTask::methodString() const {
             return "textDocument.typeDefinition";
         case LSPMethod::WorkspaceSymbol:
             return "workspace.symbol";
+        case LSPMethod::WorkspaceDidChangeConfiguration:
+            return "worksapce.didChangeConfiguration";
         case LSPMethod::TextDocumentImplementation:
             return "textDocument.implementation";
         case LSPMethod::CodeActionResolve:

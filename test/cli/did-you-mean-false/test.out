@@ -1,0 +1,48 @@
+test.rb:17: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
+    17 |  takes_integer(x)
+                        ^
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
+    test.rb:11:
+    11 |sig {params(x: Integer).void}
+                    ^
+  Got `T.nilable(Integer)` originating from:
+    test.rb:16:
+    16 |def takes_nilable_integer(x)
+                                  ^
+  Autocorrect: Done
+    test.rb:17: Replaced with `T.must(x)`
+    17 |  takes_integer(x)
+                        ^
+
+test.rb:9: Method `my_metho` does not exist on `A` https://srb.help/7003
+     9 |A.new.my_metho
+              ^^^^^^^^
+  Got `A` originating from:
+    test.rb:9:
+     9 |A.new.my_metho
+        ^^^^^
+    test.rb:5: Defined here
+     5 |  def my_method
+          ^^^^^^^^^^^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+extend T::Sig
+
+class A
+  def my_method
+  end
+end
+
+A.new.my_metho
+
+sig {params(x: Integer).void}
+def takes_integer(x)
+end
+
+sig {params(x: T.nilable(Integer)).void}
+def takes_nilable_integer(x)
+  takes_integer(T.must(x))
+end

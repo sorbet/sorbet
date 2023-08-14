@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "--- Loading with_backoff helper"
+echo "Loading with_backoff helper"
 
 # https://stackoverflow.com/a/8351489
 with_backoff() {

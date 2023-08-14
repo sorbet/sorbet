@@ -1,0 +1,4 @@
+# typed: true
+# assert-slow-path: true
+
+class DoesNotExist; end

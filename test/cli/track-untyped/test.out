@@ -1,0 +1,84 @@
+a.rb:6: Call to method `foo` on `T.untyped` https://srb.help/7018
+     6 |  result = arg0.foo
+                        ^^^
+  Got `T.untyped` originating from:
+    a.rb:5:
+     5 |def example_untyped(arg0)
+                            ^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:8: Conditional branch on `T.untyped` https://srb.help/7018
+     8 |  if result
+             ^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:6:
+     6 |  result = arg0.foo
+                   ^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
+     9 |    puts(result)
+                 ^^^^^^
+  Expected `BasicObject` for argument `arg0` of method `Kernel#puts`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1903:
+    1903 |        arg0: BasicObject,
+                  ^^^^
+  Got `T.untyped` originating from:
+    a.rb:6:
+     6 |  result = arg0.foo
+                   ^^^^^^^^
+    a.rb:8:
+     8 |  if result
+             ^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
+    12 |  result
+          ^^^^^^
+  Got `T.untyped` originating from:
+    a.rb:6:
+     6 |  result = arg0.foo
+                   ^^^^^^^^
+    a.rb:8:
+     8 |  if result
+             ^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+
+b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
+     4 |T.unsafe(nil).foo
+                      ^^^
+  Got `T.untyped` originating from:
+    b.rb:4:
+     4 |T.unsafe(nil).foo
+        ^^^^^^^^^^^^^
+  Note:
+    Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
+Errors: 5
+{
+ "files": [
+  {
+   "path": "test/cli/track-untyped/a.rb",
+   "sigil": "Strong",
+   "strict": "Strong",
+   "min_error_level": "Strong",
+   "untyped_usages": 4
+  },
+  {
+   "path": "test/cli/track-untyped/b.rb",
+   "sigil": "Strong",
+   "strict": "Strong",
+   "min_error_level": "Strong",
+   "untyped_usages": 1
+  },
+  {
+   "path": "test/cli/track-untyped/c.rb",
+   "sigil": "Strong",
+   "strict": "Strong",
+   "min_error_level": "Max"
+  }
+ ]
+}

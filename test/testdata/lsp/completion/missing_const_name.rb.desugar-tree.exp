@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def test_constant_completion_before_keyword<<todo method>>(&<blk>)
     begin
       <emptyTree>::<C Outer>::<C <ConstantNameMissing>>
-      <emptyTree>
+      nil
     end
   end
 

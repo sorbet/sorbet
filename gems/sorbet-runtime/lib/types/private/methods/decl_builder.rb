@@ -231,15 +231,17 @@ module T::Private::Methods
         decl.on_failure = nil
       end
       if decl.params.equal?(ARG_NOT_PROVIDED)
-        decl.params = {}
+        decl.params = FROZEN_HASH
       end
       if decl.type_parameters.equal?(ARG_NOT_PROVIDED)
-        decl.type_parameters = {}
+        decl.type_parameters = FROZEN_HASH
       end
 
       decl.finalized = true
 
       self
     end
+
+    FROZEN_HASH = {}.freeze
   end
 end

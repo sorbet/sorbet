@@ -9,12 +9,12 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
      .. |  MyConstantWithNoTypo = nil
           ^^^^^^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
+test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: String,
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -66,12 +66,12 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
      .. |  MyConstantWithNoTypo = nil
           ^^^^^^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
+test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: String,
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
@@ -123,12 +123,12 @@ test/cli/errors/errors.rb:5: Unable to resolve constant `MyConstantWithTypo` htt
      .. |  MyConstantWithNoTypo = nil
           ^^^^^^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument `arg0` https://srb.help/7002
+test/cli/errors/errors.rb:15: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer` for argument `arg0` https://srb.help/7002
     .. |    raise arg # raise is defined by stdlib
                   ^^^
-  Expected `String` for argument `arg0` of method `Kernel#raise (overload.1)`:
+  Expected `T.any(T::Class[T.anything], Exception, String)` for argument `arg0` of method `Kernel#raise (overload.1)`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED:
-      NN |        arg0: String,
+      NN |        arg0: T.any(T::Class[T.anything], Exception, String),
                   ^^^^
   Got `Integer` originating from:
     test/cli/errors/errors.rb:13:

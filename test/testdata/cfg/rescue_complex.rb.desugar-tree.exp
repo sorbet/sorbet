@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TestRescue><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
     def meth<<todo method>>(&<blk>)
       0
     end
@@ -20,6 +22,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       x
     end
 
+    def untyped_exceptions<<todo method>>(&<blk>)
+      [<emptyTree>::<C Exception>]
+    end
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.class_of(<emptyTree>::<C Exception>)))
+    end
+
+    def typed_exceptions<<todo method>>(&<blk>)
+      [<emptyTree>::<C Exception>]
+    end
+
     def initialize<<todo method>>(&<blk>)
       @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
     end
@@ -36,6 +50,41 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.meth()
     rescue <emptyTree>::<C Foo>, <emptyTree>::<C Bar> => baz
       baz
+    end
+
+    def multiple_rescue_classes_varuse<<todo method>>(&<blk>)
+      begin
+        <self>.meth()
+      rescue <emptyTree>::<C LoadError>, <emptyTree>::<C SocketError> => baz
+        baz
+        <emptyTree>::<C T>.reveal_type(baz)
+      end
+    end
+
+    def rescue_loop<<todo method>>(&<blk>)
+      begin
+        ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
+        <self>.loop() do ||
+          begin
+            ex = nil
+            <self>.meth()
+          rescue => ex
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+    def rescue_untyped_splat<<todo method>>(&<blk>)
+      <self>.meth()
+    rescue ::<Magic>.<splat>(<self>.untyped_exceptions()) => e
+      <emptyTree>::<C T>.reveal_type(e)
+    end
+
+    def rescue_typed_splat<<todo method>>(&<blk>)
+      <self>.meth()
+    rescue ::<Magic>.<splat>(<self>.typed_exceptions()) => e
+      <emptyTree>::<C T>.reveal_type(e)
     end
 
     def parse_rescue_ensure<<todo method>>(&<blk>)

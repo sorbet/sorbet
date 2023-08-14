@@ -174,3 +174,44 @@ class BadSigReturnNotLastStatement
     @x = x
   end
 end
+
+class TProcBindInInitializerLet
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String).void).void }
+  def initialize(&blk)
+    @blk = blk
+  end
+end
+
+class NoBindInTProcInitializerLet
+  extend T::Sig
+
+  sig {params(blk: T.proc.void).void }
+  def initialize(&blk)
+    @blk = blk
+  end
+end
+
+class TProcBindInInitializerLastSend
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String)).void }
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed T.proc: You must specify a return type
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed T.proc: You must specify a return type
+  #                ^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
+  def initialize(&blk)
+    @blk = blk
+  end
+end
+
+class TProcBindInInitializerManyBinds
+  extend T::Sig
+
+  sig {params(blk: T.proc.bind(String).bind(String).void).void }
+  #                ^^^^^^^^^^^^^^^^^^^ error: Malformed `bind`: Multiple calls to `.bind`
+  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Using `bind` is not permitted here
+  def initialize(&blk)
+    @blk = blk
+  end
+end

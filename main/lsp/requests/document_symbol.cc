@@ -23,17 +23,18 @@ namespace {
 // ensure that both of the locs we're looking at are referencing the same file.
 // (We could do this with the locs from the symbol table, but it seems simpler
 // to do things this way.)
-struct SymbolFileLocs {
+struct ASTSymbolInfo {
     core::Loc loc;
     core::Loc declLoc;
+    bool isAttrBestEffortUIOnly;
 };
 
 class SymbolFileLocSaver {
 public:
     core::FileRef fref;
-    UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping;
+    UnorderedMap<core::SymbolRef, ASTSymbolInfo> &mapping;
 
-    SymbolFileLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, SymbolFileLocs> &mapping)
+    SymbolFileLocSaver(core::FileRef fref, UnorderedMap<core::SymbolRef, ASTSymbolInfo> &mapping)
         : fref(fref), mapping(mapping) {}
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &expr) {
@@ -42,7 +43,9 @@ public:
             return;
         }
 
-        mapping[klass.symbol] = SymbolFileLocs{core::Loc{fref, klass.loc}, core::Loc{fref, klass.declLoc}};
+        auto isAttrBestEffortUIOnly = false;
+        mapping[klass.symbol] =
+            ASTSymbolInfo{core::Loc{fref, klass.loc}, core::Loc{fref, klass.declLoc}, isAttrBestEffortUIOnly};
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &expr) {
@@ -51,17 +54,19 @@ public:
             return;
         }
 
-        mapping[method.symbol] = SymbolFileLocs{core::Loc{fref, method.loc}, core::Loc{fref, method.declLoc}};
+        auto isAttrBestEffortUIOnly = method.flags.isAttrBestEffortUIOnly;
+        mapping[method.symbol] =
+            ASTSymbolInfo{core::Loc{fref, method.loc}, core::Loc{fref, method.declLoc}, isAttrBestEffortUIOnly};
     }
 };
 
-std::unique_ptr<DocumentSymbol>
-symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
-                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
-                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced);
+std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
+                                                         core::FileRef filter,
+                                                         const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping,
+                                                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced);
 
 void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
-                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                                         const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping,
                                          const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced,
                                          vector<unique_ptr<DocumentSymbol>> &out) {
     if (!sym.isClassOrModule()) {
@@ -90,7 +95,7 @@ struct RangeInfo {
 };
 
 std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
-                                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
+                                         const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping,
                                          const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
     RangeInfo info;
     auto it = defMapping.find(symRef);
@@ -119,10 +124,15 @@ std::optional<RangeInfo> rangesForSymbol(const core::GlobalState &gs, core::Symb
     return info;
 }
 
-std::unique_ptr<DocumentSymbol>
-symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, core::FileRef filter,
-                         const UnorderedMap<core::SymbolRef, SymbolFileLocs> &defMapping,
-                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
+bool symbolIsAttr(core::SymbolRef symRef, const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping) {
+    auto it = defMapping.find(symRef);
+    return it != defMapping.end() && it->second.isAttrBestEffortUIOnly;
+}
+
+std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef,
+                                                         core::FileRef filter,
+                                                         const UnorderedMap<core::SymbolRef, ASTSymbolInfo> &defMapping,
+                                                         const UnorderedMap<core::SymbolRef, core::SymbolRef> &forced) {
     if (!symRef.exists()) {
         return nullptr;
     }
@@ -133,7 +143,7 @@ symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef symRef, co
     if (!info.has_value()) {
         return nullptr;
     }
-    auto kind = symbolRef2SymbolKind(gs, symRef);
+    auto kind = symbolRef2SymbolKind(gs, symRef, symbolIsAttr(symRef, defMapping));
 
     string name;
     auto owner = symRef.owner(gs);
@@ -310,7 +320,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
                        [&deduplicatedCandidates](const auto ref) { return !deduplicatedCandidates.contains(ref); }),
         candidates.end());
 
-    UnorderedMap<core::SymbolRef, SymbolFileLocs> defMapping;
+    UnorderedMap<core::SymbolRef, ASTSymbolInfo> defMapping;
     SymbolFileLocSaver saver{fref, defMapping};
     core::Context ctx{gs, core::Symbols::root(), fref};
     auto resolved = typechecker.getResolved({fref});

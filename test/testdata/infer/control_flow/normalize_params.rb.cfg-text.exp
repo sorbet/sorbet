@@ -20,8 +20,8 @@ method ::Test#normalize_params {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Test = cast(<self>: NilClass, Test);
     v: T.untyped = load_arg(v)
-    <cfgAlias>$6: T.class_of(Hash) = alias <C Hash>
-    <ifTemp>$3: T.untyped = v: T.untyped.is_a?(<cfgAlias>$6: T.class_of(Hash))
+    <cfgAlias>$6: T.class_of(Hash)[T::Hash[T.untyped, T.untyped]] = alias <C Hash>
+    <ifTemp>$3: T.untyped = v: T.untyped.is_a?(<cfgAlias>$6: T.class_of(Hash)[T::Hash[T.untyped, T.untyped]])
     <ifTemp>$3 -> (T.untyped ? bb2 : bb3)
 
 # backedges
@@ -40,8 +40,8 @@ bb2[rubyRegionId=0, firstDead=-1](<self>: Test, v: T::Hash[T.untyped, T.untyped]
 # backedges
 # - bb0(rubyRegionId=0)
 bb3[rubyRegionId=0, firstDead=-1](<self>: Test, v: T.untyped):
-    <cfgAlias>$14: T.class_of(Array) = alias <C Array>
-    <ifTemp>$11: T.untyped = v: T.untyped.is_a?(<cfgAlias>$14: T.class_of(Array))
+    <cfgAlias>$14: T.class_of(Array)[T::Array[T.untyped]] = alias <C Array>
+    <ifTemp>$11: T.untyped = v: T.untyped.is_a?(<cfgAlias>$14: T.class_of(Array)[T::Array[T.untyped]])
     <ifTemp>$11 -> (T.untyped ? bb4 : bb5)
 
 # backedges

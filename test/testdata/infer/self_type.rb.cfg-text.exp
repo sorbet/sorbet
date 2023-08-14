@@ -83,8 +83,8 @@ bb2[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[S
 # - bb2(rubyRegionId=0)
 bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
     <cfgAlias>$88: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$90: T.class_of(Array) = alias <C Array>
-    <statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(Array))
+    <cfgAlias>$90: T.class_of(Array)[T::Array[T.untyped]] = alias <C Array>
+    <statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(Array)[T::Array[T.untyped]])
     <cfgAlias>$94: T.class_of(Integer) = alias <C Integer>
     <cfgAlias>$96: T.class_of(Integer) = alias <C Integer>
     <magic>$97: T.class_of(<Magic>) = alias <C <Magic>>

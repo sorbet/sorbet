@@ -19,7 +19,7 @@ end
 sig {params(x: T.any(T.class_of(C), T.class_of())).void} # error: Not enough arguments provided for method `T.class_of`
 def test5(x)
   if x == C
-    T.reveal_type(x) # error: `T.class_of(C)[T.untyped]`
+    T.reveal_type(x) # error: `T.class_of(C)[C, T.untyped]`
   else
     T.reveal_type(x) # error: `T.untyped`
   end

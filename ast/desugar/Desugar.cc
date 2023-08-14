@@ -177,6 +177,24 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     return res;
 }
 
+ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec &stmts) {
+    if (stmts.empty()) {
+        return MK::Nil(loc);
+    } else {
+        InsSeq::STATS_store stats;
+        stats.reserve(stmts.size() - 1);
+        auto end = stmts.end();
+        --end;
+        for (auto it = stmts.begin(); it != end; ++it) {
+            auto &stat = *it;
+            stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
+        };
+        auto &last = stmts.back();
+        auto expr = node2TreeImpl(dctx, std::move(last));
+        return MK::InsSeq(loc, std::move(stats), std::move(expr));
+    }
+}
+
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
     Literal *lit;
     return (lit = cast_tree<Literal>(expr)) && lit->isString();
@@ -666,7 +684,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 if (absl::c_any_of(send->args, [](auto &arg) {
                         return parser::isa_node<parser::Splat>(arg.get()) ||
-                               parser::isa_node<parser::ForwardedArgs>(arg.get());
+                               parser::isa_node<parser::ForwardedArgs>(arg.get()) ||
+                               parser::isa_node<parser::ForwardedRestArg>(arg.get());
                     })) {
                     // Build up an array that represents the keyword args for the send. When there is a Kwsplat, treat
                     // all keyword arguments as a single argument.
@@ -693,11 +712,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                                 // skip inlining the kwargs if there are any kwsplat nodes present
                                 if (absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
-                                        // kwsplat nodes
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
+                                        // kwsplat, or forwarded kwrest arg nodes
                                         ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
-                                                parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                                parser::isa_node<parser::Pair>(node.get()) ||
+                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
                                     elts.emplace_back(std::move(node));
                                 } else {
@@ -735,7 +757,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // synthesize a call to
                     //   Magic.callWithSplat(receiver, method, argArray, [&blk])
                     // The callWithSplat implementation (in C++) will unpack a
-                    // tuple type and call into the normal call merchanism.
+                    // tuple type and call into the normal call mechanism.
                     unique_ptr<parser::Node> block;
                     auto argnodes = std::move(send->args);
                     bool anonymousBlockPass = false;
@@ -762,6 +784,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         argnodes.erase(fwdIt);
                     }
 
+                    auto hasFwdRestArg = false;
+                    auto fwdRestIt = absl::c_find_if(
+                        argnodes, [](auto &arg) { return parser::isa_node<parser::ForwardedRestArg>(arg.get()); });
+                    if (fwdRestIt != argnodes.end()) {
+                        hasFwdRestArg = true;
+                        argnodes.erase(fwdRestIt);
+                    }
+
                     auto array = make_unique<parser::Array>(locZeroLen, std::move(argnodes));
                     auto args = node2TreeImpl(dctx, std::move(array));
 
@@ -781,6 +811,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                         argsConcat = MK::Send1(loc, std::move(argsConcat), core::Names::concat(), locZeroLen,
                                                std::move(kwargsArray));
+
+                        args = std::move(argsConcat);
+                    } else if (hasFwdRestArg) {
+                        auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
+                        auto argsSplat = MK::Send0(loc, std::move(fwdArgs), core::Names::toA(), locZeroLen);
+                        auto tUnsafe = MK::Unsafe(loc, std::move(argsSplat));
+                        auto argsConcat =
+                            MK::Send1(loc, std::move(args), core::Names::concat(), locZeroLen, std::move(tUnsafe));
 
                         args = std::move(argsConcat);
                     }
@@ -839,11 +877,13 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                                 // skip inlining the kwargs if there are any non-key/value pairs present
                                 if (!absl::c_any_of(hash->pairs, [](auto &node) {
-                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
-                                        // kwsplat nodes
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair,
+                                        // kwsplat, or forwarded kwrest nodes
                                         ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get()) ||
                                                 parser::isa_node<parser::Pair>(node.get()));
-                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                        return parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
                                     // hold a reference to the node, and remove it from the back fo the send list
                                     auto node = std::move(send->args[kwargsHashIndex]);
@@ -1003,7 +1043,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
 
                     auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
-                    ENFORCE(splat != nullptr, "kwsplat cast failed");
+
+                    ExpressionPtr expr;
+                    if (splat != nullptr) {
+                        expr = node2TreeImpl(dctx, std::move(splat->expr));
+                    } else {
+                        auto *fwdKwrestArg = parser::cast_node<parser::ForwardedKwrestArg>(pairAsExpression.get());
+                        ENFORCE(fwdKwrestArg != nullptr, "kwsplat and fwdkwrestarg cast failed");
+
+                        auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
+                        expr = MK::Unsafe(loc, std::move(fwdKwargs));
+                    }
 
                     if (havePairsToMerge) {
                         havePairsToMerge = false;
@@ -1022,8 +1072,6 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         mergeValues.clear();
                         mergeValues.emplace_back(MK::Local(loc, acc));
                     }
-
-                    auto expr = node2TreeImpl(dctx, std::move(splat->expr));
 
                     // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
                     // intrinsic is assumed to mutate its first argument.
@@ -1064,25 +1112,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Block *block) {
                 result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
             },
-            [&](parser::Begin *begin) {
-                if (!begin->stmts.empty()) {
-                    InsSeq::STATS_store stats;
-                    stats.reserve(begin->stmts.size() - 1);
-                    auto end = begin->stmts.end();
-                    --end;
-                    for (auto it = begin->stmts.begin(); it != end; ++it) {
-                        auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
-                    };
-                    auto &last = begin->stmts.back();
-                    auto expr = node2TreeImpl(dctx, std::move(last));
-                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
-                    result = std::move(block);
-                } else {
-                    ExpressionPtr res = MK::Nil(loc);
-                    result = std::move(res);
-                }
-            },
+            [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, std::move(asgn->lhs));
                 auto rhs = node2TreeImpl(dctx, std::move(asgn->rhs));
@@ -1137,9 +1167,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         thenp = std::move(rhs);
                     }
                     auto lhsLoc = lhs.loc();
+                    auto condLoc = lhsLoc.exists() && thenp.loc().exists()
+                                       ? core::LocOffsets{lhsLoc.endPos(), thenp.loc().beginPos()}
+                                       : lhsLoc;
                     auto temp = MK::Assign(loc, andAndTemp, std::move(lhs));
                     auto iff =
-                        MK::If(loc, MK::Local(lhsLoc, andAndTemp), std::move(thenp), MK::Local(lhsLoc, andAndTemp));
+                        MK::If(loc, MK::Local(condLoc, andAndTemp), std::move(thenp), MK::Local(lhsLoc, andAndTemp));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }
@@ -1154,8 +1187,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 } else {
                     core::NameRef tempName = dctx.freshNameUnique(core::Names::orOr());
                     auto lhsLoc = lhs.loc();
+                    auto condLoc = lhsLoc.exists() && rhs.loc().exists()
+                                       ? core::LocOffsets{lhsLoc.endPos(), rhs.loc().beginPos()}
+                                       : lhsLoc;
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
-                    auto iff = MK::If(loc, MK::Local(lhsLoc, tempName), MK::Local(lhsLoc, tempName), std::move(rhs));
+                    auto iff = MK::If(loc, MK::Local(condLoc, tempName), MK::Local(lhsLoc, tempName), std::move(rhs));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
                     result = std::move(wrapped);
                 }
@@ -1447,25 +1483,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
                 result = std::move(res);
             },
-            [&](parser::Kwbegin *kwbegin) {
-                if (!kwbegin->stmts.empty()) {
-                    InsSeq::STATS_store stats;
-                    stats.reserve(kwbegin->stmts.size() - 1);
-                    auto end = kwbegin->stmts.end();
-                    --end;
-                    for (auto it = kwbegin->stmts.begin(); it != end; ++it) {
-                        auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
-                    };
-                    auto &last = kwbegin->stmts.back();
-                    auto expr = node2TreeImpl(dctx, std::move(last));
-                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
-                    result = std::move(block);
-                } else {
-                    ExpressionPtr res = MK::EmptyTree();
-                    result = std::move(res);
-                }
-            },
+            [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;

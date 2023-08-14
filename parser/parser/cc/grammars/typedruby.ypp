@@ -870,6 +870,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
@@ -884,6 +885,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::location *lloc, ruby_parser:
                       driver.lex.set_state_expr_beg();
                       driver.lex.unset_command_start();
                       driver.pattern_variables.push();
+                      driver.pattern_hash_keys.push();
 
                       $<boolean>$ = driver.lex.context.inKwarg;
                       driver.lex.context.inKwarg = true;
@@ -1931,6 +1933,14 @@ lbrace_cmd_block_start:
                     {
                       $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
                     }
+                | tSTAR
+                  {
+                    if (!driver.lex.is_declared_anonymous_restarg()) {
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousRestArg, $1);
+                    }
+
+                    $$ = driver.alloc.node_list(driver.build.forwarded_restarg(self, $1));
+                  }
                 | args tCOMMA arg_value
                     {
                       auto &list = $1;
@@ -1948,6 +1958,16 @@ lbrace_cmd_block_start:
                     {
                       auto &list = $1;
                       list->emplace_back(driver.build.splat(self, $3, $4));
+                      $$ = list;
+                    }
+                | args tCOMMA tSTAR
+                    {
+                      if (!driver.lex.is_declared_anonymous_restarg()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousRestArg, $3);
+                      }
+
+                      auto &list = $1;
+                      list->emplace_back(driver.build.forwarded_restarg(self, $3));
                       $$ = list;
                     }
 
@@ -3215,26 +3235,15 @@ lcurly_block_start:
                       $$ = $1;
                       $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER
+                | p_args_head p_rest
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
+                      $$->emplace_back($2);
                     }
-                | p_args_head tSTAR tIDENTIFIER tCOMMA p_args_post
+                | p_args_head p_rest tCOMMA p_args_post
                     {
                       $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, $3));
-                      $$->concat($5);
-                    }
-                | p_args_head tSTAR
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
-                    }
-                | p_args_head tSTAR tCOMMA p_args_post
-                    {
-                      $$ = $1;
-                      $$->emplace_back(driver.build.match_rest(self, $2, nullptr));
+                      $$->emplace_back($2);
                       $$->concat($4);
                     }
                 | p_args_tail
@@ -3413,7 +3422,7 @@ lcurly_block_start:
                       auto non_lvar = driver.build.accessible(self, $2);
                       $$ = driver.build.pin(self, $1, non_lvar);
                     }
-      p_expr_ref: tCARET tLPAREN expr_value tRPAREN
+      p_expr_ref: tCARET tLPAREN expr_value rparen
                     {
                       auto expr = driver.build.begin(self, $2, $3, $4);
                       $$ = driver.build.pin(self, $1, expr);
@@ -3740,22 +3749,11 @@ regexp_contents: // nothing
                     {
                       $$ = driver.build.ident(self, $1);
                     }
-                | tIVAR
-                    {
-                      $$ = driver.build.ivar(self, $1);
-                    }
-                | tGVAR
-                    {
-                      $$ = driver.build.gvar(self, $1);
-                    }
                 | tCONSTANT
                     {
                       $$ = driver.build.const_(self, $1);
                     }
-                | tCVAR
-                    {
-                      $$ = driver.build.cvar(self, $1);
-                    }
+                | nonlocal_var
 
 keyword_variable: kNIL
                     {
@@ -4168,9 +4166,9 @@ f_opt_paren_args: f_paren_args
 
      kwrest_mark: tPOW | tDSTAR
 
-      f_no_kwarg: kwrest_mark kNIL
+      f_no_kwarg: p_kwnorest
                     {
-                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1, $2));
+                      $$ = driver.alloc.node_list(driver.build.kwnilarg(self, $1->at(0)));
                     }
 
         f_kwrest: kwrest_mark tIDENTIFIER
@@ -4185,6 +4183,8 @@ f_opt_paren_args: f_paren_args
                     }
                 | kwrest_mark
                     {
+                      driver.lex.declare_anonymous_kwrestarg();
+
                       auto kwrestarg = driver.build.kwrestarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(kwrestarg);
@@ -4240,6 +4240,8 @@ f_opt_paren_args: f_paren_args
                     }
                 | restarg_mark
                     {
+                      driver.lex.declare_anonymous_restarg();
+
                       auto restarg = driver.build.restarg(self, $1, nullptr);
 
                       $$ = driver.alloc.node_list(restarg);
@@ -4378,9 +4380,17 @@ f_opt_paren_args: f_paren_args
                     {
                       $$ = driver.build.kwsplat(self, $1, $2);
                     }
+                | tDSTAR
+                    {
+                      if (!driver.lex.is_declared_anonymous_kwrestarg()) {
+                        driver.diagnostics.emplace_back(dlevel::ERROR, dclass::NoAnonymousKwrestArg, $1);
+                      }
+
+                      $$ = driver.build.forwarded_kwrestarg(self, $1);
+                    }
 
        operation: tIDENTIFIER | tCONSTANT | tFID
-      operation2: tIDENTIFIER | tCONSTANT | tFID | op
+      operation2: operation | op
       operation3: tIDENTIFIER | tFID | op
     dot_or_colon: call_op | tCOLON2
          call_op: tDOT
@@ -4414,7 +4424,7 @@ f_opt_paren_args: f_paren_args
                       $$ = $2;
                     }
 
-         trailer:  | tNL | tCOMMA
+         trailer: opt_nl | tCOMMA
 
             term: tSEMI
                   {
