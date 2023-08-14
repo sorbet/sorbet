@@ -15,6 +15,8 @@ class Parent
 end
 
   class Child < Parent
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
+
     sig do
       override
       .params(
@@ -27,6 +29,5 @@ end
       .returns(T.nilable(T::Hash[Symbol, T.untyped]))
     end
     def foo(bar, baz, qux, quux, corge:); end
-# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
   end
 # ------------------------------
