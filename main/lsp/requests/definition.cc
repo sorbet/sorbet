@@ -1,11 +1,51 @@
 #include "main/lsp/requests/definition.h"
+#include "ast/treemap/treemap.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LSPQuery.h"
+#include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+namespace {
+
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
+    const auto &gs = typechecker.state();
+    auto files = vector<core::FileRef>{queryLoc.file()};
+    auto resolved = typechecker.getResolved(files);
+
+    NextMethodFinder nextMethodFinder(queryLoc);
+    for (auto &t : resolved) {
+        auto ctx = core::Context(gs, core::Symbols::root(), t.file);
+        ast::TreeWalk::apply(ctx, nextMethodFinder, t.tree);
+    }
+
+    return nextMethodFinder.result();
+}
+
+// TODO(jez) Can replace this with findMemberTransitiveAncestors once 7212 lands.
+core::MethodRef findParentMethod(const core::GlobalState &gs, core::MethodRef childMethod) {
+    const auto &klassData = childMethod.data(gs)->owner.data(gs);
+    auto name = childMethod.data(gs)->name;
+
+    for (const auto &mixin : klassData->mixins()) {
+        auto superMethod = mixin.data(gs)->findMethod(gs, name);
+        if (superMethod.exists()) {
+            return superMethod;
+        }
+    }
+
+    if (klassData->superClass().exists()) {
+        return klassData->superClass().data(gs)->findMethodTransitive(gs, name);
+    }
+
+    return core::Symbols::noMethod();
+}
+
+} // namespace
+
 DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
                                unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentDefinition), params(move(params)) {}
@@ -66,7 +106,20 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             auto start = sendResp->dispatchResult.get();
             while (start != nullptr) {
                 if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    addLocIfExists(gs, locations, start->main.method.data(gs)->loc());
+                    auto loc = start->main.method.data(gs)->loc();
+                    if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
+                        auto nextMethod = firstMethodAfterQuery(typechecker, sendResp->termLoc());
+                        if (nextMethod.exists()) {
+                            auto parentMethod = findParentMethod(gs, nextMethod);
+                            if (parentMethod.exists()) {
+                                // actually, jump to the definition of the abstract method, instead of
+                                // the definition of `override` in builder.rbi
+                                loc = parentMethod.data(gs)->loc();
+                            }
+                        }
+                    }
+
+                    addLocIfExists(gs, locations, loc);
                 }
                 start = start->secondary.get();
             }
