@@ -74,7 +74,7 @@ foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its packa
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    __package.rb:6: Inserted `import Foo::Bar::OtherPackage`
+    __package.rb:6: Inserted `test_import Foo::Bar::OtherPackage`
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 Errors: 6
