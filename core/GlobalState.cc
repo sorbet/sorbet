@@ -84,6 +84,13 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &defaultKeywordArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.flags.isDefault = true;
+        arg.flags.isKeyword = true;
+        return *this;
+    }
+
     MethodBuilder &repeatedArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isRepeated = true;
@@ -554,6 +561,15 @@ void GlobalState::initEmpty() {
     klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::T_Private_Methods_DeclBuilder());
+
+    method = enterMethod(*this, Symbols::T_Private_Methods_DeclBuilder(), Names::abstract()).build();
+    ENFORCE(method == Symbols::T_Private_Methods_DeclBuilder_abstract());
+    method = enterMethod(*this, Symbols::T_Private_Methods_DeclBuilder(), Names::overridable()).build();
+    ENFORCE(method == Symbols::T_Private_Methods_DeclBuilder_overridable());
+    method = enterMethod(*this, Symbols::T_Private_Methods_DeclBuilder(), Names::override_())
+                 .defaultKeywordArg(Names::allowIncompatible())
+                 .build();
+    ENFORCE(method == Symbols::T_Private_Methods_DeclBuilder_override());
 
     // T.class_of(T::Sig::WithoutRuntime)
     klass = Symbols::T_Sig_WithoutRuntime().data(*this)->singletonClass(*this);
