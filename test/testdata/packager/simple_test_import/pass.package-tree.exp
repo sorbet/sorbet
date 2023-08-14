@@ -8,6 +8,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export_for_test(<emptyTree>::<C Project>::<C MainLib>::<C Lib>)
   end
 end
+# -- test/testdata/packager/simple_test_import/test_only/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Project>::<C TestOnly><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C TestOnly>::<C SomeHelper>)
+  end
+end
+# -- test/testdata/packager/simple_test_import/util/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(::<root>::<C Project>::<C Util>::<C MyUtil>)
+
+    <self>.export(::<root>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
+  end
+end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C MainLib>::<C Lib><<C <todo sym>>> < (::<todo sym>)
@@ -34,23 +48,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C Test>::<C Project>::<C Util>::<C Unexported>
   end
 end
-# -- test/testdata/packager/simple_test_import/test_only/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C TestOnly><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(::<root>::<C Project>::<C TestOnly>::<C SomeHelper>)
-  end
-end
 # -- test/testdata/packager/simple_test_import/test_only/some_helper.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper><<C <todo sym>>> < (::<todo sym>)
-  end
-end
-# -- test/testdata/packager/simple_test_import/util/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Project>::<C Util><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.export(::<root>::<C Project>::<C Util>::<C MyUtil>)
-
-    <self>.export(::<root>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
   end
 end
 # -- test/testdata/packager/simple_test_import/util/my_util.rb --
