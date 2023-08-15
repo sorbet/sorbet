@@ -73,6 +73,29 @@ class TestRescue
     end
   end
 
+  def rescue_in_a_loop()
+    2.times do
+      begin
+        meth
+      rescue => e 
+              # ^ Changing the type of a variable in a loop is not permitted
+      end
+    end
+  end
+
+
+  def reraise_in_rescue()
+    begin
+      bar
+    rescue => exc
+      raise
+    ensure
+      puts(exc&.message)
+         # ^^^^^^^^^^^^ This code is unreachable
+
+    end
+  end
+
   def parse_rescue_ensure()
     begin; meth; rescue; baz; ensure; bar; end
   end

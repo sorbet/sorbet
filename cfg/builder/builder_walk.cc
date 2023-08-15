@@ -820,9 +820,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
+                stopInDebugger();
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
-                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
+                    auto caseHeader = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
@@ -830,8 +831,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
 
-                    caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
-                    // Mark the exception as handled
+                    // caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Literal>(core::Types::top()));
+                    synthesizeExpr(caseHeader, localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
+                    unconditionalJump(caseHeader, caseBody, cctx.inWhat, a.loc);
+
+                    // TODO(iz): Add contidional jump here
+                    // caseBody = 7
                     synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
                                    make_insn<Literal>(core::Types::nilClass()));
 
@@ -867,7 +873,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                             args.size(), args, std::move(argLocs), isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
-                        conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
+                        conditionalJump(rescueHandlersBlock, isaCheck, caseHeader, otherHandlerBlock, cctx.inWhat, loc);
                         rescueHandlersBlock = otherHandlerBlock;
                     }
                     if (added) {
