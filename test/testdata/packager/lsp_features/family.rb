@@ -41,7 +41,6 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Krabappel::Popquiz` in non-test file
 # ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` is defined in a test namespace
   #                ^^^^^^^ usage: popquiz
 # ^^^^^^^^^^^^^^^ importusage: krabappel-pkg
