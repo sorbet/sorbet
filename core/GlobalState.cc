@@ -2530,6 +2530,9 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
+    } else {
+        // Ensures that locs get properly updated on the fast path
+        sym.data(*this)->addLoc(*this, loc);
     }
     return sym;
 }
@@ -2549,6 +2552,9 @@ MethodRef GlobalState::staticInitForFile(Loc loc) {
         auto blkLoc = core::Loc::none(loc.file());
         auto &blkSym = this->enterMethodArgumentSymbol(blkLoc, sym, core::Names::blkArg());
         blkSym.flags.isBlock = true;
+    } else {
+        // Ensures that locs get properly updated on the fast path
+        sym.data(*this)->addLoc(*this, loc);
     }
     return sym;
 }
