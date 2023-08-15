@@ -13,6 +13,7 @@
 
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
+#include <regex>
 
 using namespace std;
 
@@ -904,69 +905,22 @@ private:
         }
     }
 
-    /**
-     * Tries to suggest an autocorrect that declares a concrete method definition for the given abstract method.
-     *
-     * For now, this will only suggest an autocorrect where the target class/module definition already spans multiple
-     * lines of the source text. Otherwise, this will return the null option.
-     */
-    optional<core::AutocorrectSuggestion> suggestMethodDefinition(const core::GlobalState &gs,
-                                                                  const core::Loc classOrModuleDeclaredAt,
-                                                                  const core::Loc classOrModuleEndsAt,
-                                                                  const core::MethodRef abstractMethodRef) {
-        auto hasMultilineDefinition =
-            classOrModuleDeclaredAt.position(gs).first.line != classOrModuleEndsAt.position(gs).second.line;
-        if (!hasMultilineDefinition) {
-            // For now we don't suggest an edit for this scenario, because the edit would have to modify an existing
-            // line of the source text (rather than only adding new lines to the source text); multiple such edits would
-            // not be applied correctly if the user chose to apply them all at once using the "Apply all Sorbet fixes
-            // for file" quickfix.
-            return nullopt;
-        }
-
+    core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
+                                                                    const core::MethodRef abstractMethodRef,
+                                                                    const core::Loc insertAt, const string format,
+                                                                    const string classOrModuleIndent) {
         auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
         auto resultType = abstractMethodRef.data(gs)->resultType;
-        auto methodDefinition = reindentSource(gs,
-                                               core::source_generator::prettyTypeForMethod(
-                                                   gs, abstractMethodRef, nullptr, resultType, nullptr, showOptions),
-                                               classOrModuleDeclaredAt);
-        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(gs);
-        string classOrModuleIndent(indentLength, ' ');
+        auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
+                                                                            nullptr, showOptions);
 
-        // This variable contains an optional newline to use as a prefix to the new method definition.
-        //
-        // Adding this leading newline generally produces the most readable output, because most class/module bodies
-        // will not contain unnecessary whitespace lines just before the final `end` statement.
-        //
-        // However, we make an exception for one common style of declaration: class/module an empty body over two
-        // consecutive lines i.e.:
-        //
-        //     class Foo < Bar
-        //     end
-        //
-        // For that type of declaration, we omit the leading newline.
-        auto spacer =
-            (classOrModuleEndsAt.position(gs).second.line - classOrModuleDeclaredAt.position(gs).first.line == 1)
-                ? ""
-                : "\n";
+        vector<string> indentedLines;
+        absl::c_transform(
+            absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
+            [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
+        auto indentedMethodDefintion = absl::StrJoin(indentedLines, "\n");
 
-        return core::AutocorrectSuggestion{
-            fmt::format("Define `{}`", abstractMethodRef.data(gs)->name.show(gs)),
-            {core::AutocorrectSuggestion::Edit{
-                endLoc.adjust(gs, -indentLength, 0),
-                fmt::format("{}{}\n{}", spacer, methodDefinition, classOrModuleIndent)}}};
-    }
-
-    /** Indents the given text one level deeper than the level of the given parent location. */
-    string reindentSource(const core::GlobalState &gs, string text, core::Loc parentLoc) {
-        auto [_, indentLength] = parentLoc.findStartOfLine(gs);
-        string indent(indentLength, ' ');
-
-        vector<string> reindentedLines;
-        absl::c_transform(absl::StrSplit(text, "\n"), std::back_inserter(reindentedLines),
-                          [indent](auto &line) -> string { return fmt::format("{}  {}", indent, line); });
-
-        return absl::StrJoin(reindentedLines, "\n");
+        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefintion)};
     }
 
     void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym, ast::ClassDef &classDef) {
@@ -984,24 +938,68 @@ private:
             return;
         }
 
+        vector<core::MethodRef> missingMethods;
         for (auto proto : abstract) {
             if (proto.data(gs)->owner == sym) {
                 continue;
             }
 
-            auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
-            if (!mem.exists()) {
-                if (auto e = gs.beginError(classOrModuleDeclaredAt, core::errors::Resolver::BadAbstractMethod)) {
-                    e.setHeader("Missing definition for abstract method `{}`", proto.show(gs));
-                    e.addErrorLine(proto.data(gs)->loc(), "defined here");
+            auto concreteMethodRef = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
+            if (concreteMethodRef.exists()) {
+                continue;
+            }
 
-                    auto classOrModuleEndsAt =
-                        core::Loc{classOrModuleDeclaredAt.file(), classDef.loc.copyEndWithZeroLength()};
-                    auto maybeAutocorrect =
-                        suggestMethodDefinition(gs, classOrModuleDeclaredAt, classOrModuleEndsAt, proto);
-                    if (maybeAutocorrect.has_value()) {
-                        e.addAutocorrect(move(maybeAutocorrect.value()));
+            missingMethods.emplace_back(proto);
+        }
+
+        if (!missingMethods.empty()) {
+            if (auto e = gs.beginError(classOrModuleDeclaredAt, core::errors::Resolver::BadAbstractMethod)) {
+                auto pluralization = (missingMethods.size() > 1 ? "s" : "");
+                e.setHeader("Missing definition{} for abstract method{}", pluralization, pluralization);
+
+                auto classOrModuleEndsAt =
+                    core::Loc{classOrModuleDeclaredAt.file(), classDef.loc.copyEndWithZeroLength()};
+                auto hasSingleLineDefinition =
+                    classOrModuleDeclaredAt.position(gs).first.line == classOrModuleEndsAt.position(gs).second.line;
+
+                auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
+                string endSuffix(endRange.source(gs).value_or(""));
+                regex emptyBodyRe("^\\s*;\\s+end\\s*$");
+                auto hasEmptyBody = regex_match(endSuffix, emptyBodyRe);
+
+                auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(gs);
+                string classOrModuleIndent(indentLength, ' ');
+                auto insertAt = endLoc.adjust(gs, -indentLength, 0);
+                auto format = "{}\n" + classOrModuleIndent;
+
+                vector<core::AutocorrectSuggestion::Edit> edits;
+                if (hasSingleLineDefinition && hasEmptyBody) {
+                    // First, break the class/module definition up onto multiple lines.
+                    edits.emplace_back(
+                        core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
+
+                    // Then, modify our insertion strategy such that we add new methods to the top of the class/module
+                    // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
+                    // class/module body that we just created.
+                    insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
+                    format = "\n{}";
+                }
+
+                for (auto proto : missingMethods) {
+                    e.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
+
+                    if (hasSingleLineDefinition && !hasEmptyBody) {
+                        // We don't suggest autocorrects for this case because we cannot say for sure how the
+                        // class/module has been declared, and so we also can't determine how to modify it.
+                        continue;
                     }
+
+                    edits.emplace_back(defineInheritedAbstractMethod(gs, proto, insertAt, format, classOrModuleIndent));
+                }
+
+                if (!edits.empty()) {
+                    e.addAutocorrect(core::AutocorrectSuggestion{
+                        fmt::format("Define inherited abstract method{}", pluralization), edits});
                 }
             }
         }

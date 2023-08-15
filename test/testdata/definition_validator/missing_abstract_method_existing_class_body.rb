@@ -16,7 +16,7 @@ class Parent
 end
 
   class Child < Parent
-# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#bar`
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
     sig {override.void}
     def foo; end
 

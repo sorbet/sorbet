@@ -9,7 +9,5 @@ class Parent
   def foo; end
 end
 
-  Child = Class.new(Parent) do
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
-    def bar; end
-  end
+  class Child < Parent; end
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method

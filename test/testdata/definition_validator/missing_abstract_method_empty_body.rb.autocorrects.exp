@@ -1,4 +1,4 @@
-# -- test/testdata/definition_validator/missing_abstract_method_class_constructor_block.rb --
+# -- test/testdata/definition_validator/missing_abstract_method_empty_body.rb --
 # typed: true
 # selective-apply-code-action: quickfix
 class Parent
@@ -10,11 +10,9 @@ class Parent
   def foo; end
 end
 
-  Child = Class.new(Parent) do
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
-    def bar; end
-
+  class Child < Parent
     sig {override.void}
     def foo; end
   end
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
 # ------------------------------

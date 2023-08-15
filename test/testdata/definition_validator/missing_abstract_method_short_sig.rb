@@ -10,5 +10,5 @@ class Parent
 end
 
   class Child < Parent
-# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Parent#foo`
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
   end

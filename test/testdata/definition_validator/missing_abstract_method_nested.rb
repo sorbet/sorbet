@@ -20,5 +20,5 @@ class Parent < Grandparent
 end
 
   class Child < Parent
-# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `Grandparent#bar`
+# ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
   end
