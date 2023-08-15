@@ -22,8 +22,8 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
      9 |    puts(result)
                  ^^^^^^
   Expected `BasicObject` for argument `arg0` of method `Kernel#puts`:
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1903:
-    1903 |        arg0: BasicObject,
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1906:
+    1906 |        arg0: BasicObject,
                   ^^^^
   Got `T.untyped` originating from:
     a.rb:6:
