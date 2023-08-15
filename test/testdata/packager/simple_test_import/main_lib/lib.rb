@@ -12,6 +12,5 @@ class Project::MainLib::Lib
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` is defined in a test namespace
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but is not exported from `Project::Util`
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` is defined in a test namespace
 end
