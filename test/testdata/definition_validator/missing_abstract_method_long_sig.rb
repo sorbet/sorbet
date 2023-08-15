@@ -1,5 +1,5 @@
 # typed: true
-# selective-apply-code-action: quickfix
+
 class Parent
   extend T::Sig
   extend T::Helpers

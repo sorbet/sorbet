@@ -1,6 +1,6 @@
 # -- test/testdata/definition_validator/missing_abstract_method_nested.rb --
 # typed: true
-# selective-apply-code-action: quickfix
+
 class Grandparent
   extend T::Sig
   extend T::Helpers

@@ -1,6 +1,6 @@
 # -- test/testdata/definition_validator/missing_abstract_method_empty_body.rb --
 # typed: true
-# selective-apply-code-action: quickfix
+
 class Parent
   extend T::Sig
   extend T::Helpers
