@@ -36,7 +36,6 @@ module Opus::Foo
   Opus::TestImported::TIClass
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Opus::TestImported::TIClass` in non-test file
   Test::Opus::TestImported::TITestClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Opus::TestImported::TITestClass` in non-test file
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` is defined in a test namespace
 
 
