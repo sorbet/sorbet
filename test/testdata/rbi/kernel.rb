@@ -5,6 +5,10 @@ extend T::Sig
 T.assert_type!(caller, T::Array[String])
 T.assert_type!(caller(10), T.nilable(T::Array[String]))
 
+T.assert_type!(caller_locations, T::Array[Thread::Backtrace::Location])
+T.assert_type!(caller_locations(2, 10), T.nilable(T::Array[Thread::Backtrace::Location]))
+T.assert_type!(caller_locations(1..10), T.nilable(T::Array[Thread::Backtrace::Location]))
+
 T.assert_type!(BigDecimal('123', 1, exception: true), BigDecimal)
 T.assert_type!(Complex('123', exception: false), Complex)
 T.assert_type!(Float('123.0'), Float)
