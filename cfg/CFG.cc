@@ -227,14 +227,16 @@ string CFG::toString(const core::GlobalState &gs) const {
         auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
+        auto penwidth = basicBlock->flags.isExceptionHandlingBlock ? "        penwidth = 2;\n" : "";
         fmt::format_to(std::back_inserter(buf),
                        "    \"bb{}_{}\" [\n"
                        "        shape = {};\n"
                        "        color = {};\n"
+                       "{}"
                        "        label = \"{}\\l\"\n"
                        "    ];\n\n"
                        "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-                       symbolName, basicBlock->id, shape, color,
+                       symbolName, basicBlock->id, shape, color, penwidth,
                        fmt::map_join(lines, "\\l", [](auto line) -> string { return absl::CEscape(line); }), symbolName,
                        basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
@@ -281,14 +283,16 @@ string CFG::showRaw(core::Context ctx) const {
         auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
+        auto penwidth = basicBlock->flags.isExceptionHandlingBlock ? "        penwidth = 2;\n" : "";
         fmt::format_to(std::back_inserter(buf),
                        "    \"bb{}_{}\" [\n"
                        "        shape = {};\n"
                        "        color = {};\n"
+                       "{}"
                        "        label = \"{}\\l\"\n"
                        "    ];\n\n"
                        "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-                       symbolName, basicBlock->id, shape, color,
+                       symbolName, basicBlock->id, shape, color, penwidth,
                        fmt::map_join(lines, "\\l", [](auto line) -> string { return absl::CEscape(line); }), symbolName,
                        basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
@@ -377,8 +381,9 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
-                   this->firstDeadInstructionIdx,
+    fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}{}]({}):\n", this->id,
+                   this->rubyRegionId, this->firstDeadInstructionIdx,
+                   this->flags.isExceptionHandlingBlock ? ", isExceptionHandlingBlock=true" : "",
                    fmt::map_join(
                        this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
