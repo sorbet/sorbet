@@ -1363,4 +1363,12 @@ class Regexp < Object
     params(pats: T.untyped).returns(Regexp)
   end
   def self.union(*pats); end
+
+
+  # [TimeoutError](https://docs.ruby-lang.org/en/3.2/Regexp/TimeoutError.html) 
+  # is raised when the timeout set by calling
+  # [::timeout=][https://docs.ruby-lang.org/en/3.2/Regexp.html#method-c-timeout-3D]
+  # is reached during matching.
+  class Regexp::TimeoutError < RegexpError
+  end
 end
