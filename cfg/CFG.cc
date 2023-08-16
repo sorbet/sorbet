@@ -31,7 +31,11 @@ int CFG::numLocalVariables() const {
     return this->localVariables.size();
 }
 
-BasicBlock *CFG::freshBlock(int outerLoops, int rubyRegionId) {
+BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *current) {
+    return this->freshBlockWithRegion(outerLoops, current->rubyRegionId);
+}
+
+BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
