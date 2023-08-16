@@ -32,6 +32,7 @@ int CFG::numLocalVariables() const {
 }
 
 BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *current) {
+    ENFORCE(current != nullptr);
     return this->freshBlockWithRegion(outerLoops, current->rubyRegionId);
 }
 
@@ -68,8 +69,8 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
 }
 
 CFG::CFG() {
-    freshBlock(0, 0); // entry;
-    freshBlock(0, 0); // dead code;
+    freshBlockWithRegion(0, 0); // entry;
+    freshBlockWithRegion(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
