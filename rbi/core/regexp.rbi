@@ -1369,6 +1369,6 @@ class Regexp < Object
   # is raised when the timeout set by calling
   # [::timeout=][https://docs.ruby-lang.org/en/3.2/Regexp.html#method-c-timeout-3D]
   # is reached during matching.
-  class Regexp::TimeoutError < RegexpError
+  class TimeoutError < RegexpError
   end
 end
