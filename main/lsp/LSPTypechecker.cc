@@ -74,7 +74,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
     // Initialize the global state for the indexer
     {
         initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
-        initialGS->enableTypedFalseCompletionNudges = currentConfig.getClientConfig().enableTypedFalseNudge;
+        initialGS->enableTypedFalseCompletionNudges = currentConfig.getClientConfig().enableTypedFalseCompletionNudges;
         // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
