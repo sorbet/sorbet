@@ -96,7 +96,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && elseb->exprs.empty() &&
+            if (elseb != cfg.deadBlock() && bb->rubyRegionId == elseb->rubyRegionId && elseb->exprs.empty() &&
                 elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
                 ENFORCE(bb->flags.isExceptionHandlingBlock == elseb->flags.isExceptionHandlingBlock);
                 // shortcut else
