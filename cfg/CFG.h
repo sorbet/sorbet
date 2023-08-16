@@ -55,7 +55,13 @@ public:
     int id = 0;
     int fwdId = -1;
     int bwdId = -1;
-    int flags = 0;
+    struct Flags {
+        bool isLoopHeader : 1;
+        bool wasJumpDestination : 1;
+        // In C++20 we can replace this with bit field initializers
+        Flags() : isLoopHeader(false), wasJumpDestination(false) {}
+    };
+    Flags flags;
     int outerLoops = 0;
     // Tracks which Ruby block (do ... end) or Ruby exception-handling region
     // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
@@ -156,10 +162,6 @@ public:
     std::string toTextualString(const core::GlobalState &gs) const;
     // Verbose debug output
     std::string showRaw(core::Context ctx) const;
-
-    // Flags
-    static constexpr int LOOP_HEADER = 1 << 0;
-    static constexpr int WAS_JUMP_DESTINATION = 1 << 1;
 
     // special minLoops
     static constexpr int MIN_LOOP_FIELD = -1;
