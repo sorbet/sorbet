@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def <before><<todo method>>(&<blk>)
       begin
         @foo = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
         <self>.instance_helper()
@@ -156,7 +156,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of instance_helper>
 
-    <runtime method definition of initialize>
+    <runtime method definition of <before>>
 
     <runtime method definition of <after>>
 
