@@ -53,7 +53,8 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
             auto *send = ast::cast_tree<ast::Send>(stat);
             auto loc = send->loc;
             auto block = send->block();
-            auto method_name = send->fun == core::Names::setup() ? core::Names::initialize() : core::Names::teardown();
+            auto method_name =
+                send->fun == core::Names::setup() ? core::Names::beforeAngles() : core::Names::teardown();
 
             auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));
             auto method_with_sig =
