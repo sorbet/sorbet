@@ -108,7 +108,7 @@ bb15[rubyRegionId=7, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClas
 
 # backedges
 # - bb6(rubyRegionId=6)
-bb16[rubyRegionId=6, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+bb16[rubyRegionId=6, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$8: A, <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <exceptionValue>$8: NilClass = nil
     <keepForCfgTemp>$30: Sorbet::Private::Static::Void = <magic>$29: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$8: NilClass)
     <statTemp>$36: String("rescue A") = "rescue A"
@@ -142,7 +142,7 @@ bb20[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb21[rubyRegionId=2, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+bb21[rubyRegionId=2, firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <exceptionValue>$4: B, <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$43: Sorbet::Private::Static::Void = <magic>$42: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
     <statTemp>$49: String("rescue B ") = "rescue B "

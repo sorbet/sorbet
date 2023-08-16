@@ -42,7 +42,7 @@ class TestRescue
       baz
     end
 
-    T.reveal_type(baz) # error: Revealed type: `T.untyped`
+    T.reveal_type(baz) # error: Revealed type: `T.nilable(T.any(LoadError, SocketError))`
   end
 
   def rescue_loop()
@@ -70,6 +70,29 @@ class TestRescue
       meth
     rescue *typed_exceptions => e
       T.reveal_type(e) # error: Revealed type: `T.untyped`
+    end
+  end
+
+  def rescue_in_a_loop()
+    2.times do
+      begin
+        meth
+      rescue => e 
+              # ^ Changing the type of a variable in a loop is not permitted
+      end
+    end
+  end
+
+
+  def reraise_in_rescue()
+    begin
+      bar
+    rescue => exc
+      raise
+    ensure
+      puts(exc&.message)
+         # ^^^^^^^^^^^^ This code is unreachable
+
     end
   end
 

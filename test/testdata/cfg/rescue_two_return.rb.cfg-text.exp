@@ -36,7 +36,7 @@ bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <gotoDeadTemp>$12: TrueClass):
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=4](<magic>$6: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=4](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
     <returnTemp>$11: Integer(2) = 2

@@ -58,9 +58,8 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Pr
 # - bb8(rubyRegionId=2)
 bb7[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer), <exceptionValue>$8: T.untyped, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
-    se$1: T.untyped = <exceptionValue>$8
     <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(se$1: T.untyped)
+    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$8: T.untyped)
     <isaCheckTemp>$13 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
@@ -87,7 +86,7 @@ bb10[rubyRegionId=4, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::P
 
 # backedges
 # - bb7(rubyRegionId=3)
-bb11[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
+bb11[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <exceptionValue>$8: StandardError, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
     <exceptionValue>$8: NilClass = nil
     <keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$8: NilClass)
