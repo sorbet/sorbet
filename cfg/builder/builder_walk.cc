@@ -820,7 +820,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
-                stopInDebugger();
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseHeader = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
@@ -832,9 +831,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
 
                     // caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Literal>(core::Types::top()));
+                    auto rescueHeaderTemp = cctx.newTemporary(core::Names::rescueHeaderTemp());
                     synthesizeExpr(caseHeader, localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+                    synthesizeExpr(caseHeader, rescueHeaderTemp, rescueCase->var.loc(), make_insn<Literal>(core::Types::top()));
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
-                    unconditionalJump(caseHeader, caseBody, cctx.inWhat, a.loc);
+                    // unconditionalJump(caseHeader, caseBody, cctx.inWhat, a.loc);
+                    conditionalJump(caseHeader, rescueHeaderTemp, caseBody, ensureBody, cctx.inWhat, a.loc);
+                    //                         auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
+                        // rescueHandlersBlock->exprs.emplace_back(
+                            // isaCheck, loc,
+                            // make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
+                                            // args.size(), args, std::move(argLocs), isPrivateOk));
+
+                        // conditionalJump(rescueHandlersBlock, isaCheck, caseHeader, otherHandlerBlock, cctx.inWhat, loc);
+
+                    // conditionalJump(caseHeader, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat, core::LocOffsets loc)
 
                     // TODO(iz): Add contidional jump here
                     // caseBody = 7
