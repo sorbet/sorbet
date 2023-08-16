@@ -8,6 +8,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(::<root>::<C Package>::<C InnerClass>)
   end
 end
+# -- test/testdata/packager/deeply_nested_packages/subdirectory/subpackage/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C Package>)
+
+    <self>.export(::<root>::<C Package>::<C Subpackage>::<C SubpackageClass>)
+  end
+end
 # -- test/testdata/packager/deeply_nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
@@ -27,14 +35,6 @@ end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/inner_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C InnerClass><<C <todo sym>>> < (::<todo sym>)
-  end
-end
-# -- test/testdata/packager/deeply_nested_packages/subdirectory/subpackage/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(::<PackageSpecRegistry>::<C Package>)
-
-    <self>.export(::<root>::<C Package>::<C Subpackage>::<C SubpackageClass>)
   end
 end
 # -- test/testdata/packager/deeply_nested_packages/subdirectory/subpackage/subpackage.rb --

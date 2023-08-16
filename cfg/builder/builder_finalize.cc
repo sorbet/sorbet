@@ -124,7 +124,7 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
             continue;
         }
         if (bb.get() != cfg.entry()) {
-            ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block {} was never linked into cfg", bb->id);
+            ENFORCE(bb->flags.wasJumpDestination, "block {} was never linked into cfg", bb->id);
         }
         auto thenFnd = absl::c_find(bb->bexit.thenb->backEdges, bb.get());
         auto elseFnd = absl::c_find(bb->bexit.elseb->backEdges, bb.get());
@@ -237,7 +237,7 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
     for (unique_ptr<BasicBlock> &bb : cfg.basicBlocks) {
         for (auto *parent : bb->backEdges) {
             if (parent->outerLoops < bb->outerLoops) {
-                bb->flags |= CFG::LOOP_HEADER;
+                bb->flags.isLoopHeader = true;
                 continue;
             }
         }

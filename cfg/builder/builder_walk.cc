@@ -12,8 +12,8 @@ namespace sorbet::cfg {
 
 void CFGBuilder::conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                                  core::LocOffsets loc) {
-    thenb->flags |= CFG::WAS_JUMP_DESTINATION;
-    elseb->flags |= CFG::WAS_JUMP_DESTINATION;
+    thenb->flags.wasJumpDestination = true;
+    elseb->flags.wasJumpDestination = true;
     if (from != inWhat.deadBlock()) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
@@ -28,7 +28,7 @@ void CFGBuilder::conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *th
 }
 
 void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc) {
-    to->flags |= CFG::WAS_JUMP_DESTINATION;
+    to->flags.wasJumpDestination = true;
     if (from != inWhat.deadBlock()) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");

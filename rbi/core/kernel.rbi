@@ -168,6 +168,9 @@ module Kernel
     )
     .returns(T.nilable(T::Array[Thread::Backtrace::Location]))
   end
+  sig do
+    returns(T::Array[Thread::Backtrace::Location])
+  end
   def caller_locations(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   # `catch` executes its block. If `throw` is not called, the block executes

@@ -136,7 +136,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         copy.markDead();
         return copy;
     }
-    bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
+    bool enteringLoop = bb->flags.isLoopHeader;
     for (auto &pair : env.vars()) {
         auto local = pair.first;
         auto &state = pair.second;
@@ -829,7 +829,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
             pair.second.knownTruthy = other.getKnownTruthy(var);
         }
 
-        if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
+        if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
         bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
