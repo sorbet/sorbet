@@ -133,45 +133,21 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else {
             current.isDead = (bb != cfg->entry());
             for (cfg::BasicBlock *parent : bb->backEdges) {
-                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
-                    // if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
-                    // TODO(jez) Want to replace ^ this with something like this:
-                    //
-                    // if (!visited[parent->id]) {
-                    //
-                    // or like this:
-                    //
-                    // if (!visited[parent->id] ||
-                    //     (outEnvironments[parent->id].isDead && !isBasicBlockForRescueOrEnsureOrElse(bb))) {
-                    //
-                    // otherwise this code will short circuit and defeat our attempt to merge
-                    // previously-dead environments.
+                if (!visited[parent->id] ||
+                    (outEnvironments[parent->id].isDead && !bb->flags.isExceptionHandlingBlock)) {
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
-                if (!envAsSeenFromBranch.isDead) {
+                if (!envAsSeenFromBranch.isDead || bb->flags.isExceptionHandlingBlock) {
                     current.isDead = false;
+                    // If parent env is not dead, of course we can merge.
+                    // If parent env IS dead, we might still want to merge, because current could
+                    // be reached via exceptional control flow.
                     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
-                // TODO(jez) Want to replace ^ this with something like this:
-                // if (!envAsSeenFromBranch.isDead) {
-                //     current.isDead = false;
-                // }
-                // if (!envAsSeenFromBranch.isDead || isBasicBlockForRescueOrEnsureOrElse(bb)) {
-                //     // If parent env is not dead, of course we can merge.
-                //     // If parent env IS dead, we might still want to merge, because current could
-                //     // be reached via exceptional control flow.
-                //     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
-                // }
-                // TODO(jez) Is it enough to simply ask whether parent->bexit.cond is <exceptionValue>?
-                // Intuitively: we're making the claim that any block with <get-current-exception>
-                // is possibly not dead because unwinding exceptional control flow might reach that
-                // block. It's also worth noting that this name == <exceptionValue> check mimics
-                // what the compiler does to decide it needs to start emitting exceptional control
-                // flow stuff.
             }
         }
 
