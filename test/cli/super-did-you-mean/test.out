@@ -1,0 +1,7 @@
+test/cli/super-did-you-mean/test.rb:15: Method `no_parent_method` does not exist on ancestors of `Child` https://srb.help/7003
+    15 |    super
+            ^^^^^
+    test/cli/super-did-you-mean/test.rb:6: Did you mean: `Parent#supper`
+     6 |  def supper
+          ^^^^^^^^^^
+Errors: 1
