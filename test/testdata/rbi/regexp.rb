@@ -37,3 +37,5 @@ T.reveal_type(Regexp.timeout) # error: type: `T.nilable(Float)`
 T.reveal_type(Regexp.timeout = 3.0) # error: type: `Float(3.000000)`
 T.reveal_type(Regexp.timeout) # error: type: `T.nilable(Float)`
 T.reveal_type(Regexp.timeout = nil) # error: type: `NilClass`
+
+Regexp::TimeoutError.new
