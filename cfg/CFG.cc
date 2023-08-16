@@ -33,15 +33,16 @@ int CFG::numLocalVariables() const {
 
 BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *current) {
     ENFORCE(current != nullptr);
-    return this->freshBlockWithRegion(outerLoops, current->rubyRegionId);
+    return this->freshBlockWithRegion(outerLoops, current->rubyRegionId, current->flags.isExceptionHandlingBlock);
 }
 
-BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId) {
+BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId, bool isExceptionHandlingBlock) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
     r->rubyRegionId = rubyRegionId;
+    r->flags.isExceptionHandlingBlock = isExceptionHandlingBlock;
     return r.get();
 }
 
@@ -69,8 +70,9 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
 }
 
 CFG::CFG() {
-    freshBlockWithRegion(0, 0); // entry;
-    freshBlockWithRegion(0, 0); // dead code;
+    auto isExceptionHandlingBlock = true;
+    freshBlockWithRegion(0, 0, !isExceptionHandlingBlock); // entry;
+    freshBlockWithRegion(0, 0, !isExceptionHandlingBlock); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();

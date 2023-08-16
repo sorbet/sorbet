@@ -58,8 +58,13 @@ public:
     struct Flags {
         bool isLoopHeader : 1;
         bool wasJumpDestination : 1;
+        // Either a rescue or ensure block, which means that the block could be reachable via
+        // (implicit) exceptional control flow/unwinding, even if the jumps into that block from
+        // Sorbet's CFG are dead.
+        bool isExceptionHandlingBlock : 1;
+
         // In C++20 we can replace this with bit field initializers
-        Flags() : isLoopHeader(false), wasJumpDestination(false) {}
+        Flags() : isLoopHeader(false), wasJumpDestination(false), isExceptionHandlingBlock(false) {}
     };
     Flags flags;
     int outerLoops = 0;
@@ -193,7 +198,7 @@ public:
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops, BasicBlock *current);
-    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId);
+    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId, bool isExceptionHandlingBlock);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;
