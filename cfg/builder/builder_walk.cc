@@ -816,11 +816,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a.body, bodyBlock);
 
+                auto bodyEndBlock =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRubyRegionId, isExceptionHandlingBlock);
+                unconditionalJump(bodyBlock, bodyEndBlock, cctx.inWhat, a.loc);
+
                 // else is only executed if body didn't raise an exception
                 auto elseBody =
                     cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRubyRegionId, !isExceptionHandlingBlock);
-                synthesizeExpr(bodyBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
-                conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
+                synthesizeExpr(bodyEndBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
+                conditionalJump(bodyEndBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
                                 rescueKeywordLoc);
 
                 elseBody = walk(cctx, a.else_, elseBody);

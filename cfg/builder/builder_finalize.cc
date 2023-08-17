@@ -10,6 +10,20 @@ using namespace std;
 
 namespace sorbet::cfg {
 
+namespace {
+
+bool safeToMergeBlocks(BasicBlock *from, BasicBlock *to) {
+    // 1. Don't want to merge code from outside a Ruby `do ... end` block into one (or vice versa)
+    // 2. Don't want to merge code from one begin/rescue/ensure/else region into a different one
+    return from->rubyRegionId == to->rubyRegionId &&
+           // 3. Don't want to merge the exception-handling-specific code from one
+           // begin/rescue/ensure/else basic block into a non-exception-handling-specific basic
+           // block of the same rubyRegionId (see begin_rescue_partial_raise.rb)
+           from->flags.isExceptionHandlingBlock == to->flags.isExceptionHandlingBlock;
+}
+
+} // namespace
+
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
@@ -50,8 +64,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.cond = LocalRef::unconditional();
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
-                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed togather
-                ENFORCE(bb->flags.isExceptionHandlingBlock == thenb->flags.isExceptionHandlingBlock);
+                safeToMergeBlocks(bb, thenb)) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));
@@ -84,9 +97,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && thenb->exprs.empty() &&
+            if (thenb != cfg.deadBlock() && safeToMergeBlocks(bb, thenb) && thenb->exprs.empty() &&
                 thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
-                ENFORCE(bb->flags.isExceptionHandlingBlock == thenb->flags.isExceptionHandlingBlock);
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.emplace_back(bb);
@@ -96,9 +108,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && bb->rubyRegionId == elseb->rubyRegionId && elseb->exprs.empty() &&
+            if (elseb != cfg.deadBlock() && safeToMergeBlocks(bb, elseb) && elseb->exprs.empty() &&
                 elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
-                ENFORCE(bb->flags.isExceptionHandlingBlock == elseb->flags.isExceptionHandlingBlock);
                 // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
