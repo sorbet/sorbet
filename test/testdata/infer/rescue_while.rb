@@ -6,5 +6,5 @@ begin
     raise
   end
 rescue
-  T.reveal_type(x) # error: `NilClass`
+  T.reveal_type(x) # error: `T.nilable(Integer)`
 end

@@ -23,8 +23,10 @@ begin
     raise
   else T.absurd(x)
   end
+  T.reveal_type(x) # error: `T.any(MyEnum::X, MyEnum::Y)`
+  T.reveal_type(y) # error: `MyEnum`
 rescue
   # Sorbet doesn't stitch the individual enum values back together once they've been split.
-  T.reveal_type(x) # error: `NilClass`
-  T.reveal_type(y) # error: `NilClass`
+  T.reveal_type(x) # error: `T.nilable(T.any(MyEnum::X, MyEnum::Y))`
+  T.reveal_type(y) # error: `T.nialble(MyEnum)`
 end

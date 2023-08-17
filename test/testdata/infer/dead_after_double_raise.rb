@@ -10,9 +10,9 @@ def example1
     else
       raise
     end
-    T.reveal_type(x)
+    T.reveal_type(x) # error: `Integer(1)`
   rescue
-    T.reveal_type(x) # error: `NilClass`
+    T.reveal_type(x) # error: `T.nilable(Integer)`
   end
 end
 
