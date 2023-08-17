@@ -10,22 +10,22 @@ export async function toggleUntypedCodeHighlighting(
 ): Promise<boolean> {
   const targetState = !context.configuration.highlightUntyped;
   await context.configuration.setHighlightUntyped(targetState);
-  const { activeLanguageClient: client } = context.statusProvider;
-  if (!client || client === undefined) {
-    context.log.debug("ToggleUntyped: No active Sorbet LSP.");
-  }
-
   context.log.info(
     `ToggleUntyped: Untyped code highlighting: ${
       targetState ? "enabled" : "disabled"
     }`,
   );
 
-  client?.sendNotification("workspace/didChangeConfiguration", {
-    settings: {
-      highlightUntyped: targetState,
-    },
-  });
+  const { activeLanguageClient: client } = context.statusProvider;
+  if (client) {
+    client.sendNotification("workspace/didChangeConfiguration", {
+      settings: {
+        highlightUntyped: targetState,
+      },
+    });
+  } else {
+    context.log.debug("ToggleUntyped: No active Sorbet LSP to notify.");
+  }
 
-  return context.configuration.highlightUntyped;
+  return targetState;
 }
