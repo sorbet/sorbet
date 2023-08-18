@@ -30,6 +30,7 @@
     "onCommand:sorbet.setLogLevel",
     "onCommand:sorbet.showOutput",
     "onCommand:sorbet.toggleHighlightUntyped",
+    "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
   ],
@@ -94,6 +95,12 @@
       {
         "command": "sorbet.toggleHighlightUntyped",
         "title": "Toggle highlighting untyped code",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
+      },
+      {
+        "command": "sorbet.toggleTypedFalseCompletionNudges",
+        "title": "Toggle the auto-complete nudge in `typed: false` files",
         "category": "Sorbet",
         "enablement": "workbenchState != empty"
       }
@@ -257,6 +264,11 @@
           "type": "boolean",
           "description": "Shows warning for untyped values.",
           "default": false
+        },
+        "sorbet.typedFalseCompletionNudges": {
+          "type": "boolean",
+          "description": "Displays an auto-complete nudge in `typed: false` files.",
+          "default": true
         },
         "sorbet.configFilePatterns": {
           "type": "array",

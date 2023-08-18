@@ -59,6 +59,8 @@ function createClient(
       // Let Sorbet know that we can handle sorbet:// URIs for generated files.
       supportsSorbetURIs: true,
       highlightUntyped: context.configuration.highlightUntyped,
+      enableTypedFalseCompletionNudges:
+        context.configuration.typedFalseCompletionNudges,
     },
     errorHandler,
     revealOutputChannelOn: context.configuration.revealOutputOnError

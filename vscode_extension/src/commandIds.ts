@@ -53,3 +53,9 @@ export const SORBET_SAVE_PACKAGE_FILES = "sorbet.savePackageFiles";
  */
 export const TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID =
   "sorbet.toggleHighlightUntyped";
+
+/**
+ * Toggle the auto-complete nudge in `typed: false` files.
+ */
+export const TOGGLE_TYPED_FALSE_COMPLETION_NUDGES_COMMAND_ID =
+  "sorbet.toggleTypedFalseCompletionNudges";
