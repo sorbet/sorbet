@@ -353,7 +353,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     }
 
     if (send->numPosArgs() == 0 && (send->fun == core::Names::before() || send->fun == core::Names::after())) {
-        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
+        auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto method = addSigVoid(
