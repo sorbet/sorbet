@@ -31,6 +31,11 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         name == core::Names::unresolvedAncestors() || name == core::Names::Constants::AttachedClass()) {
         return true;
     }
+    // TODO(jez) We probably want to get rid of anything with angle brackets (like what
+    // completion.cc does) but that can be in another change.
+    if (name == core::Names::beforeAngles()) {
+        return true;
+    }
     // static-init for a file
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
