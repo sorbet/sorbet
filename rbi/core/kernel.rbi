@@ -3162,4 +3162,13 @@ module Kernel
   # ```
   sig {returns(T.self_type)}
   def itself(); end
+
+  private def initialize_clone(*args); end
+
+  private def initialize_copy(orig); end
+
+  private def initialize_dup(orig); end
+
+  sig {params(method_name: Symbol, include_private: T::Boolean).returns(T.anything)}
+  private def respond_to_missing?(method_name, include_private = false); end
 end
