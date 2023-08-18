@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def <before><<todo method>>(&<blk>)
       begin
         @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
         <self>.foo()
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def <before><<todo method>>(&<blk>)
       <self>.bar()
     end
 
@@ -102,9 +102,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of test_block_is_evaluated_in_the_context_of_an_instance>
 
-    <runtime method definition of initialize>
+    <runtime method definition of <before>>
 
-    <runtime method definition of initialize>
+    <runtime method definition of <before>>
 
     <runtime method definition of teardown>
 
@@ -180,7 +180,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<todo method>>(&<blk>)
+    def <before><<todo method>>(&<blk>)
       @a = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
     end
 
@@ -202,7 +202,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of test_it_works>
 
-    <runtime method definition of initialize>
+    <runtime method definition of <before>>
 
     <runtime method definition of teardown>
   end

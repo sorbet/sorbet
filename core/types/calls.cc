@@ -2747,7 +2747,8 @@ public:
             auto fieldName = fieldNameTy.asName().show(gs);
 
             auto suggestType = res.returnType;
-            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit()) {
+            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit() &&
+                definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,
