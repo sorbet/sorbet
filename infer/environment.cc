@@ -688,12 +688,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         if (core::isa_type<core::ClassType>(argType)) {
             auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
                 !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
