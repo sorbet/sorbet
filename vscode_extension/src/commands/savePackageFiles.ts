@@ -1,24 +1,29 @@
 import { workspace } from "vscode";
+import { basename } from "path";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 
 /**
- * Save all open __package.rb files
+ * Save all __package.rb files with changes.
  *
  * @param context Sorbet extension context.
- * @return true if all the files were successfully saved
+ * @return `true` if all the files were successfully saved.
  */
 export async function savePackageFiles(
   context: SorbetExtensionContext,
 ): Promise<boolean> {
-  context.log.trace("savePackageFiles");
-  const allSaved = await Promise.all(
-    workspace.textDocuments.map(async (document) => {
-      context.log.trace(`savePackageFiles: saving ${document.fileName}`);
-      if (document.fileName.endsWith("/__package.rb")) {
-        return document.save();
-      }
+  const packageDocuments = workspace.textDocuments.filter(
+    (document) =>
+      document.isDirty && basename(document.fileName) === "__package.rb",
+  );
+  if (!packageDocuments.length) {
+    context.log.trace("savePackageFiles: nothing to save");
+    return true;
+  }
 
-      return true;
+  const allSaved = await Promise.all(
+    packageDocuments.map((document) => {
+      context.log.trace(`savePackageFiles: saving ${document.fileName}`);
+      return document.save();
     }),
   );
 
