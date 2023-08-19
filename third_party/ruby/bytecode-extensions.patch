@@ -1,0 +1,3784 @@
+diff --git common.mk common.mk
+index fd14ab6688..28d3ae2f60 100644
+--- common.mk
++++ common.mk
+@@ -129,6 +129,7 @@ COMMONOBJS    = array.$(OBJEXT) \
+ 		ruby.$(OBJEXT) \
+ 		safe.$(OBJEXT) \
+ 		signal.$(OBJEXT) \
++		sorbet.$(OBJEXT) \
+ 		sprintf.$(OBJEXT) \
+ 		st.$(OBJEXT) \
+ 		strftime.$(OBJEXT) \
+@@ -2853,6 +2854,19 @@ signal.$(OBJEXT): {$(VPATH)}thread_$(THREAD_MODEL).h
+ signal.$(OBJEXT): {$(VPATH)}thread_native.h
+ signal.$(OBJEXT): {$(VPATH)}vm_core.h
+ signal.$(OBJEXT): {$(VPATH)}vm_opts.h
++sorbet.$(OBJEXT): $(hdrdir)/ruby.h
++sorbet.$(OBJEXT): $(hdrdir)/ruby/ruby.h
++sorbet.$(OBJEXT): {$(VPATH)}assert.h
++sorbet.$(OBJEXT): {$(VPATH)}builtin.h
++sorbet.$(OBJEXT): {$(VPATH)}config.h
++sorbet.$(OBJEXT): {$(VPATH)}defines.h
++sorbet.$(OBJEXT): {$(VPATH)}sorbet.c
++sorbet.$(OBJEXT): {$(VPATH)}intern.h
++sorbet.$(OBJEXT): {$(VPATH)}internal.h
++sorbet.$(OBJEXT): {$(VPATH)}missing.h
++sorbet.$(OBJEXT): {$(VPATH)}prelude.rbinc
++sorbet.$(OBJEXT): {$(VPATH)}st.h
++sorbet.$(OBJEXT): {$(VPATH)}subst.h
+ sprintf.$(OBJEXT): $(hdrdir)/ruby.h
+ sprintf.$(OBJEXT): $(hdrdir)/ruby/ruby.h
+ sprintf.$(OBJEXT): {$(VPATH)}assert.h
+diff --git compile.c compile.c
+index 5f86a5bd67..19578c9c69 100644
+--- compile.c
++++ compile.c
+@@ -3313,6 +3313,7 @@ iseq_specialized_instruction(rb_iseq_t *iseq, INSN *iobj)
+                   case idNilP:   SP_INSN(nil_p);  return COMPILE_OK;
+ 		  case idSucc:	 SP_INSN(succ);	  return COMPILE_OK;
+ 		  case idNot:	 SP_INSN(not);	  return COMPILE_OK;
++                case idKlass:    SP_INSN(klass);  return COMPILE_OK;
+ 		}
+ 		break;
+ 	      case 1:
+@@ -3333,11 +3334,15 @@ iseq_specialized_instruction(rb_iseq_t *iseq, INSN *iobj)
+ 		  case idAREF:	 SP_INSN(aref);	  return COMPILE_OK;
+                   case idAnd:    SP_INSN(and);    return COMPILE_OK;
+                   case idOr:     SP_INSN(or);    return COMPILE_OK;
++                case idIs_aP: SP_INSN(is_a_p);   return COMPILE_OK;
++                case idUnsafe: SP_INSN(t_unsafe); return COMPILE_OK;
++                case idMust: SP_INSN(t_must); return COMPILE_OK;
+ 		}
+ 		break;
+ 	      case 2:
+ 		switch (ci->mid) {
+ 		  case idASET:	 SP_INSN(aset);	  return COMPILE_OK;
++		  case idLet:	 SP_INSN(t_let);  return COMPILE_OK;
+ 		}
+ 		break;
+ 	    }
+diff --git defs/id.def defs/id.def
+index fc7a04ffbc..fd93956153 100644
+--- defs/id.def
++++ defs/id.def
+@@ -86,6 +86,11 @@ firstline, predefined = __LINE__+1, %[\
+   core#hash_merge_ptr
+   core#hash_merge_kwd
+   core#raise
++  class                                                 klass
++  is_a?
++  let
++  unsafe
++  must
+ 
+   -                                                     debug#created_info
+ 
+diff --git insns.def insns.def
+index 71b9f44072..e6f955c709 100644
+--- insns.def
++++ insns.def
+@@ -835,6 +835,74 @@ opt_nil_p
+ }
+ 
+ DEFINE_INSN
++opt_klass
++(CALL_DATA cd)
++(VALUE recv)
++(VALUE val)
++{
++    val = vm_opt_class(cd, recv);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++
++DEFINE_INSN
++opt_is_a_p
++(CALL_DATA cd)
++(VALUE recv, VALUE mod)
++(VALUE val)
++{
++    val = vm_opt_is_a_p(cd, recv, mod);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++
++DEFINE_INSN
++opt_t_let
++(CALL_DATA cd)
++(VALUE recv, VALUE val_to_check, VALUE type)
++(VALUE val)
++{
++    val = vm_opt_t_let(cd, recv, val_to_check, type);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++
++DEFINE_INSN
++opt_t_unsafe
++(CALL_DATA cd)
++(VALUE recv, VALUE cast_val)
++(VALUE val)
++{
++    extern VALUE rb_mT;
++    if (recv == rb_mT) {
++        val = cast_val;
++    } else {
++        CALL_SIMPLE_METHOD();
++    }
++}
++
++DEFINE_INSN
++opt_t_must
++(CALL_DATA cd)
++(VALUE recv, VALUE cast_val)
++(VALUE val)
++{
++    extern VALUE rb_mT;
++    if (recv == rb_mT && cast_val != Qnil) {
++        val = cast_val;
++    } else {
++        val = Qundef;
++        CALL_SIMPLE_METHOD();
++    }
++}
++
++DEFINE_INSN
+ opt_str_uminus
+ (VALUE str, CALL_DATA cd)
+ ()
+diff --git sorbet.c sorbet.c
+new file mode 100644
+index 0000000000..7fb45bddfa
+--- /dev/null
++++ sorbet.c
+@@ -0,0 +1,18 @@
++#include "internal.h"
++#include "ruby.h"
++
++#define GCABLE_VALUE(name, expr)                \
++    do { \
++        name = expr; \
++        rb_gc_register_address(&name); \
++    } while (0)
++
++VALUE rb_mT;
++
++void Init_Sorbet_T() {
++    // Set up modules that are defined by the sorbet-runtime gem.  Note that Ruby
++    // will complain about mismatches if we get e.g. the class inheritance
++    // structure wrong relative to how it is actually defined in sorbet-runtime.
++
++    GCABLE_VALUE(rb_mT, rb_define_module("T"));
++}
+diff --git vm_insnhelper.c vm_insnhelper.c
+index f1d8966bb3..14980465db 100644
+--- vm_insnhelper.c
++++ vm_insnhelper.c
+@@ -2506,9 +2506,9 @@ vm_call_cfunc_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp
+     RUBY_DTRACE_CMETHOD_ENTRY_HOOK(ec, me->owner, me->def->original_id);
+     EXEC_EVENT_HOOK(ec, RUBY_EVENT_C_CALL, recv, me->def->original_id, ci->mid, me->owner, Qundef);
+ 
+-    vm_push_frame(ec, NULL, frame_type, recv,
+-		  block_handler, (VALUE)me,
+-		  0, ec->cfp->sp, 0, 0);
++    rb_control_frame_t *new_cfp = vm_push_frame(ec, NULL, frame_type, recv,
++                                                block_handler, (VALUE)me,
++                                                0, ec->cfp->sp, 0, 0);
+ 
+     if (len >= 0) rb_check_arity(argc, len, len);
+ 
+@@ -2517,7 +2517,7 @@ vm_call_cfunc_with_frame(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp
+ 
+     CHECK_CFP_CONSISTENCY("vm_call_cfunc");
+ 
+-    rb_vm_pop_frame(ec);
++    vm_pop_frame(ec, new_cfp, new_cfp->ep);
+ 
+     EXEC_EVENT_HOOK(ec, RUBY_EVENT_C_RETURN, recv, me->def->original_id, ci->mid, me->owner, val);
+     RUBY_DTRACE_CMETHOD_RETURN_HOOK(ec, me->owner, me->def->original_id);
+@@ -5237,6 +5237,71 @@ vm_opt_nil_p(CALL_DATA cd, VALUE recv)
+ }
+ 
+ static VALUE
++vm_opt_class(CALL_DATA cd, VALUE recv)
++{
++    if (vm_method_cfunc_is(cd, recv, rb_obj_class)) {
++        return rb_obj_class(recv);
++    }
++
++    return Qundef;
++}
++
++static VALUE
++vm_opt_is_a_p(CALL_DATA cd, VALUE recv, VALUE mod)
++{
++    if (FIXNUM_P(recv) && mod == rb_cInteger) {
++        return Qtrue;
++    }
++    if (!SPECIAL_CONST_P(recv) && mod == rb_cHash) {
++        return RB_TYPE_P(recv, T_HASH) ? Qtrue : Qfalse;
++    }
++    if (vm_method_cfunc_is(cd, recv, rb_obj_is_kind_of)) {
++        return rb_obj_is_kind_of(recv, mod);
++    }
++
++    return Qundef;
++}
++
++static VALUE
++vm_opt_t_let(CALL_DATA cd, VALUE recv, VALUE val, VALUE type)
++{
++    extern VALUE rb_mT;
++    if (recv != rb_mT) {
++        return Qundef;
++    }
++
++    if (FIXNUM_P(val) && type == rb_cInteger) {
++        return Qtrue;
++    }
++
++#if 0
++    if (SYMBOL_P(val) && type == rb_cSymbol) {
++        return Qtrue;
++    }
++#endif
++
++    if (SPECIAL_CONST_P(val)) {
++        return Qundef;
++    }
++
++    if (RBASIC_CLASS(val) == rb_cString && type == rb_cString) {
++        return Qtrue;
++    }
++
++    /* TODO(froydnj): other easy cases?  hashes and arrays will be generic.
++     * It would be nice to pick off simple module types here, but it's not
++     * clear that calling is_a? without a warm call cache would be a win
++     * here.  We can't use rb_obj_is_kind_of directly because of mocking.
++     *
++     * Next-level hackery would be to insert another call cache for is_a?
++     * into the instruction stream and use it here.
++     */
++
++    /* Something that's too complex to check.  */
++    return Qundef;
++}
++
++static VALUE
+ fix_succ(VALUE x)
+ {
+     switch (x) {
+diff --git id.h id.h
+--- id.h
++++ id.h
+@@ -126,6 +126,7 @@
+     id_core_hash_merge_ptr,
+     id_core_hash_merge_kwd,
+     id_core_raise,
++    idIs_aP,
+     id_debug_created_info,
+     tPRESERVED_ID_END,
+     tTOKEN_LOCAL_BEGIN = tPRESERVED_ID_END-1,
+@@ -194,6 +195,10 @@
+     tNUMPARAM_7,
+     tNUMPARAM_8,
+     tNUMPARAM_9,
++    tKlass,
++    tLet,
++    tUnsafe,
++    tMust,
+     tTOKEN_LOCAL_END,
+     tTOKEN_INSTANCE_BEGIN = tTOKEN_LOCAL_END-1,
+     tTOKEN_INSTANCE_END,
+@@ -275,6 +280,10 @@
+     DEFINE_LOCALID_FROM_TOKEN(NUMPARAM_7),
+     DEFINE_LOCALID_FROM_TOKEN(NUMPARAM_8),
+     DEFINE_LOCALID_FROM_TOKEN(NUMPARAM_9),
++    DEFINE_LOCALID_FROM_TOKEN(Klass),
++    DEFINE_LOCALID_FROM_TOKEN(Let),
++    DEFINE_LOCALID_FROM_TOKEN(Unsafe),
++    DEFINE_LOCALID_FROM_TOKEN(Must),
+ #define DEFINE_INSTANCEID_FROM_TOKEN(n) id##n = TOKEN2INSTANCEID(t##n)
+ #define DEFINE_GLOBALID_FROM_TOKEN(n) id##n = TOKEN2GLOBALID(t##n)
+     DEFINE_GLOBALID_FROM_TOKEN(LASTLINE),
+diff --git id.c id.c
+--- id.c
++++ id.c
+@@ -148,6 +148,11 @@
+     REGISTER_SYMID(id_core_hash_merge_ptr, "core#hash_merge_ptr");
+     REGISTER_SYMID(id_core_hash_merge_kwd, "core#hash_merge_kwd");
+     REGISTER_SYMID(id_core_raise, "core#raise");
++    REGISTER_SYMID(idKlass, "class");
++    REGISTER_SYMID(idIs_aP, "is_a?");
++    REGISTER_SYMID(idLet, "let");
++    REGISTER_SYMID(idUnsafe, "unsafe");
++    REGISTER_SYMID(idMust, "must");
+     REGISTER_SYMID(idLASTLINE, "$_");
+     REGISTER_SYMID(idBACKREF, "$~");
+     REGISTER_SYMID(idERROR_INFO, "$!");
+diff -u insns.inc insns.inc
+--- insns.inc
++++ insns.inc
+@@ -94,6 +94,11 @@
+     BIN(opt_send_without_block),
+     BIN(opt_str_freeze),
+     BIN(opt_nil_p),
++    BIN(opt_klass),
++    BIN(opt_is_a_p),
++    BIN(opt_t_let),
++    BIN(opt_t_unsafe),
++    BIN(opt_t_must),
+     BIN(opt_str_uminus),
+     BIN(opt_newarray_max),
+     BIN(opt_newarray_min),
+@@ -197,6 +202,11 @@
+     BIN(trace_opt_send_without_block),
+     BIN(trace_opt_str_freeze),
+     BIN(trace_opt_nil_p),
++    BIN(trace_opt_klass),
++    BIN(trace_opt_is_a_p),
++    BIN(trace_opt_t_let),
++    BIN(trace_opt_t_unsafe),
++    BIN(trace_opt_t_must),
+     BIN(trace_opt_str_uminus),
+     BIN(trace_opt_newarray_max),
+     BIN(trace_opt_newarray_min),
+diff -u insns_info.inc insns_info.inc
+--- insns_info.inc
++++ insns_info.inc
+@@ -118,6 +118,11 @@
+         "opt_send_without_block" "\0"
+         "opt_str_freeze" "\0"
+         "opt_nil_p" "\0"
++        "opt_klass" "\0"
++        "opt_is_a_p" "\0"
++        "opt_t_let" "\0"
++        "opt_t_unsafe" "\0"
++        "opt_t_must" "\0"
+         "opt_str_uminus" "\0"
+         "opt_newarray_max" "\0"
+         "opt_newarray_min" "\0"
+@@ -221,6 +226,11 @@
+         "trace_opt_send_without_block" "\0"
+         "trace_opt_str_freeze" "\0"
+         "trace_opt_nil_p" "\0"
++        "trace_opt_klass" "\0"
++        "trace_opt_is_a_p" "\0"
++        "trace_opt_t_let" "\0"
++        "trace_opt_t_unsafe" "\0"
++        "trace_opt_t_must" "\0"
+         "trace_opt_str_uminus" "\0"
+         "trace_opt_newarray_max" "\0"
+         "trace_opt_newarray_min" "\0"
+@@ -277,20 +287,20 @@
+          165,  177,  189,  199,  209,  216,  224,  234,  251,  261,  275,  284,
+          297,  306,  313,  322,  338,  347,  355,  367,  379,  390,  398,  407,
+          411,  415,  420,  425,  433,  438,  443,  455,  463,  474,  487,  497,
+-         509,  522,  536,  541,  564,  579,  589,  604,  621,  638,  650,  662,
+-         668,  674,  679,  688,  701,  711,  730,  749,  754,  772,  781,  791,
+-         800,  808,  816,  823,  831,  838,  845,  852,  859,  868,  876,  883,
+-         892,  901,  915,  929,  940,  949,  961,  970,  978,  995, 1015, 1029,
+-        1056, 1089, 1103, 1117, 1131, 1145, 1166, 1187, 1197, 1212, 1227, 1247,
+-        1267, 1292, 1309, 1326, 1352, 1378, 1401, 1424, 1442, 1460, 1476, 1492,
+-        1505, 1519, 1535, 1558, 1574, 1594, 1609, 1628, 1643, 1656, 1671, 1693,
+-        1708, 1722, 1740, 1758, 1775, 1789, 1804, 1814, 1824, 1835, 1846, 1860,
+-        1871, 1882, 1900, 1914, 1931, 1950, 1966, 1984, 2003, 2023, 2034, 2063,
+-        2084, 2100, 2121, 2144, 2167, 2185, 2203, 2215, 2227, 2238, 2253, 2272,
+-        2288, 2313, 2338, 2349, 2373, 2388, 2404, 2419, 2433, 2447, 2460, 2474,
+-        2487, 2500, 2513, 2526, 2541, 2555, 2568, 2583, 2598, 2618, 2638, 2655,
+-        2670, 2688, 2703, 2717, 2740, 2766, 2786, 2819, 2858, 2878, 2898, 2918,
+-        2938, 2965,
++         509,  522,  536,  541,  564,  579,  589,  599,  610,  620,  633,  644,
++         659,  676,  693,  705,  717,  723,  729,  734,  743,  756,  766,  785,
++         804,  809,  827,  836,  846,  855,  863,  871,  878,  886,  893,  900,
++         907,  914,  923,  931,  938,  947,  956,  970,  984,  995, 1004, 1016,
++        1025, 1033, 1050, 1070, 1084, 1111, 1144, 1158, 1172, 1186, 1200, 1221,
++        1242, 1252, 1267, 1282, 1302, 1322, 1347, 1364, 1381, 1407, 1433, 1456,
++        1479, 1497, 1515, 1531, 1547, 1560, 1574, 1590, 1613, 1629, 1649, 1664,
++        1683, 1698, 1711, 1726, 1748, 1763, 1777, 1795, 1813, 1830, 1844, 1859,
++        1869, 1879, 1890, 1901, 1915, 1926, 1937, 1955, 1969, 1986, 2005, 2021,
++        2039, 2058, 2078, 2089, 2118, 2139, 2155, 2171, 2188, 2204, 2223, 2240,
++        2261, 2284, 2307, 2325, 2343, 2355, 2367, 2378, 2393, 2412, 2428, 2453,
++        2478, 2489, 2513, 2528, 2544, 2559, 2573, 2587, 2600, 2614, 2627, 2640,
++        2653, 2666, 2681, 2695, 2708, 2723, 2738, 2758, 2778, 2795, 2810, 2828,
++        2843, 2857, 2880, 2906, 2926, 2959, 2998, 3018, 3038, 3058, 3078, 3105,
+     };
+ 
+     ASSERT_VM_INSTRUCTION_SIZE(y);
+@@ -306,13 +316,14 @@
+     static const char t[] = {
+         1, 3, 3, 3, 3, 3, 3, 2, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1,
+         2, 3, 1, 2, 2, 2, 2, 3, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 4, 2, 3,
+-        2, 4, 3, 3, 3, 2, 3, 2, 3, 2, 2, 3, 2, 1, 2, 2, 2, 2, 2, 3, 2, 3, 3,
+-        2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2,
+-        2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 3, 3, 2, 2,
+-        2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 2, 3, 1, 2, 2, 2, 2, 3, 1, 2, 2, 2,
+-        1, 1, 2, 1, 2, 2, 2, 2, 4, 2, 3, 2, 4, 3, 3, 3, 2, 3, 2, 3, 2, 2, 3,
+-        2, 1, 2, 2, 2, 2, 2, 3, 2, 3, 3, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2,
+-        2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1,
++        2, 4, 3, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 3, 2, 2, 3, 2, 1, 2, 2, 2, 2,
++        2, 3, 2, 3, 3, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
++        2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3,
++        2, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 2, 3, 1, 2, 2, 2, 2,
++        3, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 4, 2, 3, 2, 4, 3, 3, 3, 2, 3,
++        2, 2, 2, 2, 2, 2, 3, 2, 2, 3, 2, 1, 2, 2, 2, 2, 2, 3, 2, 3, 3, 2, 2,
++        2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2,
++        2, 3, 3, 2, 2, 2, 2, 1, 1,
+     };
+ 
+     ASSERT_VM_INSTRUCTION_SIZE(t);
+@@ -336,7 +347,8 @@
+         ""     "\0" ""     "\0" "N"    "\0" ""     "\0" "N"    "\0"
+         "N"    "\0" "N"    "\0" "N"    "\0" "NVV"  "\0" "N"    "\0"
+         "LL"   "\0" "N"    "\0" "ISN"  "\0" "IS"   "\0" "IS"   "\0"
+-        "CS"   "\0" "C"    "\0" "VC"   "\0" "C"    "\0" "VC"   "\0"
++        "CS"   "\0" "C"    "\0" "VC"   "\0" "C"    "\0" "C"    "\0"
++        "C"    "\0" "C"    "\0" "C"    "\0" "C"    "\0" "VC"   "\0"
+         "N"    "\0" "N"    "\0" "CS"   "\0" "C"    "\0" ""     "\0"
+         "N"    "\0" "O"    "\0" "O"    "\0" "O"    "\0" "O"    "\0"
+         "OK"   "\0" "K"    "\0" "ST"   "\0" "HO"   "\0" "C"    "\0"
+@@ -357,7 +369,8 @@
+         "N"    "\0" ""     "\0" "N"    "\0" "N"    "\0" "N"    "\0"
+         "N"    "\0" "NVV"  "\0" "N"    "\0" "LL"   "\0" "N"    "\0"
+         "ISN"  "\0" "IS"   "\0" "IS"   "\0" "CS"   "\0" "C"    "\0"
+-        "VC"   "\0" "C"    "\0" "VC"   "\0" "N"    "\0" "N"    "\0"
++        "VC"   "\0" "C"    "\0" "C"    "\0" "C"    "\0" "C"    "\0"
++        "C"    "\0" "C"    "\0" "VC"   "\0" "N"    "\0" "N"    "\0"
+         "CS"   "\0" "C"    "\0" ""     "\0" "N"    "\0" "O"    "\0"
+         "O"    "\0" "O"    "\0" "O"    "\0" "OK"   "\0" "K"    "\0"
+         "ST"   "\0" "HO"   "\0" "C"    "\0" "C"    "\0" "C"    "\0"
+@@ -375,20 +388,20 @@
+          31,  33,  35,  37,  39,  40,  41,  43,  45,  47,  49,  50,
+          52,  55,  56,  58,  60,  62,  64,  67,  68,  70,  72,  74,
+          75,  76,  78,  79,  81,  83,  85,  87,  91,  93,  96,  98,
+-        102, 105, 108, 111, 113, 116, 118, 121, 123, 125, 128, 130,
+-        131, 133, 135, 137, 139, 141, 144, 146, 149, 152, 154, 156,
+-        158, 160, 162, 164, 167, 169, 171, 173, 175, 177, 179, 181,
+-        183, 185, 188, 191, 193, 195, 197, 199, 201, 203, 205, 207,
+-        210, 213, 215, 217, 219, 221, 222, 223, 224, 227, 230, 233,
+-        236, 239, 242, 244, 247, 250, 252, 254, 256, 258, 260, 262,
+-        263, 264, 266, 268, 270, 272, 273, 275, 278, 279, 281, 283,
+-        285, 287, 290, 291, 293, 295, 297, 298, 299, 301, 302, 304,
+-        306, 308, 310, 314, 316, 319, 321, 325, 328, 331, 334, 336,
+-        339, 341, 344, 346, 348, 351, 353, 354, 356, 358, 360, 362,
+-        364, 367, 369, 372, 375, 377, 379, 381, 383, 385, 387, 390,
+-        392, 394, 396, 398, 400, 402, 404, 406, 408, 411, 414, 416,
+-        418, 420, 422, 424, 426, 428, 430, 433, 436, 438, 440, 442,
+-        444, 445,
++        102, 105, 108, 111, 113, 116, 118, 120, 122, 124, 126, 128,
++        131, 133, 135, 138, 140, 141, 143, 145, 147, 149, 151, 154,
++        156, 159, 162, 164, 166, 168, 170, 172, 174, 177, 179, 181,
++        183, 185, 187, 189, 191, 193, 195, 198, 201, 203, 205, 207,
++        209, 211, 213, 215, 217, 220, 223, 225, 227, 229, 231, 232,
++        233, 234, 237, 240, 243, 246, 249, 252, 254, 257, 260, 262,
++        264, 266, 268, 270, 272, 273, 274, 276, 278, 280, 282, 283,
++        285, 288, 289, 291, 293, 295, 297, 300, 301, 303, 305, 307,
++        308, 309, 311, 312, 314, 316, 318, 320, 324, 326, 329, 331,
++        335, 338, 341, 344, 346, 349, 351, 353, 355, 357, 359, 361,
++        364, 366, 368, 371, 373, 374, 376, 378, 380, 382, 384, 387,
++        389, 392, 395, 397, 399, 401, 403, 405, 407, 410, 412, 414,
++        416, 418, 420, 422, 424, 426, 428, 431, 434, 436, 438, 440,
++        442, 444, 446, 448, 450, 453, 456, 458, 460, 462, 464, 465,
+     };
+ 
+     ASSERT_VM_INSTRUCTION_SIZE(y);
+@@ -506,7 +519,7 @@
+         return false;
+     }
+ }
+-#line 510 "insns_info.inc"
++#line 523 "insns_info.inc"
+ 
+ #line 10 "tool/ruby_vm/views/_sp_inc_helpers.erb"
+ 
+@@ -536,7 +549,7 @@
+      * instructions, except that it does not pop receiver. */
+     return sp_inc_of_sendish(ci) + 1;
+ }
+-#line 540 "insns_info.inc"
++#line 553 "insns_info.inc"
+ 
+ #ifndef RUBY_VM_EXEC_H
+ /* can't #include "vm_exec.h" here... */
+@@ -1034,6 +1047,51 @@
+ PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_nil_p(CALL_DATA cd)));
+ PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_nil_p(CALL_DATA cd)));
+ PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_nil_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static const char* attr_name_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_open_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_popn_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_klass(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static const char* attr_name_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_open_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_popn_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_is_a_p(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static const char* attr_name_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_open_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_popn_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_t_let(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static const char* attr_name_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_open_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_popn_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_t_unsafe(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static const char* attr_name_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_open_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_popn_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_retn_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_snum_t attr_sp_inc_opt_t_must(CALL_DATA cd)));
++PUREFUNC(MAYBE_UNUSED(static rb_num_t attr_width_opt_t_must(CALL_DATA cd)));
+ PUREFUNC(MAYBE_UNUSED(static enum ruby_vminsn_type attr_bin_opt_str_uminus(VALUE str, CALL_DATA cd)));
+ PUREFUNC(MAYBE_UNUSED(static bool attr_handles_sp_opt_str_uminus(VALUE str, CALL_DATA cd)));
+ PUREFUNC(MAYBE_UNUSED(static bool attr_leaf_opt_str_uminus(VALUE str, CALL_DATA cd)));
+@@ -2021,7 +2079,7 @@
+     return
+ #line 192 "insns.def"
+ (type == 0) ? true : false;
+-#line 2025 "insns_info.inc"
++#line 2083 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ getspecial(key, type)()(val) */
+@@ -2177,7 +2235,7 @@
+     return
+ #line 214 "insns.def"
+ false;
+-#line 2181 "insns_info.inc"
++#line 2239 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ getinstancevariable(id, ic)()(val) */
+@@ -2270,7 +2328,7 @@
+     return
+ #line 225 "insns.def"
+ false;
+-#line 2274 "insns_info.inc"
++#line 2332 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ setinstancevariable(id, ic)(val)() */
+@@ -2354,7 +2412,7 @@
+     return
+ #line 237 "insns.def"
+ false;
+-#line 2358 "insns_info.inc"
++#line 2416 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ getclassvariable(id)()(val) */
+@@ -2420,7 +2478,7 @@
+     return
+ #line 249 "insns.def"
+ false;
+-#line 2424 "insns_info.inc"
++#line 2482 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ setclassvariable(id)(val)() */
+@@ -2486,7 +2544,7 @@
+     return
+ #line 265 "insns.def"
+ false;
+-#line 2490 "insns_info.inc"
++#line 2548 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ getconstant(id)(klass, allow_nil)(val) */
+@@ -2552,7 +2610,7 @@
+     return
+ #line 281 "insns.def"
+ false;
+-#line 2556 "insns_info.inc"
++#line 2614 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ setconstant(id)(val, cbase)() */
+@@ -2618,7 +2676,7 @@
+     return
+ #line 294 "insns.def"
+ leafness_of_getglobal(entry);
+-#line 2622 "insns_info.inc"
++#line 2680 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ getglobal(entry)()(val) */
+@@ -2684,7 +2742,7 @@
+     return
+ #line 306 "insns.def"
+ leafness_of_setglobal(entry);
+-#line 2688 "insns_info.inc"
++#line 2746 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ setglobal(entry)(val)() */
+@@ -3065,7 +3123,7 @@
+     return
+ #line 379 "insns.def"
+ false;
+-#line 3069 "insns_info.inc"
++#line 3127 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ concatstrings(num)(...)(val) */
+@@ -3103,7 +3161,7 @@
+     return
+ #line 380 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 3107 "insns_info.inc"
++#line 3165 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ concatstrings(num)(...)(val) */
+@@ -3269,7 +3327,7 @@
+     return
+ #line 415 "insns.def"
+ false;
+-#line 3273 "insns_info.inc"
++#line 3331 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ toregexp(opt, cnt)(...)(val) */
+@@ -3322,7 +3380,7 @@
+     return
+ #line 416 "insns.def"
+ 1 - (rb_snum_t)cnt;
+-#line 3326 "insns_info.inc"
++#line 3384 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ toregexp(opt, cnt)(...)(val) */
+@@ -3454,7 +3512,7 @@
+     return
+ #line 439 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 3458 "insns_info.inc"
++#line 3516 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ newarray(num)(...)(val) */
+@@ -3520,7 +3578,7 @@
+     return
+ #line 454 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 3524 "insns_info.inc"
++#line 3582 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ newarraykwsplat(num)(...)(val) */
+@@ -3686,7 +3744,7 @@
+     return
+ #line 500 "insns.def"
+ false;
+-#line 3690 "insns_info.inc"
++#line 3748 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ expandarray(num, flag)(..., ary)(...) */
+@@ -3739,7 +3797,7 @@
+     return
+ #line 501 "insns.def"
+ (rb_snum_t)num - 1 + (flag & 1 ? 1 : 0);
+-#line 3743 "insns_info.inc"
++#line 3801 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ expandarray(num, flag)(..., ary)(...) */
+@@ -3773,7 +3831,7 @@
+     return
+ #line 512 "insns.def"
+ false;
+-#line 3777 "insns_info.inc"
++#line 3835 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ concatarray()(ary1, ary2)(ary) */
+@@ -3839,7 +3897,7 @@
+     return
+ #line 523 "insns.def"
+ false;
+-#line 3843 "insns_info.inc"
++#line 3901 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ splatarray(flag)(ary)(obj) */
+@@ -3905,7 +3963,7 @@
+     return
+ #line 534 "insns.def"
+ false;
+-#line 3909 "insns_info.inc"
++#line 3967 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ newhash(num)(...)(val) */
+@@ -3943,7 +4001,7 @@
+     return
+ #line 535 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 3947 "insns_info.inc"
++#line 4005 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ newhash(num)(...)(val) */
+@@ -3974,7 +4032,7 @@
+     return
+ #line 553 "insns.def"
+ false;
+-#line 3978 "insns_info.inc"
++#line 4036 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ newrange(flag)(low, high)(val) */
+@@ -4201,7 +4259,7 @@
+     return
+ #line 589 "insns.def"
+ n;
+-#line 4205 "insns_info.inc"
++#line 4263 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ dupn(n)(...)(...) */
+@@ -4330,7 +4388,7 @@
+     return
+ #line 613 "insns.def"
+ 0;
+-#line 4334 "insns_info.inc"
++#line 4392 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ reverse(n)(...)(...) */
+@@ -4396,7 +4454,7 @@
+     return
+ #line 643 "insns.def"
+ 1;
+-#line 4400 "insns_info.inc"
++#line 4458 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ topn(n)(...)(val) */
+@@ -4462,7 +4520,7 @@
+     return
+ #line 654 "insns.def"
+ 0;
+-#line 4466 "insns_info.inc"
++#line 4524 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ setn(n)(..., val)(val) */
+@@ -4528,7 +4586,7 @@
+     return
+ #line 665 "insns.def"
+ -(rb_snum_t)n;
+-#line 4532 "insns_info.inc"
++#line 4590 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ adjuststack(n)(...)(...) */
+@@ -4571,7 +4629,7 @@
+     return
+ #line 680 "insns.def"
+ leafness_of_defined(op_type);
+-#line 4575 "insns_info.inc"
++#line 4633 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ defined(op_type, obj, needstr)(v)(val) */
+@@ -4661,7 +4719,7 @@
+     return
+ #line 697 "insns.def"
+ leafness_of_checkmatch(flag);
+-#line 4665 "insns_info.inc"
++#line 4723 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ checkmatch(flag)(target, pattern)(result) */
+@@ -5158,7 +5216,7 @@
+     return
+ #line 779 "insns.def"
+ sp_inc_of_sendish(ci);
+-#line 5162 "insns_info.inc"
++#line 5220 "insns_info.inc"
+ }
+ 
+ /* attr bool handles_sp @ send(cd, blockiseq)(...)(val) */
+@@ -5231,7 +5289,7 @@
+     return
+ #line 778 "insns.def"
+ sp_inc_of_sendish(&cd->ci);
+-#line 5235 "insns_info.inc"
++#line 5293 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ send(cd, blockiseq)(...)(val) */
+@@ -5258,7 +5316,7 @@
+     return
+ #line 798 "insns.def"
+ sp_inc_of_sendish(ci);
+-#line 5262 "insns_info.inc"
++#line 5320 "insns_info.inc"
+ }
+ 
+ /* attr bool handles_sp @ opt_send_without_block(cd)(...)(val) */
+@@ -5268,7 +5326,7 @@
+     return
+ #line 796 "insns.def"
+ true;
+-#line 5272 "insns_info.inc"
++#line 5330 "insns_info.inc"
+ }
+ 
+ /* attr bool leaf @ opt_send_without_block(cd)(...)(val) */
+@@ -5313,7 +5371,7 @@
+     return
+ #line 797 "insns.def"
+ sp_inc_of_sendish(&cd->ci);
+-#line 5317 "insns_info.inc"
++#line 5375 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ opt_send_without_block(cd)(...)(val) */
+@@ -5476,6 +5534,321 @@
+     return 2;
+ }
+ 
++/* attr enum ruby_vminsn_type bin @ opt_klass(cd)(recv)(val) */
++enum ruby_vminsn_type
++attr_bin_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return BIN(opt_klass);
++}
++
++/* attr bool handles_sp @ opt_klass(cd)(recv)(val) */
++bool
++attr_handles_sp_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return false;
++}
++
++/* attr bool leaf @ opt_klass(cd)(recv)(val) */
++bool
++attr_leaf_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return true;
++}
++
++/* attr const char* name @ opt_klass(cd)(recv)(val) */
++const char*
++attr_name_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return insn_name(BIN(opt_klass));
++}
++
++/* attr rb_num_t open @ opt_klass(cd)(recv)(val) */
++rb_num_t
++attr_open_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t popn @ opt_klass(cd)(recv)(val) */
++rb_num_t
++attr_popn_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t retn @ opt_klass(cd)(recv)(val) */
++rb_num_t
++attr_retn_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_snum_t sp_inc @ opt_klass(cd)(recv)(val) */
++rb_snum_t
++attr_sp_inc_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 0;
++}
++
++/* attr rb_num_t width @ opt_klass(cd)(recv)(val) */
++rb_num_t
++attr_width_opt_klass(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr enum ruby_vminsn_type bin @ opt_is_a_p(cd)(recv, mod)(val) */
++enum ruby_vminsn_type
++attr_bin_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return BIN(opt_is_a_p);
++}
++
++/* attr bool handles_sp @ opt_is_a_p(cd)(recv, mod)(val) */
++bool
++attr_handles_sp_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return false;
++}
++
++/* attr bool leaf @ opt_is_a_p(cd)(recv, mod)(val) */
++bool
++attr_leaf_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return true;
++}
++
++/* attr const char* name @ opt_is_a_p(cd)(recv, mod)(val) */
++const char*
++attr_name_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return insn_name(BIN(opt_is_a_p));
++}
++
++/* attr rb_num_t open @ opt_is_a_p(cd)(recv, mod)(val) */
++rb_num_t
++attr_open_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t popn @ opt_is_a_p(cd)(recv, mod)(val) */
++rb_num_t
++attr_popn_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr rb_num_t retn @ opt_is_a_p(cd)(recv, mod)(val) */
++rb_num_t
++attr_retn_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_snum_t sp_inc @ opt_is_a_p(cd)(recv, mod)(val) */
++rb_snum_t
++attr_sp_inc_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return -1;
++}
++
++/* attr rb_num_t width @ opt_is_a_p(cd)(recv, mod)(val) */
++rb_num_t
++attr_width_opt_is_a_p(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr enum ruby_vminsn_type bin @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++enum ruby_vminsn_type
++attr_bin_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return BIN(opt_t_let);
++}
++
++/* attr bool handles_sp @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++bool
++attr_handles_sp_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return false;
++}
++
++/* attr bool leaf @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++bool
++attr_leaf_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return true;
++}
++
++/* attr const char* name @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++const char*
++attr_name_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return insn_name(BIN(opt_t_let));
++}
++
++/* attr rb_num_t open @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++rb_num_t
++attr_open_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t popn @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++rb_num_t
++attr_popn_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 3;
++}
++
++/* attr rb_num_t retn @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++rb_num_t
++attr_retn_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_snum_t sp_inc @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++rb_snum_t
++attr_sp_inc_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return -2;
++}
++
++/* attr rb_num_t width @ opt_t_let(cd)(recv, val_to_check, type)(val) */
++rb_num_t
++attr_width_opt_t_let(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr enum ruby_vminsn_type bin @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++enum ruby_vminsn_type
++attr_bin_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return BIN(opt_t_unsafe);
++}
++
++/* attr bool handles_sp @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++bool
++attr_handles_sp_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return false;
++}
++
++/* attr bool leaf @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++bool
++attr_leaf_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return true;
++}
++
++/* attr const char* name @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++const char*
++attr_name_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return insn_name(BIN(opt_t_unsafe));
++}
++
++/* attr rb_num_t open @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_open_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t popn @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_popn_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr rb_num_t retn @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_retn_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_snum_t sp_inc @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++rb_snum_t
++attr_sp_inc_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return -1;
++}
++
++/* attr rb_num_t width @ opt_t_unsafe(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_width_opt_t_unsafe(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr enum ruby_vminsn_type bin @ opt_t_must(cd)(recv, cast_val)(val) */
++enum ruby_vminsn_type
++attr_bin_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return BIN(opt_t_must);
++}
++
++/* attr bool handles_sp @ opt_t_must(cd)(recv, cast_val)(val) */
++bool
++attr_handles_sp_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return false;
++}
++
++/* attr bool leaf @ opt_t_must(cd)(recv, cast_val)(val) */
++bool
++attr_leaf_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return true;
++}
++
++/* attr const char* name @ opt_t_must(cd)(recv, cast_val)(val) */
++const char*
++attr_name_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return insn_name(BIN(opt_t_must));
++}
++
++/* attr rb_num_t open @ opt_t_must(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_open_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_num_t popn @ opt_t_must(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_popn_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
++/* attr rb_num_t retn @ opt_t_must(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_retn_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 1;
++}
++
++/* attr rb_snum_t sp_inc @ opt_t_must(cd)(recv, cast_val)(val) */
++rb_snum_t
++attr_sp_inc_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return -1;
++}
++
++/* attr rb_num_t width @ opt_t_must(cd)(recv, cast_val)(val) */
++rb_num_t
++attr_width_opt_t_must(MAYBE_UNUSED(CALL_DATA cd))
++{
++    return 2;
++}
++
+ /* attr enum ruby_vminsn_type bin @ opt_str_uminus(str, cd)()(val) */
+ enum ruby_vminsn_type
+ attr_bin_opt_str_uminus(
+@@ -5585,9 +5958,9 @@
+ attr_leaf_opt_newarray_max(MAYBE_UNUSED(rb_num_t num))
+ {
+     return
+-#line 860 "insns.def"
++#line 928 "insns.def"
+ false;
+-#line 5591 "insns_info.inc"
++#line 5964 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_newarray_max(num)(...)(val) */
+@@ -5623,9 +5996,9 @@
+ attr_sp_inc_opt_newarray_max(MAYBE_UNUSED(rb_num_t num))
+ {
+     return
+-#line 861 "insns.def"
++#line 929 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 5629 "insns_info.inc"
++#line 6002 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ opt_newarray_max(num)(...)(val) */
+@@ -5654,9 +6027,9 @@
+ attr_leaf_opt_newarray_min(MAYBE_UNUSED(rb_num_t num))
+ {
+     return
+-#line 872 "insns.def"
++#line 940 "insns.def"
+ false;
+-#line 5660 "insns_info.inc"
++#line 6033 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_newarray_min(num)(...)(val) */
+@@ -5692,9 +6065,9 @@
+ attr_sp_inc_opt_newarray_min(MAYBE_UNUSED(rb_num_t num))
+ {
+     return
+-#line 873 "insns.def"
++#line 941 "insns.def"
+ 1 - (rb_snum_t)num;
+-#line 5698 "insns_info.inc"
++#line 6071 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ opt_newarray_min(num)(...)(val) */
+@@ -5722,9 +6095,9 @@
+ )
+ {
+     return
+-#line 885 "insns.def"
++#line 953 "insns.def"
+ sp_inc_of_sendish(ci);
+-#line 5728 "insns_info.inc"
++#line 6101 "insns_info.inc"
+ }
+ 
+ /* attr bool handles_sp @ invokesuper(cd, blockiseq)(...)(val) */
+@@ -5795,9 +6168,9 @@
+ )
+ {
+     return
+-#line 884 "insns.def"
++#line 952 "insns.def"
+ sp_inc_of_sendish(&cd->ci);
+-#line 5801 "insns_info.inc"
++#line 6174 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ invokesuper(cd, blockiseq)(...)(val) */
+@@ -5822,9 +6195,9 @@
+ attr_comptime_sp_inc_invokeblock(MAYBE_UNUSED(CALL_INFO ci))
+ {
+     return
+-#line 904 "insns.def"
++#line 972 "insns.def"
+ sp_inc_of_invokeblock(ci);
+-#line 5828 "insns_info.inc"
++#line 6201 "insns_info.inc"
+ }
+ 
+ /* attr bool handles_sp @ invokeblock(cd)(...)(val) */
+@@ -5832,9 +6205,9 @@
+ attr_handles_sp_invokeblock(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 902 "insns.def"
++#line 970 "insns.def"
+ true;
+-#line 5838 "insns_info.inc"
++#line 6211 "insns_info.inc"
+ }
+ 
+ /* attr bool leaf @ invokeblock(cd)(...)(val) */
+@@ -5877,9 +6250,9 @@
+ attr_sp_inc_invokeblock(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 903 "insns.def"
++#line 971 "insns.def"
+ sp_inc_of_invokeblock(&cd->ci);
+-#line 5883 "insns_info.inc"
++#line 6256 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ invokeblock(cd)(...)(val) */
+@@ -5901,9 +6274,9 @@
+ attr_handles_sp_leave(void)
+ {
+     return
+-#line 929 "insns.def"
++#line 997 "insns.def"
+ true;
+-#line 5907 "insns_info.inc"
++#line 6280 "insns_info.inc"
+ }
+ 
+ /* attr bool leaf @ leave()(val)(val) */
+@@ -5911,9 +6284,9 @@
+ attr_leaf_leave(void)
+ {
+     return
+-#line 928 "insns.def"
++#line 996 "insns.def"
+ false;
+-#line 5917 "insns_info.inc"
++#line 6290 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ leave()(val)(val) */
+@@ -5977,9 +6350,9 @@
+ attr_leaf_throw(MAYBE_UNUSED(rb_num_t throw_state))
+ {
+     return
+-#line 962 "insns.def"
++#line 1030 "insns.def"
+ false;
+-#line 5983 "insns_info.inc"
++#line 6356 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ throw(throw_state)(throwobj)(val) */
+@@ -6043,9 +6416,9 @@
+ attr_leaf_jump(MAYBE_UNUSED(OFFSET dst))
+ {
+     return
+-#line 980 "insns.def"
++#line 1048 "insns.def"
+ false;
+-#line 6049 "insns_info.inc"
++#line 6422 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ jump(dst)()() */
+@@ -6109,9 +6482,9 @@
+ attr_leaf_branchif(MAYBE_UNUSED(OFFSET dst))
+ {
+     return
+-#line 993 "insns.def"
++#line 1061 "insns.def"
+ false;
+-#line 6115 "insns_info.inc"
++#line 6488 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ branchif(dst)(val)() */
+@@ -6175,9 +6548,9 @@
+ attr_leaf_branchunless(MAYBE_UNUSED(OFFSET dst))
+ {
+     return
+-#line 1008 "insns.def"
++#line 1076 "insns.def"
+ false;
+-#line 6181 "insns_info.inc"
++#line 6554 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ branchunless(dst)(val)() */
+@@ -6241,9 +6614,9 @@
+ attr_leaf_branchnil(MAYBE_UNUSED(OFFSET dst))
+ {
+     return
+-#line 1023 "insns.def"
++#line 1091 "insns.def"
+ false;
+-#line 6247 "insns_info.inc"
++#line 6620 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ branchnil(dst)(val)() */
+@@ -6609,9 +6982,9 @@
+ )
+ {
+     return
+-#line 1077 "insns.def"
++#line 1145 "insns.def"
+ -1;
+-#line 6615 "insns_info.inc"
++#line 6988 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ opt_case_dispatch(hash, else_offset)(..., key)() */
+@@ -6832,9 +7205,9 @@
+ attr_leaf_opt_div(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1138 "insns.def"
++#line 1206 "insns.def"
+ false;
+-#line 6838 "insns_info.inc"
++#line 7211 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_div(cd)(recv, obj)(val) */
+@@ -6898,9 +7271,9 @@
+ attr_leaf_opt_mod(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1154 "insns.def"
++#line 1222 "insns.def"
+ false;
+-#line 6904 "insns_info.inc"
++#line 7277 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_mod(cd)(recv, obj)(val) */
+@@ -7369,9 +7742,9 @@
+ attr_leaf_opt_ltlt(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1256 "insns.def"
++#line 1324 "insns.def"
+ false;
+-#line 7375 "insns_info.inc"
++#line 7748 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_ltlt(cd)(recv, obj)(val) */
+@@ -7561,9 +7934,9 @@
+ attr_leaf_opt_aref(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1303 "insns.def"
++#line 1371 "insns.def"
+ false;
+-#line 7567 "insns_info.inc"
++#line 7940 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_aref(cd)(recv, obj)(val) */
+@@ -7627,9 +8000,9 @@
+ attr_leaf_opt_aset(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1320 "insns.def"
++#line 1388 "insns.def"
+ false;
+-#line 7633 "insns_info.inc"
++#line 8006 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_aset(cd)(recv, obj, set)(val) */
+@@ -7702,9 +8075,9 @@
+ )
+ {
+     return
+-#line 1336 "insns.def"
++#line 1404 "insns.def"
+ false;
+-#line 7708 "insns_info.inc"
++#line 8081 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_aset_with(key, cd)(recv, val)(val) */
+@@ -7795,9 +8168,9 @@
+ )
+ {
+     return
+-#line 1359 "insns.def"
++#line 1427 "insns.def"
+ false;
+-#line 7801 "insns_info.inc"
++#line 8174 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_aref_with(key, cd)(recv)(val) */
+@@ -8194,9 +8567,9 @@
+ attr_leaf_opt_regexpmatch2(MAYBE_UNUSED(CALL_DATA cd))
+ {
+     return
+-#line 1447 "insns.def"
++#line 1515 "insns.def"
+ false;
+-#line 8200 "insns_info.inc"
++#line 8573 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_regexpmatch2(cd)(obj2, obj1)(val) */
+@@ -8253,9 +8626,9 @@
+ attr_handles_sp_opt_call_c_function(MAYBE_UNUSED(rb_insn_func_t funcptr))
+ {
+     return
+-#line 1463 "insns.def"
++#line 1531 "insns.def"
+ true;
+-#line 8259 "insns_info.inc"
++#line 8632 "insns_info.inc"
+ }
+ 
+ /* attr bool leaf @ opt_call_c_function(funcptr)()() */
+@@ -8263,9 +8636,9 @@
+ attr_leaf_opt_call_c_function(MAYBE_UNUSED(rb_insn_func_t funcptr))
+ {
+     return
+-#line 1462 "insns.def"
++#line 1530 "insns.def"
+ false;
+-#line 8269 "insns_info.inc"
++#line 8642 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_call_c_function(funcptr)()() */
+@@ -8329,9 +8702,9 @@
+ attr_leaf_invokebuiltin(MAYBE_UNUSED(RB_BUILTIN bf))
+ {
+     return
+-#line 1483 "insns.def"
++#line 1551 "insns.def"
+ false;
+-#line 8335 "insns_info.inc"
++#line 8708 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ invokebuiltin(bf)(...)(ret) */
+@@ -8367,9 +8740,9 @@
+ attr_sp_inc_invokebuiltin(MAYBE_UNUSED(RB_BUILTIN bf))
+ {
+     return
+-#line 1484 "insns.def"
++#line 1552 "insns.def"
+ 1 - bf->argc;
+-#line 8373 "insns_info.inc"
++#line 8746 "insns_info.inc"
+ }
+ 
+ /* attr rb_num_t width @ invokebuiltin(bf)(...)(ret) */
+@@ -8407,9 +8780,9 @@
+ )
+ {
+     return
+-#line 1495 "insns.def"
++#line 1563 "insns.def"
+ false;
+-#line 8413 "insns_info.inc"
++#line 8786 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_invokebuiltin_delegate(bf, index)()(ret) */
+@@ -8500,9 +8873,9 @@
+ )
+ {
+     return
+-#line 1506 "insns.def"
++#line 1574 "insns.def"
+ false;
+-#line 8506 "insns_info.inc"
++#line 8879 "insns_info.inc"
+ }
+ 
+ /* attr const char* name @ opt_invokebuiltin_delegate_leave(bf, index)()(val) */
+@@ -8956,13 +9329,15 @@
+         -127,    0, -127, -127,    1,    1, -127,   -1,
+            0, -127,   -1,   -1,    1, -127,    0, -127,
+         -127, -127, -127,    0,   -1,    1,    0,   -1,
+-           0,   -1, -127, -127,    1,    0,    1, -127,
+-        -127, -127, -127,    0,    0,    0,   -1,   -1,
+-          -1,    1,    0,    1, -127,   -1,   -1,   -1,
++           0,   -1, -127, -127,    1,    0,    0,   -1,
++          -2,   -1,   -1,    1, -127, -127, -127, -127,
++           0,    0,    0,   -1,   -1,   -1,    1,    0,
++           1, -127,   -1,   -1,   -1,   -1,   -1,   -1,
+           -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+-          -1,   -1,   -1,   -1,   -2,   -1,    0,    0,
+-           0,    0,    0,    0,   -1,    0, -127,    1,
+-           1,    1,    1,   -1,   -1,    1,    1,    0,
++          -1,   -2,   -1,    0,    0,    0,    0,    0,
++           0,   -1,    0, -127,    1,    1,    1,    1,
++          -1,   -1,    1,    1,    0,    0,    0,    0,
++           0,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0,
+@@ -8975,7 +9350,6 @@
+            0,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,    0,
+-           0,    0,    0,    0,    0,    0,
+     };
+     signed char c = t[insn];
+ 
+@@ -9140,6 +9514,11 @@
+       case BIN(trace_opt_send_without_block):
+       case BIN(trace_opt_str_freeze):
+       case BIN(trace_opt_nil_p):
++      case BIN(trace_opt_klass):
++      case BIN(trace_opt_is_a_p):
++      case BIN(trace_opt_t_let):
++      case BIN(trace_opt_t_unsafe):
++      case BIN(trace_opt_t_must):
+       case BIN(trace_opt_str_uminus):
+       case BIN(trace_opt_newarray_max):
+       case BIN(trace_opt_newarray_min):
+diff -u mjit_compile.inc mjit_compile.inc
+--- mjit_compile.inc
++++ mjit_compile.inc
+@@ -2429,6 +2429,984 @@
+     }
+     fprintf(f, "}\n");
+     break;
++  case BIN(opt_klass):
++      if (has_valid_method_type(status->cc_entries + call_data_index((CALL_DATA)operands[0], body))) {
++{
++    MAYBE_UNUSED(int pc_moved_p) = FALSE;
++    MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++    CALL_CACHE cc_copy = status->cc_entries + call_data_index(cd, body);
++    if (!status->compile_info->disable_send_cache && has_valid_method_type(cc_copy)) {
++        const rb_iseq_t *iseq;
++        const CALL_INFO ci = &cd->ci;
++        unsigned int argc = ci->orig_argc; // this `argc` variable is for calculating a value's position on stack considering `blockarg`.
++
++        if (!(ci->flag & VM_CALL_TAILCALL) // inlining non-tailcall path
++                && cc_copy->me->def->type == VM_METHOD_TYPE_ISEQ && fastpath_applied_iseq_p(ci, cc_copy, iseq = def_iseq_ptr(cc_copy->me->def))) { // CC_SET_FASTPATH in vm_callee_setup_arg
++            int param_size = iseq->body->param.size;
++
++            fprintf(f, "{\n");
++            if (status->local_stack_p) {
++                fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++            }
++
++            fprintf(f, "    if (UNLIKELY(GET_GLOBAL_METHOD_STATE() != %"PRI_SERIALT_PREFIX"u ||\n", cc_copy->method_state);
++            fprintf(f, "        RCLASS_SERIAL(CLASS_OF(stack[%d])) != %"PRI_SERIALT_PREFIX"u)) {\n", b->stack_size - 1 - argc, cc_copy->class_serial[0]);
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", pos);
++            fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++            fprintf(f, "        goto send_cancel;\n");
++            fprintf(f, "    }\n");
++
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++
++            if (status->inlined_iseqs != NULL && status->inlined_iseqs[pos] == iseq->body) {
++                fprintf(f, "    {\n");
++                fprintf(f, "        VALUE orig_self = reg_cfp->self;\n");
++                fprintf(f, "        reg_cfp->self = stack[%d];\n", b->stack_size - argc - 1);
++                fprintf(f, "        stack[%d] = _mjit_inlined_%d(ec, reg_cfp, orig_self, original_iseq);\n", b->stack_size - argc - 1, pos);
++                fprintf(f, "        reg_cfp->self = orig_self;\n");
++                fprintf(f, "    }\n");
++            }
++            else {
++                fprintf(f, "    {\n");
++                fprintf(f, "        struct rb_calling_info calling;\n");
++                fprintf(f, "        calling.block_handler = VM_BLOCK_HANDLER_NONE;\n");
++                fprintf(f, "        calling.argc = %d;\n", ci->orig_argc);
++                fprintf(f, "        calling.recv = stack[%d];\n", b->stack_size - 1 - argc);
++
++                fprintf(f, "        {\n");
++                fprintf(f, "            VALUE v;\n");
++                fprintf(f, "            vm_call_iseq_setup_normal(ec, reg_cfp, &calling, (const rb_callable_method_entry_t *)0x%"PRIxVALUE", 0, %d, %d);\n",
++                        (VALUE)cc_copy->me, param_size, iseq->body->local_table_size); // fastpath_applied_iseq_p checks rb_simple_iseq_p, which ensures has_opt == FALSE
++                if (iseq->body->catch_except_p) {
++                    fprintf(f, "            VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n");
++                    fprintf(f, "            v = vm_exec(ec, TRUE);\n");
++                }
++                else {
++                    fprintf(f, "            if ((v = mjit_exec(ec)) == Qundef) {\n");
++                    fprintf(f, "                VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n"); // This is vm_call0_body's code after vm_call_iseq_setup
++                    fprintf(f, "                v = vm_exec(ec, FALSE);\n");
++                    fprintf(f, "            }\n");
++                }
++                fprintf(f, "            stack[%d] = v;\n", b->stack_size - argc - 1);
++                fprintf(f, "        }\n");
++
++                fprintf(f, "    }\n");
++
++                fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++                fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++                if (!pc_moved_p) {
++                    fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++                }
++                fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++                fprintf(f, "        goto cancel;\n");
++                fprintf(f, "    }\n");
++            }
++
++            b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++
++            fprintf(f, "}\n");
++            break;
++        }
++    }
++}
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        VALUE bh = VM_BLOCK_HANDLER_NONE;\n");
++        fprintf(f, "        val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_method_wrap);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        fprintf(f, "#if OPT_CALL_THREADED_CODE\n");
++        fprintf(f, "    rb_ec_thread_ptr(ec)->retval = val;\n");
++        fprintf(f, "    return 0;\n");
++        fprintf(f, "#else\n");
++        fprintf(f, "    return val;\n");
++        fprintf(f, "#endif\n");
++        fprintf(f, "    UNREACHABLE_RETURN(Qundef);\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
++        b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++    }
++    fprintf(f, "}\n");
++          break;
++      }
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) recv, val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        fprintf(f, "    recv = stack[%d];\n", b->stack_size - 1);
++        if (body->catch_except_p || FALSE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        val = vm_opt_class(cd, recv);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        if (status->local_stack_p) {
++            fprintf(f, "            reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "            reg_cfp->pc = original_body_iseq + %d;\n", pos);
++        fprintf(f, "            RB_DEBUG_COUNTER_INC(mjit_cancel_opt_insn);\n");
++        fprintf(f, "            goto cancel;\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_klass(cd) - 1);
++        b->stack_size += attr_sp_inc_opt_klass(cd);
++    }
++    fprintf(f, "}\n");
++    break;
++  case BIN(opt_is_a_p):
++      if (has_valid_method_type(status->cc_entries + call_data_index((CALL_DATA)operands[0], body))) {
++{
++    MAYBE_UNUSED(int pc_moved_p) = FALSE;
++    MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++    CALL_CACHE cc_copy = status->cc_entries + call_data_index(cd, body);
++    if (!status->compile_info->disable_send_cache && has_valid_method_type(cc_copy)) {
++        const rb_iseq_t *iseq;
++        const CALL_INFO ci = &cd->ci;
++        unsigned int argc = ci->orig_argc; // this `argc` variable is for calculating a value's position on stack considering `blockarg`.
++
++        if (!(ci->flag & VM_CALL_TAILCALL) // inlining non-tailcall path
++                && cc_copy->me->def->type == VM_METHOD_TYPE_ISEQ && fastpath_applied_iseq_p(ci, cc_copy, iseq = def_iseq_ptr(cc_copy->me->def))) { // CC_SET_FASTPATH in vm_callee_setup_arg
++            int param_size = iseq->body->param.size;
++
++            fprintf(f, "{\n");
++            if (status->local_stack_p) {
++                fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++            }
++
++            fprintf(f, "    if (UNLIKELY(GET_GLOBAL_METHOD_STATE() != %"PRI_SERIALT_PREFIX"u ||\n", cc_copy->method_state);
++            fprintf(f, "        RCLASS_SERIAL(CLASS_OF(stack[%d])) != %"PRI_SERIALT_PREFIX"u)) {\n", b->stack_size - 1 - argc, cc_copy->class_serial[0]);
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", pos);
++            fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++            fprintf(f, "        goto send_cancel;\n");
++            fprintf(f, "    }\n");
++
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++
++            if (status->inlined_iseqs != NULL && status->inlined_iseqs[pos] == iseq->body) {
++                fprintf(f, "    {\n");
++                fprintf(f, "        VALUE orig_self = reg_cfp->self;\n");
++                fprintf(f, "        reg_cfp->self = stack[%d];\n", b->stack_size - argc - 1);
++                fprintf(f, "        stack[%d] = _mjit_inlined_%d(ec, reg_cfp, orig_self, original_iseq);\n", b->stack_size - argc - 1, pos);
++                fprintf(f, "        reg_cfp->self = orig_self;\n");
++                fprintf(f, "    }\n");
++            }
++            else {
++                fprintf(f, "    {\n");
++                fprintf(f, "        struct rb_calling_info calling;\n");
++                fprintf(f, "        calling.block_handler = VM_BLOCK_HANDLER_NONE;\n");
++                fprintf(f, "        calling.argc = %d;\n", ci->orig_argc);
++                fprintf(f, "        calling.recv = stack[%d];\n", b->stack_size - 1 - argc);
++
++                fprintf(f, "        {\n");
++                fprintf(f, "            VALUE v;\n");
++                fprintf(f, "            vm_call_iseq_setup_normal(ec, reg_cfp, &calling, (const rb_callable_method_entry_t *)0x%"PRIxVALUE", 0, %d, %d);\n",
++                        (VALUE)cc_copy->me, param_size, iseq->body->local_table_size); // fastpath_applied_iseq_p checks rb_simple_iseq_p, which ensures has_opt == FALSE
++                if (iseq->body->catch_except_p) {
++                    fprintf(f, "            VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n");
++                    fprintf(f, "            v = vm_exec(ec, TRUE);\n");
++                }
++                else {
++                    fprintf(f, "            if ((v = mjit_exec(ec)) == Qundef) {\n");
++                    fprintf(f, "                VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n"); // This is vm_call0_body's code after vm_call_iseq_setup
++                    fprintf(f, "                v = vm_exec(ec, FALSE);\n");
++                    fprintf(f, "            }\n");
++                }
++                fprintf(f, "            stack[%d] = v;\n", b->stack_size - argc - 1);
++                fprintf(f, "        }\n");
++
++                fprintf(f, "    }\n");
++
++                fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++                fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++                if (!pc_moved_p) {
++                    fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++                }
++                fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++                fprintf(f, "        goto cancel;\n");
++                fprintf(f, "    }\n");
++            }
++
++            b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++
++            fprintf(f, "}\n");
++            break;
++        }
++    }
++}
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        VALUE bh = VM_BLOCK_HANDLER_NONE;\n");
++        fprintf(f, "        val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_method_wrap);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        fprintf(f, "#if OPT_CALL_THREADED_CODE\n");
++        fprintf(f, "    rb_ec_thread_ptr(ec)->retval = val;\n");
++        fprintf(f, "    return 0;\n");
++        fprintf(f, "#else\n");
++        fprintf(f, "    return val;\n");
++        fprintf(f, "#endif\n");
++        fprintf(f, "    UNREACHABLE_RETURN(Qundef);\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
++        b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++    }
++    fprintf(f, "}\n");
++          break;
++      }
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) mod, recv, val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        fprintf(f, "    recv = stack[%d];\n", b->stack_size - 2);
++        fprintf(f, "    mod = stack[%d];\n", b->stack_size - 1);
++        if (body->catch_except_p || FALSE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        val = vm_opt_is_a_p(cd, recv, mod);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        if (status->local_stack_p) {
++            fprintf(f, "            reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "            reg_cfp->pc = original_body_iseq + %d;\n", pos);
++        fprintf(f, "            RB_DEBUG_COUNTER_INC(mjit_cancel_opt_insn);\n");
++        fprintf(f, "            goto cancel;\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_is_a_p(cd) - 1);
++        b->stack_size += attr_sp_inc_opt_is_a_p(cd);
++    }
++    fprintf(f, "}\n");
++    break;
++  case BIN(opt_t_let):
++      if (has_valid_method_type(status->cc_entries + call_data_index((CALL_DATA)operands[0], body))) {
++{
++    MAYBE_UNUSED(int pc_moved_p) = FALSE;
++    MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++    CALL_CACHE cc_copy = status->cc_entries + call_data_index(cd, body);
++    if (!status->compile_info->disable_send_cache && has_valid_method_type(cc_copy)) {
++        const rb_iseq_t *iseq;
++        const CALL_INFO ci = &cd->ci;
++        unsigned int argc = ci->orig_argc; // this `argc` variable is for calculating a value's position on stack considering `blockarg`.
++
++        if (!(ci->flag & VM_CALL_TAILCALL) // inlining non-tailcall path
++                && cc_copy->me->def->type == VM_METHOD_TYPE_ISEQ && fastpath_applied_iseq_p(ci, cc_copy, iseq = def_iseq_ptr(cc_copy->me->def))) { // CC_SET_FASTPATH in vm_callee_setup_arg
++            int param_size = iseq->body->param.size;
++
++            fprintf(f, "{\n");
++            if (status->local_stack_p) {
++                fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++            }
++
++            fprintf(f, "    if (UNLIKELY(GET_GLOBAL_METHOD_STATE() != %"PRI_SERIALT_PREFIX"u ||\n", cc_copy->method_state);
++            fprintf(f, "        RCLASS_SERIAL(CLASS_OF(stack[%d])) != %"PRI_SERIALT_PREFIX"u)) {\n", b->stack_size - 1 - argc, cc_copy->class_serial[0]);
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", pos);
++            fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++            fprintf(f, "        goto send_cancel;\n");
++            fprintf(f, "    }\n");
++
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++
++            if (status->inlined_iseqs != NULL && status->inlined_iseqs[pos] == iseq->body) {
++                fprintf(f, "    {\n");
++                fprintf(f, "        VALUE orig_self = reg_cfp->self;\n");
++                fprintf(f, "        reg_cfp->self = stack[%d];\n", b->stack_size - argc - 1);
++                fprintf(f, "        stack[%d] = _mjit_inlined_%d(ec, reg_cfp, orig_self, original_iseq);\n", b->stack_size - argc - 1, pos);
++                fprintf(f, "        reg_cfp->self = orig_self;\n");
++                fprintf(f, "    }\n");
++            }
++            else {
++                fprintf(f, "    {\n");
++                fprintf(f, "        struct rb_calling_info calling;\n");
++                fprintf(f, "        calling.block_handler = VM_BLOCK_HANDLER_NONE;\n");
++                fprintf(f, "        calling.argc = %d;\n", ci->orig_argc);
++                fprintf(f, "        calling.recv = stack[%d];\n", b->stack_size - 1 - argc);
++
++                fprintf(f, "        {\n");
++                fprintf(f, "            VALUE v;\n");
++                fprintf(f, "            vm_call_iseq_setup_normal(ec, reg_cfp, &calling, (const rb_callable_method_entry_t *)0x%"PRIxVALUE", 0, %d, %d);\n",
++                        (VALUE)cc_copy->me, param_size, iseq->body->local_table_size); // fastpath_applied_iseq_p checks rb_simple_iseq_p, which ensures has_opt == FALSE
++                if (iseq->body->catch_except_p) {
++                    fprintf(f, "            VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n");
++                    fprintf(f, "            v = vm_exec(ec, TRUE);\n");
++                }
++                else {
++                    fprintf(f, "            if ((v = mjit_exec(ec)) == Qundef) {\n");
++                    fprintf(f, "                VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n"); // This is vm_call0_body's code after vm_call_iseq_setup
++                    fprintf(f, "                v = vm_exec(ec, FALSE);\n");
++                    fprintf(f, "            }\n");
++                }
++                fprintf(f, "            stack[%d] = v;\n", b->stack_size - argc - 1);
++                fprintf(f, "        }\n");
++
++                fprintf(f, "    }\n");
++
++                fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++                fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++                if (!pc_moved_p) {
++                    fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++                }
++                fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++                fprintf(f, "        goto cancel;\n");
++                fprintf(f, "    }\n");
++            }
++
++            b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++
++            fprintf(f, "}\n");
++            break;
++        }
++    }
++}
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        VALUE bh = VM_BLOCK_HANDLER_NONE;\n");
++        fprintf(f, "        val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_method_wrap);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        fprintf(f, "#if OPT_CALL_THREADED_CODE\n");
++        fprintf(f, "    rb_ec_thread_ptr(ec)->retval = val;\n");
++        fprintf(f, "    return 0;\n");
++        fprintf(f, "#else\n");
++        fprintf(f, "    return val;\n");
++        fprintf(f, "#endif\n");
++        fprintf(f, "    UNREACHABLE_RETURN(Qundef);\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
++        b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++    }
++    fprintf(f, "}\n");
++          break;
++      }
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) recv, type, val, val_to_check;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        fprintf(f, "    recv = stack[%d];\n", b->stack_size - 3);
++        fprintf(f, "    val_to_check = stack[%d];\n", b->stack_size - 2);
++        fprintf(f, "    type = stack[%d];\n", b->stack_size - 1);
++        if (body->catch_except_p || FALSE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        val = vm_opt_t_let(cd, recv, val_to_check, type);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        if (status->local_stack_p) {
++            fprintf(f, "            reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "            reg_cfp->pc = original_body_iseq + %d;\n", pos);
++        fprintf(f, "            RB_DEBUG_COUNTER_INC(mjit_cancel_opt_insn);\n");
++        fprintf(f, "            goto cancel;\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_t_let(cd) - 1);
++        b->stack_size += attr_sp_inc_opt_t_let(cd);
++    }
++    fprintf(f, "}\n");
++    break;
++  case BIN(opt_t_unsafe):
++      if (has_valid_method_type(status->cc_entries + call_data_index((CALL_DATA)operands[0], body))) {
++{
++    MAYBE_UNUSED(int pc_moved_p) = FALSE;
++    MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++    CALL_CACHE cc_copy = status->cc_entries + call_data_index(cd, body);
++    if (!status->compile_info->disable_send_cache && has_valid_method_type(cc_copy)) {
++        const rb_iseq_t *iseq;
++        const CALL_INFO ci = &cd->ci;
++        unsigned int argc = ci->orig_argc; // this `argc` variable is for calculating a value's position on stack considering `blockarg`.
++
++        if (!(ci->flag & VM_CALL_TAILCALL) // inlining non-tailcall path
++                && cc_copy->me->def->type == VM_METHOD_TYPE_ISEQ && fastpath_applied_iseq_p(ci, cc_copy, iseq = def_iseq_ptr(cc_copy->me->def))) { // CC_SET_FASTPATH in vm_callee_setup_arg
++            int param_size = iseq->body->param.size;
++
++            fprintf(f, "{\n");
++            if (status->local_stack_p) {
++                fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++            }
++
++            fprintf(f, "    if (UNLIKELY(GET_GLOBAL_METHOD_STATE() != %"PRI_SERIALT_PREFIX"u ||\n", cc_copy->method_state);
++            fprintf(f, "        RCLASS_SERIAL(CLASS_OF(stack[%d])) != %"PRI_SERIALT_PREFIX"u)) {\n", b->stack_size - 1 - argc, cc_copy->class_serial[0]);
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", pos);
++            fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++            fprintf(f, "        goto send_cancel;\n");
++            fprintf(f, "    }\n");
++
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++
++            if (status->inlined_iseqs != NULL && status->inlined_iseqs[pos] == iseq->body) {
++                fprintf(f, "    {\n");
++                fprintf(f, "        VALUE orig_self = reg_cfp->self;\n");
++                fprintf(f, "        reg_cfp->self = stack[%d];\n", b->stack_size - argc - 1);
++                fprintf(f, "        stack[%d] = _mjit_inlined_%d(ec, reg_cfp, orig_self, original_iseq);\n", b->stack_size - argc - 1, pos);
++                fprintf(f, "        reg_cfp->self = orig_self;\n");
++                fprintf(f, "    }\n");
++            }
++            else {
++                fprintf(f, "    {\n");
++                fprintf(f, "        struct rb_calling_info calling;\n");
++                fprintf(f, "        calling.block_handler = VM_BLOCK_HANDLER_NONE;\n");
++                fprintf(f, "        calling.argc = %d;\n", ci->orig_argc);
++                fprintf(f, "        calling.recv = stack[%d];\n", b->stack_size - 1 - argc);
++
++                fprintf(f, "        {\n");
++                fprintf(f, "            VALUE v;\n");
++                fprintf(f, "            vm_call_iseq_setup_normal(ec, reg_cfp, &calling, (const rb_callable_method_entry_t *)0x%"PRIxVALUE", 0, %d, %d);\n",
++                        (VALUE)cc_copy->me, param_size, iseq->body->local_table_size); // fastpath_applied_iseq_p checks rb_simple_iseq_p, which ensures has_opt == FALSE
++                if (iseq->body->catch_except_p) {
++                    fprintf(f, "            VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n");
++                    fprintf(f, "            v = vm_exec(ec, TRUE);\n");
++                }
++                else {
++                    fprintf(f, "            if ((v = mjit_exec(ec)) == Qundef) {\n");
++                    fprintf(f, "                VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n"); // This is vm_call0_body's code after vm_call_iseq_setup
++                    fprintf(f, "                v = vm_exec(ec, FALSE);\n");
++                    fprintf(f, "            }\n");
++                }
++                fprintf(f, "            stack[%d] = v;\n", b->stack_size - argc - 1);
++                fprintf(f, "        }\n");
++
++                fprintf(f, "    }\n");
++
++                fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++                fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++                if (!pc_moved_p) {
++                    fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++                }
++                fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++                fprintf(f, "        goto cancel;\n");
++                fprintf(f, "    }\n");
++            }
++
++            b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++
++            fprintf(f, "}\n");
++            break;
++        }
++    }
++}
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        VALUE bh = VM_BLOCK_HANDLER_NONE;\n");
++        fprintf(f, "        val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_method_wrap);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        fprintf(f, "#if OPT_CALL_THREADED_CODE\n");
++        fprintf(f, "    rb_ec_thread_ptr(ec)->retval = val;\n");
++        fprintf(f, "    return 0;\n");
++        fprintf(f, "#else\n");
++        fprintf(f, "    return val;\n");
++        fprintf(f, "#endif\n");
++        fprintf(f, "    UNREACHABLE_RETURN(Qundef);\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
++        b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++    }
++    fprintf(f, "}\n");
++          break;
++      }
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) cast_val, recv, val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        fprintf(f, "    recv = stack[%d];\n", b->stack_size - 2);
++        fprintf(f, "    cast_val = stack[%d];\n", b->stack_size - 1);
++        if (body->catch_except_p || FALSE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        extern VALUE rb_mT;\n");
++        fprintf(f, "        if (recv == rb_mT) {\n");
++        fprintf(f, "            val = cast_val;\n");
++        fprintf(f, "        } else {\n");
++        if (status->local_stack_p) {
++            fprintf(f, "            reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "            reg_cfp->pc = original_body_iseq + %d;\n", pos);
++        fprintf(f, "            RB_DEBUG_COUNTER_INC(mjit_cancel_opt_insn);\n");
++        fprintf(f, "            goto cancel;\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_t_unsafe(cd) - 1);
++        b->stack_size += attr_sp_inc_opt_t_unsafe(cd);
++    }
++    fprintf(f, "}\n");
++    break;
++  case BIN(opt_t_must):
++      if (has_valid_method_type(status->cc_entries + call_data_index((CALL_DATA)operands[0], body))) {
++{
++    MAYBE_UNUSED(int pc_moved_p) = FALSE;
++    MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++    CALL_CACHE cc_copy = status->cc_entries + call_data_index(cd, body);
++    if (!status->compile_info->disable_send_cache && has_valid_method_type(cc_copy)) {
++        const rb_iseq_t *iseq;
++        const CALL_INFO ci = &cd->ci;
++        unsigned int argc = ci->orig_argc; // this `argc` variable is for calculating a value's position on stack considering `blockarg`.
++
++        if (!(ci->flag & VM_CALL_TAILCALL) // inlining non-tailcall path
++                && cc_copy->me->def->type == VM_METHOD_TYPE_ISEQ && fastpath_applied_iseq_p(ci, cc_copy, iseq = def_iseq_ptr(cc_copy->me->def))) { // CC_SET_FASTPATH in vm_callee_setup_arg
++            int param_size = iseq->body->param.size;
++
++            fprintf(f, "{\n");
++            if (status->local_stack_p) {
++                fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++            }
++
++            fprintf(f, "    if (UNLIKELY(GET_GLOBAL_METHOD_STATE() != %"PRI_SERIALT_PREFIX"u ||\n", cc_copy->method_state);
++            fprintf(f, "        RCLASS_SERIAL(CLASS_OF(stack[%d])) != %"PRI_SERIALT_PREFIX"u)) {\n", b->stack_size - 1 - argc, cc_copy->class_serial[0]);
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", pos);
++            fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++            fprintf(f, "        goto send_cancel;\n");
++            fprintf(f, "    }\n");
++
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++
++            if (status->inlined_iseqs != NULL && status->inlined_iseqs[pos] == iseq->body) {
++                fprintf(f, "    {\n");
++                fprintf(f, "        VALUE orig_self = reg_cfp->self;\n");
++                fprintf(f, "        reg_cfp->self = stack[%d];\n", b->stack_size - argc - 1);
++                fprintf(f, "        stack[%d] = _mjit_inlined_%d(ec, reg_cfp, orig_self, original_iseq);\n", b->stack_size - argc - 1, pos);
++                fprintf(f, "        reg_cfp->self = orig_self;\n");
++                fprintf(f, "    }\n");
++            }
++            else {
++                fprintf(f, "    {\n");
++                fprintf(f, "        struct rb_calling_info calling;\n");
++                fprintf(f, "        calling.block_handler = VM_BLOCK_HANDLER_NONE;\n");
++                fprintf(f, "        calling.argc = %d;\n", ci->orig_argc);
++                fprintf(f, "        calling.recv = stack[%d];\n", b->stack_size - 1 - argc);
++
++                fprintf(f, "        {\n");
++                fprintf(f, "            VALUE v;\n");
++                fprintf(f, "            vm_call_iseq_setup_normal(ec, reg_cfp, &calling, (const rb_callable_method_entry_t *)0x%"PRIxVALUE", 0, %d, %d);\n",
++                        (VALUE)cc_copy->me, param_size, iseq->body->local_table_size); // fastpath_applied_iseq_p checks rb_simple_iseq_p, which ensures has_opt == FALSE
++                if (iseq->body->catch_except_p) {
++                    fprintf(f, "            VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n");
++                    fprintf(f, "            v = vm_exec(ec, TRUE);\n");
++                }
++                else {
++                    fprintf(f, "            if ((v = mjit_exec(ec)) == Qundef) {\n");
++                    fprintf(f, "                VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);\n"); // This is vm_call0_body's code after vm_call_iseq_setup
++                    fprintf(f, "                v = vm_exec(ec, FALSE);\n");
++                    fprintf(f, "            }\n");
++                }
++                fprintf(f, "            stack[%d] = v;\n", b->stack_size - argc - 1);
++                fprintf(f, "        }\n");
++
++                fprintf(f, "    }\n");
++
++                fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++                fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++                if (!pc_moved_p) {
++                    fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++                }
++                fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++                fprintf(f, "        goto cancel;\n");
++                fprintf(f, "    }\n");
++            }
++
++            b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++
++            fprintf(f, "}\n");
++            break;
++        }
++    }
++}
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        if (body->catch_except_p || TRUE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++            {
++                rb_snum_t i, push_size;
++                push_size = -attr_sp_inc_opt_send_without_block(cd) + 1 - 0;
++                fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %ld;\n", push_size); /* POPN(INSN_ATTR(popn)); */
++                for (i = 0; i < push_size; i++) {
++                    fprintf(f, "    *(reg_cfp->sp + %ld) = stack[%ld];\n", i - push_size, (rb_snum_t)b->stack_size - push_size + i);
++                }
++            }
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size - 0); /* POPN(INSN_ATTR(popn)); */
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        VALUE bh = VM_BLOCK_HANDLER_NONE;\n");
++        fprintf(f, "        val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_method_wrap);\n");
++        fprintf(f, "\n");
++        fprintf(f, "        if (val == Qundef) {\n");
++        fprintf(f, "#if OPT_CALL_THREADED_CODE\n");
++        fprintf(f, "    rb_ec_thread_ptr(ec)->retval = val;\n");
++        fprintf(f, "    return 0;\n");
++        fprintf(f, "#else\n");
++        fprintf(f, "    return val;\n");
++        fprintf(f, "#endif\n");
++        fprintf(f, "    UNREACHABLE_RETURN(Qundef);\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd) - 1);
++        fprintf(f, "    if (UNLIKELY(!mjit_call_p)) {\n");
++        fprintf(f, "        reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size + (int)attr_sp_inc_opt_send_without_block(cd));
++        if (!pc_moved_p) {
++            fprintf(f, "        reg_cfp->pc = original_body_iseq + %d;\n", next_pos);
++        }
++        fprintf(f, "        RB_DEBUG_COUNTER_INC(mjit_cancel_invalidate_all);\n");
++        fprintf(f, "        goto cancel;\n");
++        fprintf(f, "    }\n");
++        b->stack_size += attr_sp_inc_opt_send_without_block(cd);
++    }
++    fprintf(f, "}\n");
++          break;
++      }
++    fprintf(f, "{\n");
++    {
++        MAYBE_UNUSED(int pc_moved_p) = FALSE;
++        MAYBE_UNUSED(CALL_DATA cd) = (CALL_DATA)operands[0];
++        if (status->local_stack_p) {
++            fprintf(f, "    MAYBE_UNUSED(unsigned int) stack_size = %u;\n", b->stack_size);
++        }
++        fprintf(f, "    MAYBE_UNUSED(CALL_DATA) cd;\n");
++        fprintf(f, "    MAYBE_UNUSED(VALUE) cast_val, recv, val;\n");
++
++        fprintf(f, "    cd = (CALL_DATA)0x%"PRIxVALUE";", operands[0]);
++        comment_id(f, ((CALL_DATA)operands[0])->ci.mid);
++        fprintf(f, "\n");
++        fprintf(f, "    recv = stack[%d];\n", b->stack_size - 2);
++        fprintf(f, "    cast_val = stack[%d];\n", b->stack_size - 1);
++        if (body->catch_except_p || FALSE) {
++            fprintf(f, "    reg_cfp->pc = original_body_iseq + %d;\n", next_pos); /* ADD_PC(INSN_ATTR(width)); */
++            pc_moved_p = TRUE;
++        }
++        if (status->local_stack_p) {
++        }
++        else {
++            fprintf(f, "    reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "    {\n");
++        fprintf(f, "        extern VALUE rb_mT;\n");
++        fprintf(f, "        if (recv == rb_mT && cast_val != Qnil) {\n");
++        fprintf(f, "            val = cast_val;\n");
++        fprintf(f, "        } else {\n");
++        fprintf(f, "            val = Qundef;\n");
++        if (status->local_stack_p) {
++            fprintf(f, "            reg_cfp->sp = vm_base_ptr(reg_cfp) + %d;\n", b->stack_size);
++        }
++        fprintf(f, "            reg_cfp->pc = original_body_iseq + %d;\n", pos);
++        fprintf(f, "            RB_DEBUG_COUNTER_INC(mjit_cancel_opt_insn);\n");
++        fprintf(f, "            goto cancel;\n");
++        fprintf(f, "        }\n");
++        fprintf(f, "    }\n");
++        fprintf(f, "    stack[%d] = val;\n", b->stack_size + (int)attr_sp_inc_opt_t_must(cd) - 1);
++        b->stack_size += attr_sp_inc_opt_t_must(cd);
++    }
++    fprintf(f, "}\n");
++    break;
+   case BIN(opt_str_uminus):
+     fprintf(f, "{\n");
+     {
+diff -u opt_sc.inc opt_sc.inc
+--- opt_sc.inc
++++ opt_sc.inc
+@@ -73,7 +73,8 @@
+     NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
+     NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
+     NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
+-    NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
++    NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
++    NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC, NO_SC,
+ #undef NO_SC
+ };
+ 
+@@ -103,7 +104,8 @@
+     SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
+     SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
+     SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
+-    SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
++    SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
++    SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX, SCS_XX,
+ };
+ 
+ ASSERT_VM_INSTRUCTION_SIZE(sc_insn_next);
+diff -u optunifs.inc optunifs.inc
+--- optunifs.inc
++++ optunifs.inc
+@@ -38,6 +38,6 @@
+ 
+ /* Let .bss section automatically initialize this variable */
+ /* cf. Section 6.7.8 of ISO/IEC 9899:1999 */
+-static const int *const *const unified_insns_data[206];
++static const int *const *const unified_insns_data[216];
+ 
+ ASSERT_VM_INSTRUCTION_SIZE(unified_insns_data);
+diff -u vm.inc vm.inc
+--- vm.inc
++++ vm.inc
+@@ -2369,6 +2369,249 @@
+     END_INSN(opt_nil_p);
+ }
+ 
++/* insn opt_klass(cd)(recv)(val) */
++INSN_ENTRY(opt_klass)
++{
++    /* ###  Declare that we have just entered into an instruction. ### */
++    START_OF_ORIGINAL_INSN(opt_klass);
++    DEBUG_ENTER_INSN("opt_klass");
++
++    /* ###  Declare and assign variables. ### */
++    CALL_DATA cd = (CALL_DATA)GET_OPERAND(1);
++#   define INSN_ATTR(x) attr_ ## x ## _opt_klass(cd)
++    bool leaf = INSN_ATTR(leaf);
++    VALUE recv = TOPN(0);
++    VALUE val;
++
++    /* ### Instruction preambles. ### */
++    if (! leaf) ADD_PC(INSN_ATTR(width));
++    SETUP_CANARY();
++    COLLECT_USAGE_INSN(INSN_ATTR(bin));
++    COLLECT_USAGE_OPERAND(INSN_ATTR(bin), 0, cd);
++
++    /* ### Here we do the instruction body. ### */
++#   define NAME_OF_CURRENT_INSN opt_klass
++#   line 842 "insns.def"
++{
++    val = vm_opt_class(cd, recv);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++#   line 2403 "vm.inc"
++#   undef NAME_OF_CURRENT_INSN
++
++    /* ### Instruction trailers. ### */
++    CHECK_VM_STACK_OVERFLOW_FOR_INSN(VM_REG_CFP, INSN_ATTR(retn));
++    CHECK_CANARY();
++    INC_SP(INSN_ATTR(sp_inc));
++    TOPN(0) = val;
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_NONE));
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_MOVED));
++    if (leaf) ADD_PC(INSN_ATTR(width));
++#   undef INSN_ATTR
++
++    /* ### Leave the instruction. ### */
++    END_INSN(opt_klass);
++}
++
++/* insn opt_is_a_p(cd)(recv, mod)(val) */
++INSN_ENTRY(opt_is_a_p)
++{
++    /* ###  Declare that we have just entered into an instruction. ### */
++    START_OF_ORIGINAL_INSN(opt_is_a_p);
++    DEBUG_ENTER_INSN("opt_is_a_p");
++
++    /* ###  Declare and assign variables. ### */
++    CALL_DATA cd = (CALL_DATA)GET_OPERAND(1);
++#   define INSN_ATTR(x) attr_ ## x ## _opt_is_a_p(cd)
++    bool leaf = INSN_ATTR(leaf);
++    VALUE recv = TOPN(1);
++    VALUE mod = TOPN(0);
++    VALUE val;
++
++    /* ### Instruction preambles. ### */
++    if (! leaf) ADD_PC(INSN_ATTR(width));
++    SETUP_CANARY();
++    COLLECT_USAGE_INSN(INSN_ATTR(bin));
++    COLLECT_USAGE_OPERAND(INSN_ATTR(bin), 0, cd);
++
++    /* ### Here we do the instruction body. ### */
++#   define NAME_OF_CURRENT_INSN opt_is_a_p
++#   line 855 "insns.def"
++{
++    val = vm_opt_is_a_p(cd, recv, mod);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++#   line 2451 "vm.inc"
++#   undef NAME_OF_CURRENT_INSN
++
++    /* ### Instruction trailers. ### */
++    CHECK_VM_STACK_OVERFLOW_FOR_INSN(VM_REG_CFP, INSN_ATTR(retn));
++    CHECK_CANARY();
++    INC_SP(INSN_ATTR(sp_inc));
++    TOPN(0) = val;
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_NONE));
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_MOVED));
++    if (leaf) ADD_PC(INSN_ATTR(width));
++#   undef INSN_ATTR
++
++    /* ### Leave the instruction. ### */
++    END_INSN(opt_is_a_p);
++}
++
++/* insn opt_t_let(cd)(recv, val_to_check, type)(val) */
++INSN_ENTRY(opt_t_let)
++{
++    /* ###  Declare that we have just entered into an instruction. ### */
++    START_OF_ORIGINAL_INSN(opt_t_let);
++    DEBUG_ENTER_INSN("opt_t_let");
++
++    /* ###  Declare and assign variables. ### */
++    CALL_DATA cd = (CALL_DATA)GET_OPERAND(1);
++#   define INSN_ATTR(x) attr_ ## x ## _opt_t_let(cd)
++    bool leaf = INSN_ATTR(leaf);
++    VALUE recv = TOPN(2);
++    VALUE val_to_check = TOPN(1);
++    VALUE type = TOPN(0);
++    VALUE val;
++
++    /* ### Instruction preambles. ### */
++    if (! leaf) ADD_PC(INSN_ATTR(width));
++    SETUP_CANARY();
++    COLLECT_USAGE_INSN(INSN_ATTR(bin));
++    COLLECT_USAGE_OPERAND(INSN_ATTR(bin), 0, cd);
++
++    /* ### Here we do the instruction body. ### */
++#   define NAME_OF_CURRENT_INSN opt_t_let
++#   line 868 "insns.def"
++{
++    val = vm_opt_t_let(cd, recv, val_to_check, type);
++
++    if (val == Qundef) {
++        CALL_SIMPLE_METHOD();
++    }
++}
++#   line 2500 "vm.inc"
++#   undef NAME_OF_CURRENT_INSN
++
++    /* ### Instruction trailers. ### */
++    CHECK_VM_STACK_OVERFLOW_FOR_INSN(VM_REG_CFP, INSN_ATTR(retn));
++    CHECK_CANARY();
++    INC_SP(INSN_ATTR(sp_inc));
++    TOPN(0) = val;
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_NONE));
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_MOVED));
++    if (leaf) ADD_PC(INSN_ATTR(width));
++#   undef INSN_ATTR
++
++    /* ### Leave the instruction. ### */
++    END_INSN(opt_t_let);
++}
++
++/* insn opt_t_unsafe(cd)(recv, cast_val)(val) */
++INSN_ENTRY(opt_t_unsafe)
++{
++    /* ###  Declare that we have just entered into an instruction. ### */
++    START_OF_ORIGINAL_INSN(opt_t_unsafe);
++    DEBUG_ENTER_INSN("opt_t_unsafe");
++
++    /* ###  Declare and assign variables. ### */
++    CALL_DATA cd = (CALL_DATA)GET_OPERAND(1);
++#   define INSN_ATTR(x) attr_ ## x ## _opt_t_unsafe(cd)
++    bool leaf = INSN_ATTR(leaf);
++    VALUE recv = TOPN(1);
++    VALUE cast_val = TOPN(0);
++    VALUE val;
++
++    /* ### Instruction preambles. ### */
++    if (! leaf) ADD_PC(INSN_ATTR(width));
++    SETUP_CANARY();
++    COLLECT_USAGE_INSN(INSN_ATTR(bin));
++    COLLECT_USAGE_OPERAND(INSN_ATTR(bin), 0, cd);
++
++    /* ### Here we do the instruction body. ### */
++#   define NAME_OF_CURRENT_INSN opt_t_unsafe
++#   line 881 "insns.def"
++{
++    extern VALUE rb_mT;
++    if (recv == rb_mT) {
++        val = cast_val;
++    } else {
++        CALL_SIMPLE_METHOD();
++    }
++}
++#   line 2549 "vm.inc"
++#   undef NAME_OF_CURRENT_INSN
++
++    /* ### Instruction trailers. ### */
++    CHECK_VM_STACK_OVERFLOW_FOR_INSN(VM_REG_CFP, INSN_ATTR(retn));
++    CHECK_CANARY();
++    INC_SP(INSN_ATTR(sp_inc));
++    TOPN(0) = val;
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_NONE));
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_MOVED));
++    if (leaf) ADD_PC(INSN_ATTR(width));
++#   undef INSN_ATTR
++
++    /* ### Leave the instruction. ### */
++    END_INSN(opt_t_unsafe);
++}
++
++/* insn opt_t_must(cd)(recv, cast_val)(val) */
++INSN_ENTRY(opt_t_must)
++{
++    /* ###  Declare that we have just entered into an instruction. ### */
++    START_OF_ORIGINAL_INSN(opt_t_must);
++    DEBUG_ENTER_INSN("opt_t_must");
++
++    /* ###  Declare and assign variables. ### */
++    CALL_DATA cd = (CALL_DATA)GET_OPERAND(1);
++#   define INSN_ATTR(x) attr_ ## x ## _opt_t_must(cd)
++    bool leaf = INSN_ATTR(leaf);
++    VALUE recv = TOPN(1);
++    VALUE cast_val = TOPN(0);
++    VALUE val;
++
++    /* ### Instruction preambles. ### */
++    if (! leaf) ADD_PC(INSN_ATTR(width));
++    SETUP_CANARY();
++    COLLECT_USAGE_INSN(INSN_ATTR(bin));
++    COLLECT_USAGE_OPERAND(INSN_ATTR(bin), 0, cd);
++
++    /* ### Here we do the instruction body. ### */
++#   define NAME_OF_CURRENT_INSN opt_t_must
++#   line 895 "insns.def"
++{
++    extern VALUE rb_mT;
++    if (recv == rb_mT && cast_val != Qnil) {
++        val = cast_val;
++    } else {
++        val = Qundef;
++        CALL_SIMPLE_METHOD();
++    }
++}
++#   line 2599 "vm.inc"
++#   undef NAME_OF_CURRENT_INSN
++
++    /* ### Instruction trailers. ### */
++    CHECK_VM_STACK_OVERFLOW_FOR_INSN(VM_REG_CFP, INSN_ATTR(retn));
++    CHECK_CANARY();
++    INC_SP(INSN_ATTR(sp_inc));
++    TOPN(0) = val;
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_NONE));
++    VM_ASSERT(!RB_TYPE_P(TOPN(0), T_MOVED));
++    if (leaf) ADD_PC(INSN_ATTR(width));
++#   undef INSN_ATTR
++
++    /* ### Leave the instruction. ### */
++    END_INSN(opt_t_must);
++}
++
+ /* insn opt_str_uminus(str, cd)()(val) */
+ INSN_ENTRY(opt_str_uminus)
+ {
+@@ -2392,7 +2635,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_str_uminus
+-#   line 842 "insns.def"
++#   line 910 "insns.def"
+ {
+     val = vm_opt_str_freeze(str, BOP_UMINUS, idUMinus);
+ 
+@@ -2401,7 +2644,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 2405 "vm.inc"
++#   line 2648 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2439,11 +2682,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_newarray_max
+-#   line 862 "insns.def"
++#   line 930 "insns.def"
+ {
+     val = vm_opt_newarray_max(num, STACK_ADDR_FROM_TOP(num));
+ }
+-#   line 2447 "vm.inc"
++#   line 2690 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2481,11 +2724,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_newarray_min
+-#   line 874 "insns.def"
++#   line 942 "insns.def"
+ {
+     val = vm_opt_newarray_min(num, STACK_ADDR_FROM_TOP(num));
+ }
+-#   line 2489 "vm.inc"
++#   line 2732 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2526,7 +2769,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN invokesuper
+-#   line 886 "insns.def"
++#   line 954 "insns.def"
+ {
+     VALUE bh = vm_caller_setup_arg_block(ec, GET_CFP(), &cd->ci, blockiseq, true);
+     val = vm_sendish(ec, GET_CFP(), cd, bh, vm_search_super_method);
+@@ -2536,7 +2779,7 @@
+         NEXT_INSN();
+     }
+ }
+-#   line 2540 "vm.inc"
++#   line 2783 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2572,7 +2815,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN invokeblock
+-#   line 905 "insns.def"
++#   line 973 "insns.def"
+ {
+     if (UNLIKELY(cd->cc.call != vm_invokeblock_i)) {
+         cd->cc.call = vm_invokeblock_i; // check before setting to avoid CoW
+@@ -2586,7 +2829,7 @@
+         NEXT_INSN();
+     }
+ }
+-#   line 2590 "vm.inc"
++#   line 2833 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2620,7 +2863,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN leave
+-#   line 930 "insns.def"
++#   line 998 "insns.def"
+ {
+     if (OPT_CHECKED_RUN) {
+         const VALUE *const bp = vm_base_ptr(GET_CFP());
+@@ -2641,7 +2884,7 @@
+ 	RESTORE_REGS();
+     }
+ }
+-#   line 2645 "vm.inc"
++#   line 2888 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2677,13 +2920,13 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN throw
+-#   line 963 "insns.def"
++#   line 1031 "insns.def"
+ {
+     val = vm_throw(ec, GET_CFP(), throw_state, throwobj);
+     THROW_EXCEPTION(val);
+     /* unreachable */
+ }
+-#   line 2687 "vm.inc"
++#   line 2930 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2720,12 +2963,12 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN jump
+-#   line 981 "insns.def"
++#   line 1049 "insns.def"
+ {
+     RUBY_VM_CHECK_INTS(ec);
+     JUMP(dst);
+ }
+-#   line 2729 "vm.inc"
++#   line 2972 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2760,14 +3003,14 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN branchif
+-#   line 994 "insns.def"
++#   line 1062 "insns.def"
+ {
+     if (RTEST(val)) {
+ 	RUBY_VM_CHECK_INTS(ec);
+ 	JUMP(dst);
+     }
+ }
+-#   line 2771 "vm.inc"
++#   line 3014 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2802,14 +3045,14 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN branchunless
+-#   line 1009 "insns.def"
++#   line 1077 "insns.def"
+ {
+     if (!RTEST(val)) {
+ 	RUBY_VM_CHECK_INTS(ec);
+ 	JUMP(dst);
+     }
+ }
+-#   line 2813 "vm.inc"
++#   line 3056 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2844,14 +3087,14 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN branchnil
+-#   line 1024 "insns.def"
++#   line 1092 "insns.def"
+ {
+     if (NIL_P(val)) {
+ 	RUBY_VM_CHECK_INTS(ec);
+ 	JUMP(dst);
+     }
+ }
+-#   line 2855 "vm.inc"
++#   line 3098 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2888,7 +3131,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_getinlinecache
+-#   line 1041 "insns.def"
++#   line 1109 "insns.def"
+ {
+     if (vm_ic_hit_p(ic, GET_EP())) {
+ 	val = ic->value;
+@@ -2898,7 +3141,7 @@
+ 	val = Qnil;
+     }
+ }
+-#   line 2902 "vm.inc"
++#   line 3145 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2936,11 +3179,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_setinlinecache
+-#   line 1057 "insns.def"
++#   line 1125 "insns.def"
+ {
+     vm_ic_update(ic, val, GET_EP());
+ }
+-#   line 2944 "vm.inc"
++#   line 3187 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -2981,11 +3224,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN once
+-#   line 1067 "insns.def"
++#   line 1135 "insns.def"
+ {
+     val = vm_once_dispatch(ec, iseq, ise);
+ }
+-#   line 2989 "vm.inc"
++#   line 3232 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3022,7 +3265,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_case_dispatch
+-#   line 1078 "insns.def"
++#   line 1146 "insns.def"
+ {
+     OFFSET dst = vm_case_dispatch(hash, else_offset, key);
+ 
+@@ -3030,7 +3273,7 @@
+ 	JUMP(dst);
+     }
+ }
+-#   line 3034 "vm.inc"
++#   line 3277 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3067,7 +3310,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_plus
+-#   line 1094 "insns.def"
++#   line 1162 "insns.def"
+ {
+     val = vm_opt_plus(recv, obj);
+ 
+@@ -3075,7 +3318,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3079 "vm.inc"
++#   line 3322 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3115,7 +3358,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_minus
+-#   line 1108 "insns.def"
++#   line 1176 "insns.def"
+ {
+     val = vm_opt_minus(recv, obj);
+ 
+@@ -3123,7 +3366,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3127 "vm.inc"
++#   line 3370 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3163,7 +3406,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_mult
+-#   line 1122 "insns.def"
++#   line 1190 "insns.def"
+ {
+     val = vm_opt_mult(recv, obj);
+ 
+@@ -3171,7 +3414,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3175 "vm.inc"
++#   line 3418 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3211,7 +3454,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_div
+-#   line 1139 "insns.def"
++#   line 1207 "insns.def"
+ {
+     val = vm_opt_div(recv, obj);
+ 
+@@ -3219,7 +3462,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3223 "vm.inc"
++#   line 3466 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3259,7 +3502,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_mod
+-#   line 1155 "insns.def"
++#   line 1223 "insns.def"
+ {
+     val = vm_opt_mod(recv, obj);
+ 
+@@ -3267,7 +3510,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3271 "vm.inc"
++#   line 3514 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3307,7 +3550,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_eq
+-#   line 1169 "insns.def"
++#   line 1237 "insns.def"
+ {
+     val = opt_eq_func(recv, obj, cd);
+ 
+@@ -3315,7 +3558,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3319 "vm.inc"
++#   line 3562 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3357,7 +3600,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_neq
+-#   line 1183 "insns.def"
++#   line 1251 "insns.def"
+ {
+     val = vm_opt_neq(cd, cd_eq, recv, obj);
+ 
+@@ -3365,7 +3608,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3369 "vm.inc"
++#   line 3612 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3405,7 +3648,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_lt
+-#   line 1197 "insns.def"
++#   line 1265 "insns.def"
+ {
+     val = vm_opt_lt(recv, obj);
+ 
+@@ -3413,7 +3656,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3417 "vm.inc"
++#   line 3660 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3453,7 +3696,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_le
+-#   line 1211 "insns.def"
++#   line 1279 "insns.def"
+ {
+     val = vm_opt_le(recv, obj);
+ 
+@@ -3461,7 +3704,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3465 "vm.inc"
++#   line 3708 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3501,7 +3744,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_gt
+-#   line 1225 "insns.def"
++#   line 1293 "insns.def"
+ {
+     val = vm_opt_gt(recv, obj);
+ 
+@@ -3509,7 +3752,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3513 "vm.inc"
++#   line 3756 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3549,7 +3792,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_ge
+-#   line 1239 "insns.def"
++#   line 1307 "insns.def"
+ {
+     val = vm_opt_ge(recv, obj);
+ 
+@@ -3557,7 +3800,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3561 "vm.inc"
++#   line 3804 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3597,7 +3840,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_ltlt
+-#   line 1257 "insns.def"
++#   line 1325 "insns.def"
+ {
+     val = vm_opt_ltlt(recv, obj);
+ 
+@@ -3605,7 +3848,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3609 "vm.inc"
++#   line 3852 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3645,7 +3888,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_and
+-#   line 1271 "insns.def"
++#   line 1339 "insns.def"
+ {
+     val = vm_opt_and(recv, obj);
+ 
+@@ -3653,7 +3896,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3657 "vm.inc"
++#   line 3900 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3693,7 +3936,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_or
+-#   line 1285 "insns.def"
++#   line 1353 "insns.def"
+ {
+     val = vm_opt_or(recv, obj);
+ 
+@@ -3701,7 +3944,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3705 "vm.inc"
++#   line 3948 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3741,7 +3984,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_aref
+-#   line 1304 "insns.def"
++#   line 1372 "insns.def"
+ {
+     val = vm_opt_aref(recv, obj);
+ 
+@@ -3749,7 +3992,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3753 "vm.inc"
++#   line 3996 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3790,7 +4033,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_aset
+-#   line 1321 "insns.def"
++#   line 1389 "insns.def"
+ {
+     val = vm_opt_aset(recv, obj, set);
+ 
+@@ -3798,7 +4041,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3802 "vm.inc"
++#   line 4045 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3839,7 +4082,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_aset_with
+-#   line 1337 "insns.def"
++#   line 1405 "insns.def"
+ {
+     VALUE tmp = vm_opt_aset_with(recv, key, val);
+ 
+@@ -3854,7 +4097,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3858 "vm.inc"
++#   line 4101 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3895,7 +4138,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_aref_with
+-#   line 1360 "insns.def"
++#   line 1428 "insns.def"
+ {
+     val = vm_opt_aref_with(recv, key);
+ 
+@@ -3906,7 +4149,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3910 "vm.inc"
++#   line 4153 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3945,7 +4188,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_length
+-#   line 1377 "insns.def"
++#   line 1445 "insns.def"
+ {
+     val = vm_opt_length(recv, BOP_LENGTH);
+ 
+@@ -3953,7 +4196,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 3957 "vm.inc"
++#   line 4200 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -3992,7 +4235,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_size
+-#   line 1391 "insns.def"
++#   line 1459 "insns.def"
+ {
+     val = vm_opt_length(recv, BOP_SIZE);
+ 
+@@ -4000,7 +4243,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 4004 "vm.inc"
++#   line 4247 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4039,7 +4282,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_empty_p
+-#   line 1405 "insns.def"
++#   line 1473 "insns.def"
+ {
+     val = vm_opt_empty_p(recv);
+ 
+@@ -4047,7 +4290,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 4051 "vm.inc"
++#   line 4294 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4086,7 +4329,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_succ
+-#   line 1419 "insns.def"
++#   line 1487 "insns.def"
+ {
+     val = vm_opt_succ(recv);
+ 
+@@ -4094,7 +4337,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 4098 "vm.inc"
++#   line 4341 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4133,7 +4376,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_not
+-#   line 1433 "insns.def"
++#   line 1501 "insns.def"
+ {
+     val = vm_opt_not(cd, recv);
+ 
+@@ -4141,7 +4384,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 4145 "vm.inc"
++#   line 4388 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4181,7 +4424,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_regexpmatch2
+-#   line 1448 "insns.def"
++#   line 1516 "insns.def"
+ {
+     val = vm_opt_regexpmatch2(obj2, obj1);
+ 
+@@ -4189,7 +4432,7 @@
+         CALL_SIMPLE_METHOD();
+     }
+ }
+-#   line 4193 "vm.inc"
++#   line 4436 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4227,7 +4470,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_call_c_function
+-#   line 1464 "insns.def"
++#   line 1532 "insns.def"
+ {
+     reg_cfp = (funcptr)(ec, reg_cfp);
+ 
+@@ -4240,7 +4483,7 @@
+     RESTORE_REGS();
+     NEXT_INSN();
+ }
+-#   line 4244 "vm.inc"
++#   line 4487 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4274,11 +4517,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN invokebuiltin
+-#   line 1485 "insns.def"
++#   line 1553 "insns.def"
+ {
+     ret = vm_invoke_builtin(ec, reg_cfp, bf, STACK_ADDR_FROM_TOP(bf->argc));
+ }
+-#   line 4282 "vm.inc"
++#   line 4525 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4318,11 +4561,11 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_invokebuiltin_delegate
+-#   line 1496 "insns.def"
++#   line 1564 "insns.def"
+ {
+     ret = vm_invoke_builtin_delegate(ec, reg_cfp, bf, (unsigned int)index);
+ }
+-#   line 4326 "vm.inc"
++#   line 4569 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4362,7 +4605,7 @@
+ 
+     /* ### Here we do the instruction body. ### */
+ #   define NAME_OF_CURRENT_INSN opt_invokebuiltin_delegate_leave
+-#   line 1507 "insns.def"
++#   line 1575 "insns.def"
+ {
+     val = vm_invoke_builtin_delegate(ec, reg_cfp, bf, (unsigned int)index);
+ 
+@@ -4380,7 +4623,7 @@
+         RESTORE_REGS();
+     }
+ }
+-#   line 4384 "vm.inc"
++#   line 4627 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4407,7 +4650,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 10 "defs/opt_operand.def"
+     const rb_num_t level = 0;
+-#line 4411 "vm.inc"
++#line 4654 "vm.inc"
+     lindex_t idx = (lindex_t)GET_OPERAND(1);
+ #   define INSN_ATTR(x) attr_ ## x ## _getlocal_WC_0(idx)
+     bool leaf = INSN_ATTR(leaf);
+@@ -4427,7 +4670,7 @@
+     RB_DEBUG_COUNTER_INC(lvar_get);
+     (void)RB_DEBUG_COUNTER_INC_IF(lvar_get_dynamic, level > 0);
+ }
+-#   line 4431 "vm.inc"
++#   line 4674 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4454,7 +4697,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 11 "defs/opt_operand.def"
+     const rb_num_t level = 1;
+-#line 4458 "vm.inc"
++#line 4701 "vm.inc"
+     lindex_t idx = (lindex_t)GET_OPERAND(1);
+ #   define INSN_ATTR(x) attr_ ## x ## _getlocal_WC_1(idx)
+     bool leaf = INSN_ATTR(leaf);
+@@ -4474,7 +4717,7 @@
+     RB_DEBUG_COUNTER_INC(lvar_get);
+     (void)RB_DEBUG_COUNTER_INC_IF(lvar_get_dynamic, level > 0);
+ }
+-#   line 4478 "vm.inc"
++#   line 4721 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4501,7 +4744,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 12 "defs/opt_operand.def"
+     const rb_num_t level = 0;
+-#line 4505 "vm.inc"
++#line 4748 "vm.inc"
+     lindex_t idx = (lindex_t)GET_OPERAND(1);
+ #   define INSN_ATTR(x) attr_ ## x ## _setlocal_WC_0(idx)
+     bool leaf = INSN_ATTR(leaf);
+@@ -4521,7 +4764,7 @@
+     RB_DEBUG_COUNTER_INC(lvar_set);
+     (void)RB_DEBUG_COUNTER_INC_IF(lvar_set_dynamic, level > 0);
+ }
+-#   line 4525 "vm.inc"
++#   line 4768 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4545,7 +4788,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 13 "defs/opt_operand.def"
+     const rb_num_t level = 1;
+-#line 4549 "vm.inc"
++#line 4792 "vm.inc"
+     lindex_t idx = (lindex_t)GET_OPERAND(1);
+ #   define INSN_ATTR(x) attr_ ## x ## _setlocal_WC_1(idx)
+     bool leaf = INSN_ATTR(leaf);
+@@ -4565,7 +4808,7 @@
+     RB_DEBUG_COUNTER_INC(lvar_set);
+     (void)RB_DEBUG_COUNTER_INC_IF(lvar_set_dynamic, level > 0);
+ }
+-#   line 4569 "vm.inc"
++#   line 4812 "vm.inc"
+ #   undef NAME_OF_CURRENT_INSN
+ 
+     /* ### Instruction trailers. ### */
+@@ -4589,7 +4832,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 15 "defs/opt_operand.def"
+     const VALUE val = INT2FIX(0);
+-#line 4593 "vm.inc"
++#line 4836 "vm.inc"
+ #   define INSN_ATTR(x) attr_ ## x ## _putobject_INT2FIX_0_()
+     bool leaf = INSN_ATTR(leaf);
+ 
+@@ -4620,7 +4863,7 @@
+     /* ###  Declare and assign variables. ### */
+ #line 16 "defs/opt_operand.def"
+     const VALUE val = INT2FIX(1);
+-#line 4624 "vm.inc"
++#line 4867 "vm.inc"
+ #   define INSN_ATTR(x) attr_ ## x ## _putobject_INT2FIX_1_()
+     bool leaf = INSN_ATTR(leaf);
+ 
+@@ -5073,6 +5316,46 @@
+     END_INSN(trace_opt_nil_p);
+ }
+ 
++/* insn trace_opt_klass(...)(...)(...) */
++INSN_ENTRY(trace_opt_klass)
++{
++    vm_trace(ec, GET_CFP(), GET_PC());
++    DISPATCH_ORIGINAL_INSN(opt_klass);
++    END_INSN(trace_opt_klass);
++}
++
++/* insn trace_opt_is_a_p(...)(...)(...) */
++INSN_ENTRY(trace_opt_is_a_p)
++{
++    vm_trace(ec, GET_CFP(), GET_PC());
++    DISPATCH_ORIGINAL_INSN(opt_is_a_p);
++    END_INSN(trace_opt_is_a_p);
++}
++
++/* insn trace_opt_t_let(...)(...)(...) */
++INSN_ENTRY(trace_opt_t_let)
++{
++    vm_trace(ec, GET_CFP(), GET_PC());
++    DISPATCH_ORIGINAL_INSN(opt_t_let);
++    END_INSN(trace_opt_t_let);
++}
++
++/* insn trace_opt_t_unsafe(...)(...)(...) */
++INSN_ENTRY(trace_opt_t_unsafe)
++{
++    vm_trace(ec, GET_CFP(), GET_PC());
++    DISPATCH_ORIGINAL_INSN(opt_t_unsafe);
++    END_INSN(trace_opt_t_unsafe);
++}
++
++/* insn trace_opt_t_must(...)(...)(...) */
++INSN_ENTRY(trace_opt_t_must)
++{
++    vm_trace(ec, GET_CFP(), GET_PC());
++    DISPATCH_ORIGINAL_INSN(opt_t_must);
++    END_INSN(trace_opt_t_must);
++}
++
+ /* insn trace_opt_str_uminus(...)(...)(...) */
+ INSN_ENTRY(trace_opt_str_uminus)
+ {
+diff -u vmtc.inc vmtc.inc
+--- vmtc.inc
++++ vmtc.inc
+@@ -90,6 +90,11 @@
+     LABEL_PTR(opt_send_without_block),
+     LABEL_PTR(opt_str_freeze),
+     LABEL_PTR(opt_nil_p),
++    LABEL_PTR(opt_klass),
++    LABEL_PTR(opt_is_a_p),
++    LABEL_PTR(opt_t_let),
++    LABEL_PTR(opt_t_unsafe),
++    LABEL_PTR(opt_t_must),
+     LABEL_PTR(opt_str_uminus),
+     LABEL_PTR(opt_newarray_max),
+     LABEL_PTR(opt_newarray_min),
+@@ -193,6 +198,11 @@
+     LABEL_PTR(trace_opt_send_without_block),
+     LABEL_PTR(trace_opt_str_freeze),
+     LABEL_PTR(trace_opt_nil_p),
++    LABEL_PTR(trace_opt_klass),
++    LABEL_PTR(trace_opt_is_a_p),
++    LABEL_PTR(trace_opt_t_let),
++    LABEL_PTR(trace_opt_t_unsafe),
++    LABEL_PTR(trace_opt_t_must),
+     LABEL_PTR(trace_opt_str_uminus),
+     LABEL_PTR(trace_opt_newarray_max),
+     LABEL_PTR(trace_opt_newarray_min),
