@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-main/sorbet --silence-dev-message --track-untyped --print=file-table-json --max-threads=0 test/cli/track-untyped 2>&1
+main/sorbet --censor-for-snapshot-tests --silence-dev-message --track-untyped --print=file-table-json --max-threads=0 test/cli/track-untyped 2>&1

@@ -488,8 +488,12 @@ module Kernel
   sig {returns(Integer)}
   def hash(); end
 
+  private def initialize_clone(*args); end
+
   sig {params(object: T.self_type).returns(T.self_type)}
   def initialize_copy(object); end
+
+  private def initialize_dup(orig); end
 
   sig {returns(String)}
   def inspect(); end
@@ -623,6 +627,16 @@ module Kernel
     .returns(T::Boolean)
   end
   def respond_to?(arg0,include_all=false); end
+
+  # DO NOT USE THIS DIRECTLY.
+  #
+  # Hook method to return whether the obj can respond to id method or not.
+  #
+  # When the method name parameter is given as a string, the string is converted to a symbol.
+  #
+  # See respond_to?, and the example of BasicObject.
+  sig {params(method_name: Symbol, include_private: T::Boolean).returns(T.anything)}
+  private def respond_to_missing?(method_name, include_private = false); end
 
   sig do
     params(
