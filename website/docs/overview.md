@@ -65,5 +65,5 @@ end
 
 - [Enabling Runtime Checks](runtime.md)
 
-  How to how to get **more confidence** out of Sorbet by enabling runtime
+  Learn how to get **more confidence** out of Sorbet by enabling runtime
   checks.
