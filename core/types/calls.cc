@@ -632,7 +632,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // TODO(jez): confirm 100 and true params
         // TODO(jez) We should not be doing two findMemberTransitive when we already know the method
         // name is Names::super()
-        SymbolRef sym = symbol.data(gs)->findMemberTransitiveAncestors(gs, args.enclosingMethodForSuper, 100, true);
+        SymbolRef sym = symbol.data(gs)->findParentMemberTransitive(gs, args.enclosingMethodForSuper);
 
         if (sym.exists() && sym.isMethod()) {
             if (sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {

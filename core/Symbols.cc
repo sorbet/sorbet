@@ -570,6 +570,11 @@ SymbolRef ClassOrModule::findMemberTransitiveNoDealias(const GlobalState &gs, Na
     return findMemberTransitiveInternal(gs, name, 100, dealias);
 }
 
+SymbolRef ClassOrModule::findParentMemberTransitive(const GlobalState &gs, NameRef name) const {
+    auto dealias = true;
+    return findParentMemberTransitiveInternal(gs, name, 100, dealias);
+}
+
 MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef name) const {
     auto sym = findMemberTransitive(gs, name);
     if (sym.exists() && sym.isMethod()) {
@@ -745,8 +750,8 @@ MethodRef ClassOrModule::findConcreteMethodTransitive(const GlobalState &gs, Nam
     return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
 }
 
-SymbolRef ClassOrModule::findMemberTransitiveAncestors(const GlobalState &gs, NameRef name, int maxDepth,
-                                                       bool dealias) const {
+SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth,
+                                                            bool dealias) const {
     SymbolRef result;
     if (flags.isLinearizationComputed) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
@@ -801,7 +806,7 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
         return result;
     }
 
-    return findMemberTransitiveAncestors(gs, name, maxDepth, dealias);
+    return findParentMemberTransitiveInternal(gs, name, maxDepth, dealias);
 }
 
 vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,

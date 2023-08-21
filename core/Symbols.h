@@ -517,9 +517,11 @@ public:
     MethodRef findMethodNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const;
+    // A version of findMemberTransitive that skips looking in the members of the current symbol,
+    // instead looking only in the members of any parent.
+    SymbolRef findParentMemberTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
-    SymbolRef findMemberTransitiveAncestors(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
 
     /* transitively finds a member with the most similar name */
 
@@ -644,6 +646,7 @@ private:
                                                                       std::vector<ClassOrModuleRef> &seen);
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
+    SymbolRef findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {
         flags.isLinearizationComputed = false;
