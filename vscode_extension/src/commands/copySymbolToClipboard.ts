@@ -61,7 +61,7 @@ export async function copySymbolToClipboard(
         location: ProgressLocation.Notification,
       },
       async (progress, token) => {
-        progress.report({ message: `Querying Sorbet …` });
+        progress.report({ message: "Querying Sorbet …" });
         const r = await client.sendRequest<SymbolInformation>(
           "sorbet/showSymbol",
           params,
