@@ -96,6 +96,7 @@ NameDef names[] = {
     {"unconditional", "<unconditional>"},
     {"argPresent", "<argPresent>"},
     {"rescueHeaderTemp", "<rescueHeaderTemp>"},
+    {"rescueTrueTemp", "<rescueTrueTemp>"},
     // end CFG temporaries
 
     {"include"},

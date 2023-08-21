@@ -830,25 +830,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
 
-                    // caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Literal>(core::Types::top()));
-                    auto rescueHeaderTemp = cctx.newTemporary(core::Names::rescueHeaderTemp());
                     synthesizeExpr(caseHeader, localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
-                    synthesizeExpr(caseHeader, rescueHeaderTemp, rescueCase->var.loc(), make_insn<Literal>(core::Types::top()));
+
+                    auto rescueHeaderTemp = cctx.newTemporary(core::Names::rescueHeaderTemp());
+                    auto rescueTrueTemp = cctx.newTemporary(core::Names::rescueTrueTemp());
+                    synthesizeExpr(caseHeader, rescueTrueTemp,rescueCase->var.loc(), make_insn<Literal>(core::Types::trueClass()));
+                    synthesizeExpr(caseHeader, rescueHeaderTemp, rescueCase->var.loc(),
+                                   make_insn<Cast>(rescueTrueTemp, rescueCase->var.loc(), core::Types::top(),
+                                                   core::Names::cast()));
+
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, handlersRubyRegionId);
-                    // unconditionalJump(caseHeader, caseBody, cctx.inWhat, a.loc);
                     conditionalJump(caseHeader, rescueHeaderTemp, caseBody, ensureBody, cctx.inWhat, a.loc);
-                    //                         auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
-                        // rescueHandlersBlock->exprs.emplace_back(
-                            // isaCheck, loc,
-                            // make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
-                                            // args.size(), args, std::move(argLocs), isPrivateOk));
-
-                        // conditionalJump(rescueHandlersBlock, isaCheck, caseHeader, otherHandlerBlock, cctx.inWhat, loc);
-
-                    // conditionalJump(caseHeader, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat, core::LocOffsets loc)
-
-                    // TODO(iz): Add contidional jump here
-                    // caseBody = 7
                     synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
                                    make_insn<Literal>(core::Types::nilClass()));
 
