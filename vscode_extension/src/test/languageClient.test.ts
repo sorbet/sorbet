@@ -120,7 +120,7 @@ suite("LanguageClient", () => {
         assert.equal(metrics.length, 1);
         const m = metrics[0];
         assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
+        assert.equal(m[1], "latency.textDocument_hover_ms");
         assert.equal(m[3].success, "true");
       }
 
@@ -142,7 +142,7 @@ suite("LanguageClient", () => {
         assert.equal(metrics.length, 1);
         const m = metrics[0];
         assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
+        assert.equal(m[1], "latency.textDocument_hover_ms");
         assert.equal(m[3].success, "true");
       }
 
@@ -164,7 +164,7 @@ suite("LanguageClient", () => {
         assert.equal(metrics.length, 1);
         const m = metrics[0];
         assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
+        assert.equal(m[1], "latency.textDocument_hover_ms");
         assert.equal(m[3].success, "false");
       }
 
@@ -181,7 +181,7 @@ suite("LanguageClient", () => {
         assert.equal(metrics.length, 1);
         const m = metrics[0];
         assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
+        assert.equal(m[1], "latency.textDocument_hover_ms");
         assert.equal(m[3].success, "false");
       }
     });
