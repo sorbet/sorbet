@@ -59,6 +59,7 @@ def register_ruby_dependencies():
         strip_prefix = strip_prefix,
         build_file = ruby_build,
         patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
             "@com_stripe_ruby_typer//third_party/ruby:dtoa.patch",
             "@com_stripe_ruby_typer//third_party/ruby:penelope_procc.patch",
