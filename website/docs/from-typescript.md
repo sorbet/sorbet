@@ -337,10 +337,11 @@ end</code></pre>
       </td>
       <td>
         <code>T.noreturn</code>
+        <code>T.absurd</code>
       </td>
       <td>
         See <a href="/docs/noreturn">T.noreturn</a> and <a
-        href="/docs/exhaustiveness">Exhaustiveness Checking</a> for more.
+        href="/docs/exhaustiveness">Exhaustiveness Checking (T.absurd)</a> for more.
       </td>
     </tr>
     <tr>
