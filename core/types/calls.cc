@@ -667,9 +667,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Sig(), "");
+            } else if (args.name == Names::super()) {
+                // TODO(jez) Special error for super.
+                // - If identical name exists as self/instance method in parent but we're currently
+                //   an instance/self method, suggest changing enclosing method definition.
+                // - If similar name exists in parent suggest renaming enclosing method definition
+                //   (intialize -> initialize, etc.)
+                // - Otherwise, suggest `T.bind`
             } else if (args.receiverLoc().exists() &&
                        (gs.suggestUnsafe.has_value() ||
                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+                // Explicitly ignore `<super>`, because super is not actually a method call with a receiver.
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
                 if (args.receiverLoc().empty()) {
                     auto shortName = args.name.shortName(gs);
