@@ -570,13 +570,17 @@ SymbolRef ClassOrModule::findMemberTransitiveNoDealias(const GlobalState &gs, Na
     return findMemberTransitiveInternal(gs, name, 100, dealias);
 }
 
-SymbolRef ClassOrModule::findParentMemberTransitive(const GlobalState &gs, NameRef name) const {
-    auto dealias = true;
-    return findParentMemberTransitiveInternal(gs, name, 100, dealias);
-}
-
 MethodRef ClassOrModule::findMethodTransitive(const GlobalState &gs, NameRef name) const {
     auto sym = findMemberTransitive(gs, name);
+    if (sym.exists() && sym.isMethod()) {
+        return sym.asMethodRef();
+    }
+    return Symbols::noMethod();
+}
+
+MethodRef ClassOrModule::findParentMethodTransitive(const GlobalState &gs, NameRef name) const {
+    auto dealias = true;
+    auto sym = findParentMemberTransitiveInternal(gs, name, 100, dealias);
     if (sym.exists() && sym.isMethod()) {
         return sym.asMethodRef();
     }

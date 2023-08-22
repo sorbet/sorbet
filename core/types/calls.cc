@@ -598,8 +598,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                               Symbols::noMethod());
     }
 
-    // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
-    // in which case we could simply let the findMethodTransitive run and fail to find any methods
     MethodRef mayBeOverloaded;
     if (args.name == Names::super()) {
         if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
@@ -607,17 +605,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                   Symbols::noMethod());
         }
 
-        SymbolRef sym = symbol.data(gs)->findParentMemberTransitive(gs, args.enclosingMethodForSuper);
+        mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, args.enclosingMethodForSuper);
 
         // TODO(jez) Move this isMethod stuff into findParentMemberTransitive.
-        if (sym.exists() && sym.isMethod() &&
-            sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
-            mayBeOverloaded = sym.asMethodRef();
-        } else {
+        if (!mayBeOverloaded.exists() ||
+            mayBeOverloaded.data(gs)->loc().file().data(gs).strictLevel < core::StrictLevel::Strict) {
             return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                                   Symbols::noMethod());
         }
     } else if (symbol != core::Symbols::top()) {
+        // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
+        // in which case we could simply let the findMethodTransitive run and fail to find any methods
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
     }
 
