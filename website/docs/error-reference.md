@@ -4139,6 +4139,16 @@ the guarantees of the type system.
 This feature is opt-in. See [VS Code](vscode.md) for instructions on how to turn
 it on.
 
+## 7048
+
+This error is like [7003](#7003), but for calls using `super`.
+
+That is, then difference is that Sorbet checks whether a method with the same
+name as the enclosing method exists on any ancestor of the current method.
+
+This error is caused by most of the same reasons that cause [7003](#7003), so
+it's best to read the docs for that code as well.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
