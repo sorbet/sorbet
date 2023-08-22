@@ -636,12 +636,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
+
+        auto unknownMethodCode = args.name == Names::super()
+                                     // So people can ignore new, super-related errors if need be
+                                     ? errors::Infer::UnknownSuperMethod
+                                     : errors::Infer::UnknownMethod;
+
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
         // Instead, the error always should get queued up in the
         // errors list of the result so that the caller can deal with the error.
-        auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
+        auto e = gs.beginError(errLoc, unknownMethodCode);
         if (e) {
             string thisStr = args.thisType.show(gs);
             if (args.name == Names::super()) {
