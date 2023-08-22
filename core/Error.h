@@ -174,6 +174,10 @@ public:
     // will no longer report the error, and is the caller's responsibility to
     // pass it to GlobalState::_error if the error should actually be recorded.
     std::unique_ptr<Error> build();
+
+    Loc getLoc() const {
+        return this->loc;
+    };
 };
 
 template <typename H> H AbslHashValue(H h, const ErrorClass &m) {
