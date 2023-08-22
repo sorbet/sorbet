@@ -588,8 +588,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (args.name == Names::methodNameMissing()) {
         // We already reported a parse error earlier in the pipeline
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    } else if (args.name == Names::super()) {
-        // Currently, `super` is completely untyped.
+    } else if (args.name == Names::untypedSuper()) {
+        // Currently, `super` is only checked for the following cases:
+        // - The receiver is a class
+        // - The super call and parent method are both in a typed: strict file
+        // - The super call is not inside a block
         // No point in paying a full findMethodTransitive just to discover that.
         return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                               Symbols::noMethod());
@@ -598,7 +601,23 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
     // in which case we could simply let the findMethodTransitive run and fail to find any methods
     MethodRef mayBeOverloaded;
-    if (symbol != core::Symbols::top()) {
+    if (args.name == Names::super()) {
+        if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
+        }
+
+        SymbolRef sym = symbol.data(gs)->findParentMemberTransitive(gs, args.enclosingMethodForSuper);
+
+        // TODO(jez) Move this isMethod stuff into findParentMemberTransitive.
+        if (sym.exists() && sym.isMethod() &&
+            sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
+            mayBeOverloaded = sym.asMethodRef();
+        } else {
+            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                                  Symbols::noMethod());
+        }
+    } else if (symbol != core::Symbols::top()) {
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
     }
 
@@ -609,37 +628,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, args.name);
             if (mayBeOverloaded.exists()) {
                 break;
-            }
-        }
-    }
-
-    /* Super is only checked for the following cases for now:
-     * - The receiver is a class
-     * - The super call and parent method are both in a typed: strict file
-     * - The super call is not inside a block
-     */
-    if (!mayBeOverloaded.exists() && args.name == core::Names::untypedSuper()) {
-        return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                              Symbols::noMethod());
-    }
-
-    if (!mayBeOverloaded.exists() && args.name == core::Names::super()) {
-        if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
-        }
-
-        // TODO(jez): confirm 100 and true params
-        // TODO(jez) We should not be doing two findMemberTransitive when we already know the method
-        // name is Names::super()
-        SymbolRef sym = symbol.data(gs)->findParentMemberTransitive(gs, args.enclosingMethodForSuper);
-
-        if (sym.exists() && sym.isMethod()) {
-            if (sym.asMethodRef().data(gs)->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict) {
-                mayBeOverloaded = sym.asMethodRef();
-            } else {
-                return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                      Symbols::noMethod());
             }
         }
     }
