@@ -87,6 +87,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C T>.reveal_type(e)
     end
 
+    def rescue_in_a_loop<<todo method>>(&<blk>)
+      2.times() do ||
+        <self>.meth()
+      rescue => e
+        <emptyTree>
+      end
+    end
+
+    def reraise_in_rescue<<todo method>>(&<blk>)
+      <self>.bar()
+    rescue => exc
+      <self>.raise()
+    ensure
+      <self>.puts(begin
+          <assignTemp>$2 = exc
+          if ::NilClass.===(<assignTemp>$2)
+            ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+          else
+            <assignTemp>$2.message()
+          end
+        end)
+    end
+
     def parse_rescue_ensure<<todo method>>(&<blk>)
       <self>.meth()
     rescue => <rescueTemp>$2
