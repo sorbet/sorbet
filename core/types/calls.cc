@@ -588,6 +588,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (args.name == Names::methodNameMissing()) {
         // We already reported a parse error earlier in the pipeline
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    } else if (args.name == Names::super()) {
+        // Currently, `super` is completely untyped.
+        // No point in paying a full findMethodTransitive just to discover that.
+        return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                              Symbols::noMethod());
     }
 
     // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
@@ -624,9 +629,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             return result;
-        } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
