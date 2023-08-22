@@ -549,6 +549,112 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     return hash;
 }
 
+void enrichMissingMethodError(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
+                              ErrorBuilder &e) {
+    // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
+    // suggest adding `extend T::Helpers`.
+    if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
+        args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
+        args.name == core::Names::mixesInClassMethods() ||
+        (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
+        auto attachedClass = symbol.data(gs)->attachedClass(gs);
+        TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
+                                                   Symbols::T_Helpers(), "");
+    } else if (args.name == core::Names::sig()) {
+        auto attachedClass = symbol.data(gs)->attachedClass(gs);
+        TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
+                                                   Symbols::T_Sig(), "");
+    } else if (args.receiverLoc().exists() && (gs.suggestUnsafe.has_value() || (args.fullType.type != args.thisType &&
+                                                                                symbol == Symbols::NilClass()))) {
+        auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
+        if (args.receiverLoc().empty()) {
+            auto shortName = args.name.shortName(gs);
+            auto beginAdjust = -2;                     // (&
+            auto endAdjust = 1 + shortName.size() + 1; // :foo)
+            auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
+            if (blockPassLoc.exists()) {
+                auto blockPassSource = blockPassLoc.source(gs).value();
+                if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                    e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                  " {{ |x| {}(x).{} }}", wrapInFn, shortName);
+                }
+            }
+        } else if (errLoc == args.funLoc() && args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
+            e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
+                          args.receiverLoc().source(gs).value(), args.name.shortName(gs));
+        } else {
+            e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
+                          args.receiverLoc().source(gs).value());
+        }
+    } else {
+        if (symbol.data(gs)->isModule()) {
+            auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
+            if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
+                e.addErrorNote("Did you mean to `{}` in this module?",
+                               fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
+            }
+        }
+        auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
+        for (auto alternative : alternatives) {
+            auto possibleSymbol = alternative.symbol;
+            if (!possibleSymbol.isClassOrModule() &&
+                (!possibleSymbol.isMethod() ||
+                 (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                continue;
+            }
+
+            const auto toReplace = args.name.toString(gs);
+            if (args.funLoc().source(gs) != toReplace) {
+                auto suggestedName =
+                    possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new" : possibleSymbol.show(gs);
+                e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                continue;
+            }
+
+            if (possibleSymbol.isClassOrModule()) {
+                if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
+                    // If this call was in type sytnax, we might have already have built an
+                    // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
+                    continue;
+                }
+                e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                continue;
+            }
+
+            const auto replacement = possibleSymbol.name(gs).toString(gs);
+            if (replacement != toReplace) {
+                e.didYouMean(replacement, args.funLoc());
+                e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
+                continue;
+            }
+
+            auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
+            if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
+                auto defKeyword = "def ";
+                auto defKeywordLen = char_traits<char>::length(defKeyword);
+                auto prefixLen = defKeywordLen + toReplace.size();
+                auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
+                e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
+                if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
+                    e.replaceWith("Define method with `self.`", possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0),
+                                  "self.");
+                } else {
+                    e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+                }
+            } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
+                e.addErrorNote("Did you mean to call `{}` which is a singleton class method?", possibleSymbol.show(gs));
+                if (args.receiverLoc().empty()) {
+                    e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
+                } else {
+                    e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
+                }
+                e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+            }
+        }
+    }
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -650,112 +756,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
-
-            // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
-            // suggest adding `extend T::Helpers`.
-            if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
-                args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
-                args.name == core::Names::mixesInClassMethods() ||
-                (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
-                auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
-                                                           Symbols::T_Helpers(), "");
-            } else if (args.name == core::Names::sig()) {
-                auto attachedClass = symbol.data(gs)->attachedClass(gs);
-                TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
-                                                           Symbols::T_Sig(), "");
-            } else if (args.receiverLoc().exists() &&
-                       (gs.suggestUnsafe.has_value() ||
-                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
-                auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                if (args.receiverLoc().empty()) {
-                    auto shortName = args.name.shortName(gs);
-                    auto beginAdjust = -2;                     // (&
-                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
-                    auto blockPassLoc = args.receiverLoc().adjust(gs, beginAdjust, endAdjust);
-                    if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs).value();
-                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
-                                          " {{ |x| {}(x).{} }}", wrapInFn, shortName);
-                        }
-                    }
-                } else if (errLoc == args.funLoc() &&
-                           args.funLoc().source(gs) == absl::StrCat(args.name.shortName(gs), "=")) {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.funLoc(), "= {}({}) {}", wrapInFn,
-                                  args.receiverLoc().source(gs).value(), args.name.shortName(gs));
-                } else {
-                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), args.receiverLoc(), "{}({})", wrapInFn,
-                                  args.receiverLoc().source(gs).value());
-                }
-            } else {
-                if (symbol.data(gs)->isModule()) {
-                    auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
-                    if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
-                        e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
-                    }
-                }
-                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
-                for (auto alternative : alternatives) {
-                    auto possibleSymbol = alternative.symbol;
-                    if (!possibleSymbol.isClassOrModule() &&
-                        (!possibleSymbol.isMethod() ||
-                         (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
-                        continue;
-                    }
-
-                    const auto toReplace = args.name.toString(gs);
-                    if (args.funLoc().source(gs) != toReplace) {
-                        auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
-                                                                              : possibleSymbol.show(gs);
-                        e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
-                        continue;
-                    }
-
-                    if (possibleSymbol.isClassOrModule()) {
-                        if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
-                            // If this call was in type sytnax, we might have already have built an
-                            // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
-                            continue;
-                        }
-                        e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
-                        e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
-                        continue;
-                    }
-
-                    const auto replacement = possibleSymbol.name(gs).toString(gs);
-                    if (replacement != toReplace) {
-                        e.didYouMean(replacement, args.funLoc());
-                        e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
-                        continue;
-                    }
-
-                    auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
-                    if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
-                        auto defKeyword = "def ";
-                        auto defKeywordLen = char_traits<char>::length(defKeyword);
-                        auto prefixLen = defKeywordLen + toReplace.size();
-                        auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
-                        e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
-                        if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
-                            e.replaceWith("Define method with `self.`",
-                                          possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0), "self.");
-                        } else {
-                            e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
-                        }
-                    } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
-                        e.addErrorNote("Did you mean to call `{}` which is a singleton class method?",
-                                       possibleSymbol.show(gs));
-                        if (args.receiverLoc().empty()) {
-                            e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
-                        } else {
-                            e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
-                        }
-                        e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
-                    }
-                }
-            }
+            enrichMissingMethodError(gs, args, symbol, e);
         }
         result.main.errors.emplace_back(e.build());
         return result;
