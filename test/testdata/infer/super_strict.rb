@@ -28,6 +28,11 @@ class A
   def quz(x)
     x
   end
+
+  sig { params(blk: T.proc.void).void }
+  def takes_block(&blk)
+    yield
+  end
 end
 
 class B < A
@@ -62,5 +67,11 @@ class B < A
   sig { params(x: Integer).returns(Integer) }
   def quz(x)
     super
+  end
+
+  sig { void }
+  def takes_block
+    super
+    #    ^ error: `takes_block` requires a block parameter, but no block was passed
   end
 end
