@@ -2882,18 +2882,20 @@ public:
         auto recvLoc = args.locs.args[0];
         CallLocs sendLocs{args.locs.file, args.locs.call, recvLoc, args.locs.fun, sendArgLocs};
 
-        DispatchArgs innerArgs{fun,
-                               sendLocs,
-                               numPosArgs,
-                               sendArgStore,
-                               selfTy.type,
-                               selfTy,
-                               selfTy.type,
-                               args.block,
-                               args.originForUninitialized,
-                               args.isPrivateOk,
-                               args.suppressErrors,
-                               args.enclosingMethodForSuper};
+        DispatchArgs innerArgs{
+            fun,
+            sendLocs,
+            numPosArgs,
+            sendArgStore,
+            selfTy.type,
+            selfTy,
+            selfTy.type,
+            args.block,
+            args.originForUninitialized,
+            args.isPrivateOk,
+            args.suppressErrors,
+            args.enclosingMethodForSuper,
+        };
         auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
 
         auto multipleComponents = dispatched.secondary != nullptr;
@@ -2908,10 +2910,21 @@ public:
             }
 
             if (unknownMethodOnNilClassErrors == 1 && !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type)) {
-                DispatchArgs newInnerArgs{fun, sendLocs, numPosArgs, sendArgStore, selfTyAndAnd.type, selfTyAndAnd,
-                                          selfTyAndAnd.type, args.block, args.originForUninitialized,
-                                          // We already reported one visibility error, if relevant
-                                          /* isPrivateOk */ true, args.suppressErrors, args.enclosingMethodForSuper};
+                DispatchArgs newInnerArgs{
+                    fun,
+                    sendLocs,
+                    numPosArgs,
+                    sendArgStore,
+                    selfTyAndAnd.type,
+                    selfTyAndAnd,
+                    selfTyAndAnd.type,
+                    args.block,
+                    args.originForUninitialized,
+                    // We already reported one visibility error, if relevant
+                    /* isPrivateOk */ true,
+                    args.suppressErrors,
+                    args.enclosingMethodForSuper,
+                };
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
 
                 auto foundErrorOnRetry = false;
@@ -3541,10 +3554,12 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     };
     auto baseCaseArgTypes = InlinedVector<const TypeAndOrigins *, 2>{};
     baseCaseArgTypes.emplace_back(args.args[0]);
-    auto baseCaseArgs = DispatchArgs{methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
-                                     baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
-                                     args.selfType,    args.block,          args.originForUninitialized,
-                                     args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper};
+    auto baseCaseArgs = DispatchArgs{
+        methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
+        baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
+        args.selfType,    args.block,          args.originForUninitialized,
+        args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper,
+    };
 
     auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
     for (auto &err : dispatched.main.errors) {
@@ -3603,18 +3618,20 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     }
     fullTypeOrigins.emplace_back(args.argLoc(0));
     auto newFullType = TypeAndOrigins{newSelfType, fullTypeOrigins};
-    DispatchArgs digArgs{Names::dig(),
-                         digLocs,
-                         newNumPosArgs,
-                         digArgTypes,
-                         newSelfType,
-                         newFullType,
-                         newSelfType,
-                         args.block,
-                         args.originForUninitialized,
-                         false, /* isPrivateOk */
-                         args.suppressErrors,
-                         args.enclosingMethodForSuper};
+    DispatchArgs digArgs{
+        Names::dig(),
+        digLocs,
+        newNumPosArgs,
+        digArgTypes,
+        newSelfType,
+        newFullType,
+        newSelfType,
+        args.block,
+        args.originForUninitialized,
+        false, /* isPrivateOk */
+        args.suppressErrors,
+        args.enclosingMethodForSuper,
+    };
 
     auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
 
@@ -3977,18 +3994,20 @@ public:
             newSendArgs.emplace_back(args.args[1]);
         }
 
-        DispatchArgs newArgs{Names::new_(),
-                             newCallLocs,
-                             newNumPosArgs,
-                             newSendArgs,
-                             classArg->type,
-                             *classArg,
-                             classArg->type,
-                             /* block */ nullptr,
-                             args.originForUninitialized,
-                             IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                             args.suppressErrors,
-                             args.enclosingMethodForSuper};
+        DispatchArgs newArgs{
+            Names::new_(),
+            newCallLocs,
+            newNumPosArgs,
+            newSendArgs,
+            classArg->type,
+            *classArg,
+            classArg->type,
+            /* block */ nullptr,
+            args.originForUninitialized,
+            IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
+            args.suppressErrors,
+            args.enclosingMethodForSuper,
+        };
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
