@@ -598,32 +598,27 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                               Symbols::noMethod());
     }
 
+    auto targetName = args.name;
     MethodRef mayBeOverloaded;
-    if (args.name == Names::super()) {
+    if (targetName == Names::super()) {
+        targetName = args.enclosingMethodForSuper;
         if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
             return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                                   Symbols::noMethod());
         }
 
-        mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, args.enclosingMethodForSuper);
-
-        // TODO(jez) Move this isMethod stuff into findParentMemberTransitive.
-        if (!mayBeOverloaded.exists() ||
-            mayBeOverloaded.data(gs)->loc().file().data(gs).strictLevel < core::StrictLevel::Strict) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
-        }
+        mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, targetName);
     } else if (symbol != core::Symbols::top()) {
         // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
         // in which case we could simply let the findMethodTransitive run and fail to find any methods
-        mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
+        mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
         for (auto ancst : ancestors) {
-            mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, args.name);
+            mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, targetName);
             if (mayBeOverloaded.exists()) {
                 break;
             }
@@ -650,24 +645,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(errLoc, unknownMethodCode);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            if (args.name == Names::super()) {
-                if (args.fullType.type != args.thisType) {
-                    e.setHeader("Method `{}` does not exist on ancestors of `{}` component of `{}`",
-                                args.enclosingMethodForSuper.show(gs), thisStr, args.fullType.type.show(gs));
-                } else {
-                    e.setHeader("Method `{}` does not exist on ancestors of `{}`",
-                                args.enclosingMethodForSuper.show(gs), thisStr);
-                }
+            auto ancestorsOf = args.name == Names::super() ? "ancestors of " : "";
+            if (args.fullType.type != args.thisType) {
+                e.setHeader("Method `{}` does not exist on {}`{}` component of `{}`", targetName.show(gs), ancestorsOf,
+                            thisStr, args.fullType.type.show(gs));
             } else {
-                if (args.fullType.type != args.thisType) {
-                    e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                                args.fullType.type.show(gs));
-                } else {
-                    e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
-                }
-                e.addErrorSection(args.fullType.explainGot(
-                    gs, args.originForUninitialized)); // TODO(jez): version of this in the super case?
+                e.setHeader("Method `{}` does not exist on {}`{}`", targetName.show(gs), ancestorsOf, thisStr);
             }
+            e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
             // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
             // suggest adding `extend T::Helpers`.
@@ -714,8 +699,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
-                // TODO(jez): special case super for did you mean
-                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
+                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                 for (auto alternative : alternatives) {
                     auto possibleSymbol = alternative.symbol;
                     if (!possibleSymbol.isClassOrModule() &&
@@ -1113,7 +1097,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 method.show(gs), prettyArity(gs, method), posArgs);
                 }
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
-                if (args.name == core::Names::any() &&
+                if (targetName == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
                 }
@@ -1301,7 +1285,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
@@ -1310,7 +1294,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             method.show(gs), prettyArity(gs, method), posArgs);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
@@ -1419,7 +1403,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
-                e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
+                e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
             }
