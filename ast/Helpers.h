@@ -423,7 +423,7 @@ public:
         Send::Flags flags;
         flags.isPrivateOk = true;
         return Send(loc, Self(loc), core::Names::super(), loc, 1,
-                    SendArgs(make_expression<ast::ZSuperArgs>(loc.copyWithZeroLength())), flags);
+                    SendArgs(make_expression<ast::ZSuperArgs>(loc.copyEndWithZeroLength())), flags);
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
