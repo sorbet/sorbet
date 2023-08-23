@@ -3603,17 +3603,22 @@ private:
 
         OverloadedMethodSigInformation info;
         if (usesArgumentForwardingSyntax(ctx, methodInfo, mdef, isOverloaded)) {
-            if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
-                e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
-                e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
-                               method.show(ctx));
+            if (sig.argTypes.size() < 1 || sig.argTypes.back().name != core::Names::fwdDots() ||
+                sig.argTypes.back().rebind.exists()) {
+                if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
+                    e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
+                    e.addErrorNote("Use `{}` to annotate argument forwarding parameters", "\"...\": T.untyped");
+                }
+                return info;
             }
-            return info;
-        }
 
-        // Get the parameters order from the signature
-        vector<ParsedSig::ArgSpec> sigParams(sig.argTypes);
+            sig.argTypes.back().name = core::Names::fwdArgs();
+            sig.argTypes.emplace_back(sig.argTypes.back());
+            sig.argTypes.back().name = core::Names::fwdKwargs();
+            sig.argTypes.emplace_back(sig.argTypes.back());
+            sig.argTypes.back().name = core::Names::fwdBlock();
+        }
 
         vector<ast::Local const *> defParams; // Parameters order from the method declaration
         bool seenOptional = false;
@@ -3728,7 +3733,7 @@ private:
         // Check params ordering match between signature and definition
         if (sig.argTypes.empty()) {
             int j = 0;
-            for (const auto &spec : sigParams) {
+            for (const auto &spec : sig.argTypes) {
                 auto *param = defParams[j];
                 auto sname = spec.name;
                 auto dname = param->localVariable._name;
