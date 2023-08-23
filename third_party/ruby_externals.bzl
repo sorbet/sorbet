@@ -89,6 +89,7 @@ def register_ruby_dependencies():
         strip_prefix = "ruby-3.1.4",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
         patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by-3_1.patch",  # https://github.com/ruby/ruby/pull/6791
         ],
     )
