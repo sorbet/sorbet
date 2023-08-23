@@ -1,18 +1,14 @@
 diff --git eval.c eval.c
-index 844c537cc4..f15ee3d2ea 100644
+index 844c537cc4..0fd751650a 100644
 --- eval.c
 +++ eval.c
-@@ -72,13 +72,6 @@ ruby_setup(void)
- 
-     ruby_init_stack((void *)&state);
- 
--    /*
--     * Disable THP early before mallocs happen because we want this to
--     * affect as many future pages as possible for CoW-friendliness
--     */
--#if defined(__linux__) && defined(PR_SET_THP_DISABLE)
--    prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0);
--#endif
+@@ -77,7 +77,9 @@ ruby_setup(void)
+      * affect as many future pages as possible for CoW-friendliness
+      */
+ #if defined(__linux__) && defined(PR_SET_THP_DISABLE)
++  if (strncmp(getenv("STRIPE_RUBY_ENABLE_THP"), "true", 4) != 0) {
+     prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0);
++  }
+ #endif
      Init_BareVM();
      Init_heap();
-     rb_vm_encoded_insn_data_table_init();
