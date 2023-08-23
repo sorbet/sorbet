@@ -510,3 +510,40 @@ There are also third-party tools that offer the ability to sort and filter
 Sorbet's errors, like [spoom].
 
 [spoom]: https://github.com/Shopify/spoom#errors-sorting-and-filtering
+
+## How can I provide types for methods declared with `...`?
+
+Recent versions of Ruby introduced `...` "argument forwarding" syntax. It looks
+like this:
+
+```ruby
+def foo(...)
+  bar(...)
+end
+```
+
+To annotate a method declared like this with a signature, you'll have to use the
+special `"...":` syntax. This is the syntax Ruby provides for keyword arguments
+when those keyword arguments use special symbols (like `.`).
+
+```ruby
+sig {params("...": T.untyped).void}
+def foo(...)
+  bar(...)
+end
+```
+
+Note that certain style guides mandate using `...` always instead of
+`*args, **kwargs, &blk`. This will not work with Sorbet for cases where it's
+desirable to provide more granular types to each part of the `...`. For example,
+to define a method which takes only `Integer` positional parameters but only
+`String` keyword parameters, Sorbet requires split the `...` into
+`*args, **kwargs, &blk` so that there's a name associated with each component of
+the parameters.
+
+```ruby
+sig {params(args: Integer, kwargs: String, blk: T.proc.void).void}
+def foo(*args, **kwargs, &blk)
+  bar(*args, **kwargs, &blk)
+end
+```
