@@ -108,7 +108,6 @@ class LocalNameInserter {
         struct Arg {
             core::LocalVariable arg;
             ArgFlags flags;
-            core::LocOffsets loc;
         };
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<Arg> args;
@@ -195,7 +194,7 @@ class LocalNameInserter {
             args.emplace_back(move(named.expr));
             auto &frame = scopeStack.back();
             frame.locals[named.name] = named.local;
-            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags, named.loc});
+            frame.args.emplace_back(LocalFrame::Arg{named.local, named.flags});
         }
 
         return args;
@@ -225,6 +224,7 @@ class LocalNameInserter {
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
         // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
+        auto zSuperArgsLoc = original.getPosArg(0).loc();
         original.clearArgs();
 
         if (!scopeStack.back().insideMethod) {
@@ -290,44 +290,45 @@ class LocalNameInserter {
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional arg after keyword arg");
                 ENFORCE(kwArgsHash == nullptr, "Saw positional arg after keyword splat");
 
-                posArgsEntries.emplace_back(ast::make_expression<ast::Local>(arg.loc, arg.arg));
+                posArgsEntries.emplace_back(ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
             } else if (arg.flags.isPositionalSplat()) {
                 ENFORCE(posArgsArray == nullptr, "Saw multiple positional splats");
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional splat after keyword arg");
                 ENFORCE(kwArgsHash == nullptr, "Saw positional splat after keyword splat");
 
-                posArgsArray = ast::MK::Splat(arg.loc, ast::make_expression<ast::Local>(arg.loc, arg.arg));
+                posArgsArray = ast::MK::Splat(zSuperArgsLoc, ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
                 if (!posArgsEntries.empty()) {
-                    posArgsArray =
-                        ast::MK::Send1(arg.loc, ast::MK::Array(arg.loc, std::move(posArgsEntries)),
-                                       core::Names::concat(), arg.loc.copyWithZeroLength(), std::move(posArgsArray));
+                    posArgsArray = ast::MK::Send1(
+                        zSuperArgsLoc, ast::MK::Array(zSuperArgsLoc, std::move(posArgsEntries)), core::Names::concat(),
+                        zSuperArgsLoc.copyWithZeroLength(), std::move(posArgsArray));
                     posArgsEntries.clear();
                 }
             } else if (arg.flags.isKeyword()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
 
                 auto name = arg.arg._name;
-                kwArgKeyEntries.emplace_back(
-                    ast::MK::Literal(arg.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
-                kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(arg.loc, arg.arg));
+                kwArgKeyEntries.emplace_back(ast::MK::Literal(
+                    zSuperArgsLoc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
+                kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
-                kwArgsHash =
-                    ast::MK::Send1(arg.loc, ast::MK::Magic(arg.loc), core::Names::toHashDup(),
-                                   arg.loc.copyWithZeroLength(), ast::make_expression<ast::Local>(arg.loc, arg.arg));
+                kwArgsHash = ast::MK::Send1(zSuperArgsLoc, ast::MK::Magic(zSuperArgsLoc), core::Names::toHashDup(),
+                                            zSuperArgsLoc.copyWithZeroLength(),
+                                            ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
                 if (!kwArgKeyEntries.empty()) {
                     // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
                     // <Magic>::<merge-hash>, which is what's done in the desugarer.
                     kwArgsHash = ast::MK::Send1(
-                        arg.loc, ast::MK::Hash(arg.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
-                        core::Names::merge(), arg.loc.copyWithZeroLength(), std::move(kwArgsHash));
+                        zSuperArgsLoc,
+                        ast::MK::Hash(zSuperArgsLoc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
+                        core::Names::merge(), zSuperArgsLoc.copyWithZeroLength(), std::move(kwArgsHash));
                     kwArgKeyEntries.clear();
                     kwArgValueEntries.clear();
                 }
             } else if (arg.flags.block) {
-                blockArg = ast::make_expression<ast::Local>(arg.loc, arg.arg);
+                blockArg = ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg);
             } else if (arg.flags.shadow) {
                 ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
