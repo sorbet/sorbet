@@ -328,7 +328,8 @@ class LocalNameInserter {
                     kwArgValueEntries.clear();
                 }
             } else if (arg.flags.block) {
-                blockArg = ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg);
+                auto blockLoc = arg.arg._name == core::Names::blkArg() ? core::LocOffsets::none() : zSuperArgsLoc;
+                blockArg = ast::make_expression<ast::Local>(blockLoc, arg.arg);
             } else if (arg.flags.shadow) {
                 ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
