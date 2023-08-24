@@ -602,10 +602,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     MethodRef mayBeOverloaded;
     if (targetName == Names::super()) {
         targetName = args.enclosingMethodForSuper;
-        if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
-        }
+        // if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
+        //     return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+        //                           Symbols::noMethod());
+        // }
 
         mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, targetName);
     } else if (symbol != core::Symbols::top()) {
