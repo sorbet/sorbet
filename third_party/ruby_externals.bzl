@@ -64,6 +64,7 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:penelope_procc.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-fix-malloc-increase-calculation.patch",  # https://github.com/ruby/ruby/pull/4860
             "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by.patch",  # https://github.com/ruby/ruby/pull/6791
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
         ],
     )
 
@@ -89,6 +90,7 @@ def register_ruby_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by-3_1.patch",  # https://github.com/ruby/ruby/pull/6791
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
         ],
     )
 
