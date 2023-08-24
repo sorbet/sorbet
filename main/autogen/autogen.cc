@@ -43,7 +43,25 @@ class AutogenWalk {
             auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             out.emplace_back(original.cnst);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+
+            // If any part of the constant literal scope is a class alias, the final name should be scoped
+            // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
+            // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
+            // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
+            // heuristics in our package generation tooling to determine whether something was resolved via an alias.
+            if (cnst != nullptr && cnst->original != nullptr) {
+                auto scopeSym = cnst->symbol;
+                if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
+                    auto resolvedScopeName = symbolName(ctx, scopeSym);
+
+                    // append the name in reverse order to the hitherto-built name vector,
+                    // then break out of the loop.
+                    out.insert(out.end(), std::move(resolvedScopeName).rbegin(), std::move(resolvedScopeName).rend());
+                    break;
+                }
+            }
         }
+
         reverse(out.begin(), out.end());
         return out;
     }
