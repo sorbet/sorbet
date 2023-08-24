@@ -497,6 +497,7 @@ int realmain(int argc, char *argv[]) {
         gs->includeErrorSections = false;
     }
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
+    gs->typedSuper = opts.typedSuper;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {

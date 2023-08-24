@@ -507,9 +507,9 @@ public:
         // If the super calls occurs inside a block, or a module, we would like to leave it as untyped,
         // rather than checking it. This code replaces those <super> with <untypedSuper>,
         // and then dispatchCallSymbol will ignore those.
-        auto newMethodName = core::Names::super();
-        if (scopeStack.back().insideBlock || scopeStack.back().insideModule) {
-            newMethodName = core::Names::untypedSuper();
+        auto newMethodName = core::Names::untypedSuper();
+        if (ctx.state.typedSuper && !scopeStack.back().insideBlock && !scopeStack.back().insideModule) {
+            newMethodName = core::Names::super();
         }
         if (original.fun == core::Names::callWithBlock() || original.fun == core::Names::callWithSplat() ||
             original.fun == core::Names::callWithSplatAndBlock()) {

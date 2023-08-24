@@ -176,6 +176,7 @@ struct Options {
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
+    bool typedSuper = false;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;
     bool noErrorSections = false;

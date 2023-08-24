@@ -298,6 +298,10 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // If 'true', attempt to typecheck calls to `super` as often as possible.
+    // Some calls to `super` are not type checked due to incomplete/imperfect information.
+    bool typedSuper = true;
+
     // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
     // the packages that are imported by the one whose interface is being generated.
     std::optional<packages::ImportInfo> singlePackageImports;
