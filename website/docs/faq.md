@@ -246,10 +246,13 @@ end
 
 ## Why is `super` untyped, even when the parent method has a `sig`?
 
-Sorbet can't know what the "parent method" is 100% of the time. For example,
-when calling `super` from a method defined in a module, the `super` method will
-be determined only once we know which class or module this module has been mixed
-into. That's a lot of words, so here's an example:
+Sorbet can't always know what the parent method is. For example, when calling
+`super` from a method defined in a module, the method that `super` dispatches to
+changes for each place where that module is mixed into something else. This
+means there's not necessarily a single way to treat a call to `super`
+statically.
+
+That's a lot of words, so here's an example:
 
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Amodule%20MyModule%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20foo%0A%20%20%20%20%23%20Can't%20know%20super%20until%20we%20know%20which%20module%20we're%20mixed%20into%0A%20%20%20%20res%20%3D%20super%0A%20%20%20%20T.reveal_type(res)%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Amodule%20ParentModule1%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20def%20foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Amodule%20ParentModule2%0A%20%20sig%20%7Breturns(String)%7D%0A%20%20def%20foo%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20MyClass1%0A%20%20include%20ParentModule1%0A%20%20include%20MyModule%0Aend%0A%0Aclass%20MyClass2%0A%20%20include%20ParentModule2%0A%20%20include%20MyModule%0Aend%0A%0AMyClass1.new.foo%0AMyClass2.new.foo%0A">→
 View on sorbet.run</a>
@@ -258,9 +261,78 @@ To typecheck this example, Sorbet would have to typecheck `MyModule#foo`
 multiple times, once for each place that method might be used from, or place
 restrictions on how and where this module can be included.
 
-Sorbet might adopt a more sophisticated approach in the future, but for now it
-falls back to treating `super` as a method call that accepts anything and
-returns anything.
+Over time, we have improved support for `super` in certain circumstances. In
+particular, if all of these things are true, Sorbet will type check the call to
+`super`:
+
+- The usage of `super` must be in a method defined in a `class`, not a module.
+
+  (Why? → See the example above.)
+
+- The usage of `super` must not be inside a Ruby block (like `do ... end`)
+
+  (Why? → Sorbet doesn't always know whether the block is being passed to
+  `define_method`, or otherwise [executed in a context different from the
+  enclosing context][define_method_super].)
+
+- The usage of `super` and the method it resolves to must both be defined in a
+  `# typed: strict` file.
+
+  (Why? → In `# typed: true` files, Sorbet does not know whether a method must
+  take a block or not except in `# typed: strict` or higher files.)
+
+[define_method_super]:
+  https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0A%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.bar%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20define_method%28%3Abar%29%20do%0A%20%20%20%20%20%20x%20%3D%20super%0A%20%20%20%20%20%20T.reveal_type%28x%29%0A%20%20%20%20%20%20%23%20-%3E%20should%20reveal%20String%2C%20but%20Sorbet%20doesn't%20know%20that%0A%20%20%20%20end%0A%0A%20%20%20%200%0A%20%20end%0Aend
+
+By default, Sorbet type checks all calls to `super` that it can. To opt out of
+type checking `super`, pass the `--typed-super=false` command line flag to
+Sorbet. Note that like with most parts of Sorbet, support for typing `super` is
+expected to improve over time, which might introduce new type errors upon
+upgrading to a newer Sorbet version.
+
+### How can I fix type errors that arise from `super`?
+
+1.  Usually type errors from `super` arise because of incompatible overrides,
+    [like this][super_incompatible]. Sorbet only does
+    [Override Checking](override-checking.md) when the parent method is declared
+    with `overridable` or `abstract`, which means that incompatible overrides
+    can creep into a codebase.
+
+    To fix these errors, correct the signature so that the child signature is a
+    [valid override](override-checking.md#a-note-on-variance).
+
+1.  Sometimes the type errors happen even when the child is a valid override of
+    the parent, because the child either promises to accept a wider input or
+    return a narrower output. In these cases, before and/or after calling
+    `super`, the child method will need to handle the cases that the parent
+    method's type is unable to handle. (Or, if possible: adjust the parent's
+    signature to match the child's signature.)
+
+1.  Unlike method calls, it's **not possible** to do something like
+    `T.unsafe(self).super` to silence errors from a single usage of `super`
+    (`super` is a keyword in Ruby, not a method call).
+
+    This means that there is not a way to silence errors from a single usage of
+    `super`. The best you can do is silence all errors inside a method using
+    `T.bind`:
+
+    ```ruby
+    def example
+      T.bind(self, T.untyped) # <------
+      super
+    end
+    ```
+
+    See the docs for [T.bind](procs.md#casting-the-self-type-with-tbind). Note:
+    not only does this opt out of typechecking calls to `super`, but it also
+    opts out of type checking for all method calls on `self` in that method
+    body.
+
+1.  To silence all type errors from super, use the `--typed-super=false` flag.
+    This opts out of all `super` type checking.
+
+[super_incompatible]:
+  https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20super%0A%20%20end%0Aend
 
 ## Does Sorbet work with Rake and Rakefiles?
 
