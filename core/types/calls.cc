@@ -500,7 +500,7 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
 }
 
 void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
-    if (!kwSplatArgLoc.exists()) {
+    if (!kwSplatArgLoc.exists() || kwSplatArgLoc.empty()) {
         return;
     }
 
@@ -1294,7 +1294,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
-                e.replaceWith("Delete extra args", deleteLoc, "");
+                if (!deleteLoc.empty()) {
+                    e.replaceWith("Delete extra args", deleteLoc, "");
+                }
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
                 // people some slightly confusing error messages.
@@ -1319,7 +1321,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
                                       "{}: ", possibleArg);
                     }
-                } else {
+                } else if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
