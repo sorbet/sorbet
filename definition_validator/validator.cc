@@ -953,60 +953,66 @@ private:
             missingMethods.emplace_back(proto);
         }
 
-        if (!missingMethods.empty()) {
-            if (auto e = gs.beginError(classOrModuleDeclaredAt, core::errors::Resolver::BadAbstractMethod)) {
-                auto pluralization = (missingMethods.size() > 1 ? "s" : "");
-                e.setHeader("Missing definition{} for abstract method{}", pluralization, pluralization);
-
-                auto classOrModuleEndsAt =
-                    core::Loc{classOrModuleDeclaredAt.file(), classDef.loc.copyEndWithZeroLength()};
-                auto hasSingleLineDefinition =
-                    classOrModuleDeclaredAt.position(gs).first.line == classOrModuleEndsAt.position(gs).second.line;
-
-                auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
-                string endSuffix(endRange.source(gs).value_or(""));
-                regex emptyBodyRe("^\\s*;\\s+end\\s*$");
-                auto hasEmptyBody = regex_match(endSuffix, emptyBodyRe);
-
-                auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(gs);
-                string classOrModuleIndent(indentLength, ' ');
-                auto insertAt = endLoc.adjust(gs, -indentLength, 0);
-                auto format = "{}\n" + classOrModuleIndent;
-
-                vector<core::AutocorrectSuggestion::Edit> edits;
-                if (hasSingleLineDefinition && hasEmptyBody) {
-                    // First, break the class/module definition up onto multiple lines.
-                    edits.emplace_back(
-                        core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
-
-                    // Then, modify our insertion strategy such that we add new methods to the top of the class/module
-                    // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
-                    // class/module body that we just created.
-                    insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
-                    format = "\n{}";
-                }
-
-                fast_sort(missingMethods, [&gs](const auto &l, const auto &r) -> bool {
-                    return l.data(gs)->name.show(gs) < r.data(gs)->name.show(gs);
-                });
-                for (auto proto : missingMethods) {
-                    e.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
-
-                    if (hasSingleLineDefinition && !hasEmptyBody) {
-                        // We don't suggest autocorrects for this case because we cannot say for sure how the
-                        // class/module has been declared, and so we also can't determine how to modify it.
-                        continue;
-                    }
-
-                    edits.emplace_back(defineInheritedAbstractMethod(gs, proto, insertAt, format, classOrModuleIndent));
-                }
-
-                if (!edits.empty()) {
-                    e.addAutocorrect(core::AutocorrectSuggestion{
-                        fmt::format("Define inherited abstract method{}", pluralization), edits});
-                }
-            }
+        if (missingMethods.empty()) {
+            return;
         }
+
+        auto errorBuilder = gs.beginError(classOrModuleDeclaredAt, core::errors::Resolver::BadAbstractMethod);
+        if (!errorBuilder) {
+            return;
+        }
+
+        auto pluralization = (missingMethods.size() > 1 ? "s" : "");
+        errorBuilder.setHeader("Missing definition{} for abstract method{}", pluralization, pluralization);
+
+        auto classOrModuleEndsAt = core::Loc{classOrModuleDeclaredAt.file(), classDef.loc.copyEndWithZeroLength()};
+        auto hasSingleLineDefinition =
+            classOrModuleDeclaredAt.position(gs).first.line == classOrModuleEndsAt.position(gs).second.line;
+
+        auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
+        string endSuffix(endRange.source(gs).value_or(""));
+        regex emptyBodyRe("^\\s*;\\s+end\\s*$");
+        auto hasEmptyBody = regex_match(endSuffix, emptyBodyRe);
+
+        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(gs);
+        string classOrModuleIndent(indentLength, ' ');
+        auto insertAt = endLoc.adjust(gs, -indentLength, 0);
+        auto format = "{}\n" + classOrModuleIndent;
+
+        vector<core::AutocorrectSuggestion::Edit> edits;
+        if (hasSingleLineDefinition && hasEmptyBody) {
+            // First, break the class/module definition up onto multiple lines.
+            edits.emplace_back(
+                core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
+
+            // Then, modify our insertion strategy such that we add new methods to the top of the class/module
+            // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
+            // class/module body that we just created.
+            insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
+            format = "\n{}";
+        }
+
+        fast_sort(missingMethods, [&gs](const auto &l, const auto &r) -> bool {
+            return l.data(gs)->name.show(gs) < r.data(gs)->name.show(gs);
+        });
+        for (auto proto : missingMethods) {
+            errorBuilder.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
+
+            if (hasSingleLineDefinition && !hasEmptyBody) {
+                // We don't suggest autocorrects for this case because we cannot say for sure how the
+                // class/module has been declared, and so we also can't determine how to modify it.
+                continue;
+            }
+
+            edits.emplace_back(defineInheritedAbstractMethod(gs, proto, insertAt, format, classOrModuleIndent));
+        }
+
+        if (edits.empty()) {
+            return;
+        }
+
+        errorBuilder.addAutocorrect(
+            core::AutocorrectSuggestion{fmt::format("Define inherited abstract method{}", pluralization), edits});
     }
 
 public:
