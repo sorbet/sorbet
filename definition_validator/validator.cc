@@ -924,43 +924,44 @@ private:
         return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefintion)};
     }
 
-    void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym, ast::ClassDef &classDef) {
-        if (sym.data(gs)->flags.isAbstract) {
+    void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, ast::ClassDef &classDef) {
+        if (sym.data(ctx)->flags.isAbstract) {
             return;
         }
 
-        auto classOrModuleDeclaredAt = sym.data(gs)->loc();
-        if (classOrModuleDeclaredAt.exists() && classOrModuleDeclaredAt.file().data(gs).isRBI()) {
+        auto classOrModuleDeclaredAt = sym.data(ctx)->loc();
+        if (classOrModuleDeclaredAt.exists() && classOrModuleDeclaredAt.file().data(ctx).isRBI()) {
             return;
         }
 
-        auto missingAbstractMethods = findMissingAbstractMethods(gs, sym);
+        auto missingAbstractMethods = findMissingAbstractMethods(ctx, sym);
         if (missingAbstractMethods.empty()) {
             return;
         }
 
-        auto errorBuilder = gs.beginError(classOrModuleDeclaredAt, core::errors::Resolver::BadAbstractMethod);
+        auto errorBuilder =
+            ctx.beginError(classOrModuleDeclaredAt.offsets(), core::errors::Resolver::BadAbstractMethod);
         if (!errorBuilder) {
             return;
         }
 
         auto pluralization = (missingAbstractMethods.size() > 1 ? "s" : "");
         auto suffix =
-            (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(gs)));
+            (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(ctx)));
         errorBuilder.setHeader("Missing definition{} for abstract method{}{}", pluralization, pluralization, suffix);
 
-        auto classOrModuleEndsAt = core::Loc{classOrModuleDeclaredAt.file(), classDef.loc.copyEndWithZeroLength()};
+        auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
         auto hasSingleLineDefinition =
-            classOrModuleDeclaredAt.position(gs).first.line == classOrModuleEndsAt.position(gs).second.line;
+            classOrModuleDeclaredAt.position(ctx).first.line == classOrModuleEndsAt.position(ctx).second.line;
 
         auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
-        string endSuffix(endRange.source(gs).value_or(""));
+        string endSuffix(endRange.source(ctx).value_or(""));
         regex emptyBodyRe("^\\s*;\\s+end\\s*$");
         auto hasEmptyBody = regex_match(endSuffix, emptyBodyRe);
 
-        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(gs);
+        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
         string classOrModuleIndent(indentLength, ' ');
-        auto insertAt = endLoc.adjust(gs, -indentLength, 0);
+        auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
         auto format = "{}\n" + classOrModuleIndent;
 
         vector<core::AutocorrectSuggestion::Edit> edits;
@@ -977,7 +978,7 @@ private:
         }
 
         for (auto proto : missingAbstractMethods) {
-            errorBuilder.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
+            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
 
             if (hasSingleLineDefinition && !hasEmptyBody) {
                 // We don't suggest autocorrects for this case because we cannot say for sure how the
@@ -985,7 +986,7 @@ private:
                 continue;
             }
 
-            edits.emplace_back(defineInheritedAbstractMethod(gs, proto, insertAt, format, classOrModuleIndent));
+            edits.emplace_back(defineInheritedAbstractMethod(ctx, proto, insertAt, format, classOrModuleIndent));
         }
 
         if (edits.empty()) {
@@ -996,20 +997,20 @@ private:
             core::AutocorrectSuggestion{fmt::format("Define inherited abstract method{}", pluralization), edits});
     }
 
-    vector<core::MethodRef> findMissingAbstractMethods(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
+    vector<core::MethodRef> findMissingAbstractMethods(const core::Context ctx, core::ClassOrModuleRef sym) {
         vector<core::MethodRef> result;
 
-        auto &abstractMethods = getAbstractMethods(gs, sym);
+        auto &abstractMethods = getAbstractMethods(ctx, sym);
         if (abstractMethods.empty()) {
             return result;
         }
 
         for (auto proto : abstractMethods) {
-            if (proto.data(gs)->owner == sym) {
+            if (proto.data(ctx)->owner == sym) {
                 continue;
             }
 
-            auto concreteMethodRef = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, proto.data(ctx)->name);
             if (concreteMethodRef.exists()) {
                 continue;
             }
@@ -1018,8 +1019,8 @@ private:
         }
 
         // Sort missing methods to ensure consistent ordering in both the error message and the autocorrect output.
-        fast_sort(result, [&gs](const auto &l, const auto &r) -> bool {
-            return l.data(gs)->name.show(gs) < r.data(gs)->name.show(gs);
+        fast_sort(result, [ctx](const auto &l, const auto &r) -> bool {
+            return l.data(ctx)->name.show(ctx) < r.data(ctx)->name.show(ctx);
         });
 
         // Deduplicate methods to prevent suggesting duplicate corrections for methods that are missing from several
