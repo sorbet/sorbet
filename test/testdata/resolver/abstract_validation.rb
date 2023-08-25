@@ -52,8 +52,7 @@ end
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
-# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#bar`
-# ^^^^^^^^^ error: Missing definition for abstract method `AbstractMixin#foo`
+# ^^^^^^^^^ error: Missing definitions for abstract methods
   extend T::Helpers
   include AbstractMixin
 end

@@ -53,12 +53,13 @@ string argTypeForUnresolvedAppliedType(const GlobalState &gs, const TypePtr &t, 
 } // namespace
 
 string UnresolvedAppliedType::show(const GlobalState &gs, ShowOptions options) const {
-    string resolvedString = options.showForRBI ? "" : " (unresolved)";
+    string resolvedString = options.useValidSyntax ? "" : " (unresolved)";
     return fmt::format("{}[{}]{}", this->klass.show(gs, options),
                        fmt::map_join(targs, ", ",
                                      [&](auto targ) {
-                                         return options.showForRBI ? argTypeForUnresolvedAppliedType(gs, targ, options)
-                                                                   : targ.show(gs, options);
+                                         return options.useValidSyntax
+                                                    ? argTypeForUnresolvedAppliedType(gs, targ, options)
+                                                    : targ.show(gs, options);
                                      }),
                        resolvedString);
 }
@@ -68,7 +69,7 @@ string NamedLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const
 }
 
 string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const {
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         // RBI generator: Users type the class name, not `String("value")`.
         return fmt::format("{}", this->underlying(gs).show(gs, options));
     }
@@ -96,7 +97,7 @@ string IntegerLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) con
 }
 
 string IntegerLiteralType::show(const GlobalState &gs, ShowOptions options) const {
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         // RBI generator: Users type the class name, not `String("value")`.
         return fmt::format("{}", this->underlying(gs).show(gs, options));
     }
@@ -113,7 +114,7 @@ string FloatLiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const
 }
 
 string FloatLiteralType::show(const GlobalState &gs, ShowOptions options) const {
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         // RBI generator: Users type the class name, not `String("value")`.
         return fmt::format("{}", this->underlying(gs).show(gs, options));
     }
@@ -188,15 +189,15 @@ string ShapeType::show(const GlobalState &gs, ShowOptions options) const {
                 keyStr = keyLiteral.asName().show(gs);
                 sepStr = ": ";
             } else {
-                keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
+                keyStr = options.useValidSyntax ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
             }
         } else if (isa_type<IntegerLiteralType>(key)) {
             const auto &keyLiteral = cast_type_nonnull<IntegerLiteralType>(key);
-            keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
+            keyStr = options.useValidSyntax ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
         } else {
             ENFORCE(isa_type<FloatLiteralType>(key));
             const auto &keyLiteral = cast_type_nonnull<FloatLiteralType>(key);
-            keyStr = options.showForRBI ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
+            keyStr = options.useValidSyntax ? keyLiteral.showValue(gs) : keyLiteral.show(gs, options);
         }
 
         fmt::format_to(std::back_inserter(buf), "{}{}{}", keyStr, sepStr, value.show(gs, options));
@@ -214,7 +215,7 @@ string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string AliasType::show(const GlobalState &gs, ShowOptions options) const {
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         return this->symbol.show(gs);
     }
     return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
@@ -477,7 +478,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             return to_string(buf);
         } else {
             // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
-            if (options.showForRBI && this->klass.data(gs)->isSingletonClass(gs)) {
+            if (options.useValidSyntax && this->klass.data(gs)->isSingletonClass(gs)) {
                 return this->klass.show(gs, options);
             }
             fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));

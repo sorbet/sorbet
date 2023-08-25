@@ -218,7 +218,7 @@ private:
             return "";
         }
         enqueueSymbolsInType(type);
-        auto options = core::ShowOptions{}.withShowForRBI();
+        auto options = core::ShowOptions{}.withUseValidSyntax();
         return type.show(gs, options);
     }
 
