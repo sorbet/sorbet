@@ -1715,7 +1715,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                      !inWhat.symbol.data(ctx)->loc().contains(cur.origins[0]))) {
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    auto replacement = suggest.show(ctx, core::ShowOptions().withShowForRBI());
+                                    auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
                                     e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
                                                   "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
                                 } else {

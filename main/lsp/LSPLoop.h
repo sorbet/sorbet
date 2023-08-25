@@ -94,11 +94,7 @@ std::optional<std::string> findDocumentation(std::string_view sourceCode, int be
 bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::string_view rubyMarkup,
                                                 std::optional<std::string_view> explanation);
-std::string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                                const core::TypePtr &retType, const core::TypeConstraint *constraint);
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
-core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
-                            core::TypePtr receiver, const core::TypeConstraint *constr);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
 // Returns all subclasses of ClassOrModuleRef (including itself)
