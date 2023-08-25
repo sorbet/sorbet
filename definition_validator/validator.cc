@@ -4,6 +4,7 @@
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -985,6 +986,9 @@ private:
                     format = "\n{}";
                 }
 
+                fast_sort(missingMethods, [&gs](const auto &l, const auto &r) -> bool {
+                    return l.data(gs)->name.show(gs) < r.data(gs)->name.show(gs);
+                });
                 for (auto proto : missingMethods) {
                     e.addErrorLine(proto.data(gs)->loc(), "`{}` defined here", proto.data(gs)->name.show(gs));
 
