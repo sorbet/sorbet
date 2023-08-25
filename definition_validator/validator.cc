@@ -954,10 +954,12 @@ private:
         auto hasSingleLineDefinition =
             classOrModuleDeclaredAt.position(ctx).first.line == classOrModuleEndsAt.position(ctx).second.line;
 
-        auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
-        string endSuffix(endRange.source(ctx).value_or(""));
-        regex emptyBodyRe("^\\s*;\\s+end\\s*$");
-        auto hasEmptyBody = regex_match(endSuffix, emptyBodyRe);
+        auto hasEmptyBody = classDef.rhs.empty();
+        if (classDef.rhs.size() == 1) {
+            if (auto *mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
+                hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
+            }
+        }
 
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
         string classOrModuleIndent(indentLength, ' ');
@@ -967,6 +969,7 @@ private:
         vector<core::AutocorrectSuggestion::Edit> edits;
         if (hasSingleLineDefinition && hasEmptyBody) {
             // First, break the class/module definition up onto multiple lines.
+            auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
             edits.emplace_back(
                 core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
 
