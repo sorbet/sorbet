@@ -87,13 +87,6 @@ class BigFoo; extend T::Sig
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 6 ---
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 8 Tests return markdown output
   end
-
-  sig {returns(T.attached_class)}
-  def self.factory
-    #      ^ hover: sig {returns(T.attached_class)}
-    #      ^ hover: def self.factory; end
-    new
-  end
 end
 
 module Mod

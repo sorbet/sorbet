@@ -68,7 +68,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     }
 
     auto resp = move(queryResponses[0]);
-    auto options = core::ShowOptions().withUseValidSyntax();
+    auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
 
