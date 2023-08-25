@@ -908,8 +908,8 @@ private:
 
     core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
                                                                     const core::MethodRef abstractMethodRef,
-                                                                    const core::Loc insertAt, const string format,
-                                                                    const string classOrModuleIndent) {
+                                                                    const core::Loc insertAt, const string &format,
+                                                                    const string &classOrModuleIndent) {
         auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
         auto resultType = abstractMethodRef.data(gs)->resultType;
         auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
