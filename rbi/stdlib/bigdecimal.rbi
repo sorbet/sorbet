@@ -171,7 +171,7 @@ class BigDecimal < Numeric
 
   # Determines what happens when the result of a computation is not a number (NaN). See
   # [`BigDecimal.mode`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html#method-c-mode).
-  EXCEPTION_NaN = T.let(T.unsafe(nil, Integer)
+  EXCEPTION_NaN = T.let(T.unsafe(nil), Integer)
 
   # Determines what happens when the result of a computation is an overflow (a
   # result too large to be represented). See
