@@ -820,7 +820,7 @@ private:
                 name = parsedArg.local._name;
             }
         } else if (parsedArg.flags.isBlock) {
-            name = core::Names::blkArg();
+            name = parsedArg.local._name;
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }

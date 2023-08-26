@@ -14,10 +14,10 @@ begin
     end
   end
   class ::Main<<C Main>> < (::<todo sym>)
-    def yielder(<blk>)
+    def yielder(&blk)
       begin
-        a = <blk>.call(1)
-        <blk>.call(a)
+        a = &blk.call(1)
+        &blk.call(a)
       end
     end
 
@@ -35,9 +35,9 @@ begin
       end
     end
 
-    def blockyield(<blk>)
+    def blockyield(&blk)
       <self>.yielder() do |i$1|
-        <blk>.call(i$1)
+        &blk.call(i$1)
       end
     end
 

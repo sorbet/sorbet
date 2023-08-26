@@ -346,6 +346,7 @@ NameDef names[] = {
     {"arg", "<arg>"},
     {"kwargs", "<kwargs>"},
     {"blkArg", "<blk>"},
+    {"ampersandBlockArg", "&blk"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 

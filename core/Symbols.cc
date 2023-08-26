@@ -1720,6 +1720,8 @@ string ArgInfo::toString(const GlobalState &gs) const {
 string_view ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword && !flags.isRepeated) {
         return name.shortName(gs);
+    } else if (flags.isBlock && name == core::Names::ampersandBlockArg()) {
+        return name.shortName(gs);
     } else {
         if (auto source = loc.source(gs)) {
             return source.value();
@@ -2135,8 +2137,13 @@ SymbolRef TypeParameter::dealias(const GlobalState &gs, int depthLimit) const {
 }
 
 bool ArgInfo::isSyntheticBlockArgument() const {
-    // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
-    return flags.isBlock && !loc.exists();
+    return flags.isBlock && name == core::Names::blkArg();
+}
+
+bool ArgInfo::isImplicitBlockArgument() const {
+    // This name is used when the method actually had a call to `yield` or `block_given?` but did
+    // not mention a block argument in the method signature.
+    return flags.isBlock && name == core::Names::ampersandBlockArg();
 }
 
 ArgInfo ArgInfo::deepCopy() const {

@@ -3702,6 +3702,11 @@ private:
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     arg.argumentName(ctx.state));
                         e.addErrorLine(ctx.locAt(exprLoc), "Signature");
+                        if (arg.isImplicitBlockArgument()) {
+                            e.addErrorNote("To annotate this argument, either explicitly name a block argument,\n"
+                                           "    or add `{}` to the end of the signature's `{}`",
+                                           "\"&blk\": ...", "params");
+                        }
                     }
                 }
             }
