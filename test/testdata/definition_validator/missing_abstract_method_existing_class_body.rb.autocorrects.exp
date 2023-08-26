@@ -23,7 +23,7 @@ end
 
     sig {override.void}
     def baz; end
-    sig {override.void}
+    sig { override.void }
     def bar; end
   end
 # ------------------------------
