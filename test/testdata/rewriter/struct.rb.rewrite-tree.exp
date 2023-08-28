@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C RealStruct><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -53,7 +53,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of initialize>
     end
 
-    class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C A$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
+    end
+
+    class <emptyTree>::<C KeywordInit$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -91,6 +97,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C KeywordInit><<C <todo sym>>> < (<emptyTree>::<C KeywordInit$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
     end
   end
 
@@ -135,7 +147,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C TwoStructs><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -163,7 +175,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of initialize>
     end
 
-    class <emptyTree>::<C B><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C A$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
+    end
+
+    class <emptyTree>::<C B$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -189,6 +207,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C B$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
     end
   end
 
@@ -196,7 +220,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C Struct><<C <todo sym>>> < (::<todo sym>)
     end
 
-    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -235,10 +259,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of initialize>
     end
+
+    class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C A$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
+    end
   end
 
   class <emptyTree>::<C InvalidMember><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C A><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C A$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def foo=<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -265,6 +295,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of initialize>
     end
+
+    class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C A$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
+    end
   end
 
   class <emptyTree>::<C MixinStruct><<C <todo sym>>> < (::<todo sym>)
@@ -276,7 +312,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of foo>
     end
 
-    class <emptyTree>::<C MyStruct><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C MyStruct$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def x<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -302,6 +338,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C MyStruct><<C <todo sym>>> < (<emptyTree>::<C MyStruct$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -310,7 +352,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.new().foo()
     end
 
-    class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C MyKeywordInitStruct$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def x<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -336,6 +378,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (<emptyTree>::<C MyKeywordInitStruct$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
 
       <self>.include(<emptyTree>::<C MyMixin>)
 
@@ -394,7 +442,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(<emptyTree>::<C Main>.new().main())
 
   class <emptyTree>::<C FullyQualifiedStructUsages><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C Foo><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C Foo$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def a<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -422,7 +470,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of initialize>
     end
 
-    class <emptyTree>::<C Bar><<C <todo sym>>> < (::<root>::<C Struct>)
+    class <emptyTree>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C Foo$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
+    end
+
+    class <emptyTree>::<C Bar$1><<C <todo sym>>> < (::<root>::<C Struct>)
       def a<<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       end
@@ -448,6 +502,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       <runtime method definition of initialize>
+    end
+
+    class <emptyTree>::<C Bar><<C <todo sym>>> < (<emptyTree>::<C Bar$1>)
+      <emptyTree>::<C Elem> = <self>.type_member() do ||
+        {:fixed => ::T.untyped()}
+      end
     end
 
     <emptyTree>::<C Baz> = <cast:<assume type>>(::<root>::<C Foo>::<C Struct>.new(), <todo sym>, ::<root>::<C Foo>::<C Struct>)
