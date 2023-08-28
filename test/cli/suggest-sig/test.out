@@ -293,34 +293,6 @@ suggest-sig.rb:43: The method `a_protected` does not have a `sig` https://srb.he
     43 |  protected def a_protected; end
           ^
 
-suggest-sig.rb:102: The method `a` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                            ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `a=` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                            ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `b` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                                ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `b=` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                                ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
 suggest-sig.rb:112: The method `load_account_business_profile` does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -391,7 +363,7 @@ suggest-sig.rb:204: The method `returns_int` does not have a `sig` https://srb.h
     suggest-sig.rb:204: Inserted `sig(:final) { returns(Integer) }`
      204 |  def returns_int; 42; end
             ^
-Errors: 47
+Errors: 43
 
 --------------------------------------------------------------------------
 
