@@ -22,30 +22,14 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &nod
     return false;
 }
 
-bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
-    if (!send->hasBlock()) {
-        return true;
-    }
-
-    auto block = send->block();
-
-    if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
-        auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
-
-        if (methodDef && methodDef->name == core::Names::initialize()) {
-            return false;
-        }
-
-        for (auto &&stat : insSeq->stats) {
-            methodDef = ast::cast_tree<ast::MethodDef>(stat);
-
-            if (methodDef && methodDef->name == core::Names::initialize()) {
-                return false;
-            }
-        }
-    }
-
-    return true;
+// Elem = type_member {{fixed: T.untyped}}
+ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
+    auto typeMember = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength());
+    ast::cast_tree_nonnull<ast::Send>(typeMember)
+        .setBlock(ast::MK::Block0(
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc))));
+    return ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+                           std::move(typeMember));
 }
 
 } // namespace
@@ -144,43 +128,54 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                                                     ast::MK::RaiseUnimplemented(loc)));
     }
 
-    // Elem = type_member {{fixed: T.untyped}}
-    {
-        auto typeMember = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength());
-        ast::cast_tree_nonnull<ast::Send>(typeMember)
-            .setBlock(ast::MK::Block0(
-                loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc))));
-        body.emplace_back(
-            ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
-                            std::move(typeMember)));
-    }
-
-    if (isMissingInitialize(ctx, send)) {
-        body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
-        body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                                   ast::MK::RaiseUnimplemented(loc)));
-    }
-
-    if (auto *block = send->block()) {
-        // Steal the trees, because the run is going to remove the original send node from the tree anyway.
-        if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
-            for (auto &&stat : insSeq->stats) {
-                body.emplace_back(move(stat));
-            }
-            body.emplace_back(move(insSeq->expr));
-        } else {
-            body.emplace_back(move(block->body));
-        }
-
-        // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
-    }
-
-    ast::ClassDef::ANCESTORS_store ancestors;
-    ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                                       core::Names::Constants::Struct()));
+    body.emplace_back(elemFixedUntyped(loc));
+    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
+    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                               ast::MK::RaiseUnimplemented(loc)));
 
     vector<ast::ExpressionPtr> stats;
-    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+
+    auto structUniqueName = asgn->lhs.deepCopy();
+    auto &structUniqueNameUnresolvedConst = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(structUniqueName);
+    structUniqueNameUnresolvedConst.cnst =
+        ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::Struct, lhs->cnst, 1));
+
+    // class Foo$1 < ::Struct
+    {
+        ast::ClassDef::ANCESTORS_store ancestors;
+        ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
+                                                           core::Names::Constants::Struct()));
+
+        stats.emplace_back(
+            ast::MK::Class(loc, loc, structUniqueName.deepCopy(), std::move(ancestors), std::move(body)));
+    }
+
+    // class Foo < Foo$1
+    {
+        ast::ClassDef::ANCESTORS_store ancestors;
+        ancestors.emplace_back(move(structUniqueName));
+
+        ast::ClassDef::RHS_store body;
+
+        body.emplace_back(elemFixedUntyped(loc));
+
+        if (auto *block = send->block()) {
+            // Steal the trees, because the run is going to remove the original send node from the tree anyway.
+            if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+                for (auto &&stat : insSeq->stats) {
+                    body.emplace_back(move(stat));
+                }
+                body.emplace_back(move(insSeq->expr));
+            } else {
+                body.emplace_back(move(block->body));
+            }
+
+            // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
+        }
+
+        stats.emplace_back(ast::MK::Class(loc, loc, move(asgn->lhs), std::move(ancestors), std::move(body)));
+    }
+
     return stats;
 }
 
