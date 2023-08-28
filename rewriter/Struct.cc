@@ -123,7 +123,11 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
+        body.emplace_back(ast::MK::Sig0(symLoc.copyWithZeroLength(), ast::MK::Untyped(symLoc.copyWithZeroLength())));
         body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::Sig1(symLoc.copyWithZeroLength(), ast::MK::Symbol(symLoc, name),
+                                        ast::MK::Untyped(symLoc.copyWithZeroLength()),
+                                        ast::MK::Untyped(symLoc.copyWithZeroLength())));
         body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
                                                     ast::MK::RaiseUnimplemented(loc)));
     }
