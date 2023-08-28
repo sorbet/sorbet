@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<todo method>>(foo, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(foo = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of foo>
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -61,7 +61,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<todo method>>(foo, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -69,7 +69,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(foo: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of foo>
@@ -101,7 +101,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def a<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -109,7 +109,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def a=<<todo method>>(a, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -117,7 +117,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def b<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -125,7 +125,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def b=<<todo method>>(b, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -133,7 +133,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(a: = nil, b: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <runtime method definition of a>

@@ -10,10 +10,14 @@ end
 
 ExplicitOverride = Struct.new(:foo) do
   sig {returns(String)}
-  def foo; super; end
-  #        ^^^^^ untyped: Value returned from method is `T.untyped`
+  def foo
+    super
+  # ^^^^^ untyped: Value returned from method is `T.untyped`
+  end
 
   sig {params(foo: String).returns(String)}
-  def foo=(foo); super; end
-  #              ^^^^^ untyped: Value returned from method is `T.untyped`
+  def foo=(foo);
+    super
+  # ^^^^^ untyped: Value returned from method is `T.untyped`
+  end
 end

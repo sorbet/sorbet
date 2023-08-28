@@ -32,6 +32,22 @@ ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
                            std::move(typeMember));
 }
 
+void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
+    if (ast::isa_tree<ast::EmptyTree>(cnst.scope) || ast::isa_tree<ast::ConstantLit>(cnst.scope)) {
+        return;
+    }
+
+    if (cnst.scope.isSelfReference()) {
+        cnst.scope = ast::MK::EmptyTree();
+        return;
+    }
+
+    if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
+        selfScopeToEmptyTree(*scope);
+        return;
+    }
+}
+
 } // namespace
 
 vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
@@ -124,18 +140,18 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
         body.emplace_back(ast::MK::Sig0(symLoc.copyWithZeroLength(), ast::MK::Untyped(symLoc.copyWithZeroLength())));
-        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseTypedUnimplemented(loc)));
         body.emplace_back(ast::MK::Sig1(symLoc.copyWithZeroLength(), ast::MK::Symbol(symLoc, name),
                                         ast::MK::Untyped(symLoc.copyWithZeroLength()),
                                         ast::MK::Untyped(symLoc.copyWithZeroLength())));
         body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
-                                                    ast::MK::RaiseUnimplemented(loc)));
+                                                    ast::MK::RaiseTypedUnimplemented(loc)));
     }
 
     body.emplace_back(elemFixedUntyped(loc));
     body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
     body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                               ast::MK::RaiseUnimplemented(loc)));
+                                               ast::MK::RaiseTypedUnimplemented(loc)));
 
     vector<ast::ExpressionPtr> stats;
 
@@ -157,6 +173,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
     // class Foo < Foo$1
     {
         ast::ClassDef::ANCESTORS_store ancestors;
+        selfScopeToEmptyTree(structUniqueNameUnresolvedConst);
         ancestors.emplace_back(move(structUniqueName));
 
         ast::ClassDef::RHS_store body;
