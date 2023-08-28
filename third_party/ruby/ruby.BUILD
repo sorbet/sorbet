@@ -37,6 +37,7 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
         "-fPIC",
+        "-DUSE_RVARGC=1"
     ] + select({
         # Don't include JIT statistics unless we're building JIT support
         "@com_stripe_ruby_typer//tools/config:jit_enabled": ["-DYJIT_STATS=1"],
