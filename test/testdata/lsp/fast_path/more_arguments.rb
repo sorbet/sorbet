@@ -5,7 +5,7 @@ class Foo
 
   sig {returns(Integer)}
   def foo
-    # ^ hover: sig {returns(Integer)}
+    # ^ hover: sig { returns(Integer) }
     # ^ hover: def foo; end
     42
   end

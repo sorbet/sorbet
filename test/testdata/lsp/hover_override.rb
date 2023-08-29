@@ -4,7 +4,7 @@ class Animal
 
   sig {overridable.returns(String)}
   def self.name; "Animal"; end
-    # ^ hover: sig {overridable.returns(String)}
+    # ^ hover: sig { overridable.returns(String) }
 end
 
 class Dog < Animal
@@ -12,7 +12,7 @@ class Dog < Animal
 
   sig {override.returns(String)}
   def self.name
-    # ^ hover: sig {override.returns(String)}
+    # ^ hover: sig { override.returns(String) }
     'Dog'
   end
 end
