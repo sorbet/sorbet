@@ -16,18 +16,12 @@ export class SorbetStatusMetricsTracker implements Disposable {
 
     this.disposable = Disposable.from(
       this.context.statusProvider.onStatusChanged((e) => {
-        console.log(
-          `status changed: ${ServerStatus[e.status]} (error: '${e.error}')`,
-        );
         this.context.metrics.emitTimingMetric("status.changed", new Date(), {
           status: ServerStatus[e.status],
           error: e.error || "",
         });
       }),
       this.context.statusProvider.onShowOperation((_params) => {
-        console.log(
-          `operation changed: ${_params.operationName} went to ${_params.status}`,
-        );
         this.context.metrics.emitTimingMetric("status.operation", new Date(), {
           operationName: _params.operationName,
           status: _params.status,
