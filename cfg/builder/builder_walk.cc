@@ -839,7 +839,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     // ensure block. That way we can model the exception being reraised in the rescue
                     //
                     //                       With ensure
-                    // 
+                    //
                     //                   ┌──────────────────┐
                     //                   │                  │
                     //                   │ rescue header bb ├───┐
