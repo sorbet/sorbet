@@ -290,4 +290,7 @@ class BasicObject
     .returns(T.type_parameter(:U))
   end
   def instance_exec(*args, &blk); end
+
+  sig {overridable.params(method: Symbol).returns(T.untyped)}
+  private def singleton_method_added(method); end
 end

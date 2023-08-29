@@ -973,12 +973,24 @@ public:
         return ClassOrModuleRef::fromRaw(82);
     }
 
+    static MethodRef T_Private_Methods_DeclBuilder_abstract() {
+        return MethodRef::fromRaw(4);
+    }
+
+    static MethodRef T_Private_Methods_DeclBuilder_overridable() {
+        return MethodRef::fromRaw(5);
+    }
+
+    static MethodRef T_Private_Methods_DeclBuilder_override() {
+        return MethodRef::fromRaw(6);
+    }
+
     static ClassOrModuleRef T_Sig_WithoutRuntimeSingleton() {
         return ClassOrModuleRef::fromRaw(83);
     }
 
     static MethodRef sigWithoutRuntime() {
-        return MethodRef::fromRaw(4);
+        return MethodRef::fromRaw(7);
     }
 
     static ClassOrModuleRef T_NonForcingConstants() {
@@ -986,7 +998,7 @@ public:
     }
 
     static MethodRef SorbetPrivateStaticSingleton_sig() {
-        return MethodRef::fromRaw(5);
+        return MethodRef::fromRaw(8);
     }
 
     static ClassOrModuleRef PackageSpecRegistry() {
@@ -1002,19 +1014,19 @@ public:
     }
 
     static MethodRef PackageSpec_import() {
-        return MethodRef::fromRaw(6);
+        return MethodRef::fromRaw(9);
     }
 
     static MethodRef PackageSpec_test_import() {
-        return MethodRef::fromRaw(7);
+        return MethodRef::fromRaw(10);
     }
 
     static MethodRef PackageSpec_export() {
-        return MethodRef::fromRaw(8);
+        return MethodRef::fromRaw(11);
     }
 
     static MethodRef PackageSpec_restrict_to_service() {
-        return MethodRef::fromRaw(9);
+        return MethodRef::fromRaw(12);
     }
 
     static ClassOrModuleRef Encoding() {
@@ -1026,27 +1038,27 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(10);
-    }
-
-    static MethodRef todoMethod() {
-        return MethodRef::fromRaw(11);
-    }
-
-    static MethodRef rootStaticInit() {
-        return MethodRef::fromRaw(12);
-    }
-
-    static MethodRef PackageSpec_autoloader_compatibility() {
         return MethodRef::fromRaw(13);
     }
 
-    static MethodRef PackageSpec_visible_to() {
+    static MethodRef todoMethod() {
         return MethodRef::fromRaw(14);
     }
 
-    static MethodRef PackageSpec_export_all() {
+    static MethodRef rootStaticInit() {
         return MethodRef::fromRaw(15);
+    }
+
+    static MethodRef PackageSpec_autoloader_compatibility() {
+        return MethodRef::fromRaw(16);
+    }
+
+    static MethodRef PackageSpec_visible_to() {
+        return MethodRef::fromRaw(17);
+    }
+
+    static MethodRef PackageSpec_export_all() {
+        return MethodRef::fromRaw(18);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
@@ -1090,7 +1102,7 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(16);
+        return MethodRef::fromRaw(19);
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {

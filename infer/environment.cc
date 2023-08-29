@@ -136,7 +136,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         copy.markDead();
         return copy;
     }
-    bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
+    bool enteringLoop = bb->flags.isLoopHeader;
     for (auto &pair : env.vars()) {
         auto local = pair.first;
         auto &state = pair.second;
@@ -688,12 +688,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         if (core::isa_type<core::ClassType>(argType)) {
             auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
                 !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Module()) ||
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
@@ -829,7 +829,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
             pair.second.knownTruthy = other.getKnownTruthy(var);
         }
 
-        if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
+        if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
         bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
@@ -1715,7 +1715,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                      !inWhat.symbol.data(ctx)->loc().contains(cur.origins[0]))) {
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    auto replacement = suggest.show(ctx, core::ShowOptions().withShowForRBI());
+                                    auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
                                     e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
                                                   "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
                                 } else {

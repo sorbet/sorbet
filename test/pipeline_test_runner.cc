@@ -257,14 +257,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
     return trees;
 }
 
-void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
-             ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
-    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-
-    if (!enablePackager) {
-        return;
-    }
-
+void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
@@ -294,6 +287,15 @@ void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers,
         gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
                                extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
                                "PACKAGE_ERROR_HINT");
+    }
+}
+
+void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers, absl::Span<ast::ParsedFile> trees,
+             ExpectationHandler &handler, vector<shared_ptr<RangeAssertion>> &assertions) {
+    auto enablePackager = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
+
+    if (!enablePackager) {
+        return;
     }
 
     // Packager runs over all trees.
@@ -384,17 +386,21 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     vector<ast::ParsedFile> trees;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (enablePackager) {
+        setupPackager(gs, assertions);
+
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
         auto inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(gs, inputPackageFiles, handler, test);
+
+        // First run: only the __package.rb files. This populates the packageDB
+        package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
     }
 
     auto nonPackageTrees = index(gs, filesSpan, handler, test);
+    package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
-
-    package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
 
     if (enablePackager) {
         if (test.expectations.contains("rbi-gen")) {
@@ -781,6 +787,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
     if (enablePackager) {
+        absl::c_stable_partition(trees, [&](const auto &pf) { return pf.file.isPackage(*gs); });
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
             handler.addObserved(*gs, "package-tree", [&]() {

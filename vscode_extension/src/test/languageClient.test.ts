@@ -112,16 +112,16 @@ suite("LanguageClient", () => {
           },
           position: { line: 1, character: 1 },
         });
-        assert.equal(
+        assert.strictEqual(
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
-        assert.equal(metrics.length, 1);
+        assert.strictEqual(metrics.length, 1);
         const m = metrics[0];
-        assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
-        assert.equal(m[3].success, "true");
+        assert.strictEqual(m[0], MetricType.Timing);
+        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
+        assert.strictEqual(m[3].success, "true");
       }
 
       {
@@ -134,16 +134,16 @@ suite("LanguageClient", () => {
             position: { line: 1, character: 1 },
           },
         );
-        assert.equal(
+        assert.strictEqual(
           (successResponse as any).contents,
           TestLanguageServerSpecialURIs.SUCCESS,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
-        assert.equal(metrics.length, 1);
+        assert.strictEqual(metrics.length, 1);
         const m = metrics[0];
-        assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
-        assert.equal(m[3].success, "true");
+        assert.strictEqual(m[0], MetricType.Timing);
+        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
+        assert.strictEqual(m[3].success, "true");
       }
 
       try {
@@ -161,11 +161,11 @@ suite("LanguageClient", () => {
           ) !== -1,
         );
         const metrics = metricsEmitter.getAndResetMetrics();
-        assert.equal(metrics.length, 1);
+        assert.strictEqual(metrics.length, 1);
         const m = metrics[0];
-        assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
-        assert.equal(m[3].success, "false");
+        assert.strictEqual(m[0], MetricType.Timing);
+        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
+        assert.strictEqual(m[3].success, "false");
       }
 
       try {
@@ -178,11 +178,11 @@ suite("LanguageClient", () => {
         assert.fail("Request should have failed.");
       } catch (e) {
         const metrics = metricsEmitter.getAndResetMetrics();
-        assert.equal(metrics.length, 1);
+        assert.strictEqual(metrics.length, 1);
         const m = metrics[0];
-        assert.equal(m[0], MetricType.Timing);
-        assert.equal(m[1], `latency.textDocument_hover_ms`);
-        assert.equal(m[3].success, "false");
+        assert.strictEqual(m[0], MetricType.Timing);
+        assert.strictEqual(m[1], "latency.textDocument_hover_ms");
+        assert.strictEqual(m[3].success, "false");
       }
     });
   });

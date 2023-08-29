@@ -59,6 +59,7 @@ compilation_database(
         "//core/serialize:serialize",
         "//core/serialize:serialize_test",
         "//core/sig_finder:sig_finder",
+        "//core/source_generator:source_generator",
         "//definition_validator:definition_validator",
         "//emscripten:main",
         "//gems/sorbet-runtime:generate_call_validation",

@@ -1,0 +1,16 @@
+diff --git eval.c eval.c
+index 844c537cc4..62ce1e142d 100644
+--- eval.c
++++ eval.c
+@@ -77,7 +77,10 @@ ruby_setup(void)
+      * affect as many future pages as possible for CoW-friendliness
+      */
+ #if defined(__linux__) && defined(PR_SET_THP_DISABLE)
+-    prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0);
++    char *enable_thp = getenv("STRIPE_RUBY_ENABLE_THP");
++    if (enable_thp == NULL || strncmp(enable_thp, "true", 4) != 0) {
++        prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0);
++    }
+ #endif
+     Init_BareVM();
+     Init_heap();

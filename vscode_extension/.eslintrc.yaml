@@ -23,6 +23,10 @@ rules:
   no-plusplus: 0
   # This rule generates false positives with typescript enums
   no-shadow: "off"
+  quotes:
+    - error
+    - double
+    - avoidEscape: true
   # This requires way too much space otherwise between fields.
   lines-between-class-members:
     - 2

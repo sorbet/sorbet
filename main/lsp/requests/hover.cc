@@ -3,6 +3,7 @@
 #include "absl/strings/str_join.h"
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
+#include "core/source_generator/source_generator.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
@@ -12,8 +13,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult,
-                        const unique_ptr<core::TypeConstraint> &constraint) {
+                        const core::DispatchResult &dispatchResult, const unique_ptr<core::TypeConstraint> &constraint,
+                        const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
     ;
@@ -23,8 +24,9 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(
-                contents, prettyTypeForMethod(gs, component.method, component.receiver, retType, constraint.get()));
+            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method,
+                                                                                          component.receiver, retType,
+                                                                                          constraint.get(), options));
         }
         start = start->secondary.get();
     }
@@ -66,6 +68,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     }
 
     auto resp = move(queryResponses[0]);
+    auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
 
@@ -110,10 +113,11 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             // the result type.
             typeString = retType.showWithMoreInfo(gs);
         } else {
-            typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
+            typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint, options);
         }
     } else if (auto defResp = resp->isMethodDef()) {
-        typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
+        typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type,
+                                                                 nullptr, options);
     } else if (auto constResp = resp->isConstant()) {
         typeString = prettyTypeForConstant(gs, constResp->symbol);
     } else {

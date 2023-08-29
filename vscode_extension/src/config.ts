@@ -210,6 +210,7 @@ export class SorbetExtensionConfig implements Disposable {
   private userLspConfigs: ReadonlyArray<SorbetLspConfig>;
   private wrappedEnabled: boolean;
   private wrappedHighlightUntyped: boolean;
+  private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
 
   constructor(sorbetWorkspaceContext: ISorbetWorkspaceContext) {
@@ -222,6 +223,7 @@ export class SorbetExtensionConfig implements Disposable {
     this.standardLspConfigs = [];
     this.userLspConfigs = [];
     this.wrappedHighlightUntyped = false;
+    this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
 
     const workspaceFolders = this.sorbetWorkspaceContext.workspaceFolders();
@@ -273,6 +275,10 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedHighlightUntyped = this.sorbetWorkspaceContext.get(
       "highlightUntyped",
       this.highlightUntyped,
+    );
+    this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
+      "typedFalseCompletionNudges",
+      this.typedFalseCompletionNudges,
     );
 
     Disposable.from(...this.configFileWatchers).dispose();
@@ -395,6 +401,10 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedHighlightUntyped;
   }
 
+  public get typedFalseCompletionNudges(): boolean {
+    return this.wrappedTypedFalseCompletionNudges;
+  }
+
   public get enabled(): boolean {
     return this.wrappedEnabled;
   }
@@ -406,6 +416,11 @@ export class SorbetExtensionConfig implements Disposable {
 
   public async setHighlightUntyped(b: boolean): Promise<void> {
     await this.sorbetWorkspaceContext.update("highlightUntyped", b);
+    this.refresh();
+  }
+
+  public async setTypedFalseCompletionNudges(b: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update("typedFalseCompletionNudges", b);
     this.refresh();
   }
 }

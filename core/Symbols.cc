@@ -23,7 +23,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
@@ -426,7 +426,7 @@ string FieldRef::show(const GlobalState &gs, ShowOptions options) const {
 
 string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         return fmt::format("T.type_parameter(:{})", sym->name.show(gs));
     } else {
         return fmt::format("T.type_parameter(:{}) (of {})", sym->name.show(gs), sym->owner.show(gs));
@@ -438,7 +438,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     if (sym->name == core::Names::Constants::AttachedClass()) {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
-        if (options.showForRBI || !attached.exists()) {
+        if (options.useValidSyntax || !attached.exists()) {
             // Attached wont exist for a number of cases:
             // - owner is a module that doesn't use has_attached_class!
             // - owner is a singleton class of a module
@@ -446,7 +446,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
     }
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         return sym->name.show(gs);
     }
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);

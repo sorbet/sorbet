@@ -797,7 +797,7 @@ TEST_CASE("LSPTest") {
                     // importUsageAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           importUsageAssertions);
-                } else {
+                } else if (dynamic_pointer_cast<GoToDefSpecialAssertion>(assertion) == nullptr) {
                     // For a regular UsageAssertion, check that a reference request at this location returns
                     // entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,

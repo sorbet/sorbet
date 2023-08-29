@@ -200,7 +200,7 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
             {{definition.loc(gs), ""}}));
 
     } else {
-        auto showOptions = ShowOptions().withShowForRBI();
+        auto showOptions = ShowOptions().withUseValidSyntax();
         auto wrapped = fmt::format("T.all({}, Constraint)", definition.show(gs, showOptions));
         e.addErrorNote("Consider using `{}` to place a constraint on this type", wrapped);
     }
@@ -588,6 +588,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (args.name == Names::methodNameMissing()) {
         // We already reported a parse error earlier in the pipeline
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    } else if (args.name == Names::super()) {
+        // Currently, `super` is completely untyped.
+        // No point in paying a full findMethodTransitive just to discover that.
+        return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
+                              Symbols::noMethod());
     }
 
     // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
@@ -624,9 +629,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             return result;
-        } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-                                  Symbols::noMethod());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
@@ -2747,7 +2749,8 @@ public:
             auto fieldName = fieldNameTy.asName().show(gs);
 
             auto suggestType = res.returnType;
-            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit()) {
+            if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit() &&
+                definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
             }
             e.setHeader("The {} variable `{}` must be declared using `{}` when specifying `{}`", fieldKind, fieldName,

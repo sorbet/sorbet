@@ -431,7 +431,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            auto options = core::ShowOptions().withShowForRBI();
+            auto options = core::ShowOptions().withUseValidSyntax();
             fmt::format_to(std::back_inserter(ss), "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx, options));
         }
         fmt::format_to(std::back_inserter(ss), ").");
@@ -451,7 +451,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");
     } else {
-        auto options = core::ShowOptions().withShowForRBI();
+        auto options = core::ShowOptions().withUseValidSyntax();
         fmt::format_to(std::back_inserter(ss), "returns({}) }}", guessedReturnType.show(ctx, options));
     }
 

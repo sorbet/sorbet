@@ -24,6 +24,7 @@ cc_library(
         "//ast/treemap",
         "//core",
         "//core/sig_finder",
+        "//core/source_generator",
         "@com_google_absl//absl/strings",
     ],
 )
