@@ -84,7 +84,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
     }
 
-    auto oneline = fmt::format("{} {{{}{}{}}}", sigCall, flagString, paramsString, methodReturnType);
+    auto oneline = fmt::format("{} {{ {}{}{} }}", sigCall, flagString, paramsString, methodReturnType);
     if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
         return oneline;
     }

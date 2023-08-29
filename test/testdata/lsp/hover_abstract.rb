@@ -6,7 +6,7 @@ class AbstractItem
 
   sig {abstract.returns(String)}
   def self.name; end
-    # ^ hover: sig {abstract.returns(String)}
+    # ^ hover: sig { abstract.returns(String) }
 end
 
 class Dog < AbstractItem
@@ -14,7 +14,7 @@ class Dog < AbstractItem
 
   sig {override.returns(String)}
   def self.name
-    # ^ hover: sig {override.returns(String)}
+    # ^ hover: sig { override.returns(String) }
     'Dog'
   end
 end

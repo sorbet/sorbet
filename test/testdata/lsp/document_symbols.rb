@@ -36,7 +36,7 @@ module M
 
   sig(:final) {params(x: String).returns(String)}
   def bye(x)
-    # ^^^ hover: sig(:final) {params(x: String).returns(String)}
+    # ^^^ hover: sig(:final) { params(x: String).returns(String) }
     "goodbye, #{x}"
   end
 end
