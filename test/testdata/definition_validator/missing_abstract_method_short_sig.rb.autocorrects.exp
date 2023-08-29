@@ -12,7 +12,7 @@ end
 
   class Child < Parent
 # ^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method
-    sig {override.params(bar: Integer).returns(String)}
+    sig { override.params(bar: Integer).returns(String) }
     def foo(bar); end
   end
 # ------------------------------

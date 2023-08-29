@@ -11,5 +11,5 @@ extend T::Generic, T::Sig
 end
 
 Box[Integer].new.read
-               # ^ hover: sig {returns(Integer)}
+               # ^ hover: sig { returns(Integer) }
 [1].map{|x| x + 1}

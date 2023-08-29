@@ -5,7 +5,7 @@ class Dog
 
   sig {returns(String)}
   attr_reader :name
-# ^ hover: sig {returns(String)}
+# ^ hover: sig { returns(String) }
 
   sig {params(name: String).void}
   def initialize(name)
@@ -32,12 +32,12 @@ end
 def main
   fred = Dog.new('fred')
   di = Dog.new('di')
-  freddi = fred + di 
+  freddi = fred + di
               # ^ sig {params(plusDog: Dog).returns(Dog)}
-  
-  fred < di 
+
+  fred < di
      # ^ sig {params(ltDog: Dog).returns(Boolean)}
 
-  fred == di 
+  fred == di
      # ^ sig {params(eqDog: Dog).returns(Boolean)}
 end
