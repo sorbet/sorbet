@@ -21,10 +21,10 @@ export class SorbetStatusMetricsTracker implements Disposable {
           error: e.error || "",
         });
       }),
-      this.context.statusProvider.onShowOperation((_params) => {
+      this.context.statusProvider.onShowOperation((params) => {
         this.context.metrics.emitTimingMetric("status.operation", new Date(), {
-          operationName: _params.operationName,
-          status: _params.status,
+          operationName: params.operationName,
+          status: params.status,
         });
       }),
     );
