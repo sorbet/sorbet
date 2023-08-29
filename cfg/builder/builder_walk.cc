@@ -823,6 +823,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                    auto caseBodyEntrance = caseBody;
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
@@ -830,7 +831,51 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
 
-                    caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+                    synthesizeExpr(caseBody, localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+
+                    // If the ensure block is present we want to propagate the exception type into it
+                    // To achieve that, we insert a BB before the rescue block. The new block branches on a `T.anything`
+                    // in a way that a true branch goes to the regular rescue block and a false branch is going to the
+                    // ensure block. That way we can model the exception being reraised in the rescue
+                    //
+                    //                       With ensure
+                    // 
+                    //                   ┌──────────────────┐
+                    //                   │                  │
+                    //                   │ rescue header bb ├───┐
+                    //                   │                  │   │
+                    //  Without ensure   └────────┬─────────┘   │
+                    //                            │             │
+                    //   ┌───────────┐      ┌─────▼─────┐       │
+                    //   │           │      │           │       │
+                    //   │ rescue bb │      │ rescue bb │       │
+                    //   │           │      │           │       │
+                    //   └─────┬─────┘      └─────┬─────┘       │
+                    //         │                  │             │
+                    //         │                  │             │
+                    //   ┌─────▼─────┐      ┌─────▼─────┐       │
+                    //   │           │      │           │       │
+                    //   │ ensure bb │      │ ensure bb ◄───────┘
+                    //   │           │      │           │
+                    //   └───────────┘      └───────────┘
+                    //
+                    // See test/testdata/cfg/ensure_exception.rb for a common use case
+                    auto shouldSplitCaseBody = !ast::isa_tree<ast::EmptyTree>(a.ensure);
+                    if (shouldSplitCaseBody) {
+                        auto rescueHeaderTemp = cctx.newTemporary(core::Names::rescueHeaderTemp());
+                        auto rescueTrueTemp = cctx.newTemporary(core::Names::rescueTrueTemp());
+                        synthesizeExpr(caseBody, rescueTrueTemp, rescueCase->var.loc(),
+                                       make_insn<Literal>(core::Types::trueClass()));
+                        synthesizeExpr(caseBody, rescueHeaderTemp, rescueCase->var.loc(),
+                                       make_insn<Cast>(rescueTrueTemp, rescueCase->var.loc(), core::Types::top(),
+                                                       core::Names::cast()));
+
+                        auto caseBodyAfterSplit = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                        conditionalJump(caseBody, rescueHeaderTemp, caseBodyAfterSplit, ensureBody, cctx.inWhat, a.loc);
+                        caseBodyEntrance = caseBody;
+                        caseBody = caseBodyAfterSplit;
+                    }
+
                     // Mark the exception as handled
                     synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
                                    make_insn<Literal>(core::Types::nilClass()));
@@ -867,7 +912,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                             args.size(), args, std::move(argLocs), isPrivateOk));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
-                        conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
+                        conditionalJump(rescueHandlersBlock, isaCheck, caseBodyEntrance, otherHandlerBlock, cctx.inWhat,
+                                        loc);
                         rescueHandlersBlock = otherHandlerBlock;
                     }
                     if (added) {
