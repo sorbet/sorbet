@@ -1284,7 +1284,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             if (method == Symbols::BasicObject_initialize()) {
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
             } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
