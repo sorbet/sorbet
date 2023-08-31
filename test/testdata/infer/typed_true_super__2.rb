@@ -6,9 +6,10 @@ class Parent
       .params(
         blk: T.proc.void
       )
-        .void
+        .returns(Integer)
   end
-  def initialize(&blk)
+  def self.foo(&blk)
     yield
+    0
   end
 end
