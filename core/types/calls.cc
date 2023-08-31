@@ -1259,7 +1259,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
             }
 
-            if (args.name == Names::initialize()) {
+            if (args.name == Names::initialize() && data->owner == core::Symbols::BasicObject()) {
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
