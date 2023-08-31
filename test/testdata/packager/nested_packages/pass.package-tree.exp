@@ -6,6 +6,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(::<root>::<C Package>::<C PackageClass>)
   end
 end
+# -- test/testdata/packager/nested_packages/subpackage/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C Package>)
+
+    <self>.export(::<root>::<C Package>::<C Subpackage>::<C SubpackageClass>)
+  end
+end
 # -- test/testdata/packager/nested_packages/mainpackage.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
@@ -20,14 +28,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of self.subpkg_class>
-  end
-end
-# -- test/testdata/packager/nested_packages/subpackage/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(::<PackageSpecRegistry>::<C Package>)
-
-    <self>.export(::<root>::<C Package>::<C Subpackage>::<C SubpackageClass>)
   end
 end
 # -- test/testdata/packager/nested_packages/subpackage/subpackage.rb --

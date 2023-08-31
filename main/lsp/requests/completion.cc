@@ -8,6 +8,7 @@
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "core/source_generator/source_generator.h"
 #include "main/lsp/FieldFinder.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
@@ -340,7 +341,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
             fmt::format_to(std::back_inserter(argBuf), "{}: ", argSym.name.shortName(gs));
         }
         if (argSym.type) {
-            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
+            auto resultType =
+                core::source_generator::getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
             fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
@@ -365,7 +367,8 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
                 auto targs_it = appliedType->targs.begin();
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
-                                          auto resultType = getResultType(gs, targ, method, receiverType, constraint);
+                                          auto resultType = core::source_generator::getResultType(
+                                              gs, targ, method, receiverType, constraint);
                                           return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
@@ -1058,7 +1061,8 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint);
+    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint,
+                                                                  core::ShowOptions().withUseValidSyntax());
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
     if (documentation != nullopt && documentation->find("@deprecated") != documentation->npos) {
@@ -1256,12 +1260,16 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             }
         }
 
-        ENFORCE(fref.exists());
-        auto level = fref.data(gs).strictLevel;
-        if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
-            items.emplace_back(getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
-            response->result = make_unique<CompletionList>(false, move(items));
-            return response;
+        auto enableTypedFalseCompletionNudges = config.getClientConfig().enableTypedFalseCompletionNudges;
+        if (enableTypedFalseCompletionNudges) {
+            ENFORCE(fref.exists());
+            auto level = fref.data(gs).strictLevel;
+            if (!fref.data(gs).hasParseErrors() && level < core::StrictLevel::True) {
+                items.emplace_back(
+                    getCompletionItemForUntyped(gs, queryLoc, 0, "(file is not `# typed: true` or higher)"));
+                response->result = make_unique<CompletionList>(false, move(items));
+                return response;
+            }
         }
 
         response->result = std::move(emptyResult);

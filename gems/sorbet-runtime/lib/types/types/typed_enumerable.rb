@@ -91,6 +91,8 @@ module T::Types
         # both reading and writing. However, Sorbet treats *all*
         # Enumerable subclasses as covariant for ease of adoption.
         @type.subtype_of?(other.type)
+      elsif other.class <= Simple
+        underlying_class <= other.raw_type
       else
         false
       end

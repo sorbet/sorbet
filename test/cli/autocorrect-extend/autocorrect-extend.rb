@@ -1,6 +1,5 @@
 # typed: strict
 
-# Don't extend T::Sig for this one, because the class wasn't defined here.
 def top_level; end
 
 # Should only add one extend

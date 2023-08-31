@@ -1,0 +1,20 @@
+{
+    "sorbet.userLspConfigs": [
+        {
+            "id": "path",
+            "name": "Sorbet (path)",
+            "description": "Sorbet on PATH, with experimental features",
+            "cwd": "${workspaceFolder}",
+            "command": [
+                "../../../bazel-bin/main/sorbet",
+                "--debug-log-file=sorbet-vscode.log",
+                "--lsp",
+                "--dir=.",
+            ]
+        }
+    ],
+    // Sorbet will restart when any of these files change.
+    "sorbet.configFilePatterns": [
+      "../../../bazel-bin/main/sorbet",
+    ]
+}

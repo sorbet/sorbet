@@ -5,7 +5,7 @@ class X
   extend T::Sig
   sig {params(x: Integer).void}
   def foo(
-    # ^ hover: sig {params(x: Integer).void}
+    # ^ hover: sig { params(x: Integer).void }
     # ^ hover: def foo(x); end
     x
   # ^ hover: Integer

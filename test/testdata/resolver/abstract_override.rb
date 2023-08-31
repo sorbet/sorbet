@@ -35,7 +35,7 @@ class Abstract
   include InterfaceChild
 end
 
-class AbstractBadChild < Abstract # error-with-dupes: Missing definition for abstract method `Interface#a_method`
+class AbstractBadChild < Abstract # error: Missing definition for abstract method `Interface#a_method`
 end
 
 class AbstractChild < Abstract
@@ -68,7 +68,7 @@ class AbstractSingleton
   def self.abstract_method; end
 end
 
-class AbstractSingletonBadChild < AbstractSingleton # error-with-dupes: Missing definition for abstract method
+class AbstractSingletonBadChild < AbstractSingleton # error: Missing definition for abstract method
 end
 
 class AbstractSingletonGoodChild < AbstractSingleton

@@ -28,6 +28,7 @@ cc_binary(
         "//main/autogen",
         "//main/lsp",
         "//main/minimize",
+        "//main/pipeline",
         "//main/pipeline/semantic_extension:none",
         "//namer",
         "//packager",
@@ -371,6 +372,9 @@ sh_binary(
         "//main:sorbet",
         "@sorbet_ruby_2_7//:ruby",
     ],
+    # This is to get the test to run on the compiler build job,
+    # so we can avoid building ruby on the test-static-sanitized job.
+    tags = ["compiler"],
     deps = [
         ":logging",
         "@bazel_tools//tools/bash/runfiles",

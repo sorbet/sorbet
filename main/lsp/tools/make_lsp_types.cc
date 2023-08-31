@@ -175,16 +175,15 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                      makeField("position", Position),
                                                  },
                                                  classTypes);
-    auto Command = makeObject(
-        "Command",
-        {
-            makeField("title", JSONString),
-            makeField("command", JSONString),
-            // the `arguments` field is declared as `LSPAny` in the LSP spec,
-            // but we use it only to call `sorbet.rename` so the type is limited to TextDocumentPositionParams
-            makeField("arguments", makeOptional(makeArray(TextDocumentPositionParams))),
-        },
-        classTypes);
+    auto Command = makeObject("Command",
+                              {
+                                  makeField("title", JSONString),
+                                  makeField("command", JSONString),
+                                  // The only thing we use this for does not require arguments, so it's null.
+                                  // The LSP spec has `arguments?: LSPAny[]` here, so feel free to expand
+                                  makeField("arguments", makeOptional(makeArray(JSONBool))),
+                              },
+                              classTypes);
 
     auto TextEdit = makeObject("TextEdit",
                                {
@@ -726,13 +725,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                       },
                                                       classTypes);
 
-    auto DidChangeConfigurationParams = makeObject("DidChangeConfigurationParams",
-                                                   {
-                                                       // Unused in Sorbet.
-                                                       // makeField("settings", JSONAny),
-                                                   },
-                                                   classTypes);
-
     auto ConfigurationItem = makeObject("ConfigurationItem",
                                         {
                                             makeField("scopeUri", makeOptional(JSONString)),
@@ -1265,6 +1257,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        makeField("supportsSorbetURIs", makeOptional(JSONBool)),
                        makeField("enableTypecheckInfo", makeOptional(JSONBool)),
                        makeField("highlightUntyped", makeOptional(JSONBool)),
+                       makeField("enableTypedFalseCompletionNudges", makeOptional(JSONBool)),
                    },
                    classTypes);
     auto InitializeParams =
@@ -1282,6 +1275,12 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     // Empty object.
     auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
+
+    auto DidChangeConfigurationParams = makeObject("DidChangeConfigurationParams",
+                                                   {
+                                                       makeField("settings", SorbetInitializationOptions),
+                                                   },
+                                                   classTypes);
 
     auto PrepareRenameResult = makeObject("PrepareRenameResult",
                                           {
@@ -1411,6 +1410,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/signatureHelp",
                                      "window/showMessage",
                                      "workspace/symbol",
+                                     "workspace/didChangeConfiguration",
                                      "textDocument/implementation",
                                  },
                                  enumTypes);
@@ -1516,6 +1516,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/fence", JSONInt},
                                                 {"sorbet/workspaceEdit", SorbetWorkspaceEditParams},
                                                 {"sorbet/typecheckRunInfo", SorbetTypecheckRunInfo},
+                                                {"workspace/didChangeConfiguration", DidChangeConfigurationParams},
                                             });
     auto NotificationMessage = makeObject("NotificationMessage",
                                           {makeField("jsonrpc", JSONRPCConstant), makeField("method", LSPMethod),

@@ -2301,13 +2301,6 @@ VALUE sorbet_nil_p(VALUE recv, ID fun, int argc, const VALUE *const restrict arg
 }
 
 SORBET_INLINE
-VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
-    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
-    VALUE obj = argv[0];
-    return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
-}
-
-SORBET_INLINE
 VALUE sorbet_returnRecv(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                         VALUE closure) {
     return recv;

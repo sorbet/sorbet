@@ -192,6 +192,29 @@ public:
                          std::string_view symbol, std::vector<int> versions);
 };
 
+// This is special, because most of the time "textDocument/definition" is tested with `def` and
+// `usage` assertions. For most symbols, "Go to Definition" on a location returned by "Find All
+// References" should jump back to the definition.
+//
+// But there are some "special" cases where that's not the case: where you can jump to def from one
+// place to get to the definition, but you can never get there via find all references.
+//
+// Unless you know you're building such a special case, you probably want to use a normal `usage`
+// assertion.
+//
+// # ^^^ go-to-def-special: symbol
+class GoToDefSpecialAssertion final : public UsageAssertion {
+public:
+    static std::shared_ptr<GoToDefSpecialAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                         int assertionLine, std::string_view assertionContents,
+                                                         std::string_view assertionType);
+
+    GoToDefSpecialAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                            std::string_view symbol, std::vector<int> versions);
+
+    std::string toString() const override;
+};
+
 // # some-property: foo
 class StringPropertyAssertion final : public RangeAssertion {
 public:

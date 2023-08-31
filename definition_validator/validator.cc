@@ -1,15 +1,20 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
+#include "core/source_generator/source_generator.h"
 
 #include "absl/algorithm/container.h"
 
+#include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
-#include "main/sig_finder/sig_finder.h"
+#include <regex>
 
 using namespace std;
 
@@ -901,34 +906,131 @@ private:
         }
     }
 
-    void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        if (sym.data(gs)->flags.isAbstract) {
-            return;
-        }
-        auto loc = sym.data(gs)->loc();
-        if (loc.exists() && loc.file().data(gs).isRBI()) {
+    core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
+                                                                    const core::MethodRef abstractMethodRef,
+                                                                    const core::Loc insertAt, const string &format,
+                                                                    const string &classOrModuleIndent) {
+        auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
+        auto resultType = abstractMethodRef.data(gs)->resultType;
+        auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
+                                                                            nullptr, showOptions);
+
+        vector<string> indentedLines;
+        absl::c_transform(
+            absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
+            [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
+        auto indentedMethodDefintion = absl::StrJoin(indentedLines, "\n");
+
+        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefintion)};
+    }
+
+    void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, ast::ClassDef &classDef) {
+        if (sym.data(ctx)->flags.isAbstract) {
             return;
         }
 
-        auto &abstract = getAbstractMethods(gs, sym);
-
-        if (abstract.empty()) {
+        auto classOrModuleDeclaredAt = sym.data(ctx)->loc();
+        if (classOrModuleDeclaredAt.exists() && classOrModuleDeclaredAt.file().data(ctx).isRBI()) {
             return;
         }
 
-        for (auto proto : abstract) {
-            if (proto.data(gs)->owner == sym) {
+        auto missingAbstractMethods = findMissingAbstractMethods(ctx, sym);
+        if (missingAbstractMethods.empty()) {
+            return;
+        }
+
+        auto errorBuilder =
+            ctx.beginError(classOrModuleDeclaredAt.offsets(), core::errors::Resolver::BadAbstractMethod);
+        if (!errorBuilder) {
+            return;
+        }
+
+        auto pluralization = (missingAbstractMethods.size() > 1 ? "s" : "");
+        auto suffix =
+            (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(ctx)));
+        errorBuilder.setHeader("Missing definition{} for abstract method{}{}", pluralization, pluralization, suffix);
+
+        auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
+        auto hasSingleLineDefinition =
+            classOrModuleDeclaredAt.position(ctx).first.line == classOrModuleEndsAt.position(ctx).second.line;
+
+        auto hasEmptyBody = classDef.rhs.empty();
+        if (classDef.rhs.size() == 1) {
+            if (auto *mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
+                hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
+            }
+        }
+
+        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
+        string classOrModuleIndent(indentLength, ' ');
+        auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
+        auto format = "{}\n" + classOrModuleIndent;
+
+        vector<core::AutocorrectSuggestion::Edit> edits;
+        if (hasSingleLineDefinition && hasEmptyBody) {
+            // First, break the class/module definition up onto multiple lines.
+            auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
+            edits.emplace_back(
+                core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
+
+            // Then, modify our insertion strategy such that we add new methods to the top of the class/module
+            // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
+            // class/module body that we just created.
+            insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
+            format = "\n{}";
+        }
+
+        for (auto proto : missingAbstractMethods) {
+            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
+
+            if (hasSingleLineDefinition && !hasEmptyBody) {
+                // We don't suggest autocorrects for this case because we cannot say for sure how the
+                // class/module has been declared, and so we also can't determine how to modify it.
                 continue;
             }
 
-            auto mem = sym.data(gs)->findConcreteMethodTransitive(gs, proto.data(gs)->name);
-            if (!mem.exists()) {
-                if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
-                    e.setHeader("Missing definition for abstract method `{}`", proto.show(gs));
-                    e.addErrorLine(proto.data(gs)->loc(), "defined here");
-                }
-            }
+            edits.emplace_back(defineInheritedAbstractMethod(ctx, proto, insertAt, format, classOrModuleIndent));
         }
+
+        if (edits.empty()) {
+            return;
+        }
+
+        errorBuilder.addAutocorrect(
+            core::AutocorrectSuggestion{fmt::format("Define inherited abstract method{}", pluralization), edits});
+    }
+
+    vector<core::MethodRef> findMissingAbstractMethods(const core::Context ctx, core::ClassOrModuleRef sym) {
+        vector<core::MethodRef> result;
+
+        auto &abstractMethods = getAbstractMethods(ctx, sym);
+        if (abstractMethods.empty()) {
+            return result;
+        }
+
+        for (auto proto : abstractMethods) {
+            if (proto.data(ctx)->owner == sym) {
+                continue;
+            }
+
+            auto concreteMethodRef = sym.data(ctx)->findConcreteMethodTransitive(ctx, proto.data(ctx)->name);
+            if (concreteMethodRef.exists()) {
+                continue;
+            }
+
+            result.emplace_back(proto);
+        }
+
+        // Sort missing methods to ensure consistent ordering in both the error message and the autocorrect output.
+        fast_sort(result, [ctx](const auto &l, const auto &r) -> bool {
+            return l.data(ctx)->name.show(ctx) < r.data(ctx)->name.show(ctx);
+        });
+
+        // Deduplicate methods to prevent suggesting duplicate corrections for methods that are missing from several
+        // ancestors in the same inheritance chain.
+        result.resize(std::distance(result.begin(), std::unique(result.begin(), result.end())));
+
+        return result;
     }
 
 public:
@@ -940,13 +1042,13 @@ public:
         if (!sym.data(ctx)->isSingletonClass(ctx)) {
             // Only validateAbstract for this class if we haven't already (we already have if this
             // is a `class << self` ClassDef)
-            validateAbstract(ctx, sym);
+            validateAbstract(ctx, sym, classDef);
 
             if (ctx.state.requiresAncestorEnabled) {
                 validateRequiredAncestors(ctx, sym);
             }
         }
-        validateAbstract(ctx, singleton);
+        validateAbstract(ctx, singleton, classDef);
         validateFinal(ctx, sym, tree);
         validateSealed(ctx, sym, classDef);
         validateSuperClass(ctx, sym, classDef);

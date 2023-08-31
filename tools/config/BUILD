@@ -84,3 +84,10 @@ config_setting(
         "define": "release=true",
     },
 )
+
+config_setting(
+    name = "jit_enabled",
+    values = {
+        "define": "jit_enabled=true",
+    },
+)

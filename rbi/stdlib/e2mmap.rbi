@@ -84,7 +84,7 @@ module Exception2MessageMapper
   #     m:  message_form
   # define exception c with message m.
   # ```
-  sig {params(c: Class, m: String).void}
+  sig {params(c: T::Class[T.anything], m: String).void}
   def def_e2message(c, m); end
 
   # [`def_exception`](https://docs.ruby-lang.org/en/2.6.0/Exception2MessageMapper.html#method-i-def_exception)(n,
@@ -96,6 +96,6 @@ module Exception2MessageMapper
   #     s:  superclass(default: StandardError)
   # define exception named ``c'' with message m.
   # ```
-  sig {params(n: Symbol, m: String, s: Class).void}
+  sig {params(n: Symbol, m: String, s: T::Class[T.anything]).void}
   def def_exception(n, m, s = StandardError); end
 end

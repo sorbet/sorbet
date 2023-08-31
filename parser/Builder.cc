@@ -377,6 +377,10 @@ public:
             return true;
         }
 
+        if (parser::isa_node<ForwardedKwrestArg>(nd)) {
+            return true;
+        }
+
         if (auto *pair = parser::cast_node<Pair>(nd)) {
             return parser::isa_node<Symbol>(pair->key.get());
         }
@@ -986,6 +990,14 @@ public:
         return make_unique<ForwardedArgs>(tokLoc(dots));
     }
 
+    unique_ptr<Node> forwarded_restarg(const token *star) {
+        return make_unique<ForwardedRestArg>(tokLoc(star));
+    }
+
+    unique_ptr<Node> forwarded_kwrestarg(const token *dstar) {
+        return make_unique<ForwardedKwrestArg>(tokLoc(dstar));
+    }
+
     unique_ptr<Node> gvar(const token *tok) {
         return make_unique<GVar>(tokLoc(tok), gs_.enterNameUTF8(tok->view()));
     }
@@ -1107,8 +1119,8 @@ public:
                                      std::move(value));
     }
 
-    unique_ptr<Node> kwnilarg(const token *dstar, const token *nil) {
-        return make_unique<Kwnilarg>(tokLoc(dstar).join(tokLoc(nil)));
+    unique_ptr<Node> kwnilarg(unique_ptr<Node> node) {
+        return make_unique<Kwnilarg>(node->loc);
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
@@ -2200,6 +2212,16 @@ ForeignPtr forwarded_args(SelfPtr builder, const token *dots) {
     return build->toForeign(build->forwarded_args(dots));
 }
 
+ForeignPtr forwarded_restarg(SelfPtr builder, const token *star) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forwarded_restarg(star));
+}
+
+ForeignPtr forwarded_kwrestarg(SelfPtr builder, const token *dstar) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forwarded_kwrestarg(dstar));
+}
+
 ForeignPtr gvar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->gvar(tok));
@@ -2310,9 +2332,9 @@ ForeignPtr kwoptarg(SelfPtr builder, const token *name, ForeignPtr value) {
     return build->toForeign(build->kwoptarg(name, build->cast_node(value)));
 }
 
-ForeignPtr kwnilarg(SelfPtr builder, const token *dstar, const token *nil) {
+ForeignPtr kwnilarg(SelfPtr builder, ForeignPtr node) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->kwnilarg(dstar, nil));
+    return build->toForeign(build->kwnilarg(build->cast_node(node)));
 }
 
 ForeignPtr kwrestarg(SelfPtr builder, const token *dstar, const token *name) {
@@ -2734,6 +2756,8 @@ struct ruby_parser::builder Builder::interface = {
     for_,
     forward_arg,
     forwarded_args,
+    forwarded_restarg,
+    forwarded_kwrestarg,
     gvar,
     hash_pattern,
     ident,

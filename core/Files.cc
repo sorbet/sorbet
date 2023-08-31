@@ -302,6 +302,12 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
     return *(gs.files[_id]);
 }
 
+bool FileRef::isPackage(const GlobalState &gs) const {
+    ENFORCE(gs.files[_id]);
+    ENFORCE(gs.files[_id]->sourceType != File::Type::TombStone);
+    return dataAllowingUnsafe(gs).isPackage();
+}
+
 string_view File::path() const {
     return this->path_;
 }

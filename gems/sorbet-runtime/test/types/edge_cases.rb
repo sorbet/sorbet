@@ -604,6 +604,39 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     T::Private::Abstract::Validate.validate_abstract_module(klass)
   end
 
+  it 'allows abstract classes to return instances of other types' do
+    mod = Module.new do
+      def new(type: self)
+        if type == self
+          super()
+        else
+          type.new
+        end
+      end
+    end
+
+    superclass = Class.new do
+      extend mod
+    end
+
+    klass = Class.new(superclass) do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+    end
+
+    err = assert_raises(RuntimeError) do
+      klass.new
+    end
+
+    assert_includes(
+      err.message,
+      "is declared as abstract; it cannot be instantiated",
+    )
+
+    assert_instance_of(String, klass.new(type: String))
+  end
+
   it 'handles class scope change when already hooked' do
     klass = Class.new do
       extend T::Sig
@@ -901,5 +934,14 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       %i[a_protected_method protected],
       %i[a_public_method public],
     ], unique_method_redefinitions.sort)
+  end
+
+  it "can mark a class abstract! even if it defines a method called method" do
+    Class.new do
+      extend T::Helpers
+      # bad override of Object#method
+      def self.method; end
+      abstract!
+    end
   end
 end

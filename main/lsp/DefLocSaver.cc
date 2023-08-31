@@ -31,7 +31,7 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
             if (localExp && lspQuery.matchesLoc(ctx.locAt(localExp->loc))) {
                 tp.type = argType.type;
                 if (tp.type == nullptr) {
-                    tp.type = core::Types::untyped(ctx, methodDef.symbol);
+                    tp.type = core::Types::untyped(methodDef.symbol);
                 }
                 tp.origins.emplace_back(ctx.locAt(localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
@@ -113,7 +113,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
                 tp.type = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
                 auto resultType = symbol.resultType(ctx);
-                tp.type = resultType == nullptr ? core::Types::untyped(ctx, symbol) : resultType;
+                tp.type = resultType == nullptr ? core::Types::untyped(symbol) : resultType;
             }
 
             core::lsp::ConstantResponse::Scopes scopes;

@@ -44,7 +44,7 @@ sig {params(blk: T.proc.params(arg0: Integer).returns(String)).void}
 def int_map(&blk)
   a = [1, 2, 3].map(&blk)
   T.reveal_type(a) # error: Revealed type: `T::Array[String]`
-  ["a", "b"].map(&blk) # error: Expected `T.proc.params(arg0: String).returns(<top>)` but found `T.proc.params(arg0: Integer).returns(String)` for block argument
+  ["a", "b"].map(&blk) # error: Expected `T.proc.params(arg0: String).returns(T.anything)` but found `T.proc.params(arg0: Integer).returns(String)` for block argument
 end
 
 sig {params(blk: Proc).void}

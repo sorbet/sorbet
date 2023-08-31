@@ -304,8 +304,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
         // which one it will be.
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
-        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, frefs,
-                                                                 workers, kvstore);
+        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                 absl::Span<core::FileRef>(frefs), workers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file];
@@ -393,6 +393,10 @@ core::FileRef LSPIndexer::uri2FileRef(string_view uri) const {
 const core::File &LSPIndexer::getFile(core::FileRef fref) const {
     ENFORCE(fref.exists());
     return fref.data(*initialGS);
+}
+
+void LSPIndexer::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    initialGS->trackUntyped = options.settings->highlightUntyped.value_or(initialGS->trackUntyped);
 }
 
 } // namespace sorbet::realmain::lsp

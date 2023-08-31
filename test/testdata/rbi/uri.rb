@@ -9,7 +9,7 @@ def validate_http(uri_string)
   uri
 end
 
-sig {returns(Class)}
+sig {returns(T::Class[T.anything])}
 def uri_parser
   URI::Parser
 end

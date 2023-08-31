@@ -182,6 +182,10 @@ public:
         return exportAll_;
     }
 
+    bool visibleToTests() const {
+        return visibleToTests_;
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     vector<std::string> packagePathPrefixes;
     PackageName name;
@@ -206,6 +210,9 @@ public:
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     vector<PackageName> visibleTo_;
+
+    // Whether `visible_to` directives should be ignored for test code
+    bool visibleToTests_;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -688,7 +695,7 @@ public:
         ENFORCE(pkg.exists());
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -699,7 +706,7 @@ public:
             return;
         }
 
-        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -721,7 +728,7 @@ public:
         }
     }
 
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
@@ -738,7 +745,7 @@ public:
             }
         }
 
-        ast::UnresolvedConstantLit *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        auto *constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
         if (constantLit == nullptr) {
             return;
         }
@@ -746,7 +753,7 @@ public:
         popConstantLit(constantLit);
     }
 
-    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -769,13 +776,13 @@ public:
         }
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -784,13 +791,13 @@ public:
         checkBehaviorLoc(ctx, def.declLoc);
     }
 
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
@@ -798,7 +805,7 @@ public:
         checkBehaviorLoc(ctx, original.loc());
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
         if (errorDepth > 0) {
             errorDepth--;
         }
@@ -832,7 +839,7 @@ public:
     }
 
 private:
-    void pushConstantLit(core::Context ctx, ast::UnresolvedConstantLit *lit) {
+    void pushConstantLit(core::Context ctx, const ast::UnresolvedConstantLit *lit) {
         ENFORCE(tmpNameParts.empty());
         auto prevDepth = namespaces.depth();
         while (lit != nullptr) {
@@ -859,7 +866,7 @@ private:
         tmpNameParts.clear();
     }
 
-    void popConstantLit(ast::UnresolvedConstantLit *lit) {
+    void popConstantLit(const ast::UnresolvedConstantLit *lit) {
         while (lit != nullptr) {
             if (rootConsts == 0) {
                 namespaces.popName();
@@ -965,7 +972,7 @@ struct PackageInfoFinder {
             }
         }
 
-        if ((send.fun == core::Names::import() || send.fun == core::Names::test_import()) && send.numPosArgs() == 1) {
+        if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
@@ -987,7 +994,7 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::restrict_to_service() && send.numPosArgs() == 1) {
+        if (send.fun == core::Names::restrictToService() && send.numPosArgs() == 1) {
             // Transform: `restrict_to_service Foo` -> `restrict_to_service <PackageSpecRegistry>::Foo`
             auto importArg = move(send.getPosArg(0));
             send.removePosArg(0);
@@ -999,7 +1006,7 @@ struct PackageInfoFinder {
             info->exportAll_ = true;
         }
 
-        if (send.fun == core::Names::autoloader_compatibility() && send.numPosArgs() == 1) {
+        if (send.fun == core::Names::autoloaderCompatibility() && send.numPosArgs() == 1) {
             // Parse autoloader_compatibility DSL and set strict bit on PackageInfoImpl if configured
             auto *compatibilityAnnotationLit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
             if (compatibilityAnnotationLit == nullptr || !compatibilityAnnotationLit->isString()) {
@@ -1040,8 +1047,18 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::visible_to() && send.numPosArgs() == 1) {
-            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
+        if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
+            if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
+                // the only valid literal here is `visible_to "tests"`; others should be rejected
+                if (!target->isString() || target->asString() != core::Names::tests()) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                    send.fun.show(ctx), "\"tests\"");
+                    }
+                    return;
+                }
+                info->visibleToTests_ = true;
+            } else if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
                 ENFORCE(name.mangledName.exists());
 
@@ -1174,11 +1191,11 @@ struct PackageInfoFinder {
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-            case core::Names::test_import().rawId():
+            case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
-            case core::Names::restrict_to_service().rawId():
-            case core::Names::autoloader_compatibility().rawId():
-            case core::Names::visible_to().rawId():
+            case core::Names::restrictToService().rawId():
+            case core::Names::autoloaderCompatibility().rawId():
+            case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
                 return true;
             default:
@@ -1190,7 +1207,7 @@ struct PackageInfoFinder {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
                 return ImportType::Normal;
-            case core::Names::test_import().rawId():
+            case core::Names::testImport().rawId():
                 return ImportType::Test;
             default:
                 ENFORCE(false);
@@ -1349,7 +1366,11 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
             }
 
             const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty()) {
+            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+                continue;
+            }
+
+            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
                 continue;
             }
 
@@ -1431,8 +1452,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
     return files;
 }
 
-vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool &workers,
-                                               vector<ast::ParsedFile> files) {
+void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
@@ -1481,11 +1501,9 @@ vector<ast::ParsedFile> Packager::findPackages(core::GlobalState &gs, WorkerPool
             }
         }
     }
-
-    return files;
 }
 
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::ParsedFile> &files) {
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
     mapping.reserve(files.size());
 
@@ -1509,18 +1527,14 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<ast::Pa
             packages.db.setPackageNameForFile(file, package);
         }
     }
-
-    return;
 }
 
-// NOTE: we use `dataAllowingUnsafe` here, as determining the package for a file is something that can be done from its
-// path alone.
-void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::FileRef> &files) {
+void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
     std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
-    // no symbols will be allocated.
+    // Step 1a, add package references to every file.
+    // This could be parallel if needed, file access will be unique and no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1543,18 +1557,13 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, const vector<core::F
     return;
 }
 
-vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> files) {
+void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
+    ENFORCE(!gs.runningUnderAutogen, "Packager pass does not run in autogen");
+
     Timer timeit(gs.tracer(), "packager");
 
-    files = findPackages(gs, workers, std::move(files));
+    findPackages(gs, files);
     setPackageNameOnFiles(gs, files);
-    if (gs.runningUnderAutogen) {
-        // Autogen only requires package metadata. Remove the package files.
-        auto it = std::remove_if(files.begin(), files.end(),
-                                 [&gs](auto &file) -> bool { return file.file.data(gs).isPackage(); });
-        files.erase(it, files.end());
-        return files;
-    }
 
     // Step 2:
     // * Find package files and rewrite them into virtual AST mappings.
@@ -1591,8 +1600,6 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
 
         barrier.Wait();
     }
-
-    return files;
 }
 
 vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
@@ -1602,8 +1609,6 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     auto namesUsed = gs.namesUsedTotal();
     files = rewriteFilesFast(gs, move(files));
     ENFORCE(gs.namesUsedTotal() == namesUsed);
-    return files;
-    Packager::setPackageNameOnFiles(gs, files);
     return files;
 }
 

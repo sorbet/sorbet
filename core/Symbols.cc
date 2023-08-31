@@ -22,11 +22,11 @@ namespace sorbet::core {
 
 using namespace std;
 
-const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 210;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 50;
-const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 4;
+const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
+const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 72;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -112,6 +112,8 @@ TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
     }
 }
 
+// ClassOrModule::resultType is computed by unsafeComputeExternalType,
+// so that it can be computed once and cached (see below).
 TypePtr ClassOrModule::externalType() const {
     ENFORCE_NO_TIMER(resultType);
     if (resultType == nullptr) {
@@ -137,34 +139,23 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
         vector<TypePtr> targs;
         targs.reserve(typeMembers().size());
 
-        // Special-case covariant stdlib generics to have their types
-        // defaulted to `T.untyped`. This set *should not* grow over time.
-        bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
-                               ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator() ||
-                               ref == core::Symbols::Enumerator_Lazy() || ref == core::Symbols::Enumerator_Chain();
-
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
-            if (isStdlibGeneric) {
-                // For backwards compatibility, instantiate stdlib generics
-                // with T.untyped.
-                targs.emplace_back(Types::untyped(gs, ref));
+            if (ref.isLegacyStdlibGeneric()) {
+                // Instantiate certain covariant stdlib generics with T.untyped, instead of <top>
+                targs.emplace_back(Types::untyped(ref));
             } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
-                // Default fixed or covariant parameters to their upper
-                // bound.
+                // Default fixed or covariant parameters to their upper bound.
                 targs.emplace_back(lambdaParam->upperBound);
             } else if (tmData->flags.isInvariant) {
-                // We instantiate Invariant type members as T.untyped as
-                // this will behave a bit like a unification variable with
-                // Types::glb.
-                targs.emplace_back(Types::untyped(gs, ref));
+                // We instantiate Invariant type members as T.untyped as this will behave a bit like
+                // a unification variable with Types::glb.
+                targs.emplace_back(Types::untyped(ref));
             } else {
-                // The remaining case is a contravariant parameter, which
-                // gets defaulted to its lower bound.
+                // The remaining case is a contravariant parameter, which gets defaulted to its lower bound.
                 targs.emplace_back(lambdaParam->lowerBound);
             }
         }
@@ -435,7 +426,7 @@ string FieldRef::show(const GlobalState &gs, ShowOptions options) const {
 
 string TypeArgumentRef::show(const GlobalState &gs, ShowOptions options) const {
     auto sym = data(gs);
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         return fmt::format("T.type_parameter(:{})", sym->name.show(gs));
     } else {
         return fmt::format("T.type_parameter(:{}) (of {})", sym->name.show(gs), sym->owner.show(gs));
@@ -447,13 +438,15 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
     if (sym->name == core::Names::Constants::AttachedClass()) {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists() || owner.data(gs)->isModule());
-        if (options.showForRBI || owner.data(gs)->isModule()) {
+        if (options.useValidSyntax || !attached.exists()) {
+            // Attached wont exist for a number of cases:
+            // - owner is a module that doesn't use has_attached_class!
+            // - owner is a singleton class of a module
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
     }
-    if (options.showForRBI) {
+    if (options.useValidSyntax) {
         return sym->name.show(gs);
     }
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
@@ -464,7 +457,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
-        instantiated = core::Types::untyped(ctx, owner);
+        instantiated = core::Types::untyped(owner);
     }
     if (owner.data(ctx)->flags.isGenericMethod) {
         instantiated = core::Types::instantiate(ctx, instantiated, constr);
@@ -637,8 +630,9 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
-           *this == Symbols::T_Range() || *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
-           *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
+           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Enumerable() ||
+           *this == Symbols::T_Enumerator() || *this == Symbols::T_Enumerator_Lazy() ||
+           *this == Symbols::T_Enumerator_Chain();
 }
 
 ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
@@ -658,6 +652,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Range();
     } else if (*this == Symbols::T_Set()) {
         return Symbols::Set();
+    } else if (*this == Symbols::T_Class()) {
+        return Symbols::Class();
     } else {
         return *this;
     }
@@ -680,6 +676,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Range();
     } else if (*this == Symbols::Set()) {
         return Symbols::T_Set();
+    } else if (*this == Symbols::Class()) {
+        return Symbols::T_Class();
     } else {
         return Symbols::noClassOrModule();
     }
@@ -1824,23 +1822,24 @@ ClassOrModuleRef ClassOrModule::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
-    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(ctx).show(ctx));
-    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
+void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass) {
+    ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(gs).show(gs));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
-    ClassOrModuleRef selfRef = this->ref(ctx);
+    ClassOrModuleRef selfRef = this->ref(gs);
 
-    // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
-    // bloat the `sizeof class Symbol` with an extra field that most class sybmols will never use.
-    // Note: We had hoped to ALSO implement this method in the runtime, but we couldn't think of a way to make it work
-    // that didn't require running with the help of Stripe's autoloader, specifically because we might want to allow
-    // subclassing a sealed class across multiple files, not just one file.
-    auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
+    // We record sealed subclasses on the method called core::Names::sealedSubclasses().
+    //
+    // This is so we don't bloat the `sizeof ClassOrModule` with an extra field that all non-sealed
+    // classes will never use.
+    //
+    // Note: this method actually exists at runtime as well--the name is not magic.
+    auto classOfSubclass = subclass.data(gs)->singletonClass(gs);
     auto sealedSubclasses =
-        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMethod(ctx, core::Names::sealedSubclasses());
+        selfRef.data(gs)->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
-    auto data = sealedSubclasses.data(ctx);
+    auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
     auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
@@ -1850,20 +1849,37 @@ void ClassOrModule::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef su
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
-        auto right = cast_type_nonnull<ClassType>(orT->right);
-        ENFORCE(left);
-        if (right.symbol == classOfSubclass) {
+        core::ClassOrModuleRef subclass;
+        if (auto *right = cast_type<AppliedType>(orT->right)) {
+            subclass = right->klass;
+        } else if (isa_type<ClassType>(orT->right)) {
+            auto right = cast_type_nonnull<ClassType>(orT->right);
+            subclass = right.symbol;
+        } else {
+            ENFORCE(false, "Unexpected type in sealedSubclasses!")
+        }
+        if (subclass == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
+
+    core::ClassOrModuleRef lastClass;
+    if (auto *lastType = cast_type<AppliedType>(*iter)) {
+        lastClass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(*iter)) {
+        auto lastType = cast_type_nonnull<ClassType>(*iter);
+        lastClass = lastType.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+    }
+    if (lastClass == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
+        appliedType->targs[0] = OrType::make_shared(currentClasses, classOfSubclass.data(gs)->externalType());
     } else {
-        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
+        appliedType->targs[0] = classOfSubclass.data(gs)->externalType();
     }
 }
 
@@ -1882,11 +1898,11 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType);
-    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
+    auto setAppliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(setAppliedType != nullptr, "sealedSubclasses should always be AppliedType");
+    ENFORCE(setAppliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
 
-    auto currentClasses = appliedType->targs[0];
+    auto currentClasses = setAppliedType->targs[0];
     if (currentClasses.isBottom()) {
         // Declared sealed parent class, but never saw any children.
         return Types::bottom();
@@ -1894,17 +1910,30 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
-        auto classType = cast_type_nonnull<ClassType>(orType->right);
-        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
+        core::ClassOrModuleRef subclass;
+        if (auto *right = cast_type<AppliedType>(orType->right)) {
+            subclass = right->klass.data(gs)->attachedClass(gs);
+        } else if (isa_type<ClassType>(orType->right)) {
+            auto right = cast_type_nonnull<ClassType>(orType->right);
+            subclass = right.symbol.data(gs)->attachedClass(gs);
+        } else {
+            ENFORCE(false, "Unexpected type in sealedSubclasses!")
+        }
+
         ENFORCE(subclass.exists());
         result = Types::any(gs, subclass.data(gs)->externalType(), result);
         currentClasses = orType->left;
     }
 
-    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
-    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
-    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
+    core::ClassOrModuleRef subclass;
+    if (auto *lastType = cast_type<AppliedType>(currentClasses)) {
+        subclass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(currentClasses)) {
+        auto lastType = cast_type_nonnull<ClassType>(currentClasses);
+        subclass = lastType.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+    }
     ENFORCE(subclass.exists());
     result = Types::any(gs, subclass.data(gs)->externalType(), result);
 

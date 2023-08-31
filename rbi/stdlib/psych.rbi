@@ -319,7 +319,7 @@ module Psych
     params(
       yaml: T.any(String, StringIO, IO),
       legacy_filename: Object,
-      permitted_classes: T::Array[Class],
+      permitted_classes: T::Array[T::Class[T.anything]],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
       filename: T.nilable(String),
@@ -396,7 +396,7 @@ module Psych
       legacy_permitted_symbols: Object,
       legacy_aliases: Object,
       legacy_filename: Object,
-      permitted_classes: T::Array[Class],
+      permitted_classes: T::Array[T::Class[T.anything]],
       permitted_symbols: T::Array[Symbol],
       aliases: T::Boolean,
       filename: T.nilable(String),
@@ -630,6 +630,14 @@ module Psych
   # specified `fallback` return value, which defaults to `false`.
   sig { params(filename: T.any(String, Pathname), kwargs: T.untyped).returns(T.untyped) }
   def self.load_file(filename, **kwargs); end
+
+  ###
+  # Safely loads the document contained in +filename+.  Returns the yaml contained in
+  # +filename+ as a Ruby object, or if the file is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  # See safe_load for options.
+  sig { params(filename: T.any(String, Pathname), kwargs: T.untyped).returns(T.untyped) }
+  def self.safe_load_file(filename, **kwargs); end
 end
 
 class Psych::Exception < RuntimeError

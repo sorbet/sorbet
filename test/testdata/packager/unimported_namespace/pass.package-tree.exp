@@ -4,6 +4,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(::<root>::<C AAA>::<C AClass>)
   end
 end
+# -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(::<PackageSpecRegistry>::<C AAA>)
+  end
+end
+# -- test/testdata/packager/unimported_namespace/ccc/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::<C CCC><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  end
+end
 # -- test/testdata/packager/unimported_namespace/aaa/a_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C AAA>::<C AClass><<C <todo sym>>> < (::<todo sym>)
@@ -14,19 +25,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C C>
   end
 end
-# -- test/testdata/packager/unimported_namespace/bbb/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C BBB><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
-    <self>.import(::<PackageSpecRegistry>::<C AAA>)
-  end
-end
 # -- test/testdata/packager/unimported_namespace/bbb/b_class.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C BBB>::<C BClass><<C <todo sym>>> < (::<todo sym>)
-  end
-end
-# -- test/testdata/packager/unimported_namespace/ccc/__package.rb --
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C CCC><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
   end
 end

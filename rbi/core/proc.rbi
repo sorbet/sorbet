@@ -347,21 +347,21 @@
 #
 # Numbered parameters were introduced in Ruby 2.7.
 class Proc < Object
-  # Creates a new [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)
+  # Creates a new [`Proc`](https://docs.ruby-lang.org/en/3.2/Proc.html)
   # object, bound to the current context.
-  # [`Proc::new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new)
-  # may be called without a block only within a method with an attached block,
-  # in which case that block is converted to the
-  # [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) object.
   #
   # ```ruby
-  # def proc_from
-  #   Proc.new
-  # end
-  # proc = proc_from { "hello" }
+  # proc = Proc.new { "hello" }
   # proc.call   #=> "hello"
   # ```
-  sig {params(blk: T.untyped).returns(T.attached_class)}
+  #
+  # Raises [`ArgumentError`](https://docs.ruby-lang.org/en/3.2/ArgumentError.html)
+  # if called without a block.
+  #
+  # ```ruby
+  # Proc.new    #=> ArgumentError
+  # ```
+  sig {params(blk: Proc).returns(T.attached_class)}
   def self.new(&blk); end
 
   # Invokes the block with `obj` as the proc's parameter like

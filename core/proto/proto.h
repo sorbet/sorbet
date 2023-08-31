@@ -28,7 +28,8 @@ public:
     static com::stripe::rubytyper::Type toProto(const GlobalState &gs, const TypePtr &typ);
 
     static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);
-    static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs, bool showFull);
+    static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs,
+                                                          const UnorderedMap<long, long> &untypedUsages, bool showFull);
 
     static com::stripe::payserver::events::cibot::SourceMetrics toProto(const CounterState &counters,
                                                                         std::string_view prefix);

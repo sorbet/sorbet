@@ -1,6 +1,6 @@
 # typed: strict
 
-# Don't extend T::Sig for this one, because the class wasn't defined here.
+extend T::Sig
 sig { returns(NilClass) }
 def top_level; end
 

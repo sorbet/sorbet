@@ -56,15 +56,22 @@ done
 build_dir="$(mktemp -d)"
 
 # Add the compiler's directory the PATH, as this fixes builds with gcc
-export PATH="$(dirname "{cc}"):$PATH"
+export PATH="$(dirname "{cc}"):$(dirname $(realpath {rustc})):$PATH"
 
 # Copy everything to a separate directory to get rid of symlinks:
 # tool/rbinstall.rb will explicitly ignore symlinks when installing files,
 # and this feels more maintainable than patching it.
 cp -aL "{src_dir}"/* "$build_dir"
+# Manually copy over .bundle as bundled gems are no longer installed
+# https://github.com/ruby/ruby/pull/6234
+if [[ -d "{src_dir}/.bundle" ]]; then
+  cp -raL "{src_dir}/.bundle" "$build_dir"
+fi
 
 {install_extra_srcs}
 {install_append_srcs}
+
+libyaml_loc="$(realpath {libyaml})"
 
 pushd "$build_dir" > /dev/null
 
@@ -91,14 +98,17 @@ run_cmd rm -f configure.bak
 # files that includes `-fvisibility=hidden`. To override it, our flag needs to
 # come after, so we inject a flag right before the `-o` option that comes near
 # the end of the command via OUTFLAG.
-OUTFLAG="-fvisibility=default -o" \
-CC="{cc}" \
-CFLAGS="{copts}" \
-CXXFLAGS="{copts}" \
-CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}" \
-LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}" \
+
+export OUTFLAG="-fvisibility=default -o"
+export CC="{cc}"
+export CFLAGS="{copts}"
+export CXXFLAGS="{copts}"
+export CPPFLAGS="{sysroot_flag} ${{inc_path[*]:-}} {cppopts}"
+export LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}"
+
 run_cmd ./configure \
         {configure_flags} \
+        --with-libyaml-source-dir=$libyaml_loc \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -150,11 +160,6 @@ run_cmd gem uninstall rubygems-update
 cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
 
 {install_gems}
-
-# Since we get our version of bundler from update_rubygems, we have to apply
-# this patch after everything is built. This is a bit of a hack, but the need
-# for the patch should go away once we upgrade Ruby and/or bundler anyway.
-{post_build_patch_command}
 
 popd > /dev/null
 
@@ -237,7 +242,7 @@ def _build_ruby_impl(ctx):
     # Outputs
     binaries = [
         ctx.actions.declare_file("toolchain/bin/{}".format(binary))
-        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri", "bundle", "bundler"]
+        for binary in ["ruby", "erb", "gem", "irb", "rdoc", "ri", "bundle", "bundler", "rake"]
     ]
 
     libdir = ctx.actions.declare_directory("toolchain/lib")
@@ -269,18 +274,10 @@ def _build_ruby_impl(ctx):
 
     install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
 
-    post_build_patches = ctx.files.post_build_patches
-
-    post_build_patch_commands = []
-    for patch in post_build_patches:
-        dirname = patch.dirname
-        install_extra_srcs.append(_INSTALL_EXTRA_SRC.format(file = patch.path, dirname = dirname, basename = patch.basename))
-        post_build_patch_commands.append(_APPLY_PATCH.format(path = patch.path))
-
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs + post_build_patches,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -293,14 +290,16 @@ def _build_ruby_impl(ctx):
             hdrs = " ".join(hdrs),
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
+            libyaml = ctx.files.libyaml[0].dirname,
+            rustc = ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc.path,
             configure_flags = " ".join(ctx.attr.configure_flags),
             sysroot_flag = ctx.attr.sysroot_flag,
             install_extra_srcs = "\n".join(install_extra_srcs),
             extra_srcs_object_files = " ".join(extra_srcs_object_files),
             install_append_srcs = "\n".join(install_append_srcs),
             install_gems = "\n".join(install_gems),
-            post_build_patch_command = "\n".join(post_build_patch_commands),
         )),
+        tools = [ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc],
     )
 
     return [
@@ -329,6 +328,10 @@ _build_ruby = rule(
         "gems": attr.label_list(
             doc = "Additional ruby gems to install into the ruby build",
         ),
+        "libyaml": attr.label(
+            default = Label("@libyaml//:libyaml"),
+            doc = "A filegroup containing the libyaml source, `configure` should be at the top level",
+        ),
         "extra_srcs": attr.label_list(
             doc = "A list of *.c and *.h files to treat as extra source files to libruby",
         ),
@@ -351,17 +354,13 @@ _build_ruby = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
         ),
         "sysroot_flag": attr.string(),
-        "post_build_patches": attr.label_list(
-            allow_files = True,
-            doc = "Patches to apply to the output tree after Ruby is built and gems are installed",
-        ),
     },
     fragments = ["cpp"],
     provides = [
         RubyInfo,
         DefaultInfo,
     ],
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type", "@rules_rust//rust:toolchain_type"],
     implementation = _build_ruby_impl,
 )
 
@@ -547,7 +546,7 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
-def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = [], post_build_patches = []):
+def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
@@ -575,7 +574,6 @@ def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags 
             "@platforms//os:osx": "-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
             "//conditions:default": "",
         }),
-        post_build_patches = post_build_patches,
     )
 
     _ruby_headers(

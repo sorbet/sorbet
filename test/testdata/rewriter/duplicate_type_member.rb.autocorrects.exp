@@ -1,0 +1,23 @@
+# -- test/testdata/rewriter/duplicate_type_member.rb --
+# typed: true
+
+class A
+  extend T::Generic
+
+  X = type_member
+  
+# ^ error: Duplicate type member `X`
+  
+# ^ error: Duplicate type member `X`
+end
+
+class B
+  extend T::Generic
+
+  Y = type_template
+  
+# ^ error: Duplicate type template `Y`
+  
+# ^ error: Duplicate type template `Y`
+end
+# ------------------------------

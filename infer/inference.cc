@@ -60,7 +60,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else if (cfg->symbol.data(ctx)->name.isAnyStaticInitName(ctx)) {
             methodReturnType = core::Types::top();
         } else {
-            methodReturnType = core::Types::untyped(ctx, cfg->symbol);
+            methodReturnType = core::Types::untyped(cfg->symbol);
         }
     } else {
         auto enclosingClass = cfg->symbol.enclosingClass(ctx);
@@ -230,12 +230,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         bool andAndOrOr = false;
                         if (ident != nullptr) {
                             auto name = ident->what.data(*cfg)._name;
-                            if (name.kind() == core::NameKind::UNIQUE &&
-                                name.dataUnique(ctx)->original == core::Names::andAnd()) {
+                            if (name.isUniqueNameOf(ctx, core::Names::andAnd())) {
                                 e.setHeader("Left side of `{}` condition was always `{}`", "&&", "truthy");
                                 andAndOrOr = true;
-                            } else if (name.kind() == core::NameKind::UNIQUE &&
-                                       name.dataUnique(ctx)->original == core::Names::orOr()) {
+                            } else if (name.isUniqueNameOf(ctx, core::Names::orOr())) {
                                 e.setHeader("Left side of `{}` condition was always `{}`", "||", "falsy");
                                 andAndOrOr = true;
                             }
@@ -264,6 +262,23 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                             auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
                             auto bexitLoc = ctx.locAt(prevBasicBlock->bexit.loc);
+
+                            auto bexitVar = cond.variable.data(*cfg)._name;
+                            if ((bexitVar.isUniqueNameOf(ctx, core::Names::andAnd()) ||
+                                 bexitVar.isUniqueNameOf(ctx, core::Names::orOr())) &&
+                                !prevBasicBlock->exprs.empty() &&
+                                prevBasicBlock->exprs.back().bind.variable == cond.variable) {
+                                // ^ This condition is a hack that hardcodes the most common structure of the CFG
+                                // we'd need to handle. If we had SSA form in Sorbet's CFG, we wouldn't have to pray
+                                // that the bexit var's initializer is the .back() of the expression in the block
+                                // (despite how rare it is for that to _not_ be the case).
+
+                                // We want to show one location for the "Conditional branch on untyped" warning/error,
+                                // but setting that location clobbers the location we need for this autocorrect to work.
+                                // So we have to claw back what the LHS of the || or && would have been.
+                                bexitLoc = ctx.locAt(prevBasicBlock->exprs.back().loc);
+                            }
+
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
 
@@ -299,10 +314,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
-                    } else if (bind.bind.type.hasUntyped()) {
-                        // TODO(jez) We use `hasUntyped`, but untypedBlame doesn't look inside the
-                        // type to find which part has untyped (it just looks at the top-level type).
-                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
                     }
                 }
                 ENFORCE(bind.bind.type);
@@ -327,7 +338,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             ENFORCE(bb->firstDeadInstructionIdx == -1);
             auto bexitTpo = current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
             if (bexitTpo.type.isUntyped()) {
-                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file);
+                auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, bexitTpo.type);
                 if (auto e = ctx.beginError(bb->bexit.loc, what)) {
                     e.setHeader("Conditional branch on `{}`", "T.untyped");
                     core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, bexitTpo, methodLoc);

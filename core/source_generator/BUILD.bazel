@@ -1,0 +1,21 @@
+cc_library(
+    name = "source_generator",
+    srcs = glob(
+        [
+            "*.cc",
+            "*.h",
+        ],
+    ),
+    hdrs = [
+        "source_generator.h",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "@com_google_absl//absl/strings",
+    ],
+)

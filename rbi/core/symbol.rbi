@@ -70,7 +70,8 @@ class Symbol < Object
   def ==(obj); end
 
   # Equality---If *sym* and *obj* are exactly the same symbol, returns `true`.
-  def ===(_); end
+  sig {params(obj: T.anything).returns(T::Boolean)}
+  def ===(obj); end
 
   # Returns `sym.to_s =~ obj`.
   sig do

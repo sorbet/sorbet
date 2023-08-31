@@ -1,0 +1,10 @@
+# -- test/testdata/resolver/t_class.rb --
+# typed: strict
+extend T::Sig
+
+sig {returns(T::Class[T.anything])}
+#            ^^^^^ error: Generic class without type arguments `Class`
+def example
+  Integer
+end
+# ------------------------------

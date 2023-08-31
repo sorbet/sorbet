@@ -47,7 +47,7 @@ public:
 } // namespace
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     {
         auto initCounters = getCounters();
         CHECK_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialize"), 1);
@@ -67,8 +67,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
     // Pause so that all latency timers for the above operations get reported.
     this_thread::sleep_for(chrono::milliseconds(2));
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt))),
-                      {{"yolo1.rb", 3, "bear"}});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt))),
+                           {{"yolo1.rb", 3, "bear"}});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -84,39 +84,39 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTakeFastPathWithOldEdits") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three files.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                               "\n"
-                                               "class Foo\n"
-                                               "\n"
-                                               "end\n")),
-                      {});
-    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
-                                               "\n"
-                                               "class Bar\n"
-                                               "extend T::Sig\n"
-                                               "\n"
-                                               "sig{returns(String)}\n"
-                                               "def hello\n"
-                                               "\"hi\"\n"
-                                               "end\n"
-                                               "end\n")),
-                      {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "\n"
+                                                    "class Foo\n"
+                                                    "\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "\n"
+                                                    "class Bar\n"
+                                                    "extend T::Sig\n"
+                                                    "\n"
+                                                    "sig{returns(String)}\n"
+                                                    "def hello\n"
+                                                    "\"hi\"\n"
+                                                    "end\n"
+                                                    "end\n")),
+                           {});
     // baz calls the method defined in bar
-    assertDiagnostics(send(*openFile("baz.rb", "# typed: true\n"
-                                               "\n"
-                                               "class Baz\n"
-                                               "extend T::Sig\n"
-                                               "\n"
-                                               "sig{returns(String)}\n"
-                                               "def hello\n"
-                                               "Bar.new.hello\n"
-                                               "end\n"
-                                               "end\n")),
-                      {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "# typed: true\n"
+                                                    "\n"
+                                                    "class Baz\n"
+                                                    "extend T::Sig\n"
+                                                    "\n"
+                                                    "sig{returns(String)}\n"
+                                                    "def hello\n"
+                                                    "Bar.new.hello\n"
+                                                    "end\n"
+                                                    "end\n")),
+                           {});
 
     // clear counters
     getCounters();
@@ -174,11 +174,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have errors in bar and baz, but not foo.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {
-                          {"bar.rb", 7, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                          {"baz.rb", 7, "Expected `String` but found `Integer` for method result type"},
-                      });
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {
+                               {"bar.rb", 7, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                               {"baz.rb", 7, "Expected `String` but found `Integer` for method result type"},
+                           });
 
     auto counters = getCounters();
     // N.B.: lsp.messages.processed contains canceled slow paths.
@@ -206,12 +206,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTakeSlowPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Initial state: Two empty files.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
-    assertDiagnostics(send(*openFile("bar.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "")), {});
 
     // clear counters
     getCounters();
@@ -246,11 +246,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     }
 
     // Send a no-op to clear out the pipeline. Should have one error per file.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {
-                          {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
-                          {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
-                      });
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {
+                               {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
+                               {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
+                           });
 
     auto counters = getCounters();
     // N.B.: lsp.messages.processed contains canceled slow paths.
@@ -270,11 +270,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
 
     // clear counters
     getCounters();
@@ -313,7 +313,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -337,11 +337,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction")
 
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
 
     // clear counters
     getCounters();
@@ -384,7 +384,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction")
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
     }
 
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 1);
@@ -402,11 +402,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction")
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndReturnsErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
 
     // Slow path: Edit foo to have a class with a documentation string and a method with an error.
     sendAsync(*changeFile("foo.rb",
@@ -434,10 +434,10 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
     }
 
     // Send a no-op to clear out the pipeline. Should have one error in `foo.rb`.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {
-                          {"foo.rb", 6, "Expected `String` but found `Integer(3)` for method result type"},
-                      });
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {
+                               {"foo.rb", 6, "Expected `String` but found `Integer(3)` for method result type"},
+                           });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 2,
                          /* assertUniqueStartTimes */ false);
 }
@@ -445,12 +445,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create two new files.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
-    assertDiagnostics(send(*openFile("bar.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "")), {});
 
     // Slow path: Edit foo to have a class with two methods and two errors, and add an error to bar.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
@@ -477,11 +477,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
 
     // Send a no-op to clear out the pipeline. Should have two error now: bar.rb from slow path and foo.rb from fast
     // path.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {
-                          {"foo.rb", 9, "Expected `Float` but found `String(\"not a float\")` for method result type"},
-                          {"bar.rb", 5, "Expected `String` but found `Integer(1)` for method result type"},
-                      });
+    assertErrorDiagnostics(
+        send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+        {
+            {"foo.rb", 9, "Expected `Float` but found `String(\"not a float\")` for method result type"},
+            {"bar.rb", 5, "Expected `String` but found `Integer(1)` for method result type"},
+        });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }
@@ -489,12 +490,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThatFixesAllErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create two new files.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
-    assertDiagnostics(send(*openFile("bar.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "")), {});
 
     // Slow path: Edit foo to have a class with an error that also causes an error in bar
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
@@ -539,7 +540,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
                           "end\n",
                           3));
     // Send a no-op to clear out the pipeline. Should have no errors at end of both typechecking runs.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
     // Need to re-evaluate the test strategy for timings
     // checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
@@ -549,16 +550,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThat
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndThenCancelBoth") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three new files! foo.rb defines a class, bar.rb defines a class and method used in baz.rb.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
-    assertDiagnostics(
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
+    assertErrorDiagnostics(
         send(*openFile("bar.rb",
                        "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef str\n'hi'\nend\nend\n")),
         {});
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile(
             "baz.rb",
             "# typed: true\nclass Baz\nextend T::Sig\nsig{returns(String)}\ndef bar\nBar.new.str\nend\nend\n")),
@@ -586,11 +587,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
     }
 
     // Fast path [cancel]: Fix syntax error. Foo should not have any errors.
-    assertDiagnostics(send(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend", 4)),
-                      {
-                          {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                          {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
-                      });
+    assertErrorDiagnostics(send(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend", 4)),
+                           {
+                               {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                               {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
+                           });
 
     auto counters = getCounters();
     checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 6, /* assertUniqueStartTimes */ false);
@@ -604,16 +605,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndBothErrorsAreReported") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create three new files! foo.rb defines a class, bar.rb defines a class and method used in baz.rb.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
-    assertDiagnostics(
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend")), {});
+    assertErrorDiagnostics(
         send(*openFile("bar.rb",
                        "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef str\n'hi'\nend\nend\n")),
         {});
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile(
             "baz.rb",
             "# typed: true\nclass Baz\nextend T::Sig\nsig{returns(String)}\ndef bar\nBar.new.str\nend\nend\n")),
@@ -639,12 +640,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 
     // We should receive errors for `foo`, `bar`, and `baz`.
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {
-                          {"foo.rb", 2, "unexpected token"},
-                          {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                          {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
-                      });
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {
+                               {"foo.rb", 2, "unexpected token"},
+                               {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                               {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
+                           });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }
@@ -652,18 +653,18 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatReintroducesOldError") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // foo stands alone
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend\n")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend\n")), {});
     // bar defines method
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile("bar.rb",
                        "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef str\n10\nend\nend\n")),
         {});
     // baz uses it
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile(
             "baz.rb",
             "# typed: true\nclass Baz\nextend T::Sig\nsig{returns(String)}\ndef bar\nBar.new.str\nend\nend\n")),
@@ -692,8 +693,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7,
                          /* assertUniqueStartTimes */ false);
 }
@@ -701,11 +702,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // bar has no error
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile("bar.rb",
                        "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend\nend\n")),
         {});
@@ -747,10 +748,10 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
                                   "end"));
 
     // Send fence to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
-                       {"bar.rb", 1, "Hint: this \"class\" token is not closed before the end of the file"},
-                       {"bar.rb", 6, "unexpected"}});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                            {"bar.rb", 1, "Hint: this \"class\" token is not closed before the end of the file"},
+                            {"bar.rb", 6, "unexpected"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }
@@ -758,22 +759,22 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                               "class Foo\n"
-                                               "end\n")),
-                      {});
-    assertDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
-                                               "class Bar\n"
-                                               "  extend T::Sig\n"
-                                               "  sig {returns(Integer)}\n"
-                                               "  def example\n"
-                                               "    1+1\n"
-                                               "  end\n"
-                                               "end\n")),
-                      {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Foo\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "class Bar\n"
+                                                    "  extend T::Sig\n"
+                                                    "  sig {returns(Integer)}\n"
+                                                    "  def example\n"
+                                                    "    1+1\n"
+                                                    "  end\n"
+                                                    "end\n")),
+                           {});
 
     // Slow path in foo.rb
     sendAsync(*changeFile("foo.rb",
@@ -810,14 +811,14 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo"
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {{"bar.rb", 5, "Expected `String` but found `Integer` for method result type"}});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {{"bar.rb", 5, "Expected `String` but found `Integer` for method result type"}});
 }
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyMetrics") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
 
     // Create a new file.
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*openFile("foo.rb", "# typed: true\n# A class that does things.\nclass Foo\nextend T::Sig\nend\n")), {});
 
     // clear counters
@@ -845,16 +846,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanceledRequestsDontReportLatencyM
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptionByFastPathClearedByNewSlowPath") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create new file
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                               "module M\n"
-                                               "end\n"
-                                               "class Foo\n"
-                                               "end")),
-                      {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "module M\n"
+                                                    "end\n"
+                                                    "class Foo\n"
+                                                    "end")),
+                           {});
 
     // Slow path: no errors
     sendAsync(*changeFile("foo.rb",
@@ -905,17 +906,17 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "ErrorIntroducedInSlowPathPreemptio
                           4, false, 0));
 
     // Send a no-op to clear out the pipeline.
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
-    assertDiagnostics(
+    assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     // Create a simple file.
-    assertDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
     sendAsync(*changeFile("foo.rb",
                           "# typed: true\n"
                           "class Foo\n"

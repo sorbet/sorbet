@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ['>= 2.7.0']
 
   s.add_development_dependency 'minitest', '~> 5.11'
-  s.add_development_dependency 'mocha', '~> 1.7'
+  s.add_development_dependency 'mocha', '~> 2.1'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rubocop', '~> 0.90.0'
   s.add_development_dependency 'rubocop-performance', '~> 1.8.0'

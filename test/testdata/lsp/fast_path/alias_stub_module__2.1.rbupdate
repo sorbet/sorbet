@@ -1,0 +1,3 @@
+# typed: true
+# exclude-from-file-update: true
+A = DoesNotExist

@@ -23,6 +23,12 @@ module Opus::Types::Test
       def foo(req, opt=nil, kwreq:, kwopt: nil, &blk); end
     end
 
+    class AbstractBase
+      extend T::Sig
+      sig {abstract.void}
+      def initialize; end
+    end
+
     it "succeeds if the override matches the shape" do
       klass = Class.new(Base) do
         extend T::Sig
@@ -207,6 +213,35 @@ module Opus::Types::Test
         def foo; end
       end
       klass.new.foo
+    end
+
+    it "does opt-in override checking on initialize" do
+      klass = Class.new(AbstractBase) do
+        extend T::Sig
+        sig {override.void}
+        def initialize; end
+
+        def foo
+          0
+        end
+      end
+      assert_equal(0, klass.new.foo)
+    end
+
+    it "raises if initialize is not compatible with parent" do
+      klass = Class.new(AbstractBase) do
+        extend T::Sig
+        sig do
+          override
+          .params(x: Integer)
+          .void
+        end
+        def initialize(x); end
+      end
+      err = assert_raises(RuntimeError) do
+        klass.new(0)
+      end
+      assert_includes(err.message, "must have no more than 0 required argument(s) to be compatible")
     end
   end
 end

@@ -5,10 +5,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.make<<todo method>>(&<blk>)
-      cls = <emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
-        begin
-          <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C A>))
-          <emptyTree>
+      begin
+        _cls = <emptyTree>::<C Class>.new() do ||
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
+            <emptyTree>
+          end
+        end
+        _cls = <emptyTree>::<C Class>.new(<emptyTree>::<C A>) do ||
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, ::T.class_of(<emptyTree>::<C A>))
+            <emptyTree>
+          end
         end
       end
     end

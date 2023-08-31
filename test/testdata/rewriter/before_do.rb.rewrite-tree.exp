@@ -1,0 +1,56 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Module><<C <todo sym>>> < (::<todo sym>)
+    <self>.include(<emptyTree>::<C T>::<C Sig>)
+  end
+
+  class <emptyTree>::<C MyTestGrandParent><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:name, <emptyTree>::<C String>).void()
+    end
+
+    def initialize<<todo method>>(name, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of initialize>
+  end
+
+  class <emptyTree>::<C MyTestParent><<C <todo sym>>> < (<emptyTree>::<C MyTestGrandParent>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <before><<todo method>>(&<blk>)
+      @x = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+    end
+
+    <runtime method definition of <before>>
+  end
+
+  class <emptyTree>::<C MyTestChild><<C <todo sym>>> < (<emptyTree>::<C MyTestParent>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:name, <emptyTree>::<C String>).void()
+    end
+
+    def initialize<<todo method>>(name, &<blk>)
+      <self>.<super>(ZSuperArgs)
+    end
+
+    <runtime method definition of initialize>
+
+    class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it 'does thing'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(@x)
+      end
+
+      begin
+        "does thing"
+        <runtime method definition of <it 'does thing'>>
+      end
+    end
+  end
+end

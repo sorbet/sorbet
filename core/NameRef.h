@@ -190,6 +190,8 @@ public:
     // (file-level static init).
     bool isAnyStaticInitName(const GlobalState &gs) const;
 
+    bool isUniqueNameOf(const GlobalState &gs, NameRef name) const;
+
     // All the names that Environment::updateKnowledge treats as special for the purposes of
     // updating control flow-sensitive type knowledge.
     //

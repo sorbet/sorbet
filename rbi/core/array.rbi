@@ -444,16 +444,10 @@ class Array < Object
   # See also
   # [`Array#concat`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-concat).
   sig do
-    params(
-        arg0: T::Enumerable[Elem],
+    type_parameters(:T).params(
+        arg0: T::Enumerable[T.type_parameter(:T)],
     )
-    .returns(T::Array[Elem])
-  end
-  sig do
-    params(
-        arg0: T::Array[Elem],
-    )
-    .returns(T::Array[Elem])
+    .returns(T::Array[T.any(Elem, T.type_parameter(:T))])
   end
   def +(arg0); end
 

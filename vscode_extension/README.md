@@ -44,17 +44,5 @@ for further information.
 
 ## Developing on this Extension
 
-```
-cd vscode_extension
-code --new-window .
-```
-
-To test out the changes:
-
-- Find the "Run and Debug" window
-- Ensure that "Launch Extension" is selected in the dropdown
-- Click the green triangle, which will launch a new VS Code instance with the
-  local copy of the extension loaded
-- Navigate to the project you want to test Sorbet in
-
-Or in one command: ⇧⌘P > `Debug: Select and Start Debugging` > `Launch Extension`
+See [docs/internals/lsp-dev-guide.md](../docs/internals/lsp-dev-guide.md) for
+information on how to get started with LSP and VS Code extension development.

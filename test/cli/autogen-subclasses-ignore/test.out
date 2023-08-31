@@ -2,4 +2,4 @@
 
 --- autogen-subclasses-ignore-relative ---
 class Opus::Parent
- class Opus::Child
+ class Opus::Child test/cli/autogen-subclasses-ignore/not-ignored/not-ignored.rb

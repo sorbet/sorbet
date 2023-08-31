@@ -44,6 +44,9 @@ std::unique_ptr<LSPMessage> makeChange(std::string_view uri, std::string_view co
 /** Create an LSPMessage containing a textDocument/didClose notification. */
 std::unique_ptr<LSPMessage> makeClose(std::string_view uri);
 
+/** Create an LSPMessage containing a workspace/didChangeConfiguration notification */
+std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params);
+
 /** Checks that we are properly advertising Sorbet LSP's capabilities to clients. */
 void checkServerCapabilities(const ServerCapabilities &capabilities);
 

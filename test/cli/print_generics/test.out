@@ -2,7 +2,8 @@ test/cli/print_generics/print_generics.rb:5: The method `foo` does not have a `s
      5 |def foo(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:5: Insert `sig { params(x: T.untyped).returns(T::Array[Integer]) }`
+    test/cli/print_generics/print_generics.rb:5: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Array[Integer]) }`
      5 |def foo(x)
         ^
 
@@ -10,7 +11,8 @@ test/cli/print_generics/print_generics.rb:9: The method `bar` does not have a `s
      9 |def bar(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:9: Insert `sig { params(x: T.untyped).returns(T::Hash[Symbol, Integer]) }`
+    test/cli/print_generics/print_generics.rb:9: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Hash[Symbol, Integer]) }`
      9 |def bar(x)
         ^
 
@@ -18,7 +20,8 @@ test/cli/print_generics/print_generics.rb:13: The method `qux` does not have a `
     13 |def qux(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:13: Insert `sig { params(x: T.untyped).returns(T::Enumerable[Integer]) }`
+    test/cli/print_generics/print_generics.rb:13: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Enumerable[Integer]) }`
     13 |def qux(x)
         ^
 
@@ -26,7 +29,8 @@ test/cli/print_generics/print_generics.rb:17: The method `wub` does not have a `
     17 |def wub(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:17: Insert `sig { params(x: T.untyped).returns(T::Range[Integer]) }`
+    test/cli/print_generics/print_generics.rb:17: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Range[Integer]) }`
     17 |def wub(x)
         ^
 
@@ -34,7 +38,8 @@ test/cli/print_generics/print_generics.rb:21: The method `zan` does not have a `
     21 |def zan(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:21: Insert `sig { params(x: T.untyped).returns(T::Set[Integer]) }`
+    test/cli/print_generics/print_generics.rb:21: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Set[Integer]) }`
     21 |def zan(x)
         ^
 
@@ -42,7 +47,8 @@ test/cli/print_generics/print_generics.rb:25: The method `gaz` does not have a `
     25 |def gaz(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:25: Insert `sig { params(x: T.untyped).returns(T::Enumerator[Integer]) }`
+    test/cli/print_generics/print_generics.rb:25: Insert `extend T::Sig
+    sig { params(x: T.untyped).returns(T::Enumerator[Integer]) }`
     25 |def gaz(x)
         ^
 Errors: 6

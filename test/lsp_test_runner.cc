@@ -607,6 +607,8 @@ TEST_CASE("LSPTest") {
         sorbetInitOptions->enableTypecheckInfo = true;
         sorbetInitOptions->highlightUntyped =
             BooleanPropertyAssertion::getValue("highlight-untyped-values", assertions).value_or(false);
+        sorbetInitOptions->enableTypedFalseCompletionNudges =
+            BooleanPropertyAssertion::getValue("enable-typed-false-completion-nudges", assertions).value_or(true);
         auto initializedResponses = initializeLSP(rootPath, rootUri, *lspWrapper, nextId, true,
                                                   shouldUseCodeActionResolve, move(sorbetInitOptions));
         INFO("Should not receive any response to 'initialized' message.");
@@ -795,7 +797,7 @@ TEST_CASE("LSPTest") {
                     // importUsageAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           importUsageAssertions);
-                } else {
+                } else if (dynamic_pointer_cast<GoToDefSpecialAssertion>(assertion) == nullptr) {
                     // For a regular UsageAssertion, check that a reference request at this location returns
                     // entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,

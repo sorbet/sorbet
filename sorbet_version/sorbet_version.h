@@ -22,6 +22,12 @@ constexpr bool debug_mode = true;
 constexpr bool debug_mode = false;
 #endif
 
+#ifdef TRACK_UNTYPED_BLAME_MODE
+constexpr bool track_untyped_blame_mode = true;
+#else
+constexpr bool track_untyped_blame_mode = false;
+#endif
+
 #if !defined(EMSCRIPTEN)
 constexpr bool emscripten_build = false;
 #else

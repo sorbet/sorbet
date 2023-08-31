@@ -33,7 +33,7 @@ class BigFoo; extend T::Sig
       a.bar(1)
    # ^ hover: null
     # ^ hover: BigFoo::LittleFoo1
-      # ^ hover: sig {params(num: Integer).returns(Integer)}
+      # ^ hover: sig { params(num: Integer).returns(Integer) }
     end
   end
 
@@ -42,7 +42,7 @@ class BigFoo; extend T::Sig
               # ^ hover: Integer
                    # ^ hover: String
     4 + num1 + num2.to_i + @@static_variable.length
-           # ^ hover: sig {params(arg0: Integer).returns(Integer)}
+           # ^ hover: sig { params(arg0: Integer).returns(Integer) }
                            # ^^^^^^^^^^^^^^^ hover: Docs for Bar#static_variable
                            # ^^^^^^^^^^^^^^^ hover: String
   end
@@ -58,7 +58,7 @@ class BigFoo; extend T::Sig
 
   sig {params(num: Integer).returns(String)}
   private def quux(num)
-    #         ^ hover: sig {params(num: Integer).returns(String)}
+    #         ^ hover: sig { params(num: Integer).returns(String) }
     #         ^ hover: private def quux(num); end
     if num < 10
       s = 1
@@ -70,7 +70,7 @@ class BigFoo; extend T::Sig
 
   sig {void}
   protected def protected_fun; end;
-  #             ^ hover: sig {void}
+  #             ^ hover: sig { void }
   #             ^ hover: protected def protected_fun; end
 
   sig { returns([Integer, String]) }
@@ -82,10 +82,17 @@ class BigFoo; extend T::Sig
   sig {void}
   def tests_return_markdown
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 1 ```ruby
-    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 2 sig {void}
+    # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 2 sig { void }
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 4 ```
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 6 ---
     # ^^^^^^^^^^^^^^^^^^^^^ hover-line: 8 Tests return markdown output
+  end
+
+  sig {returns(T.attached_class)}
+  def self.factory
+    #      ^ hover: sig { returns(T.attached_class (of BigFoo)) }
+    #      ^ hover: def self.factory; end
+    new
   end
 end
 
@@ -94,20 +101,20 @@ end
 
 def main
   BigFoo.bar(10, "hello")
-        # ^ hover: sig {params(num1: Integer, num2: String).returns(Integer)}
+        # ^ hover: sig { params(num1: Integer, num2: String).returns(Integer) }
         # ^ hover: ```ruby
         # Checks that we're sending Markdown.
   BigFoo.baz
-        # ^ hover: sig {void}
+        # ^ hover: sig { void }
   l = BigFoo.anotherFunc
 # ^ hover: [Integer, String] (2-tuple)
 
   # Test primitive types
   n = nil
 # ^ hover: NilClass
-  t = true 
+  t = true
 # ^ hover: TrueClass
-  f = false 
+  f = false
 # ^ hover: FalseClass
   r = //
 # ^ hover: Regexp
@@ -139,10 +146,10 @@ def main
       # ^^^^^^ hover: The docs for BigFoo
 
   foo = BigFoo.new
-  #            ^^^ hover: sig {params(args: T.untyped, blk: T.untyped).returns(BigFoo)}
+  #            ^^^ hover: sig { params(args: T.untyped, blk: T.untyped).returns(BigFoo) }
   #            ^^^ hover: def new(*args, &blk); end
   hoo = BigFoo::LittleFoo1.new
-                         # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
+                         # ^^^ hover: sig { returns(BigFoo::LittleFoo1) }
   raise "error message"
-# ^ hover: sig {params(arg0: String).returns(T.noreturn)}
+  # ^ hover-line: 4     arg0: T.any(T::Class[T.anything], Exception, String)
 end

@@ -25,20 +25,19 @@ bool isOperator(string_view name) {
 
 vector<unique_ptr<TextDocumentEdit>> getQuickfixEdits(const LSPConfiguration &config, const core::GlobalState &gs,
                                                       const vector<core::AutocorrectSuggestion::Edit> &edits) {
-    UnorderedMap<string, vector<unique_ptr<TextEdit>>> editsByFile;
+    UnorderedMap<core::FileRef, vector<unique_ptr<TextEdit>>> editsByFile;
     for (auto &edit : edits) {
         auto range = Range::fromLoc(gs, edit.loc);
         if (range != nullptr) {
-            editsByFile[config.fileRef2Uri(gs, edit.loc.file())].emplace_back(
-                make_unique<TextEdit>(move(range), edit.replacement));
+            editsByFile[edit.loc.file()].emplace_back(make_unique<TextEdit>(move(range), edit.replacement));
         }
     }
 
     vector<unique_ptr<TextDocumentEdit>> documentEdits;
-    for (auto &it : editsByFile) {
+    for (auto &[file, edits] : editsByFile) {
         // TODO: Document version
         documentEdits.emplace_back(make_unique<TextDocumentEdit>(
-            make_unique<VersionedTextDocumentIdentifier>(it.first, JSONNullObject()), move(it.second)));
+            make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits)));
     }
     return documentEdits;
 }
@@ -71,6 +70,36 @@ hasLoneMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core:
 
     return found;
 }
+
+const core::lsp::SendResponse *isTUnsafeResponse(const core::GlobalState &gs,
+                                                 const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+    if (responses.empty()) {
+        return nullptr;
+    }
+
+    auto *resp = responses[0]->isSend();
+    if (resp == nullptr) {
+        return nullptr;
+    }
+
+    auto method = resp->dispatchResult->main.method;
+    if (!method.exists()) {
+        return nullptr;
+    }
+
+    auto data = method.data(gs);
+    if (data->owner != core::Symbols::TSingleton() || data->name != core::Names::unsafe()) {
+        return nullptr;
+    }
+
+    if (!resp->termLocOffsets.exists() || resp->termLocOffsets.empty() || resp->argLocOffsets.size() != 1 ||
+        !resp->argLocOffsets[0].exists() || resp->argLocOffsets[0].empty()) {
+        return nullptr;
+    }
+
+    return resp;
+}
+
 } // namespace
 
 CodeActionTask::CodeActionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CodeActionParams> params)
@@ -124,6 +153,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::Quickfix;
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
                 workspaceEdit->documentChanges = getQuickfixEdits(config, gs, autocorrect.edits);
+                if (absl::c_any_of(autocorrect.edits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
+                    action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
+                }
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
             }
@@ -208,6 +240,25 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     }
                 }
             }
+        } else if (auto *resp = isTUnsafeResponse(gs, queryResult.responses)) {
+            auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(params->textDocument->uri), JSONNullObject());
+            auto replaceRange = Range::fromLoc(gs, resp->termLoc());
+            auto arg0Loc = core::Loc(file, resp->argLocOffsets[0]);
+            auto newContents = arg0Loc.source(gs).value();
+
+            vector<unique_ptr<TextEdit>> edits;
+            edits.emplace_back(make_unique<TextEdit>(move(replaceRange), string(newContents)));
+
+            vector<unique_ptr<TextDocumentEdit>> documentEdits;
+            documentEdits.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
+
+            auto workspaceEdit = make_unique<WorkspaceEdit>();
+            workspaceEdit->documentChanges = move(documentEdits);
+
+            auto action = make_unique<CodeAction>("Delete T.unsafe");
+            action->kind = CodeActionKind::RefactorRewrite;
+            action->edit = move(workspaceEdit);
+            result.emplace_back(move(action));
         }
     }
 

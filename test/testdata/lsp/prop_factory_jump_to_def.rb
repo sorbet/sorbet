@@ -10,6 +10,6 @@ class A < T::Struct
 
   prop :foo, String, factory: -> {A.bar}
   #                                 ^ usage: self_bar
-  #                                 ^ hover: sig {void}
+  #                                 ^ hover: sig { void }
   #                                 ^ hover: def self.bar; end
 end

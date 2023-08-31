@@ -12,23 +12,23 @@ using namespace sorbet::realmain::lsp;
 
 // Adds two new files that have errors, and asserts that Sorbet returns errors for both of them.
 TEST_CASE_FIXTURE(ProtocolTest, "AddFile") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(send(*openFile("yolo1.rb", "")), {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
     ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "Expected `Integer`"};
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
         {yolo1Diagnostic});
-    assertDiagnostics(send(*openFile("yolo2.rb", "")), {yolo1Diagnostic});
+    assertErrorDiagnostics(send(*openFile("yolo2.rb", "")), {yolo1Diagnostic});
 
     ExpectedDiagnostic yolo2Diagnostic = {"yolo2.rb", 4, "Expected `Integer`"};
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(*changeFile("yolo2.rb", "# typed: true\nclass Foo2\n\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
         {yolo1Diagnostic, yolo2Diagnostic});
 
     // Slightly change text so that error changes line and contents.
     ExpectedDiagnostic yolo2Diagnostic2 = {"yolo2.rb", 5, "stuff3"};
-    assertDiagnostics(
+    assertErrorDiagnostics(
         send(
             *changeFile("yolo2.rb", "# typed: true\nclass Foo2\n\n\n def branch\n    1 + \"stuff3\"\n  end\nend\n", 3)),
         {yolo1Diagnostic, yolo2Diagnostic2});
@@ -36,18 +36,18 @@ TEST_CASE_FIXTURE(ProtocolTest, "AddFile") {
 
 // Write to the same file twice. Sorbet should only return errors from the second version.
 TEST_CASE_FIXTURE(ProtocolTest, "AddFileJoiningRequests") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
     requests.push_back(
         changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
-    assertDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
+    assertErrorDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
 }
 
 // Cancels requests before they are processed, and ensures that they are actually not processed.
 TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(
         send(*openFile("foo.rb",
                        "#typed: true\nmodule Bar\n    CONST = 2\n\n    def self.meth(x)\n        x\n    "
                        "end\nend\n\nlocal = 131\nlocaler = local + 2\nlocaler2 = localer + 2\nlocal3 = localer + "
@@ -90,8 +90,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
 
 // Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
 TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
     INFO("Expected a single response to a definition request to an untyped document.");
     const auto numResponses = absl::c_count_if(defResponses, [](const auto &m) { return m->isResponse(); });
@@ -113,7 +113,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
 
 // Ensures that Sorbet merges didChanges that are interspersed with canceled requests.
 TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
     requests.push_back(openFile("foo.rb", ""));
@@ -156,7 +156,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
             FAIL_CHECK(fmt::format("Unexpected response:\n{}", msg->toJSON()));
         }
     }
-    assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
+    assertErrorDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
     CHECK_EQ(cancelRequestCount, 3);
     // Expected a diagnostic error for foo.rb
     CHECK_EQ(diagnosticCount, 1);
@@ -164,7 +164,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
 
 // Applies all consecutive file changes at once.
 TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossFiles") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // File is fine at first.
     requests.push_back(openFile("foo.rb", ""));
@@ -192,14 +192,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossFiles") {
     auto msgs = send(move(requests));
     INFO("Expected only 4 diagnostic responses to the merged file changes");
     CHECK_EQ(msgs.size(), 4);
-    assertDiagnostics(move(msgs), {{"bar.rb", 3, "Expected `Integer`"},
-                                   {"baz.rb", 3, "Expected `Integer`"},
-                                   {"bat.rb", 3, "Expected `Integer`"},
-                                   {"foo.rb", 7, "Method `blah` does not exist"}});
+    assertErrorDiagnostics(move(msgs), {{"bar.rb", 3, "Expected `Integer`"},
+                                        {"baz.rb", 3, "Expected `Integer`"},
+                                        {"bat.rb", 3, "Expected `Integer`"},
+                                        {"foo.rb", 7, "Method `blah` does not exist"}});
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // Invalid: Returns false.
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
@@ -222,7 +222,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
     REQUIRE_GT(msgs.size(), 0);
     CHECK(msgs.at(0)->isNotification());
     CHECK_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);
-    assertDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
+    assertErrorDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
 
     INFO("Expected a diagnostic error, followed by two document symbol responses.");
     REQUIRE_EQ(msgs.size(), 3);
@@ -231,7 +231,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableRequests") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
                                           "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
@@ -275,26 +275,27 @@ TEST_CASE_FIXTURE(ProtocolTest, "WorkspaceEditIgnoredWhenNotInitialized") {
     // Avoid using `openFile`, as it only works post-initialization.
     toSend.push_back(makeOpen("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 1));
     // This update should be ignored.
-    assertDiagnostics(send(move(toSend)), {});
+    assertErrorDiagnostics(send(move(toSend)), {});
     // We shouldn't have any code errors post-initialization since the previous edit was ignored.
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "InitializeAndShutdown") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     auto resp = send(LSPMessage(make_unique<RequestMessage>("2.0", nextId++, LSPMethod::Shutdown, JSONNullObject())));
     INFO("Expected a single response to shutdown request.");
     REQUIRE_EQ(resp.size(), 1);
     auto &r = resp.at(0)->asResponse();
     REQUIRE_EQ(r.requestMethod, LSPMethod::Shutdown);
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()))), {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Exit, JSONNullObject()))),
+                           {});
 }
 
 // Some clients send an empty string for the root uri.
 TEST_CASE_FIXTURE(ProtocolTest, "EmptyRootUriInitialization") {
     // Manually reset rootUri before initializing.
     rootUri = "";
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
 
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
@@ -329,9 +330,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "MissingRootPathInitialization") {
         auto &resp = respMsg->asResponse();
         CHECK_EQ(resp.requestMethod, LSPMethod::Initialize);
     }
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
-                                                                       make_unique<InitializedParams>()))),
-                      {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
+                                                                            make_unique<InitializedParams>()))),
+                           {});
 
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
@@ -366,9 +367,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
         auto &resp = respMsg->asResponse();
         CHECK_EQ(resp.requestMethod, LSPMethod::Initialize);
     }
-    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
-                                                                       make_unique<InitializedParams>()))),
-                      {});
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::Initialized,
+                                                                            make_unique<InitializedParams>()))),
+                           {});
 
     // Manually construct an openFile with text that has a typechecking error.
     auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
@@ -387,8 +388,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "CompletionOnNonClass") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
 
     // TODO: Once we have better helpers for completion, clean this up.
     auto completionParams = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
@@ -403,23 +404,23 @@ TEST_CASE_FIXTURE(ProtocolTest, "CompletionOnNonClass") {
 
 // Ensures that unrecognized notifications are ignored.
 TEST_CASE_FIXTURE(ProtocolTest, "IgnoresUnrecognizedNotifications") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
-                              "didChangeConfiguration\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}"),
-                      {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
+                                   "didChangeConfiguration\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}"),
+                           {});
 }
 
 // Ensures that notifications that have an improper params shape are handled gracefully / not responded to.
 TEST_CASE_FIXTURE(ProtocolTest, "IgnoresNotificationsThatDontTypecheck") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{}})"), {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{}})"), {});
 }
 
 // Ensures that unrecognized requests are responded to.
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
-    assertDiagnostics(initializeLSP(), {});
-    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"workspace/"
-                             "didChangeConfiguration\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"sorbet/"
+                             "fooBar\",\"id\":9001,\"params\":{\"settings\":{\"highlightUntyped\": false}}}");
     REQUIRE_EQ(responses.size(), 1);
     auto &response = responses.at(0);
     REQUIRE(response->isResponse());
@@ -433,7 +434,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsUnrecognizedRequests") {
 
 // Ensures that requests that have an improper params shape are responded to with an error.
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
                              "hover\",\"id\":9001,\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
     REQUIRE_EQ(responses.size(), 1);
@@ -449,15 +450,15 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
 
 // Ensures that the server ignores invalid JSON.
 TEST_CASE_FIXTURE(ProtocolTest, "SilentlyIgnoresInvalidJSONMessages") {
-    assertDiagnostics(initializeLSP(), {});
-    assertDiagnostics(sendRaw("{"), {});
+    assertErrorDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(sendRaw("{"), {});
 }
 
 // If a client doesn't support markdown, send hover as plaintext.
 TEST_CASE_FIXTURE(ProtocolTest, "RespectsHoverTextLimitations") {
-    assertDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
+    assertErrorDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
 
-    assertDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
+    assertErrorDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
 
     auto hoverResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::TextDocumentHover,
@@ -481,10 +482,10 @@ TEST_CASE_FIXTURE(ProtocolTest, "SorbetURIsWork") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->supportsSorbetURIs = true;
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
-    assertDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
 
     string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
-    assertDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
+    assertErrorDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
 
     auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
     REQUIRE_EQ(selectDefinitions.size(), 1);
@@ -588,22 +589,22 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnFormattingNonWorkspaceURIs") {
 
 // Tests that Sorbet reports metrics about the request's response status for certain requests
 TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
 
     // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                               "class A\n"
-                                               "def foo; end\n"
-                                               "end\n"
-                                               "A.new.fo\n"
-                                               "A.new.no_completion_results\n"
-                                               "A.new.foo\n"
-                                               "T.unsafe(nil).foo\n"
-                                               "\n")),
-                      {
-                          {"foo.rb", 4, "does not exist"},
-                          {"foo.rb", 5, "does not exist"},
-                      });
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "def foo; end\n"
+                                                    "end\n"
+                                                    "A.new.fo\n"
+                                                    "A.new.no_completion_results\n"
+                                                    "A.new.foo\n"
+                                                    "T.unsafe(nil).foo\n"
+                                                    "\n")),
+                           {
+                               {"foo.rb", 4, "does not exist"},
+                               {"foo.rb", 5, "does not exist"},
+                           });
 
     // clear counters
     getCounters();
@@ -664,34 +665,64 @@ TEST_CASE_FIXTURE(ProtocolTest, "RequestReportsEmptyResultsMetrics") {
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
-    assertDiagnostics(initializeLSP(), {});
+    assertErrorDiagnostics(initializeLSP(), {});
 
     // Create a new file.
-    assertDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                               "class A\n"
-                                               "def foo; end\n"
-                                               "end\n"
-                                               "\n")),
-                      {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "def foo; end\n"
+                                                    "end\n"
+                                                    "\n")),
+                           {});
 
     // clear counters
     getCounters();
 
-    assertDiagnostics(send(*changeFile("foo.rb",
-                                       "# typed: true\n"
-                                       "class A\n"
-                                       "def foo(; end\n"
-                                       "end\n"
-                                       "\n",
-                                       2)),
-                      {
-                          {"foo.rb", 1, "class definition in method body"},
-                          {"foo.rb", 2, "unexpected token \";\""},
-                      });
+    assertErrorDiagnostics(send(*changeFile("foo.rb",
+                                            "# typed: true\n"
+                                            "class A\n"
+                                            "def foo(; end\n"
+                                            "end\n"
+                                            "\n",
+                                            2)),
+                           {
+                               {"foo.rb", 1, "class definition in method body"},
+                               {"foo.rb", 2, "unexpected token \";\""},
+                           });
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "syntax_error"), 1);
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "changed_definition"), 0);
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighlightUntypedSetting") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "def foo; end\n"
+                                                    "end\n"
+                                                    "\n")),
+                           {});
+    auto settings = make_unique<SorbetInitializationOptions>();
+    settings->highlightUntyped = true;
+    auto config = make_unique<DidChangeConfigurationParams>(move(settings));
+    send(*makeConfigurationChange(move(config)));
+
+    assertUntypedDiagnostics(send(*changeFile("foo.rb",
+                                              "# typed: true\n"
+                                              "class A\n"
+                                              "  def foo(x)\n;"
+                                              "    x.foo\n"
+                                              "    5\n"
+                                              "  end\n"
+                                              "end\n"
+                                              "\n",
+                                              2)),
+                             {
+                                 {"foo.rb", 3, "Call to method `foo` on `T.untyped`"},
+                             });
 }
 
 } // namespace sorbet::test::lsp

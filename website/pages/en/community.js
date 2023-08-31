@@ -130,12 +130,6 @@ class Index extends React.Component {
                     'A central repository for sharing type definitions for Ruby gems',
                 },
                 {
-                  title: 'sorbet-rails',
-                  link: 'https://github.com/chanzuckerberg/sorbet-rails',
-                  description:
-                    'A set of tools to make Sorbet work with Rails seamlessly',
-                },
-                {
                   title: 'Sord',
                   link: 'https://github.com/AaronC81/sord',
                   description:
@@ -152,6 +146,24 @@ class Index extends React.Component {
                   link: 'https://github.com/jaredbeck/sorbet-progress',
                   description:
                     'Measure your progress as you adopt Sorbet, stay motivated!',
+                },
+                {
+                  title: 'activerecord-ejection_seat',
+                  link: 'https://github.com/maxveldink/activerecord-ejection_seat',
+                  description:
+                    'Eject from an ActiveRecord model to a Sorbet T::Struct, or buckle back in',
+                },
+                {
+                  title: 'sorbet-result',
+                  link: 'https://github.com/maxveldink/sorbet-result',
+                  description:
+                    'Introduces T::Result, T::Success and T::Failure types to facilitate Railway Oriented Programming',
+                },
+                {
+                  title: 'sorbet-struct-comparable',
+                  link: 'https://github.com/samuelgiles/sorbet-struct-comparable',
+                  description:
+                    "Comparable T::Struct's for the equality focused typed Ruby developer",
                 },
                 {
                   title: 'Parlour',
@@ -172,6 +184,12 @@ class Index extends React.Component {
                   title: 'spoom',
                   link: 'https://github.com/Shopify/spoom',
                   description: 'Useful tools for Sorbet enthusiasts',
+                },
+                {
+                  title: 'rubymine-sorbet-lsp',
+                  link: 'https://github.com/simoleone/rubymine-sorbet-lsp',
+                  description:
+                    'RubyMine plugin for error highlights and fixes powered by Sorbet language server',
                 },
               ]}
             />

@@ -700,7 +700,7 @@ private:
                         e.addErrorLine(ctx.locAt(job.out->original.loc()), "Type alias used here");
                     }
 
-                    resolvedField.data(gs)->resultType = core::Types::untyped(ctx, resolved);
+                    resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
                 }
             }
             job.out->symbol = resolved;
@@ -931,7 +931,7 @@ private:
                 e.setHeader("Type aliases are not allowed in generic classes");
                 e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
             }
-            job.lhs.setResultType(ctx, core::Types::untyped(ctx, job.lhs));
+            job.lhs.setResultType(ctx, core::Types::untyped(job.lhs));
             return true;
         }
         if (isFullyResolved(ctx, rhs)) {
@@ -1283,18 +1283,6 @@ private:
         }
 
         owner.data(gs)->recordRequiredAncestor(gs, symbol, blockLoc);
-    }
-
-    static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
-        ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
-        auto ancestorSym = job.ancestor->symbol.dealias(ctx).asClassOrModuleRef();
-
-        if (!ancestorSym.data(ctx)->flags.isSealed) {
-            return;
-        }
-        Timer timeit(ctx.state.tracer(), "resolver.registerSealedSubclass");
-
-        ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
@@ -1836,9 +1824,6 @@ public:
                     const auto origSize = job.items.size();
                     auto g = [&](AncestorResolutionItem &item) -> bool {
                         auto resolved = resolveAncestorJob(ctx, item, false);
-                        if (resolved) {
-                            tryRegisterSealedSubclass(ctx, item);
-                        }
                         return resolved;
                     };
                     auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
@@ -1980,12 +1965,10 @@ public:
                 }
             }
 
-            if (singlePackageRbiGeneration) {
-                for (auto &job : todoClassAliases) {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    for (auto &item : job.items) {
-                        resolveClassAliasJob(ctx, item);
-                    }
+            for (auto &job : todoClassAliases) {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                for (auto &item : job.items) {
+                    resolveClassAliasJob(ctx, item);
                 }
             }
 
@@ -2069,6 +2052,11 @@ class ResolveTypeMembersAndFieldsWalk {
         core::NameRef fromName;
     };
 
+    struct RecordSealedSubclassItem {
+        core::ClassOrModuleRef sealedClass;
+        core::ClassOrModuleRef subclass;
+    };
+
     struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
@@ -2079,6 +2067,7 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
+        vector<RecordSealedSubclassItem> todoSealedSubclassItems;
     };
 
     struct ResolveTypeMembersAndFieldsResult {
@@ -2094,6 +2083,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
     vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
     vector<ResolveMethodAliasItem> todoMethodAliasItems_;
+    vector<RecordSealedSubclassItem> todoSealedSubclassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -2225,8 +2215,9 @@ class ResolveTypeMembersAndFieldsWalk {
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
                 // Declaring a class instance variable
-            } else if (job.atTopLevel && ctx.owner.name(ctx) == core::Names::initialize()) {
-                // Declaring a instance variable
+            } else if (job.atTopLevel && (ctx.owner.name(ctx) == core::Names::initialize() ||
+                                          ctx.owner.name(ctx) == core::Names::beforeAngles())) {
+                // Declaring a instance variable in either `initialize` or a `before do` block.
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
                        !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
@@ -2884,6 +2875,25 @@ public:
         if (isGenericResolved(ctx, klass.symbol)) {
             todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
+
+        for (const auto &ancestor : klass.ancestors) {
+            auto *ancestorCnst = ast::cast_tree<ast::ConstantLit>(ancestor);
+            if (ancestorCnst == nullptr) {
+                continue;
+            }
+
+            auto dealiased = ancestorCnst->symbol.dealias(ctx);
+            if (!dealiased.isClassOrModule()) {
+                continue;
+            }
+
+            auto ancestorSym = dealiased.asClassOrModuleRef();
+            if (!ancestorSym.data(ctx)->flags.isSealed) {
+                continue;
+            }
+
+            todoSealedSubclassItems_.emplace_back(RecordSealedSubclassItem{ancestorSym, klass.symbol});
+        }
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -3218,6 +3228,7 @@ public:
                 output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
                 output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
+                output.todoSealedSubclassItems = move(walk.todoSealedSubclassItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -3234,6 +3245,7 @@ public:
         vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
         vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+        vector<vector<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
@@ -3255,6 +3267,7 @@ public:
                     combinedTodoResolveSimpleStaticFieldItems.emplace_back(
                         move(threadResult.todoResolveSimpleStaticFieldItems));
                     combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
+                    combinedTodoSealedSubclassItems.emplace_back(move(threadResult.todoSealedSubclassItems));
                 }
             }
         }
@@ -3362,6 +3375,14 @@ public:
             for (auto &job : threadTodos) {
                 core::MutableContext ctx(gs, job.owner, job.file);
                 resolveMethodAlias(ctx, job);
+            }
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.registerSealedSubclass");
+            for (auto &threadTodos : combinedTodoSealedSubclassItems) {
+                for (auto &[sealedClass, subclass] : threadTodos) {
+                    sealedClass.data(gs)->recordSealedSubclass(gs, subclass);
+                }
             }
         }
 
@@ -3671,7 +3692,7 @@ private:
                 }
 
                 if (arg.type == nullptr) {
-                    arg.type = core::Types::untyped(ctx, method);
+                    arg.type = core::Types::untyped(method);
                 }
 
                 // We silence the "type not specified" error when a sig does not mention the synthesized block arg.

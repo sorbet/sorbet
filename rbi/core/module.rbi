@@ -1634,7 +1634,7 @@ class Module < Object
   # Returns a module, where refined methods are defined.
   sig do
     params(
-        arg0: Class,
+        arg0: T::Class[T.anything],
         blk: T.proc.params(arg0: T.untyped).returns(BasicObject),
     )
     .returns(T.self_type)

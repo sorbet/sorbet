@@ -40,6 +40,6 @@ end
 class D1 < A
   T1 = type_member
      # ^^^^^^^^^^^ error: The `lower` type bound `T.noreturn` must be a supertype of the parent's `lower` type bound `Serval` for type_member `T1`
-     # ^^^^^^^^^^^ error: The `upper` type bound `<top>` must be a subtype of the parent's `upper` type bound `Animal` for type_member `T1`
+     # ^^^^^^^^^^^ error: The `upper` type bound `T.anything` must be a subtype of the parent's `upper` type bound `Animal` for type_member `T1`
 end
 
