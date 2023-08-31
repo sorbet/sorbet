@@ -275,12 +275,6 @@ particular, if all of these things are true, Sorbet will type check the call to
   `define_method`, or otherwise [executed in a context different from the
   enclosing context][define_method_super].)
 
-- The usage of `super` and the method it resolves to must both be defined in a
-  `# typed: strict` file.
-
-  (Why? → In `# typed: true` files, Sorbet does not know whether a method must
-  take a block or not except in `# typed: strict` or higher files.)
-
 [define_method_super]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0A%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.bar%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20define_method%28%3Abar%29%20do%0A%20%20%20%20%20%20x%20%3D%20super%0A%20%20%20%20%20%20T.reveal_type%28x%29%0A%20%20%20%20%20%20%23%20-%3E%20should%20reveal%20String%2C%20but%20Sorbet%20doesn't%20know%20that%0A%20%20%20%20end%0A%0A%20%20%20%200%0A%20%20end%0Aend
 
@@ -291,6 +285,12 @@ expected to improve over time, which might introduce new type errors upon
 upgrading to a newer Sorbet version.
 
 ### How can I fix type errors that arise from `super`?
+
+1.  "Method does not exist" type errors can happen when Sorbet does not see that
+    a method with the same name actually exists on an ancestor of the current
+    class. Double check whether such a method actually exist. If it does,
+    metaprogramming is likely hiding that definition from Sorbet. Use
+    [RBI files](rbi.md) to ensure that Sorbet sees the parent's definition.
 
 1.  Usually type errors from `super` arise because of incompatible overrides,
     [like this][super_incompatible]. Sorbet only does

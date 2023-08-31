@@ -591,7 +591,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (args.name == Names::untypedSuper()) {
         // Currently, `super` is only checked for the following cases:
         // - The receiver is a class
-        // - The super call and parent method are both in a typed: strict file
         // - The super call is not inside a block
         // No point in paying a full findMethodTransitive just to discover that.
         return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
@@ -602,11 +601,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     MethodRef mayBeOverloaded;
     if (targetName == Names::super()) {
         targetName = args.enclosingMethodForSuper;
-        // if (args.locs.file.data(gs).strictLevel < core::StrictLevel::Strict) {
-        //     return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
-        //                           Symbols::noMethod());
-        // }
-
         mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, targetName);
     } else if (symbol != core::Symbols::top()) {
         // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,

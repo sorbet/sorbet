@@ -998,7 +998,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // This is the main place where we type check a method, so we default by assuming
                 // that we want to report all errors (supressing nothing).
                 auto suppressErrors = false;
-                auto funName = send.fun.show(ctx);
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,

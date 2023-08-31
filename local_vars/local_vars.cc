@@ -352,8 +352,7 @@ class LocalNameInserter {
         auto method = ast::MK::Literal(original.loc,
                                        core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
-        auto shouldForwardBlockArg =
-            blockArg.loc().exists() /* || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict */;
+        auto shouldForwardBlockArg = blockArg.loc().exists();
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
@@ -437,7 +436,6 @@ class LocalNameInserter {
             original.fun = core::Names::callWithBlock();
         } else {
             // No positional splat and we have a "do", so we can synthesize an ordinary send.
-            // Or no block arg in sig, and in strict mode.
             original.reserveArguments(posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
 
