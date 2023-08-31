@@ -26,7 +26,7 @@ class C
 end
 
 c = C.new
-c.initialize
+c.initialize # error: Non-private call to private method `initialize` on `C`
 
 class D
   def self.initialize
@@ -42,3 +42,10 @@ sig {params(xs: T::Array[T.class_of(E)]).void}
 def example(xs)
   xs.map(&:new)
 end
+
+class F
+  public def initialize
+  end
+end
+f = F.new
+f.initialize
