@@ -627,7 +627,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         auto unknownMethodCode = args.name == Names::super()
-                                     // So people can ignore new, super-related errors if need be
+                                     // So we can attach super-specific autocorrects at some point in the future
                                      ? errors::Infer::UnknownSuperMethod
                                      : errors::Infer::UnknownMethod;
 
