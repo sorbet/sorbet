@@ -614,22 +614,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (!mayBeOverloaded.exists()) {
-        if (args.name == Names::initialize()) {
-            // Special-case initialize(). We should define this on
-            // `BasicObject`, but our method-resolution order is wrong, and
-            // putting it there will inadvertently shadow real definitions in
-            // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-            if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
-                                args.args.size());
-                    e.replaceWith("Delete args", args.argsLoc(), "");
-                    result.main.errors.emplace_back(e.build());
-                }
-            }
-            return result;
-        }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
@@ -1275,7 +1259,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
             }
 
-            if (!hasKwargs) {
+            if (args.name == Names::initialize()) {
+                e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.replaceWith("Delete extra args", deleteLoc, "");
+            } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
