@@ -157,6 +157,8 @@ paperino(2, y: 3, z: 4)
 super-arity-messages.rb:12: Method `unary2` does not exist on ancestors of `Parent` https://srb.help/7048
     12 |    super
             ^^^^^
+  Note:
+    As a last resort, silence all `super`-related errors using `--typed-super=false`
 
 super-arity-messages.rb:19: Not enough arguments provided for method `Parent#unary1`. Expected: `1`, got: `0` https://srb.help/7004
     19 |    super
@@ -165,16 +167,12 @@ super-arity-messages.rb:19: Not enough arguments provided for method `Parent#una
      7 |  def unary1(x)
           ^^^^^^^^^^^^^
 
-super-arity-messages.rb:23: Too many arguments provided for method `Parent#unary2`. Expected: `1`, got: `2` https://srb.help/7004
-    23 |  def unary2(x, y)
-                        ^
+super-arity-messages.rb:24: Too many arguments provided for method `Parent#unary2`. Expected: `1`, got: `2` https://srb.help/7004
+    24 |    super
+                 ^
     super-arity-messages.rb:11: `unary2` defined here
     11 |  def unary2(x)
           ^^^^^^^^^^^^^
-  Autocorrect: Done
-    super-arity-messages.rb:23: Deleted
-    23 |  def unary2(x, y)
-                      ^^^
 Errors: 3
 
 --------------------------------------------------------------------------
@@ -201,7 +199,7 @@ class Child < Parent
   end
 
   sig {params(x: Integer, y: String).void}
-  def unary2(x)
+  def unary2(x, y)
     super
   end
 end
