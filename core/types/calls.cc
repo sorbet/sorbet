@@ -2007,21 +2007,20 @@ public:
                                /* isPrivateOk */ true,
                                args.suppressErrors};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
-
-        for (auto &err : res.main.errors) {
-            dispatched.main.errors.emplace_back(std::move(err));
-        }
-        res.main.errors.clear();
-        res.main = move(dispatched.main);
-        if (!res.main.method.exists()) {
+        if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
             // result.
             //
             // But if this class hasn't defined a custom `initialize` method, still record that we
             // dispatched to *something*, namely `Class#new`.
-            res.main.method = core::Symbols::Class_new();
+
+            for (auto &err : res.main.errors) {
+                dispatched.main.errors.emplace_back(std::move(err));
+            }
+            res.main = move(dispatched.main);
         }
+
         res.main.sendTp = instanceTy;
     }
 } Class_new;
