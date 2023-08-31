@@ -506,7 +506,12 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
         if ((overridenMethod.data(ctx)->flags.isAbstract || overridenMethod.data(ctx)->flags.isOverridable ||
              (overridenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
             !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
-            !method.data(ctx)->flags.isRewriterSynthesized) {
+            !method.data(ctx)->flags.isRewriterSynthesized &&
+            overridenMethod != core::Symbols::BasicObject_initialize()) {
+            // We only ignore BasicObject#initialize for backwards compatibility.
+            // One day, we may want to build something like overridable(allow_incompatible: true)
+            // and mark certain methods in the standard library as possible to be overridden incompatibly,
+            // without needing to write `override(allow_incompatible: true)`.
             validateCompatibleOverride(ctx, overridenMethod, method);
         }
     }

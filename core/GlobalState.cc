@@ -371,6 +371,8 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::Class());
     klass = synthesizeClass(core::Names::Constants::BasicObject(), 0);
     ENFORCE(klass == Symbols::BasicObject());
+    method = enterMethod(*this, Symbols::BasicObject(), Names::initialize()).build();
+    ENFORCE(method == Symbols::BasicObject_initialize());
     klass = synthesizeClass(core::Names::Constants::Kernel(), 0, true);
     ENFORCE(klass == Symbols::Kernel());
     klass = synthesizeClass(core::Names::Constants::Range());
