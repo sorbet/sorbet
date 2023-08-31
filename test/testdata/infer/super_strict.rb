@@ -46,8 +46,8 @@ class B < A
 
   sig { params(x: Integer).returns(Integer) }
   def foo(x)
-        # ^ error: Too many arguments provided for method `A#foo`. Expected: `0`, got: `1
     super
+    #    ^ error: Too many arguments provided for method `A#foo`. Expected: `0`, got: `1
     super(1)
         # ^ error: Too many arguments provided for method `A#foo`. Expected: `0`, got: `1`
     T.reveal_type(super()) # error: Revealed type: `Integer`
@@ -55,11 +55,11 @@ class B < A
 
   sig { params(x: String).returns(Integer) }
   def bar(x)
-        # ^ error: Expected `Integer` but found `String` for argument `x`
     super() # error: Not enough arguments provided for method `A#bar`. Expected: `1`, got: `0`
     super("a")
         # ^^^ error: Expected `Integer` but found `String("a")` for argument `x`
     super
+    #    ^ error: Expected `Integer` but found `String` for argument `x`
     super(1)
   end
 

@@ -17,7 +17,9 @@ ExplicitOverride = Struct.new(:foo) do
 
   sig {params(foo: String).returns(String)}
   def foo=(foo);
+    # This one is actually typed, because method calls ending in `=` always
+    # return their first argument (the VM mandates this). So the fact that the
+    # parent method has an untyped signature is irrelevant.
     super
-  # ^^^^^ untyped: Value returned from method is `T.untyped`
   end
 end

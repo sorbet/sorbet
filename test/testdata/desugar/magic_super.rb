@@ -15,11 +15,7 @@ class Child < Parent
   end
 
   def unary(x)
-    # Reporting no error here is actually incorrect, but consistently incorrect
-    #
-    # (it doesn't have to do with conflating `super()` and `<super>()` but
-    # rather that we don't type check `<super>` at all.
-    # See https://github.com/sorbet/sorbet/issues/1068)
     super(1, 2)
+    #        ^ error: Too many arguments provided for method `Parent#unary`
   end
 end

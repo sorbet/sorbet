@@ -709,13 +709,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <super>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 1
+            pos_args = 4
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U <blk>>
+              }
               Local{
                 localVariable = <U arg0>
               }
@@ -776,13 +784,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <super>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 0
+            pos_args = 3
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U <blk>>
+              }
               Literal{ value = :arg0 }
               Local{
                 localVariable = <U arg0>
@@ -851,13 +867,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <super>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 0
+            pos_args = 3
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U <blk>>
+              }
               Literal{ value = :arg0 }
               Local{
                 localVariable = <U arg0>
@@ -930,13 +954,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <super>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 1
+            pos_args = 4
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U <blk>>
+              }
               Local{
                 localVariable = <U arg0>
               }
@@ -1013,9 +1045,9 @@ ClassDef{
               symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U <call-with-splat>>
+            fun = <U <call-with-splat-and-block>>
             block = nullptr
-            pos_args = 4
+            pos_args = 5
             args = [
               Send{
                 flags = {}
@@ -1049,6 +1081,9 @@ ClassDef{
                 ]
               }
               Literal{ value = nil }
+              Local{
+                localVariable = <U <blk>>
+              }
             ]
           }
         }
@@ -1114,13 +1149,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <super>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 0
+            pos_args = 3
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<super> }
+              Local{
+                localVariable = <U <blk>>
+              }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -1274,13 +1317,21 @@ ClassDef{
               ]
               body = Send{
                 flags = {privateOk}
-                recv = Local{
-                  localVariable = <U <self>>
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
                 }
-                fun = <U <untypedSuper>>
+                fun = <U <call-with-block>>
                 block = nullptr
-                pos_args = 0
+                pos_args = 3
                 args = [
+                  Local{
+                    localVariable = <U <self>>
+                  }
+                  Literal{ value = :<untypedSuper> }
+                  Local{
+                    localVariable = <U <blk>>
+                  }
                 ]
               }
             }
@@ -1355,13 +1406,21 @@ ClassDef{
             } }]
           rhs = Send{
             flags = {privateOk}
-            recv = Local{
-              localVariable = <U <self>>
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
             }
-            fun = <U <untypedSuper>>
+            fun = <U <call-with-block>>
             block = nullptr
-            pos_args = 0
+            pos_args = 3
             args = [
+              Local{
+                localVariable = <U <self>>
+              }
+              Literal{ value = :<untypedSuper> }
+              Local{
+                localVariable = <U <blk>>
+              }
             ]
           }
         }
