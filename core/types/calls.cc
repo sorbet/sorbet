@@ -1335,11 +1335,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // block parameter" error, so we can use the heuristic about isSyntheticBlockArgument.
         // (Some RBI-only strictness levels are technically higher than strict but don't require
         // having written a sig. This usually manifests as `def foo(*_); end` with no sig in an RBI.)
+        //
+        // We also have to check whether the blockLoc exists and is not empty. (Sometimes the block
+        // can be imaginary, like from a bare `super` call).
         if (data->hasSig() && data->loc().exists()) {
             auto file = data->loc().file();
+            auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                bspec.isSyntheticBlockArgument()) {
-                auto blockLoc = args.blockLoc(gs);
+                bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {

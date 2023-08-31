@@ -352,8 +352,6 @@ class LocalNameInserter {
         auto method = ast::MK::Literal(original.loc,
                                        core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
 
-        auto shouldForwardBlockArg = blockArg.loc().exists();
-
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
@@ -399,16 +397,10 @@ class LocalNameInserter {
                 // Re-add block argument
                 original.setBlock(std::move(originalBlock));
             } else {
-                if (shouldForwardBlockArg) {
-                    // <call-with-splat-and-block>(..., &blk)
-                    original.fun = core::Names::callWithSplatAndBlock();
-                    original.addPosArg(std::move(blockArg));
-                } else {
-                    // <call-with-splat>(...)
-                    original.fun = core::Names::callWithSplat();
-                }
+                original.fun = core::Names::callWithSplatAndBlock();
+                original.addPosArg(std::move(blockArg));
             }
-        } else if (originalBlock == nullptr && shouldForwardBlockArg) {
+        } else if (originalBlock == nullptr) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
@@ -453,9 +445,7 @@ class LocalNameInserter {
                 }
             }
             // Re-add original block
-            if (originalBlock) {
-                original.setBlock(std::move(originalBlock));
-            }
+            original.setBlock(std::move(originalBlock));
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
         }
