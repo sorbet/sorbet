@@ -27,6 +27,7 @@ message Name {
          PACKAGER = 13;
          // PACKAGER_PRIVATE = 14;
          MANGLE_RENAME_OVERLOAD = 15;
+         STRUCT = 16;
     };
 
     Kind kind = 1;

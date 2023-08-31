@@ -1,0 +1,79 @@
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^
+  Got `T.class_of(Sorbet::Private::Static)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^
+  Got `T.class_of(Sorbet::Private::Static)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^
+  Got `T.class_of(Sorbet::Private::Static)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `keep_for_ide` does not exist on `T.class_of(Sorbet::Private::Static)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^
+  Got `T.class_of(Sorbet::Private::Static)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+  Got `T.class_of(Kernel)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+    ???: Did you mean: `Kernel#raise`
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+  Got `T.class_of(Kernel)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2:
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+    ???: Did you mean: `Kernel#raise`
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+  Got `T.class_of(Kernel)` originating from:
+    test/cli/struct_fuzz/struct_fuzz.rb:2: Possibly uninitialized (`NilClass`) in:
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+    ???: Did you mean: `Kernel#raise`
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `returns` does not exist on `T.class_of(B)` https://srb.help/7003
+     2 |::B=Struct.new:x
+                       ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `params` does not exist on `T.class_of(B)` https://srb.help/7003
+     2 |::B=Struct.new:x
+                       ^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `params` does not exist on `T.class_of(B)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `type_member` does not exist on `T.class_of(B)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+
+test/cli/struct_fuzz/struct_fuzz.rb:2: Method `type_member` does not exist on `T.class_of(B)` https://srb.help/7003
+     2 |::B=Struct.new:x
+        ^^^^^^^^^^^^^^^^
+Errors: 12

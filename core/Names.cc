@@ -72,6 +72,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::TEnum:
                     kind = "E";
                     break;
+                case UniqueNameKind::Struct:
+                    kind = "U";
+                    break;
                 case UniqueNameKind::Packager:
                     kind = "G";
                     break;
@@ -186,6 +189,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::MangleRename:
                 case UniqueNameKind::MangleRenameOverload:
                 case UniqueNameKind::TEnum:
+                case UniqueNameKind::Struct:
                     return dataUnique(gs)->original.isClassName(gs);
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::Packager:
@@ -220,6 +224,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
             switch (dataUnique(gs)->uniqueNameKind) {
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::TEnum:
+                case UniqueNameKind::Struct:
                 case UniqueNameKind::Packager:
                     return true;
                 case UniqueNameKind::Parser:
