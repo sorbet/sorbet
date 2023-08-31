@@ -668,6 +668,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // - If similar name exists in parent suggest renaming enclosing method definition
                 //   (intialize -> initialize, etc.)
                 // - Otherwise, suggest `T.bind`
+                e.addErrorNote("As a last resort, silence all `{}`-related errors using `{}`", "super",
+                               "--typed-super=false");
             } else if (args.receiverLoc().exists() &&
                        (gs.suggestUnsafe.has_value() ||
                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
