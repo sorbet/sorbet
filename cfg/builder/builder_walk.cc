@@ -328,8 +328,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, current);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
-                auto thenEnd = walk(cctx, a.thenp, thenBlock);
-                auto elseEnd = walk(cctx, a.elsep, elseBlock);
+                auto thenResult = cctx.newTemporary(core::Names::ifTemp());
+                auto thenEnd = walk(cctx.withTarget(thenResult), a.thenp, thenBlock);
+                synthesizeExpr(thenEnd, cctx.target, a.loc, make_insn<Ident>(thenResult));
+
+                auto elseResult = cctx.newTemporary(core::Names::ifTemp());
+                auto elseEnd = walk(cctx.withTarget(elseResult), a.elsep, elseBlock);
+                synthesizeExpr(elseEnd, cctx.target, a.loc, make_insn<Ident>(elseResult));
+
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;
