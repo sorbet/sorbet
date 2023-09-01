@@ -500,7 +500,7 @@ string prettyArity(const GlobalState &gs, MethodRef method) {
 }
 
 void maybeSuggestUnsafeKwsplat(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc kwSplatArgLoc) {
-    if (!kwSplatArgLoc.exists()) {
+    if (!kwSplatArgLoc.exists() || kwSplatArgLoc.empty()) {
         return;
     }
 
@@ -588,25 +588,31 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (args.name == Names::methodNameMissing()) {
         // We already reported a parse error earlier in the pipeline
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-    } else if (args.name == Names::super()) {
-        // Currently, `super` is completely untyped.
+    } else if (args.name == Names::untypedSuper()) {
+        // Currently, `super` is only checked for the following cases:
+        // - The receiver is a class
+        // - The super call is not inside a block
         // No point in paying a full findMethodTransitive just to discover that.
         return DispatchResult(Types::untyped(Symbols::Magic_UntypedSource_super()), std::move(args.selfType),
                               Symbols::noMethod());
     }
 
-    // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
-    // in which case we could simply let the findMethodTransitive run and fail to find any methods
+    auto targetName = args.name;
     MethodRef mayBeOverloaded;
-    if (symbol != core::Symbols::top()) {
-        mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, args.name);
+    if (targetName == Names::super()) {
+        targetName = args.enclosingMethodForSuper;
+        mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, targetName);
+    } else if (symbol != core::Symbols::top()) {
+        // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
+        // in which case we could simply let the findMethodTransitive run and fail to find any methods
+        mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
         for (auto ancst : ancestors) {
-            mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, args.name);
+            mayBeOverloaded = ancst.symbol.data(gs)->findMethodTransitive(gs, targetName);
             if (mayBeOverloaded.exists()) {
                 break;
             }
@@ -614,40 +620,31 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (!mayBeOverloaded.exists()) {
-        if (args.name == Names::initialize()) {
-            // Special-case initialize(). We should define this on
-            // `BasicObject`, but our method-resolution order is wrong, and
-            // putting it there will inadvertently shadow real definitions in
-            // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
-            if (!args.args.empty() && !args.suppressErrors) {
-                if (auto e = gs.beginError(args.argsLoc(), errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
-                                args.args.size());
-                    e.replaceWith("Delete args", args.argsLoc(), "");
-                    result.main.errors.emplace_back(e.build());
-                }
-            }
-            return result;
-        }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return result;
         }
+
+        auto unknownMethodCode = args.name == Names::super()
+                                     // So we can attach super-specific autocorrects at some point in the future
+                                     ? errors::Infer::UnknownSuperMethod
+                                     : errors::Infer::UnknownMethod;
+
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
         // Instead, the error always should get queued up in the
         // errors list of the result so that the caller can deal with the error.
-        auto e = gs.beginError(errLoc, errors::Infer::UnknownMethod);
+        auto e = gs.beginError(errLoc, unknownMethodCode);
         if (e) {
             string thisStr = args.thisType.show(gs);
+            auto ancestorsOf = args.name == Names::super() ? "ancestors of " : "";
             if (args.fullType.type != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                            args.fullType.type.show(gs));
+                e.setHeader("Method `{}` does not exist on {}`{}` component of `{}`", targetName.show(gs), ancestorsOf,
+                            thisStr, args.fullType.type.show(gs));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
+                e.setHeader("Method `{}` does not exist on {}`{}`", targetName.show(gs), ancestorsOf, thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
@@ -664,6 +661,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Sig(), "");
+            } else if (args.name == Names::super()) {
+                // TODO(jez) Special error for super.
+                // - If identical name exists as self/instance method in parent but we're currently
+                //   an instance/self method, suggest changing enclosing method definition.
+                // - If similar name exists in parent suggest renaming enclosing method definition
+                //   (intialize -> initialize, etc.)
+                // - Otherwise, suggest `T.bind`
+                // Note: super is not a method call, and so all the logic in the case below to
+                // compute autocorrects to potentially fix up the method call's receiver can't apply.
+                e.addErrorNote("For help fixing `{}` errors: {}", "super", "https://sorbet.org/docs/typed-super");
             } else if (args.receiverLoc().exists() &&
                        (gs.suggestUnsafe.has_value() ||
                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
@@ -696,7 +703,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
-                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
+                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                 for (auto alternative : alternatives) {
                     auto possibleSymbol = alternative.symbol;
                     if (!possibleSymbol.isClassOrModule() &&
@@ -1094,7 +1101,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 method.show(gs), prettyArity(gs, method), posArgs);
                 }
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
-                if (args.name == core::Names::any() &&
+                if (targetName == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
                 }
@@ -1275,11 +1282,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
             }
 
-            if (!hasKwargs) {
+            if (method == Symbols::BasicObject_initialize()) {
+                e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
+                e.replaceWith("Delete extra args", deleteLoc, "");
+            } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
-                e.replaceWith("Delete extra args", deleteLoc, "");
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
+                if (!deleteLoc.empty()) {
+                    e.replaceWith("Delete extra args", deleteLoc, "");
+                }
             } else {
                 // if we have keyword arguments, we should print a more informative message: otherwise, we might give
                 // people some slightly confusing error messages.
@@ -1287,7 +1300,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             method.show(gs), prettyArity(gs, method), posArgs);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
@@ -1304,7 +1317,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         e.replaceWith(fmt::format("Prefix with `{}:`", possibleArg), extraArgsLoc.copyWithZeroLength(),
                                       "{}: ", possibleArg);
                     }
-                } else {
+                } else if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
@@ -1322,11 +1335,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // block parameter" error, so we can use the heuristic about isSyntheticBlockArgument.
         // (Some RBI-only strictness levels are technically higher than strict but don't require
         // having written a sig. This usually manifests as `def foo(*_); end` with no sig in an RBI.)
+        //
+        // We also have to check whether the blockLoc exists and is not empty. (Sometimes the block
+        // can be imaginary, like from a bare `super` call).
         if (data->hasSig() && data->loc().exists()) {
             auto file = data->loc().file();
+            auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
-                bspec.isSyntheticBlockArgument()) {
-                auto blockLoc = args.blockLoc(gs);
+                bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
@@ -1396,7 +1412,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
-                e.setHeader("`{}` requires a block parameter, but no block was passed", args.name.show(gs));
+                e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
             }
@@ -1569,7 +1585,8 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.block,
                                           args.originForUninitialized,
                                           /* isPrivateOk */ true,
-                                          args.suppressErrors};
+                                          args.suppressErrors,
+                                          args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             original.main.sendTp = wrapped;
@@ -2005,23 +2022,23 @@ public:
                                args.block,
                                args.originForUninitialized,
                                /* isPrivateOk */ true,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
-
-        for (auto &err : res.main.errors) {
-            dispatched.main.errors.emplace_back(std::move(err));
-        }
-        res.main.errors.clear();
-        res.main = move(dispatched.main);
-        if (!res.main.method.exists()) {
+        if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
             // result.
             //
             // But if this class hasn't defined a custom `initialize` method, still record that we
             // dispatched to *something*, namely `Class#new`.
-            res.main.method = core::Symbols::Class_new();
+
+            for (auto &err : res.main.errors) {
+                dispatched.main.errors.emplace_back(std::move(err));
+            }
+            res.main = move(dispatched.main);
         }
+
         res.main.sendTp = instanceTy;
     }
 } Class_new;
@@ -2073,7 +2090,7 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchResult &r
     auto recv = *args.args[0];
     res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
                                       recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
-                                      args.suppressErrors});
+                                      args.suppressErrors, args.enclosingMethodForSuper});
 }
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
@@ -2318,7 +2335,8 @@ public:
                                args.block,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
@@ -2374,7 +2392,8 @@ private:
                                nullptr,
                                originForUninitialized,
                                IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                               suppressErrors};
+                               suppressErrors,
+                               core::NameRef::noName()};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
@@ -2582,7 +2601,8 @@ public:
                                link,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(2), args.callLoc(),
                                           res);
@@ -2696,7 +2716,8 @@ public:
                                link,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType, args.argLoc(4), args.callLoc(),
                                           res);
@@ -2874,6 +2895,7 @@ public:
             args.originForUninitialized,
             args.isPrivateOk,
             args.suppressErrors,
+            args.enclosingMethodForSuper,
         };
         auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
 
@@ -2902,6 +2924,7 @@ public:
                     // We already reported one visibility error, if relevant
                     /* isPrivateOk */ true,
                     args.suppressErrors,
+                    args.enclosingMethodForSuper,
                 };
                 auto retried = selfTyAndAnd.type.dispatchCall(gs, newInnerArgs);
 
@@ -2985,7 +3008,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                              args.suppressErrors};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         auto dispatched = arg->type.dispatchCall(gs, dispatch);
 
         // The VM handles the case of an error when dispatching to_a, so the only
@@ -3396,7 +3420,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                              args.suppressErrors};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         res = arg->type.dispatchCall(gs, dispatch);
     }
 
@@ -3436,7 +3461,8 @@ class Magic_mergeHash : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         res = accType.dispatchCall(gs, mergeArgs);
     }
@@ -3505,7 +3531,8 @@ class Magic_mergeHashValues : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                args.isPrivateOk,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         res = accType.dispatchCall(gs, mergeArgs);
     }
@@ -3532,7 +3559,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         methodToDigWith,  baseCaseLocs,        1, /* numPosArgs */
         baseCaseArgTypes, args.selfType,       {args.selfType, args.fullType.origins},
         args.selfType,    args.block,          args.originForUninitialized,
-        args.isPrivateOk, args.suppressErrors,
+        args.isPrivateOk, args.suppressErrors, args.enclosingMethodForSuper,
     };
 
     auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
@@ -3604,6 +3631,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         args.originForUninitialized,
         false, /* isPrivateOk */
         args.suppressErrors,
+        args.enclosingMethodForSuper,
     };
 
     auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
@@ -3656,7 +3684,8 @@ class Array_flatten : public IntrinsicMethod {
                                nullptr,
                                args.originForUninitialized,
                                IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
-                               args.suppressErrors};
+                               args.suppressErrors,
+                               args.enclosingMethodForSuper};
 
         auto dispatched = type.dispatchCall(gs, innerArgs);
         if (dispatched.main.errors.empty()) {
@@ -3978,6 +4007,7 @@ public:
             args.originForUninitialized,
             IMPLICIT_CONVERSION_ALLOWS_PRIVATE,
             args.suppressErrors,
+            args.enclosingMethodForSuper,
         };
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
@@ -4021,7 +4051,8 @@ public:
                               nullptr,
                               args.originForUninitialized,
                               args.isPrivateOk,
-                              args.suppressErrors};
+                              args.suppressErrors,
+                              args.enclosingMethodForSuper};
         auto dispatched = hash.dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));

@@ -4139,6 +4139,26 @@ the guarantees of the type system.
 This feature is opt-in. See [VS Code](vscode.md) for instructions on how to turn
 it on.
 
+## 7048
+
+This error is like [7003](#7003), but for calls using `super`.
+
+That is, the difference is that Sorbet checks whether a method with the same
+name as the enclosing method exists on any ancestor of the current method.
+
+This error is caused by most of the same reasons that cause [7003](#7003), so
+it's best to read the docs for that code as well.
+
+See also:
+
+- [Why is `super` untyped, even when the parent method has a `sig`?]
+- [How can I fix type errors that arise from `super`?]
+
+[Why is `super` untyped, even when the parent method has a `sig`?]:
+  faq.md#why-is-super-untyped-even-when-the-parent-method-has-a-sig
+[How can I fix type errors that arise from `super`?]:
+  faq.md#how-can-i-fix-type-errors-that-arise-from-super
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

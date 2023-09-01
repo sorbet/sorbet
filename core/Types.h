@@ -970,6 +970,7 @@ struct DispatchArgs {
     // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
     // unreported errors is expensive!
     bool suppressErrors;
+    NameRef enclosingMethodForSuper;
 
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;

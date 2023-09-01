@@ -115,6 +115,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
     if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
       needs_requires_ancestor=true
     fi
+    if grep -q '^# typed-super: false' "${srcs[@]}"; then
+      needs_typed_super_false=true
+    else
+      needs_typed_super_false=false
+    fi
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
       # Document symbols is weird, because it's (currently) the only exp-style
@@ -163,6 +168,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args=("--enable-experimental-requires-ancestor")
       else
         args=()
+      fi
+      if $needs_typed_super_false; then
+        args+=("--typed-super=false")
+      else
+        args+=()
       fi
       if [ "$pass" = "autogen" ]; then
         args=("--stop-after=namer")

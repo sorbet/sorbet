@@ -436,7 +436,8 @@ llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx) {
         args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(vmIfuncType)));
     }
     auto *searchSuper =
-        llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super())));
+        llvm::ConstantInt::get(cs, llvm::APInt(1, static_cast<bool>(mcctx.send->fun == core::Names::super() ||
+                                                                    mcctx.send->fun == core::Names::untypedSuper())));
     args.emplace_back(searchSuper);
     args.emplace_back(cfp);
     args.emplace_back(recv);

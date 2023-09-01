@@ -409,6 +409,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
     options.add_options("advanced")("experimental-ruby3-keyword-args",
                                     "Enforce use of new (Ruby 3.0-style) keyword arguments", cxxopts::value<bool>());
+    options.add_options("advanced")("typed-super", "Enable typechecking of `super` calls when possible",
+                                    cxxopts::value<bool>()->default_value("true"));
     options.add_options("advanced")("check-out-of-order-constant-references",
                                     "Enable out-of-order constant reference checks (error 5027)");
     options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output");
@@ -1029,6 +1031,7 @@ void readOptions(Options &opts,
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
+        opts.typedSuper = raw["typed-super"].as<bool>();
         if (raw.count("error-white-list") > 0) {
             logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
             auto rawList = raw["error-white-list"].as<vector<int>>();

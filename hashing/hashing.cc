@@ -92,6 +92,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
     lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
     lgs->ruby3KeywordArgs = hashingOpts.ruby3KeywordArgs;
+    lgs->typedSuper = hashingOpts.typedSuper;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         auto fref = lgs->enterFile(forWhat);

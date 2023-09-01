@@ -34,7 +34,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U <blk>>
               }
@@ -55,7 +55,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -123,7 +123,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -186,7 +186,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -247,7 +247,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -328,7 +328,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -409,7 +409,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -493,7 +493,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -581,7 +581,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -683,7 +683,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -771,7 +771,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U blk>
               }
@@ -792,7 +792,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -860,7 +860,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -923,7 +923,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -984,7 +984,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -1065,7 +1065,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -1146,7 +1146,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -1230,7 +1230,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -1318,7 +1318,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -1420,7 +1420,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -1512,7 +1512,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U <blk>>
               }
@@ -1541,7 +1541,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -1621,7 +1621,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -1695,7 +1695,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -1771,7 +1771,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -1863,7 +1863,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -1959,7 +1959,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -2054,7 +2054,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -2157,7 +2157,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -2270,7 +2270,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -2371,7 +2371,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U <blk>>
               }
@@ -2407,7 +2407,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -2492,7 +2492,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -2573,7 +2573,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -2654,7 +2654,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -2753,7 +2753,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -2854,7 +2854,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -2956,7 +2956,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -3064,7 +3064,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -3184,7 +3184,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -3296,7 +3296,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U <blk>>
               }
@@ -3356,7 +3356,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -3469,7 +3469,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -3574,7 +3574,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -3683,7 +3683,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -3806,7 +3806,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -3935,7 +3935,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -4061,7 +4061,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -4197,7 +4197,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -4341,7 +4341,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -4475,7 +4475,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U blk>
               }
@@ -4504,7 +4504,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -4584,7 +4584,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -4658,7 +4658,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -4734,7 +4734,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -4826,7 +4826,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -4922,7 +4922,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -5017,7 +5017,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -5120,7 +5120,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -5233,7 +5233,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -5334,7 +5334,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U blk>
               }
@@ -5370,7 +5370,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -5455,7 +5455,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -5536,7 +5536,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -5617,7 +5617,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -5716,7 +5716,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -5817,7 +5817,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -5919,7 +5919,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -6027,7 +6027,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -6147,7 +6147,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -6259,7 +6259,7 @@ ClassDef{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Local{
                 localVariable = <U blk>
               }
@@ -6319,7 +6319,7 @@ ClassDef{
           recv = Local{
             localVariable = <U <self>>
           }
-          fun = <U <super>>
+          fun = <U <untypedSuper>>
           block = Block {
             args = [
             ]
@@ -6432,7 +6432,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = ConstantLit{
@@ -6537,7 +6537,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = ConstantLit{
@@ -6646,7 +6646,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -6769,7 +6769,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{
@@ -6898,7 +6898,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Array{
@@ -7024,7 +7024,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Array{
@@ -7160,7 +7160,7 @@ ClassDef{
                   }
                 ]
               }
-              Literal{ value = :<super> }
+              Literal{ value = :<untypedSuper> }
               Send{
                 flags = {}
                 recv = Send{
@@ -7304,7 +7304,7 @@ ClassDef{
                 }
               ]
             }
-            Literal{ value = :<super> }
+            Literal{ value = :<untypedSuper> }
             Send{
               flags = {}
               recv = Send{

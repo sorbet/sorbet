@@ -65,7 +65,7 @@ when b
   "b"
 end
 
-# use of super
+# use of super in class
 class Base
   extend T::Sig
 
@@ -78,6 +78,15 @@ end
 class Derived < Base
   extend T::Sig
   sig { override.returns(String) }
+  def foo
+    super
+  end
+end
+
+# use of super in module
+module CallsSuperInModule
+  extend T::Sig
+  sig { returns(String) }
   def foo
     super
 #   ^^^^^ untyped: Value returned from method is `T.untyped`

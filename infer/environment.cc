@@ -917,7 +917,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
 }
 
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
-                          core::NameRef fun, const core::Loc &loc) {
+                          core::NameRef fun, const core::Loc &loc, const core::NameRef currentMethodName) {
     if (fun != core::Names::flatMap()) {
         return returnType;
     }
@@ -945,7 +945,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     };
 
     core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
-                                    recvType.type,          nullptr, loc, true, false};
+                                    recvType.type,          nullptr, loc, true, false,         currentMethodName};
 
     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
     if (dispatched.main.errors.empty()) {
@@ -998,9 +998,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // This is the main place where we type check a method, so we default by assuming
                 // that we want to report all errors (supressing nothing).
                 auto suppressErrors = false;
-                core::DispatchArgs dispatchArgs{
-                    send.fun,  locs,     send.numPosArgs,  args,          recvType.type, recvType, recvType.type,
-                    send.link, ownerLoc, send.isPrivateOk, suppressErrors};
+                core::DispatchArgs dispatchArgs{send.fun,        locs,
+                                                send.numPosArgs, args,
+                                                recvType.type,   recvType,
+                                                recvType.type,   send.link,
+                                                ownerLoc,        send.isPrivateOk,
+                                                suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
@@ -1246,7 +1249,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     type = i.link->result->returnType;
                 }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc);
+                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
             },
@@ -1392,7 +1395,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     block,
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
-                                                    suppressErrors};
+                                                    suppressErrors,
+                                                    inWhat.symbol.data(ctx)->name};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;
                 }

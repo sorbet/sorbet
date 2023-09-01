@@ -22,8 +22,10 @@ class Bar
 
     Foo1.new(1) {}
     #        ^ error: Wrong number of arguments for constructor
+    #          ^^^ error: Method `BasicObject#initialize` does not take a block
     Foo1.new 1 do end
     #        ^ error: Wrong number of arguments for constructor
+    #         ^^^^^^^ error: Method `BasicObject#initialize` does not take a block
   end
 end
 

@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C CompatibleOverride><<C <todo sym>>> < (<emptyTree>::<C CompatibleOverride$1>)
     def initialize<<todo method>>(foo, &<blk>)
-      <self>.<super>(ZSuperArgs)
+      <self>.<untypedSuper>(ZSuperArgs)
     end
 
     <emptyTree>::<C Elem> = <self>.type_member() do ||
@@ -85,7 +85,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C MismatchKeywordInit><<C <todo sym>>> < (<emptyTree>::<C MismatchKeywordInit$1>)
     def initialize<<todo method>>(foo, &<blk>)
-      <self>.<super>(ZSuperArgs)
+      <self>.<untypedSuper>(ZSuperArgs)
     end
 
     <emptyTree>::<C Elem> = <self>.type_member() do ||
@@ -153,7 +153,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C DifferentArity><<C <todo sym>>> < (<emptyTree>::<C DifferentArity$1>)
     def initialize<<todo method>>(a, &<blk>)
-      <self>.<super>(:a, a, :b, "b")
+      <self>.<untypedSuper>(:a, a, :b, "b")
     end
 
     <emptyTree>::<C Elem> = <self>.type_member() do ||

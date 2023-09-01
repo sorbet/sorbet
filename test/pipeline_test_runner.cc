@@ -337,6 +337,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     gs->ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
+    gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
 
     if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);

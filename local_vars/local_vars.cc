@@ -210,6 +210,7 @@ class LocalNameInserter {
 
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         ENFORCE(original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0)));
+        ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::untypedSuper());
 
         ast::ExpressionPtr originalBlock;
         if (auto *rawBlock = original.rawBlock()) {
@@ -218,6 +219,7 @@ class LocalNameInserter {
 
         // Clear out the args (which are just [ZSuperArgs]) in the original send. (Note that we want this cleared even
         // if we error out below, because later `ENFORCE`s will be triggered if we don't.)
+        auto zSuperArgsLoc = original.getPosArg(0).loc();
         original.clearArgs();
 
         if (!scopeStack.back().insideMethod) {
@@ -283,17 +285,17 @@ class LocalNameInserter {
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional arg after keyword arg");
                 ENFORCE(kwArgsHash == nullptr, "Saw positional arg after keyword splat");
 
-                posArgsEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                posArgsEntries.emplace_back(ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
             } else if (arg.flags.isPositionalSplat()) {
                 ENFORCE(posArgsArray == nullptr, "Saw multiple positional splats");
                 ENFORCE(kwArgKeyEntries.empty(), "Saw positional splat after keyword arg");
                 ENFORCE(kwArgsHash == nullptr, "Saw positional splat after keyword splat");
 
-                posArgsArray = ast::MK::Splat(original.loc, ast::make_expression<ast::Local>(original.loc, arg.arg));
+                posArgsArray = ast::MK::Splat(zSuperArgsLoc, ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
                 if (!posArgsEntries.empty()) {
-                    posArgsArray = ast::MK::Send1(original.loc, ast::MK::Array(original.loc, std::move(posArgsEntries)),
-                                                  core::Names::concat(), original.loc.copyWithZeroLength(),
-                                                  std::move(posArgsArray));
+                    posArgsArray = ast::MK::Send1(
+                        zSuperArgsLoc, ast::MK::Array(zSuperArgsLoc, std::move(posArgsEntries)), core::Names::concat(),
+                        zSuperArgsLoc.copyWithZeroLength(), std::move(posArgsArray));
                     posArgsEntries.clear();
                 }
             } else if (arg.flags.isKeyword()) {
@@ -301,27 +303,28 @@ class LocalNameInserter {
 
                 auto name = arg.arg._name;
                 kwArgKeyEntries.emplace_back(ast::MK::Literal(
-                    original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
-                kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
+                    zSuperArgsLoc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), name)));
+                kwArgValueEntries.emplace_back(ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
             } else if (arg.flags.isKeywordSplat()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw multiple keyword splats");
 
                 // TODO(aprocter): is it necessary to duplicate the hash here?
-                kwArgsHash = ast::MK::Send1(original.loc, ast::MK::Magic(original.loc), core::Names::toHashDup(),
-                                            original.loc.copyWithZeroLength(),
-                                            ast::make_expression<ast::Local>(original.loc, arg.arg));
+                kwArgsHash = ast::MK::Send1(zSuperArgsLoc, ast::MK::Magic(zSuperArgsLoc), core::Names::toHashDup(),
+                                            zSuperArgsLoc.copyWithZeroLength(),
+                                            ast::make_expression<ast::Local>(zSuperArgsLoc, arg.arg));
                 if (!kwArgKeyEntries.empty()) {
                     // TODO(aprocter): it might make more sense to replace this with an InsSeq that calls
                     // <Magic>::<merge-hash>, which is what's done in the desugarer.
                     kwArgsHash = ast::MK::Send1(
-                        original.loc,
-                        ast::MK::Hash(original.loc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
-                        core::Names::merge(), original.loc.copyWithZeroLength(), std::move(kwArgsHash));
+                        zSuperArgsLoc,
+                        ast::MK::Hash(zSuperArgsLoc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
+                        core::Names::merge(), zSuperArgsLoc.copyWithZeroLength(), std::move(kwArgsHash));
                     kwArgKeyEntries.clear();
                     kwArgValueEntries.clear();
                 }
             } else if (arg.flags.block) {
-                blockArg = ast::make_expression<ast::Local>(original.loc, arg.arg);
+                auto blockLoc = arg.arg._name == core::Names::blkArg() ? core::LocOffsets::none() : zSuperArgsLoc;
+                blockArg = ast::make_expression<ast::Local>(blockLoc, arg.arg);
             } else if (arg.flags.shadow) {
                 ENFORCE(false, "Shadow only come from blocks, but super only looks at a method's args");
             } else {
@@ -341,13 +344,17 @@ class LocalNameInserter {
             posArgsEntries.clear();
         }
 
-        auto method = ast::MK::Literal(
-            original.loc, core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), core::Names::super()));
+        auto method = ast::MK::Literal(original.loc,
+                                       core::make_type<core::NamedLiteralType>(core::Symbols::Symbol(), original.fun));
+
+        auto shouldForwardBlockArg =
+            blockArg.loc().exists() || ctx.file.data(ctx).strictLevel < core::StrictLevel::Strict;
 
         if (posArgsArray != nullptr) {
             // We wrap self with T.unsafe in order to get around the requirement for <call-with-splat> and
             // <call-with-splat-and-block> that the shapes of the splatted hashes be known statically. This is a bit of
             // a hack, but 'super' is currently treated as untyped anyway.
+            // TODO(neil): this probably blames to unsafe, we should find a way to blame to super maybe?
             original.addPosArg(ast::MK::Unsafe(original.loc, std::move(original.recv)));
             original.addPosArg(std::move(method));
 
@@ -387,12 +394,15 @@ class LocalNameInserter {
                 original.fun = core::Names::callWithSplat();
                 // Re-add block argument
                 original.setBlock(std::move(originalBlock));
-            } else {
+            } else if (shouldForwardBlockArg) {
                 // <call-with-splat-and-block>(..., &blk)
                 original.fun = core::Names::callWithSplatAndBlock();
                 original.addPosArg(std::move(blockArg));
+            } else {
+                // <call-with-splat>(...)
+                original.fun = core::Names::callWithSplat();
             }
-        } else if (originalBlock == nullptr) {
+        } else if (originalBlock == nullptr && shouldForwardBlockArg) {
             // No positional splat and no "do", so we need to forward &<blkvar> with <call-with-block>.
             original.reserveArguments(3 + posArgsEntries.size(), kwArgKeyEntries.size(),
                                       /* hasKwSplat */ kwArgsHash != nullptr, /* hasBlock */ false);
@@ -437,7 +447,9 @@ class LocalNameInserter {
                 }
             }
             // Re-add original block
-            original.setBlock(std::move(originalBlock));
+            if (originalBlock) {
+                original.setBlock(std::move(originalBlock));
+            }
             kwArgKeyEntries.clear();
             kwArgValueEntries.clear();
         }

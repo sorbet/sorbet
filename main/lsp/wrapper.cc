@@ -30,6 +30,7 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
 
     gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
     gs.ruby3KeywordArgs = options.ruby3KeywordArgs;
+    gs.typedSuper = options.typedSuper;
 
     // Ensure LSP is enabled.
     options.runLSP = true;
