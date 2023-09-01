@@ -29,7 +29,7 @@ export enum RestartReason {
 }
 
 // Note: Sorbet is either running/in the process or running, or in an error state. There's no benign idle/not running state.
-export enum ServerStatus {
+export const enum ServerStatus {
   // The language client is disabled.
   DISABLED,
   // The language client is restarting.
