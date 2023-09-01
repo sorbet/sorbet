@@ -17,7 +17,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Also cat the file, to make that the autocorrect applied
+# Also cat the file, to make sure that the autocorrect applied
 cat autocorrect_array_plus.rb
 
 rm autocorrect_array_plus.rb
