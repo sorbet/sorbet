@@ -137,11 +137,12 @@ class LocalNameInserter {
     }
 
     LocalFrame &enterMethod() {
-        auto insideModule = scopeStack.back().insideModule;
+        const auto &lastFrame = scopeStack.back();
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
-        frame.insideModule = insideModule;
+        frame.insideModule = lastFrame.insideModule;
+        frame.insideAnyBlock = lastFrame.insideAnyBlock;
         blockCounter = 1;
         return frame;
     }
