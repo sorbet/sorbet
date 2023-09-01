@@ -377,6 +377,9 @@ aware of:
   p(foo_serialized) # => {"foo_or_bar"=><Foo foo=12>}
   ```
 
+- Same with [generic-typed](generics.md) properties containing `T::Struct`
+  instances: these are also not serialized.
+
 ### `from_hash` gotchas
 
 As mentioned in the [previous section][legacy], the `deserialize` behavior was
