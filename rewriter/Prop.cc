@@ -586,7 +586,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     // to get the correct handling.
     ast::ExpressionPtr maybeSuper;
     if (absl::c_any_of(props, [](const auto &prop) { return prop.enum_ != nullptr; })) {
-        maybeSuper = ast::MK::ZSuper(klassDeclLoc);
+        maybeSuper = ast::MK::ZSuper(klassDeclLoc, core::Names::untypedSuper());
     } else {
         maybeSuper = ast::MK::Nil(klassDeclLoc);
     }

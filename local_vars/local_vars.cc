@@ -116,16 +116,14 @@ class LocalNameInserter {
         bool insideBlock = false;
         bool insideMethod = false;
         bool insideModule = false;
-        bool insideAnyBlock = false;
     };
 
-    LocalFrame &pushBlockFrame(bool insideMethod, bool insideModule, bool insideAnyBlock) {
+    LocalFrame &pushBlockFrame(bool insideMethod, bool insideModule) {
         auto &frame = scopeStack.emplace_back();
         frame.localId = blockCounter;
         frame.insideBlock = true;
         frame.insideMethod = insideMethod;
         frame.insideModule = insideModule;
-        frame.insideAnyBlock = insideAnyBlock;
         ++blockCounter;
         return frame;
     }
@@ -133,7 +131,7 @@ class LocalNameInserter {
     LocalFrame &enterBlock() {
         // NOTE: the base-case for this being a valid initialization is setup by
         // the `create()` static method.
-        return pushBlockFrame(scopeStack.back().insideMethod, scopeStack.back().insideModule, true);
+        return pushBlockFrame(scopeStack.back().insideMethod, scopeStack.back().insideModule);
     }
 
     LocalFrame &enterMethod() {
@@ -142,7 +140,6 @@ class LocalNameInserter {
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
         frame.insideModule = lastFrame.insideModule;
-        frame.insideAnyBlock = lastFrame.insideAnyBlock;
         blockCounter = 1;
         return frame;
     }
@@ -477,15 +474,6 @@ class LocalNameInserter {
         }
     }
 
-    core::NameRef maybeTypedSuper(core::MutableContext ctx) {
-        // If the super calls occurs inside a block, or a module, we would like to leave it as untyped,
-        // rather than checking it. This code replaces those <super> with <untypedSuper>,
-        // and then dispatchCallSymbol will ignore those.
-        return (ctx.state.typedSuper && !scopeStack.back().insideAnyBlock && !scopeStack.back().insideModule)
-                   ? core::Names::super()
-                   : core::Names::untypedSuper();
-    }
-
 public:
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -513,25 +501,8 @@ public:
 
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (original.fun == core::Names::callWithBlock() || original.fun == core::Names::callWithSplat() ||
-            original.fun == core::Names::callWithSplatAndBlock()) {
-            ENFORCE(ast::isa_tree<ast::Literal>(original.getPosArg(1)));
-            auto literal = ast::cast_tree_nonnull<ast::Literal>(original.getPosArg(1));
-
-            ENFORCE(core::isa_type<core::NamedLiteralType>(literal.value));
-            auto methodName = core::cast_type_nonnull<core::NamedLiteralType>(literal.value).asName();
-
-            if (methodName == core::Names::super()) {
-                auto newMethod = ast::MK::Literal(literal.loc, core::make_type<core::NamedLiteralType>(
-                                                                   core::Symbols::Symbol(), maybeTypedSuper(ctx)));
-                original.removePosArg(1);
-                original.insertPosArg(1, std::move(newMethod));
-            }
-        } else if (original.fun == core::Names::super()) {
-            original.fun = maybeTypedSuper(ctx);
-            if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
-                tree = lowerZSuperArgs(ctx, std::move(tree));
-            }
+        if (original.numPosArgs() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.getPosArg(0))) {
+            tree = lowerZSuperArgs(ctx, std::move(tree));
         }
     }
 
@@ -577,7 +548,7 @@ private:
     LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
-        pushBlockFrame(false, false, false);
+        pushBlockFrame(false, false);
     }
 };
 

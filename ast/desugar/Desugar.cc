@@ -24,11 +24,15 @@ struct DesugarContext final {
     core::NameRef enclosingBlockArg;
     core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
+    bool inAnyBlock;
+    bool inModule;
 
     DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockArg,
-                   core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName)
+                   core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName, bool inAnyBlock,
+                   bool inModule)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
-          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
+          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock),
+          inModule(inModule){};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -170,7 +174,10 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
     }
     auto [args, destructures] = desugarArgs(dctx, loc, blockArgs);
-    auto desugaredBody = desugarBody(dctx, loc, blockBody, std::move(destructures));
+    auto inBlock = true;
+    DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                         dctx.enclosingMethodName, inBlock, dctx.inModule);
+    auto desugaredBody = desugarBody(dctx1, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
     send->setBlock(MK::Block(loc, std::move(desugaredBody), std::move(args)));
@@ -193,6 +200,11 @@ ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::No
         auto expr = node2TreeImpl(dctx, std::move(last));
         return MK::InsSeq(loc, std::move(stats), std::move(expr));
     }
+}
+
+core::NameRef maybeTypedSuper(DesugarContext dctx) {
+    return (dctx.ctx.state.typedSuper && !dctx.inAnyBlock && !dctx.inModule) ? core::Names::super()
+                                                                             : core::Names::untypedSuper();
 }
 
 bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
@@ -322,7 +334,8 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
                           unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name);
+    auto inModule = dctx.inModule && !isSelf;
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name, dctx.inAnyBlock, inModule);
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
 
     if (args.empty() || !isa_tree<BlockArg>(args.back())) {
@@ -334,7 +347,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     ENFORCE(blkArg != nullptr, "Every method's last arg must be a block arg by now.");
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
-    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name);
+    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name, dctx.inAnyBlock, inModule);
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
@@ -494,8 +507,10 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
+    // Blocks never persist across a class/module boundary
+    auto inAnyBlock = false;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                         dctx.enclosingMethodName);
+                         dctx.enclosingMethodName, inAnyBlock, dctx.inModule);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
@@ -1485,7 +1500,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
-                ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, true);
+                ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 ExpressionPtr res =
                     MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
@@ -1493,7 +1510,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Class *claz) {
-                ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(claz->body));
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, false);
+                ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(claz->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (claz->superclass == nullptr) {
                     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
@@ -1570,7 +1589,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     return;
                 }
 
-                ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(sclass->body));
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, false);
+                ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 ExpressionPtr res =
                     MK::Class(sclass->loc, sclass->declLoc,
@@ -1580,7 +1601,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::NumBlock *block) {
-                result = desugarBlock(dctx, loc, block->loc, block->send, block->args, block->body);
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
+                                     dctx.enclosingMethodName, true, dctx.inModule);
+                result = desugarBlock(dctx1, loc, block->loc, block->send, block->args, block->body);
             },
             [&](parser::While *wl) {
                 auto cond = node2TreeImpl(dctx, std::move(wl->cond));
@@ -1658,12 +1681,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 // Desugar super into a call to a normal method named `super`;
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
-                auto method = core::Names::super();
+                auto method = maybeTypedSuper(dctx);
                 auto send = make_unique<parser::Send>(super->loc, nullptr, method, super->loc, std::move(super->args));
                 auto res = node2TreeImpl(dctx, std::move(send));
                 result = std::move(res);
             },
-            [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc); },
+            [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc, maybeTypedSuper(dctx)); },
             [&](parser::For *for_) {
                 MethodDef::ARGS_store args;
                 bool canProvideNiceDesugar = true;
@@ -2343,7 +2366,7 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what)
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
-                            core::NameRef::noName());
+                            core::NameRef::noName(), false, false);
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
         result = liftTopLevel(dctx, loc, std::move(result));

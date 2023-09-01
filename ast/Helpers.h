@@ -419,10 +419,10 @@ public:
                      std::move(arg));
     }
 
-    static ExpressionPtr ZSuper(core::LocOffsets loc) {
+    static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(loc), core::Names::super(), loc, 1,
+        return Send(loc, Self(loc), method, loc, 1,
                     SendArgs(make_expression<ast::ZSuperArgs>(loc.copyEndWithZeroLength())), flags);
     }
 
