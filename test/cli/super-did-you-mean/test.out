@@ -2,5 +2,5 @@ test/cli/super-did-you-mean/test.rb:15: Method `no_parent_method` does not exist
     15 |    super
             ^^^^^
   Note:
-    As a last resort, silence all `super`-related errors using `--typed-super=false`
+    For help fixing `super` errors: https://sorbet.org/docs/typed-super
 Errors: 1
