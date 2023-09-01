@@ -13,7 +13,6 @@ import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { SorbetStatusBarEntry } from "./sorbetStatusBarEntry";
-import { SorbetStatusMetricsTracker } from "./sorbetStatusMetricsTracker";
 import { ServerStatus, RestartReason } from "./types";
 
 /**
@@ -42,11 +41,6 @@ export function activate(context: ExtensionContext) {
 
   const statusBarEntry = new SorbetStatusBarEntry(sorbetExtensionContext);
   context.subscriptions.push(statusBarEntry);
-
-  const statusMetricsTracker = new SorbetStatusMetricsTracker(
-    sorbetExtensionContext,
-  );
-  context.subscriptions.push(statusMetricsTracker);
 
   // Register providers
   context.subscriptions.push(
