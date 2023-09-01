@@ -19,7 +19,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Cat the file, to make that the autocorrect applied
+# Cat the file, to make sure that the autocorrect applied
 cat autocorrect-non-final-methods-final-module.rb
 
 rm autocorrect-non-final-methods-final-module.rb

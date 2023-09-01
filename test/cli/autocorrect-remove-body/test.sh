@@ -16,7 +16,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Also cat the file, to make that the autocorrect applied
+# Also cat the file, to make sure that the autocorrect applied
 echo ----- rb -----
 cat autocorrect-remove-body.rb
 echo ----- rbi -----

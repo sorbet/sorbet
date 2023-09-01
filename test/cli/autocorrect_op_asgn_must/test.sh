@@ -18,7 +18,7 @@ tmp="$(mktemp -d)"
   echo --------------------------------------------------------------------------
   echo
 
-  # Also cat the file, to make that the autocorrect applied
+  # Also cat the file, to make sure that the autocorrect applied
   cat autocorrect_op_asgn_must.rb
 
   rm autocorrect_op_asgn_must.rb
@@ -41,7 +41,7 @@ echo
   echo --------------------------------------------------------------------------
   echo
 
-  # Also cat the file, to make that the autocorrect applied
+  # Also cat the file, to make sure that the autocorrect applied
   cat autocorrect_op_asgn_must.rb
 
   rm autocorrect_op_asgn_must.rb
