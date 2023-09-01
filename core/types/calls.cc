@@ -668,12 +668,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // - If similar name exists in parent suggest renaming enclosing method definition
                 //   (intialize -> initialize, etc.)
                 // - Otherwise, suggest `T.bind`
+                // Note: super is not a method call, and so all the logic in the case below to
+                // compute autocorrects to potentially fix up the method call's receiver can't apply.
                 e.addErrorNote("As a last resort, silence all `{}`-related errors using `{}`", "super",
                                "--typed-super=false");
             } else if (args.receiverLoc().exists() &&
                        (gs.suggestUnsafe.has_value() ||
                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
-                // Explicitly ignore `<super>`, because super is not actually a method call with a receiver.
                 auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
                 if (args.receiverLoc().empty()) {
                     auto shortName = args.name.shortName(gs);
