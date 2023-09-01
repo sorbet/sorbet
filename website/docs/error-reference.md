@@ -4143,7 +4143,7 @@ it on.
 
 This error is like [7003](#7003), but for calls using `super`.
 
-That is, then difference is that Sorbet checks whether a method with the same
+That is, the difference is that Sorbet checks whether a method with the same
 name as the enclosing method exists on any ancestor of the current method.
 
 This error is caused by most of the same reasons that cause [7003](#7003), so

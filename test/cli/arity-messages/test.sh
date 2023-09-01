@@ -21,7 +21,7 @@ for infile in *.rb; do
   echo --------------------------------------------------------------------------
   echo
 
-  # Also cat the file, to make that the autocorrect applied
+  # Also cat the file, to make sure that the autocorrect applied
   cat "$infile"
 
   rm "$infile"
