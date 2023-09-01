@@ -115,15 +115,13 @@ class LocalNameInserter {
         uint32_t localId = 0;
         bool insideBlock = false;
         bool insideMethod = false;
-        bool insideModule = false;
     };
 
-    LocalFrame &pushBlockFrame(bool insideMethod, bool insideModule) {
+    LocalFrame &pushBlockFrame(bool insideMethod) {
         auto &frame = scopeStack.emplace_back();
         frame.localId = blockCounter;
         frame.insideBlock = true;
         frame.insideMethod = insideMethod;
-        frame.insideModule = insideModule;
         ++blockCounter;
         return frame;
     }
@@ -131,23 +129,20 @@ class LocalNameInserter {
     LocalFrame &enterBlock() {
         // NOTE: the base-case for this being a valid initialization is setup by
         // the `create()` static method.
-        return pushBlockFrame(scopeStack.back().insideMethod, scopeStack.back().insideModule);
+        return pushBlockFrame(scopeStack.back().insideMethod);
     }
 
     LocalFrame &enterMethod() {
-        const auto &lastFrame = scopeStack.back();
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
         frame.insideMethod = true;
-        frame.insideModule = lastFrame.insideModule;
         blockCounter = 1;
         return frame;
     }
 
-    LocalFrame &enterClass(bool insideModule) {
+    LocalFrame &enterClass() {
         auto &frame = scopeStack.emplace_back();
         frame.oldBlockCounter = blockCounter;
-        frame.insideModule = insideModule;
         blockCounter = 1;
         return frame;
     }
@@ -481,7 +476,7 @@ public:
             ast::TreeWalk::apply(ctx, *this, ancestor);
         }
 
-        enterClass(klass.kind == ast::ClassDef::Kind::Module);
+        enterClass();
     }
 
     void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
@@ -548,7 +543,7 @@ private:
     LocalNameInserter() {
         // Setup a block frame that's outside of a method context as the base of
         // the scope stack.
-        pushBlockFrame(false, false);
+        pushBlockFrame(false);
     }
 };
 
