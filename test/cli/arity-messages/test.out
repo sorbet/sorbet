@@ -158,7 +158,7 @@ super-arity-messages.rb:12: Method `unary2` does not exist on ancestors of `Pare
     12 |    super
             ^^^^^
   Note:
-    As a last resort, silence all `super`-related errors using `--typed-super=false`
+    For help fixing `super` errors: https://sorbet.org/docs/typed-super
 
 super-arity-messages.rb:19: Not enough arguments provided for method `Parent#unary1`. Expected: `1`, got: `0` https://srb.help/7004
     19 |    super
