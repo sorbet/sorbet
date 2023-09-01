@@ -213,6 +213,49 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     return current;
 }
 
+BasicBlock *CFGBuilder::walkCast(CFGContext cctx, ast::Cast &c, BasicBlock *current) {
+    // This is kind of gross, but it is the only way to ensure that the bits in the
+    // type expression make it into the CFG for LSP to hit on their locations.
+    LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+    current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
+    // Ensure later passes don't delete the results of the typeExpr.
+    current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+    LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
+    core::LocOffsets argLoc = c.arg.loc();
+    current = walk(cctx.withTarget(tmp), c.arg, current);
+    if (c.cast == core::Names::uncheckedLet()) {
+        current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(tmp));
+    } else if (c.cast == core::Names::bind() || c.cast == core::Names::syntheticBind()) {
+        auto isSynthetic = c.cast == core::Names::syntheticBind();
+        if (c.arg.isSelfReference()) {
+            auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
+            auto &inserted =
+                current->exprs.emplace_back(self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
+            if (isSynthetic) {
+                inserted.value.setSynthetic();
+            }
+            current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
+
+            if (cctx.rescueScope) {
+                cctx.rescueScope->exprs.emplace_back(self, c.loc,
+                                                     make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
+                cctx.rescueScope->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
+            }
+        } else {
+            if (auto e = cctx.ctx.beginError(c.loc, core::errors::CFG::MalformedTBind)) {
+                e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");
+            }
+        }
+    } else {
+        current->exprs.emplace_back(cctx.target, c.loc, make_insn<Cast>(tmp, argLoc, c.type, c.cast));
+    }
+    if (c.cast == core::Names::let()) {
+        cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
+    }
+
+    return current;
+}
+
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
     auto *join = cctx.inWhat.freshBlock(cctx.loops, a);
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
@@ -422,9 +465,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     Exception::raise("Unexpected Assign::lhs in builder_walk.cc: {}", a.nodeName());
                 }
 
-                auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
-                ret = rhsCont;
+                if (auto *c = ast::cast_tree<ast::Cast>(a.rhs)) {
+                    // Call walkCast directly, skipping the logic in the ast::Cast case that writes
+                    // the cast result to a synthetic temporary.
+                    ret = walkCast(cctx.withTarget(lhs), *c, current);
+                } else {
+                    ret = walk(cctx.withTarget(lhs), a.rhs, current);
+                }
+                ret->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
             },
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
@@ -914,46 +962,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
-                // This is kind of gross, but it is the only way to ensure that the bits in the
-                // type expression make it into the CFG for LSP to hit on their locations.
-                LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
-                // Ensure later passes don't delete the results of the typeExpr.
-                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
-                LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
-                core::LocOffsets argLoc = c.arg.loc();
-                current = walk(cctx.withTarget(tmp), c.arg, current);
-                if (c.cast == core::Names::uncheckedLet()) {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(tmp));
-                } else if (c.cast == core::Names::bind() || c.cast == core::Names::syntheticBind()) {
-                    auto isSynthetic = c.cast == core::Names::syntheticBind();
-                    if (c.arg.isSelfReference()) {
-                        auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
-                        auto &inserted = current->exprs.emplace_back(
-                            self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
-                        if (isSynthetic) {
-                            inserted.value.setSynthetic();
-                        }
-                        current->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
+                // Write this cast result to a new temporary, to avoid pinning errors.
+                // If the cast was meant to pin a variable, we would skip this recursive case of
+                // `walk` and have called walkCast directly in the ast::Assign case.
+                // (If it's already synthetic, skip making a new one to make the simplifier's job easier)
+                auto target = cctx.target.isSyntheticTemporary(cctx.inWhat)
+                                  ? cctx.target
+                                  : cctx.newTemporary(core::Names::castTemp());
 
-                        if (cctx.rescueScope) {
-                            cctx.rescueScope->exprs.emplace_back(
-                                self, c.loc, make_insn<Cast>(tmp, argLoc, c.type, core::Names::cast()));
-                            cctx.rescueScope->exprs.emplace_back(cctx.target, c.loc, make_insn<Ident>(self));
-                        }
-                    } else {
-                        if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
-                            e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");
-                        }
-                    }
-                } else {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_insn<Cast>(tmp, argLoc, c.type, c.cast));
-                }
-                if (c.cast == core::Names::let()) {
-                    cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
-                }
+                ret = walkCast(cctx.withTarget(target), c, current);
 
-                ret = current;
+                if (target != cctx.target) {
+                    synthesizeExpr(ret, cctx.target, c.loc, make_insn<Ident>(target));
+                }
             },
 
             [&](ast::RuntimeMethodDefinition &rmd) {
