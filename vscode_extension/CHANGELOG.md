@@ -1,4 +1,8 @@
 # Version history
+
+## 0.3.26 (next)
+- Emit status/operation changes through `MetricsEmitter`
+
 ## 0.3.25
 - Toggling highlighting of untyped code does not require a restart now
   - Sends workspace/didChangeConfiguration notification to LSP server instead
