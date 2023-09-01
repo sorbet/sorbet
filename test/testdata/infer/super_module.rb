@@ -12,7 +12,7 @@ module A
   class << self
     sig {void}
     def bar
-      x = super
+      x = super # error: Method `bar` does not exist on ancestors
       T.reveal_type(x) # error: `T.untyped`
     end
 
@@ -27,19 +27,15 @@ end
 module ModuleSelfDotMethods
   extend ThisOneExists
 
-  # TODO(jez) Our "is in module" check is too eager to toss out
-  # these calls for the sake of typed super. A problem for another
-  # PR.
-
   sig {void}
   def self.bar
-    x = super
+    x = super # error: Method `bar` does not exist on ancestors
     T.reveal_type(x) # error: `T.untyped`
   end
 
   sig {void}
   def self.this_one_exists
     x = super
-    T.reveal_type(x) # error: `T.untyped`
+    T.reveal_type(x) # error: `Integer`
   end
 end
