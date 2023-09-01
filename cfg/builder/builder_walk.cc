@@ -965,16 +965,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // Write this cast result to a new temporary, to avoid pinning errors.
                 // If the cast was meant to pin a variable, we would skip this recursive case of
                 // `walk` and have called walkCast directly in the ast::Assign case.
-                // (If it's already synthetic, skip making a new one to make the simplifier's job easier)
-                auto target = cctx.target.isSyntheticTemporary(cctx.inWhat)
-                                  ? cctx.target
-                                  : cctx.newTemporary(core::Names::castTemp());
+                auto target = cctx.newTemporary(core::Names::castTemp());
 
                 ret = walkCast(cctx.withTarget(target), c, current);
 
-                if (target != cctx.target) {
-                    synthesizeExpr(ret, cctx.target, c.loc, make_insn<Ident>(target));
-                }
+                synthesizeExpr(ret, cctx.target, c.loc, make_insn<Ident>(target));
             },
 
             [&](ast::RuntimeMethodDefinition &rmd) {
