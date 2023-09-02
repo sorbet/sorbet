@@ -125,12 +125,12 @@ bb0[rubyRegionId=0, firstDead=10]():
     <self>: A = cast(<self>: NilClass, A);
     x: T.untyped = load_arg(x)
     y: T.untyped = load_arg(y)
-    <cfgAlias>$5: T.class_of(String) = alias <C String>
-    keep_for_ide$4: T.class_of(String) = <cfgAlias>$5
-    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
-    <castTemp>$6: T.untyped = x
-    <statTemp>$3: String = cast(<castTemp>$6: T.untyped, String);
-    <returnMethodTemp>$2: String = <statTemp>$3: String.+(y: T.untyped)
+    <cfgAlias>$6: T.class_of(String) = alias <C String>
+    keep_for_ide$5: T.class_of(String) = <cfgAlias>$6
+    keep_for_ide$5: T.untyped = <keep-alive> keep_for_ide$5
+    <castTemp>$7: T.untyped = x
+    <castTemp>$4: String = cast(<castTemp>$7: T.untyped, String);
+    <returnMethodTemp>$2: String = <castTemp>$4: String.+(y: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
     <unconditional> -> bb1
 
