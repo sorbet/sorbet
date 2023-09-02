@@ -2,7 +2,7 @@ method ::Object#foo {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <magic>$5: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$3: T.untyped = <get-current-exception>
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb4)
 
@@ -15,14 +15,14 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: T.untyped, <magic>$5: T.class_of(<Magic>)):
-    <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: T.untyped)
-    <isaCheckTemp>$9 -> (T::Boolean ? bb10 : bb11)
+bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: T.untyped, <magic>$6: T.class_of(<Magic>)):
+    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$3: T.untyped)
+    <isaCheckTemp>$10 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb4[rubyRegionId=1, firstDead=-1](<magic>$5: T.class_of(<Magic>)):
+bb4[rubyRegionId=1, firstDead=-1](<magic>$6: T.class_of(<Magic>)):
     <returnMethodTemp>$2: Integer(1) = 1
     <exceptionValue>$3: T.untyped = <get-current-exception>
     <exceptionValue>$3 -> (T.untyped ? bb3 : bb5)
@@ -44,20 +44,23 @@ bb6[rubyRegionId=4, firstDead=-1]():
 # - bb6(rubyRegionId=4)
 # - bb10(rubyRegionId=2)
 # - bb11(rubyRegionId=2)
-bb9[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$10: T.nilable(TrueClass)):
-    <gotoDeadTemp>$10 -> (T.nilable(TrueClass) ? bb1 : bb12)
+bb9[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <rescueTemp>$2: T.nilable(StandardError), <gotoDeadTemp>$11: T.nilable(TrueClass)):
+    <rescueTAliasTemp>$5: T.class_of(T) = alias <C T>
+    <rescueTemp>$2: T.untyped = <rescueTAliasTemp>$5: T.class_of(T).unsafe(<rescueTemp>$2: T.nilable(StandardError))
+    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb12)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb10[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
+bb10[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: StandardError, <magic>$6: T.class_of(<Magic>)):
+    <rescueTemp>$2: StandardError = <exceptionValue>$3
     <exceptionValue>$3: NilClass = nil
-    <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
+    <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <unconditional> -> bb9
 
 # backedges
 # - bb3(rubyRegionId=2)
 bb11[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer)):
-    <gotoDeadTemp>$10: TrueClass = true
+    <gotoDeadTemp>$11: TrueClass = true
     <unconditional> -> bb9
 
 # backedges
