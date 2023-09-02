@@ -2,7 +2,7 @@ method ::Object#foo {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
-    <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
+    <magic>$7: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$4: T.untyped = <get-current-exception>
     <exceptionValue>$4 -> (T.untyped ? bb3 : bb4)
 
@@ -17,10 +17,10 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <exceptionValue>$4: T.untyped, <magic>$6: T.class_of(<Magic>)):
-    <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$4: T.untyped)
-    <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
+bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <exceptionValue>$4: T.untyped, <magic>$7: T.class_of(<Magic>)):
+    <cfgAlias>$10: T.class_of(StandardError) = alias <C StandardError>
+    <isaCheckTemp>$11: T::Boolean = <cfgAlias>$10: T.class_of(StandardError).===(<exceptionValue>$4: T.untyped)
+    <isaCheckTemp>$11 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
 # - bb0(rubyRegionId=0)
@@ -31,22 +31,24 @@ bb4[rubyRegionId=1, firstDead=2]():
 
 # backedges
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <gotoDeadTemp>$12: TrueClass):
-    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
+bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <gotoDeadTemp>$13: TrueClass):
+    <rescueTAliasTemp>$6: T.class_of(T) = alias <C T>
+    <rescueTemp>$2: T.untyped = <rescueTAliasTemp>$6: T.class_of(T).unsafe(<rescueTemp>$2: NilClass)
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=4](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=4](<exceptionValue>$4: StandardError, <magic>$7: T.class_of(<Magic>)):
     <exceptionValue>$4: NilClass = nil
-    <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
-    <returnTemp>$11: Integer(2) = 2
-    <statTemp>$3: T.noreturn = return <returnTemp>$11: Integer(2)
+    <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
+    <returnTemp>$12: Integer(2) = 2
+    <statTemp>$3: T.noreturn = return <returnTemp>$12: Integer(2)
     <unconditional> -> bb1
 
 # backedges
 # - bb3(rubyRegionId=2)
 bb8[rubyRegionId=2, firstDead=-1](<self>: Object):
-    <gotoDeadTemp>$12: TrueClass = true
+    <gotoDeadTemp>$13: TrueClass = true
     <unconditional> -> bb6
 
 # backedges
