@@ -11,7 +11,12 @@ class SubclassObject < Object; end
 class SubclassModule2 < Module; end
 
 # It's not okay to subclass Class
-class SubclassClass < Class; end # error: `SubclassClass` is a subclass of `Class` which is not allowed
+class SubclassClass < Class # error: `SubclassClass` is a subclass of `Class` which is not allowed
+  # ... but we can't ENFORCE that it _never_ happens
+  def example
+    new
+  end
+end
 
 module M; end
 
