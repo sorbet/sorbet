@@ -722,7 +722,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                     if (possibleSymbol.isClassOrModule()) {
                         if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
-                            // If this call was in type sytnax, we might have already have built an
+                            // If this call was in type syntax, we might have already have built an
                             // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
                             continue;
                         }
@@ -1995,21 +1995,27 @@ public:
     }
 
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto mustExist = true;
-        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-
-        auto attachedClass = self.data(gs)->attachedClass(gs);
-        if (!attachedClass.exists()) {
-            // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
-            // actually going to be on an "instance" not a singleton (Class.new, the one on the
-            // singleton, is the one that defines a new class at runtime).
-            //
-            // In that case, there's no attachedClass to look for an `initialize` method on.
-            // We could _maybe_ imagine trying to dispatch to `initialize` on the `<AttachedClass>`
-            // type argument? But I haven't thought about what the consequences of that would be.
+        auto *selfApp = cast_type<AppliedType>(args.thisType);
+        if (selfApp == nullptr) {
             return;
         }
-        auto instanceTy = attachedClass.data(gs)->externalType();
+
+        // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
+        // actually going to be on an "instance" not a singleton (Class.new, the one on the
+        // singleton, is the one that defines a new class at runtime).
+        //
+        // In that case, `Class` is an instance class (there's no `->attachedClass(gs)` to look for
+        // an `initialize` method on). So let's extract out the type applied to the
+        // `<AttachedClass>` type member and forward the dispatch to `initialize` on that type.
+        //
+        // Note that this subsumes cases like calls to new on `T.class_of(MyClass)` because class
+        // singleton classes ARE applied types, obviating the need to call `->attachedClass(gs)` at all.
+        auto currentAlignment = Types::alignBaseTypeArgs(gs, selfApp->klass, selfApp->targs, Symbols::Class());
+        auto it = absl::c_find_if(
+            currentAlignment, [&](auto tmRef) { return tmRef.data(gs)->name == Names::Constants::AttachedClass(); });
+        ENFORCE(it != currentAlignment.end());
+        auto instanceTy = selfApp->targs[distance(currentAlignment.begin(), it)];
+
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
         DispatchArgs innerArgs{Names::initialize(),
                                args.locs,
@@ -2024,6 +2030,27 @@ public:
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
+
+        // Sorbet *should* treat a missing `initialize` here as a bug, because it can't know the
+        // arity/types of the constructor. The most common way `initialize` might be missing is if
+        // the user has written `Class`, which is treated like `T::Class[T.anything]`. In that case,
+        // the type means "this could be literally any class," and so the right thing to do would be
+        // to request a better constructor from the user.
+        //
+        // But there's an unknown amount of code relying on this right now (from before `T::Class`
+        // was built), which in combination with some other bugs, would mean that treating a missing
+        // `initialize` as an error would introduce low-value friction until we fix two other bugs:
+        //
+        // - https://github.com/sorbet/sorbet/issues/1317
+        // - https://github.com/sorbet/sorbet/issues/7309
+        //
+        // More information here:
+        // https://github.com/sorbet/sorbet/pull/7285#issuecomment-1718167511
+        //
+        // There's also the state of things at runtime, described in this comment:
+        // https://github.com/sorbet/sorbet/pull/6888/files#diff-b565686f17b8592d5c1e544cd639aaac3244869ac059f2db416a2ac24aa94675R9
+        //
+        // So for now, simply swallow "misisng `initialize`" errors.
         if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
