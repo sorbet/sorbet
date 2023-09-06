@@ -71,8 +71,7 @@ rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet
 trap 'rbenv exec gem uninstall --all --executables --ignore-dependencies sorbet sorbet-static' EXIT
 
 if [[ "darwin" == "$kernel_name" ]]; then
-  gem_platform="$(ruby -e "(platform = Gem::Platform.local).cpu = 'universal'; puts(platform.to_s)")"
-  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$gem_platform".gem
+  rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"universal-darwin".gem
 else
   rbenv exec gem install ../../gems/sorbet-static/sorbet-static-*-"$processor_name"-linux.gem
 fi
