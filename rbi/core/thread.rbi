@@ -1208,6 +1208,11 @@ class Thread < Object
   # ```
   sig {returns(T.untyped)}
   def self.stop; end
+
+  # Yields each frame of the current execution stack as a
+  # backtrace location object.
+  sig {params(blk: T.proc.void).returns(T.untyped)}
+  def self.each_caller_location(&blk); end
 end
 
 class Thread::Backtrace < Object
