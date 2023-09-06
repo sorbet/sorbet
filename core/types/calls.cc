@@ -2007,7 +2007,6 @@ public:
             // In that case, there's no attachedClass to look for an `initialize` method on.
             // We could _maybe_ imagine trying to dispatch to `initialize` on the `<AttachedClass>`
             // type argument? But I haven't thought about what the consequences of that would be.
-            ENFORCE(self == Symbols::Class());
             return;
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
