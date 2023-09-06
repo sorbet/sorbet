@@ -1525,7 +1525,7 @@ class IRB::OutputMethod::NotImplementedError < ::StandardError; end
 
 class IRB::ReidlineInputMethod < ::IRB::RelineInputMethod; end
 
-class IRB::RelineInputMethod < ::IRB::StdioInputMethod
+class IRB::RelineInputMethod < ::IRB::InputMethod
   include(::Reline)
 
   # Creates a new input method object using
@@ -1561,7 +1561,7 @@ class IRB::RelineInputMethod < ::IRB::StdioInputMethod
   def line(line_no); end
 end
 
-class IRB::ReadlineInputMethod < ::IRB::StdioInputMethod
+class IRB::ReadlineInputMethod < ::IRB::InputMethod
   include(::Readline)
 
   # Creates a new input method object using
