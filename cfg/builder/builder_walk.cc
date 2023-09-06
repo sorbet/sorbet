@@ -824,7 +824,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
                 for (auto &expr : a.rescueCases) {
-
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
                     auto caseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
                     auto &exceptions = rescueCase->exceptions;
@@ -837,8 +836,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto unsafeLocs = {core::LocOffsets::none()};
                     synthesizeExpr(ensureBody, localVar, rescueCase->loc,
                                    make_insn<Send>(tAliasTemp, rescueCase->loc, core::Names::unsafe(),
-                                                   core::LocOffsets::none(), 1, unsafeArgs, unsafeLocs,
-                                                   false));
+                                                   core::LocOffsets::none(), 1, unsafeArgs, unsafeLocs, false));
 
                     caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
                     // Mark the exception as handled
