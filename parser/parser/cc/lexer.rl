@@ -3101,6 +3101,22 @@ bool lexer::is_declared_anonymous_args() {
   return is_declared(ANONYMOUS_BLOCKARG);
 }
 
+void lexer::declare_anonymous_restarg() {
+  declare(ANONYMOUS_RESTARG);
+}
+
+bool lexer::is_declared_anonymous_restarg() {
+  return is_declared(ANONYMOUS_RESTARG);
+}
+
+void lexer::declare_anonymous_kwrestarg() {
+  declare(ANONYMOUS_KWRESTARG);
+}
+
+bool lexer::is_declared_anonymous_kwrestarg() {
+  return is_declared(ANONYMOUS_KWRESTARG);
+}
+
 optional_size lexer::dedentLevel() {
   // We erase @dedentLevel as a precaution to avoid accidentally
   // using a stale value.

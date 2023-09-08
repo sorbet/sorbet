@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   c1 = <emptyTree>::<C Class>.new() do ||
     begin
-      <cast:<synthetic bind>>(<self>, <todo sym>, ::Class)
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
       <emptyTree>::<C T>.reveal_type(<self>)
     end
   end
@@ -95,7 +95,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C Class>.new() do ||
     begin
-      <cast:<synthetic bind>>(<self>, <todo sym>, ::Class)
+      <cast:<synthetic bind>>(<self>, <todo sym>, ::T::Class.[](::Object))
       <emptyTree>::<C T>.reveal_type(<self>)
     end
   end

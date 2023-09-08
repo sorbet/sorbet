@@ -95,7 +95,11 @@ protected:
 
     std::unique_ptr<LSPMessage> readAsync();
 
-    void assertDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages, std::vector<ExpectedDiagnostic> expected);
+    void assertErrorDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
+                                std::vector<ExpectedDiagnostic> expected);
+
+    void assertUntypedDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
+                                  std::vector<ExpectedDiagnostic> expected);
 
     std::string readFile(std::string_view uri);
 

@@ -86,6 +86,8 @@ struct builder {
                        const token *do_, ForeignPtr body, const token *end);
     ForeignPtr (*forward_arg)(SelfPtr builder, const token *begin, const token *dots, const token *end);
     ForeignPtr (*forwarded_args)(SelfPtr builder, const token *dots);
+    ForeignPtr (*forwarded_restarg)(SelfPtr builder, const token *star);
+    ForeignPtr (*forwarded_kwrestarg)(SelfPtr builder, const token *dstar);
     ForeignPtr (*gvar)(SelfPtr builder, const token *tok);
     ForeignPtr (*hash_pattern)(SelfPtr builder, const token *begin, const node_list *kwargs, const token *end);
     ForeignPtr (*ident)(SelfPtr builder, const token *tok);
@@ -114,7 +116,7 @@ struct builder {
     ForeignPtr (*keywordZsuper)(SelfPtr builder, const token *keyword);
     ForeignPtr (*kwarg)(SelfPtr builder, const token *name);
     ForeignPtr (*kwoptarg)(SelfPtr builder, const token *name, ForeignPtr value);
-    ForeignPtr (*kwnilarg)(SelfPtr builder, const token *dstar, const token *nil);
+    ForeignPtr (*kwnilarg)(SelfPtr builder, ForeignPtr node);
     ForeignPtr (*kwrestarg)(SelfPtr builder, const token *dstar, const token *name);
     ForeignPtr (*kwsplat)(SelfPtr builder, const token *dstar, ForeignPtr arg);
     ForeignPtr (*line_literal)(SelfPtr builder, const token *tok);

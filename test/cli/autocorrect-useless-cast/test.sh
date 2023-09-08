@@ -18,7 +18,7 @@ tmp="$(mktemp -d)"
   echo --------------------------------------------------------------------------
   echo
 
-  # Also cat the file, to make that the autocorrect applied
+  # Also cat the file, to make sure that the autocorrect applied
   cat autocorrect-useless-cast.rb
 
   rm autocorrect-useless-cast.rb
@@ -41,7 +41,7 @@ echo
   echo --------------------------------------------------------------------------
   echo
 
-  # Also cat the file, to make that the autocorrect applied
+  # Also cat the file, to make sure that the autocorrect applied
   cat autocorrect-useless-cast.rb
 
   rm autocorrect-useless-cast.rb

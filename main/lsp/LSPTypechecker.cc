@@ -11,6 +11,7 @@
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/sig_finder/sig_finder.h"
 #include "hashing/hashing.h"
 #include "main/cache/cache.h"
 #include "main/lsp/DefLocSaver.h"
@@ -27,7 +28,6 @@
 #include "main/lsp/notifications/indexer_initialization.h"
 #include "main/lsp/notifications/sorbet_resume.h"
 #include "main/pipeline/pipeline.h"
-#include "main/sig_finder/sig_finder.h"
 
 namespace sorbet::realmain::lsp {
 using namespace std;
@@ -73,7 +73,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
 
     // Initialize the global state for the indexer
     {
-        initialGS->highlightUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
+        initialGS->trackUntyped = currentConfig.getClientConfig().enableHighlightUntyped;
         // Temporarily replace error queue, as it asserts that the same thread that created it uses it and we're
         // going to use it on typechecker thread for this one operation.
         auto savedErrorQueue = initialGS->errorQueue;
@@ -90,8 +90,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, std::unique_ptr<core::GlobalSt
             inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
             indexed.resize(initialGS->filesUsed());
 
-            auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger,
-                                                                    inputFiles, workers, ownedKvstore);
+            auto asts = hashing::Hashing::indexAndComputeFileHashes(
+                initialGS, config->opts, *config->logger, absl::Span<core::FileRef>(inputFiles), workers, ownedKvstore);
             // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so
             // vector index != FileRef ID. Fix that by slotting them into `indexed`.
             for (auto &ast : asts) {
@@ -460,6 +460,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
                 }
             }
         }
+
+        pipeline::setPackagerOptions(*gs, config->opts);
+        // TODO(jez) Splitting this like how the pipeline intersperses this with indexing is going
+        // to take more work. Punting for now.
+        pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers);
+
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundHashes);
@@ -715,6 +721,22 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
     slowPathBlocked = blocked;
 }
 
+void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    this->gs->trackUntyped = options.settings->highlightUntyped.value_or(this->gs->trackUntyped);
+
+    if (options.settings->enableTypecheckInfo.has_value() ||
+        options.settings->enableTypedFalseCompletionNudges.has_value() ||
+        options.settings->supportsOperationNotifications.has_value() ||
+        options.settings->supportsSorbetURIs.has_value()) {
+        auto msg =
+            "Currently `highlightUntyped` is the only updateable setting using the workspace/didChangeConfiguration "
+            "notification";
+        auto params = make_unique<ShowMessageParams>(MessageType::Warning, msg);
+        config->output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+    }
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
@@ -758,6 +780,13 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
     return typechecker.state();
+}
+void LSPTypecheckerDelegate::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
+    typechecker.updateGsFromOptions(options);
+}
+
+LSPFileUpdates LSPTypecheckerDelegate::getNoopUpdate(std::vector<core::FileRef> frefs) const {
+    return typechecker.getNoopUpdate(frefs);
 }
 
 } // namespace sorbet::realmain::lsp

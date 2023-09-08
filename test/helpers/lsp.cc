@@ -480,6 +480,11 @@ unique_ptr<LSPMessage> makeClose(string_view uri) {
     return make_unique<LSPMessage>(move(didCloseNotif));
 }
 
+std::unique_ptr<LSPMessage> makeConfigurationChange(std::unique_ptr<DidChangeConfigurationParams> params) {
+    auto changeConfigNotification =
+        make_unique<NotificationMessage>("2.0", LSPMethod::WorkspaceDidChangeConfiguration, move(params));
+    return make_unique<LSPMessage>(move(changeConfigNotification));
+}
 vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, vector<unique_ptr<LSPMessage>> messages) {
     if (auto stWrapper = dynamic_cast<SingleThreadedLSPWrapper *>(&wrapper)) {
         return stWrapper->getLSPResponsesFor(move(messages));

@@ -56,7 +56,7 @@ C2 = Class.new(Foo) do
 end
 
 c1 = Class.new do
-  T.reveal_type self # error: Revealed type: `Class`
+  T.reveal_type self # error: Revealed type: `T::Class[Object]`
 end
 
 c2 = Class.new(Foo) do
@@ -65,7 +65,7 @@ c2 = Class.new(Foo) do
 end
 
 Class.new do
-  T.reveal_type(self) # error: Revealed type: `Class`
+  T.reveal_type(self) # error: Revealed type: `T::Class[Object]`
 end
 
 Class.new(Foo) do

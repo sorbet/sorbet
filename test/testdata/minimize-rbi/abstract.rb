@@ -15,6 +15,5 @@ end
 
   class Card
 # ^^^^^^^^^^ error: Missing definition for abstract method `PaymentRecord#fx_currency`
-# ^^^^^^^^^^ error: Missing definition for abstract method `PaymentRecord#fx_currency`
     include CardPaymentRecord
   end

@@ -4,26 +4,26 @@ class Foo
 
   sig {returns(Integer)}
   def bar
-    # ^ hover: sig {returns(Integer)}
+    # ^ hover: sig { returns(Integer) }
     # N.B. Checking two positions on below function call as they used to return different strings.
     baz("1")
-  # ^ hover: sig {params(arg0: String).returns(Integer)}
-   # ^ hover: sig {params(arg0: String).returns(Integer)}
+  # ^ hover: sig { params(arg0: String).returns(Integer) }
+   # ^ hover: sig { params(arg0: String).returns(Integer) }
   end
 
   # Docs for static bar
   sig {params(a: String).void}
   def self.bar(a)
-         # ^ hover: sig {params(a: String).void}
+         # ^ hover: sig { params(a: String).void }
   end
 
   sig {params(arg0: String).returns(Integer)}
   def baz(arg0)
     no_args_and_void
-  # ^ hover: sig {void}
+  # ^ hover: sig { void }
     Foo::bat(1)
   # ^ hover: T.class_of(Foo)
-       # ^ hover: sig {params(i: Integer).returns(Integer)}
+       # ^ hover: sig { params(i: Integer).returns(Integer) }
            # ^ hover: Integer(1)
     arg0.to_i
   end
@@ -37,17 +37,17 @@ class Foo
   sig {params(arg0: Integer).void}
   def typed_with_docs(arg0)
     # ^ hover: Docs above single-line sig
-    # ^ hover: sig {params(arg0: Integer).void}
+    # ^ hover: sig { params(arg0: Integer).void }
   end
 
   # Some docs for qux
   sig {void}
   def qux
     # ^^^ hover: Some docs for qux
-    # ^^^ hover: sig {void}
+    # ^^^ hover: sig { void }
     typed_with_docs(1)
   # ^ hover: Docs above single-line sig
-  # ^ hover: sig {params(arg0: Integer).void}
+  # ^ hover: sig { params(arg0: Integer).void }
   end
 
   sig {void}
@@ -64,7 +64,7 @@ class Foo
   sig {params(blk: T.proc.params(arg0: Integer, arg1: String).returns(String)).returns(String)}
   def self.blk_arg(&blk)
     yield(1, "hello")
-  # ^ hover: sig {params(arg0: Integer, arg1: String).returns(String)}
+  # ^ hover: sig { params(arg0: Integer, arg1: String).returns(String) }
   end
 
   sig {params(a: String, x: String).returns(T::Array[String])}
@@ -79,7 +79,7 @@ class Foo
   # Docs are below the sig
   def docs_below_sig
     # ^^^^^^^^^^^^^^ hover: Docs are below the sig
-    # ^^^^^^^^^^^^^^ hover: sig {void}
+    # ^^^^^^^^^^^^^^ hover: sig { void }
   end
 end
 
@@ -91,17 +91,17 @@ def main
                         # ^ hover: String
   rv2 = Foo.splat_arg("a", "b", "c")
 # ^ hover: T::Array[String]
-          # ^ hover: sig {params(a: String, x: String).returns(T::Array[String])}
+          # ^ hover: sig { params(a: String, x: String).returns(T::Array[String]) }
 
   Foo.bar('')
 # ^^^ hover: T.class_of(Foo)
     # ^^^ hover: Docs for static bar
-    # ^^^ hover: sig {params(a: String).void}
+    # ^^^ hover: sig { params(a: String).void }
 
   f = Foo.new
 # ^ hover: Foo
      # ^ hover: T.class_of(Foo)
   f.qux
   # ^^^ hover: Some docs for qux
-  # ^^^ hover: sig {void}
+  # ^^^ hover: sig { void }
 end

@@ -21,7 +21,7 @@ def foo(x)
     puts "got nil"
   else
     y = T.let(x, T.any(T::Array[Integer], T::Array[String]))
-    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(Integer, String)]`
   end
 end
 
@@ -32,7 +32,7 @@ def bar(x)
     puts "got nil"
   else
     y = T.let(x, T.any(T::Array[Integer], T::Array[String]))
-    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(Integer, String)]`
   end
 end
 
@@ -43,7 +43,7 @@ def qux(x)
     puts "got nil"
   else
     y = T.let(x, T.any(T::Array[Integer], T::Array[String]))
-    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+    T.reveal_type(y) # error: Revealed type: `T::Array[T.any(Integer, String)]`
   end
 end
 

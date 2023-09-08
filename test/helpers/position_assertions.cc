@@ -256,6 +256,7 @@ const UnorderedMap<
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
+        {"typed-super", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
         {"selective-apply-code-action", StringPropertyAssertions::make},
         {"use-code-action-resolve", BooleanPropertyAssertion::make},
@@ -276,6 +277,8 @@ const UnorderedMap<
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
         {"show-symbol", ShowSymbolAssertion::make},
+        {"enable-typed-false-completion-nudges", BooleanPropertyAssertion::make},
+        {"go-to-def-special", GoToDefSpecialAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -887,7 +890,13 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
         return;
     }
 
-    assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
+    vector<shared_ptr<RangeAssertion>> newLocs;
+    for (const auto &assertion : allLocs) {
+        if (dynamic_pointer_cast<GoToDefSpecialAssertion>(assertion) == nullptr) {
+            newLocs.emplace_back(assertion);
+        }
+    }
+    assertLocationsMatch(config, sourceFileContents, symbol, newLocs, line, character, locSourceLine, locFilename,
                          locations, "reference");
 }
 
@@ -944,7 +953,13 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
         return;
     }
 
-    assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
+    vector<shared_ptr<RangeAssertion>> newLocs;
+    for (const auto &assertion : allLocs) {
+        if (dynamic_pointer_cast<GoToDefSpecialAssertion>(assertion) == nullptr) {
+            newLocs.emplace_back(assertion);
+        }
+    }
+    assertLocationsMatch(config, sourceFileContents, symbol, newLocs, line, character, locSourceLine, locFilename,
                          locations, "highlight");
 }
 
@@ -997,6 +1012,25 @@ shared_ptr<ImportUsageAssertion> ImportUsageAssertion::make(string_view filename
 
 string UsageAssertion::toString() const {
     return fmt::format("usage: {}", symbol);
+}
+
+GoToDefSpecialAssertion::GoToDefSpecialAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                 string_view symbol, vector<int> versions)
+    : UsageAssertion(filename, range, assertionLine, symbol, versions) {}
+
+shared_ptr<GoToDefSpecialAssertion> GoToDefSpecialAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                                  int assertionLine, string_view assertionContents,
+                                                                  string_view assertionType) {
+    auto [symbol, versions, option] = getSymbolVersionAndOption(assertionContents);
+    if (!option.empty()) {
+        ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                          fmt::format("Unexpected import assertion option: `{}`", option));
+    }
+    return make_shared<GoToDefSpecialAssertion>(filename, range, assertionLine, symbol, versions);
+}
+
+string GoToDefSpecialAssertion::toString() const {
+    return fmt::format("go-to-def-special: {}", symbol);
 }
 
 TypeDefAssertion::TypeDefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,

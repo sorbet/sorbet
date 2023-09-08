@@ -3,7 +3,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=3:1 end=12:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/type_member_missing.rb start=??? end=???}
   class <C <U Base>>[<C <U Elem>>] < <C <U Object>> () @ Loc {file=test/testdata/resolver/type_member_missing.rb start=3:1 end=3:11}
-    type-member(=) <C <U Base>>::<C <U Elem>> -> LambdaParam(<C <U Base>>::<C <U Elem>>, lower=T.noreturn, upper=<top>) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=6:3 end=6:21}
+    type-member(=) <C <U Base>>::<C <U Elem>> -> LambdaParam(<C <U Base>>::<C <U Elem>>, lower=T.noreturn, upper=T.anything) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=6:3 end=6:21}
   class <S <C <U Base>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Generic>>, <C <U Helpers>>) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=3:1 end=3:11}
     type-member(+) <S <C <U Base>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Base>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <C <U Base>>   targs = [     <C <U Elem>> = T.untyped   ] }) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=3:1 end=3:11}
     method <S <C <U Base>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/type_member_missing.rb start=3:1 end=7:4}

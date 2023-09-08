@@ -196,6 +196,17 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
+void ErrorBuilder::didYouMean(const std::string &replacement, Loc loc) {
+    if (!gs.didYouMean) {
+        return;
+    }
+
+    std::string formatted = fmt::format("Replace with `{}`", replacement);
+    auto isDidYouMean = true;
+    addAutocorrect(
+        AutocorrectSuggestion{move(formatted), {AutocorrectSuggestion::Edit{loc, replacement}}, isDidYouMean});
+}
+
 // This will sometimes be bypassed in lieu of just calling build() so put your
 // logic in build() instead.
 ErrorBuilder::~ErrorBuilder() {

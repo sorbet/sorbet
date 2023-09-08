@@ -1,7 +1,13 @@
 # typed: true
 
+extend T::Sig
+
 T.assert_type!(caller, T::Array[String])
 T.assert_type!(caller(10), T.nilable(T::Array[String]))
+
+T.assert_type!(caller_locations, T::Array[Thread::Backtrace::Location])
+T.assert_type!(caller_locations(2, 10), T.nilable(T::Array[Thread::Backtrace::Location]))
+T.assert_type!(caller_locations(1..10), T.nilable(T::Array[Thread::Backtrace::Location]))
 
 T.assert_type!(BigDecimal('123', 1, exception: true), BigDecimal)
 T.assert_type!(Complex('123', exception: false), Complex)
@@ -31,6 +37,11 @@ define_singleton_method('foo') { puts '' }
 
 def raise_test
   raise ArgumentError, 'bad argument', nil
+end
+
+sig { params(obj_or_str: T.any(Exception, String)).void }
+def raise_obj_or_string(obj_or_str)
+  raise obj_or_str
 end
 
 # make sure we don't regress and mark these as errors

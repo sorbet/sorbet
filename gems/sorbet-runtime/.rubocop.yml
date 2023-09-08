@@ -31,6 +31,8 @@ Style/EmptyElse:
   EnforcedStyle: empty
 Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
+Style/SingleLineMethods:
+  Enabled: false
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
@@ -69,6 +71,8 @@ Naming/FileName:
 # You can convey semantic meaning by using is_foo?
 Naming/PredicateName:
   Enabled: false
+Naming/MethodParameterName:
+  Enabled: false
 
 Lint/MissingSuper:
   Exclude:
@@ -87,6 +91,9 @@ Style/DoubleNegation:
 
 # We don't want to needlessly break older Rubies
 Style/SlicingWithRange:
+  Enabled: false
+
+Style/CaseEquality:
   Enabled: false
 
 Layout/EmptyLines:

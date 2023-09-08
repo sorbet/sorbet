@@ -1,0 +1,8 @@
+# typed: true
+# exclude-from-file-update: true
+extend T::Sig
+
+sig {params(x: A).void}
+def example(x)
+  T.reveal_type(x) # error: `T.untyped`
+end

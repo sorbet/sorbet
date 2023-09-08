@@ -48,4 +48,7 @@ module RbConfig
   MAKEFILE_CONFIG = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
   # Ruby installed directory.
   TOPDIR = T.let(T.unsafe(nil), String)
+
+  sig {returns(String)}
+  def self.ruby; end
 end

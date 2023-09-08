@@ -151,3 +151,58 @@ pluto
 
 def paperino(x, y: nil, **kwargs); end
 paperino(2, y: 3, z: 4)
+
+--------------------------------------------------------------------------
+
+super-arity-messages.rb:12: Method `unary2` does not exist on ancestors of `Parent` https://srb.help/7048
+    12 |    super
+            ^^^^^
+  Note:
+    For help fixing `super` errors: https://sorbet.org/docs/typed-super
+
+super-arity-messages.rb:19: Not enough arguments provided for method `Parent#unary1`. Expected: `1`, got: `0` https://srb.help/7004
+    19 |    super
+                 ^
+    super-arity-messages.rb:7: `Parent#unary1` defined here
+     7 |  def unary1(x)
+          ^^^^^^^^^^^^^
+
+super-arity-messages.rb:24: Too many arguments provided for method `Parent#unary2`. Expected: `1`, got: `2` https://srb.help/7004
+    24 |    super
+                 ^
+    super-arity-messages.rb:11: `unary2` defined here
+    11 |  def unary2(x)
+          ^^^^^^^^^^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+class Parent
+  extend T::Sig
+
+  sig {params(x: Integer).void}
+  def unary1(x)
+  end
+
+  sig {params(x: Integer).void}
+  def unary2(x)
+    super
+  end
+end
+
+class Child < Parent
+  sig {void}
+  def unary1
+    super
+  end
+
+  sig {params(x: Integer, y: String).void}
+  def unary2(x, y)
+    super
+  end
+end
+
+--------------------------------------------------------------------------
+

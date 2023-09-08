@@ -401,6 +401,7 @@ public:
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             lit.symbol.show(ctx));
             }
+            return;
         }
 
         auto &db = ctx.state.packageDB();
@@ -456,7 +457,7 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest();
+                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
                 if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
                     e.addAutocorrect(std::move(exp.value()));
@@ -549,7 +550,7 @@ class ImportCheckerPass final {
 public:
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.fun != core::Names::import() && send.fun != core::Names::test_import()) {
+        if (send.fun != core::Names::import() && send.fun != core::Names::testImport()) {
             return;
         }
 

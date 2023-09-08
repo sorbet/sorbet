@@ -13,7 +13,7 @@ constexpr ErrorClass SuperOutsideMethod{4006, StrictLevel::True};
 // constexpr ErrorClass MethodNotFound{4008, StrictLevel::True};
 // constexpr ErrorClass InvalidAlias{4009, StrictLevel::True};
 constexpr ErrorClass RedefinitionOfMethod{4010, StrictLevel::True};
-constexpr ErrorClass InvalidTypeDefinition{4011, StrictLevel::True};
+constexpr ErrorClass InvalidTypeDefinition{4011, StrictLevel::False};
 constexpr ErrorClass ModuleKindRedefinition{4012, StrictLevel::False};
 constexpr ErrorClass InterfaceClass{4013, StrictLevel::False};
 constexpr ErrorClass DynamicConstant{4014, StrictLevel::False};
@@ -25,6 +25,7 @@ constexpr ErrorClass MultipleBehaviorDefs{4019, StrictLevel::False};
 // constexpr ErrorClass YAMLSyntaxError{4020, StrictLevel::False};
 constexpr ErrorClass OldTypeMemberSyntax{4021, StrictLevel::False};
 constexpr ErrorClass ConstantKindRedefinition{4022, StrictLevel::False};
+constexpr ErrorClass HasAttachedClassInClass{4023, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

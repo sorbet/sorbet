@@ -241,7 +241,12 @@ vector<unique_ptr<Location>> ProtocolTest::getDefinitions(std::string_view uri, 
     return {};
 }
 
-void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected) {
+namespace {
+
+template <typename T>
+void assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedDiagnostic> expected,
+                       const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                       map<string, vector<unique_ptr<Diagnostic>>> &diagnostics) {
     for (auto &msg : messages) {
         // Ignore typecheck run and sorbet/fence messages. They do not impact semantics.
         if (!isTypecheckRun(*msg) && !isSorbetFence(*msg)) {
@@ -250,14 +255,25 @@ void ProtocolTest::assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, ve
     }
 
     // Convert ExpectedDiagnostic into ErrorAssertion objects.
-    vector<shared_ptr<ErrorAssertion>> errorAssertions;
+    vector<shared_ptr<T>> errorAssertions;
     for (auto e : expected) {
         auto range = RangeAssertion::makeRange(e.line);
-        errorAssertions.push_back(ErrorAssertion::make(e.path, range, e.line, e.message, "error"));
+        errorAssertions.push_back(T::make(e.path, range, e.line, e.message, "error"));
     }
 
     // Use same logic as main test runner.
-    ErrorAssertion::checkAll(sourceFileContents, errorAssertions, diagnostics);
+    T::checkAll(sourceFileContents, errorAssertions, diagnostics);
+}
+} // namespace
+
+void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                          vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<ErrorAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
+}
+
+void ProtocolTest::assertUntypedDiagnostics(vector<unique_ptr<LSPMessage>> messages,
+                                            vector<ExpectedDiagnostic> expected) {
+    assertDiagnostics<UntypedAssertion>(std::move(messages), expected, sourceFileContents, diagnostics);
 }
 
 const CounterStateDatabase ProtocolTest::getCounters() {

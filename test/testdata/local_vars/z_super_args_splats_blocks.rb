@@ -2,6 +2,9 @@
 
 # Note that this test exists just for the purpose of validating lowering of zero-arg "super", via exp files. It's not
 # expected to do anything useful if actually executed.
+#
+# For this reason, this test does double duty in checking that `--typed-super=false` works.
+# typed-super: false
 
 def pos(x, y, z)
   super

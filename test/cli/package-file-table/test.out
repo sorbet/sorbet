@@ -1,0 +1,68 @@
+foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
+    13 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `Project::Bar::BarClass`? Use `-a` to autocorrect
+    foo/foo.rb:13: Replace with `Project::Bar::BarClass`
+    13 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
+    bar/bar.rb:6: `Project::Bar::BarClass` defined here
+     6 |  class BarClass
+          ^^^^^^^^^^^^^^
+
+foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from `Project::Bar` https://srb.help/3717
+    14 |    Project::Bar::UnexportedClass
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    bar/bar.rb:14: Defined here
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    bar/__package.rb:9: Insert `export Project::Bar::UnexportedClass`
+     9 |  export Project::Bar::BarMethods
+                                         ^
+Errors: 2
+{
+ "files": [
+  {
+   "path": "./bar/__package.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Bar"
+  },
+  {
+   "path": "./bar/bar.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Bar"
+  },
+  {
+   "path": "./bar/bar_methods.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Bar"
+  },
+  {
+   "path": "./foo/__package.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Foo"
+  },
+  {
+   "path": "./foo/foo.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "False",
+   "pkg": "Project::Foo"
+  },
+  {
+   "path": "./foo/foo_methods.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Foo"
+  }
+ ]
+}

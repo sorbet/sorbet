@@ -100,6 +100,9 @@ def single_package_rbi_test(name, rb_files):
         name = name,
         rb_files = rb_files,
         size = "small",
+        # This is to get the test to run on the compiler build job,
+        # so we can avoid building ruby on the test-static-sanitized job.
+        tags = ["compiler"],
     )
 
 _TEST_RUNNERS = {

@@ -13,7 +13,8 @@ class ::<root> < ::Object ()
      2 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    -e:2: Insert `sig { returns(NilClass) }`
+    -e:2: Insert `extend T::Sig
+    sig { returns(NilClass) }`
      2 |def foo; end
         ^
 Errors: 1

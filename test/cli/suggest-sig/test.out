@@ -36,7 +36,8 @@ suggest-sig.rb:5: The method `hazTwoArgs` does not have a `sig` https://srb.help
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:5: Inserted `sig { params(a: T.untyped, b: T.untyped).returns(Integer) }`
+    suggest-sig.rb:5: Inserted `extend T::Sig
+    sig { params(a: T.untyped, b: T.untyped).returns(Integer) }`
      5 |def hazTwoArgs(a, b); 1; end;
         ^
 
@@ -48,7 +49,8 @@ suggest-sig.rb:7: The method `baz` does not have a `sig` https://srb.help/7017
      7 |def baz
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:7: Inserted `sig { returns(T.any(T::Array[T.untyped], String)) }`
+    suggest-sig.rb:7: Inserted `extend T::Sig
+    sig { returns(T.any(T::Array[T.untyped], String)) }`
      7 |def baz
         ^
 
@@ -56,7 +58,8 @@ suggest-sig.rb:18: The method `bla` does not have a `sig` https://srb.help/7017
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:18: Inserted `sig { void }`
+    suggest-sig.rb:18: Inserted `extend T::Sig
+    sig { void }`
     18 |def bla; give_me_void; end
         ^
 
@@ -68,7 +71,8 @@ suggest-sig.rb:20: The method `bbq` does not have a `sig` https://srb.help/7017
     20 |def bbq
         ^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:20: Inserted `sig { void }`
+    suggest-sig.rb:20: Inserted `extend T::Sig
+    sig { void }`
     20 |def bbq
         ^
 
@@ -80,7 +84,8 @@ suggest-sig.rb:30: The method `give_me_literal` does not have a `sig` https://sr
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:30: Inserted `sig { returns(Integer) }`
+    suggest-sig.rb:30: Inserted `extend T::Sig
+    sig { returns(Integer) }`
     30 |def give_me_literal; 1; end;
         ^
 
@@ -88,7 +93,8 @@ suggest-sig.rb:32: The method `give_me_literal_nested` does not have a `sig` htt
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:32: Inserted `sig { returns(T::Array[T::Array[Integer]]) }`
+    suggest-sig.rb:32: Inserted `extend T::Sig
+    sig { returns(T::Array[T::Array[Integer]]) }`
     32 |def give_me_literal_nested; [[1]]; end;
         ^
 
@@ -96,7 +102,8 @@ suggest-sig.rb:34: The method `root_private` does not have a `sig` https://srb.h
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:34: Inserted `sig { returns(NilClass) }`
+    suggest-sig.rb:34: Inserted `extend T::Sig
+    sig { returns(NilClass) }`
     34 |private def root_private; end
         ^
 
@@ -104,7 +111,8 @@ suggest-sig.rb:36: The method `root_protected` does not have a `sig` https://srb
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:36: Inserted `sig { returns(NilClass) }`
+    suggest-sig.rb:36: Inserted `extend T::Sig
+    sig { returns(NilClass) }`
     36 |protected def root_protected; end
         ^
 
@@ -112,7 +120,8 @@ suggest-sig.rb:46: The method `foo` does not have a `sig` https://srb.help/7017
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:46: Inserted `sig { params(a: Integer).returns(Integer) }`
+    suggest-sig.rb:46: Inserted `extend T::Sig
+    sig { params(a: Integer).returns(Integer) }`
     46 |def foo(a)
         ^
 
@@ -120,7 +129,8 @@ suggest-sig.rb:56: The method `fooCond` does not have a `sig` https://srb.help/7
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:56: Inserted `sig { params(a: T.any(Integer, String), cond: T.untyped).void }`
+    suggest-sig.rb:56: Inserted `extend T::Sig
+    sig { params(a: T.any(Integer, String), cond: T.untyped).void }`
     56 |def fooCond(a, cond)
         ^
 
@@ -128,7 +138,8 @@ suggest-sig.rb:64: The method `fooWhile` does not have a `sig` https://srb.help/
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:64: Inserted `sig { params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass) }`
+    suggest-sig.rb:64: Inserted `extend T::Sig
+    sig { params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass) }`
     64 |def fooWhile(a, cond1, cond2)
         ^
 
@@ -136,7 +147,8 @@ suggest-sig.rb:74: The method `takesBlock` does not have a `sig` https://srb.hel
     74 |def takesBlock
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:74: Inserted `sig { returns(Integer) }`
+    suggest-sig.rb:74: Inserted `extend T::Sig
+    sig { returns(Integer) }`
     74 |def takesBlock
         ^
 
@@ -144,7 +156,8 @@ suggest-sig.rb:79: The method `list_ints_or_empty_list` does not have a `sig` ht
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:79: Inserted `sig { returns(T::Array[T.untyped]) }`
+    suggest-sig.rb:79: Inserted `extend T::Sig
+    sig { returns(T::Array[T.untyped]) }`
     79 |def list_ints_or_empty_list
         ^
 
@@ -164,11 +177,14 @@ suggest-sig.rb:85: This code is unreachable https://srb.help/7006
                             ^^^^
     suggest-sig.rb:85: This condition was always `truthy` (`TrueClass`)
     85 |  if true || qux || blah
-             ^^^^^^^^^^^
+             ^^^^
   Got `TrueClass` originating from:
     suggest-sig.rb:85:
     85 |  if true || qux || blah
              ^^^^
+    suggest-sig.rb:85:
+    85 |  if true || qux || blah
+                 ^^^^
 
 suggest-sig.rb:88: This code is unreachable https://srb.help/7006
     88 |    takesString(x)
@@ -182,13 +198,17 @@ suggest-sig.rb:88: This code is unreachable https://srb.help/7006
              ^^^^
     suggest-sig.rb:85:
     85 |  if true || qux || blah
-             ^^^^^^^^^^^
+                 ^^^^
+    suggest-sig.rb:85:
+    85 |  if true || qux || blah
+                        ^^^^
 
 suggest-sig.rb:84: The method `dead` does not have a `sig` https://srb.help/7017
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:84: Inserted `sig { params(x: Integer).void }`
+    suggest-sig.rb:84: Inserted `extend T::Sig
+    sig { params(x: Integer).void }`
     84 |def dead(x)
         ^
 
@@ -196,7 +216,8 @@ suggest-sig.rb:92: The method `with_block` does not have a `sig` https://srb.hel
     92 |def with_block
         ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:92: Inserted `sig { returns(NilClass) }`
+    suggest-sig.rb:92: Inserted `extend T::Sig
+    sig { returns(NilClass) }`
     92 |def with_block
         ^
 
@@ -212,7 +233,8 @@ suggest-sig.rb:118: The method `cantRun` does not have a `sig` https://srb.help/
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:118: Inserted `sig { params(a: T.untyped).returns(Integer) }`
+    suggest-sig.rb:118: Inserted `extend T::Sig
+    sig { params(a: T.untyped).returns(Integer) }`
      118 |def cantRun(a)
           ^
 
@@ -220,7 +242,8 @@ suggest-sig.rb:155: The method `explicitly_named_block_parameter` does not have 
      155 |def explicitly_named_block_parameter(&blk)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest-sig.rb:155: Inserted `sig { params(blk: T.untyped).returns(Integer) }`
+    suggest-sig.rb:155: Inserted `extend T::Sig
+    sig { params(blk: T.untyped).returns(Integer) }`
      155 |def explicitly_named_block_parameter(&blk)
           ^
 
@@ -269,34 +292,6 @@ suggest-sig.rb:43: The method `a_protected` does not have a `sig` https://srb.he
     suggest-sig.rb:43: Inserted `sig { returns(NilClass) }`
     43 |  protected def a_protected; end
           ^
-
-suggest-sig.rb:102: The method `a` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                            ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `a=` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                            ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `b` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                                ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
-
-suggest-sig.rb:102: The method `b=` does not have a `sig` https://srb.help/7017
-     102 |Foo = Struct.new(:a, :b)
-                                ^
-  Note:
-    Struct classes defined with `Struct` are hard to use in `# typed: strict` files.
-    Consider using `T::Struct` instead.
 
 suggest-sig.rb:112: The method `load_account_business_profile` does not have a `sig` https://srb.help/7017
      112 |  def self.load_account_business_profile(merchant)
@@ -368,7 +363,7 @@ suggest-sig.rb:204: The method `returns_int` does not have a `sig` https://srb.h
     suggest-sig.rb:204: Inserted `sig(:final) { returns(Integer) }`
      204 |  def returns_int; 42; end
             ^
-Errors: 47
+Errors: 43
 
 --------------------------------------------------------------------------
 
@@ -376,9 +371,11 @@ Errors: 47
 
 extend T::Sig
 
+extend T::Sig
 sig { params(a: T.untyped, b: T.untyped).returns(Integer) }
 def hazTwoArgs(a, b); 1; end;
 
+extend T::Sig
 sig { returns(T.any(T::Array[T.untyped], String)) }
 def baz
   if someCondition
@@ -391,9 +388,11 @@ end
 sig {void}
 def give_me_void; end
 
+extend T::Sig
 sig { void }
 def bla; give_me_void; end
 
+extend T::Sig
 sig { void }
 def bbq
   if someCondition
@@ -405,15 +404,19 @@ end
 
 def idk(a); a / a + a * a; end
 
+extend T::Sig
 sig { returns(Integer) }
 def give_me_literal; 1; end;
 
+extend T::Sig
 sig { returns(T::Array[T::Array[Integer]]) }
 def give_me_literal_nested; [[1]]; end;
 
+extend T::Sig
 sig { returns(NilClass) }
 private def root_private; end
 
+extend T::Sig
 sig { returns(NilClass) }
 protected def root_protected; end
 
@@ -427,6 +430,7 @@ class A
   protected def a_protected; end
 end
 
+extend T::Sig
 sig { params(a: Integer).returns(Integer) }
 def foo(a)
  1 + a
@@ -438,6 +442,7 @@ def takesInt(a); end;
 sig {params(a: String).void}
 def takesString(a); end;
 
+extend T::Sig
 sig { params(a: T.any(Integer, String), cond: T.untyped).void }
 def fooCond(a, cond)
   if cond
@@ -447,6 +452,7 @@ def fooCond(a, cond)
   end
 end
 
+extend T::Sig
 sig { params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass) }
 def fooWhile(a, cond1, cond2)
   while cond2
@@ -458,18 +464,21 @@ def fooWhile(a, cond1, cond2)
   end
 end
 
+extend T::Sig
 sig { returns(Integer) }
 def takesBlock
   yield 1
   2
 end
 
+extend T::Sig
 sig { returns(T::Array[T.untyped]) }
 def list_ints_or_empty_list
   x = T.let(1, T.nilable(Integer))
   x.nil? ? [x] : []
 end
 
+extend T::Sig
 sig { params(x: Integer).void }
 def dead(x)
   if true || qux || blah
@@ -479,6 +488,7 @@ def dead(x)
   end
 end
 
+extend T::Sig
 sig { returns(NilClass) }
 def with_block
   yield
@@ -508,6 +518,7 @@ class TestCarash
   end
 end
 
+extend T::Sig
 sig { params(a: T.untyped).returns(Integer) }
 def cantRun(a)
   takesInt(a)
@@ -546,6 +557,7 @@ class Abstract
   def abstract_foo(a); end
 end
 
+extend T::Sig
 sig { params(blk: T.untyped).returns(Integer) }
 def explicitly_named_block_parameter(&blk)
   42

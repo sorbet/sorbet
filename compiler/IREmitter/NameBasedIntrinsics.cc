@@ -37,6 +37,10 @@ core::ClassOrModuleRef typeToSym(const core::GlobalState &gs, core::TypePtr typ)
     return sym;
 }
 
+bool isSuper(core::NameRef name) {
+    return name == core::Names::super() || name == core::Names::untypedSuper();
+}
+
 class DoNothingIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DoNothingIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
@@ -176,7 +180,7 @@ public:
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyRegionId);
         Payload::pushRubyStackVector(cs, builder, cfp, Payload::varGet(cs, recv, builder, irctx, rubyRegionId), stack);
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(shortName), flags, stack.size(), keywords);
-        if (methodName == core::Names::super()) {
+        if (isSuper(methodName)) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
         return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
@@ -495,13 +499,13 @@ public:
             auto blkId = mcctx.blk.value();
             auto usesBreak = irctx.blockUsesBreak[blkId];
             auto *ifunc = Payload::getOrBuildBlockIfunc(cs, builder, irctx, blkId);
-            if (methodName == core::Names::super()) {
+            if (isSuper(methodName)) {
                 return Payload::callSuperFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
             }
             return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.builder, cache, usesBreak, ifunc);
         } else {
             auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.builder);
-            if (methodName == core::Names::super()) {
+            if (isSuper(methodName)) {
                 return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
             }
             return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
@@ -552,7 +556,7 @@ public:
         Payload::pushRubyStackVector(
             cs, builder, cfp, Payload::varGet(mcctx.cs, recv, mcctx.builder, irctx, mcctx.rubyRegionId), {splatArray});
 
-        if (methodName == core::Names::super()) {
+        if (isSuper(methodName)) {
             return Payload::callSuperFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
         }
         return Payload::callFuncWithCache(mcctx.cs, mcctx.builder, cache, blockHandler);
@@ -891,7 +895,6 @@ static const vector<CallCMethod> knownCMethods{
      core::ClassOrModuleRef()},
     {core::Names::stringInterpolate(), "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
      core::Symbols::String()},
-    {core::Names::selfNew(), "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::blockBreak(), "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::nil_p(), "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {core::Names::checkMatchArray(), "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,

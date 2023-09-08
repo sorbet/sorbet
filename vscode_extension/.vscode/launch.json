@@ -6,13 +6,19 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
+            "env": {
+                "VSCODE_SORBETEXT_LOG_LEVEL": "trace"
+              },
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}"
             ],
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
             ],
-            "preLaunchTask": "watch"
+            "preLaunchTask": "watch",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/out/**"
+            ],
         },
         {
             "name": "Run Extension Tests",
@@ -26,7 +32,10 @@
             "outFiles": [
                 "${workspaceFolder}/out/src/test/**/*.js"
             ],
-            "preLaunchTask": "watch"
+            "preLaunchTask": "watch",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/out/**"
+            ],
         }
     ]
 }

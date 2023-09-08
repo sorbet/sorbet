@@ -1,23 +1,32 @@
 #!/usr/bin/env bash
 
 cwd="$(pwd)"
-infile="$cwd/test/cli/arity-messages/arity-messages.rb"
+infiles=(
+  "$cwd/test/cli/arity-messages/arity-messages.rb"
+  "$cwd/test/cli/arity-messages/super-arity-messages.rb"
+)
 
 tmp="$(mktemp -d)"
 
-cp "$infile" "$tmp"
+cp "${infiles[@]}" "$tmp"
 
 cd "$tmp" || exit 1
-if "$cwd/main/sorbet" --silence-dev-message -a arity-messages.rb 2>&1; then
-  echo "Expected to fail!"
-  exit 1
-fi
+for infile in *.rb; do
+  if "$cwd/main/sorbet" --silence-dev-message -a "$infile" 2>&1; then
+    echo "Expected to fail!"
+    exit 1
+  fi
 
-echo
-echo --------------------------------------------------------------------------
-echo
+  echo
+  echo --------------------------------------------------------------------------
+  echo
 
-# Also cat the file, to make that the autocorrect applied
-cat arity-messages.rb
+  # Also cat the file, to make sure that the autocorrect applied
+  cat "$infile"
 
-rm arity-messages.rb
+  rm "$infile"
+
+  echo
+  echo --------------------------------------------------------------------------
+  echo
+done

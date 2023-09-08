@@ -1,0 +1,7 @@
+# -- test/testdata/infer/autocorrect_t_let_nilable.rb --
+# typed: true
+
+x = T.let(5, T.nilable(Integer))
+  T.let(T.must(x), Integer)
+# ^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type `Integer`
+# ------------------------------

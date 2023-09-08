@@ -37,6 +37,7 @@ require_relative 'types/types/fixed_array'
 require_relative 'types/types/fixed_hash'
 require_relative 'types/types/intersection'
 require_relative 'types/types/noreturn'
+require_relative 'types/types/anything'
 require_relative 'types/types/proc'
 require_relative 'types/types/attached_class'
 require_relative 'types/types/self_type'
@@ -84,6 +85,7 @@ require_relative 'types/boolean'
 
 # Depends on types/utils
 require_relative 'types/types/typed_array'
+require_relative 'types/types/typed_class'
 
 # Props dependencies
 require_relative 'types/private/abstract/data'

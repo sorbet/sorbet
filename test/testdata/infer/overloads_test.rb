@@ -79,7 +79,7 @@ class Foo
     T.assert_type!(h.overloaded(self.class), Symbol)
     h.overloaded(1) # error: Expected `String` but found `Integer(1)` for argument `arg0`
                     # should ask for string
-    h.overloaded("1", 2) # error: Expected `Class` but found `String("1")` for argument `arg0`
+    h.overloaded("1", 2) # error: Expected `T::Class[T.anything]` but found `String("1")` for argument `arg0`
   #                   ^ error: Expected `String` but found `Integer(2)` for argument `arg1`
 
     g = OverloadAndGenerics[Integer].new

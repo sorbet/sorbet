@@ -43,9 +43,7 @@ struct Definition;
 struct DefinitionRef;
 struct ReferenceRef;
 
-struct AutoloaderConfig;
 struct NamedDefinition;
-class DefTree;
 
 enum class ClassKind { Class, Module };
 
@@ -86,12 +84,15 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : uint64_t { Module, Class, Casgn, Alias, TypeAlias };
+    enum class Type : uint8_t { Module, Class, Casgn, Alias, TypeAlias };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
     //   definition.id.data(pf) == definition
     DefinitionRef id;
+
+    // The symbol reference for this reference
+    core::SymbolRef sym;
 
     // is this a class, module, constant, or alias
     Type type;
@@ -118,6 +119,9 @@ struct Reference {
     // should always be the case that
     //   reference.id.data(pf) == reference
     ReferenceRef id;
+
+    // The symbol reference for this reference
+    core::SymbolRef sym;
 
     // In which class or module was this reference used?
     DefinitionRef scope;

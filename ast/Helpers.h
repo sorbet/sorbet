@@ -419,20 +419,15 @@ public:
                      std::move(arg));
     }
 
-    static ExpressionPtr ZSuper(core::LocOffsets loc) {
+    static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(loc), core::Names::super(), loc, 1, SendArgs(make_expression<ast::ZSuperArgs>(loc)),
-                    flags);
+        return Send(loc, Self(loc), method, loc, 1,
+                    SendArgs(make_expression<ast::ZSuperArgs>(loc.copyEndWithZeroLength())), flags);
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
         return Constant(loc, core::Symbols::Magic());
-    }
-
-    static ExpressionPtr SelfNew(core::LocOffsets loc, core::LocOffsets funLoc, int numPosArgs,
-                                 ast::Send::ARGS_store args, Send::Flags flags = {}) {
-        return Send(loc, Magic(loc), core::Names::selfNew(), funLoc, numPosArgs, std::move(args), flags);
     }
 
     static ExpressionPtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
@@ -481,11 +476,7 @@ public:
     }
 
     static bool isSelfNew(ast::Send *send) {
-        if (send->fun != core::Names::selfNew()) {
-            return false;
-        }
-
-        return isMagicClass(send->recv);
+        return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
     static core::NameRef arg2Name(const ExpressionPtr &arg) {

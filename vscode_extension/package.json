@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.19",
+  "version": "0.3.25",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -27,8 +27,10 @@
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
-    "onCommand:sorbet.toggleHighlightUntyped",
+    "onCommand:sorbet.setLogLevel",
     "onCommand:sorbet.showOutput",
+    "onCommand:sorbet.toggleHighlightUntyped",
+    "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
   ],
@@ -54,6 +56,12 @@
         "category": "Sorbet"
       },
       {
+        "command": "sorbet.copySymbolToClipboard",
+        "title": "Copy Symbol to Clipboard",
+        "category": "Sorbet",
+        "enablement": "editorLangId == ruby && !editorHasSelection"
+      },
+      {
         "command": "sorbet.disable",
         "title": "Disable",
         "category": "Sorbet"
@@ -64,13 +72,19 @@
         "category": "Sorbet"
       },
       {
+        "command": "sorbet.rename",
+        "title": "Rename Symbol",
+        "category": "Sorbet",
+        "enablement": "editorLangId == ruby"
+      },
+      {
         "command": "sorbet.restart",
         "title": "Restart",
         "category": "Sorbet"
       },
       {
-        "command": "sorbet.toggleHighlightUntyped",
-        "title": "Toggle highlighting untyped code",
+        "command": "sorbet.setLogLevel",
+        "title": "Set Log Level…",
         "category": "Sorbet"
       },
       {
@@ -79,14 +93,16 @@
         "category": "Sorbet"
       },
       {
-        "command": "sorbet.copySymbolToClipboard",
-        "title": "Copy Symbol to Clipboard",
-        "category": "Sorbet"
+        "command": "sorbet.toggleHighlightUntyped",
+        "title": "Toggle highlighting untyped code",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
       },
       {
-        "command": "sorbet.rename",
-        "title": "Rename Symbol",
-        "category": "Sorbet"
+        "command": "sorbet.toggleTypedFalseCompletionNudges",
+        "title": "Toggle the auto-complete nudge in `typed: false` files",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
       }
     ],
     "configuration": {
@@ -97,11 +113,11 @@
           "type": "boolean"
         },
         "sorbet.selectedLspConfigId": {
-          "description": "The default configuration to use from `sorbet.userLspConfigs` or `sorbet.lspConfigs`.  If unset, defaults to the first item in `sorbet.userLspConfigs` or `sorbet.lspConfigs`.",
+          "markdownDescription": "The default configuration to use from `sorbet.userLspConfigs` or `sorbet.lspConfigs`.  If unset, defaults to the first item in `sorbet.userLspConfigs` or `sorbet.lspConfigs`.",
           "type": "string"
         },
         "sorbet.lspConfigs": {
-          "description": "Standard Ruby LSP configurations.  If you commit your VSCode settings to source control, you probably want to commit *this* setting, not `sorbet.userLspConfigs`.",
+          "markdownDescription": "Standard Ruby LSP configurations.  If you commit your VSCode settings to source control, you probably want to commit *this* setting, not `sorbet.userLspConfigs`.",
           "type": "array",
           "default": [
             {
@@ -184,7 +200,7 @@
           }
         },
         "sorbet.userLspConfigs": {
-          "description": "Custom user LSP configurations that supplement `sorbet.lspConfigs` (and override configurations with the same id).  If you commit your VSCode settings to source control, you probably want to commit `sorbet.lspConfigs`, not this value.",
+          "markdownDescription": "Custom user LSP configurations that supplement `sorbet.lspConfigs` (and override configurations with the same id).  If you commit your VSCode settings to source control, you probably want to commit `sorbet.lspConfigs`, not this value.",
           "type": "array",
           "default": [],
           "items": {
@@ -249,6 +265,11 @@
           "description": "Shows warning for untyped values.",
           "default": false
         },
+        "sorbet.typedFalseCompletionNudges": {
+          "type": "boolean",
+          "description": "Displays an auto-complete nudge in `typed: false` files.",
+          "default": true
+        },
         "sorbet.configFilePatterns": {
           "type": "array",
           "description": "List of workspace file patterns that contribute to Sorbet's configuration.  Changes to any of those files should trigger a restart of any actively running Sorbet language server.",
@@ -269,27 +290,6 @@
       }
     },
     "menus": {
-      "commandPalette": [
-        {
-          "command": "sorbet.configure"
-        },
-        {
-          "command": "sorbet.disable"
-        },
-        {
-          "command": "sorbet.enable"
-        },
-        {
-          "command": "sorbet.restart"
-        },
-        {
-          "command": "sorbet.toggleHighlightUntyped"
-        },
-        {
-          "command": "sorbet.showOutput",
-          "when": "editorLangId == ruby"
-        }
-      ],
       "editor/context": [
         {
           "when": "resourceLangId == ruby",
@@ -308,19 +308,17 @@
     "test": "yarn compile && ./scripts/run_tests.sh .",
     "test:ci": "node --preserve-symlinks-main ./out/scripts/runTests.js .",
     "generate-package": "yarn install && yarn compile && yarn vsce package --out sorbet.vsix",
-    "vscode-install": "yarn generate-package && code --force --install-extension sorbet.vsix"
+    "launch": "VSCODE_SORBETEXT_LOG_LEVEL=trace code --extensionDevelopmentPath=$PWD"
   },
   "dependencies": {
     "async": "^2.6.4",
     "elegant-spinner": "^2.0.0",
-    "lodash": "^4.17.21",
     "minimatch": "^3.0.5",
     "vscode-languageclient": "7.0.0"
   },
   "devDependencies": {
     "@types/elegant-spinner": "^1.0.0",
     "@types/glob": "^7.1.1",
-    "@types/lodash": "^4.14.144",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.11.7",
     "@types/sinon": "^7.5.0",

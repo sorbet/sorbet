@@ -57,7 +57,7 @@ class A
   # Constructors are dispatched via a different code path; ensure that
   # it knows how to enter blocks.
   def test_constructors
-    NoConstructor.new do |x|
+    NoConstructor.new do |x| # error: `BasicObject#initialize` does not take a block
       x + 1
     end
 

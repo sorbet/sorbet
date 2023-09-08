@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_NOTIFICATIONS_NOTIFICATIONS_H
 
 #include "main/lsp/notifications/cancel_request.h"
+#include "main/lsp/notifications/did_change_configuration.h"
 #include "main/lsp/notifications/exit.h"
 #include "main/lsp/notifications/initialized.h"
 #include "main/lsp/notifications/sorbet_fence.h"

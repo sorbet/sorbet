@@ -17,7 +17,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Also cat the file, to make that the autocorrect applied
+# Also cat the file, to make sure that the autocorrect applied
 cat autocorrect-t-combinator-kwargs.rb
 
 rm autocorrect-t-combinator-kwargs.rb

@@ -25,5 +25,5 @@ def foo(name, tags: {}, x: 42, &blk)
   yield
 end
 
-blk = Proc.new
+blk = Proc.new {}
 foo("", tags: {}, x: 1, &blk)

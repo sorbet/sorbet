@@ -17,7 +17,7 @@ echo
 echo --------------------------------------------------------------------------
 echo
 
-# Also cat the file, to make that the autocorrect applied
+# Also cat the file, to make sure that the autocorrect applied
 cat type_argument_suggest_unsafe.rb
 
 rm type_argument_suggest_unsafe.rb

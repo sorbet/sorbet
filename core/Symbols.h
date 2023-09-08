@@ -518,6 +518,9 @@ public:
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const;
     MethodRef findMethodTransitive(const GlobalState &gs, NameRef name) const;
+    // A version of findMemberTransitive that skips looking in the members of the current symbol,
+    // instead looking only in the members of any parent.
+    MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
     /* transitively finds a member with the most similar name */
@@ -545,7 +548,7 @@ public:
 
     ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
-    void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
+    void recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass);
 
     // Returns the locations that are allowed to subclass the sealed class.
     const SymbolRef::LOC_store &sealedLocs(const GlobalState &gs) const;
@@ -643,6 +646,7 @@ private:
                                                                       std::vector<ClassOrModuleRef> &seen);
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
+    SymbolRef findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {
         flags.isLinearizationComputed = false;

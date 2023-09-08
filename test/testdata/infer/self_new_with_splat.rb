@@ -14,7 +14,7 @@ class Foo
 
   sig {returns(T.attached_class)}
   def self.also_works_with_block
-    new(*[]) do
+    new(*[]) do # error: `BasicObject#initialize` does not take a block
       1
     end
   end

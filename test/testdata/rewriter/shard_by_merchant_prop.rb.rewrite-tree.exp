@@ -1,4 +1,13 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Opus><<C <todo sym>>> < ()
+    module <emptyTree>::<C Account><<C <todo sym>>> < ()
+      module <emptyTree>::<C Model><<C <todo sym>>> < ()
+        module <emptyTree>::<C Merchant><<C <todo sym>>> < ()
+        end
+      end
+    end
+  end
+
   module <emptyTree>::<C Opus>::<C Autogen>::<C Tokens>::<C AccountModelMerchant><<C <todo sym>>> < ()
     class <emptyTree>::<C Token><<C <todo sym>>> < (::<todo sym>)
     end
@@ -26,6 +35,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def merchant<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>))
+    end
+
+    def merchant_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>)
+    end
+
+    def merchant_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 

@@ -19,7 +19,6 @@ class HasSig
 end
 
   extend T::Sig
-
   sig do
 # ^^^ error: Method `sig` does not exist
     load

@@ -29,6 +29,30 @@ bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     return true;
 }
 
+// Not checking for being T.proc, it's expected to be checked
+void maybeRemoveBind(core::Context ctx, ast::Send *send) {
+    auto lastSend = send;
+    while (send != nullptr) {
+        if (send->fun == core::Names::bind()) {
+            // `bind` is the last send in the chain of sends.
+            // This is incorrect syntax which is covered by the resolver.
+            // Safe to ignore.
+            if (send == lastSend) {
+                return;
+            }
+            auto recvSend = ast::cast_tree<ast::Send>(send->recv);
+            if (recvSend != nullptr) {
+                lastSend->recv = move(send->recv);
+                return;
+            }
+            // We handle only one `.bind` call in the whole chain,
+            // no need to traverse the rest of the tree.
+            return;
+        }
+        send = ast::cast_tree<ast::Send>(send->recv);
+    }
+}
+
 // if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
 // type_of_local)`
 void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
@@ -75,6 +99,11 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
                                    zloc, ast::MK::Constant(zloc, core::Symbols::Symbol()), move(type));
                 break;
             }
+        }
+
+        auto send = ast::cast_tree<ast::Send>(type);
+        if (send != nullptr) {
+            maybeRemoveBind(ctx, send);
         }
 
         auto newLet = ast::MK::Let(loc, move(assn->rhs), move(type));

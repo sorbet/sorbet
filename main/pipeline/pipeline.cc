@@ -229,6 +229,14 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
+            // For simplicity, we still call Packager::runIncremental here, even though
+            // pipeline::resolve no longer calls Packager::run.
+            //
+            // TODO(jez) We may want to revisit this. At the moment, the only thing that
+            // runIncremental does is validate that files have the right package prefix. We could
+            // split `pipeline::package` into something like "populate the package DB" and "verify
+            // the package prefixes" with the later living in `pipeline::resolve` once again (thus
+            // restoring the symmetry).
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
@@ -529,7 +537,7 @@ vector<ast::ParsedFile> mergeIndexResults(core::GlobalState &cgs, const options:
     return ret;
 }
 
-vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<core::FileRef> &files,
+vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<core::FileRef> files,
                                            const options::Options &opts, WorkerPool &workers,
                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
@@ -572,7 +580,7 @@ vector<ast::ParsedFile> indexSuppliedFiles(core::GlobalState &baseGs, vector<cor
     return mergeIndexResults(baseGs, opts, resultq, workers, kvstore);
 }
 
-vector<ast::ParsedFile> index(core::GlobalState &gs, vector<core::FileRef> files, const options::Options &opts,
+vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, const options::Options &opts,
                               WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     Timer timeit(gs.tracer(), "index");
     vector<ast::ParsedFile> ret;
@@ -629,7 +637,12 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         }
         return;
     }
-    if (f.data(ctx).isRBI()) {
+    if (f.data(ctx).isRBI() && ctx.state.lspQuery.isEmpty()) {
+        // If this is an RBI file but isEmpty is not set, we want to run inference just so that we
+        // can get hover, completion, and definition requests.
+        //
+        // There may be type errors in the file (e.g., you don't need `extend T::Sig` to write `sig`
+        // in an RBI file), but we already ignore errors produced in service of an LSPQuery.
         if (intentionallyLeakASTs) {
             intentionallyLeakMemory(resolved.tree.release());
         }
@@ -650,6 +663,9 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         CFGCollectorAndTyper collector(opts);
         {
             ast::ShallowWalk::apply(ctx, collector, resolved.tree);
+            if (f.data(ctx).isRBI()) {
+                return;
+            }
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
@@ -674,28 +690,70 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 } // namespace
 
-vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                WorkerPool &workers) {
+size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> inputFiles) {
+    // c_partition does not maintain relative ordering of the elements, which means that
+    // the sort order of the file paths is not preserved.
+    //
+    // index doesn't depend on this order, because it is already indexes files in
+    // parallel and sorts the resulting parsed files at the end. For that reason, I've
+    // chosen not to use stable_partition here.
+    auto packageFilesEnd = absl::c_partition(inputFiles, [&](auto f) { return f.isPackage(gs); });
+    auto numPackageFiles = distance(inputFiles.begin(), packageFilesEnd);
+    return numPackageFiles;
+}
+
+void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::ParsedFile> &&nonPackageIndexed) {
+    if (indexed.empty()) {
+        // Performance optimization--if it's already empty, no need to move one-by-one
+        indexed = move(nonPackageIndexed);
+    } else {
+        // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
+        // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
+        indexed.reserve(indexed.size() + nonPackageIndexed.size());
+        absl::c_move(nonPackageIndexed, back_inserter(indexed));
+    }
+}
+
+void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.stripePackages) {
-        {
-            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
-            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-            gs.setPackagerOptions(
-                opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
-        }
-        what = packager::Packager::run(gs, workers, move(what));
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    {
+        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
+        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
+        gs.setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
+                              opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
+    }
+#endif
+}
+
+// packager intentionally runs outside of rewriter so that its output does not get cached.
+// TODO(jez) How much of this still needs to be outside of rewriter?
+void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+             WorkerPool &workers) {
+#ifndef SORBET_REALMAIN_MIN
+    if (!opts.stripePackages) {
+        return;
+    }
+
+    try {
+        packager::Packager::run(gs, workers, what);
         if (opts.print.Packager.enabled) {
             for (auto &f : what) {
                 opts.print.Packager.fmt("# -- {} --\n", f.file.data(gs).path());
                 opts.print.Packager.fmt("{}\n", f.tree.toStringWithTabs(gs, 0));
             }
         }
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception packaging (backtrace is above)");
+        }
     }
 #endif
-    return what;
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
@@ -787,9 +845,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
     try {
-        // packager intentionally runs outside of rewriter so that its output does not get cached.
-        what = package(*gs, move(what), opts, workers);
-
         auto result = name(*gs, move(what), opts, workers, foundHashes);
         if (!result.hasResult()) {
             return result;
@@ -960,56 +1015,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         opts.print.SymbolTableFullRaw.fmt("{}\n", gs->showRawFull());
     }
 
-#ifndef SORBET_REALMAIN_MIN
-    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
-        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
-            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullProto.enabled);
-        if (opts.print.FileTableProto.outputPath.empty()) {
-            files.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            files.SerializeToString(&buf);
-            opts.print.FileTableProto.print(buf);
-        }
-    }
-    if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
-        if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
-            Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullJson.enabled);
-        if (opts.print.FileTableJson.outputPath.empty()) {
-            core::Proto::toJSON(files, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(files, buf);
-            opts.print.FileTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
-        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
-            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(*gs, opts.print.FileTableFullMessagePack.enabled);
-        stringstream buf;
-        core::Proto::toJSON(files, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.FileTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
-#endif
-
     if (opts.print.MissingConstants.enabled) {
         what = printMissingConstants(*gs, opts, move(what));
     }
@@ -1153,6 +1158,59 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
     }
 }
 
+void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &opts,
+                    const UnorderedMap<long, long> &untypedUsages) {
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
+        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
+            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullProto.enabled);
+        if (opts.print.FileTableProto.outputPath.empty()) {
+            files.SerializeToOstream(&cout);
+        } else {
+            string buf;
+            files.SerializeToString(&buf);
+            opts.print.FileTableProto.print(buf);
+        }
+    }
+    if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
+        if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
+            Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullJson.enabled);
+        if (opts.print.FileTableJson.outputPath.empty()) {
+            core::Proto::toJSON(files, cout);
+        } else {
+            stringstream buf;
+            core::Proto::toJSON(files, buf);
+            opts.print.FileTableJson.print(buf.str());
+        }
+    }
+    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
+        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
+            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
+        }
+        auto files = core::Proto::filesToProto(*gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
+        stringstream buf;
+        core::Proto::toJSON(files, buf);
+        auto str = buf.str();
+        rapidjson::Document document;
+        document.Parse(str);
+        mpack_writer_t writer;
+        if (opts.print.FileTableMessagePack.outputPath.empty()) {
+            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
+        } else {
+            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
+        }
+        json2msgpack::json2msgpack(document, &writer);
+        if (mpack_writer_destroy(&writer)) {
+            Exception::raise("failed to write msgpack");
+        }
+    }
+#endif
+}
+
 bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -1258,6 +1316,65 @@ vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const
     return results;
 #else
     return what;
+#endif
+}
+
+void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
+                        const options::Options &opts) {
+#ifndef SORBET_REALMAIN_MIN
+
+    if (!opts.print.UntypedBlame.enabled) {
+        return;
+    }
+
+    rapidjson::StringBuffer result;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(result);
+
+    writer.StartArray();
+
+    for (auto &[symId, count] : untypedBlames) {
+        auto sym = core::SymbolRef::fromRaw(symId);
+
+        writer.StartObject();
+
+        writer.String("path");
+        if (sym.exists() && sym.loc(gs).exists()) {
+            writer.String(std::string(sym.loc(gs).file().data(gs).path()));
+
+        } else {
+            writer.String("<none>");
+        }
+
+        writer.String("package");
+        if (sym.exists() && sym.loc(gs).exists()) {
+            const auto file = sym.loc(gs).file();
+            const auto &pkg = gs.packageDB().getPackageForFile(gs, file);
+            if (!pkg.exists()) {
+                writer.String("<none>");
+            } else {
+                writer.String(pkg.show(gs));
+            }
+
+        } else {
+            writer.String("<none>");
+        }
+
+        writer.String("owner");
+        auto owner = sym.owner(gs).show(gs);
+        writer.String(owner);
+
+        writer.String("name");
+        writer.String(sym.name(gs).show(gs));
+
+        writer.String("count");
+        writer.Int64(count);
+
+        writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    opts.print.UntypedBlame.print(result.GetString());
 #endif
 }
 

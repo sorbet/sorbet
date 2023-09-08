@@ -176,7 +176,7 @@ module T::Props
         base_message = "Can't set #{klass.name}.#{prop} to #{val.inspect} (instance of #{val.class}) - need a #{type}"
 
         pretty_message = "Parameter '#{prop}': #{base_message}\n"
-        caller_loc = caller_locations&.find {|l| !l.to_s.include?('sorbet-runtime/lib/types/props')}
+        caller_loc = caller_locations.find {|l| !l.to_s.include?('sorbet-runtime/lib/types/props')}
         if caller_loc
           pretty_message += "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
         end

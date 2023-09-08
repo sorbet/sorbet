@@ -2,11 +2,11 @@
 
 set -euo pipefail
 
-echo "--- Loading with_backoff helper"
+echo "Loading with_backoff helper"
 
 # https://stackoverflow.com/a/8351489
 with_backoff() {
-  local attempts=5
+  local attempts=8
   local timeout=1 # doubles each failure
 
   local attempt=0

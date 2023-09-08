@@ -71,7 +71,7 @@ public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
+    /** Lower upper bound: the narrowest type that is super type of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /**
@@ -97,7 +97,7 @@ public:
     static TypePtr top();
     static TypePtr bottom();
     static TypePtr nilClass();
-    static TypePtr untyped(const core::GlobalState &gs, core::SymbolRef blame);
+    static TypePtr untyped(core::SymbolRef blame);
     static TypePtr untypedUntracked();
     static TypePtr void_();
     static TypePtr trueClass();
@@ -108,12 +108,12 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
-    static TypePtr arrayOfUntyped();
-    static TypePtr rangeOfUntyped();
+    static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
+    static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
+    static TypePtr hashOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr procClass();
     static TypePtr nilableProcClass();
-    static TypePtr classClass();
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
     static TypePtr todo();
@@ -156,6 +156,8 @@ public:
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
+    static TypePtr setOf(const TypePtr &elem);
+    static TypePtr tClass(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */
@@ -968,6 +970,7 @@ struct DispatchArgs {
     // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
     // unreported errors is expensive!
     bool suppressErrors;
+    NameRef enclosingMethodForSuper;
 
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
@@ -1004,7 +1007,7 @@ struct DispatchArgs {
     }
     Loc blockLoc(const GlobalState &gs) const;
 
-    DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
+    DispatchArgs withSelfAndThisRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
     DispatchArgs withErrorsSuppressed() const;
 };

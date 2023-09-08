@@ -20,4 +20,6 @@ class T::Private::Types::NotTyped < T::Types::Base
   private def subtype_of_single?(other)
     raise ERROR_MESSAGE
   end
+
+  INSTANCE = ::T::Private::Types::NotTyped.new.freeze
 end

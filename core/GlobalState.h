@@ -231,7 +231,9 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
-    bool highlightUntyped = false;
+    bool didYouMean = true;
+    bool trackUntyped = false;
+    bool printingFileTable = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
     // this into a valid ruby identifier without suffering.
@@ -296,6 +298,10 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // If 'true', attempt to typecheck calls to `super` as often as possible.
+    // Some calls to `super` are not type checked due to incomplete/imperfect information.
+    bool typedSuper = true;
+
     // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
     // the packages that are imported by the one whose interface is being generated.
     std::optional<packages::ImportInfo> singlePackageImports;
@@ -333,7 +339,11 @@ private:
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeArguments;
-    std::vector<std::pair<unsigned int, uint32_t>> namesByHash;
+    struct Bucket {
+        unsigned int hash;
+        uint32_t rawId;
+    };
+    std::vector<Bucket> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
@@ -353,6 +363,7 @@ private:
     bool fileTableFrozen = true;
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
+    void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
 

@@ -51,3 +51,8 @@ compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
 # for YARD documentation
 .yardoc/
 doc/
+
+# Sandbox folders
+test/sandbox/*/*.log
+test/sandbox/*/*.rb
+test/sandbox/*/*.rbi

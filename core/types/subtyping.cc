@@ -286,8 +286,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass);
-        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -373,7 +373,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<TupleType>(move(elemLubs));
                             }
                         } else {
-                            result = Types::arrayOfUntyped();
+                            result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
@@ -392,7 +392,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 ++i;
                                 auto optind = h1.indexForKey(el2);
                                 if (!optind.has_value()) {
-                                    result = Types::hashOfUntyped();
+                                    result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                                     return;
                                 }
                                 auto &inserted =
@@ -408,7 +408,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<ShapeType>(h2->keys, move(valueLubs));
                             }
                         } else {
-                            result = Types::hashOfUntyped();
+                            result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                         }
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);
@@ -608,7 +608,6 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    TypePtr result;
     // 1 :-)
     auto c1 = cast_type_nonnull<ClassType>(t1);
     auto c2 = cast_type_nonnull<ClassType>(t2);
@@ -1374,8 +1373,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     //                 9 (Or, Or)
     // _ wildcards are ClassType or ProxyType(ClassType)
 
-    // Note: order of cases here matters! We can't loose "and" information in t1 early and we can't
-    // loose "or" information in t2 early.
+    // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
+    // lose "or" information in t2 early.
     if (auto *o1 = cast_type<OrType>(t1)) { // 7, 8, 9
         return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode) &&
                Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode);
@@ -1392,37 +1391,37 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     if (a1 != nullptr) {
         // If the left is an And of an Or, then we can reorder it to be an Or of
         // an And, which lets us recurse on smaller types
-        auto l = a1->left;
-        auto r = a1->right;
-        if (isa_type<OrType>(r)) {
+        const auto *l = &a1->left;
+        const auto *r = &a1->right;
+        if (isa_type<OrType>(*r)) {
             swap(r, l);
         }
-        auto *a2o = cast_type<OrType>(l);
-        if (a2o != nullptr) {
+        auto *a1o = cast_type<OrType>(*l);
+        if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
 
-            // this could be using glb, but we _know_ that we alredy tried to collapse it(prior
+            // this could be using glb, but we _know_ that we alredy tried to collapse it (prior
             // construction of types did). Thus we use AndType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a2o->left, r), t2, mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a2o->right, r), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, *r), t2, mode);
         }
     }
     if (o2 != nullptr) {
-        // Simiarly to above, if the right is an Or of an And, then we can reorder it to be an And of
+        // Similarly to above, if the right is an Or of an And, then we can reorder it to be an And of
         // an Or, which lets us recurse on smaller types
-        auto l = o2->left;
-        auto r = o2->right;
-        if (isa_type<AndType>(r)) {
+        const auto *l = &o2->left;
+        const auto *r = &o2->right;
+        if (isa_type<AndType>(*r)) {
             swap(r, l);
         }
-        auto *o2a = cast_type<AndType>(l);
+        auto *o2a = cast_type<AndType>(*l);
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
 
-            // this could be using lub, but we _know_ that we alredy tried to collapse it(prior
+            // this could be using lub, but we _know_ that we alredy tried to collapse it (prior
             // construction of types did). Thus we use OrType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, r), mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, r), mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode);
         }
     }
 
@@ -1454,8 +1453,16 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (leftIsSubType && !stillNeedToCheckRight) {
             // Short circuit to save time
             return true;
-        } else {
-            return Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode);
+        } else if (Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode)) {
+            return true;
+        } else if (a1 == nullptr) {
+            // If neither t1 <: o2->left nor t1 <: o2->right, it might mean that we tried to split
+            // up an OrType when we weren't meant to. It could be that t1 is an AndType of an OrType
+            //
+            // Note: This is deliberately a case where the code to handle an OrType is not
+            // symmetric (nor even anti-symmetric) with the code to handle an AndType. (There is no
+            // corresponding logic in the `a1 != nullptr` condition below.)
+            return false;
         }
     }
     if (a1 != nullptr) { // 4

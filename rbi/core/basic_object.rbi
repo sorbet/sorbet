@@ -223,6 +223,10 @@ class BasicObject
   end
   def equal?(other); end
 
+  # Default constructor. Does not do anything interesting.
+  sig {void}
+  def initialize(); end
+
   # Evaluates a string containing Ruby source code, or the given block, within
   # the context of the receiver (*obj*). In order to set the context, the
   # variable `self` is set to *obj* while the code is executing, giving the code
@@ -290,4 +294,7 @@ class BasicObject
     .returns(T.type_parameter(:U))
   end
   def instance_exec(*args, &blk); end
+
+  sig {overridable.params(method: Symbol).returns(T.untyped)}
+  private def singleton_method_added(method); end
 end

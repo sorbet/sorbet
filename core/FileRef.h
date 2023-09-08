@@ -47,6 +47,11 @@ public:
     const File &dataAllowingUnsafe(const GlobalState &gs) const;
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
+    // Normally, using .data requires that the file have been read.
+    // But File::Flag data is populated when the File is created, before needing to read the
+    // file. This helper exposes that without tripping an ENFORCE.
+    bool isPackage(const GlobalState &gs) const;
+
 private:
     uint32_t _id;
 };

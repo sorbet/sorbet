@@ -1383,13 +1383,20 @@ class Pathname < Object
   # [`File.write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-write).
   sig do
     params(
-        arg0: String,
+        arg0: Object,
         offset: Integer,
-        open_args: Integer,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
+        textmode: BasicObject,
+        binmode: BasicObject,
+        autoclose: BasicObject,
+        mode: String,
+        perm: Integer
     )
     .returns(Integer)
   end
-  def write(arg0, offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
+  def write(arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil), perm: T.unsafe(nil)); end
 
   # See
   # [`FileTest.zero?`](https://docs.ruby-lang.org/en/2.7.0/FileTest.html#method-i-zero-3F).

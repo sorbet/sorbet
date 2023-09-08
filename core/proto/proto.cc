@@ -61,6 +61,9 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::TEnum:
                     protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
                     break;
+                case UniqueNameKind::Struct:
+                    protoName.set_unique(com::stripe::rubytyper::Name::STRUCT);
+                    break;
                 case UniqueNameKind::Packager:
                     protoName.set_unique(com::stripe::rubytyper::Name::PACKAGER);
                     break;
@@ -387,8 +390,11 @@ com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel 
     }
 }
 
-com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, bool showFull) {
+com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
+                                                      const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
+    const auto &packageDB = gs.packageDB();
+    auto stripePackages = !packageDB.empty();
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
         if (file.data(gs).isPayload()) {
@@ -408,6 +414,18 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs, boo
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
         entry->set_compiled(compiledToProto(file.data(gs).compiledLevel));
+
+        auto frefIdIt = untypedUsages.find(i);
+        if (frefIdIt != untypedUsages.end()) {
+            entry->set_untyped_usages(frefIdIt->second);
+        }
+
+        if (stripePackages) {
+            const auto &packageInfo = packageDB.getPackageForFile(gs, file);
+            if (packageInfo.exists()) {
+                entry->set_pkg(packageInfo.show(gs));
+            }
+        }
     }
     return files;
 }
