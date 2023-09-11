@@ -60,7 +60,20 @@ void MsgpackWriter::packDefinitionRef(DefinitionRef ref) {
 }
 
 void MsgpackWriter::packRange(uint32_t begin, uint32_t end) {
-    mpack_write_u64(&writer, ((uint64_t)begin << 32) | end);
+    if (version <= 4) {
+        mpack_write_u64(&writer, ((uint64_t)begin << 32) | end);
+    } else {
+        // The above scheme almost certainly implies that the value written
+        // will be larger than 2**32 and therefore will take up a full nine
+        // bytes of space in the msgpack file.
+        //
+        // Writing the values as individual u32s means that each can take
+        // advantage of being written as a fixuint/u8/u16/u32 in the output;
+        // the length of the range will be usually a fixuint or a u8, resulting
+        // in even smaller output than writing the endpoint of the range.
+        mpack_write_u32(&writer, begin);
+        mpack_write_u32(&writer, end - begin);
+    }
 }
 
 void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition &def,
@@ -259,6 +272,7 @@ const map<int, int> MsgpackWriter::typeCount{
     {2, 4},
     {3, 5},
     {4, 5},
+    {5, 5},
 };
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{
@@ -301,6 +315,19 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
             "parent_of",
         },
     },
+    {5,
+     {
+         "scope",
+         "name",
+         "nesting",
+         "expr_range_start",
+         "expr_range_len",
+         "expr_pos_range_start",
+         "expr_pos_range_len",
+         "resolved",
+         "is_defining_ref",
+         "parent_of",
+     }},
 };
 
 const map<int, vector<string>> MsgpackWriter::defAttrMap{
@@ -330,6 +357,18 @@ const map<int, vector<string>> MsgpackWriter::defAttrMap{
     },
     {
         4,
+        {
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "is_empty",
+            "parent_ref",
+            "aliased_ref",
+            "defining_ref",
+        },
+    },
+    {
+        5,
         {
             "raw_full_name",
             "type",
