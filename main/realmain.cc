@@ -211,11 +211,11 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         fileq->push(i, 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
+    int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &autogenVersion, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
-        int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
         {
             Timer timeit(logger, "autogenWorker");
             int idx = 0;
@@ -279,6 +279,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         {
             Timer timeit(logger, "autogenDependencyDBPrint");
+            if (opts.print.AutogenMsgPack.enabled) {
+                opts.print.AutogenMsgPack.print(autogen::ParsedFile::msgpackGlobalHeader(autogenVersion));
+            }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
                     opts.print.Autogen.print(elem.strval);

@@ -175,6 +175,8 @@ struct ParsedFile {
 
     std::string toString(const core::GlobalState &gs, int version) const;
     std::string toMsgpack(core::Context ctx, int version, const AutogenConfig &autogenCfg);
+    static std::string msgpackGlobalHeader(int version);
+
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);

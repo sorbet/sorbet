@@ -20,6 +20,7 @@ private:
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
     static const std::map<int, int> typeCount;
 
     // a bunch of helpers
@@ -42,6 +43,7 @@ private:
 public:
     MsgpackWriter(int version);
 
+    static std::string msgpackGlobalHeader(int version);
     std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
 };
 
