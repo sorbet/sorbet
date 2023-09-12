@@ -25,7 +25,6 @@ private:
     // a bunch of helpers
     void packName(core::NameRef nm);
     void packNames(std::vector<core::NameRef> &names);
-    void packString(std::string_view str);
     void packBool(bool b);
     void packReferenceRef(ReferenceRef ref);
     void packDefinitionRef(DefinitionRef ref);

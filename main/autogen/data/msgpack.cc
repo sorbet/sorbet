@@ -31,8 +31,8 @@ void MsgpackWriter::packNames(vector<core::NameRef> &names) {
     mpack_finish_array(&writer);
 }
 
-void MsgpackWriter::packString(string_view str) {
-    mpack_write_str(&writer, str.data(), str.size());
+void packString(mpack_writer_t *writer, string_view str) {
+    mpack_write_str(writer, str.data(), str.size());
 }
 
 void MsgpackWriter::packBool(bool b) {
@@ -162,13 +162,13 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
-    packString(ctx.state.getPrintablePath(pf.path));
+    packString(&writer, ctx.state.getPrintablePath(pf.path));
     mpack_write_u32(&writer, pf.cksum);
 
     // requires
     mpack_start_array(&writer, pf.requireStatements.size());
     for (auto nm : pf.requireStatements) {
-        packString(nm.show(ctx));
+        packString(&writer, nm.show(ctx));
     }
     mpack_finish_array(&writer);
 
@@ -194,7 +194,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
 
     mpack_start_map(&writer, 5);
 
-    packString("symbols");
+    packString(&writer, "symbols");
     int i = -1;
     int numTypes = typeCount.at(version);
     mpack_start_array(&writer, symbols.size());
@@ -232,26 +232,26 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
             str = v;
         }
 
-        packString(str);
+        packString(&writer, str);
     }
     mpack_finish_array(&writer);
 
-    packString("ref_count");
+    packString(&writer, "ref_count");
     mpack_write_u32(&writer, pf.refs.size());
-    packString("def_count");
+    packString(&writer, "def_count");
     mpack_write_u32(&writer, pf.defs.size());
 
-    packString("ref_attrs");
+    packString(&writer, "ref_attrs");
     mpack_start_array(&writer, refAttrs.size());
     for (auto attr : refAttrs) {
-        packString(attr);
+        packString(&writer, attr);
     }
     mpack_finish_array(&writer);
 
-    packString("def_attrs");
+    packString(&writer, "def_attrs");
     mpack_start_array(&writer, defAttrs.size());
     for (auto attr : defAttrs) {
-        packString(attr);
+        packString(&writer, attr);
     }
     mpack_finish_array(&writer);
 
