@@ -334,6 +334,26 @@ const map<int, int> MsgpackWriter::typeCount{
 
 const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
     {
+        2,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+            "ref_attrs",
+            "def_attrs",
+        },
+    },
+    {
+        3,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+            "ref_attrs",
+            "def_attrs",
+        },
+    },
+    {
         4,
         {
             "symbols",
