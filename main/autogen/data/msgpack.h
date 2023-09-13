@@ -20,12 +20,12 @@ private:
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
     static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
     static const std::map<int, int> typeCount;
 
     // a bunch of helpers
     void packName(core::NameRef nm);
     void packNames(std::vector<core::NameRef> &names);
-    void packString(std::string_view str);
     void packBool(bool b);
     void packReferenceRef(ReferenceRef ref);
     void packDefinitionRef(DefinitionRef ref);
@@ -43,6 +43,7 @@ private:
 public:
     MsgpackWriter(int version);
 
+    static std::string msgpackGlobalHeader(int version);
     std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
 };
 

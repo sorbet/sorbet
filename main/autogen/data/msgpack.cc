@@ -31,8 +31,8 @@ void MsgpackWriter::packNames(vector<core::NameRef> &names) {
     mpack_finish_array(&writer);
 }
 
-void MsgpackWriter::packString(string_view str) {
-    mpack_write_str(&writer, str.data(), str.size());
+void packString(mpack_writer_t *writer, string_view str) {
+    mpack_write_str(writer, str.data(), str.size());
 }
 
 void MsgpackWriter::packBool(bool b) {
@@ -162,13 +162,13 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
-    packString(ctx.state.getPrintablePath(pf.path));
+    packString(&writer, ctx.state.getPrintablePath(pf.path));
     mpack_write_u32(&writer, pf.cksum);
 
     // requires
     mpack_start_array(&writer, pf.requireStatements.size());
     for (auto nm : pf.requireStatements) {
-        packString(nm.show(ctx));
+        packString(&writer, nm.show(ctx));
     }
     mpack_finish_array(&writer);
 
@@ -192,9 +192,18 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     size_t headerSize;
     mpack_writer_init_growable(&writer, &header, &headerSize);
 
-    mpack_start_map(&writer, 5);
+    const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
+    const bool writesAttributeStrings = version <= 4;
 
-    packString("symbols");
+    if (writesAttributeStrings) {
+        mpack_start_map(&writer, pfAttrs.size());
+    } else {
+        mpack_start_array(&writer, pfAttrs.size());
+    }
+
+    if (writesAttributeStrings) {
+        packString(&writer, "symbols");
+    }
     int i = -1;
     int numTypes = typeCount.at(version);
     mpack_start_array(&writer, symbols.size());
@@ -232,28 +241,35 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
             str = v;
         }
 
-        packString(str);
+        packString(&writer, str);
     }
     mpack_finish_array(&writer);
 
-    packString("ref_count");
+    if (writesAttributeStrings) {
+        packString(&writer, "ref_count");
+    }
     mpack_write_u32(&writer, pf.refs.size());
-    packString("def_count");
+    if (writesAttributeStrings) {
+        packString(&writer, "def_count");
+    }
     mpack_write_u32(&writer, pf.defs.size());
 
-    packString("ref_attrs");
-    mpack_start_array(&writer, refAttrs.size());
-    for (auto attr : refAttrs) {
-        packString(attr);
-    }
-    mpack_finish_array(&writer);
+    if (version <= 4) {
+        ENFORCE(writesAttributeStrings);
+        packString(&writer, "ref_attrs");
+        mpack_start_array(&writer, refAttrs.size());
+        for (auto attr : refAttrs) {
+            packString(&writer, attr);
+        }
+        mpack_finish_array(&writer);
 
-    packString("def_attrs");
-    mpack_start_array(&writer, defAttrs.size());
-    for (auto attr : defAttrs) {
-        packString(attr);
+        packString(&writer, "def_attrs");
+        mpack_start_array(&writer, defAttrs.size());
+        for (auto attr : defAttrs) {
+            packString(&writer, attr);
+        }
+        mpack_finish_array(&writer);
     }
-    mpack_finish_array(&writer);
 
     mpack_write_object_bytes(&writer, body, bodySize);
     MPACK_FREE(body);
@@ -266,6 +282,47 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     return ret;
 }
 
+string MsgpackWriter::msgpackGlobalHeader(int version) {
+    string header;
+
+    if (version <= 4) {
+        return header;
+    }
+
+    const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
+    const vector<string> &refAttrs = refAttrMap.at(version);
+    const vector<string> &defAttrs = defAttrMap.at(version);
+
+    mpack_writer_t writer;
+    char *body;
+    size_t bodySize;
+    mpack_writer_init_growable(&writer, &body, &bodySize);
+
+    mpack_start_array(&writer, pfAttrs.size());
+    for (const auto &attr : pfAttrs) {
+        packString(&writer, attr);
+    }
+
+    mpack_start_array(&writer, refAttrs.size());
+    for (const auto &attr : refAttrs) {
+        packString(&writer, attr);
+    }
+    mpack_finish_array(&writer);
+
+    mpack_start_array(&writer, defAttrs.size());
+    for (const auto &attr : defAttrs) {
+        packString(&writer, attr);
+    }
+    mpack_finish_array(&writer);
+
+    mpack_writer_destroy(&writer);
+
+    header = string(body, bodySize);
+    MPACK_FREE(body);
+
+    return header;
+}
+
 // Support back-compat down to V2. V3 includes an additional
 // symbol for definition Type, namely TypeAlias.
 const map<int, int> MsgpackWriter::typeCount{
@@ -273,6 +330,47 @@ const map<int, int> MsgpackWriter::typeCount{
     {3, 5},
     {4, 5},
     {5, 5},
+};
+
+const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
+    {
+        2,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+            "ref_attrs",
+            "def_attrs",
+        },
+    },
+    {
+        3,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+            "ref_attrs",
+            "def_attrs",
+        },
+    },
+    {
+        4,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+            "ref_attrs",
+            "def_attrs",
+        },
+    },
+    {
+        5,
+        {
+            "symbols",
+            "ref_count",
+            "def_count",
+        },
+    },
 };
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{

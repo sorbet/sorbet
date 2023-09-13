@@ -211,58 +211,59 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         fileq->push(i, 1);
     }
     auto crcBuilder = autogen::CRCBuilder::create();
+    int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
-        AutogenResult out;
-        int n = 0;
-        int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
-        {
-            Timer timeit(logger, "autogenWorker");
-            int idx = 0;
+    workers.multiplexJob(
+        "runAutogen", [&gs, &autogenVersion, &opts, &indexed, &autogenCfg, crcBuilder, fileq, resultq]() {
+            AutogenResult out;
+            int n = 0;
+            {
+                Timer timeit(logger, "autogenWorker");
+                int idx = 0;
 
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
-                ++n;
-                auto &tree = indexed[idx];
-                if (tree.file.data(gs).isPackage()) {
-                    continue;
-                }
-                if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
-                    continue;
-                }
-
-                core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
-                tree = move(pf.tree);
-
-                AutogenResult::Serialized serialized;
-
-                if (opts.print.Autogen.enabled) {
-                    Timer timeit(logger, "autogenToString");
-                    serialized.strval = pf.toString(ctx, autogenVersion);
-                }
-                if (opts.print.AutogenMsgPack.enabled) {
-                    Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
-                }
-
-                if (!tree.file.data(gs).isRBI()) {
-                    // Exclude RBI files because they are not loadable and should not appear in
-                    // auto-loader related output.
-                    if (opts.print.AutogenSubclasses.enabled) {
-                        Timer timeit(logger, "autogenSubclasses");
-                        serialized.subclasses = autogen::Subclasses::listAllSubclasses(
-                            ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                            opts.autogenSubclassesRelativeIgnorePatterns);
+                for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+                    ++n;
+                    auto &tree = indexed[idx];
+                    if (tree.file.data(gs).isPackage()) {
+                        continue;
                     }
+                    if (autogenVersion < autogen::AutogenVersion::VERSION_INCLUDE_RBI && tree.file.data(gs).isRBI()) {
+                        continue;
+                    }
+
+                    core::Context ctx(gs, core::Symbols::root(), tree.file);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder);
+                    tree = move(pf.tree);
+
+                    AutogenResult::Serialized serialized;
+
+                    if (opts.print.Autogen.enabled) {
+                        Timer timeit(logger, "autogenToString");
+                        serialized.strval = pf.toString(ctx, autogenVersion);
+                    }
+                    if (opts.print.AutogenMsgPack.enabled) {
+                        Timer timeit(logger, "autogenToMsgpack");
+                        serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
+                    }
+
+                    if (!tree.file.data(gs).isRBI()) {
+                        // Exclude RBI files because they are not loadable and should not appear in
+                        // auto-loader related output.
+                        if (opts.print.AutogenSubclasses.enabled) {
+                            Timer timeit(logger, "autogenSubclasses");
+                            serialized.subclasses = autogen::Subclasses::listAllSubclasses(
+                                ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                opts.autogenSubclassesRelativeIgnorePatterns);
+                        }
+                    }
+
+                    out.prints.emplace_back(idx, move(serialized));
                 }
-
-                out.prints.emplace_back(idx, move(serialized));
             }
-        }
 
-        out.counters = getAndClearThreadCounters();
-        resultq->push(move(out), n);
-    });
+            out.counters = getAndClearThreadCounters();
+            resultq->push(move(out), n);
+        });
 
     AutogenResult out;
     for (auto res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger); !res.done();
@@ -279,6 +280,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         {
             Timer timeit(logger, "autogenDependencyDBPrint");
+            if (opts.print.AutogenMsgPack.enabled) {
+                opts.print.AutogenMsgPack.print(autogen::ParsedFile::msgpackGlobalHeader(autogenVersion));
+            }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
                     opts.print.Autogen.print(elem.strval);
