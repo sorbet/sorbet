@@ -132,9 +132,8 @@ smart enough to understand that either:
 
 A current shortcoming of Sorbet is that in many cases it cannot reuse static
 type knowledge in order to automatically determine the type of an instance or
-class variable. In the following example, Sorbet will naturally understand that
-`@x` is of type `Integer`, but it cannot determine the static type of `@y`
-without a `T.let` and therefore treats it as `T.untyped`:
+class variable. In the following example it can, Sorbet will naturally understand that
+`@x` is of type `Integer`, and that `@y` is also of the same type.
 
 ```ruby
 class Foo
@@ -144,7 +143,7 @@ class Foo
     @y = y + 0
 
     T.reveal_type(@x)  # Integer
-    T.reveal_type(@y)  # T.untyped
+    T.reveal_type(@y)  # Integer
   end
 end
 ```
