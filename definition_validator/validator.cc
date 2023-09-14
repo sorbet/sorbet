@@ -912,10 +912,14 @@ private:
     }
 
     core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
+                                                                    const core::ClassOrModuleRef sym,
                                                                     const core::MethodRef abstractMethodRef,
                                                                     const core::Loc insertAt, const string &format,
                                                                     const string &classOrModuleIndent) {
         auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
+        if (sym.data(gs)->attachedClass(gs).exists()) {
+            showOptions = showOptions.withForceSelfPrefix();
+        }
         auto resultType = abstractMethodRef.data(gs)->resultType;
         auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
                                                                             nullptr, showOptions);
@@ -994,7 +998,7 @@ private:
                 continue;
             }
 
-            edits.emplace_back(defineInheritedAbstractMethod(ctx, proto, insertAt, format, classOrModuleIndent));
+            edits.emplace_back(defineInheritedAbstractMethod(ctx, sym, proto, insertAt, format, classOrModuleIndent));
         }
 
         if (edits.empty()) {

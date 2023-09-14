@@ -120,7 +120,8 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
         methodName = methodNameRef.toString(gs);
     }
     string methodNamePrefix = "";
-    if (methodData->owner.exists() && methodData->owner.data(gs)->attachedClass(gs).exists()) {
+    if (options.forceSelfPrefix ||
+        (methodData->owner.exists() && methodData->owner.data(gs)->attachedClass(gs).exists())) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
