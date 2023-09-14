@@ -134,7 +134,8 @@ A current shortcoming of Sorbet is that in many cases it cannot reuse static
 type knowledge in order to automatically determine the type of an instance or
 class variable. In the following example, Sorbet will naturally understand that
 `@x` is of type `Integer`, but it cannot determine the static type of `@y`
-without a `T.let` and therefore treats it as `T.untyped`:
+without a `T.let` and therefore treats it as `T.untyped` when used in other
+methods:
 
 ```ruby
 class Foo
@@ -142,7 +143,10 @@ class Foo
   def initialize(x, y)
     @x = x
     @y = y + 0
+  end
 
+  sig {void}
+  def example
     T.reveal_type(@x)  # Integer
     T.reveal_type(@y)  # T.untyped
   end
