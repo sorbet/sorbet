@@ -158,13 +158,17 @@ condition is truthy and thus must return a <code>String</code>, or</li>
 type knowledge in order to automatically determine the type of an instance or
 class variable. In the following example, Sorbet will naturally understand that
 <code>@x</code> is of type <code>Integer</code>, but it cannot determine the static type of <code>@y</code>
-without a <code>T.let</code> and therefore treats it as <code>T.untyped</code>:</p>
+without a <code>T.let</code> and therefore treats it as <code>T.untyped</code> when used in other
+methods:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   sig {params(<span class="hljs-symbol">x:</span> Integer, <span class="hljs-symbol">y:</span> Integer).void}
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(x, y)</span></span>
     @x = x
     @y = y + <span class="hljs-number">0</span>
+  <span class="hljs-keyword">end</span>
 
+  sig {void}
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span></span>
     T.reveal_type(@x)  <span class="hljs-comment"># Integer</span>
     T.reveal_type(@y)  <span class="hljs-comment"># T.untyped</span>
   <span class="hljs-keyword">end</span>
