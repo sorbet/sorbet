@@ -4,20 +4,7 @@ class Module; include T::Sig; end
 class Class
   def my_new
     # There should be an error here, but Sorbet doesn't currently model that.
-    # If we made the Class_new intrinsic dispatch to `initialize` on
-    # `<AttachedClass>` we can _almost_ get the behavior we want, but doing
-    # that would require `Class::<AttachedClass>` to be `upper: BasicObject`
-    # which is inconvenient.
-    #
-    # So we might want to do some ad-hoc defaulting in the Class_new intrinsic
-    # to either dispatch to `<AttachedClass>`, or if it's `<top>`, then
-    # dispatch to `BasicObject`.
-    #
-    # Note: normally we don't do these sorts of <top> -> BasicObject
-    # conversions, because of parametricity, so this would be a little bit
-    # frowned upon but maybe worth it.
-    #
-    # https://blog.jez.io/sorbet-parametricity/
+    # See the comment inside the Class_new intrinsic for why.
     new(1)
   end
 end
@@ -36,8 +23,11 @@ end
 sig {params(klass: T::Class[MyClass]).void}
 def example1(klass)
   klass.new
+  #        ^ error: Not enough arguments provided for method `MyClass#initialize`. Expected: `1`, got: `0`
   klass.new(0)
+  #         ^ error: Expected `String` but found `Integer(0)` for argument `x`
   klass.new('', 0)
+  #             ^ error: Too many arguments provided for method `MyClass#initialize`. Expected: `1`, got: `2`
   instance = klass.new('')
   T.reveal_type(instance) # error: `MyClass`
 end
@@ -58,8 +48,11 @@ sig do
 end
 def example3(klass)
   klass.new
+  #        ^ error: Not enough arguments provided for method `MyClass#initialize` on `MyClass` component of `T.all(MyClass, T.type_parameter(:Instance) (of Object#example3))`. Expected: `1`, got: `0`
   klass.new(0)
+  #         ^ error: Expected `String` but found `Integer(0)` for argument `x`
   klass.new('', 0)
+  #             ^ error: Too many arguments provided for method `MyClass#initialize`. Expected: `1`, got: `2`
   instance = klass.new('')
   T.reveal_type(instance) # error: `T.all(MyClass, T.type_parameter(:Instance) (of Object#example3))`
 end
@@ -73,21 +66,29 @@ def example4(klass)
   klass.new
 end
 
-# This is a weird side effect of the fact that we treat all modules as having
-# an ImplicitModuleSuperclass, which has BasicObject as its superclass.
+# That there are no errors for the MyModule cases below is a weird side effect
+# of the fact that we treat all modules as having an ImplicitModuleSuperclass,
+# which has BasicObject as its superclass.
 #
 # Arguably, we should make modules descend from <top> instead of BasicObject,
 # but that would be an invasive change, and it looks like it's been this way
 # ~forever, so let's not worry about fixing that now.
+#
+# https://github.com/sorbet/sorbet/issues/7309
+
 module MyModule
   def example
+    # missing error!
     initialize
   end
 end
 
 sig {params(klass: T::Class[MyModule], m: MyModule).void}
 def example5(klass, m)
+  # missing error!
   klass.new
+  # error, but the wrong one (should be: `initialize` doesn't exist, etc.)
   klass.new(0)
+  #         ^ error: Wrong number of arguments for constructor. Expected: `0`, got: `1`
   T.let(m, BasicObject)
 end

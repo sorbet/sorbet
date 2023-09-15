@@ -49,13 +49,8 @@ def example2(klass)
 
   klass.new # error: Not enough arguments provided for method `Box#initialize`
 
-  # These two are bugs in our Class_new intrinsic. We dispatch on
-  # attachedClass->externalType() instead of on the attached class type
-  # argument. This doesn't happen for the klass[Integer].new calls because the
-  # [] call creates a MetaType, and then the `new` dispatchCall goes to
-  # `initialize` on the the MetaType's wrapped type.
-  klass.new(A.new)
-  klass.new(0)
+  klass.new(A.new) # error: Expected `T.all(A, M)` but found `A` for argument `val`
+  klass.new(0) # error: Expected `T.all(A, M)` but found `Integer(0)` for argument `val`
 
   # But I guess this still works, where you can just apply it to another type?
 
