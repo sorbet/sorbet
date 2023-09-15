@@ -1,0 +1,8 @@
+# -- test/testdata/resolver/alias_suggest_unsafe.rb --
+# typed: true
+
+class Child
+  alias_method :bar, :foo
+  #                  ^^^^ error: Can't make method alias from `bar` to non existing method `foo`
+end
+# ------------------------------
