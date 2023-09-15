@@ -2634,7 +2634,7 @@ class Gem::Version < Object
 
   sig do
     params(
-      version: String,
+      version: T.any(String, Gem::Version),
     )
     .void
   end
