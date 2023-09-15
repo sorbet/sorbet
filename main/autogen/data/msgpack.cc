@@ -172,6 +172,8 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     }
     mpack_finish_array(&writer);
 
+    size_t preDefsSize = mpack_writer_buffer_used(&writer);
+
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
         packDefinition(ctx, pf, def, autogenCfg);
@@ -269,6 +271,15 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
             packString(&writer, attr);
         }
         mpack_finish_array(&writer);
+    }
+
+    // v5 and up record the size of refs and defs to enable fast skipping
+    // of the entire data chunk, rather than reading and discarding
+    // individual msgpack fields.
+    size_t defsAndRefsSize = bodySize - preDefsSize;
+    if (version >= 5) {
+        ENFORCE(!writesAttributeStrings);
+        mpack_write_u64(&writer, defsAndRefsSize);
     }
 
     mpack_write_object_bytes(&writer, body, bodySize);
@@ -371,6 +382,7 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
             "symbols",
             "ref_count",
             "def_count",
+            "defs_and_refs_size",
         },
     },
 };
