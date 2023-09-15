@@ -19,7 +19,7 @@ ruby(
         "//conditions:default": [],
     }) + select({
         # Do not enable the JIT unless opted in.
-        "@com_stripe_ruby_typer//tools/config:jit_enabled": [],
+        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["--enable-yjit=stats"],
         "//conditions:default": ["--disable-jit-support"],
     }),
     copts = [
