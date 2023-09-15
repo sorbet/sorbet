@@ -327,7 +327,7 @@ class Benchmark::Job
   # Registers the given label and block pair in the job list.
   sig do
     params(
-        label: String,
+        label: Object,
         blk: T.proc.void
     )
     .returns(T.self_type)
@@ -341,7 +341,7 @@ class Benchmark::Job
   # Registers the given label and block pair in the job list.
   sig do
     params(
-        label: String,
+        label: Object,
         blk: T.proc.void
     )
     .returns(T.self_type)
