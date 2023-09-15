@@ -74,8 +74,6 @@ class Class < Module
   # because RBI files are not typechecked anyways.
   has_attached_class!(:out)
 
-  ### TODO(jez) After T::Class change: Use `T.attached_class` in `allocate`
-
   # Allocates space for a new object of *class*'s class and does not call
   # initialize on the new instance. The returned object must be an instance of
   # *class*.
@@ -93,7 +91,7 @@ class Class < Module
   #
   # klass.allocate.initialized? #=> false
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(T.attached_class)}
   def allocate(); end
 
 
