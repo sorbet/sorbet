@@ -635,7 +635,7 @@ module Kernel
   # When the method name parameter is given as a string, the string is converted to a symbol.
   #
   # See respond_to?, and the example of BasicObject.
-  sig {params(method_name: Symbol, include_private: T::Boolean).returns(T.anything)}
+  sig {params(method_name: Symbol, include_private: T::Boolean).returns(T::Boolean)}
   private def respond_to_missing?(method_name, include_private = false); end
 
   sig do
