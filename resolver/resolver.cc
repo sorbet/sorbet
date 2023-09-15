@@ -2046,7 +2046,8 @@ class ResolveTypeMembersAndFieldsWalk {
     struct ResolveMethodAliasItem {
         core::FileRef file;
         core::ClassOrModuleRef owner;
-        core::LocOffsets loc;
+        core::LocOffsets funLoc;
+        core::LocOffsets fromNameLoc;
         core::LocOffsets toNameLoc;
         core::NameRef toName;
         core::NameRef fromName;
@@ -2578,13 +2579,17 @@ class ResolveTypeMembersAndFieldsWalk {
             if (auto e = ctx.beginError(job.toNameLoc, core::errors::Resolver::BadAliasMethod)) {
                 e.setHeader("Can't make method alias from `{}` to non existing method `{}`", job.fromName.show(ctx),
                             job.toName.show(ctx));
+                auto funLoc = ctx.locAt(job.funLoc);
+                if (ctx.state.suggestUnsafe && funLoc.exists() && funLoc.source(ctx) == "alias_method") {
+                    e.replaceWith("Insert `T.unsafe(self).`", funLoc.copyWithZeroLength(), "T.unsafe(self).");
+                }
             }
             toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
         }
 
         core::MethodRef fromMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(ctx, job.fromName);
         if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
-            if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
+            if (auto e = ctx.beginError(job.fromNameLoc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                 if (fromMethod == dealiased) {
                     e.setHeader("Redefining the existing method `{}` as a method alias", fromMethod.show(ctx));
@@ -2610,7 +2615,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.loc), job.owner, job.fromName);
+        auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.fromNameLoc), job.owner, job.fromName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
 
         // Add a fake keyword argument to remember the toName (for fast path hashing).
@@ -3113,7 +3118,8 @@ public:
             todoMethodAliasItems_.emplace_back(ResolveMethodAliasItem{
                 ctx.file,
                 owner,
-                send.loc,
+                send.funLoc,
+                send.getPosArg(0).loc(),
                 send.getPosArg(1).loc(),
                 toName,
                 fromName,

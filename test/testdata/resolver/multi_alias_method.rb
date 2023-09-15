@@ -6,7 +6,7 @@ class A
   alias_method :from, :to
   alias_method :from, :to_bad
   #                   ^^^^^^^ error: Can't make method alias from `from` to non existing method `to_bad`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Redefining method alias `A#from` from `A#to` to `Sorbet::Private::Static#<bad-method-alias-stub>`
+  #            ^^^^^ error: Redefining method alias `A#from` from `A#to` to `Sorbet::Private::Static#<bad-method-alias-stub>`
 end
 
 class B
