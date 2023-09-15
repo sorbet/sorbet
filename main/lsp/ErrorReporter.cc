@@ -169,6 +169,15 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
         for (auto &section : error->sections) {
             string sectionHeader = section.header;
 
+            if (section.messages.empty()) {
+                // Sometimes we just use section headers to report extra information, not connected
+                // to a specific line. The LSP spec needs a location, so let's just re-use the error->loc.
+                auto location = config->loc2Location(gs, error->loc);
+                relatedInformation.push_back(
+                    make_unique<DiagnosticRelatedInformation>(move(location), move(sectionHeader)));
+                continue;
+            }
+
             for (auto &errorLine : section.messages) {
                 string message = errorLine.formattedMessage.length() > 0 ? errorLine.formattedMessage : sectionHeader;
                 auto location = config->loc2Location(gs, errorLine.loc);
