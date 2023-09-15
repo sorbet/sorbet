@@ -7,8 +7,9 @@ namespace sorbet::core {
 struct ShowOptions final {
     bool useValidSyntax : 1;
     bool concretizeIfAbstract : 1;
+    bool forceSelfPrefix : 1;
 
-    ShowOptions() : useValidSyntax{false}, concretizeIfAbstract{false} {}
+    ShowOptions() : useValidSyntax{false}, concretizeIfAbstract{false}, forceSelfPrefix{false} {}
 
     // Only generate generate or suggest syntactically valid code.
     ShowOptions withUseValidSyntax() {
@@ -21,6 +22,13 @@ struct ShowOptions final {
     ShowOptions withConcretizeIfAbstract() {
         ShowOptions res{*this};
         res.concretizeIfAbstract = true;
+        return res;
+    }
+
+    // Always use `self.` for the prefix of a method definition.
+    ShowOptions withForceSelfPrefix() {
+        ShowOptions res{*this};
+        res.forceSelfPrefix = true;
         return res;
     }
 };

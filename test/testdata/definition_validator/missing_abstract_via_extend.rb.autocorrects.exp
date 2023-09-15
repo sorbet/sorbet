@@ -1,0 +1,19 @@
+# -- test/testdata/definition_validator/missing_abstract_via_extend.rb --
+# typed: true
+class Module; include T::Sig; end
+
+module IFoo
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def foo
+  end
+end
+
+class A # error: Missing definition for abstract method `IFoo#foo`
+  extend IFoo
+  sig { override.void }
+  def self.foo; end
+end
+# ------------------------------
