@@ -357,7 +357,7 @@ module T::Private::Methods
     builder
       .instance_exec(&declaration_block.blk)
       .finalize!
-      .decl
+      .__decl__
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)

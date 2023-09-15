@@ -5,18 +5,18 @@ module T::Private::Methods
   Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
-    attr_reader :decl
+    attr_reader :__decl__
 
     class BuilderError < StandardError; end
 
     private def check_live!
-      if decl.finalized
+      if __decl__.finalized
         raise BuilderError.new("You can't modify a signature declaration after it has been used.")
       end
     end
 
     def initialize(mod, raw)
-      @decl = Declaration.new(
+      @__decl__ = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
         ARG_NOT_PROVIDED, # returns
@@ -33,7 +33,7 @@ module T::Private::Methods
 
     def params(*unused_positional_params, **params)
       check_live!
-      if !decl.params.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.params.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .params twice")
       end
 
@@ -54,43 +54,43 @@ module T::Private::Methods
         MSG
       end
 
-      decl.params = params
+      __decl__.params = params
 
       self
     end
 
     def returns(type)
       check_live!
-      if decl.returns.is_a?(T::Private::Types::Void)
+      if __decl__.returns.is_a?(T::Private::Types::Void)
         raise BuilderError.new("You can't call .returns after calling .void.")
       end
-      if !decl.returns.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.returns.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .returns multiple times in a signature.")
       end
 
-      decl.returns = type
+      __decl__.returns = type
 
       self
     end
 
     def void
       check_live!
-      if !decl.returns.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.returns.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .void after calling .returns.")
       end
 
-      decl.returns = T::Private::Types::Void::Private::INSTANCE
+      __decl__.returns = T::Private::Types::Void::Private::INSTANCE
 
       self
     end
 
     def bind(type)
       check_live!
-      if !decl.bind.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.bind.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .bind multiple times in a signature.")
       end
 
-      decl.bind = type
+      __decl__.bind = type
 
       self
     end
@@ -98,17 +98,17 @@ module T::Private::Methods
     def checked(level)
       check_live!
 
-      if !decl.checked.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if (level == :never || level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+      if (level == :never || level == :compiled) && !__decl__.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
         raise BuilderError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
       end
 
-      decl.checked = level
+      __decl__.checked = level
 
       self
     end
@@ -116,14 +116,14 @@ module T::Private::Methods
     def on_failure(*args)
       check_live!
 
-      if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
-      if decl.checked == :never || decl.checked == :compiled
-        raise BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
+      if __decl__.checked == :never || __decl__.checked == :compiled
+        raise BuilderError.new("You can't use .on_failure with .checked(:#{__decl__.checked}) because .on_failure will have no effect.")
       end
 
-      decl.on_failure = args
+      __decl__.on_failure = args
 
       self
     end
@@ -131,9 +131,9 @@ module T::Private::Methods
     def abstract
       check_live!
 
-      case decl.mode
+      case __decl__.mode
       when Modes.standard
-        decl.mode = Modes.abstract
+        __decl__.mode = Modes.abstract
       when Modes.abstract
         raise BuilderError.new(".abstract cannot be repeated in a single signature")
       else
@@ -151,14 +151,14 @@ module T::Private::Methods
     def override(allow_incompatible: false)
       check_live!
 
-      case decl.mode
+      case __decl__.mode
       when Modes.standard
-        decl.mode = Modes.override
-        decl.override_allow_incompatible = allow_incompatible
+        __decl__.mode = Modes.override
+        __decl__.override_allow_incompatible = allow_incompatible
       when Modes.override, Modes.overridable_override
         raise BuilderError.new(".override cannot be repeated in a single signature")
       when Modes.overridable
-        decl.mode = Modes.overridable_override
+        __decl__.mode = Modes.overridable_override
       else
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
@@ -169,13 +169,13 @@ module T::Private::Methods
     def overridable
       check_live!
 
-      case decl.mode
+      case __decl__.mode
       when Modes.abstract
-        raise BuilderError.new("`.overridable` cannot be combined with `.#{decl.mode}`")
+        raise BuilderError.new("`.overridable` cannot be combined with `.#{__decl__.mode}`")
       when Modes.override
-        decl.mode = Modes.overridable_override
+        __decl__.mode = Modes.overridable_override
       when Modes.standard
-        decl.mode = Modes.overridable
+        __decl__.mode = Modes.overridable
       when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
       end
@@ -201,11 +201,11 @@ module T::Private::Methods
         raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
       end
 
-      if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)
+      if !__decl__.type_parameters.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .type_parameters multiple times in a signature.")
       end
 
-      decl.type_parameters = names
+      __decl__.type_parameters = names
 
       self
     end
@@ -213,31 +213,31 @@ module T::Private::Methods
     def finalize!
       check_live!
 
-      if decl.returns.equal?(ARG_NOT_PROVIDED)
+      if __decl__.returns.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You must provide a return type; use the `.returns` or `.void` builder methods.")
       end
 
-      if decl.bind.equal?(ARG_NOT_PROVIDED)
-        decl.bind = nil
+      if __decl__.bind.equal?(ARG_NOT_PROVIDED)
+        __decl__.bind = nil
       end
-      if decl.checked.equal?(ARG_NOT_PROVIDED)
+      if __decl__.checked.equal?(ARG_NOT_PROVIDED)
         default_checked_level = T::Private::RuntimeLevels.default_checked_level
-        if (default_checked_level == :never || default_checked_level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+        if (default_checked_level == :never || default_checked_level == :compiled) && !__decl__.on_failure.equal?(ARG_NOT_PROVIDED)
           raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
         end
-        decl.checked = default_checked_level
+        __decl__.checked = default_checked_level
       end
-      if decl.on_failure.equal?(ARG_NOT_PROVIDED)
-        decl.on_failure = nil
+      if __decl__.on_failure.equal?(ARG_NOT_PROVIDED)
+        __decl__.on_failure = nil
       end
-      if decl.params.equal?(ARG_NOT_PROVIDED)
-        decl.params = FROZEN_HASH
+      if __decl__.params.equal?(ARG_NOT_PROVIDED)
+        __decl__.params = FROZEN_HASH
       end
-      if decl.type_parameters.equal?(ARG_NOT_PROVIDED)
-        decl.type_parameters = FROZEN_HASH
+      if __decl__.type_parameters.equal?(ARG_NOT_PROVIDED)
+        __decl__.type_parameters = FROZEN_HASH
       end
 
-      decl.finalized = true
+      __decl__.finalized = true
 
       self
     end

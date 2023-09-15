@@ -23,12 +23,12 @@ module Opus::Types::Test
       mod.fn(1) # executes the sig block
 
       assert(builder)
-      assert_equal(mod, builder.decl.mod)
-      assert_equal({x: Integer}, builder.decl.params)
-      assert_equal(String, builder.decl.returns)
-      assert_equal(:always, builder.decl.checked)
-      assert_equal('standard', builder.decl.mode)
-      assert_equal(true, builder.decl.finalized)
+      assert_equal(mod, builder.__decl__.mod)
+      assert_equal({x: Integer}, builder.__decl__.params)
+      assert_equal(String, builder.__decl__.returns)
+      assert_equal(:always, builder.__decl__.checked)
+      assert_equal('standard', builder.__decl__.mode)
+      assert_equal(true, builder.__decl__.finalized)
     end
 
     it 'requires params not have any positional args' do
@@ -127,17 +127,17 @@ module Opus::Types::Test
         end
 
         Child1.new.implement_me
-        assert_equal('abstract', builders[:abstract].decl.mode)
+        assert_equal('abstract', builders[:abstract].__decl__.mode)
 
         Child1.new.override_me
-        assert_equal('overridable', builders[:overridable].decl.mode)
-        assert_equal('override', builders[:override].decl.mode)
+        assert_equal('overridable', builders[:overridable].__decl__.mode)
+        assert_equal('override', builders[:override].__decl__.mode)
 
         Child2.new.implement_me
-        assert_equal('overridable_override', builders[:override_overridable].decl.mode)
+        assert_equal('overridable_override', builders[:override_overridable].__decl__.mode)
 
         Child3.new.implement_me
-        assert_equal('overridable_override', builders[:overridable_override].decl.mode)
+        assert_equal('overridable_override', builders[:overridable_override].__decl__.mode)
       end
 
       INVALID_MODE_TESTS = [
@@ -213,7 +213,7 @@ module Opus::Types::Test
             def self.test_method; end
           end
           mod.test_method
-          assert_equal(:always, builder.decl.checked)
+          assert_equal(:always, builder.__decl__.checked)
         end
 
         describe 'runtime levels' do

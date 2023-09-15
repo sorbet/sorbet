@@ -21,7 +21,7 @@ module T::Utils
       elsif val.is_a?(::Hash)
         T::Types::FixedHash.new(val)
       elsif val.is_a?(T::Private::Methods::DeclBuilder)
-        T::Private::Methods.finalize_proc(val.decl)
+        T::Private::Methods.finalize_proc(val.__decl__)
       elsif val.is_a?(::T::Enum)
         T::Types::TEnum.new(val)
       elsif val.is_a?(::String)
