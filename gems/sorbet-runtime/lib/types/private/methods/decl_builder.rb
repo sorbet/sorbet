@@ -207,6 +207,10 @@ module T::Private::Methods
 
       __decl__.type_parameters = names
 
+      names.each do |name|
+        instance_variable_set("@#{name}", T::Types::TypeParameter.make(name))
+      end
+
       self
     end
 

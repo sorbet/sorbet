@@ -708,6 +708,23 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     return singleton;
 }
 
+optional<core::TypePtr> interpretTypeParameter(core::Context ctx, const ParsedSig &sig, TypeSyntaxArgs args,
+                                               core::NameRef name, core::LocOffsets loc) {
+    auto fnd = sig.findTypeArgByName(name);
+    if (!fnd.type) {
+        if (args.allowUnspecifiedTypeParameter) {
+            // Return nullopt, which will indicate that we couldn't parse the sig at this time.
+            return nullopt;
+        } else {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Unspecified type parameter");
+            }
+            return core::Types::untypedUntracked();
+        }
+    }
+    return fnd.type;
+}
+
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
@@ -796,19 +813,11 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 }
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-            auto fnd = sig.findTypeArgByName(arr->asSymbol());
-            if (!fnd.type) {
-                if (args.allowUnspecifiedTypeParameter) {
-                    // Return nullopt, which will indicate that we couldn't parse the sig at this time.
-                    return nullopt;
-                } else {
-                    if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("Unspecified type parameter");
-                    }
-                    return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
-                }
+            auto result = interpretTypeParameter(ctx, sig, args, arr->asSymbol(), arr->loc);
+            if (!result.has_value()) {
+                return nullopt;
             }
-            return TypeSyntax::ResultType{fnd.type, core::Symbols::noClassOrModule()};
+            return TypeSyntax::ResultType{result.value(), core::Symbols::noClassOrModule()};
         }
         case core::Names::enum_().rawId():
         case core::Names::deprecatedEnum().rawId(): {
@@ -1405,6 +1414,28 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             e.replaceWith("Replace with underlying type", ctx.locAt(lit.loc), "{}", underlying.show(ctx));
         }
         result.type = underlying;
+    } else if (auto *ident = ast::cast_tree<ast::UnresolvedIdent>(expr)) {
+        if (ident->kind != ast::UnresolvedIdent::Kind::Instance) {
+            if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Unsupported type syntax");
+            }
+            result.type = core::Types::untypedUntracked();
+        } else {
+            auto name = ident->name.removeAt(ctx);
+            if (!name.exists()) {
+                if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Unspecified type parameter");
+                }
+                result.type = core::Types::untypedUntracked();
+            } else {
+                auto typeParam = interpretTypeParameter(ctx, sigBeingParsed, args, name, ident->loc);
+                if (!typeParam.has_value()) {
+                    return nullopt;
+                }
+
+                result.type = move(typeParam.value());
+            }
+        }
     } else {
         if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("Unsupported type syntax");

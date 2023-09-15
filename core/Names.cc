@@ -421,6 +421,17 @@ NameRef NameRef::addAt(GlobalState &gs) const {
     return gs.enterNameUTF8(nameEq);
 }
 
+NameRef NameRef::removeAt(const GlobalState &gs) const {
+    auto name = this->dataUtf8(gs);
+    if (!absl::StartsWith(name->utf8, "@")) {
+        return noName();
+    }
+
+    auto utf8 = name->utf8;
+    utf8.remove_prefix(1);
+    return gs.lookupNameUTF8(utf8);
+}
+
 NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(s, name->utf8);
