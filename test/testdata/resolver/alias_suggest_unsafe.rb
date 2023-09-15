@@ -1,4 +1,5 @@
 # typed: true
+# enable-suggest-unsafe: true
 
 class Child
   alias_method :bar, :foo
