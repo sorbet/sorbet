@@ -174,8 +174,8 @@ string ParsedFile::toMsgpack(core::Context ctx, int version, const AutogenConfig
     return write.pack(ctx, *this, autogenCfg);
 }
 
-string ParsedFile::msgpackGlobalHeader(int version) {
-    return MsgpackWriter::msgpackGlobalHeader(version);
+string ParsedFile::msgpackGlobalHeader(int version, size_t numFiles) {
+    return MsgpackWriter::msgpackGlobalHeader(version, numFiles);
 }
 
 } // namespace sorbet::autogen

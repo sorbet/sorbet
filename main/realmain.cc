@@ -281,7 +281,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         {
             Timer timeit(logger, "autogenDependencyDBPrint");
             if (opts.print.AutogenMsgPack.enabled) {
-                opts.print.AutogenMsgPack.print(autogen::ParsedFile::msgpackGlobalHeader(autogenVersion));
+                opts.print.AutogenMsgPack.print(
+                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size()));
             }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {

@@ -293,7 +293,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     return ret;
 }
 
-string MsgpackWriter::msgpackGlobalHeader(int version) {
+string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
     string header;
 
     if (version <= 4) {
@@ -327,6 +327,8 @@ string MsgpackWriter::msgpackGlobalHeader(int version) {
         packString(&writer, attr);
     }
     mpack_finish_array(&writer);
+
+    mpack_write_u64(&writer, numFiles);
 
     mpack_writer_destroy(&writer);
 
