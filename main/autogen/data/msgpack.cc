@@ -172,6 +172,8 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     }
     mpack_finish_array(&writer);
 
+    size_t preDefsSize = mpack_writer_buffer_used(&writer);
+
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
         packDefinition(ctx, pf, def, autogenCfg);
@@ -271,6 +273,15 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
         mpack_finish_array(&writer);
     }
 
+    // v5 and up record the size of refs and defs to enable fast skipping
+    // of the entire data chunk, rather than reading and discarding
+    // individual msgpack fields.
+    size_t defsAndRefsSize = bodySize - preDefsSize;
+    if (version >= 5) {
+        ENFORCE(!writesAttributeStrings);
+        mpack_write_u64(&writer, defsAndRefsSize);
+    }
+
     mpack_write_object_bytes(&writer, body, bodySize);
     MPACK_FREE(body);
 
@@ -282,7 +293,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     return ret;
 }
 
-string MsgpackWriter::msgpackGlobalHeader(int version) {
+string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
     string header;
 
     if (version <= 4) {
@@ -297,6 +308,8 @@ string MsgpackWriter::msgpackGlobalHeader(int version) {
     char *body;
     size_t bodySize;
     mpack_writer_init_growable(&writer, &body, &bodySize);
+
+    mpack_write_u32(&writer, version);
 
     mpack_start_array(&writer, pfAttrs.size());
     for (const auto &attr : pfAttrs) {
@@ -314,6 +327,8 @@ string MsgpackWriter::msgpackGlobalHeader(int version) {
         packString(&writer, attr);
     }
     mpack_finish_array(&writer);
+
+    mpack_write_u64(&writer, numFiles);
 
     mpack_writer_destroy(&writer);
 
@@ -369,6 +384,7 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
             "symbols",
             "ref_count",
             "def_count",
+            "defs_and_refs_size",
         },
     },
 };

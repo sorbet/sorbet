@@ -43,7 +43,7 @@ private:
 public:
     MsgpackWriter(int version);
 
-    static std::string msgpackGlobalHeader(int version);
+    static std::string msgpackGlobalHeader(int version, size_t numFiles);
     std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
 };
 
