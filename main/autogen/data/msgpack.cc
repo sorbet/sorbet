@@ -298,6 +298,8 @@ string MsgpackWriter::msgpackGlobalHeader(int version) {
     size_t bodySize;
     mpack_writer_init_growable(&writer, &body, &bodySize);
 
+    mpack_write_u32(&writer, version);
+
     mpack_start_array(&writer, pfAttrs.size());
     for (const auto &attr : pfAttrs) {
         packString(&writer, attr);
