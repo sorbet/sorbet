@@ -650,6 +650,16 @@ core::ClassOrModuleRef sendLooksLikeBadTypeApplication(core::Context ctx, const 
     return klass;
 }
 
+void maybeSuggestTClass(core::Context ctx, core::ErrorBuilder &e, core::LocOffsets sendLoc, core::LocOffsets argLoc) {
+    e.addErrorNote("You may wish to use `{}`, which doesn't have this restriction.\n"
+                   "    For more information, see https://sorbet.org/docs/class-of#tclass-vs-tclass_of",
+                   "T::Class");
+    if (sendLoc.exists() && !sendLoc.empty() && argLoc.exists() && !argLoc.empty()) {
+        e.replaceWith("Use `T::Class` instead", ctx.locAt(sendLoc), "T::Class[{}]",
+                      ctx.locAt(argLoc).source(ctx).value());
+    }
+}
+
 optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                TypeSyntaxArgs args) {
     if (send.numPosArgs() != 1 || send.hasKwArgs()) {
@@ -673,6 +683,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
                 e.replaceWith("Distribute `T.class_of`", ctx.locAt(send.loc), "{}", autocorrect);
             } else {
                 e.setHeader("`{}` needs a class or module as its argument", "T.class_of");
+                maybeSuggestTClass(ctx, e, send.loc, send.getPosArg(0).loc());
             }
         }
         return core::Symbols::untyped();
@@ -681,12 +692,14 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     if (maybeAliased.isTypeAlias(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_alias");
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
         }
         return core::Symbols::untyped();
     }
     if (maybeAliased.isTypeMember()) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a T.type_member");
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
         }
         return core::Symbols::untyped();
     }
@@ -694,6 +707,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     if (sym.isStaticField(ctx)) {
         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
             e.setHeader("T.class_of can't be used with a constant field");
+            maybeSuggestTClass(ctx, e, send.loc, obj->loc);
         }
         return core::Symbols::untyped();
     }
