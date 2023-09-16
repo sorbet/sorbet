@@ -115,11 +115,19 @@ for this_src in "${rb_src[@]}" DUMMY; do
     if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
       needs_requires_ancestor=true
     fi
+
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
       needs_typed_super_false=true
     else
       needs_typed_super_false=false
     fi
+
+    if grep -q '^# enable-suggest-unsafe: true' "${srcs[@]}"; then
+      needs_suggest_unsafe=true
+    else
+      needs_suggest_unsafe=false
+    fi
+
     for pass in "${passes[@]}"; do
       candidate="$basename.$pass.exp"
       # Document symbols is weird, because it's (currently) the only exp-style
@@ -171,6 +179,11 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
       if $needs_typed_super_false; then
         args+=("--typed-super=false")
+      else
+        args+=()
+      fi
+      if $needs_suggest_unsafe; then
+        args+=("--suggest-unsafe")
       else
         args+=()
       fi
