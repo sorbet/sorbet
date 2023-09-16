@@ -29,4 +29,12 @@ class TrueClass
   def |(obj); end
   sig {returns(FalseClass)}
   def !; end
+
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(T::Boolean)
+  end
+  def ==(other); end
 end

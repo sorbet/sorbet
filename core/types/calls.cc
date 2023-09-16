@@ -3864,6 +3864,44 @@ public:
     }
 } Array_zip;
 
+class TrueClass_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto &argType = args.args[0]->type;
+        // Untyped arguments could be anything, and the Object#== signature will take care of us.
+        if (argType.isUntyped()) {
+            return;
+        }
+
+        if (Types::all(gs, Types::trueClass(), argType).isBottom()) {
+            res.returnType = Types::falseClass();
+        }
+    }
+} TrueClass_eqeq;
+
+class FalseClass_eqeq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto &argType = args.args[0]->type;
+        // Untyped arguments could be anything, and the Object#== signature will take care of us.
+        if (argType.isUntyped()) {
+            return;
+        }
+
+        if (Types::all(gs, Types::falseClass(), argType).isBottom()) {
+            res.returnType = Types::falseClass();
+        }
+    }
+} FalseClass_eqeq;
+
 class Symbol_eqeq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4284,6 +4322,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
+
+    {Symbols::TrueClass(), Intrinsic::Kind::Instance, Names::eqeq(), &TrueClass_eqeq},
+    {Symbols::FalseClass(), Intrinsic::Kind::Instance, Names::eqeq(), &FalseClass_eqeq},
 
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
     {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},

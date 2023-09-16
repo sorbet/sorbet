@@ -23,4 +23,12 @@ class FalseClass
   sig {returns(TrueClass)}
   def !
   end
+
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(T::Boolean)
+  end
+  def ==(other); end
 end
