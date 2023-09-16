@@ -297,4 +297,7 @@ class BasicObject
 
   sig {overridable.params(method: Symbol).returns(T.untyped)}
   private def singleton_method_added(method); end
+
+  sig {params(method: Symbol, args: T.untyped).returns(T.untyped)}
+  private def method_missing(method, *args); end
 end
