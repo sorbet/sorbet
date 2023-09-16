@@ -2,7 +2,7 @@
 # typed: true
 # enable-suggest-unsafe: true
 
-class Parent < T::Struct
+class Parent < T::InexactStruct
 end
 
 class Child < Parent # error: Subclassing `Parent` is not allowed

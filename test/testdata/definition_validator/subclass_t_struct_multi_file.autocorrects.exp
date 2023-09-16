@@ -2,7 +2,7 @@
 # typed: true
 # enable-suggest-unsafe: true
 
-class Parent < T::Struct
+class Parent < T::InexactStruct
 end
 # ------------------------------
 # -- test/testdata/definition_validator/subclass_t_struct_multi_file__2.rb --

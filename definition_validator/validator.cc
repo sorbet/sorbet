@@ -907,7 +907,16 @@ private:
         if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::SubclassingNotAllowed)) {
             auto parentName = parent.show(gs);
             e.setHeader("Subclassing `{}` is not allowed", parentName);
-            e.addErrorLine(parent.data(gs)->loc(), "`{}` is a subclass of `T::Struct`", parentName);
+            auto parentDeclLoc = parent.data(gs)->loc();
+            e.addErrorLine(parentDeclLoc, "`{}` is a subclass of `{}`", parentName, "T::Struct");
+            if (gs.suggestUnsafe && parentDeclLoc.exists()) {
+                auto declSource = parentDeclLoc.source(gs).value();
+                auto ltTStruct = "< T::Struct"sv;
+                if (absl::EndsWith(declSource, ltTStruct)) {
+                    e.replaceWith("Replace with `T::InexactStruct`", parentDeclLoc, "{}< {}",
+                                  declSource.substr(0, declSource.size() - ltTStruct.size()), "T::InexactStruct");
+                }
+            }
         }
     }
 
