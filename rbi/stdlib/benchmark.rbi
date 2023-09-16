@@ -306,7 +306,7 @@ module Benchmark
   # ```
   sig do
     params(
-        label: String,
+        label: Object,
         blk: T.proc.void,
     )
     .returns(Benchmark::Tms)
@@ -359,7 +359,7 @@ class Benchmark::Report
   # formatting rules.
   sig do
     params(
-        label: String,
+        label: Object,
         format: T.untyped,
         blk: T.proc.void
     )
@@ -376,7 +376,7 @@ class Benchmark::Report
   # formatting rules.
   sig do
     params(
-        label: String,
+        label: Object,
         format: T.untyped,
         blk: T.proc.void
     )
