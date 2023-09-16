@@ -78,4 +78,4 @@ T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]
 x = [[3.4], [1, "a"]]
 T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
 x = [[3.4, "a"], [:a, 5]]
-T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
+T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
