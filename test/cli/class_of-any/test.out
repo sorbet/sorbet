@@ -9,6 +9,13 @@ class_of-any.rb:9: `T.class_of` must wrap each individual class type, not the ou
 class_of-any.rb:12: `T.class_of` needs a class or module as its argument https://srb.help/5004
     12 |sig { returns(T.class_of(T.any(A, D))) }
                       ^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    You may wish to use `T::Class`, which doesn't have this restriction.
+    For more information, see https://sorbet.org/docs/class-of#tclass-vs-tclass_of
+  Autocorrect: Done
+    class_of-any.rb:12: Replaced with `T::Class[T.any(A, D)]`
+    12 |sig { returns(T.class_of(T.any(A, D))) }
+                      ^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 2
 
 --------------------------------------------------------------------------
@@ -24,5 +31,5 @@ class D < A; end
 sig { returns(T.any(T.class_of(B), T.class_of(C), T.class_of(A))) }
 def foo; end
 
-sig { returns(T.class_of(T.any(A, D))) }
+sig { returns(T::Class[T.any(A, D)]) }
 def bar; end
