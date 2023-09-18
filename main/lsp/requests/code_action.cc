@@ -72,7 +72,7 @@ hasLoneMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core:
 }
 
 const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &gs,
-                                                 const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
+                                                       const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
     if (responses.empty()) {
         return nullptr;
     }
