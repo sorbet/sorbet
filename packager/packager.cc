@@ -1353,7 +1353,7 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     }
 
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
-    bool skipImportVisibilityCheck = packageDB.skipImportVisibilityCheckFor(pkgInfo.mangledName());
+    bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
 
     if (!skipImportVisibilityCheck) {
         for (auto &i : pkgInfo.importedPackageNames) {

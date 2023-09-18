@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 # enable-packager: true
-# skip-package-import-visibility-check-for: SpecialPackage
+# allow-relaxed-packager-checks-for: SpecialPackage
 
 class SpecialPackage < PackageSpec
   import Library

@@ -396,9 +396,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Secondary top-level namespaces which contain test code (in addition to Test, which is primary). "
         "This option must be used in conjunction with --stripe-packages",
         cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("skip-package-import-visibility-check-for",
-                               "Packages for which the visible_to check does not apply. They can import any package "
-                               "regardless of visible_to annotations."
+    options.add_options("dev")("allow-relaxed-packager-checks-for",
+                               "Packages which are allowed to ignore the restrictions set by `visible_to` "
+                               "and `export` directives."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
     buildAutogenCacheOptions(options);
@@ -956,21 +956,19 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("skip-package-import-visibility-check-for")) {
+        if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.stripePackages) {
-                logger->error(
-                    "--skip-package-import-visibility-check-for can only be specified in --stripe-packages mode");
+                logger->error("--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
             std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
-            for (const string &ns : raw["skip-package-import-visibility-check-for"].as<vector<string>>()) {
+            for (const string &ns : raw["allow-relaxed-packager-checks-for"].as<vector<string>>()) {
                 if (!std::regex_match(ns, nsValid)) {
-                    logger->error(
-                        "--skip-package-import-visibility-check-for must contain items that start with a capital "
-                        "letter and are alphanumeric.");
+                    logger->error("--allow-relaxed-packager-checks-for must contain items that start with a capital "
+                                  "letter and are alphanumeric.");
                     throw EarlyReturnWithCode(1);
                 }
-                opts.skipPackageImportVisibilityCheckFor.emplace_back(ns);
+                opts.allowRelaxedPackagerChecksFor.emplace_back(ns);
             }
         }
 

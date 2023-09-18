@@ -2371,7 +2371,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
                                      const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                                     const std::vector<std::string> &skipImportVisibilityCheckFor,
+                                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                                      std::string errorHint) {
     ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
@@ -2384,13 +2384,13 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
 
-    std::vector<core::NameRef> skipImportVisibilityCheckFor_;
-    for (const string &pkgName : skipImportVisibilityCheckFor) {
+    std::vector<core::NameRef> allowRelaxedPackagerChecksFor_;
+    for (const string &pkgName : allowRelaxedPackagerChecksFor) {
         std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
         auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
-        skipImportVisibilityCheckFor_.emplace_back(mangledName);
+        allowRelaxedPackagerChecksFor_.emplace_back(mangledName);
     }
-    packageDB_.skipImportVisibilityCheckFor_ = skipImportVisibilityCheckFor_;
+    packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor_;
     packageDB_.errorHint_ = errorHint;
 }
 

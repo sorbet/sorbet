@@ -262,7 +262,7 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
     vector<std::string> skipRBIExportEnforcementDirs;
-    vector<std::string> skipImportVisibilityCheckFor;
+    vector<std::string> allowRelaxedPackagerChecksFor;
 
     auto extraDirUnderscore =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
@@ -275,17 +275,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
     }
 
-    auto skipImportVisibility =
-        StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
-    if (skipImportVisibility.has_value()) {
-        skipImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
+    if (allowRelaxedPackager.has_value()) {
+        allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
         gs->setPackagerOptions(secondaryTestPackageNamespaces, extraPackageFilesDirectoryUnderscorePrefixes,
-                               extraPackageFilesDirectorySlashPrefixes, {}, skipImportVisibilityCheckFor,
+                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
                                "PACKAGE_ERROR_HINT");
     }
 }
