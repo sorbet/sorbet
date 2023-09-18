@@ -275,8 +275,7 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         extraPackageFilesDirectorySlashPrefixes.emplace_back(extraDirSlash.value());
     }
 
-    auto allowRelaxedPackager =
-        StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
+    auto allowRelaxedPackager = StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
     if (allowRelaxedPackager.has_value()) {
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }

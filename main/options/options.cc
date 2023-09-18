@@ -958,16 +958,14 @@ void readOptions(Options &opts,
 
         if (raw.count("allow-relaxed-packager-checks-for")) {
             if (!opts.stripePackages) {
-                logger->error(
-                    "--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
+                logger->error("--allow-relaxed-packager-checks-for can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
             std::regex nsValid("[A-Z][a-zA-Z0-9:]+");
             for (const string &ns : raw["allow-relaxed-packager-checks-for"].as<vector<string>>()) {
                 if (!std::regex_match(ns, nsValid)) {
-                    logger->error(
-                        "--allow-relaxed-packager-checks-for must contain items that start with a capital "
-                        "letter and are alphanumeric.");
+                    logger->error("--allow-relaxed-packager-checks-for must contain items that start with a capital "
+                                  "letter and are alphanumeric.");
                     throw EarlyReturnWithCode(1);
                 }
                 opts.allowRelaxedPackagerChecksFor.emplace_back(ns);
