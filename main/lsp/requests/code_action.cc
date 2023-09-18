@@ -88,8 +88,8 @@ const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &
     }
 
     auto data = method.data(gs);
-    if (data->owner != core::Symbols::TSingleton() || data->name != core::Names::unsafe() ||
-        data->name != core::Names::must()) {
+    if (data->owner != core::Symbols::TSingleton() ||
+        (data->name != core::Names::unsafe() && data->name != core::Names::must())) {
         return nullptr;
     }
 
