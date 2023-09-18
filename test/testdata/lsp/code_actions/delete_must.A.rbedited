@@ -2,4 +2,4 @@
 # selective-apply-code-action: refactor.rewrite
 
 xs.even?
-# ^ apply-code-action: [A] Delete T.unsafe
+# ^ apply-code-action: [A] Delete T.must
