@@ -1,0 +1,21 @@
+# -- test/testdata/definition_validator/subclass_t_struct_multi_file__1.rb --
+# typed: true
+# enable-suggest-unsafe: true
+
+class Parent < T::InexactStruct
+end
+# ------------------------------
+# -- test/testdata/definition_validator/subclass_t_struct_multi_file__2.rb --
+# typed: true
+
+class Child2 < Parent # error: Subclassing `Parent` is not allowed
+end
+
+# ------------------------------
+# -- test/testdata/definition_validator/subclass_t_struct_multi_file__3.rb --
+# typed: true
+
+class Child3 < Parent # error: Subclassing `Parent` is not allowed
+end
+
+# ------------------------------

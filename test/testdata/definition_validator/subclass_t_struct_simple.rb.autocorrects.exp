@@ -1,0 +1,14 @@
+# -- test/testdata/definition_validator/subclass_t_struct_simple.rb --
+# typed: true
+# enable-suggest-unsafe: true
+
+class Parent < T::InexactStruct
+end
+
+class Child < Parent # error: Subclassing `Parent` is not allowed
+end
+
+# autocorrect not implemented
+Child2 = Class.new(Parent) do # error: Subclassing `Parent` is not allowed
+end
+# ------------------------------
