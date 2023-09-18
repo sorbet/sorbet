@@ -567,9 +567,9 @@ TEST_CASE("LSPTest") {
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
             auto skipImportVisibility =
-                StringPropertyAssertion::getValue("skip-package-import-visibility-check-for", assertions);
+                StringPropertyAssertion::getValue("allow-relaxed-packager-checks-for", assertions);
             if (skipImportVisibility.has_value()) {
-                opts->skipPackageImportVisibilityCheckFor.emplace_back(skipImportVisibility.value());
+                opts->allowRelaxedPackagerChecksFor.emplace_back(skipImportVisibility.value());
             }
             opts->secondaryTestPackageNamespaces.emplace_back("Critic");
         }

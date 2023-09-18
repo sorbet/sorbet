@@ -250,8 +250,8 @@ const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
-bool PackageDB::skipImportVisibilityCheckFor(core::NameRef mangledName) const {
-    return absl::c_find(skipImportVisibilityCheckFor_, mangledName) != skipImportVisibilityCheckFor_.end();
+bool PackageDB::allowRelaxedPackagerChecksFor(core::NameRef mangledName) const {
+    return absl::c_find(allowRelaxedPackagerChecksFor_, mangledName) != allowRelaxedPackagerChecksFor_.end();
 }
 
 PackageDB PackageDB::deepCopy() const {

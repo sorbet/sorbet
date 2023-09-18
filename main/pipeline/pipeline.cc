@@ -725,7 +725,7 @@ void setPackagerOptions(core::GlobalState &gs, const options::Options &opts) {
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
         gs.setPackagerOptions(opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
                               opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                              opts.skipPackageImportVisibilityCheckFor, opts.stripePackagesHint);
+                              opts.allowRelaxedPackagerChecksFor, opts.stripePackagesHint);
     }
 #endif
 }

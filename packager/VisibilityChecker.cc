@@ -420,7 +420,7 @@ public:
         }
 
         // Did we use a constant that wasn't exported?
-        if (!isExported && !db.skipImportVisibilityCheckFor(this->package.mangledName())) {
+        if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
