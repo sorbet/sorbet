@@ -71,7 +71,7 @@ hasLoneMethodResponse(const core::GlobalState &gs, const vector<unique_ptr<core:
     return found;
 }
 
-const core::lsp::SendResponse *isTUnsafeResponse(const core::GlobalState &gs,
+const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &gs,
                                                  const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
     if (responses.empty()) {
         return nullptr;
@@ -88,7 +88,8 @@ const core::lsp::SendResponse *isTUnsafeResponse(const core::GlobalState &gs,
     }
 
     auto data = method.data(gs);
-    if (data->owner != core::Symbols::TSingleton() || data->name != core::Names::unsafe()) {
+    if (data->owner != core::Symbols::TSingleton() || data->name != core::Names::unsafe() ||
+        data->name != core::Names::must()) {
         return nullptr;
     }
 
@@ -240,7 +241,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     }
                 }
             }
-        } else if (auto *resp = isTUnsafeResponse(gs, queryResult.responses)) {
+        } else if (auto *resp = isTUnsafeOrMustResponse(gs, queryResult.responses)) {
             auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(params->textDocument->uri), JSONNullObject());
             auto replaceRange = Range::fromLoc(gs, resp->termLoc());
             auto arg0Loc = core::Loc(file, resp->argLocOffsets[0]);
@@ -255,7 +256,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             auto workspaceEdit = make_unique<WorkspaceEdit>();
             workspaceEdit->documentChanges = move(documentEdits);
 
-            auto action = make_unique<CodeAction>("Delete T.unsafe");
+            auto action = make_unique<CodeAction>(fmt::format("Delete T.{}", resp->callerSideName.show(gs)));
             action->kind = CodeActionKind::RefactorRewrite;
             action->edit = move(workspaceEdit);
             result.emplace_back(move(action));
