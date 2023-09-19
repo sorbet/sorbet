@@ -9,8 +9,7 @@ def register_ruby_dependencies():
         sha256 = "c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4",
         strip_prefix = "yaml-{}".format(libyaml_version),
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libyaml.BUILD",
-    ) 
-
+    )
 
     http_archive(
         name = "rules_rust",
@@ -103,7 +102,7 @@ def register_ruby_dependencies():
         strip_prefix = "ruby-3.2.2",
         build_file = ruby_build,
     )
-    
+
     http_archive(
         name = "sorbet_ruby_3_3_preview",
         urls = _ruby_urls("3.3/ruby-3.3.0-preview1.tar.gz"),
