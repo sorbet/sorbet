@@ -344,7 +344,10 @@ const map<int, int> MsgpackWriter::typeCount{
     {2, 4},
     {3, 5},
     {4, 5},
-    {5, 5},
+    // v5 requires clients to have their own representation for common
+    // definition types, rather than stuffing symbols into the symbol
+    // array.
+    {5, 0},
 };
 
 const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
