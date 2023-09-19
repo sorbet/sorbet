@@ -114,8 +114,7 @@ run_cmd ./configure \
         --with-rubyhdrdir='${{includedir}}' \
         --with-rubyarchhdrdir='${{includedir}}/ruby-arch' \
         --disable-install-doc \
-        --prefix=/ \
-        --without-git
+        --prefix=/ 
 
 run_cmd make V=1 -j8
 run_cmd make V=1 install
