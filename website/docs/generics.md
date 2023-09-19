@@ -208,6 +208,87 @@ if box.is_a?(Box)
 end
 ```
 
+### Reifying generics at runtime
+
+> This section discusses features like `fixed` and `type_template` which are
+> introduced further below.
+
+Sorbet erases generic types at runtime, but with abstract methods and
+[`T::Class`](class-of.md#tclass-vs-tclass_of) it's sometimes possible to reify
+those types. For example, commonly we might want the generic type so we can use
+it to instantiate a value of that type:
+
+```ruby
+class Factory
+  extend T::Generic
+
+  InstanceType = type_template
+
+  sig {returns(InstanceType)}
+  def self.make_bad
+    InstanceType.new
+    # ^ this is not valid, because `InstanceType`
+    # is a generic type (erased at runtime)
+  end
+end
+```
+
+The problem here is that `InstanceType` does not "store" the runtime type that
+might be bound at runtime--it's only there for the purposes of static checking.
+
+To fix this, we can just add an abstract method to our interface which forces
+subclasses to reify the generic:
+
+```ruby
+class Factory
+  extend T::Generic
+  abstract!
+
+  InstanceType = type_template
+
+  # (1) Require the user to provide a type
+  sig { abstract.returns(T::Class[InstanceType]) }
+  def self.instance_type; end
+
+  sig {returns(InstanceType)}
+  def self.make
+    # (2) Call `self.instance_type.new` instead of `InstanceType.new`
+    self.instance_type.new
+  end
+end
+
+class A; end
+
+class AFactory < Factory
+  # (3) Fix the type in the child
+  InstanceType = type_template { {fixed: A} }
+
+  # (4) Provide the type explicitly. Sorbet checks that `A` is a valid value of
+  #     type T::Class[A]
+  sig { override.returns(T::Class[InstanceType]) }
+  def self.instance_type = A
+end
+```
+
+Some notes:
+
+1.  We declare an abstract method that uses `T::Class[InstanceType]` for its
+    return type. Subclasses are forced to fill this in (or remain abstract).
+2.  The parent `Factory` class can call that method in `make` to access the
+    class at runtime. Unlike `InstanceType.new`, this actually produces the
+    correct class at runtime.
+3.  In the subclass, we're forced to redeclare the type template. In this sense,
+    the type_template acts like a sort of "abstract type". This is done with the
+    `fixed` annotation.
+4.  The subclass implements `instance_type` with `A`. Sorbet checks that the
+    implementation `instance_type` and the value provided to `InstanceType`
+    remain in sync because of the `T::Class[InstanceType]` return annotation.
+
+This approach works as long as we only want to reify singleton class types. More
+complex types, like `T.any` types or types representing instance classes (not
+singleton class types) will either not work at all, or require a little more
+ingenuity.
+
 ## `type_member` & `type_template`
 
 The `type_member` and `type_template` annotations declare class-level generic
