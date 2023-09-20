@@ -38,7 +38,7 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
         "-fPIC",
-    ] ,
+    ],
     extra_srcs = [],
     gems = [
         "@bundler_stripe//file",
