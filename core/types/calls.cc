@@ -1974,6 +1974,39 @@ public:
             return;
         }
 
+        auto singletonExternalType = singleton.data(gs)->externalType();
+        if (const auto *thisApplied = cast_type<AppliedType>(args.thisType)) {
+            const auto *singletonAppliedType = cast_type<AppliedType>(singletonExternalType);
+            ENFORCE(singletonAppliedType != nullptr, "should be true as long as !self.data(gs)->isModule()");
+
+            vector<TypePtr> targs;
+            int ttIdx = -1;
+            for (auto tt : singleton.data(gs)->typeMembers()) {
+                ttIdx++;
+
+                // TODO(jez) Eventually, check some flag on the symbol for this information
+                if (tt.data(gs)->name != core::Names::Constants::LinkedGenericTypePair()) {
+                    targs.emplace_back(singletonAppliedType->targs[ttIdx]);
+                    continue;
+                }
+
+                size_t tmIdx = 0;
+                for (auto tm : thisApplied->klass.data(gs)->typeMembers()) {
+                    if (tm.data(gs)->name == tt.data(gs)->name) {
+                        targs.emplace_back(thisApplied->targs[tmIdx]);
+                        break;
+                    }
+                    tmIdx++;
+                }
+                ENFORCE(tmIdx != thisApplied->klass.data(gs)->typeMembers().size(),
+                        "Did not find linked type member corresponding to type template!");
+            }
+
+            // TODO(jez) Validate that the type we just made is a valid type
+            // Fully defined, does not reference another type's type members, valid bounds, etc.
+            singletonExternalType = make_type<AppliedType>(singleton, move(targs));
+        }
+
         // `singleton` might have more type members than just the `<AttachedClass>` one.
         // Calling `externalType` is the easiest way to get proper defaults for all of those.
         // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
@@ -1984,7 +2017,7 @@ public:
         // like normal, and ends up something like
         //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
         // (This matters, btw, in case the receiver is something like a generic.)
-        res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
+        res.returnType = Types::all(gs, tClassSelfType, singletonExternalType);
     }
 } Object_class;
 
@@ -2010,6 +2043,38 @@ public:
             return;
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
+
+        const auto *thisApplied = cast_type<AppliedType>(args.thisType);
+        const auto *instanceTyApplied = cast_type<AppliedType>(instanceTy);
+        if (thisApplied != nullptr && instanceTyApplied != nullptr) {
+            vector<TypePtr> targs;
+            int tmIdx = -1;
+            for (auto tm : attachedClass.data(gs)->typeMembers()) {
+                tmIdx++;
+
+                // TODO(jez) Eventually, check some flag on the symbol for this information
+                if (tm.data(gs)->name != core::Names::Constants::LinkedGenericTypePair()) {
+                    targs.emplace_back(instanceTyApplied->targs[tmIdx]);
+                    continue;
+                }
+
+                size_t ttIdx = 0;
+                for (auto tt : thisApplied->klass.data(gs)->typeMembers()) {
+                    if (tt.data(gs)->name == tm.data(gs)->name) {
+                        targs.emplace_back(thisApplied->targs[ttIdx]);
+                        break;
+                    }
+                    ttIdx++;
+                }
+                ENFORCE(ttIdx != thisApplied->klass.data(gs)->typeMembers().size(),
+                        "Did not find linked type template corresponding to type member!");
+            }
+
+            // TODO(jez) Validate that the type we just made is a valid type
+            // Fully defined, does not reference another type's type members, valid bounds, etc.
+            instanceTy = make_type<AppliedType>(attachedClass, move(targs));
+        }
+
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
         DispatchArgs innerArgs{Names::initialize(),
                                args.locs,
