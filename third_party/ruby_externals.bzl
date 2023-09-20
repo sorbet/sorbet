@@ -30,6 +30,7 @@ def register_ruby_dependencies():
     )
 
     ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"
+    ruby_3_3_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_3_3.BUILD"
     ruby_for_compiler_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_for_compiler.BUILD"
 
     http_archive(
@@ -100,6 +101,14 @@ def register_ruby_dependencies():
         sha256 = "96c57558871a6748de5bc9f274e93f4b5aad06cd8f37befa0e8d94e7b8a423bc",
         strip_prefix = "ruby-3.2.2",
         build_file = ruby_build,
+    )
+
+    http_archive(
+        name = "sorbet_ruby_3_3_preview",
+        urls = _ruby_urls("3.3/ruby-3.3.0-preview1.tar.gz"),
+        sha256 = "c3454a911779b8d747ab0ea87041030d002d533edacb2485fe558b7084da25ed",
+        strip_prefix = "ruby-3.3.0-preview1",
+        build_file = ruby_3_3_build,
     )
 
 def _rubygems_urls(gem):
