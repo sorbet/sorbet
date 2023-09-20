@@ -20,7 +20,7 @@ ruby(
         "//conditions:default": [],
     }) + select({
         # Do not enable the JIT unless opted in.
-        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["--enable-yjit=stats"],
+        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["--enable-yjit"],
         "//conditions:default": ["--disable-jit-support"],
     }),
     copts = [
@@ -38,11 +38,7 @@ ruby(
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
         "-fPIC",
-    ] + select({
-        # Don't include JIT statistics unless we're building JIT support
-        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["-DYJIT_STATS=1"],
-        "//conditions:default": [],
-    }),
+    ] ,
     extra_srcs = [],
     gems = [
         "@bundler_stripe//file",
