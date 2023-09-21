@@ -338,7 +338,7 @@ export class SorbetExtensionConfig implements Disposable {
    */
   public get lspConfigs(): ReadonlyArray<SorbetLspConfig> {
     const results: Array<SorbetLspConfig> = [];
-    const resultIds = new Set<String>();
+    const resultIds = new Set<string>();
     [...this.userLspConfigs, ...this.standardLspConfigs].forEach((c) => {
       if (!resultIds.has(c.id)) {
         results.push(c);

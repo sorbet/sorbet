@@ -131,15 +131,23 @@ rules:
   # Disallow use before definition
   'no-use-before-define': [2, {functions: false, classes: false}]
 
+  "@typescript-eslint/await-thenable": error
+  "@typescript-eslint/ban-types": error
+
 extends:
   - 'eslint-config-airbnb/rules/react'
   - 'eslint-config-airbnb-base'
   - prettier
 plugins:
+  - "@typescript-eslint"
   - eslint-comments
   - prettier
   - import
 parser: "@typescript-eslint/parser"
+overrides:
+  - files: '*.ts'
+    parserOptions:
+      project: './tsconfig.json'
 env:
   es6: true
 parserOptions:

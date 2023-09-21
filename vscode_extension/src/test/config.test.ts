@@ -20,21 +20,21 @@ import {
 
 /** Imitate the WorkspaceConfiguration. */
 class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
-  public readonly backingStore: Map<String, any>;
-  public readonly defaults: Map<String, any>;
+  public readonly backingStore: Map<string, any>;
+  public readonly defaults: Map<string, any>;
   private readonly configurationChangeEmitter: EventEmitter<
     ConfigurationChangeEvent
   >;
 
-  constructor(properties: Iterable<[String, any]> = []) {
-    this.backingStore = new Map<String, any>(properties);
+  constructor(properties: Iterable<[string, any]> = []) {
+    this.backingStore = new Map<string, any>(properties);
     this.configurationChangeEmitter = new EventEmitter<
       ConfigurationChangeEvent
     >();
     const defaultProperties = extensions.getExtension(
       "sorbet.sorbet-vscode-extension",
     )!.packageJSON.contributes.configuration.properties;
-    const defaultValues: Iterable<[String, any]> = Object.keys(
+    const defaultValues: Iterable<[string, any]> = Object.keys(
       defaultProperties,
     ).map((settingName) => {
       let value = defaultProperties[settingName].default;
@@ -48,7 +48,7 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
 
       return [settingName.replace("sorbet.", ""), value];
     });
-    this.defaults = new Map<String, any>(defaultValues);
+    this.defaults = new Map<string, any>(defaultValues);
   }
 
   dispose() {}

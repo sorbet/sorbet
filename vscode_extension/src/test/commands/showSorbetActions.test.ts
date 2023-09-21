@@ -74,13 +74,13 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     await assert.doesNotReject(showSorbetActions(context));
 
     sinon.assert.calledOnce(showQuickPickSingleStub);
-    assert.deepStrictEqual(await showQuickPickSingleStub.firstCall.args[0], [
+    assert.deepStrictEqual(showQuickPickSingleStub.firstCall.args[0], [
       Action.ViewOutput,
       Action.RestartSorbet,
       Action.DisableSorbet,
       Action.ConfigureSorbet,
     ]);
-    assert.deepStrictEqual(await showQuickPickSingleStub.firstCall.args[1], {
+    assert.deepStrictEqual(showQuickPickSingleStub.firstCall.args[1], {
       placeHolder: "Select an action",
     });
   });
