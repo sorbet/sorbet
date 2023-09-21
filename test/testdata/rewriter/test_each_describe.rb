@@ -36,7 +36,7 @@ class MyTestBad1 < Minitest::Spec
   test_each([true, false]) do |flag_enabled|
     describe 'foo' do
       def nope; end
-    # ^^^^^^^^^^^^^ error: Only valid `it`-blocks can appear within `test_each`
+    # ^^^^^^^^^^^^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     end
   end
 end
@@ -47,7 +47,7 @@ class MyTestBad2 < Minitest::Spec
       it '' do
       end
       def nope; end
-    # ^^^^^^^^^^^^^ error: Only valid `it`-blocks can appear within `test_each`
+    # ^^^^^^^^^^^^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     end
   end
 end
@@ -58,7 +58,7 @@ class MyTestBad3 < Minitest::Spec
       it '' do
       end
       def nope; end
-    # ^^^^^^^^^^^^^ error: Only valid `it`-blocks can appear within `test_each`
+    # ^^^^^^^^^^^^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     end
   end
 end
@@ -66,9 +66,9 @@ end
 class MyTestBad4 < Minitest::Spec
   test_each([true, false]) do |flag_enabled|
     x = flag_enabled
-  # ^^^^^^^^^^^^^ error: Only valid `it`-blocks can appear within `test_each`
+  # ^^^^^^^^^^^^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     puts(x)
-  # ^^^^^^^ error: Only valid `it`-blocks can appear within `test_each`
+  # ^^^^^^^ error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     describe 'foo' do
       it '' do
       end
