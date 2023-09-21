@@ -3891,6 +3891,31 @@ public:
     }
 } Array_zip;
 
+class Array_transpose : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+        ENFORCE(!ap->targs.empty());
+        auto &elementType = ap->targs.front();
+
+        auto *tuple = cast_type<TupleType>(elementType);
+        if (tuple == nullptr) {
+            return;
+        }
+
+        // The transpose of an array of tuples is a tuple of arrays.
+        vector<TypePtr> transposed;
+        transposed.reserve(tuple->elems.size());
+
+        for (auto &elem : tuple->elems) {
+            transposed.emplace_back(Types::arrayOf(gs, elem));
+        }
+
+        res.returnType = make_type<TupleType>(move(transposed));
+    }
+} Array_transpose;
+
 class Symbol_eqeq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4311,6 +4336,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::transpose(), &Array_transpose},
 
     {Symbols::Symbol(), Intrinsic::Kind::Instance, Names::eqeq(), &Symbol_eqeq},
     {Symbols::String(), Intrinsic::Kind::Instance, Names::eqeq(), &String_eqeq},

@@ -70,3 +70,12 @@ T.reveal_type(arr.fetch(0) { 1 }) # error: Revealed type: `Integer`
 
 T.reveal_type(arr.fetch(0, 'error')) # error: Revealed type: `T.any(Integer, String)`
 T.reveal_type(arr.fetch(0) { 'error' }) # error: Revealed type: `T.any(Integer, String)`
+
+x = [[1, "a"], [2, "b"]]
+T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[Integer], T::Array[String]] (2-tuple)`
+x = [[1, "a"], [2]]
+T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
+x = [[3.4], [1, "a"]]
+T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
+x = [[3.4, "a"], [:a, 5]]
+T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
