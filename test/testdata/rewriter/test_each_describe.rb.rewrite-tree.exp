@@ -1,0 +1,105 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.require("minitest/autorun")
+
+  <self>.require_relative("gems/sorbet-runtime/lib/sorbet-runtime")
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C Minitest>::<C Spec><<C <todo sym>>> < (::<todo sym>)
+    def self.test_each<<todo method>>(arg, &blk)
+      ::<Magic>.<call-with-block>(arg, :each, blk)
+    end
+
+    <runtime method definition of self.test_each>
+  end
+
+  class <emptyTree>::<C Flag><<C <todo sym>>> < (::<todo sym>)
+    def self.enable<<todo method>>(arg, &<blk>)
+      <self>.p(arg)
+    end
+
+    <runtime method definition of self.enable>
+  end
+
+  class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    <self>.test_each([true, false]) do |flag_enabled|
+      <self>.describe("foo") do ||
+        begin
+          <self>.before() do ||
+            begin
+              <emptyTree>::<C T>.reveal_type(flag_enabled)
+              <emptyTree>::<C Flag>.enable(flag_enabled)
+              @enabled = <cast:let>(flag_enabled, <todo sym>, <emptyTree>::<C T>::<C Boolean>)
+            end
+          end
+          <self>.it("do this thing") do ||
+            begin
+              <emptyTree>::<C T>.reveal_type(@enabled)
+              <emptyTree>::<C T>.reveal_type(flag_enabled)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyTestBad1><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    def nope<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.test_each([true, false]) do |flag_enabled|
+      <self>.describe("foo") do ||
+        <runtime method definition of nope>
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyTestBad2><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    def nope<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.test_each([true, false]) do |flag_enabled|
+      <self>.describe("foo") do ||
+        begin
+          <self>.it("") do ||
+            <emptyTree>
+          end
+          <runtime method definition of nope>
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyTestBad3><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    def nope<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.test_each([true, false]) do |flag_enabled|
+      <self>.describe("foo") do ||
+        begin
+          <self>.it("") do ||
+            <emptyTree>
+          end
+          <runtime method definition of nope>
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C MyTestBad4><<C <todo sym>>> < (<emptyTree>::<C Minitest>::<C Spec>)
+    <self>.test_each([true, false]) do |flag_enabled|
+      begin
+        x = flag_enabled
+        <self>.puts(x)
+        <self>.describe("foo") do ||
+          <self>.it("") do ||
+            <emptyTree>
+          end
+        end
+      end
+    end
+  end
+end
