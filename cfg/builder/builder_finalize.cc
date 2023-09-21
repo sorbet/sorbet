@@ -11,10 +11,6 @@ using namespace std;
 namespace sorbet::cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
-    if (!ctx.state.lspQuery.isEmpty()) {
-        return;
-    }
-
     sanityCheck(ctx, cfg);
     bool changed = true;
     while (changed) {
