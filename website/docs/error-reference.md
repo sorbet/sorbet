@@ -441,17 +441,20 @@ end
 ```
 
 For more examples of valid syntax,
-[see the tests](https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb).
+[see the tests](https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb),
+and
+[another test, with describe](https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/test_each_describe.rb).
 
 There are some limitations on how `test_each` can be used:
 
 The block given to `test_each` must accept at least one argument (except when
 using `test_each_hash`, it must be able to take exactly two arguments).
 
-The body of the `test_each`'s block must contain only `it` blocks, because of
-limitations in Sorbet. Sorbet models `it` blocks by translating them to method
-definitions under the hood, and method definitions do not have access to
-variables outside of their scope.
+The body of the `test_each`'s block must contain only `it`, `before`, `after`,
+and `describe` blocks, because of limitations in Sorbet. Sorbet models `it`,
+`before`, and `after` blocks by translating them to method definitions under the
+hood, and method definitions do not have access to variables outside of their
+scope.
 
 Usually this comes up with variable destructuring:
 
