@@ -8,3 +8,7 @@ class A
 end
 
 A.example(A.new, x: (0))
+
+A.example(A.new, x: begin
+       0
+  end)

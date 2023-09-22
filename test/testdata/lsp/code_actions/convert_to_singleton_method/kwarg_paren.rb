@@ -10,3 +10,9 @@ end
 A.new.example(
   x: (0)
 )
+
+A.new.example(
+  x: begin
+       0
+  end
+)
