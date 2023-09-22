@@ -197,6 +197,15 @@ ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::No
             stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
         };
         auto &last = stmts.back();
+
+        if (stmts.size() == 1) {
+            // If we're about to make an InsSeq, but the stmts are empty, MK::InsSeq will return just expr.
+            // But we want to treat `(0)` as having a loc that spans the parens too, for autocorrects.
+            // We patch that here, because the loc on an ExpressionPtr is const (maybe we should fix
+            // that, and then solve this in MK::InsSeq?) but it's easier to solve this here.
+            last->loc = loc;
+        }
+
         auto expr = node2TreeImpl(dctx, std::move(last));
         return MK::InsSeq(loc, std::move(stats), std::move(expr));
     }
