@@ -6,11 +6,12 @@ namespace sorbet::autogen {
 class AutogenVersion {
 public:
     constexpr static int MIN_VERSION = 2;
-    constexpr static int MAX_VERSION = 4;
+    constexpr static int MAX_VERSION = 5;
 
     // Version history:
     // 3 - Add type alias information in dependency db output
     // 4 - Include .rbi reference information in dependency db
+    // 5 - Pack information more tightly in various places
     constexpr static int VERSION_INCLUDE_RBI = 4;
 };
 
