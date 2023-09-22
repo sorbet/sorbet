@@ -34,4 +34,4 @@ end
 
 (T.unsafe(A.new)).nullary
 
-A.nullary(A.new + A.new)
+A.nullary((A.new + A.new))
