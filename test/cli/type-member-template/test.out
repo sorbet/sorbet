@@ -1,3 +1,34 @@
+test/cli/type-member-template/type-member-template.rb:24: Type `X` declared by parent `IFoo` must be re-declared in `T.class_of(Foo1)` https://srb.help/5014
+    24 |class Foo1
+        ^^^^^^^^^^
+    test/cli/type-member-template/type-member-template.rb:21: `X` declared in parent here
+    21 |  X = type_member
+          ^^^^^^^^^^^^^^^
+  Note:
+    Did you mean to define `X` as a `type_template` instead?
+    test/cli/type-member-template/type-member-template.rb:27: A `type_member` with the same name is defined here
+    27 |  X = type_member
+          ^^^^^^^^^^^^^^^
+
+test/cli/type-member-template/type-member-template.rb:33: `X` must be declared as a type_member (not a type_template) to match the parent https://srb.help/5018
+    33 |  X = type_template
+          ^^^^^^^^^^^^^^^^^
+    test/cli/type-member-template/type-member-template.rb:21: Declared in parent `IFoo` here
+    21 |  X = type_member
+          ^^^^^^^^^^^^^^^
+
+test/cli/type-member-template/type-member-template.rb:36: Type `X` declared by parent `IFoo` must be re-declared in `Foo3` https://srb.help/5014
+    36 |class Foo3
+        ^^^^^^^^^^
+    test/cli/type-member-template/type-member-template.rb:21: `X` declared in parent here
+    21 |  X = type_member
+          ^^^^^^^^^^^^^^^
+  Note:
+    Did you mean to define `X` as a `type_member` instead?
+    test/cli/type-member-template/type-member-template.rb:40: A `type_template` with the same name is defined here
+    40 |    X = type_member
+            ^^^^^^^^^^^^^^^
+
 test/cli/type-member-template/type-member-template.rb:10: `type_template` type `Template` used in an instance method definition https://srb.help/5072
     10 |  sig {returns(Template)}
                        ^^^^^^^^
@@ -15,4 +46,4 @@ test/cli/type-member-template/type-member-template.rb:13: `type_member` type `Me
           ^^^^^^^^^^^^^^^^^^^^
   Note:
     Only a `type_template` can be used in a singleton method definition.
-Errors: 2
+Errors: 5

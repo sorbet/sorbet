@@ -91,6 +91,22 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
             e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
                         sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+            auto symIsSingletonClass = true;
+            auto maybeDefinedOn = sym.data(gs)->attachedClass(gs);
+            if (!maybeDefinedOn.exists()) {
+                symIsSingletonClass = false;
+                // implies we _are_ the attached class
+                maybeDefinedOn = sym.data(gs)->lookupSingletonClass(gs);
+            }
+            if (maybeDefinedOn.exists()) {
+                auto didYouMeanMember = maybeDefinedOn.data(gs)->findMember(gs, name);
+                if (didYouMeanMember.exists() && didYouMeanMember.isTypeMember()) {
+                    e.addErrorNote("Did you mean to define `{}` as a `{}` instead?", name.show(gs),
+                                   symIsSingletonClass ? "type_template" : "type_member");
+                    e.addErrorLine(didYouMeanMember.loc(gs), "A `{}` with the same name is defined here",
+                                   symIsSingletonClass ? "type_member" : "type_template");
+                }
+            }
         }
     }
 }
