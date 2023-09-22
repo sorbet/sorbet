@@ -323,6 +323,7 @@
     "@types/node": "^10.11.7",
     "@types/sinon": "^7.5.0",
     "@types/vscode": "~1.65",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^17.1.0",
