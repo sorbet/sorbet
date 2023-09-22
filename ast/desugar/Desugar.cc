@@ -198,7 +198,7 @@ ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::No
         };
         auto &last = stmts.back();
 
-        if (stmts.size() == 1) {
+        if (stmts.size() == 1 && last != nullptr) {
             // If we're about to make an InsSeq, but the stmts are empty, MK::InsSeq will return just expr.
             // But we want to treat `(0)` as having a loc that spans the parens too, for autocorrects.
             // We patch that here, because the loc on an ExpressionPtr is const (maybe we should fix
