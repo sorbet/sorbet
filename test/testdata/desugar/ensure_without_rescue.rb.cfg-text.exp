@@ -15,7 +15,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped):
+bb3[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<self>: Object, <returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$6: TrueClass = true
     <unconditional> -> bb6
 
@@ -34,7 +34,7 @@ bb5[rubyRegionId=4, firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untype
 # backedges
 # - bb3(rubyRegionId=2)
 # - bb5(rubyRegionId=4)
-bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$6: T.nilable(TrueClass)):
+bb6[rubyRegionId=3, firstDead=-1, isExceptionHandlingBlock=true](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$6: T.nilable(TrueClass)):
     <throwAwayTemp>$7: T.untyped = <self>: Object.b()
     <gotoDeadTemp>$6 -> (T.nilable(TrueClass) ? bb1 : bb7)
 

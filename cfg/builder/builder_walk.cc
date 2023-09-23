@@ -527,6 +527,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 if (auto *block = s.block()) {
                     auto newRubyRegionId = ++cctx.inWhat.maxRubyRegionId;
+                    auto isExceptionHandlingBlock = current->flags.isExceptionHandlingBlock;
                     auto &blockArgs = block->args;
                     vector<core::ParsedArg> blockArgFlags = ast::ArgParsing::parseArgs(blockArgs);
                     vector<core::ArgInfo::ArgFlags> argFlags;
@@ -543,13 +544,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     synthesizeExpr(current, restoreSelf, core::LocOffsets::none(),
                                    make_insn<Ident>(LocalRef::selfVariable()));
 
-                    auto headerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops + 1, newRubyRegionId);
+                    auto headerBlock =
+                        cctx.inWhat.freshBlockWithRegion(cctx.loops + 1, newRubyRegionId, isExceptionHandlingBlock);
                     // solveConstraintBlock is only entered if break is not called
                     // in the block body.
                     auto solveConstraintBlock = cctx.inWhat.freshBlock(cctx.loops, current);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops, current);
                     auto bodyLoops = cctx.loops + 1;
-                    auto bodyBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                    auto bodyBlock =
+                        cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId, isExceptionHandlingBlock);
 
                     bodyBlock->exprs.emplace_back(LocalRef::selfVariable(), s.loc,
                                                   make_insn<LoadSelf>(link, LocalRef::selfVariable()));
@@ -573,8 +576,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             }
 
                             if (auto *opt = ast::cast_tree<ast::OptionalArg>(blockArgs[i])) {
-                                auto *presentBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
-                                auto *missingBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                                auto *presentBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId,
+                                                                                      isExceptionHandlingBlock);
+                                auto *missingBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId,
+                                                                                      isExceptionHandlingBlock);
 
                                 // add a test for YieldParamPresent
                                 auto present = cctx.newTemporary(core::Names::argPresent());
@@ -583,7 +588,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                 conditionalJump(argBlock, present, presentBlock, missingBlock, cctx.inWhat, arg.loc);
 
                                 // make a new block for the present and missing blocks to join
-                                argBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId);
+                                argBlock = cctx.inWhat.freshBlockWithRegion(bodyLoops, newRubyRegionId,
+                                                                            isExceptionHandlingBlock);
 
                                 // compile the argument fetch in the present block
                                 presentBlock->exprs.emplace_back(argLoc, arg.loc,
@@ -772,6 +778,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto handlersRubyRegionId = bodyRubyRegionId + CFG::HANDLERS_REGION_OFFSET;
                 auto ensureRubyRegionId = bodyRubyRegionId + CFG::ENSURE_REGION_OFFSET;
                 auto elseRubyRegionId = bodyRubyRegionId + CFG::ELSE_REGION_OFFSET;
+                auto isExceptionHandlingBlock = true;
                 cctx.inWhat.maxRubyRegionId = elseRubyRegionId;
 
                 auto rescueHeaderBlock = cctx.inWhat.freshBlock(cctx.loops, current);
@@ -786,8 +793,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // Unanalyzable variable at the top of the body using
                 // `exceptionValue` and one at the end of the else using
                 // `rescueEndTemp` which can jump into the rescue handlers.
-                auto rescueHandlersBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
-                auto bodyBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRubyRegionId);
+                auto rescueHandlersBlock =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId, isExceptionHandlingBlock);
+                auto bodyBlock =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRubyRegionId, !isExceptionHandlingBlock);
                 auto exceptionValue = cctx.newTemporary(core::Names::exceptionValue());
                 // In `rescue; ...; end`, we don't want the conditional jumps' variables nor the
                 // GetCurrentException calls to look like they blame to the whole `rescue; ...; end`
@@ -807,14 +816,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a.body, bodyBlock);
 
+                auto bodyEndBlock =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, bodyRubyRegionId, isExceptionHandlingBlock);
+                unconditionalJump(bodyBlock, bodyEndBlock, cctx.inWhat, a.loc);
+
                 // else is only executed if body didn't raise an exception
-                auto elseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRubyRegionId);
-                synthesizeExpr(bodyBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
-                conditionalJump(bodyBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
+                auto elseBody =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, elseRubyRegionId, !isExceptionHandlingBlock);
+                synthesizeExpr(bodyEndBlock, exceptionValue, rescueKeywordLoc, make_insn<GetCurrentException>());
+                conditionalJump(bodyEndBlock, exceptionValue, rescueHandlersBlock, elseBody, cctx.inWhat,
                                 rescueKeywordLoc);
 
                 elseBody = walk(cctx, a.else_, elseBody);
-                auto ensureBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, ensureRubyRegionId);
+                auto ensureBody =
+                    cctx.inWhat.freshBlockWithRegion(cctx.loops, ensureRubyRegionId, isExceptionHandlingBlock);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a.loc);
 
                 auto magic = cctx.newTemporary(core::Names::magic());
@@ -822,7 +837,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 for (auto &expr : a.rescueCases) {
                     auto *rescueCase = ast::cast_tree<ast::RescueCase>(expr);
-                    auto caseBody = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                    auto caseBody =
+                        cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId, isExceptionHandlingBlock);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var);
@@ -867,7 +883,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                             make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
                                             args.size(), args, std::move(argLocs), isPrivateOk));
 
-                        auto otherHandlerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
+                        auto otherHandlerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId,
+                                                                                  isExceptionHandlingBlock);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
                         rescueHandlersBlock = otherHandlerBlock;
                     }

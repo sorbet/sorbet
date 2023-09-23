@@ -133,15 +133,19 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         } else {
             current.isDead = (bb != cfg->entry());
             for (cfg::BasicBlock *parent : bb->backEdges) {
-                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
+                if (!visited[parent->id] ||
+                    (outEnvironments[parent->id].isDead && !bb->flags.isExceptionHandlingBlock)) {
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
-                if (!envAsSeenFromBranch.isDead) {
+                if (!envAsSeenFromBranch.isDead || bb->flags.isExceptionHandlingBlock) {
                     current.isDead = false;
+                    // If parent env is not dead, of course we can merge.
+                    // If parent env IS dead, we might still want to merge, because current could
+                    // be reached via exceptional control flow.
                     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
             }

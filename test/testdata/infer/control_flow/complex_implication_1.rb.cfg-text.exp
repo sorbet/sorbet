@@ -34,7 +34,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, <exceptionValue>$4: T.untyped, <magic>$5: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](final_attempt: T.untyped, foo: T.untyped, <exceptionValue>$4: T.untyped, <magic>$5: T.class_of(<Magic>)):
     e: T.untyped = <exceptionValue>$4
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(e: T.untyped)
@@ -55,12 +55,12 @@ bb5[rubyRegionId=4, firstDead=-1](final_attempt: T.untyped, foo: T.untyped):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError), <gotoDeadTemp>$10: T.nilable(TrueClass)):
+bb6[rubyRegionId=3, firstDead=-1, isExceptionHandlingBlock=true](final_attempt: T.untyped, foo: T.untyped, err: T.nilable(StandardError), <gotoDeadTemp>$10: T.nilable(TrueClass)):
     <gotoDeadTemp>$10 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, <magic>$5: T.class_of(<Magic>), e: StandardError):
+bb7[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](final_attempt: T.untyped, foo: T.untyped, <magic>$5: T.class_of(<Magic>), e: StandardError):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
     err: StandardError = e
@@ -68,7 +68,7 @@ bb7[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped, <mag
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb8[rubyRegionId=2, firstDead=-1](final_attempt: T.untyped, foo: T.untyped):
+bb8[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](final_attempt: T.untyped, foo: T.untyped):
     <gotoDeadTemp>$10: TrueClass = true
     <unconditional> -> bb6
 

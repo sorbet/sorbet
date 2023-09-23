@@ -15,7 +15,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb4(rubyRegionId=1)
-bb3[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$8: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<returnMethodTemp>$2: NilClass, <exceptionValue>$3: T.untyped, <magic>$8: T.class_of(<Magic>)):
     e: T.untyped = <exceptionValue>$3
     <cfgAlias>$13: T.class_of(MyException) = alias <C MyException>
     <statTemp>$11: MyException = <cfgAlias>$13: T.class_of(MyException).new()
@@ -41,12 +41,12 @@ bb5[rubyRegionId=4, firstDead=0](<returnMethodTemp>$2: NilClass):
 # - bb5(rubyRegionId=4)
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass)):
+bb6[rubyRegionId=3, firstDead=-1, isExceptionHandlingBlock=true](<returnMethodTemp>$2: T.nilable(Integer), <gotoDeadTemp>$15: T.nilable(TrueClass)):
     <gotoDeadTemp>$15 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<magic>$8: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<magic>$8: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$9: Sorbet::Private::Static::Void = <magic>$8: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: Integer(3) = 3
@@ -54,7 +54,7 @@ bb7[rubyRegionId=2, firstDead=-1](<magic>$8: T.class_of(<Magic>)):
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb8[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: NilClass):
+bb8[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<returnMethodTemp>$2: NilClass):
     <gotoDeadTemp>$15: TrueClass = true
     <unconditional> -> bb6
 

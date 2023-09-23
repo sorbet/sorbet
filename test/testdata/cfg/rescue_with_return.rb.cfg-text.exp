@@ -16,7 +16,7 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb3[rubyRegionId=2, firstDead=-1](<exceptionValue>$3: T.untyped, <magic>$5: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<exceptionValue>$3: T.untyped, <magic>$5: T.class_of(<Magic>)):
     <cfgAlias>$8: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$9: T::Boolean = <cfgAlias>$8: T.class_of(StandardError).===(<exceptionValue>$3: T.untyped)
     <isaCheckTemp>$9 -> (T::Boolean ? bb7 : bb8)
@@ -31,19 +31,19 @@ bb4[rubyRegionId=1, firstDead=2]():
 # backedges
 # - bb7(rubyRegionId=2)
 # - bb8(rubyRegionId=2)
-bb6[rubyRegionId=3, firstDead=-1](<gotoDeadTemp>$10: T.nilable(TrueClass)):
+bb6[rubyRegionId=3, firstDead=-1, isExceptionHandlingBlock=true](<gotoDeadTemp>$10: T.nilable(TrueClass)):
     <gotoDeadTemp>$10 -> (T.nilable(TrueClass) ? bb1 : bb9)
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb7[rubyRegionId=2, firstDead=-1](<magic>$5: T.class_of(<Magic>)):
+bb7[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true](<magic>$5: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <unconditional> -> bb6
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb8[rubyRegionId=2, firstDead=-1]():
+bb8[rubyRegionId=2, firstDead=-1, isExceptionHandlingBlock=true]():
     <gotoDeadTemp>$10: TrueClass = true
     <unconditional> -> bb6
 

@@ -810,7 +810,6 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
 
 void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                             KnowledgeFilter &knowledgeFilter) {
-    this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
@@ -863,6 +862,10 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
             }
         }
     }
+    // TODO(jez) This is currently true because of the precondition, that !other.isDead.
+    // If we relax that precondition, it's unlikely that this still stays true, but I'm curious to
+    // see relaxing the precondition does in fact break this (would be neat if it didn't)
+    ENFORCE(!this->isDead, "{}", bb->id);
 }
 
 void Environment::computePins(core::Context ctx, const vector<Environment> &envs, const cfg::CFG &inWhat,
