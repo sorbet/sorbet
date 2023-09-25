@@ -182,19 +182,32 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
     }
 }
 
+ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
+                                       ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
+                                       ast::ExpressionPtr &iteratee);
+
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName,
-                                const ast::InsSeq::STATS_store &destructuringStmts, ast::ExpressionPtr stmt,
+                                ast::InsSeq::STATS_store &destructuringStmts, ast::ExpressionPtr stmt,
                                 ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
     // this statement must be a send
     if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
-        if (send->fun == core::Names::it() && send->numPosArgs() == 1 && send->hasBlock() &&
-            send->block()->args.size() == 0) {
-            // we use this for the name of our test
-            auto argString = to_s(ctx, send->getPosArg(0));
-            auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+        if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && send->hasBlock() &&
+             send->block()->args.size() == 0) ||
+            ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
+             send->hasBlock() && send->block()->args.size() == 0)) {
+            core::NameRef name;
+            if (send->fun == core::Names::before()) {
+                name = core::Names::beforeAngles();
+            } else if (send->fun == core::Names::after()) {
+                name = core::Names::afterAngles();
+            } else {
+                // we use this for the name of our test
+                auto argString = to_s(ctx, send->getPosArg(0));
+                name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
+            }
 
             // pull constants out of the block
             ConstantMover constantMover;
@@ -223,12 +236,20 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
+        } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && send->hasBlock() &&
+                   send->block()->args.size() == 0) {
+            return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args,
+                                       std::move(destructuringStmts), iteratee);
         }
     }
 
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
     if (auto e = ctx.beginError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
-        e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
+        e.setHeader("Only valid `{}`, `{}`, `{}`, and `{}` blocks can appear within `{}`", "it", "before", "after",
+                    "describe", eachName.show(ctx));
+        e.addErrorNote("For other things, like constant and variable assignments,"
+                       "    hoist them to constants or methods defined outside the `{}` block.",
+                       eachName.show(ctx));
     }
 
     return stmt;

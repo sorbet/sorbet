@@ -2216,8 +2216,9 @@ class ResolveTypeMembersAndFieldsWalk {
             // class or body, rather then nested in some block
             if (job.atTopLevel && ctx.owner.isClassOrModule()) {
                 // Declaring a class instance variable
-            } else if (job.atTopLevel && (ctx.owner.name(ctx) == core::Names::initialize() ||
-                                          ctx.owner.name(ctx) == core::Names::beforeAngles())) {
+            } else if ((ctx.owner.name(ctx) == core::Names::initialize() && job.atTopLevel) ||
+                       // allow test_each(...) { before { @x = ... } }
+                       (ctx.owner.name(ctx) == core::Names::beforeAngles())) {
                 // Declaring a instance variable in either `initialize` or a `before do` block.
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&

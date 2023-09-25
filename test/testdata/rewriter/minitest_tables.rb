@@ -68,15 +68,15 @@ class MyTest
   end
 
   test_each [Parent.new, Child.new] do |x|
-    y = x # error: Only valid `it`-blocks can appear within `test_each`
+    y = x # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
   end
 
   test_each_hash({}) do |k, v|
-    y = k + v # error: Only valid `it`-blocks can appear within `test_each_hash`
+    y = k + v # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each_hash`
   end
 
   test_each CONST_LIST do |value|
-    x = value.foo  # error: Only valid `it`-blocks can appear within `test_each`
+    x = value.foo  # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     it "fails with non-it statements" do
       puts x
     end
@@ -181,7 +181,7 @@ class MyTest
 
   # We don't allow manual destructuring currently.
   test_each [[1,'a'], [2,'b']] do |value|
-    i, s = value # error: Only valid `it`-blocks can appear within `test_each`
+    i, s = value # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
     it "rejects manual destructuring of the list argument" do
       T.reveal_type(i) # error: type: `NilClass`
       T.reveal_type(s) # error: type: `NilClass`
