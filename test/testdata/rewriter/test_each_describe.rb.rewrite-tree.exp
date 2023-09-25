@@ -42,7 +42,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <after><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
-        @enabled = nil
+        @enabled = false
       end
     end
 

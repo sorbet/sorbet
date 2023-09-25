@@ -25,7 +25,7 @@ class MyTest < Minitest::Spec
       end
 
       after do
-        @enabled = nil
+        @enabled = false
       end
 
       it "do this thing" do
