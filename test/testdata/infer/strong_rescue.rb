@@ -11,7 +11,6 @@ def example1
   rescue TypeError => e
 # ^^^^^^ error: Conditional branch on `T.untyped`
 # ^^^^^^ error: Conditional branch on `T.untyped`
-    #    ^^^^^^^^^ error: Argument passed to parameter `other` is `T.untyped`
     T.reveal_type(e) # error: `TypeError`
   else
   ensure
@@ -24,7 +23,6 @@ def example2
   rescue; puts("")
 # ^^^^^^ error: Conditional branch on `T.untyped`
 # ^^^^^^ error: Conditional branch on `T.untyped`
-# ^^^^^^ error: Argument passed to parameter `other` is `T.untyped`
   ensure
   end
 end
@@ -35,7 +33,6 @@ def example3
   rescue => e; T.reveal_type(e)
 # ^^^^^^ error: Conditional branch on `T.untyped`
 # ^^^^^^ error: Conditional branch on `T.untyped`
-    #       ^ error: Argument passed to parameter `other` is `T.untyped`
     #          ^^^^^^^^^^^^^^^^ error: `StandardError`
   ensure
   end
@@ -48,7 +45,6 @@ def example4
   rescue; puts("")
 # ^^^^^^ error: Conditional branch on `T.untyped`
 # ^^^^^^ error: Conditional branch on `T.untyped`
-# ^^^^^^ error: Argument passed to parameter `other` is `T.untyped`
   ensure
   end
 end
@@ -59,7 +55,6 @@ def example5
   rescue Exception => e
 # ^^^^^^ error: Conditional branch on `T.untyped`
 # ^^^^^^ error: Conditional branch on `T.untyped`
-    #    ^^^^^^^^^ error: Argument passed to parameter `other` is `T.untyped`
     T.reveal_type(e) # error: `Exception`
   else
   ensure
