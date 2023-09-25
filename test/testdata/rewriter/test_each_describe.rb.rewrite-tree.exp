@@ -40,6 +40,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
+    def <after><<todo method>>(&<blk>)
+      [true, false].each() do |flag_enabled|
+        @enabled = nil
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def <it 'do this thing'><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         begin
@@ -52,6 +62,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test_each([true, false]) do |flag_enabled|
       begin
         <runtime method definition of <before>>
+        <runtime method definition of <after>>
         <runtime method definition of <it 'do this thing'>>
       end
     end

@@ -24,6 +24,10 @@ class MyTest < Minitest::Spec
         @enabled = T.let(flag_enabled, T::Boolean)
       end
 
+      after do
+        @enabled = nil
+      end
+
       it "do this thing" do
         T.reveal_type(@enabled) # error: `T::Boolean`
         T.reveal_type(flag_enabled) # error: `T::Boolean`

@@ -196,11 +196,13 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
         if ((send->fun == core::Names::it() && send->numPosArgs() == 1 && send->hasBlock() &&
              send->block()->args.size() == 0) ||
-            ((send->fun == core::Names::before() || send->fun == core::Names::before()) && send->numPosArgs() == 0 &&
+            ((send->fun == core::Names::before() || send->fun == core::Names::after()) && send->numPosArgs() == 0 &&
              send->hasBlock() && send->block()->args.size() == 0)) {
             core::NameRef name;
-            if (send->fun == core::Names::before() || send->fun == core::Names::after()) {
-                name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
+            if (send->fun == core::Names::before()) {
+                name = core::Names::beforeAngles();
+            } else if (send->fun == core::Names::after()) {
+                name = core::Names::afterAngles();
             } else {
                 // we use this for the name of our test
                 auto argString = to_s(ctx, send->getPosArg(0));
