@@ -370,14 +370,17 @@ For example:</p>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>For more examples of valid syntax,
-<a href="https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb">see the tests</a>.</p>
+<a href="https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/minitest_tables.rb">see the tests</a>,
+and
+<a href="https://github.com/sorbet/sorbet/blob/master/test/testdata/rewriter/test_each_describe.rb">another test, with describe</a>.</p>
 <p>There are some limitations on how <code>test_each</code> can be used:</p>
 <p>The block given to <code>test_each</code> must accept at least one argument (except when
 using <code>test_each_hash</code>, it must be able to take exactly two arguments).</p>
-<p>The body of the <code>test_each</code>'s block must contain only <code>it</code> blocks, because of
-limitations in Sorbet. Sorbet models <code>it</code> blocks by translating them to method
-definitions under the hood, and method definitions do not have access to
-variables outside of their scope.</p>
+<p>The body of the <code>test_each</code>'s block must contain only <code>it</code>, <code>before</code>, <code>after</code>,
+and <code>describe</code> blocks, because of limitations in Sorbet. Sorbet models <code>it</code>,
+<code>before</code>, and <code>after</code> blocks by translating them to method definitions under the
+hood, and method definitions do not have access to variables outside of their
+scope.</p>
 <p>Usually this comes up with variable destructuring:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- BAD EXAMPLE --</span>
 test_each(values) <span class="hljs-keyword">do</span> <span class="hljs-params">|value|</span>
