@@ -15,28 +15,28 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 bb2[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$10: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$9: T.class_of(Concrete) = <cfgAlias>$10
-    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
-    <castTemp>$11: Concrete = x
-    <statTemp>$3: Concrete = cast(<castTemp>$11: Concrete, Concrete);
+    <cfgAlias>$11: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$10: T.class_of(Concrete) = <cfgAlias>$11
+    keep_for_ide$10: T.untyped = <keep-alive> keep_for_ide$10
+    <castTemp>$12: Concrete = x
+    <castTemp>$9: Concrete = cast(<castTemp>$12: Concrete, Concrete);
     <unconditional> -> bb7
 
 # backedges
 # - bb0(rubyRegionId=0)
 bb3[rubyRegionId=0, firstDead=-1](x: Other):
-    <cfgAlias>$14: T.class_of(Other) = alias <C Other>
-    <ifTemp>$12: TrueClass = <cfgAlias>$14: T.class_of(Other).===(x: Other)
-    <ifTemp>$12 -> (TrueClass ? bb4 : bb7)
+    <cfgAlias>$15: T.class_of(Other) = alias <C Other>
+    <ifTemp>$13: TrueClass = <cfgAlias>$15: T.class_of(Other).===(x: Other)
+    <ifTemp>$13 -> (TrueClass ? bb4 : bb7)
 
 # backedges
 # - bb3(rubyRegionId=0)
 bb4[rubyRegionId=0, firstDead=-1](x: Other):
-    <cfgAlias>$17: T.class_of(Other) = alias <C Other>
-    keep_for_ide$16: T.class_of(Other) = <cfgAlias>$17
-    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
-    <castTemp>$18: Other = x
-    <statTemp>$3: Other = cast(<castTemp>$18: Other, Other);
+    <cfgAlias>$19: T.class_of(Other) = alias <C Other>
+    keep_for_ide$18: T.class_of(Other) = <cfgAlias>$19
+    keep_for_ide$18: T.untyped = <keep-alive> keep_for_ide$18
+    <castTemp>$20: Other = x
+    <castTemp>$17: Other = cast(<castTemp>$20: Other, Other);
     <unconditional> -> bb7
 
 # backedges
@@ -44,36 +44,37 @@ bb4[rubyRegionId=0, firstDead=-1](x: Other):
 # - bb3(rubyRegionId=0)
 # - bb4(rubyRegionId=0)
 bb7[rubyRegionId=0, firstDead=-1](x: T.any(Concrete, Other)):
-    <cfgAlias>$23: T.class_of(Concrete) = alias <C Concrete>
-    <ifTemp>$20: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$23: T.class_of(Concrete))
-    <ifTemp>$20 -> (T::Boolean ? bb8 : bb10)
+    <cfgAlias>$25: T.class_of(Concrete) = alias <C Concrete>
+    <ifTemp>$22: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$25: T.class_of(Concrete))
+    <ifTemp>$22 -> (T::Boolean ? bb8 : bb10)
 
 # backedges
 # - bb7(rubyRegionId=0)
 bb8[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$25: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$24: T.class_of(Concrete) = <cfgAlias>$25
-    keep_for_ide$24: T.untyped = <keep-alive> keep_for_ide$24
-    <castTemp>$26: Concrete = x
-    <statTemp>$19: Concrete = cast(<castTemp>$26: Concrete, Concrete);
+    <cfgAlias>$28: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$27: T.class_of(Concrete) = <cfgAlias>$28
+    keep_for_ide$27: T.untyped = <keep-alive> keep_for_ide$27
+    <castTemp>$29: Concrete = x
+    <castTemp>$26: Concrete = cast(<castTemp>$29: Concrete, Concrete);
     <unconditional> -> bb10
 
 # backedges
 # - bb7(rubyRegionId=0)
 # - bb8(rubyRegionId=0)
 bb10[rubyRegionId=0, firstDead=-1](x: T.any(Other, Concrete)):
-    <cfgAlias>$30: T.class_of(Other) = alias <C Other>
-    <ifTemp>$27: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$30: T.class_of(Other))
-    <ifTemp>$27 -> (T::Boolean ? bb13 : bb12)
+    <cfgAlias>$33: T.class_of(Other) = alias <C Other>
+    <ifTemp>$30: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$33: T.class_of(Other))
+    <ifTemp>$30 -> (T::Boolean ? bb13 : bb12)
 
 # backedges
 # - bb10(rubyRegionId=0)
 bb12[rubyRegionId=0, firstDead=-1](x: Concrete):
-    <cfgAlias>$32: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$31: T.class_of(Concrete) = <cfgAlias>$32
-    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
-    <castTemp>$33: Concrete = x
-    <returnMethodTemp>$2: Concrete = cast(<castTemp>$33: Concrete, Concrete);
+    <cfgAlias>$36: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$35: T.class_of(Concrete) = <cfgAlias>$36
+    keep_for_ide$35: T.untyped = <keep-alive> keep_for_ide$35
+    <castTemp>$37: Concrete = x
+    <castTemp>$34: Concrete = cast(<castTemp>$37: Concrete, Concrete);
+    <returnMethodTemp>$2: Concrete = <castTemp>$34
     <unconditional> -> bb13
 
 # backedges
