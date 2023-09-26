@@ -47,7 +47,7 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     return res;
 }
 
-core::MethodRef findOverridedMethod(const core::GlobalState &gs, const core::MethodRef method) {
+core::MethodRef findOverriddenMethod(const core::GlobalState &gs, const core::MethodRef method) {
     auto ownerClass = method.data(gs)->owner;
 
     for (auto mixin : ownerClass.data(gs)->mixins()) {
@@ -83,11 +83,11 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
     if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition
         auto method = def->symbol;
-        core::MethodRef overridedMethod = method;
+        core::MethodRef overriddenMethod = method;
         if (method.data(gs)->flags.isOverride) {
-            overridedMethod = findOverridedMethod(gs, method);
+            overriddenMethod = findOverriddenMethod(gs, method);
         }
-        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
+        auto locationsOrError = findMethodImplementations(gs, overriddenMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
@@ -124,12 +124,12 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
 
         auto calledMethod = mainResponse.method;
-        auto overridedMethod = calledMethod;
+        auto overriddenMethod = calledMethod;
         if (calledMethod.data(gs)->flags.isOverride) {
-            overridedMethod = findOverridedMethod(gs, overridedMethod);
+            overriddenMethod = findOverriddenMethod(gs, overriddenMethod);
         }
 
-        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
+        auto locationsOrError = findMethodImplementations(gs, overriddenMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
