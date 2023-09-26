@@ -98,6 +98,57 @@ Sorbet does not model inheritance relationships introduced by `prepend`.
   for runtime-checked type annotations on methods defined with prepended
   modules.
 
+## Refinements and `refine do`
+
+```ruby
+class C
+  def foo
+    puts "C#foo"
+  end
+end
+
+module M
+  refine C do
+    def foo
+      puts "C#foo in M"
+    end
+  end
+end
+
+using M
+
+c = C.new
+
+c.foo # prints "C#foo in M"
+```
+
+Sorbet does not support refinements.
+
+### Alternatives
+
+- Use an RBI file to define the methods. Sorbet will assume that the methods are
+  defined everywhere, not just where the `using` directive lives. This means
+  that Sorbet will not reject code that would not have caused problems at
+  runtime, at the expense of not catching situations that might have.
+
+- Use an [Escape Hatch](troubleshooting.md#escape-hatches).
+
+- Use a monkey patch.
+
+### Why?
+
+- While refinements are better than monkey patching, they still amount to monkey
+  patching. Sorbet's role as a type checker is not only to catch errors, but to
+  steer people towards simpler designs.
+
+- Historically, Sorbet was developed at Stripe, which does not use refinements.
+
+- Support for refinements would add implementation complexity to Sorbet.
+
+- Supporting refinements would require doing program-wide work to discover and
+  use refinements even if a codebase does not use them at all, which comes with
+  a performance cost.
+
 ## Creating method aliases to methods in parent classes
 
 ```ruby
