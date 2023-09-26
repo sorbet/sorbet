@@ -830,9 +830,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
                     caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+
+                    // We don't support typed exceptions in `ensure` yet.
+                    // We have a lot of tests that show why, but it boils down to a combination of
+                    // Sorbet's "simplified view of the control flow" for exceptions (see comment above)
+                    // and Sorbet's dead code detection.
                     if (!ast::isa_tree<ast::EmptyTree>(a.ensure)) {
-                        ensureBody->exprs.emplace_back(localVar, rescueCase->var.loc(),
-                                                       make_insn<Ident>(exceptionValue));
+                        auto zloc = rescueCase->var.loc().copyWithZeroLength();
+                        auto unsafe = ast::MK::Unsafe(
+                            zloc, ast::make_expression<ast::Local>(zloc, exceptionValue.data(cctx.inWhat)));
+                        ensureBody = walk(cctx.withTarget(localVar), unsafe, ensureBody);
                     }
 
                     // Mark the exception as handled
