@@ -82,13 +82,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
     auto queryResponse = move(queryResult.responses[0]);
     if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition
-        core::SymbolRef maybeMethod = def->symbol;
-        if (!maybeMethod.isMethod()) {
-            response->error = makeInvalidRequestError(maybeMethod, gs);
-            return response;
-        }
-
-        auto method = maybeMethod.asMethodRef();
+        auto method = def->symbol;
         core::MethodRef overridedMethod = method;
         if (method.data(gs)->flags.isOverride) {
             overridedMethod = findOverridedMethod(gs, method);
