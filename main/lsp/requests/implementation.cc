@@ -27,7 +27,8 @@ unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const 
 
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::MethodRef method) {
     MethodImplementationResults res;
-    if (!method.data(gs)->flags.isAbstract) {
+    auto flags = method.data(gs)->flags;
+    if (!flags.isAbstract && !flags.isOverridable) {
         res.error = makeInvalidRequestError(method, gs);
         return res;
     }
