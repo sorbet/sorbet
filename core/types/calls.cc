@@ -294,7 +294,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             //     TypeErrorDiagnostics::explainUntyped(gs, e, what, expectedType, argSym.loc, originForUninitialized);
             //     return e.build();
             // }
-        } else if (argTpe.type.isUntyped()) {
+        } else if (argTpe.type.isUntyped() && expectedType != Types::top()) {
             auto what = core::errors::Infer::errorClassForUntyped(gs, argLoc.file(), argTpe.type);
             if (auto e = gs.beginError(argLoc, what)) {
                 e.setHeader("Argument passed to parameter `{}` is `{}`", argSym.argumentName(gs), "T.untyped");
