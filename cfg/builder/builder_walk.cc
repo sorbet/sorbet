@@ -830,10 +830,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
                     caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
-                    if (!ast::isa_tree<ast::EmptyTree>(a.ensure)) {
-                        ensureBody->exprs.emplace_back(localVar, rescueCase->var.loc(),
-                                                       make_insn<Ident>(exceptionValue));
-                    }
 
                     // Mark the exception as handled
                     synthesizeExpr(caseBody, exceptionValue, core::LocOffsets::none(),
