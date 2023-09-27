@@ -11,5 +11,5 @@ end
 class Child < Parent
   sig {override.void}
   def foo; end
-  #   ^ implementation: fo
+  #   ^ implementation: foo
 end
