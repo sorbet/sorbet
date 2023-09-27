@@ -9,6 +9,8 @@ def example1
   else
   ensure
   end
+
+  T.reveal_type(e) # error: `T.nilable(TypeError)`
 end
 
 sig {void}
@@ -26,6 +28,8 @@ def example3
     #          ^^^^^^^^^^^^^^^^ error: `StandardError`
   ensure
   end
+
+  T.reveal_type(e) # error: `T.nilable(StandardError)`
 end
 
 sig {void}
@@ -45,4 +49,34 @@ def example5
   else
   ensure
   end
+
+  T.reveal_type(e) # error: `T.nilable(Exception)`
 end
+
+sig {void}
+def example6
+  begin
+  rescue Exception => e
+    T.reveal_type(e) # error: `Exception`
+  else
+  ensure
+    e.foo
+    # ^^^ error: Call to method `foo` on `T.untyped`
+  end
+
+  e.foo
+  # ^^^ error: Call to method `foo` on `T.untyped`
+end
+
+class NotAnException
+  # usually indicates logic bug or problem with RBI generation
+end
+
+sig {void}
+def example7
+  begin
+  rescue NotAnException
+    puts('hello') # error: This code is unreachable
+  end
+end
+
