@@ -11,6 +11,11 @@ class TestRescue
   sig {returns(T::Array[T.class_of(Exception)])}
   def typed_exceptions(); [Exception]; end
 
+  sig {returns([T.class_of(TypeError), T.class_of(ArgumentError)])}
+  def tuple_exceptions
+    [TypeError, ArgumentError]
+  end
+
   def initialize
     @ex = T.let(nil, T.nilable(StandardError))
   end
@@ -69,6 +74,14 @@ class TestRescue
     begin
       meth
     rescue *typed_exceptions => e
+      T.reveal_type(e) # error: Revealed type: `Exception`
+    end
+  end
+
+  def rescue_typed_splat()
+    begin
+      meth
+    rescue *tuple_exceptions => e
       T.reveal_type(e) # error: Revealed type: `Exception`
     end
   end

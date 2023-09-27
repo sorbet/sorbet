@@ -34,6 +34,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       [<emptyTree>::<C Exception>]
     end
 
+    <self>.sig() do ||
+      <self>.returns([<emptyTree>::<C T>.class_of(<emptyTree>::<C TypeError>), <emptyTree>::<C T>.class_of(<emptyTree>::<C ArgumentError>)])
+    end
+
+    def tuple_exceptions<<todo method>>(&<blk>)
+      [<emptyTree>::<C TypeError>, <emptyTree>::<C ArgumentError>]
+    end
+
     def initialize<<todo method>>(&<blk>)
       @ex = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C StandardError>))
     end
@@ -84,6 +92,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def rescue_typed_splat<<todo method>>(&<blk>)
       <self>.meth()
     rescue ::<Magic>.<splat>(<self>.typed_exceptions()) => e
+      <emptyTree>::<C T>.reveal_type(e)
+    end
+
+    def rescue_typed_splat<<todo method>>(&<blk>)
+      <self>.meth()
+    rescue ::<Magic>.<splat>(<self>.tuple_exceptions()) => e
       <emptyTree>::<C T>.reveal_type(e)
     end
 
