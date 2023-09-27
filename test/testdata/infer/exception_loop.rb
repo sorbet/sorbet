@@ -40,7 +40,7 @@ def example2
   2.times do
     begin
       puts(e.class)
-      T.reveal_type(e) # error: `T.nilable(A)`
+      T.reveal_type(e) # error: `T.nilable(T.any(A, B))`
       raises_b
     rescue B => e
     end
