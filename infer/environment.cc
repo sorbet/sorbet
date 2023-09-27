@@ -1726,6 +1726,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
                                 }
+
+                                if (!cur.origins.empty() && !tp.origins.empty() &&
+                                    absl::c_any_of(cur.origins,
+                                                   [&](auto loc) { return loc.source(ctx) == "rescue"; }) &&
+                                    absl::c_any_of(tp.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; })) {
+                                    e.addErrorNote(
+                                        "The exception variables of two `{}` blocks conflict with each other because\n"
+                                        "    the second is inside a loop. Either use `{}` to initialize the exception\n"
+                                        "    variable before the first `{}`, or pick unique variable names.\n",
+                                        "rescue", "T.let", "rescue");
+                                }
                             }
 
                             tp.type = core::Types::untypedUntracked();
