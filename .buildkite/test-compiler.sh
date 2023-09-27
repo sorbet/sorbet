@@ -76,6 +76,9 @@ if [ "$err" -ne 0 ]; then
   echo '  -c opt --config=forcedebug' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
+  ls -R bazel-out/k8-opt/bin/test/testdata/compiler/exceptions/basic.sorbet.build/
+  cp bazel-out/k8-opt/bin/test/testdata/compiler/exceptions/basic.sorbet.build/test/testdata/compiler/exceptions/basic.rb.opt.ll _out_
+
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
 
   exit "$err"
