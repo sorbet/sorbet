@@ -96,10 +96,10 @@ def example6
           puts
         rescue TypeError => e
           #                 ^ error: Changing the type of a variable in a loop is not permitted
-          T.reveal_type(e) # error: `TypeError`
+          T.reveal_type(e) # error: `T.untyped`
         end
       end
     end
   end
-  T.reveal_type(e) # error: `T.untyped`
+  T.reveal_type(e) # error: `T.nilable(TypeError)`
 end
