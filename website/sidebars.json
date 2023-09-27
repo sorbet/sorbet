@@ -20,7 +20,8 @@
       "troubleshooting",
       "why-type-annotations",
       "faq",
-      "error-reference"
+      "error-reference",
+      "unsupported"
     ],
     "Type System": [
       "sigs",
