@@ -49,7 +49,7 @@ bb9[rubyRegionId=3, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <got
 
 # backedges
 # - bb3(rubyRegionId=2)
-bb10[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <magic>$5: T.class_of(<Magic>)):
+bb10[rubyRegionId=2, firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: StandardError, <magic>$5: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <unconditional> -> bb9

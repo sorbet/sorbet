@@ -42,7 +42,7 @@ class TestRescue
       baz
     end
 
-    T.reveal_type(baz) # error: Revealed type: `T.untyped`
+    T.reveal_type(baz) # error: Revealed type: `T.nilable(T.any(LoadError, SocketError))`
   end
 
   def rescue_loop()
