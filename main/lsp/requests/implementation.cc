@@ -27,7 +27,8 @@ unique_ptr<ResponseError> makeInvalidRequestError(core::SymbolRef symbol, const 
 
 const MethodImplementationResults findMethodImplementations(const core::GlobalState &gs, core::MethodRef method) {
     MethodImplementationResults res;
-    if (!method.data(gs)->flags.isAbstract) {
+    auto flags = method.data(gs)->flags;
+    if (!flags.isAbstract && !flags.isOverridable) {
         res.error = makeInvalidRequestError(method, gs);
         return res;
     }
@@ -47,7 +48,7 @@ const MethodImplementationResults findMethodImplementations(const core::GlobalSt
     return res;
 }
 
-core::MethodRef findOverridedMethod(const core::GlobalState &gs, const core::MethodRef method) {
+core::MethodRef findOverriddenMethod(const core::GlobalState &gs, const core::MethodRef method) {
     auto ownerClass = method.data(gs)->owner;
 
     for (auto mixin : ownerClass.data(gs)->mixins()) {
@@ -82,18 +83,12 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
     auto queryResponse = move(queryResult.responses[0]);
     if (auto def = queryResponse->isMethodDef()) {
         // User called "Go to Implementation" from the abstract function definition
-        core::SymbolRef maybeMethod = def->symbol;
-        if (!maybeMethod.isMethod()) {
-            response->error = makeInvalidRequestError(maybeMethod, gs);
-            return response;
-        }
-
-        auto method = maybeMethod.asMethodRef();
-        core::MethodRef overridedMethod = method;
+        auto method = def->symbol;
+        core::MethodRef overriddenMethod = method;
         if (method.data(gs)->flags.isOverride) {
-            overridedMethod = findOverridedMethod(gs, method);
+            overriddenMethod = findOverriddenMethod(gs, method);
         }
-        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
+        auto locationsOrError = findMethodImplementations(gs, overriddenMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
@@ -130,12 +125,12 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
 
         auto calledMethod = mainResponse.method;
-        auto overridedMethod = calledMethod;
+        auto overriddenMethod = calledMethod;
         if (calledMethod.data(gs)->flags.isOverride) {
-            overridedMethod = findOverridedMethod(gs, overridedMethod);
+            overriddenMethod = findOverriddenMethod(gs, overriddenMethod);
         }
 
-        auto locationsOrError = findMethodImplementations(gs, overridedMethod);
+        auto locationsOrError = findMethodImplementations(gs, overriddenMethod);
 
         if (locationsOrError.error != nullptr) {
             response->error = move(locationsOrError.error);
