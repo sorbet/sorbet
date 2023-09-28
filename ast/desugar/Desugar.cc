@@ -197,6 +197,15 @@ ExpressionPtr desugarBegin(DesugarContext dctx, core::LocOffsets loc, parser::No
             stats.emplace_back(node2TreeImpl(dctx, std::move(stat)));
         };
         auto &last = stmts.back();
+
+        if (stmts.size() == 1 && last != nullptr) {
+            // If we're about to make an InsSeq, but the stmts are empty, MK::InsSeq will return just expr.
+            // But we want to treat `(0)` as having a loc that spans the parens too, for autocorrects.
+            // We patch that here, because the loc on an ExpressionPtr is const (maybe we should fix
+            // that, and then solve this in MK::InsSeq?) but it's easier to solve this here.
+            last->loc = loc;
+        }
+
         auto expr = node2TreeImpl(dctx, std::move(last));
         return MK::InsSeq(loc, std::move(stats), std::move(expr));
     }
@@ -228,13 +237,29 @@ ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
     }
 }
 
+// In DString, the `#{...}` are all wrapped in parser::Begin nodes.
+// Normally, we have handling for parser::Begin nodes that treats the loc of such a node to include
+// the enclosing brackets. So e.g. the loc of `(x)` would be length 3.
+// But the parser also uses Begin nodes for `#{...}`, and for those we don't want the loc to include
+// the braces (think: we don't want a `T.must` to look like `"T.must(#{x})"`, we want it to look
+// like `"#{T.must(x)}"`, etc.)
+// So we have this skipSingletonBegin to skip over these nodes before desugaring them in DString
+unique_ptr<parser::Node> skipSingletonBegin(unique_ptr<parser::Node> node) {
+    auto begin = parser::cast_node<parser::Begin>(node.get());
+    if (begin == nullptr || begin->stmts.size() != 1) {
+        return node;
+    }
+
+    return move(begin->stmts[0]);
+}
+
 ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec nodes) {
     if (nodes.empty()) {
         return MK::String(loc, core::Names::empty());
     }
     auto it = nodes.begin();
     auto end = nodes.end();
-    ExpressionPtr first = node2TreeImpl(dctx, std::move(*it));
+    ExpressionPtr first = node2TreeImpl(dctx, skipSingletonBegin(std::move(*it)));
     InlinedVector<ExpressionPtr, 4> stringsAccumulated;
 
     Send::ARGS_store interpArgs;
@@ -251,7 +276,7 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
 
     for (; it != end; ++it) {
         auto &stat = *it;
-        ExpressionPtr narg = node2TreeImpl(dctx, std::move(stat));
+        ExpressionPtr narg = node2TreeImpl(dctx, skipSingletonBegin(std::move(stat)));
         if (allStringsSoFar && isStringLit(dctx, narg)) {
             stringsAccumulated.emplace_back(std::move(narg));
         } else if (isa_tree<EmptyTree>(narg)) {

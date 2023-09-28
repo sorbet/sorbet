@@ -31,4 +31,4 @@ end
 
 (T.unsafe(A.new)).unary(0)
 
-A.unary(A.new + A.new, 0)
+A.unary((A.new + A.new), 0)

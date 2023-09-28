@@ -30,6 +30,8 @@ module A
 
       m.greeting
       print((Foo if true).greeting)
+      print((if T.unsafe(true); Foo; else Foo; end).greeting)
+      print((if T.unsafe(true); Foo; else Integer; end).greeting) # error: does not exist
     end
 
     sig {params(m: T.class_of(Foo)).void}
