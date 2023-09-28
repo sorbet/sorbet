@@ -215,26 +215,17 @@ module GC
   # consistency if RGenGC is supported.
   def self.verify_internal_consistency; end
 
-  # call-seq:
-  #    GC.measure_total_time = true/false
-  #
   # Enable to measure GC time.
-  # You can get the result with <tt>GC.stat(:time)</tt>.
+  # You can get the result with `GC.stat(:time)`.
   # Note that GC time measurement can cause some performance overhead.
   sig {params(flag: T::Boolean).void}
   def self.measure_total_time=(flag); end
 
-  # call-seq:
-  #    GC.measure_total_time -> true/false
-  #
-  # Return measure_total_time flag (default: +true+).
+  # Return measure_total_time flag (default: `true`).
   # Note that measurement can affect the application performance.
   sig {returns(T::Boolean)}
   def self.measure_total_time; end
 
-  # call-seq:
-  #    GC.total_time -> int
-  #
   # Return measured GC total time in nano seconds.
   sig {returns(Integer)}
   def self.total_time; end
