@@ -69,7 +69,7 @@ either:
   ```ruby
   sig {return(T::Array[Integer])}
   def example
-    return [1, 2]
+    return 1, 2
   end
   ```
 
@@ -78,7 +78,7 @@ either:
   ```ruby
   sig {return([Integer, String])}
   def example
-    return [1, '']
+    return 1, ''
   end
   ```
 
