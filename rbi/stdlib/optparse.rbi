@@ -460,7 +460,7 @@ class OptionParser
   sig {params(args: T.untyped).returns(T.untyped)}
   def inc(*args); end
 
-  sig {params(banner: T.untyped, width: T.untyped, indent: T.untyped, blk: T.proc.params(opts: OptionParser).void).void}
+  sig {params(banner: T.untyped, width: T.untyped, indent: T.untyped, blk: T.nilable(T.proc.params(opts: OptionParser).void)).void}
   def initialize(banner = nil, width = 32, indent = ' ' * 4, &blk); end
 
   sig {returns(T.untyped)}
