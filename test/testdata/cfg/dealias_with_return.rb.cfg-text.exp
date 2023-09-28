@@ -3,8 +3,8 @@ method ::Object#a {
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$4: T.untyped = <get-current-exception>
-    <exceptionValue>$4 -> (T.untyped ? bb3 : bb4)
+    <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
 # - bb4(rubyRegionId=1)
@@ -16,9 +16,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 # backedges
 # - bb0(rubyRegionId=0)
-bb3[rubyRegionId=2, firstDead=-1](<exceptionValue>$4: T.untyped, <magic>$6: T.class_of(<Magic>)):
+bb3[rubyRegionId=2, firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
     <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$4: T.untyped)
+    <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges

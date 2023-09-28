@@ -50,16 +50,16 @@ bb5[rubyRegionId=1, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Pr
     # outerLoops: 1
     <self>: A = loadSelf(map)
     <magic>$9: T.class_of(<Magic>) = alias <C <Magic>>
-    <exceptionValue>$8: T.untyped = <get-current-exception>
-    <exceptionValue>$8 -> (T.untyped ? bb7 : bb8)
+    <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$8 -> (T.nilable(Exception) ? bb7 : bb8)
 
 # backedges
 # - bb5(rubyRegionId=1)
 # - bb8(rubyRegionId=2)
-bb7[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer), <exceptionValue>$8: T.untyped, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
+bb7[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer), <exceptionValue>$8: Exception, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
     <cfgAlias>$12: T.class_of(StandardError) = alias <C StandardError>
-    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$8: T.untyped)
+    <isaCheckTemp>$13: T::Boolean = <cfgAlias>$12: T.class_of(StandardError).===(<exceptionValue>$8: Exception)
     <isaCheckTemp>$13 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
@@ -67,8 +67,8 @@ bb7[rubyRegionId=3, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Pr
 bb8[rubyRegionId=2, firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <magic>$9: T.class_of(<Magic>), <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$7: Integer(1) = 1
-    <exceptionValue>$8: T.untyped = <get-current-exception>
-    <exceptionValue>$8 -> (T.untyped ? bb7 : bb9)
+    <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
+    <exceptionValue>$8 -> (T.nilable(Exception) ? bb7 : bb9)
 
 # backedges
 # - bb8(rubyRegionId=2)
