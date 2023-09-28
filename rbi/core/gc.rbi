@@ -214,6 +214,21 @@ module GC
   # This method is implementation specific. Now this method checks generational
   # consistency if RGenGC is supported.
   def self.verify_internal_consistency; end
+
+  # Enable to measure GC time.
+  # You can get the result with `GC.stat(:time)`.
+  # Note that GC time measurement can cause some performance overhead.
+  sig {params(flag: T::Boolean).void}
+  def self.measure_total_time=(flag); end
+
+  # Return measure_total_time flag (default: `true`).
+  # Note that measurement can affect the application performance.
+  sig {returns(T::Boolean)}
+  def self.measure_total_time; end
+
+  # Return measured GC total time in nano seconds.
+  sig {returns(Integer)}
+  def self.total_time; end
 end
 
 # The [`GC`](https://docs.ruby-lang.org/en/2.7.0/GC.html) profiler provides
