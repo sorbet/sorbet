@@ -76,6 +76,15 @@ if [ "$err" -ne 0 ]; then
   echo '  -c opt --config=forcedebug' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
+  # Lines look like "[ .. ] Actual LLVM output: test/testdata/compiler/intrinsics/t_must.sorbet.build/test/testdata/compiler/intrinsics/t_must.rb.opt.ll"
+  { ./bazel test --test_summary=terse --test_output=errors "${test_args[@]}" || true ; } | \
+    grep --only-matching 'Actual LLVM output: .*\.ll' | \
+    sed -e 's@.*Actual LLVM output: @bazel-out/k8-opt/bin/@' | \
+    xargs cp --target-directory=_out_
+
+  echo >> "$failing_tests"
+  echo 'If there are expectation file changes, you can find them in the Artifacts tab of the build' >> "$failing_tests"
+
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
 
   exit "$err"

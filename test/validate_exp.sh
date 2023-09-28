@@ -102,6 +102,8 @@ for ext in "${exts[@]}"; do
         if grep "exists only in" "$diff_out" > /dev/null ; then
           cat "$diff_out"
           info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
+          info "(or in CI: you can find the new LLVM IR in the Artifacts tab)"
+          info "Actual LLVM output: $build_dir/$actual"
           something_failed "$(basename "$exp")"
         else
           if [ -n "${expected_failure}" ]; then
@@ -118,6 +120,8 @@ for ext in "${exts[@]}"; do
       else
         cat "$diff_out"
         info "If this was an expected difference, you need to run tools/scripts/update_compiler_exp.sh"
+        info "(or in CI: you can find the new LLVM IR in the Artifacts tab)"
+        info "Actual LLVM output: $build_dir/$actual"
         something_failed "$(basename "$exp")"
       fi
     fi
