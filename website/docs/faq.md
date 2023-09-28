@@ -57,6 +57,33 @@ sig {void}
 
 [→ Method Signatures](sigs.md)
 
+## What's the signature for a method that returns multiple values?
+
+Ruby's `return x, y` syntax is just shorthand for `return [x, y]`.
+
+For methods using this multiple return shorthand, the return type should be
+either:
+
+- an [Array](stdlib-generics.md)
+
+  ```ruby
+  sig {return(T::Array[Integer])}
+  def example
+    return [1, 2]
+  end
+  ```
+
+- a [Tuple](tuples.md) (experimental)
+
+  ```ruby
+  sig {return([Integer, String])}
+  def example
+    return [1, '']
+  end
+  ```
+
+[→ Method Signatures](sigs.md)
+
 ## How should I add types to methods defined with `attr_reader`?
 
 Sorbet has special knowledge for `attr_reader`, `attr_writer`, and
