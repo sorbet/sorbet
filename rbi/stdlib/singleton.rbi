@@ -110,6 +110,9 @@ module Singleton
     sig {returns(T.attached_class)}
     def instance; end
 
+    sig { params(klass: Class).void }
+    def self.__init__(klass); end
+
     private
 
     sig {void}
