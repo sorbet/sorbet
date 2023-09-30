@@ -14,15 +14,15 @@ end
 
 class ComplicatedBox < Box
   ReturnType = T.type_alias do
-    T.any(Integer, String, Float, Symbol) # error: Type aliases are not allowed in generic classes
+    T.any(Integer, String, Float, Symbol)
   end
   Elem = type_member { {fixed: ReturnType} }
 end
 
 sig { params(box: ComplicatedBox).returns(ComplicatedBox::ReturnType) }
 def example_good3(box)
-  T.reveal_type(box.val) # error: `T.untyped`
-  nil
+  T.reveal_type(box.val) # error: `T.any(Integer, String, Float, Symbol)`
+  nil # error: Expected `T.any(Integer, String, Float, Symbol)` but found `NilClass` for method result type
 end
 
 class BoxBad
@@ -30,8 +30,8 @@ class BoxBad
   abstract!
 
   Elem = type_member
-  MyElem = T.type_alias { Elem } # error: Type aliases are not allowed in generic classes
-  MyElem2 = T.type_alias { T.nilable(Elem) } # error: Type aliases are not allowed in generic classes
+  MyElem = T.type_alias { Elem } # error: Defining a `type_alias` to a generic `type_member` is not allowed
+  MyElem2 = T.type_alias { T.nilable(Elem) } # error: Defining a `type_alias` to a generic `type_member` is not allowed
 
   sig { abstract.returns(Elem) }
   def returns_elem; end
@@ -40,6 +40,21 @@ class BoxBad
   def returns_my_elem
     T.let(returns_my_elem, Elem)
     T.let(returns_my_elem, MyElem)
+    my_elem = returns_my_elem
+    T.reveal_type(my_elem) # error: `T.untyped`
+    nil
+  end
+
+  sig { returns(MyElem) }
+  def self.returns_my_elem
+    T.let(
+      returns_my_elem,
+      Elem  # error: `type_member` type `Elem` used in a singleton method definition
+    )
+    T.let(
+      returns_my_elem,
+      MyElem
+    )
     my_elem = returns_my_elem
     T.reveal_type(my_elem) # error: `T.untyped`
     nil

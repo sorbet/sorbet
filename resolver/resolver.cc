@@ -915,25 +915,7 @@ private:
     }
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
-        core::TypeMemberRef enclosingTypeMember;
-        core::ClassOrModuleRef enclosingClass = job.lhs.enclosingClass(ctx);
-        while (enclosingClass != core::Symbols::root()) {
-            auto typeMembers = enclosingClass.data(ctx)->typeMembers();
-            if (!typeMembers.empty()) {
-                enclosingTypeMember = typeMembers[0];
-                break;
-            }
-            enclosingClass = enclosingClass.data(ctx)->owner;
-        }
         auto &rhs = *job.rhs;
-        if (enclosingTypeMember.exists()) {
-            if (auto e = ctx.beginError(rhs.loc(), core::errors::Resolver::TypeAliasInGenericClass)) {
-                e.setHeader("Type aliases are not allowed in generic classes");
-                e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
-            }
-            job.lhs.setResultType(ctx, core::Types::untyped(job.lhs));
-            return true;
-        }
         if (isFullyResolved(ctx, rhs)) {
             // this todo will be resolved during ResolveTypeMembersAndFieldsWalk below
             job.lhs.setResultType(ctx, core::make_type<core::ClassType>(core::Symbols::todo()));
@@ -2535,7 +2517,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto allowSelfType = true;
         auto allowRebind = false;
-        auto typeMember = TypeSyntaxArgs::TypeMember::Allowed;
+        auto typeMember = TypeSyntaxArgs::TypeMember::BannedInTypeAlias;
         auto allowUnspecifiedTypeParameter = false;
         lhs.setResultType(ctx, TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
                                                          TypeSyntaxArgs{allowSelfType, allowRebind, typeMember,

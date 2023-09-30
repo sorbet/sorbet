@@ -67,6 +67,7 @@ struct TypeSyntaxArgs {
     enum class TypeMember {
         Allowed,
         BannedInTypeMember,
+        BannedInTypeAlias,
     };
     const TypeMember typeMember;
     const bool allowUnspecifiedTypeParameter;

@@ -1184,10 +1184,30 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     result.type = core::Types::untypedUntracked();
                 }
             } else {
-                // a type member has occurred in a context that doesn't allow them
-                if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
-                    e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
+                switch (args.typeMember) {
+                    case TypeSyntaxArgs::TypeMember::Allowed:
+                        ENFORCE(false);
+                        break;
+                    case TypeSyntaxArgs::TypeMember::BannedInTypeAlias:
+                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeAliasToTypeMember)) {
+                            const auto &owner = tm.data(ctx)->owner.asClassOrModuleRef().data(ctx);
+                            auto memTem = owner->attachedClass(ctx).exists() ? "type_template" : "type_member";
+                            e.setHeader("Defining a `{}` to a generic `{}` is not allowed", "type_alias", memTem);
+                            e.addErrorLine(tm.data(ctx)->loc(), "`{}` defined as a `{}` here",
+                                           tm.data(ctx)->name.show(ctx), memTem);
+                            e.addErrorNote("Type aliases to type members and type templates are not allowed: aliases\n"
+                                           "    can be referenced from both instance and singleton class methods\n"
+                                           "    whereas type members can only be referenced from one or the other.");
+                        }
+
+                        break;
+                    case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
+                        // a type member has occurred in a context that doesn't allow them
+                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                            auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
+                            e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
+                        }
+                        break;
                 }
                 result.type = core::Types::untypedUntracked();
             }
