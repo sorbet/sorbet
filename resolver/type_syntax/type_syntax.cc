@@ -1199,14 +1199,6 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                                            "    can be referenced from both instance and singleton class methods\n"
                                            "    whereas type members can only be referenced from one or the other.");
                         }
-
-                        break;
-                    case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
-                        // a type member has occurred in a context that doesn't allow them
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                            auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
-                            e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
-                        }
                         break;
                 }
                 result.type = core::Types::untypedUntracked();

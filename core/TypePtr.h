@@ -279,6 +279,13 @@ public:
     TypePtr _instantiate(const GlobalState &gs, absl::Span<const TypeMemberRef> params,
                          const std::vector<TypePtr> &targs) const;
 
+    /**
+     * Replace all LambdaParam with `SelfTypeParam` of the same definition
+     *
+     * For use with ClassOrModule::selfType--uses elsewhere should be treated with suspicion.
+     */
+    TypePtr selfTypeArgs(const GlobalState &gs) const;
+
     // If this TypePtr `is_proxy_type`, returns its underlying type.
     TypePtr underlying(const GlobalState &gs) const;
 

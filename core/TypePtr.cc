@@ -329,6 +329,118 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
     }
 }
 
+namespace {
+struct SelfTypeArgsVectorResult {
+    bool isDifferent = false;
+    vector<TypePtr> tys;
+};
+
+SelfTypeArgsVectorResult selfTypeArgsVector(const GlobalState &gs, absl::Span<const TypePtr> tys) {
+    SelfTypeArgsVectorResult result;
+    result.tys.reserve(tys.size());
+    for (const auto &ty : tys) {
+        auto ty1 = ty.selfTypeArgs(gs);
+        result.isDifferent |= (ty1 != ty);
+        result.tys.emplace_back(move(ty1));
+    }
+    return result;
+}
+} // namespace
+
+TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+        case Tag::TypeVar:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+            return *this;
+
+        case Tag::UnresolvedAppliedType: {
+            auto &this_ = cast_type_nonnull<UnresolvedAppliedType>(*this);
+            auto result = selfTypeArgsVector(gs, this_.targs);
+            if (!result.isDifferent) {
+                return *this;
+            }
+
+            return make_type<UnresolvedAppliedType>(this_.klass, move(result.tys));
+        }
+
+        case Tag::TupleType: {
+            auto &this_ = cast_type_nonnull<TupleType>(*this);
+            auto result = selfTypeArgsVector(gs, this_.elems);
+            if (!result.isDifferent) {
+                return *this;
+            }
+            return make_type<TupleType>(move(result.tys));
+        }
+
+        case Tag::ShapeType: {
+            auto &this_ = cast_type_nonnull<ShapeType>(*this);
+            auto resultKeys = selfTypeArgsVector(gs, this_.keys);
+            auto resultValues = selfTypeArgsVector(gs, this_.values);
+            if (!resultKeys.isDifferent && !resultValues.isDifferent) {
+                return *this;
+            }
+            return make_type<ShapeType>(move(resultKeys.tys), move(resultValues.tys));
+        }
+
+        case Tag::OrType: {
+            auto &this_ = cast_type_nonnull<OrType>(*this);
+            auto left = this_.left.selfTypeArgs(gs);
+            auto right = this_.right.selfTypeArgs(gs);
+            if (left == this_.left && right == this_.right) {
+                return *this;
+            }
+            // We don't collapse LambdaParam in Types::lub, so we have to use Types::any
+            // (e.g., T.any(Elem, Elem) might collapse now)
+            return Types::any(gs, left, right);
+        }
+
+        case Tag::AndType: {
+            auto &this_ = cast_type_nonnull<AndType>(*this);
+            auto left = this_.left.selfTypeArgs(gs);
+            auto right = this_.right.selfTypeArgs(gs);
+            if (left == this_.left && right == this_.right) {
+                return *this;
+            }
+            // We don't collapse LambdaParam in Types::glb, so we have to use Types::all
+            // (e.g., T.all(Elem, Elem) might collapse now)
+            return Types::all(gs, left, right);
+        }
+
+        case Tag::AppliedType: {
+            auto &this_ = cast_type_nonnull<AppliedType>(*this);
+            auto result = selfTypeArgsVector(gs, this_.targs);
+            if (!result.isDifferent) {
+                return *this;
+            }
+
+            return make_type<AppliedType>(this_.klass, move(result.tys));
+        }
+
+        case Tag::LambdaParam: {
+            // Mirrors the implementation of ClassOrModule::selfTypeArgs
+            auto &this_ = cast_type_nonnull<LambdaParam>(*this);
+            const auto &tmData = this_.definition.data(gs);
+            if (tmData->flags.isFixed) {
+                return this_.upperBound.selfTypeArgs(gs);
+            } else {
+                return make_type<SelfTypeParam>(this_.definition);
+            }
+        }
+
+        case Tag::MetaType:
+        case Tag::AliasType: {
+            Exception::raise("should never happen: selfTypeArgs on `{}`", typeName());
+        }
+    }
+}
+
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
     // Not really a dynamic check, but this is a convenient place to put this to
     // ensure that all relevant types get checked.

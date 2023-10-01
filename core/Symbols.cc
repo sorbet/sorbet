@@ -95,7 +95,7 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
         if (tmData->flags.isFixed) {
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
-            targs.emplace_back(lambdaParam->upperBound);
+            targs.emplace_back(lambdaParam->upperBound.selfTypeArgs(gs));
         } else {
             auto selfType = core::SymbolRef(tm);
             targs.emplace_back(make_type<SelfTypeParam>(selfType));
