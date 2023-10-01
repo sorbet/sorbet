@@ -2165,11 +2165,11 @@ class ResolveTypeMembersAndFieldsWalk {
         }
         auto allowSelfType = true;
         auto allowRebind = false;
-        auto allowTypeMember = true;
+        auto typeMember = TypeSyntaxArgs::TypeMember::Allowed;
         auto allowUnspecifiedTypeParameter = !lastTry;
         auto ctx = core::Context(gs, job.owner.enclosingClass(gs), job.file);
         auto type = TypeSyntax::getResultType(ctx, job.cast->typeExpr, emptySig,
-                                              TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                              TypeSyntaxArgs{allowSelfType, allowRebind, typeMember,
                                                              allowUnspecifiedTypeParameter, core::Symbols::noSymbol()});
         if (type == core::Types::todo()) {
             return false;
@@ -2397,12 +2397,11 @@ class ResolveTypeMembersAndFieldsWalk {
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
-                    auto allowTypeMember = false;
+                    auto typeMember = TypeSyntaxArgs::TypeMember::BannedInTypeMember;
                     auto allowUnspecifiedTypeParameter = false;
-                    core::TypePtr resTy =
-                        TypeSyntax::getResultType(ctx, value, emptySig,
-                                                  TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
-                                                                 allowUnspecifiedTypeParameter, lhs});
+                    core::TypePtr resTy = TypeSyntax::getResultType(
+                        ctx, value, emptySig,
+                        TypeSyntaxArgs{allowSelfType, allowRebind, typeMember, allowUnspecifiedTypeParameter, lhs});
 
                     switch (key->asSymbol().rawId()) {
                         case core::Names::fixed().rawId():
@@ -2536,10 +2535,10 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto allowSelfType = true;
         auto allowRebind = false;
-        auto allowTypeMember = true;
+        auto typeMember = TypeSyntaxArgs::TypeMember::Allowed;
         auto allowUnspecifiedTypeParameter = false;
         lhs.setResultType(ctx, TypeSyntax::getResultType(ctx, block->body, ParsedSig{},
-                                                         TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember,
+                                                         TypeSyntaxArgs{allowSelfType, allowRebind, typeMember,
                                                                         allowUnspecifiedTypeParameter, lhs}));
     }
 

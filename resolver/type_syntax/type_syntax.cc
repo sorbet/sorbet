@@ -31,7 +31,7 @@ ParsedSig TypeSyntax::parseSigTop(core::Context ctx, const ast::Send &sigSend, c
     auto args = TypeSyntaxArgs{
         /* allowSelfType */ true,
         /* allowRebind */ false,
-        /* allowTypeMember */ true,
+        TypeSyntaxArgs::TypeMember::Allowed,
         /* allowUnspecifiedTypeParameter */ false,
         blameSymbol,
     };
@@ -1124,7 +1124,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
             bool isTypeTemplate = symOwner->isSingletonClass(ctx);
 
-            if (args.allowTypeMember) {
+            if (args.typeMember == TypeSyntaxArgs::TypeMember::Allowed) {
                 bool ctxIsSingleton = ctxOwnerData->isSingletonClass(ctx);
 
                 // Check if we're processing a type within the class that
