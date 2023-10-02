@@ -107,7 +107,15 @@ CheckSize(SolveConstraint, 24, 8);
 
 INSN(Send) : public Instruction {
 public:
-    bool isPrivateOk;
+    struct Flags {
+        bool isPrivateOk : 1;
+        // In C++20 we can replace this with bit field initialzers
+        Flags() : isPrivateOk(false) {}
+        Flags(bool isPrivateOk) : isPrivateOk(isPrivateOk) {}
+    };
+    CheckSize(Flags, 1, 1);
+
+    Flags flags;
     uint16_t numPosArgs;
     core::NameRef fun;
     VariableUseSite recv;

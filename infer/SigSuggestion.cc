@@ -87,7 +87,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->recv.type,
                                     snd->link,
                                     originForUninitialized,
-                                    snd->isPrivateOk,
+                                    snd->flags.isPrivateOk,
                                     suppressErrors,
                                     currentMethodName};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);

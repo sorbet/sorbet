@@ -1002,7 +1002,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
                                                 recvType.type,   send.link,
-                                                ownerLoc,        send.isPrivateOk,
+                                                ownerLoc,        send.flags.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
@@ -1138,9 +1138,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
-                                                send.isPrivateOk, ctx.file, bind.loc, send.receiverLoc, send.funLoc));
+                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
+                                                     send.flags.isPrivateOk, ctx.file, bind.loc, send.receiverLoc,
+                                                     send.funLoc));
                 }
                 if (send.link) {
                     send.link->result = move(retainedResult);
