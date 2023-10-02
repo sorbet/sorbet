@@ -1124,92 +1124,90 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
 
             bool isTypeTemplate = symOwner->isSingletonClass(ctx);
 
-            if (args.typeMember == TypeSyntaxArgs::TypeMember::Allowed) {
-                bool ctxIsSingleton = ctxOwnerData->isSingletonClass(ctx);
+            switch (args.typeMember) {
+                case TypeSyntaxArgs::TypeMember::Allowed: {
+                    bool ctxIsSingleton = ctxOwnerData->isSingletonClass(ctx);
 
-                // Check if we're processing a type within the class that
-                // defines this type member by comparing the singleton class of
-                // the context, and the singleton class of the type member's
-                // owner.
-                core::SymbolRef symOwnerSingleton =
-                    isTypeTemplate ? symData->owner : symOwner->lookupSingletonClass(ctx);
-                core::SymbolRef ctxSingleton = ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx);
-                bool usedOnSourceClass = symOwnerSingleton == ctxSingleton;
+                    // Check if we're processing a type within the class that
+                    // defines this type member by comparing the singleton class of
+                    // the context, and the singleton class of the type member's
+                    // owner.
+                    core::SymbolRef symOwnerSingleton =
+                        isTypeTemplate ? symData->owner : symOwner->lookupSingletonClass(ctx);
+                    core::SymbolRef ctxSingleton = ctxIsSingleton ? ctx.owner : ctxOwnerData->lookupSingletonClass(ctx);
+                    bool usedOnSourceClass = symOwnerSingleton == ctxSingleton;
 
-                // For this to be a valid use of a member or template type, this
-                // must:
-                //
-                // 1. be used in the context of the class that defines it
-                // 2. if it's a type_template type, be used in a singleton
-                //    method
-                // 3. if it's a type_member type, be used in an instance method
-                if (usedOnSourceClass && ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
-                    // At this point, we maake a skolemized variable that will be unwrapped at the end of type
-                    // parsing using Types::unwrapSkolemVariables. The justification for this is that type
-                    // constructors like `Types::any` do not expect to see bound variables, and will panic.
-                    result.type = core::make_type<core::SelfTypeParam>(sym);
-                } else {
-                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
-                        string typeSource = isTypeTemplate ? "type_template" : "type_member";
-                        string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
+                    // For this to be a valid use of a member or template type, this
+                    // must:
+                    //
+                    // 1. be used in the context of the class that defines it
+                    // 2. if it's a type_template type, be used in a singleton
+                    //    method
+                    // 3. if it's a type_member type, be used in an instance method
+                    if (usedOnSourceClass &&
+                        ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
+                        // At this point, we maake a skolemized variable that will be unwrapped at the end of type
+                        // parsing using Types::unwrapSkolemVariables. The justification for this is that type
+                        // constructors like `Types::any` do not expect to see bound variables, and will panic.
+                        result.type = core::make_type<core::SelfTypeParam>(sym);
+                    } else {
+                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeMemberScopeMismatch)) {
+                            string typeSource = isTypeTemplate ? "type_template" : "type_member";
+                            string typeStr = usedOnSourceClass ? symData->name.show(ctx) : sym.show(ctx);
 
-                        if (usedOnSourceClass) {
-                            // Autocorrects here are awkward, because we want to offer the autocorrect at the
-                            // definition of the type_member or type_template and we only have access to the use of
-                            // the type_member or type_template here.  We could examine the source and attempt to
-                            // identify the location for the autocorrect, but that gets messy.
-                            //
-                            // Plus, it's not absolutely clear that the definition is really at fault: it might be
-                            // that the user is using the wrong type_member/type_template constant for the given
-                            // context, or they need to change the definition of the method this use is associated
-                            // with.  Try to give them enough of a hint to decide what to do on their own.
-                            if (ctxIsSingleton) {
-                                e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
-                                            typeStr);
-                                e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
-                                e.addErrorNote("Only a `{}` can be used in a singleton method definition.",
-                                               "type_template");
+                            if (usedOnSourceClass) {
+                                // Autocorrects here are awkward, because we want to offer the autocorrect at the
+                                // definition of the type_member or type_template and we only have access to the use of
+                                // the type_member or type_template here.  We could examine the source and attempt to
+                                // identify the location for the autocorrect, but that gets messy.
+                                //
+                                // Plus, it's not absolutely clear that the definition is really at fault: it might be
+                                // that the user is using the wrong type_member/type_template constant for the given
+                                // context, or they need to change the definition of the method this use is associated
+                                // with.  Try to give them enough of a hint to decide what to do on their own.
+                                if (ctxIsSingleton) {
+                                    e.setHeader("`{}` type `{}` used in a singleton method definition", typeSource,
+                                                typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
+                                    e.addErrorNote("Only a `{}` can be used in a singleton method definition.",
+                                                   "type_template");
+                                } else {
+                                    e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
+                                                typeStr);
+                                    e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
+                                    e.addErrorNote("Only a `{}` can be used in an instance method definition.",
+                                                   "type_member");
+                                }
                             } else {
-                                e.setHeader("`{}` type `{}` used in an instance method definition", typeSource,
-                                            typeStr);
-                                e.addErrorLine(symData->loc(), "`{}` defined here", typeStr);
-                                e.addErrorNote("Only a `{}` can be used in an instance method definition.",
-                                               "type_member");
+                                e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
+                                e.addErrorLine(symData->loc(), "{} defined here", typeStr);
                             }
-                        } else {
-                            e.setHeader("`{}` type `{}` used outside of the class definition", typeSource, typeStr);
-                            e.addErrorLine(symData->loc(), "{} defined here", typeStr);
                         }
+                        result.type = core::Types::untypedUntracked();
+                    }
+                    break;
+                }
+                case TypeSyntaxArgs::TypeMember::BannedInTypeAlias:
+                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeAliasToTypeMember)) {
+                        const auto &owner = tm.data(ctx)->owner.asClassOrModuleRef().data(ctx);
+                        auto memTem = owner->attachedClass(ctx).exists() ? "type_template" : "type_member";
+                        e.setHeader("Defining a `{}` to a generic `{}` is not allowed", "type_alias", memTem);
+                        e.addErrorLine(tm.data(ctx)->loc(), "`{}` defined as a `{}` here", tm.data(ctx)->name.show(ctx),
+                                       memTem);
+                        e.addErrorNote("Type aliases to type members and type templates are not allowed: aliases\n"
+                                       "    can be referenced from both instance and singleton class methods\n"
+                                       "    whereas type members can only be referenced from one or the other.");
                     }
                     result.type = core::Types::untypedUntracked();
-                }
-            } else {
-                switch (args.typeMember) {
-                    case TypeSyntaxArgs::TypeMember::Allowed:
-                        ENFORCE(false);
-                        break;
-                    case TypeSyntaxArgs::TypeMember::BannedInTypeAlias:
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::TypeAliasToTypeMember)) {
-                            const auto &owner = tm.data(ctx)->owner.asClassOrModuleRef().data(ctx);
-                            auto memTem = owner->attachedClass(ctx).exists() ? "type_template" : "type_member";
-                            e.setHeader("Defining a `{}` to a generic `{}` is not allowed", "type_alias", memTem);
-                            e.addErrorLine(tm.data(ctx)->loc(), "`{}` defined as a `{}` here",
-                                           tm.data(ctx)->name.show(ctx), memTem);
-                            e.addErrorNote("Type aliases to type members and type templates are not allowed: aliases\n"
-                                           "    can be referenced from both instance and singleton class methods\n"
-                                           "    whereas type members can only be referenced from one or the other.");
-                        }
-
-                        break;
-                    case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
-                        // a type member has occurred in a context that doesn't allow them
-                        if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                            auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
-                            e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
-                        }
-                        break;
-                }
-                result.type = core::Types::untypedUntracked();
+                    break;
+                case TypeSyntaxArgs::TypeMember::BannedInTypeMember:
+                    // a type member has occurred in a context that doesn't allow them
+                    if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        auto flavor = isTypeTemplate ? "type_template"sv : "type_member"sv;
+                        e.setHeader("`{}` `{}` is not allowed in this context", flavor, sym.show(ctx));
+                    }
+                    result.type = core::Types::untypedUntracked();
+                    break;
             }
         } else if (sym.isStaticField(ctx)) {
             if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
