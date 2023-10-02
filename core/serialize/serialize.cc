@@ -138,6 +138,13 @@ uint8_t UnPickler::getU1() {
     return res;
 }
 
+// Note that this does not necessarily write 4 bytes:
+// smaller numbers may take fewer bytes.
+//
+// NOTE(froydnj): SQLite has a different encoding for varints:
+//     https://sqlite.org/src4/doc/trunk/www/varint.wiki
+// Given that varint decoding is a signification fraction of cache reading time,
+// it may make sense to experiment using this in Sorbet.
 void Pickler::putU4(uint32_t u) {
     if (u == 0) {
         if (zeroCounter != 0) {
