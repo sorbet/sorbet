@@ -29,7 +29,9 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
     //
     // Keep this in sync with core::Types::untyped(...)
     if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
-        prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
+        if (!file.data(gs).isPackagedTest()) {
+            prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
+        }
     }
 
     if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {
