@@ -330,24 +330,25 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, absl::Span<const TypeMember
 }
 
 namespace {
-struct SelfTypeArgsVectorResult {
+struct TypePtrVectorResult {
     bool isDifferent = false;
     vector<TypePtr> tys;
 };
 
-SelfTypeArgsVectorResult selfTypeArgsVector(const GlobalState &gs, absl::Span<const TypePtr> tys) {
-    SelfTypeArgsVectorResult result;
+TypePtrVectorResult selfTypeArgVector(const GlobalState &gs, absl::Span<const TypePtr> tys) {
+    TypePtrVectorResult result;
     result.tys.reserve(tys.size());
     for (const auto &ty : tys) {
-        auto ty1 = ty.selfTypeArgs(gs);
+        auto ty1 = ty.selfTypeArg(gs);
         result.isDifferent |= (ty1 != ty);
         result.tys.emplace_back(move(ty1));
     }
     return result;
 }
+
 } // namespace
 
-TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
+TypePtr TypePtr::selfTypeArg(const GlobalState &gs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedClassType:
@@ -358,11 +359,12 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
+        case Tag::AliasType:
             return *this;
 
         case Tag::UnresolvedAppliedType: {
             auto &this_ = cast_type_nonnull<UnresolvedAppliedType>(*this);
-            auto result = selfTypeArgsVector(gs, this_.targs);
+            auto result = selfTypeArgVector(gs, this_.targs);
             if (!result.isDifferent) {
                 return *this;
             }
@@ -372,7 +374,7 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
 
         case Tag::TupleType: {
             auto &this_ = cast_type_nonnull<TupleType>(*this);
-            auto result = selfTypeArgsVector(gs, this_.elems);
+            auto result = selfTypeArgVector(gs, this_.elems);
             if (!result.isDifferent) {
                 return *this;
             }
@@ -381,8 +383,8 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
 
         case Tag::ShapeType: {
             auto &this_ = cast_type_nonnull<ShapeType>(*this);
-            auto resultKeys = selfTypeArgsVector(gs, this_.keys);
-            auto resultValues = selfTypeArgsVector(gs, this_.values);
+            auto resultKeys = selfTypeArgVector(gs, this_.keys);
+            auto resultValues = selfTypeArgVector(gs, this_.values);
             if (!resultKeys.isDifferent && !resultValues.isDifferent) {
                 return *this;
             }
@@ -391,8 +393,8 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
 
         case Tag::OrType: {
             auto &this_ = cast_type_nonnull<OrType>(*this);
-            auto left = this_.left.selfTypeArgs(gs);
-            auto right = this_.right.selfTypeArgs(gs);
+            auto left = this_.left.selfTypeArg(gs);
+            auto right = this_.right.selfTypeArg(gs);
             if (left == this_.left && right == this_.right) {
                 return *this;
             }
@@ -403,8 +405,8 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
 
         case Tag::AndType: {
             auto &this_ = cast_type_nonnull<AndType>(*this);
-            auto left = this_.left.selfTypeArgs(gs);
-            auto right = this_.right.selfTypeArgs(gs);
+            auto left = this_.left.selfTypeArg(gs);
+            auto right = this_.right.selfTypeArg(gs);
             if (left == this_.left && right == this_.right) {
                 return *this;
             }
@@ -415,7 +417,7 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
 
         case Tag::AppliedType: {
             auto &this_ = cast_type_nonnull<AppliedType>(*this);
-            auto result = selfTypeArgsVector(gs, this_.targs);
+            auto result = selfTypeArgVector(gs, this_.targs);
             if (!result.isDifferent) {
                 return *this;
             }
@@ -428,15 +430,144 @@ TypePtr TypePtr::selfTypeArgs(const GlobalState &gs) const {
             auto &this_ = cast_type_nonnull<LambdaParam>(*this);
             const auto &tmData = this_.definition.data(gs);
             if (tmData->flags.isFixed) {
-                return this_.upperBound.selfTypeArgs(gs);
+                return this_.upperBound.selfTypeArg(gs);
             } else {
                 return make_type<SelfTypeParam>(this_.definition);
             }
         }
 
-        case Tag::MetaType:
-        case Tag::AliasType: {
-            Exception::raise("should never happen: selfTypeArgs on `{}`", typeName());
+        case Tag::MetaType: {
+            auto &this_ = cast_type_nonnull<MetaType>(*this);
+            auto wrapped = this_.wrapped.selfTypeArg(gs);
+            if (wrapped == this_.wrapped) {
+                return *this;
+            }
+
+            return make_type<MetaType>(move(wrapped));
+        }
+    }
+}
+
+namespace {
+
+TypePtrVectorResult externalTypeArgVector(const GlobalState &gs, ClassOrModuleRef sym, absl::Span<const TypePtr> tys) {
+    TypePtrVectorResult result;
+    result.tys.reserve(tys.size());
+    for (const auto &ty : tys) {
+        auto ty1 = ty.externalTypeArg(gs, sym);
+        result.isDifferent |= (ty1 != ty);
+        result.tys.emplace_back(move(ty1));
+    }
+    return result;
+}
+
+} // namespace
+TypePtr TypePtr::externalTypeArg(const GlobalState &gs, ClassOrModuleRef sym) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+        case Tag::TypeVar:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+        case Tag::AliasType:
+            return *this;
+
+        case Tag::UnresolvedAppliedType: {
+            auto &this_ = cast_type_nonnull<UnresolvedAppliedType>(*this);
+            auto result = externalTypeArgVector(gs, sym, this_.targs);
+            if (!result.isDifferent) {
+                return *this;
+            }
+
+            return make_type<UnresolvedAppliedType>(this_.klass, move(result.tys));
+        }
+
+        case Tag::TupleType: {
+            auto &this_ = cast_type_nonnull<TupleType>(*this);
+            auto result = externalTypeArgVector(gs, sym, this_.elems);
+            if (!result.isDifferent) {
+                return *this;
+            }
+            return make_type<TupleType>(move(result.tys));
+        }
+
+        case Tag::ShapeType: {
+            auto &this_ = cast_type_nonnull<ShapeType>(*this);
+            auto resultKeys = externalTypeArgVector(gs, sym, this_.keys);
+            auto resultValues = externalTypeArgVector(gs, sym, this_.values);
+            if (!resultKeys.isDifferent && !resultValues.isDifferent) {
+                return *this;
+            }
+            return make_type<ShapeType>(move(resultKeys.tys), move(resultValues.tys));
+        }
+
+        case Tag::OrType: {
+            auto &this_ = cast_type_nonnull<OrType>(*this);
+            auto left = this_.left.externalTypeArg(gs, sym);
+            auto right = this_.right.externalTypeArg(gs, sym);
+            if (left == this_.left && right == this_.right) {
+                return *this;
+            }
+            // We don't collapse LambdaParam in Types::lub, so we have to use Types::any
+            // (e.g., T.any(Elem, Elem) might collapse now)
+            return Types::any(gs, left, right);
+        }
+
+        case Tag::AndType: {
+            auto &this_ = cast_type_nonnull<AndType>(*this);
+            auto left = this_.left.externalTypeArg(gs, sym);
+            auto right = this_.right.externalTypeArg(gs, sym);
+            if (left == this_.left && right == this_.right) {
+                return *this;
+            }
+            // We don't collapse LambdaParam in Types::glb, so we have to use Types::all
+            // (e.g., T.all(Elem, Elem) might collapse now)
+            return Types::all(gs, left, right);
+        }
+
+        case Tag::AppliedType: {
+            auto &this_ = cast_type_nonnull<AppliedType>(*this);
+            auto result = externalTypeArgVector(gs, sym, this_.targs);
+            if (!result.isDifferent) {
+                return *this;
+            }
+
+            return make_type<AppliedType>(this_.klass, move(result.tys));
+        }
+
+        case Tag::LambdaParam: {
+            auto &lambdaParam = cast_type_nonnull<LambdaParam>(*this);
+            const auto tm = lambdaParam.definition;
+            const auto &tmData = tm.data(gs);
+
+            if (sym.isLegacyStdlibGeneric()) {
+                // Instantiate certain covariant stdlib generics with T.untyped, instead of <top>
+                return Types::untyped(sym);
+            } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
+                // Default fixed or covariant parameters to their upper bound.
+                return lambdaParam.upperBound.externalTypeArg(gs, sym);
+            } else if (tmData->flags.isInvariant) {
+                // We instantiate Invariant type members as T.untyped as this will behave a bit like
+                // a unification variable with Types::glb.
+                return Types::untyped(sym);
+            } else {
+                // The remaining case is a contravariant parameter, which gets defaulted to its lower bound.
+                return lambdaParam.lowerBound.externalTypeArg(gs, sym);
+            }
+        }
+
+        case Tag::MetaType: {
+            auto &this_ = cast_type_nonnull<MetaType>(*this);
+            auto wrapped = this_.wrapped.externalTypeArg(gs, sym);
+            if (wrapped == this_.wrapped) {
+                return *this;
+            }
+
+            return make_type<MetaType>(move(wrapped));
         }
     }
 }

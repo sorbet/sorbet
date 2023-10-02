@@ -284,7 +284,14 @@ public:
      *
      * For use with ClassOrModule::selfType--uses elsewhere should be treated with suspicion.
      */
-    TypePtr selfTypeArgs(const GlobalState &gs) const;
+    TypePtr selfTypeArg(const GlobalState &gs) const;
+
+    /**
+     * Default all LambdaParam according to their variance
+     *
+     * For use with ClassOrModule::externalType--uses elsewhere should be treated with suspicion.
+     */
+    TypePtr externalTypeArg(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.
     TypePtr underlying(const GlobalState &gs) const;
