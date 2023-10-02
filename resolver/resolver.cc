@@ -2379,7 +2379,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
-                    auto typeMember = TypeSyntaxArgs::TypeMember::BannedInTypeMember;
+                    auto typeMember = TypeSyntaxArgs::TypeMember::Allowed;
                     auto allowUnspecifiedTypeParameter = false;
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig,
@@ -2962,7 +2962,7 @@ public:
                 if (!klass.data(ctx)->typeMembers().empty()) {
                     dependencies_.emplace_back(klass);
                 }
-            } else if (symbol.isTypeAlias(ctx)) {
+            } else if (symbol.isTypeAlias(ctx) || symbol.isTypeMember()) {
                 dependencies_.emplace_back(symbol);
             }
         }

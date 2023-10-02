@@ -1050,6 +1050,10 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         if (memData->flags.isFixed) {
             // Fixed args are implicitly applied, and won't consume type
             // arguments from the list that's supplied.
+            // TODO(jez) Need some way to either call selfTypeArg or externalTypeArg.
+            // I don't know in which context we'd want which.
+            // Possibly something like "if the class is the owner of the current method" but we
+            // don't have a great way to check for that in calls.cc without ~hacks.
             targs.emplace_back(memType->upperBound);
         } else if (it != args.end()) {
             auto loc = core::Loc(locs.file, locs.args[it - args.begin()]);

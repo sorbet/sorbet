@@ -2891,6 +2891,8 @@ For more information, see the docs for [`T.attached_class`](attached-class.md).
 
 ## 5075
 
+<!-- TODO(jez) Update this before merging -->
+
 Sorbet does not support type aliases that alias to generic type members (or type
 templates, which are just
 [type members owned by the singleton class](generics.md#type_member--type_template)).

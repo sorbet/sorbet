@@ -66,7 +66,6 @@ struct TypeSyntaxArgs {
     const bool allowRebind;
     enum class TypeMember {
         Allowed,
-        BannedInTypeMember,
         BannedInTypeAlias,
     };
     const TypeMember typeMember;

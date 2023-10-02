@@ -95,7 +95,7 @@ vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
         if (tmData->flags.isFixed) {
             auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
-            targs.emplace_back(lambdaParam->upperBound);
+            targs.emplace_back(lambdaParam->upperBound.selfTypeArg(gs));
         } else {
             auto selfType = core::SymbolRef(tm);
             targs.emplace_back(make_type<SelfTypeParam>(selfType));
@@ -141,23 +141,8 @@ TypePtr ClassOrModule::unsafeComputeExternalType(GlobalState &gs) {
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
-            ENFORCE(lambdaParam != nullptr);
-
-            if (ref.isLegacyStdlibGeneric()) {
-                // Instantiate certain covariant stdlib generics with T.untyped, instead of <top>
-                targs.emplace_back(Types::untyped(ref));
-            } else if (tmData->flags.isFixed || tmData->flags.isCovariant) {
-                // Default fixed or covariant parameters to their upper bound.
-                targs.emplace_back(lambdaParam->upperBound);
-            } else if (tmData->flags.isInvariant) {
-                // We instantiate Invariant type members as T.untyped as this will behave a bit like
-                // a unification variable with Types::glb.
-                targs.emplace_back(Types::untyped(ref));
-            } else {
-                // The remaining case is a contravariant parameter, which gets defaulted to its lower bound.
-                targs.emplace_back(lambdaParam->lowerBound);
-            }
+            ENFORCE(isa_type<LambdaParam>(tmData->resultType));
+            targs.emplace_back(tmData->resultType.externalTypeArg(gs, ref));
         }
 
         resultType = make_type<AppliedType>(ref, std::move(targs));
