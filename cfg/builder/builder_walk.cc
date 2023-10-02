@@ -206,10 +206,11 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     LocalRef magic = cctx.newTemporary(core::Names::magic());
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
 
-    auto isPrivateOk = false;
-    current->exprs.emplace_back(cctx.target, h.loc,
-                                make_insn<Send>(magic, h.loc, method, core::LocOffsets::none(), vars.size(), vars,
-                                                std::move(locs), isPrivateOk));
+    Send::Flags flags;
+    flags.isPrivateOk = false;
+    current->exprs.emplace_back(
+        cctx.target, h.loc,
+        make_insn<Send>(magic, h.loc, method, core::LocOffsets::none(), vars.size(), vars, std::move(locs), flags));
     return current;
 }
 
@@ -534,8 +535,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         argFlags.emplace_back(e.flags);
                     }
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyRegionId);
+                    Send::Flags flags;
+                    flags.isPrivateOk = !!s.flags.isPrivateOk;
                     auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
-                                                std::move(argLocs), !!s.flags.isPrivateOk, link);
+                                                std::move(argLocs), flags, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     auto solveConstraint = make_insn<SolveConstraint>(link, sendTemp);
                     current->exprs.emplace_back(sendTemp, s.loc, move(send));
@@ -659,9 +662,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                      *
                      */
                 } else {
+                    Send::Flags flags;
+                    flags.isPrivateOk = !!s.flags.isPrivateOk;
                     current->exprs.emplace_back(cctx.target, s.loc,
                                                 make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(),
-                                                                args, std::move(argLocs), !!s.flags.isPrivateOk));
+                                                                args, std::move(argLocs), flags));
                 }
 
                 ret = current;
@@ -718,7 +723,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     synthesizeExpr(afterBreak, magic, a.loc, make_insn<Alias>(core::Symbols::Magic()));
                     InlinedVector<LocalRef, 2> args{exprSym};
                     InlinedVector<core::LocOffsets, 2> locs{core::LocOffsets::none()};
-                    auto isPrivateOk = false;
+                    Send::Flags flags;
+                    flags.isPrivateOk = false;
 
                     // This represents the throw in the Ruby VM to the appropriate control frame.
                     // It needs to come prior to the assignment (which shouldn't really be here,
@@ -728,7 +734,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     synthesizeExpr(afterBreak, ignored, core::LocOffsets::none(),
                                    make_insn<Send>(magic, core::LocOffsets::none(), core::Names::blockBreak(),
                                                    core::LocOffsets::none(), args.size(), args, std::move(locs),
-                                                   isPrivateOk));
+                                                   flags));
                 }
 
                 afterBreak->exprs.emplace_back(cctx.blockBreakTarget, a.loc, make_insn<Ident>(blockBreakAssign));
@@ -758,10 +764,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto retryTemp = cctx.newTemporary(core::Names::retryTemp());
                     InlinedVector<cfg::LocalRef, 2> args{};
                     InlinedVector<core::LocOffsets, 2> argLocs{};
-                    auto isPrivateOk = false;
+                    Send::Flags flags;
+                    flags.isPrivateOk = false;
                     synthesizeExpr(current, retryTemp, core::LocOffsets::none(),
                                    make_insn<Send>(magic, what.loc(), core::Names::retry(), core::LocOffsets::none(),
-                                                   args.size(), args, std::move(argLocs), isPrivateOk));
+                                                   args.size(), args, std::move(argLocs), flags));
                     unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a.loc);
                 }
                 ret = cctx.inWhat.deadBlock();
@@ -847,13 +854,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                    make_insn<Literal>(core::Types::nilClass()));
 
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
-                    auto isPrivateOk = false;
+                    Send::Flags flags;
+                    flags.isPrivateOk = false;
                     auto args = {exceptionValue};
                     auto argLocs = {what.loc()};
                     synthesizeExpr(caseBody, res, rescueCase->loc,
                                    make_insn<Send>(magic, rescueCase->loc, core::Names::keepForCfg(),
                                                    core::LocOffsets::none(), args.size(), args, std::move(argLocs),
-                                                   isPrivateOk));
+                                                   flags));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
@@ -871,11 +879,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         InlinedVector<core::LocOffsets, 2> argLocs = {loc};
                         args.emplace_back(exceptionValue);
 
-                        auto isPrivateOk = false;
+                        Send::Flags flags;
+                        flags.isPrivateOk = false;
                         rescueHandlersBlock->exprs.emplace_back(
                             isaCheck, loc,
                             make_insn<Send>(exceptionClass, loc, core::Names::tripleEq(), loc.copyWithZeroLength(),
-                                            args.size(), args, std::move(argLocs), isPrivateOk));
+                                            args.size(), args, std::move(argLocs), flags));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlockWithRegion(cctx.loops, handlersRubyRegionId);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -915,11 +924,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
                 LocalRef magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
-                auto isPrivateOk = false;
+                Send::Flags flags;
+                flags.isPrivateOk = false;
                 current->exprs.emplace_back(cctx.target, a.loc,
                                             make_insn<Send>(magic, a.loc, core::Names::buildArray(),
                                                             core::LocOffsets::none(), vars.size(), vars,
-                                                            std::move(locs), isPrivateOk));
+                                                            std::move(locs), flags));
                 ret = current;
             },
 
