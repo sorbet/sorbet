@@ -945,7 +945,8 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     };
 
     core::DispatchArgs dispatchArgs{core::Names::flatten(), locs,    1,   args, recvType.type, recvType,
-                                    recvType.type,          nullptr, loc, true, false,         currentMethodName};
+                                    recvType.type,          nullptr, loc, true, false,         false,
+                                    currentMethodName};
 
     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
     if (dispatched.main.errors.empty()) {
@@ -998,12 +999,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // This is the main place where we type check a method, so we default by assuming
                 // that we want to report all errors (supressing nothing).
                 auto suppressErrors = false;
-                core::DispatchArgs dispatchArgs{send.fun,        locs,
-                                                send.numPosArgs, args,
-                                                recvType.type,   recvType,
-                                                recvType.type,   send.link,
-                                                ownerLoc,        send.flags.isPrivateOk,
-                                                suppressErrors,  inWhat.symbol.data(ctx)->name};
+                core::DispatchArgs dispatchArgs{send.fun,
+                                                locs,
+                                                send.numPosArgs,
+                                                args,
+                                                recvType.type,
+                                                recvType,
+                                                recvType.type,
+                                                send.link,
+                                                ownerLoc,
+                                                send.flags.isPrivateOk,
+                                                suppressErrors,
+                                                send.flags.rejectAbstractMethodCall,
+                                                inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
@@ -1384,6 +1392,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     const auto numPosArgs = 1;
                     const auto suppressErrors = true;
                     const auto isPrivateOk = true;
+                    const auto rejectAbstractMethodCall = false;
                     const std::shared_ptr<const core::SendAndBlockLink> block = nullptr;
                     core::DispatchArgs dispatchArgs{core::Names::squareBrackets(),
                                                     locs,
@@ -1396,6 +1405,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                     ctx.locAt(bind.loc),
                                                     isPrivateOk,
                                                     suppressErrors,
+                                                    rejectAbstractMethodCall,
                                                     inWhat.symbol.data(ctx)->name};
                     auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
                     tp.type = dispatched.returnType;

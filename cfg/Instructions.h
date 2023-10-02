@@ -109,9 +109,11 @@ INSN(Send) : public Instruction {
 public:
     struct Flags {
         bool isPrivateOk : 1;
+        bool rejectAbstractMethodCall : 1;
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false) {}
-        Flags(bool isPrivateOk) : isPrivateOk(isPrivateOk) {}
+        Flags() : isPrivateOk(false), rejectAbstractMethodCall(false) {}
+        Flags(bool isPrivateOk, bool rejectAbstractMethodCall)
+            : isPrivateOk(isPrivateOk), rejectAbstractMethodCall(rejectAbstractMethodCall) {}
     };
     CheckSize(Flags, 1, 1);
 

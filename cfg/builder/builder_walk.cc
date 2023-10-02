@@ -493,6 +493,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 recv = cctx.newTemporary(core::Names::statTemp());
                 current = walk(cctx.withTarget(recv), s.recv, current);
+                bool rejectAbstractMethodCall = false;
+                if (auto *recvConst = ast::cast_tree<ast::ConstantLit>(s.recv)) {
+                    if (recvConst->symbol.isClassOrModule()) {
+                        rejectAbstractMethodCall =
+                            recvConst->symbol.asClassOrModuleRef().data(cctx.ctx)->flags.isAbstract;
+                    }
+                }
 
                 InlinedVector<LocalRef, 2> args;
                 InlinedVector<core::LocOffsets, 2> argLocs;
@@ -537,6 +544,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     auto link = make_shared<core::SendAndBlockLink>(s.fun, move(argFlags), newRubyRegionId);
                     Send::Flags flags;
                     flags.isPrivateOk = !!s.flags.isPrivateOk;
+                    flags.rejectAbstractMethodCall = rejectAbstractMethodCall;
                     auto send = make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), args,
                                                 std::move(argLocs), flags, link);
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -664,6 +672,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else {
                     Send::Flags flags;
                     flags.isPrivateOk = !!s.flags.isPrivateOk;
+                    flags.rejectAbstractMethodCall = rejectAbstractMethodCall;
                     current->exprs.emplace_back(cctx.target, s.loc,
                                                 make_insn<Send>(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(),
                                                                 args, std::move(argLocs), flags));

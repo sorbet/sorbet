@@ -89,6 +89,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     originForUninitialized,
                                     snd->flags.isPrivateOk,
                                     suppressErrors,
+                                    snd->flags.rejectAbstractMethodCall,
                                     currentMethodName};
     auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
