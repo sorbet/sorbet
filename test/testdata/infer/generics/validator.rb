@@ -70,8 +70,8 @@ module Validator
     def try_parse(x)
       case x
       when @klass
-        T.reveal_type(x) # error: `T.anything`
-        return x # error: Expected `T.any(Validator::ParseResult, Validator::Cls::Type)` but found `T.anything` for method result type
+        T.reveal_type(x) # error: `Validator::Cls::Type`
+        return x
       else
         # In real code, might not want to print arbitrary value, might just
         # want to print the class (PII, etc.).
