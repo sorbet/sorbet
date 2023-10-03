@@ -1793,15 +1793,15 @@ recursively-defined data structure, see
 
 ## 5025
 
+> **Note**: This error has been relaxed in newer Sorbet versions. It has been
+> replaced by [5075](#5075).
+
 Sorbet does not currently support type aliases in generic classes.
 
 This limitation was crafted early in the development of Sorbet to entirely
 sidestep problems that can arise in the design of a type system leading to
 unsoundness. (Sorbet users curious about type system design may wish to read
 [What is Type Projection in Scala, and Why is it Unsound?](https://lptk.github.io/programming/2019/09/13/type-projection.html).)
-
-We are likely to reconsider lifting this limitation in the future, but have no
-immediate plans yet.
 
 As a workaround, define type aliases somewhere else. Unfortunately this does
 mean it is not currently possible to define type aliases that reference type
@@ -2888,6 +2888,108 @@ A module marked `has_attached_class!` can only be mixed into a class with
 into another module, both modules must declare `has_attached_class!`.
 
 For more information, see the docs for [`T.attached_class`](attached-class.md).
+
+## 5075
+
+Sorbet does not support type aliases that alias to generic type members (or type
+templates, which are just
+[type members owned by the singleton class](generics.md#type_member--type_template)).
+At the moment, there is no perfect workaround, though in the future Sorbet will
+support this by allowing generic type members to be bounded by other generic
+type members. The current best option is simply to copy the contents of the type
+alias into all the places where you would like to use that type alias.
+
+Here's why Sorbet does not allow type _aliases_ to alias to generic type
+members. Consider this motivating example, of a generic box type which can be
+possibly empty:
+
+```ruby
+class PossiblyEmptyBox
+  extend T::Generic
+
+  class IsEmpty; end
+
+  Elem = type_member
+  MaybeElem = T.type_alias { T.any(IsEmpty, Elem) } # ❌ NOT allowed
+
+  # ...
+
+  sig { returns(Elem) }
+  def val!; end
+
+  sig { returns(MaybeElem) }
+  def val; end
+end
+```
+
+Our class is generic in `Elem`, so that this container can hold an arbitrary
+type. But we have a lot of methods that will return [either](union-types.md) the
+`Elem` that this box contains, or an instance of some `IsEmpty` class if there
+is nothing currently in the box. (Presumably: there are a lot of methods where
+`MaybeElem` is used, and we don't want to have to repeat ourselves by writing
+`T.any(IsEmpty, Elem)` all over the place.)
+
+This is not allowed, because the restrictions on where type aliases can be used
+from are not the same as those that apply to type members:
+
+- Type aliases can be used anywhere, regardless of where the type alias is
+  defined.
+
+- Type members can only be used **inside** the enclosing class where they were
+  defined (as if they were declared with `private_constant`) **and** can only be
+  used inside methods and instance variables of the instance class (or for type
+  templates: methods and instance variables of the singleton class).
+
+If Sorbet were to allow type members to appear in type aliases, that type alias
+would have to essentially copy all the rules of where that type alias is allowed
+to be used from the type members inside it.
+
+But at that point, the type alias would be no different from defining a second,
+[`fixed`](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower)
+type member on the same class:
+
+```ruby
+class PossiblyEmptyBox
+  # ...
+  Elem = type_member
+  MaybeElem = type_member {
+    {fixed: T.any(IsEmpty, Elem)}
+    # ^ should be allowed in the future
+  }
+
+  sig { returns(Elem) }
+  def val!; end
+
+  sig { returns(MaybeElem) }
+  def val; end
+end
+```
+
+The `fixed` annotation makes `MaybeElem` exactly like a type alias with the same
+scope as `Elem`. This solution avoids having to solve the problem of "copying
+all the scoping rules of a type member onto a type alias."
+
+There is only one gotcha: at the moment Sorbet does not support using type
+members in `fixed`, `upper`, or `lower` bounds of a type member. We expect to
+relax this constraint in the future, which means that at the moment there is no
+way to define something that acts like a type alias to a generic type member.
+
+The only way forward is to copy the contents of the type alias into all the
+places where you'd like to use that type alias, like this:
+
+```ruby
+class PossiblyEmptyBox
+  # ...
+  Elem = type_member
+
+  sig { returns(Elem) }
+  def val!; end
+
+  # Use `T.any` instead of `MaybeElem`
+  sig { returns(T.any(IsEmpty, Elem)) }
+  def val; end
+end
+```
 
 ## 6001
 

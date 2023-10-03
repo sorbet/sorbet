@@ -3,7 +3,7 @@ class A
   extend T::Generic
   B = type_member
 
-  S = T.type_alias {Integer} # error: Type aliases are not allowed in generic classes
+  S = T.type_alias {Integer}
 end
 
 
