@@ -4162,6 +4162,87 @@ See also:
 [How can I fix type errors that arise from `super`?]:
   faq.md#how-can-i-fix-type-errors-that-arise-from-super
 
+## 7049
+
+Singleton classes in Ruby are not actually abstract. The defining feature of an
+abstract type is that there are no values of that exact type, only (concrete)
+subtypes of that type.
+
+Early in the development of Sorbet, based on our experiences seeing Ruby code as
+written in the wild, we made the decision to disregard this fact and allow
+abstract methods to be defined on singleton classes, despite singleton classes
+not being abstract.
+
+Unfortunately, it means that Sorbet sometimes does not report errors on code
+that cause problem at runtime (i.e., it is a source of unsoundness in Sorbet's
+type system).
+
+When the receiver of a method is an constant literal node, Sorbet can detect
+misuse of abstract methods, for example:
+
+```ruby
+class ParentAbstract
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+  sig { abstract.void }
+  def self.example; end
+end
+
+class ChildConcrete < ParentAbstract
+  sig { override.void }
+  def self.example; puts 'hello'; end
+end
+
+MyAbstractClass.example
+#               ^^^^^^^ error: call to abstract method on singleton class
+```
+
+However in other cases, it is impossible for Sorbet to detect whether to allow
+or reject the call to an abstract singleton class method:
+
+```ruby
+sig { params(klass: T.class_of(ParentAbstract)).void }
+def takes_klass_obj(klass)
+  klass.example
+end
+
+takes_klass_obj(ChildConcrete)  # => 'hello'
+takes_klass_obj(ParentAbstract) # => raises exception
+```
+
+Sorbet does not report a static error on the example above, but it will raise an
+exception at runtime on the last line, because an abstract method will have been
+called.
+
+For this reason, it's almost always preferred for abstract methods which are
+meant to be implemented by singleton classes to be declared in a `module` and
+then `extend`'ed onto the respective singleton classes.
+
+This is not always possible—in cases where it would be too hard to change way
+existing code is written, you can use `T::AbstractUtils.abstract_module?(mod)`
+to check whether a singleton class object is abstract before attempting to call
+a method on it:
+
+```ruby
+sig { params(klass: T.class_of(ParentAbstract)).void }
+def takes_klass_obj(klass)
+  if T::AbstractUtils.abstract_module?(klass)
+    puts 'skipping'
+  else
+    klass.example
+  end
+end
+
+takes_klass_obj(ChildConcrete)  # => 'hello'
+takes_klass_obj(ParentAbstract) # => 'skipping'
+```
+
+Note that in the example above, this behaves essentially the same as if
+`example` were declared as an `overridable` method, with the default
+implementation being `puts 'skipping'`. It may be preferable to simply use an
+overridable method instead of an abstract method, circumventing this issue.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

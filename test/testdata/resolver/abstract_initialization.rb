@@ -69,3 +69,22 @@ class CommonRubyPattern
     a.new
   end
 end
+
+class AbstractSingletonClassMethod
+  extend T::Sig
+  extend T::Helpers
+
+  abstract!
+
+  sig { abstract.void }
+  def self.example
+  end
+
+  sig { void }
+  def self.main
+    self.example
+  end
+end
+
+AbstractSingletonClassMethod.example
+#                            ^^^^^^^ error: Call to abstract method `example` on singleton class `T.class_of(AbstractSingletonClassMethod)`

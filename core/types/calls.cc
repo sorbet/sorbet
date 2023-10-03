@@ -786,6 +786,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
+    if (args.rejectAbstractMethodCall && method.data(gs)->flags.isAbstract) {
+        if (auto e = gs.beginError(errLoc, errors::Infer::AbstractSingletonClassMethod)) {
+            e.setHeader("Call to abstract method `{}` on singleton class `{}`", targetName.show(gs), symbol.show(gs));
+            e.addErrorLine(method.data(gs)->loc(), "`{}` defined abstract here", targetName.show(gs));
+            e.addErrorNote("Abstract singleton class methods are an antipattern, because singleton\n"
+                           "    classes are not actually abstract. Virtually all other statically typed\n"
+                           "    languages ban abstract static/singleton methods entirely.");
+        }
+    }
+
     DispatchResult result;
     auto &component = result.main;
     component.receiver = args.selfType;
@@ -1999,6 +2009,16 @@ public:
         auto *selfApp = cast_type<AppliedType>(args.thisType);
         if (selfApp == nullptr) {
             return;
+        }
+
+        if (args.rejectAbstractMethodCall && selfApp->klass.data(gs)->flags.isAbstract) {
+            auto funLoc = args.funLoc();
+            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+            if (auto e = gs.beginError(errLoc, core::errors::Resolver::AbstractClassInstantiated)) {
+                auto symbolName = selfApp->klass.show(gs);
+                e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                e.addErrorLine(selfApp->klass.data(gs)->loc(), "`{}` defined here", symbolName);
+            }
         }
 
         // If someone takes `klass: T::Class[T.anything]` and calls `klass.new`, the call is
