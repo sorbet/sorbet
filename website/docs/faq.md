@@ -176,6 +176,11 @@ Here's a complete example that uses `case` to implement `==`:
   → View on sorbet.run
 </a>
 
+You may also be interested in [Problems typing equality in Ruby].
+
+[Problems typing equality in Ruby]:
+  https://blog.jez.io/problems-typing-ruby-equality/
+
 ## I use `T.must` a lot with arrays and hashes. Is there a way around this?
 
 `Hash#[]` and `Array#[]` return a [nilable type](nilable-types.md) because in

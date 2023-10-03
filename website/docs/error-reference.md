@@ -2778,6 +2778,17 @@ typechecked.
 See [`type_member` & `type_template`](generics.md#type_member--type_template) in
 the generics docs for more.
 
+There are two main cases where this error is reported:
+
+1.  Using a `type_member` in a scope where only a `type_template` is allowed
+    (and vice versa), but within the correct class.
+2.  Using either a `type_member` or `type_template` in a completely unrelated
+    class.
+
+Neither is allowed, but in each case the solution is different.
+
+### `type_member` / `type_template` mismatch
+
 A `type_member` is limited in scope to only appear in instance methods of the
 given class. A `type_template` is limited in scope to only appear in singleton
 class methods of the given class. For example:
@@ -2851,6 +2862,91 @@ class MyClass < AbstractSerializable
   # ...
 end
 ```
+
+### In an unrelated class
+
+In this case, the error usually indicates a more fundamental problem with the
+design, which means that the way forward is more nuanced.
+
+Consider a class like this:
+
+```ruby
+class Box
+  extend T::Generic
+  Elem = type_member
+
+  sig { params(val: Elem).void }
+  def initialize(val); @val = val; end
+
+  sig { returns(Elem) }
+  def val; @val; end
+end
+```
+
+We might want to write a function which gets the element out of an arbitrary
+`Box`:
+
+```ruby
+sig do
+  type_parameters(:Elem)
+    .params(box: Box[T.type_parameter(:Elem)])
+    .returns(Box[T.type_parameter(:Elem)]::Elem)
+    #                                    ^^^^^^ ❌
+end
+def example_bad1(box)
+  box.val
+end
+```
+
+This code does not work, because we can't access arbitrary type members inside a
+class. In this case, the fix is easy enough: just
+`returns(T.type_parameter(:Elem))`:
+
+```ruby
+sig do
+  type_parameters(:Elem)
+    .params(box: Box[T.type_parameter(:Elem)])
+    .returns(T.type_parameter(:Elem)) # ✅
+end
+def example_good1(box)
+  box.val
+end
+```
+
+Another thing that might cause problems: we want to make the `type_member`
+fixed, and then access it like a type alias:
+
+```ruby
+class ComplicatedBox < Box
+  Elem = type_member { {fixed:  T.any(Integer, String, Float, Symbol)} }
+end
+
+sig { params(box: ComplicatedBox).returns(ComplicatedBox::Elem) }
+#                                         ^^^^^^^^^^^^^^^^^^^^ ❌
+def example_bad2(box)
+  box.val
+end
+```
+
+Type members are not type aliases. If you want something that works like a type
+alias, make a type alias, and then use that both in the `fixed` annotation of
+the type member, and in any signature where you'd like to use that type:
+
+```ruby
+class ComplicatedBox < Box
+  Type = T.type_alias { T.any(Integer, String, Float, Symbol) }
+  Elem = type_member { {fixed: Type} } # ✅
+end
+
+sig { params(box: ComplicatedBox).returns(ComplicatedBox::Type) }
+#                                         ^^^^^^^^^^^^^^^^^^^^ # ✅
+def example_good2(box)
+  box.val
+end
+```
+
+For more information on why type members are not type aliases and vice versa,
+see [5075](#5075).
 
 ## 5073
 
