@@ -1009,8 +1009,11 @@ struct DispatchArgs {
 
     Loc errLoc() const {
         auto funLoc = this->funLoc();
+        auto recvLoc = this->receiverLoc();
         if (funLoc.exists() && !funLoc.empty()) {
             return funLoc;
+        } else if (this->name == Names::squareBrackets() && recvLoc.exists() && !recvLoc.empty()) {
+            return core::Loc(this->locs.file, recvLoc.endPos(), this->callLoc().endPos());
         } else {
             return this->callLoc();
         }
