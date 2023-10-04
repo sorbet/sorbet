@@ -247,6 +247,21 @@ pipeline_tests(
 )
 
 pipeline_tests(
+    "stress_corpus",
+    glob(
+        [
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
+        ],
+        exclude = [
+            "testdata/compiler/**/*",
+            "testdata/ruby_benchmark/**/*",
+        ],
+    ),
+    "StressResolverTests",
+)
+
+pipeline_tests(
     "test_packager",
     glob(
         [

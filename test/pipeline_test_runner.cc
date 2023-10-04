@@ -59,6 +59,7 @@ namespace sorbet::test {
 using namespace std;
 
 string singleTest;
+bool shouldStressResolver;
 
 constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
 constexpr string_view packageFileName = "__package.rb"sv;
@@ -846,7 +847,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
-                                                       cxxopts::value<std::string>()->default_value(""), "testpath");
+                                                       cxxopts::value<std::string>()->default_value(""), "testpath")(
+        "stress_incremental_resolver", "Force incremental updates to discover resolver & namer bugs",
+        cxxopts::value<bool>()->implicit_value("true"));
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -855,7 +858,7 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
-
+    sorbet::test::shouldStressResolver = res["stress_incremental_resolver"].as<bool>();
     doctest::Context context(argc, argv);
     return context.run();
 }

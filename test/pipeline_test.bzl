@@ -15,7 +15,7 @@ def dropExtension(p):
 _TEST_SCRIPT = """#!/usr/bin/env bash
 export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_12_0_0/bin/llvm-symbolizer
 set -x
-exec {runner} --single_test="{test}"
+exec {runner} --single_test="{test}" {extra_args}
 """
 
 def _exp_test_impl(ctx):
@@ -24,6 +24,7 @@ def _exp_test_impl(ctx):
         content = _TEST_SCRIPT.format(
             runner = ctx.executable.runner.short_path,
             test = ctx.file.test.path,
+            extra_args = ' '.join(ctx.attr.extra_args),
         ),
     )
 
@@ -50,6 +51,7 @@ exp_test = rule(
         "_llvm_symbolizer": attr.label(
             default = "//test:llvm-symbolizer",
         ),
+        "extra_args": attr.string_list()
     },
 )
 
@@ -110,6 +112,7 @@ _TEST_RUNNERS = {
     "LSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
     "PackagerTests": ":pipeline_test_runner",
+    "StressResolverTests": ":pipeline_test_runner",
 }
 
 def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = []):
@@ -200,6 +203,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
             test = sentinel,
             size = "small",
             tags = tags + extra_tags,
+            extra_args = ["--stress_incremental_resolver"] if test_name_prefix == "StressResolverTests" else []
         )
 
     native.test_suite(
