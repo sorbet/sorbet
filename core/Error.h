@@ -74,6 +74,7 @@ struct ErrorLine {
 struct ErrorSection {
     std::string header;
     std::vector<ErrorLine> messages;
+    bool isAutocorrectDescription = false;
     ErrorSection(std::string_view header) : header(header) {}
     ErrorSection(std::string_view header, const std::initializer_list<ErrorLine> &messages)
         : header(header), messages(messages) {}

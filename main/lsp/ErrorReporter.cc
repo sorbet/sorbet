@@ -167,6 +167,12 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
         vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
         for (auto &section : error->sections) {
+            if (section.isAutocorrectDescription) {
+                // Just show the "fix available" in the error message, and let the code action title
+                // describe the fix. De-clutters the error message in LSP view.
+                continue;
+            }
+
             string sectionHeader = section.header;
 
             if (section.messages.empty()) {

@@ -192,7 +192,9 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
             messages.emplace_back(std::move(line));
         }
     }
-    addErrorSection(ErrorSection{sectionTitle, std::move(messages)});
+    auto errorSection = ErrorSection{sectionTitle, std::move(messages)};
+    errorSection.isAutocorrectDescription = true;
+    addErrorSection(move(errorSection));
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
