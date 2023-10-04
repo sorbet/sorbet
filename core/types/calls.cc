@@ -214,9 +214,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             // Short circuit here to avoid constructing an expensive error message.
             return emptyResult;
         }
-        auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-        auto e = gs.beginError(errLoc, errors::Infer::CallOnTypeArgument);
+        auto e = gs.beginError(args.errLoc(), errors::Infer::CallOnTypeArgument);
         if (e) {
             auto thisStr = args.thisType.show(gs);
             if (args.fullType.type != args.thisType) {
@@ -241,9 +239,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 return emptyResult;
             }
 
-            auto funLoc = args.funLoc();
-            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-            auto e = gs.beginError(errLoc, errors::Infer::CallOnUnboundedTypeMember);
+            auto e = gs.beginError(args.errLoc(), errors::Infer::CallOnUnboundedTypeMember);
             if (e) {
                 auto member = typeMember.data(gs)->owner.asClassOrModuleRef().data(gs)->attachedClass(gs).exists()
                                   ? "template"
@@ -559,8 +555,7 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
-    auto funLoc = args.funLoc();
-    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+    auto errLoc = args.errLoc();
     if (symbol == core::Symbols::untyped()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
         if (auto e = gs.beginError(errLoc, what)) {
@@ -1565,8 +1560,7 @@ DispatchResult badMetaTypeCall(const GlobalState &gs, const DispatchArgs &args, 
 } // namespace
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    auto funLoc = args.funLoc();
-    auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
+    auto errLoc = args.errLoc();
     switch (args.name.rawId()) {
         case Names::new_().rawId(): {
             if (!canCallNew(gs, wrapped)) {
@@ -3929,9 +3923,7 @@ public:
         auto isOnlySymbol =
             Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
         if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
-            auto funLoc = args.funLoc();
-            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+            if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
                             args.args[0]->type.show(gs));
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
@@ -3965,9 +3957,7 @@ public:
             // to because it would likely be a cause for surprise).
             Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
             Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
-            auto funLoc = args.funLoc();
-            auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-            if (auto e = gs.beginError(errLoc, errors::Infer::NonOverlappingEqual)) {
+            if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
                             args.args[0]->type.show(gs));
                 e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
@@ -4239,9 +4229,7 @@ public:
         }
         auto forwarderSym = forwarderSingleton.data(gs)->attachedClass(gs);
 
-        auto funLoc = args.funLoc();
-        auto errLoc = (funLoc.exists() && !funLoc.empty()) ? funLoc : args.callLoc();
-        if (auto e = gs.beginError(errLoc, core::errors::Infer::MetaTypeDispatchCall)) {
+        if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::MetaTypeDispatchCall)) {
             auto realSym = forwarderSym.maybeUnwrapBuiltinGenericForwarder();
             ENFORCE(realSym.exists());
             auto realStr = realSym.show(gs);
