@@ -52,8 +52,9 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
     return responses;
 }
 
-LSPQueryResult LSPQuery::byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
-                               const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
+LSPQueryResult LSPQuery::byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                    string_view uri, const Position &pos, LSPMethod forMethod,
+                                    bool errorIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQuery::byPosition");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);

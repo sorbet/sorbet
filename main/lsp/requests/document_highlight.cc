@@ -38,7 +38,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
     const core::GlobalState &gs = typechecker.state();
     auto uri = params->textDocument->uri;
     auto result = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentDocumentHighlight, false);
+                                       LSPMethod::TextDocumentDocumentHighlight, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

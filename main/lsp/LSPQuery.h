@@ -12,8 +12,8 @@ public:
                    const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
     static LSPQueryResult byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                std::string_view uri, const Position &pos, LSPMethod forMethod,
-                                bool errorIfFileIsUntyped = true);
+                                     std::string_view uri, const Position &pos, LSPMethod forMethod,
+                                     bool errorIfFileIsUntyped = true);
     static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                 std::string_view uri, const core::Loc &loc, LSPMethod forMethod,
                                 bool errorIfFileIsUntyped = true);

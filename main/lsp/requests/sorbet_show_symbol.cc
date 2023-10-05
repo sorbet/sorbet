@@ -19,7 +19,7 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     // be okay with returning an empty result for certain queries.
     auto errorIfFileIsUntyped = false;
     auto result = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::SorbetShowSymbol, errorIfFileIsUntyped);
+                                       LSPMethod::SorbetShowSymbol, errorIfFileIsUntyped);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

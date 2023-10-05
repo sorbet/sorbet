@@ -68,7 +68,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
 
     const core::GlobalState &gs = typechecker.state();
     auto result = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentSignatureHelp);
+                                       LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);

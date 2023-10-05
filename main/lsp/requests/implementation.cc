@@ -67,7 +67,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
 
     const core::GlobalState &gs = typechecker.state();
     auto queryResult = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
-                                       LSPMethod::TextDocumentImplementation);
+                                            LSPMethod::TextDocumentImplementation);
 
     if (queryResult.error) {
         // An error happened while setting up the query.
