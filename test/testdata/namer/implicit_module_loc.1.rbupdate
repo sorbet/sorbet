@@ -1,0 +1,5 @@
+# typed: true
+# assert-fast-path: implicit_module_loc.rb
+
+X = 1 # error: constant
+X::Y = 1
