@@ -19,5 +19,4 @@ res = example(xs)
 T.reveal_type(res) # error: `T.nilable(Integer)`
 
 res = example('')
-#             ^^ error: Expected `T::Array[T.type_parameter(:U)]` but found `String("")`
-T.reveal_type(res) # error: `NilClass`
+T.reveal_type(res) # error: `T.nilable(String)`
