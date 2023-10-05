@@ -33,6 +33,7 @@
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
+#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
@@ -738,7 +739,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // now we test the incremental resolver
 
     auto disableStressIncremental =
-        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
+        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false) ||
+        !shouldStressResolver;
     if (disableStressIncremental) {
         MESSAGE("errors OK");
         return;
@@ -748,6 +750,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto symbolsBefore = gs->symbolsUsedTotal();
 
     vector<ast::ParsedFile> newTrees;
+    UnorderedMap<core::FileRef, int> prohibitedLinesMap;
     for (auto &f : trees) {
         if (f.file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
             newTrees.emplace_back(move(f));
@@ -756,6 +759,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         const int prohibitedLines = f.file.data(*gs).source().size();
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
+        prohibitedLinesMap[f.file] = prohibitedLines;
         auto newFile =
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs->replaceFile(f.file, move(newFile));
@@ -821,6 +825,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
+
+    if (shouldStressResolver) {
+        for (auto &f : trees) {
+            f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
+                *gs, move(f), 0, prohibitedLinesMap[f.file]);
+        }
+    }
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
