@@ -129,6 +129,8 @@ public:
 
     static InlinedVector<TypeMemberRef, 4> alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
                                                              const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
+    static TypePtr extractTypeMember(const GlobalState &gs, const AppliedType &app, ClassOrModuleRef asIf,
+                                     NameRef tmName);
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
     static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, absl::Span<const TypeMemberRef> params,

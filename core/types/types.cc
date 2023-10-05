@@ -661,6 +661,26 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
     return instantiate(gs, what, currentAlignment, targs);
 }
 
+/**
+ * Get the type passed for type member `tmName` (which is a type member of `asIf`), out of the
+ * applied type `app`.
+ *
+ * We need this helper (can't just assume it's at a constant offset, because mixins and multiple inheritance
+ * might mean that a type member is actually declared at a different index in a subclass of `asIf`).
+ *
+ * Returns `nullptr` if `app->klass` does not derive from `asIf`
+ */
+TypePtr Types::extractTypeMember(const GlobalState &gs, const AppliedType &app, ClassOrModuleRef asIf, NameRef tmName) {
+    if (!app.klass.data(gs)->derivesFrom(gs, asIf)) {
+        return nullptr;
+    }
+
+    auto currentAlignment = alignBaseTypeArgs(gs, app.klass, app.targs, Symbols::Class());
+    auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) { return tmRef.data(gs)->name == tmName; });
+    ENFORCE(it != currentAlignment.end());
+    return app.targs[distance(currentAlignment.begin(), it)];
+}
+
 TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType) {
     if (!procType.derivesFrom(gs, Symbols::Proc())) {
         return Types::untypedUntracked();

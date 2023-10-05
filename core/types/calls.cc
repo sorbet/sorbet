@@ -2074,11 +2074,7 @@ public:
         //
         // Note that this subsumes cases like calls to new on `T.class_of(MyClass)` because class
         // singleton classes ARE applied types, obviating the need to call `->attachedClass(gs)` at all.
-        auto currentAlignment = Types::alignBaseTypeArgs(gs, selfApp->klass, selfApp->targs, Symbols::Class());
-        auto it = absl::c_find_if(
-            currentAlignment, [&](auto tmRef) { return tmRef.data(gs)->name == Names::Constants::AttachedClass(); });
-        ENFORCE(it != currentAlignment.end());
-        auto instanceTy = selfApp->targs[distance(currentAlignment.begin(), it)];
+        auto instanceTy = Types::extractTypeMember(gs, *selfApp, Symbols::Class(), Names::Constants::AttachedClass());
 
         // The Ruby VM treats `initialize` as private by default, but allows calling it directly within `new`.
         DispatchArgs innerArgs{Names::initialize(),
