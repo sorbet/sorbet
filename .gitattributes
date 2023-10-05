@@ -1,4 +1,5 @@
 *.rbi linguist-language=Ruby
+*.rbedited linguist-language=Ruby
 *.rb diff=ruby
 *.rbi diff=ruby
 *.md diff=markdown
