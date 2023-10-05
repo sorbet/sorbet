@@ -37,6 +37,7 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
+        "//main/pipeline/definition_checker",
     ],
 )
 
@@ -76,5 +77,6 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
+        "//main/pipeline/definition_checker",
     ],
 )
