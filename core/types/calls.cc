@@ -338,9 +338,16 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc argsLoc, Loc receiverLoc
     return nullptr;
 }
 
-int getArity(const GlobalState &gs, MethodRef method) {
+size_t getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(!method.data(gs)->arguments.empty(), "Every method should have at least a block arg.");
     ENFORCE(method.data(gs)->arguments.back().flags.isBlock, "Last arg should be the block arg.");
+
+    const auto &arguments = method.data(gs)->arguments;
+    auto restArg =
+        absl::c_find_if(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
+    if (restArg != arguments.end()) {
+        return SIZE_MAX;
+    }
 
     // Don't count the block arg in the arity
     return method.data(gs)->arguments.size() - 1;
@@ -359,11 +366,11 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
     MethodRef fallback = primary;
-    vector<MethodRef> allCandidates;
+    vector<pair<size_t, MethodRef>> allCandidates;
 
-    allCandidates.emplace_back(primary);
+    allCandidates.emplace_back(0, primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
-        int i = 0;
+        size_t i = 0;
         MethodRef current = primary;
         while (current.data(gs)->flags.isOverloaded) {
             i++;
@@ -372,17 +379,19 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(overload);
+                allCandidates.emplace_back(i, overload);
                 current = overload;
             }
         }
 
-        fast_sort(allCandidates, [&](MethodRef s1, MethodRef s2) -> bool {
-            if (getArity(gs, s1) < getArity(gs, s2)) {
+        fast_sort(allCandidates, [&](const auto &s1, const auto &s2) -> bool {
+            const auto &[s1_idx, s1_sym] = s1;
+            const auto &[s2_idx, s2_sym] = s2;
+            if (getArity(gs, s1_sym) < getArity(gs, s2_sym)) {
                 return true;
             }
-            if (getArity(gs, s1) == getArity(gs, s2)) {
-                return s1.id() < s2.id();
+            if (getArity(gs, s1_sym) == getArity(gs, s2_sym)) {
+                return s1_idx < s2_idx;
             }
             return false;
         });
@@ -390,7 +399,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     vector<GuessOverloadCandidate> allCandidatesWithConstraints;
 
-    for (const auto candidate : allCandidates) {
+    for (const auto &[_idx, candidate] : allCandidates) {
         if (!candidate.data(gs)->flags.isGenericMethod) {
             allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, nullptr});
             continue;
@@ -419,13 +428,22 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 const auto &[candidate, constr] = *it;
-                if (i >= getArity(gs, candidate)) {
+                const auto &arguments = candidate.data(gs)->arguments;
+                TypePtr argTypeRaw;
+                auto arity = getArity(gs, candidate);
+                if (i < arguments.size() - 1) {
+                    argTypeRaw = arguments[i].type;
+                } else if (arity == SIZE_MAX) {
+                    auto restArg = absl::c_find_if(
+                        arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
+                    ENFORCE(restArg != arguments.end())
+                    argTypeRaw = restArg->type;
+                } else {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments[i].type,
-                                                           candidate.data(gs)->owner, inClass, targs);
+                auto argType = Types::resultTypeAsSeenFrom(gs, argTypeRaw, candidate.data(gs)->owner, inClass, targs);
                 if (constr == nullptr) {
                     if (!Types::isSubType(gs, arg, argType)) {
                         it = leftCandidates.erase(it);

@@ -44,10 +44,9 @@ example2(Integer, "--jobs=<n>") do |x|
 end
 example2(Integer, "-j<n>", "--jobs=<n>") do |x|
   # We pick the wrong overload, because our arity is weird in guessOverload
-  T.reveal_type(x) # error: `T.untyped`
+  T.reveal_type(x) # error: `Integer`
 end
 example2("foo", /bar/) do |x|
-  #      ^^^^^ error: Expected `T::Class[Integer]` but found `String("foo")` for argument `type`
-  T.reveal_type(x) # => `Integer`
+  T.reveal_type(x) # => `T.untyped`
 end
 
