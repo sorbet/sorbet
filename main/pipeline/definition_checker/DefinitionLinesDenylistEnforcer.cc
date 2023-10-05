@@ -9,6 +9,7 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     ast::TreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
     return what;
 }
+
 bool DefinitionLinesDenylistEnforcer::isAllowListed(core::Context ctx, core::SymbolRef sym) {
     return sym.name(ctx) == core::Names::staticInit() || sym.name(ctx) == core::Names::Constants::Root() ||
            sym.name(ctx) == core::Names::unresolvedAncestors();
