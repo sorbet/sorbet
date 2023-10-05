@@ -190,7 +190,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         }
     }
 
-    auto queryResult = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->range->start,
+    auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, loc,
                                        LSPMethod::TextDocumentCodeAction, false);
 
     // Generate "Move method" code actions only for class method definitions

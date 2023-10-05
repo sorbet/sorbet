@@ -14,6 +14,9 @@ public:
     static LSPQueryResult byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                 std::string_view uri, const Position &pos, LSPMethod forMethod,
                                 bool errorIfFileIsUntyped = true);
+    static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                std::string_view uri, const core::Loc &loc, LSPMethod forMethod,
+                                bool errorIfFileIsUntyped = true);
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                           core::SymbolRef symbol, std::vector<core::FileRef> frefs);
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,

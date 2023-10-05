@@ -54,7 +54,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
 
 LSPQueryResult LSPQuery::byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                                const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
-    Timer timeit(config.logger, "setupLSPQueryByLoc");
+    Timer timeit(config.logger, "setupLSPQuery::byPosition");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
 
@@ -87,6 +87,35 @@ LSPQueryResult LSPQuery::byPosition(const LSPConfiguration &config, LSPTypecheck
     }
 
     return typechecker.query(core::lsp::Query::createLocQuery(loc.value()), {fref});
+}
+
+LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
+                               const core::Loc &loc, LSPMethod forMethod, bool errorIfFileIsUntyped) {
+    Timer timeit(config.logger, "setupLSPQuery::byLoc");
+    const core::GlobalState &gs = typechecker.state();
+    auto fref = config.uri2FileRef(gs, uri);
+
+    if (!fref.exists() && config.isFileIgnored(config.remoteName2Local(uri))) {
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Ignored file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPQueryResult{{}, move(error)};
+    }
+
+    if (!fref.exists()) {
+        auto error = make_unique<ResponseError>(
+            (int)LSPErrorCodes::InvalidParams,
+            fmt::format("Did not find file at uri {} in {}", uri, convertLSPMethodToString(forMethod)));
+        return LSPQueryResult{{}, move(error)};
+    }
+
+    if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
+        config.logger->info("Ignoring request on untyped file `{}`", uri);
+        // Act as if the query returned no results.
+        return LSPQueryResult{{}, nullptr};
+    }
+
+    return typechecker.query(core::lsp::Query::createLocQuery(loc), {fref});
 }
 
 LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
