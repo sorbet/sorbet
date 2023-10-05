@@ -44,6 +44,7 @@
 #include "pipeline.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
+#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
 
 using namespace std;
 
@@ -794,53 +795,6 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     return what;
 }
 
-class DefinitionLinesDenylistEnforcer {
-private:
-    const core::FileRef file;
-    const int prohibitedLinesStart;
-    const int prohibitedLinesEnd;
-
-    bool isAllowListed(core::Context ctx, core::SymbolRef sym) {
-        return sym.name(ctx) == core::Names::staticInit() || sym.name(ctx) == core::Names::Constants::Root() ||
-               sym.name(ctx) == core::Names::unresolvedAncestors();
-    }
-
-    void checkLoc(core::Context ctx, core::Loc loc) {
-        auto detailStart = core::Loc::offset2Pos(file.data(ctx), loc.beginPos());
-        auto detailEnd = core::Loc::offset2Pos(file.data(ctx), loc.endPos());
-        ENFORCE(!(detailStart.line >= prohibitedLinesStart && detailEnd.line <= prohibitedLinesEnd));
-    }
-
-    void checkSym(core::Context ctx, core::SymbolRef sym) {
-        if (isAllowListed(ctx, sym)) {
-            return;
-        }
-        checkLoc(ctx, sym.loc(ctx));
-    }
-
-public:
-    DefinitionLinesDenylistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
-        : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
-        // Can be equal if file was empty.
-        ENFORCE(prohibitedLinesStart <= prohibitedLinesEnd);
-        ENFORCE(file.exists());
-    };
-
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
-    }
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
-    }
-};
-
-ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
-                                                        int prohibitedLinesStart, int prohibitedLinesEnd) {
-    DefinitionLinesDenylistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
-    ast::TreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
-    return what;
-}
-
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
@@ -899,7 +853,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     auto reresolved =
                         pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
                     ENFORCE(reresolved.size() == 1);
-                    f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+                    f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
                 }
                 ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
                         "Stressing the incremental resolver should not add any new symbols");
