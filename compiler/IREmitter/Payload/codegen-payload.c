@@ -2260,7 +2260,8 @@ SORBET_INLINE
 VALUE sorbet_check_match_array(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                VALUE closure) {
     sorbet_ensure_arity(argc, 2);
-    return sorbet_vm_check_match_array(GET_EC(), argv[0], argv[1]);
+    VALUE splatted = sorbet_vm_splatIntrinsic(argv[1]);
+    return sorbet_vm_check_match_array(GET_EC(), argv[0], splatted);
 }
 
 SORBET_INLINE
