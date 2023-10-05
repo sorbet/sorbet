@@ -794,8 +794,24 @@ class OptionParser
   # Add option switch and handler. See
   # [`make_switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-make_switch)
   # for an explanation of parameters.
+  sig do
+    type_parameters(:Type)
+      .params(
+        type: T::Class[T.type_parameter(:Type)],
+        opts: T.untyped,
+        block: T.nilable(T.proc.params(arg0: T.type_parameter(:Type)).void)
+      )
+      .returns(T.untyped)
+  end
+  sig do
+    params(
+      opts: String,
+      block: T.nilable(T.proc.params(arg0: String).void)
+    )
+      .returns(T.untyped)
+  end
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
-  def on(*opts, &block); end
+  def on(type=T.unsafe(nil), *opts, &block); end
 
   # Also aliased as:
   # [`def_head_option`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-def_head_option)
