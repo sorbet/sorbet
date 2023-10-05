@@ -1239,7 +1239,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     }
     auto queryLoc = maybeQueryLoc.value();
 
-    auto result = LSPQuery::byLoc(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
+    auto result = LSPQuery::byPosition(config, typechecker, uri, pos, LSPMethod::TextDocumentCompletion);
 
     if (result.error) {
         // An error happened while setting up the query.

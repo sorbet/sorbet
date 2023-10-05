@@ -67,7 +67,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
     }
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+    auto result = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
                                   LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
@@ -92,7 +92,7 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
             }
             auto src = fref.data(gs).source();
             auto loc = params->position->toLoc(gs, fref);
-            ENFORCE(loc.has_value(), "LSPQuery::byLoc should have reported an error earlier if nullopt");
+            ENFORCE(loc.has_value(), "LSPQuery::byPosition should have reported an error earlier if nullopt");
             string_view call_str = src.substr(sendLocIndex, loc.value().endPos() - sendLocIndex);
             int numberCommas = absl::c_count(call_str, ',');
             // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =

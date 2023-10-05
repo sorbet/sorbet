@@ -11,7 +11,7 @@ public:
     filterAndDedup(const core::GlobalState &gs,
                    const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
-    static LSPQueryResult byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+    static LSPQueryResult byPosition(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                 std::string_view uri, const Position &pos, LSPMethod forMethod,
                                 bool errorIfFileIsUntyped = true);
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,

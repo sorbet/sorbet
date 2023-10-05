@@ -67,7 +67,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     ShowOperation op(config, ShowOperation::Kind::References);
 
     const core::GlobalState &gs = typechecker.state();
-    auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
+    auto result = LSPQuery::byPosition(config, typechecker, params->textDocument->uri, *params->position,
                                   LSPMethod::TextDocumentReferences, false);
     if (result.error) {
         // An error happened while setting up the query.

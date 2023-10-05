@@ -38,7 +38,7 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
     }
     const auto &actualParams = *params->data;
 
-    const auto queryResult = LSPQuery::byLoc(config, typechecker, actualParams->textDocument->uri,
+    const auto queryResult = LSPQuery::byPosition(config, typechecker, actualParams->textDocument->uri,
                                              *actualParams->range->start, LSPMethod::CodeActionResolve, false);
 
     if (queryResult.error != nullptr) {
