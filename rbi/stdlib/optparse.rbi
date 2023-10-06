@@ -803,13 +803,6 @@ class OptionParser
       )
       .returns(T.untyped)
   end
-  sig do
-    params(
-      opts: String,
-      block: T.nilable(T.proc.params(arg0: String).void)
-    )
-      .returns(T.untyped)
-  end
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on(type=T.unsafe(nil), *opts, &block); end
 
