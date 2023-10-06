@@ -795,6 +795,14 @@ class OptionParser
   # [`make_switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-make_switch)
   # for an explanation of parameters.
   sig do
+    params(
+      type: T.any(T.class_of(TrueClass), T.class_of(FalseClass)),
+      opts: T.untyped,
+      block: T.nilable(T.proc.params(arg0: T::Boolean).void)
+    )
+      .returns(T.untyped)
+  end
+  sig do
     type_parameters(:Type)
       .params(
         type: T::Class[T.type_parameter(:Type)],
