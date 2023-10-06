@@ -135,7 +135,7 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
         e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
     } else {
         if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
-            auto blameSymbol = untyped.type.untypedBlame();
+            auto blameSymbol = untyped.untypedBlame();
             if (blameSymbol.exists()) {
                 auto loc = blameSymbol.loc(gs);
                 if (loc.exists()) {
