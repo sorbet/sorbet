@@ -30,6 +30,7 @@ cc_library(
         "//local_vars",
         "//main/autogen",
         "//main/options",
+        "//main/pipeline/definition_checker",
         "//namer",
         "//packager",
         "//parser",
@@ -37,7 +38,6 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//rewriter",
-        "//main/pipeline/definition_checker",
     ],
 )
 
@@ -71,12 +71,12 @@ cc_library(
         "//infer",
         "//local_vars",
         "//main/options",
+        "//main/pipeline/definition_checker",
         "//namer",
         "//parser",
         "//payload/binary",
         "//payload/text",
         "//resolver",
         "//rewriter",
-        "//main/pipeline/definition_checker",
     ],
 )
