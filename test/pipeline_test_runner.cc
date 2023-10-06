@@ -738,8 +738,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // now we test the incremental resolver
 
     auto disableStressIncremental =
-        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false) ||
-        !shouldStressResolver;
+        BooleanPropertyAssertion::getValue("disable-stress-incremental", assertions).value_or(false);
     if (disableStressIncremental) {
         MESSAGE("errors OK");
         return;
@@ -825,11 +824,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
 
-    if (shouldStressResolver) {
-        for (auto &f : trees) {
-            f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
-                *gs, move(f), 0, prohibitedLinesMap[f.file]);
-        }
+    for (auto &f : trees) {
+        f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
+            *gs, move(f), 0, prohibitedLinesMap[f.file]);
     }
 
     if (enablePackager) {
