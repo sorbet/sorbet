@@ -25,7 +25,6 @@
 #include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
-#include "rewriter/Regexp.h"
 #include "rewriter/SigRewriter.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
@@ -80,12 +79,6 @@ public:
                     }
 
                     nodes = ClassNew::run(ctx, &assign);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = Regexp::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
