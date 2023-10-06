@@ -24,7 +24,7 @@ autocorrect.rb:19: Method `params` does not exist on `T.class_of(<root>)` https:
 
 autocorrect.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
-        ^^^^^^
+           ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -240,7 +240,7 @@ autocorrect.rb:15: Method `bar=` does not exist on `NilClass` component of `T.ni
 
 autocorrect.rb:17: Method `[]` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
     17 |[1].max_by {|l,r| 1}[2]
-        ^^^^^^^^^^^^^^^^^^^^^^^
+                            ^^^
   Got `T.nilable(Integer)` originating from:
     autocorrect.rb:17:
     17 |[1].max_by {|l,r| 1}[2]
