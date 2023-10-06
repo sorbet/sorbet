@@ -119,11 +119,33 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
     }
 }
 
+namespace {
+
+void showBlame(const GlobalState &gs, ErrorBuilder &e, const TypePtr &untyped) {
+    if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
+        auto blameSymbol = untyped.untypedBlame();
+        if (blameSymbol.exists()) {
+            auto loc = blameSymbol.loc(gs);
+            if (loc.exists()) {
+                e.addErrorLine(loc, "Blames to `{}`, defined here", blameSymbol.show(gs));
+            } else {
+                e.addErrorNote("Blames to `{}`", blameSymbol.show(gs));
+            }
+        } else {
+            e.addErrorNote("Blames to `{}`", "<none>");
+        }
+    }
+}
+
+} // namespace
+
 void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e, ErrorClass what,
                                           const TypeAndOrigins &untyped, Loc originForUninitialized) {
     e.addErrorSection(untyped.explainGot(gs, originForUninitialized));
     if (what == core::errors::Infer::UntypedValue) {
         e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
+    } else {
+        showBlame(gs, e, untyped.type);
     }
 }
 
@@ -134,19 +156,7 @@ void TypeErrorDiagnostics::explainUntyped(const GlobalState &gs, ErrorBuilder &e
     if (what == core::errors::Infer::UntypedValue) {
         e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong", "typed: strict");
     } else {
-        if constexpr (sorbet::track_untyped_blame_mode || sorbet::debug_mode) {
-            auto blameSymbol = untyped.untypedBlame();
-            if (blameSymbol.exists()) {
-                auto loc = blameSymbol.loc(gs);
-                if (loc.exists()) {
-                    e.addErrorLine(loc, "Blames to `{}`, defined here", blameSymbol.show(gs));
-                } else {
-                    e.addErrorNote("Blames to `{}`", blameSymbol.show(gs));
-                }
-            } else {
-                e.addErrorNote("Blames to `{}`", "<none>");
-            }
-        }
+        showBlame(gs, e, untyped);
     }
 }
 
