@@ -597,7 +597,23 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
             }
             whoKnows.sanityCheck();
+        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+            if (klassTypeApp->klass == core::Symbols::Class()) {
+                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
+                                                                       core::Symbols::Class());
+                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+                });
+                ENFORCE(it != currentAlignment.end());
+                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
+                if (!instanceTy.isUntyped()) {
+                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, instanceTy);
+                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                    // https://github.com/sorbet/sorbet/issues/4358
+                }
+            }
         }
+
         return;
     }
 
@@ -665,6 +681,21 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             if (!representedType.isUntyped()) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
+            }
+        } else if (auto *recvApp = core::cast_type<core::AppliedType>(recvType)) {
+            if (recvApp->klass == core::Symbols::Class()) {
+                auto currentAlignment =
+                    core::Types::alignBaseTypeArgs(ctx, recvApp->klass, recvApp->targs, core::Symbols::Class());
+                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+                });
+                ENFORCE(it != currentAlignment.end());
+                auto instanceTy = recvApp->targs[distance(currentAlignment.begin(), it)];
+                if (!instanceTy.isUntyped()) {
+                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, instanceTy);
+                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                    // https://github.com/sorbet/sorbet/issues/4358
+                }
             }
         }
 
