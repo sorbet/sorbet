@@ -219,12 +219,15 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 new_args.emplace_back(arg.deepCopy());
             }
 
-            // add the destructuring statements to the block if they're present
-            if (!destructuringStmts.empty()) {
-                ast::InsSeq::STATS_store stmts;
-                for (auto &stmt : destructuringStmts) {
-                    stmts.emplace_back(stmt.deepCopy());
-                }
+            // Make sure the `it` argument makes it in to be typechecked.
+            ast::InsSeq::STATS_store stmts;
+            if (send->fun == core::Names::it()) {
+                stmts.emplace_back(move(send->getPosArg(0)));
+            }
+            for (auto &stmt : destructuringStmts) {
+                stmts.emplace_back(stmt.deepCopy());
+            }
+            if (!stmts.empty()) {
                 body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
             }
 
