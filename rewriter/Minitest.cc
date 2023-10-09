@@ -220,14 +220,22 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             }
 
             // Make sure the `it` argument makes it in to be typechecked.
-            ast::InsSeq::STATS_store stmts;
-            if (send->fun == core::Names::it()) {
+            if (destructuringStmts.empty()) {
+                if (send->fun == core::Names::it()) {
+                    if (ast::isa_tree<ast::EmptyTree>(body)) {
+                        body = move(send->getPosArg(0));
+                    } else {
+                        ast::InsSeq::STATS_store stmts;
+                        stmts.emplace_back(move(send->getPosArg(0)));
+                        body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                    }
+                }
+            } else {
+                ast::InsSeq::STATS_store stmts;
                 stmts.emplace_back(move(send->getPosArg(0)));
-            }
-            for (auto &stmt : destructuringStmts) {
-                stmts.emplace_back(stmt.deepCopy());
-            }
-            if (!stmts.empty()) {
+                for (auto &stmt : destructuringStmts) {
+                    stmts.emplace_back(stmt.deepCopy());
+                }
                 body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
             }
 

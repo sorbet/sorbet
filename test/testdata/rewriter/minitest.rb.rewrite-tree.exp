@@ -234,10 +234,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       def <it '::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")'><<todo method>>(&<blk>)
         ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |x|
-          begin
-            ::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")
-            <emptyTree>
-          end
+          ::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")
         end
       end
 
