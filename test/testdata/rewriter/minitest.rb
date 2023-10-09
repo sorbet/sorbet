@@ -81,8 +81,8 @@ class MyTest
 
     describe "typechecks the `it` arg" do
       cases = [1, 2, 3]
-      test_each(cases) do |x|
-        it "contains a #{nonexistant} variable" do
+      test_each(cases) do |x| # error: Method `test_each` does not exist
+        it "contains a #{nonexistant} variable" do # error: Method `nonexistant` does not exist
         end
       end
     end
