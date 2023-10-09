@@ -127,9 +127,8 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
     return body;
 }
 
-string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
+string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
-    string argString;
     if (argLit != nullptr) {
         if (argLit->isString()) {
             return argLit->asString().show(ctx);
