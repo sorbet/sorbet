@@ -106,7 +106,17 @@ string ErrorSection::toString(const GlobalState &gs) const {
     bool skipEOL = false;
     if (!this->header.empty()) {
         coloredLineHeaders = false;
-        buf << indent << DETAIL_COLOR << restoreColors(this->header, DETAIL_COLOR) << RESET_COLOR;
+        string formattedHeader;
+        if (this->isAutocorrectDescription) {
+            if (gs.autocorrect) {
+                formattedHeader = fmt::format("{} Done", this->header);
+            } else {
+                formattedHeader = ErrorColors::format("{} Use `{}` to autocorrect", this->header, "-a");
+            }
+        } else {
+            formattedHeader = this->header;
+        }
+        buf << indent << DETAIL_COLOR << restoreColors(formattedHeader, DETAIL_COLOR) << RESET_COLOR;
     } else {
         skipEOL = true;
     }
@@ -166,12 +176,11 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     ENFORCE(state == State::WillBuild);
     string sectionTitle;
     if (gs.autocorrect) {
-        sectionTitle = "Autocorrect: Done";
+        sectionTitle = "Autocorrect:";
     } else if (autocorrect.isDidYouMean && autocorrect.edits.size() == 1) {
-        sectionTitle =
-            ErrorColors::format("Did you mean `{}`? Use `{}` to autocorrect", autocorrect.edits[0].replacement, "-a");
+        sectionTitle = ErrorColors::format("Did you mean `{}`?", autocorrect.edits[0].replacement);
     } else {
-        sectionTitle = ErrorColors::format("Autocorrect: Use `{}` to autocorrect", "-a");
+        sectionTitle = "Autocorrect:";
     }
 
     std::vector<ErrorLine> messages;
@@ -192,7 +201,10 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
             messages.emplace_back(std::move(line));
         }
     }
-    addErrorSection(ErrorSection{sectionTitle, std::move(messages)});
+    auto errorSection = ErrorSection{sectionTitle, std::move(messages)};
+    errorSection.isAutocorrectDescription = true;
+    errorSection.isDidYouMean = autocorrect.isDidYouMean;
+    addErrorSection(move(errorSection));
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
