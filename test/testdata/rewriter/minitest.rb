@@ -78,6 +78,14 @@ class MyTest
         end
       end
     end
+
+    describe "typechecks the `it` arg" do
+      cases = [1, 2, 3]
+      test_each(cases) do |x|
+        it "contains a #{nonexistant} variable" do
+        end
+      end
+    end
 end
 
 def junk

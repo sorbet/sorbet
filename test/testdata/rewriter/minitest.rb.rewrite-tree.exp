@@ -226,6 +226,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
     end
+
+    class <emptyTree>::<C <describe 'typechecks the `it` arg'>><<C <todo sym>>> < (<self>)
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.void()
+      end
+
+      def <it '::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")'><<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |x|
+          <emptyTree>
+        end
+      end
+
+      begin
+        cases = [1, 2, 3]
+        <self>.test_each(cases) do |x|
+          <runtime method definition of <it '::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")'>>
+        end
+      end
+    end
   end
 
   <runtime method definition of junk>
