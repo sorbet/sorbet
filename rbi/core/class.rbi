@@ -128,7 +128,7 @@ class Class < Module
   #
   # If a block is given, it is passed the class object, and the block is
   # evaluated in the context of this class like class_eval.
-  sig { params(blk: T.untyped).returns(T::Class[Object]) }
+  sig { params(blk: T.untyped).returns(T::Class[T.untyped]) }
   sig do
     type_parameters(:Parent)
       .params(

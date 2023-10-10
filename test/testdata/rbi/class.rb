@@ -9,16 +9,16 @@ Parent.attached_object
 Parent.new.singleton_class.attached_object
 
 c1 = Class.new
-T.reveal_type(c1) # error: Revealed type: `T::Class[Object]`
-T.reveal_type(c1.new) # error: Revealed type: `Object`
+T.reveal_type(c1) # error: Revealed type: `T::Class[T.untyped]`
+T.reveal_type(c1.new) # error: Revealed type: `T.untyped`
 
 c2 = Class.new(Parent)
 T.reveal_type(c2) # error: Revealed type: `T.class_of(Parent)`
 T.reveal_type(c2.new) # error: Revealed type: `Parent`
 
 c3 = Class.new { |cls| cls.superclass }
-T.reveal_type(c3) # error: Revealed type: `T::Class[Object]`
-T.reveal_type(c3.new) # error: Revealed type: `Object`
+T.reveal_type(c3) # error: Revealed type: `T::Class[T.untyped]`
+T.reveal_type(c3.new) # error: Revealed type: `T.untyped`
 
 c4 = Class.new(Parent) { |cls| cls.superclass }
 T.reveal_type(c4) # error: Revealed type: `T.class_of(Parent)`
