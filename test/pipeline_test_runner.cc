@@ -825,8 +825,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
 
     for (auto &f : trees) {
-        f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
-            *gs, move(f), 0, prohibitedLinesMap[f.file]);
+        sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, f.file, 0,
+                                                                                      prohibitedLinesMap[f.file]);
     }
 
     if (enablePackager) {
