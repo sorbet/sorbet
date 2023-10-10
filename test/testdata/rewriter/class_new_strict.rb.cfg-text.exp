@@ -39,7 +39,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(A), <block-pre-call-temp>$6
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(A)):
-    _cls: T::Class[Object] = Solve<<block-pre-call-temp>$6, new>
+    _cls: T::Class[T.untyped] = Solve<<block-pre-call-temp>$6, new>
     <self>: T.class_of(A) = <selfRestore>$7
     <cfgAlias>$18: T.class_of(Class)[T::Class[T.anything]] = alias <C Class>
     <cfgAlias>$20: T.class_of(A) = alias <C A>
