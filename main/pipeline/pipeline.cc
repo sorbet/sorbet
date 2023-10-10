@@ -38,13 +38,13 @@
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
+#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
-#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
 
 using namespace std;
 
@@ -853,7 +853,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     auto reresolved =
                         pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
                     ENFORCE(reresolved.size() == 1);
-                    f = sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
+                    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
+                        *gs, reresolved[0].file, 0, prohibitedLines);
                 }
                 ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
                         "Stressing the incremental resolver should not add any new symbols");
