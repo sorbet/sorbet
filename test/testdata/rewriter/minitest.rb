@@ -86,6 +86,18 @@ class MyTest
         end
       end
     end
+
+    test_each( # error: Method `test_each` does not exist
+      [
+        [1, "x"],
+        [2, "y"],
+        [3, "z"],
+        [4, "w"],
+      ]
+    ) do |(i, s)|
+      it "does a thing with #{i.anybits?(1)}" do
+      end
+    end
 end
 
 def junk

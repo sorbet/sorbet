@@ -93,6 +93,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it '::<Magic>.<string-interpolate>("does a thing with ", i.anybits?(1))'><<todo method>>(&<blk>)
+      [[1, "x"], [2, "y"], [3, "z"], [4, "w"]].each() do |<destructure>$2|
+        begin
+          begin
+            <assignTemp>$3 = <destructure>$2
+            <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
+            i = <assignTemp>$4.[](0)
+            s = <assignTemp>$4.[](1)
+            <assignTemp>$3
+          end
+          ::<Magic>.<string-interpolate>("does a thing with ", i.anybits?(1))
+          <emptyTree>
+        end
+      end
+    end
+
     <runtime method definition of outside_method>
 
     begin
@@ -244,6 +264,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <runtime method definition of <it '::<Magic>.<string-interpolate>("contains a ", <self>.nonexistant(), " variable")'>>
         end
       end
+    end
+
+    <self>.test_each([[1, "x"], [2, "y"], [3, "z"], [4, "w"]]) do |<destructure>$2|
+      <runtime method definition of <it '::<Magic>.<string-interpolate>("does a thing with ", i.anybits?(1))'>>
     end
   end
 

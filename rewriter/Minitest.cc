@@ -232,11 +232,17 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 }
             } else {
                 ast::InsSeq::STATS_store stmts;
-                stmts.emplace_back(move(send->getPosArg(0)));
                 for (auto &stmt : destructuringStmts) {
                     stmts.emplace_back(stmt.deepCopy());
                 }
-                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                // Ensure the possibly-string-interpolating `it` argument
+                // can see the assignments from destructuring.
+                if (send->fun == core::Names::it()) {
+                    stmts.emplace_back(move(send->getPosArg(0)));
+                }
+                auto loc = body.loc();
+                loc = loc.join(stmts[0].loc()).join(stmts[stmts.size() - 1].loc());
+                body = ast::MK::InsSeq(loc, std::move(stmts), std::move(body));
             }
 
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
