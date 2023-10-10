@@ -126,6 +126,11 @@ requires: []
  defines_behavior=1
  is_empty=0
  defining_ref=[BehaviorRBI]
+[def id=2]
+ type=casgn
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[C]
 ## refs:
 [ref id=0]
  scope=[]
@@ -134,11 +139,18 @@ requires: []
  resolved=[BehaviorRBI]
  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:3
  is_defining_ref=1
+[ref id=1]
+ scope=[BehaviorRBI]
+ name=[C]
+ nesting=[[BehaviorRBI]]
+ resolved=[BehaviorRBI C]
+ loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:4
+ is_defining_ref=1
 
 f3b9f8c31a343a60665c06f959a48dbdceef757c  autogen3.msgpack
-bd4da471dd4868384af366a23bed507c32c6f98b  autogen4.msgpack
+0e2cf6ac0798ec92157e8fe1ec908253dd1a85d5  autogen4.msgpack
 
-39a40,93
+39a40,105
 > # ParsedFile: test/cli/autogen_print_rbi/b.rbi
 > requires: []
 > ## defs:
@@ -185,6 +197,11 @@ bd4da471dd4868384af366a23bed507c32c6f98b  autogen4.msgpack
 >  defines_behavior=1
 >  is_empty=0
 >  defining_ref=[BehaviorRBI]
+> [def id=2]
+>  type=casgn
+>  defines_behavior=1
+>  is_empty=0
+>  defining_ref=[C]
 > ## refs:
 > [ref id=0]
 >  scope=[]
@@ -192,4 +209,11 @@ bd4da471dd4868384af366a23bed507c32c6f98b  autogen4.msgpack
 >  nesting=[]
 >  resolved=[BehaviorRBI]
 >  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:3
+>  is_defining_ref=1
+> [ref id=1]
+>  scope=[BehaviorRBI]
+>  name=[C]
+>  nesting=[[BehaviorRBI]]
+>  resolved=[BehaviorRBI C]
+>  loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:4
 >  is_defining_ref=1
