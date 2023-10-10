@@ -172,7 +172,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'destructured blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |<destructure>$4|
         begin
-          "destructured blocks get padded with NilClass arguments"
           begin
             <assignTemp>$5 = <destructure>$4
             <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
@@ -180,6 +179,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             v = <assignTemp>$6.[](1)
             <assignTemp>$5
           end
+          "destructured blocks get padded with NilClass arguments"
           begin
             <emptyTree>::<C T>.reveal_type(k)
             <emptyTree>::<C T>.reveal_type(v)
@@ -195,7 +195,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'multiple it blocks are ok with multiple destructured arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |<destructure>$4|
         begin
-          "multiple it blocks are ok with multiple destructured arguments"
           begin
             <assignTemp>$5 = <destructure>$4
             <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
@@ -203,6 +202,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             v = <assignTemp>$6.[](1)
             <assignTemp>$5
           end
+          "multiple it blocks are ok with multiple destructured arguments"
           begin
             <emptyTree>::<C T>.reveal_type(k)
             <emptyTree>::<C T>.reveal_type(v)
@@ -218,7 +218,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'handles mixed destructuring and positional arguments'><<todo method>>(&<blk>)
       [[1, ["hi", false]], [2, ["bye", true]]].each() do |i, <destructure>$7, <destructure>$10|
         begin
-          "handles mixed destructuring and positional arguments"
           begin
             <assignTemp>$8 = <destructure>$7
             <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
@@ -233,6 +232,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             y = <assignTemp>$12.[](1)
             <assignTemp>$11
           end
+          "handles mixed destructuring and positional arguments"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -251,7 +251,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'multiple it blocks are ok with mixed argument styles'><<todo method>>(&<blk>)
       [[1, ["hi", false]], [2, ["bye", true]]].each() do |i, <destructure>$7, <destructure>$10|
         begin
-          "multiple it blocks are ok with mixed argument styles"
           begin
             <assignTemp>$8 = <destructure>$7
             <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
@@ -266,6 +265,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             y = <assignTemp>$12.[](1)
             <assignTemp>$11
           end
+          "multiple it blocks are ok with mixed argument styles"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -298,7 +298,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a constant list of tuples and destructuring'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST_TUPLE>.each() do |<destructure>$13|
         begin
-          "succeeds with a constant list of tuples and destructuring"
           begin
             <assignTemp>$14 = <destructure>$13
             <assignTemp>$15 = ::<Magic>.<expand-splat>(<assignTemp>$14, 2, 0)
@@ -306,6 +305,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$15.[](1)
             <assignTemp>$14
           end
+          "succeeds with a constant list of tuples and destructuring"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -337,7 +337,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a typed constant tuple list with destructuring'><<todo method>>(&<blk>)
       <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>.each() do |<destructure>$16|
         begin
-          "succeeds with a typed constant tuple list with destructuring"
           begin
             <assignTemp>$17 = <destructure>$16
             <assignTemp>$18 = ::<Magic>.<expand-splat>(<assignTemp>$17, 2, 0)
@@ -345,6 +344,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$18.[](1)
             <assignTemp>$17
           end
+          "succeeds with a typed constant tuple list with destructuring"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -376,7 +376,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeed with destructured local variables but cannot type them'><<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |<destructure>$19|
         begin
-          "succeed with destructured local variables but cannot type them"
           begin
             <assignTemp>$20 = <destructure>$19
             <assignTemp>$21 = ::<Magic>.<expand-splat>(<assignTemp>$20, 2, 0)
@@ -384,6 +383,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$21.[](1)
             <assignTemp>$20
           end
+          "succeed with destructured local variables but cannot type them"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -415,7 +415,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it '::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)'><<todo method>>(&<blk>)
       [["red", <emptyTree>::<C NoShow>.new()], ["blue", <emptyTree>::<C NoShow>.new()]].each() do |<destructure>$24|
         begin
-          ::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)
           begin
             <assignTemp>$25 = <destructure>$24
             <assignTemp>$26 = ::<Magic>.<expand-splat>(<assignTemp>$25, 2, 0)
@@ -423,6 +422,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             ns = <assignTemp>$26.[](1)
             <assignTemp>$25
           end
+          ::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)
           begin
             <emptyTree>::<C T>.reveal_type(color)
             <emptyTree>::<C T>.reveal_type(ns)
