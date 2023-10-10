@@ -2,36 +2,49 @@
 #include "ast/treemap/treemap.h"
 
 namespace sorbet::pipeline::definition_checker {
-
-ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
-                                                        int prohibitedLinesStart, int prohibitedLinesEnd) {
-    DefinitionLinesDenylistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
-    ast::TreeWalk::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, what.tree);
-    return what;
-}
-
-bool DefinitionLinesDenylistEnforcer::isAllowListed(core::Context ctx, core::SymbolRef sym) {
-    return sym.name(ctx) == core::Names::staticInit() || sym.name(ctx) == core::Names::Constants::Root() ||
-           sym.name(ctx) == core::Names::unresolvedAncestors();
-}
-
-void DefinitionLinesDenylistEnforcer::checkLoc(core::Context ctx, core::Loc loc) {
-    auto detailStart = core::Loc::offset2Pos(file.data(ctx), loc.beginPos());
-    auto detailEnd = core::Loc::offset2Pos(file.data(ctx), loc.endPos());
-    ENFORCE(!(detailStart.line >= prohibitedLinesStart && detailEnd.line <= prohibitedLinesEnd));
-}
-
-void DefinitionLinesDenylistEnforcer::checkSym(core::Context ctx, core::SymbolRef sym) {
-    if (isAllowListed(ctx, sym)) {
-        return;
+namespace {
+void checkLoc(core::GlobalState &gs, const InlinedVector<core::Loc, 2> &locs, core::FileRef fref,
+              int prohibitedLinesStart, int prohibitedLinesEnd) {
+    for (auto loc : locs) {
+        if (loc.file() != fref) {
+            continue;
+        }
+        auto [detailStart, detailEnd] = loc.position(gs);
+        ENFORCE(!(detailStart.line >= prohibitedLinesStart && detailEnd.line <= prohibitedLinesEnd));
     }
-    checkLoc(ctx, sym.loc(ctx));
 }
+} // namespace
 
-void DefinitionLinesDenylistEnforcer::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
-}
-void DefinitionLinesDenylistEnforcer::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
+void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, core::FileRef fref, int prohibitedLinesStart,
+                                             int prohibitedLinesEnd) {
+    for (int i = 0; i < gs.classAndModulesUsed(); i++) {
+        auto classOrModule = core::ClassOrModuleRef(gs, i);
+        auto locs = classOrModule.data(gs)->locs();
+        checkLoc(gs, locs, fref, prohibitedLinesStart, prohibitedLinesEnd);
+    }
+
+    for (int i = 0; i < gs.methodsUsed(); i++) {
+        auto method = core::MethodRef(gs, i);
+        auto locs = method.data(gs)->locs();
+        checkLoc(gs, locs, fref, prohibitedLinesStart, prohibitedLinesEnd);
+    }
+
+    for (int i = 0; i < gs.fieldsUsed(); i++) {
+        auto field = core::FieldRef(gs, i);
+        auto locs = field.data(gs)->locs();
+        checkLoc(gs, locs, fref, prohibitedLinesStart, prohibitedLinesEnd);
+    }
+
+    for (int i = 0; i < gs.typeArgumentsUsed(); i++) {
+        auto typeArgument = core::TypeArgumentRef(gs, i);
+        auto locs = typeArgument.data(gs)->locs();
+        checkLoc(gs, locs, fref, prohibitedLinesStart, prohibitedLinesEnd);
+    }
+
+    for (int i = 0; i < gs.typeMembersUsed(); i++) {
+        auto typeMember = core::TypeMemberRef(gs, i);
+        auto locs = typeMember.data(gs)->locs();
+        checkLoc(gs, locs, fref, prohibitedLinesStart, prohibitedLinesEnd);
+    }
 }
 } // namespace sorbet::pipeline::definition_checker
