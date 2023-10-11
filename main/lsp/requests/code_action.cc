@@ -77,28 +77,32 @@ const core::lsp::SendResponse *isTUnsafeOrMustResponse(const core::GlobalState &
         return nullptr;
     }
 
-    auto *resp = responses[0]->isSend();
-    if (resp == nullptr) {
-        return nullptr;
+    for (int i = 0; i< responses.size(); i++) {
+        auto *resp = responses[i]->isSend();
+        if (resp == nullptr) {
+            continue;
+        }
+
+        auto method = resp->dispatchResult->main.method;
+        if (!method.exists()) {
+            continue;
+        }
+
+        auto data = method.data(gs);
+        if (data->owner != core::Symbols::TSingleton() ||
+            (data->name != core::Names::unsafe() && data->name != core::Names::must())) {
+            continue;
+        }
+
+        if (!resp->termLocOffsets.exists() || resp->termLocOffsets.empty() || resp->argLocOffsets.size() != 1 ||
+            !resp->argLocOffsets[0].exists() || resp->argLocOffsets[0].empty()) {
+            continue;
+        }
+
+        return resp;
     }
 
-    auto method = resp->dispatchResult->main.method;
-    if (!method.exists()) {
-        return nullptr;
-    }
-
-    auto data = method.data(gs);
-    if (data->owner != core::Symbols::TSingleton() ||
-        (data->name != core::Names::unsafe() && data->name != core::Names::must())) {
-        return nullptr;
-    }
-
-    if (!resp->termLocOffsets.exists() || resp->termLocOffsets.empty() || resp->argLocOffsets.size() != 1 ||
-        !resp->argLocOffsets[0].exists() || resp->argLocOffsets[0].empty()) {
-        return nullptr;
-    }
-
-    return resp;
+    return nullptr;
 }
 
 } // namespace
