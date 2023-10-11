@@ -1327,6 +1327,11 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     if (store.exists()) {
         ENFORCE(store.isMethod(), "existing symbol is not a method");
         counterInc("symbols.hit");
+        if (!store.locs(*this).empty() && absl::c_count(store.locs(*this), loc) == 0) {
+            ENFORCE(!symbolTableFrozen);
+            store.asMethodRef().data(*this)->addLoc(*this, loc);
+            wasModified_ = true;
+        }
         return store.asMethodRef();
     }
 
