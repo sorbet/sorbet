@@ -77,15 +77,27 @@ TypePtr Types::Float() {
 }
 
 TypePtr Types::arrayOfUntyped(sorbet::core::SymbolRef blame) {
-    static vector<TypePtr> targs{Types::untyped(blame)};
-    static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
-    return res;
+    if constexpr (!sorbet::track_untyped_blame_mode && !sorbet::debug_mode) {
+        static vector<TypePtr> targs{Types::untypedUntracked()};
+        static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
+        return res;
+    } else {
+        vector<TypePtr> targs{Types::untyped(blame)};
+        auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
+        return res;
+    }
 }
 
 TypePtr Types::rangeOfUntyped(sorbet::core::SymbolRef blame) {
-    static vector<TypePtr> targs{Types::untyped(blame)};
-    static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
-    return res;
+    if constexpr (!sorbet::track_untyped_blame_mode && !sorbet::debug_mode) {
+        static vector<TypePtr> targs{Types::untypedUntracked()};
+        static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
+        return res;
+    } else {
+        vector<TypePtr> targs{Types::untyped(blame)};
+        auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
+        return res;
+    }
 }
 
 TypePtr Types::hashOfUntyped() {
@@ -95,10 +107,14 @@ TypePtr Types::hashOfUntyped() {
 }
 
 TypePtr Types::hashOfUntyped(sorbet::core::SymbolRef blame) {
-    auto untypedWithBlame = Types::untyped(blame);
-    static vector<TypePtr> targs{untypedWithBlame, untypedWithBlame, untypedWithBlame};
-    static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
-    return res;
+    if constexpr (!sorbet::track_untyped_blame_mode && !sorbet::debug_mode) {
+        return Types::hashOfUntyped();
+    } else {
+        auto untypedWithBlame = Types::untyped(blame);
+        vector<TypePtr> targs{untypedWithBlame, untypedWithBlame, untypedWithBlame};
+        auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
+        return res;
+    }
 }
 
 TypePtr Types::procClass() {
