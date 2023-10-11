@@ -1716,7 +1716,7 @@ end
 ## 5020
 
 There are a few constraints around how methods like `include`, `extend`,
-`mixes_in_class_methods` [(docs)](abstract.mdd), and `requires_ancestor`
+`mixes_in_class_methods` [(docs)](abstract.md), and `requires_ancestor`
 [(docs)](requires-ancestor.md) work.
 
 - `include` and `extend` must be given a constant that Sorbet can _statically_
@@ -4356,9 +4356,9 @@ See also:
 - [How can I fix type errors that arise from `super`?]
 
 [Why is `super` untyped, even when the parent method has a `sig`?]:
-  faq.md#why-is-super-untyped-even-when-the-parent-method-has-a-sig
+  /docs/faq#why-is-super-untyped-even-when-the-parent-method-has-a-sig
 [How can I fix type errors that arise from `super`?]:
-  faq.md#how-can-i-fix-type-errors-that-arise-from-super
+  /docs/faq#how-can-i-fix-type-errors-that-arise-from-super
 
 <!-- -->
 

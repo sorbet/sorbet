@@ -103,7 +103,7 @@ the features Sorbet provides.
         <code>T.untyped</code>
       </td>
       <td>
-        See <a href="/docs/untyped">T.untyped</a> and <a href="../gradual">Gradual
+        See <a href="/docs/untyped">T.untyped</a> and <a href="/docs/gradual">Gradual
         Type Checking</a> for more information.
       </td>
     </tr>
