@@ -16,7 +16,7 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
 
 suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      8 |foo[0]
-        ^^^^^^
+           ^^^
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:7:
      7 |foo = T.let(nil, T.nilable(String))
@@ -132,7 +132,7 @@ suggest_t_unsafe.rb:25: Expected `String` but found `T.nilable(String)` for argu
 
 suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      8 |foo[0]
-        ^^^^^^
+           ^^^
   Got `T.nilable(String)` originating from:
     suggest_t_unsafe.rb:7:
      7 |foo = T.let(nil, T.nilable(String))

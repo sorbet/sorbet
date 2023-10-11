@@ -1,6 +1,6 @@
 suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
-        ^^^^^^
+           ^^^
   Got `T.nilable(String)` originating from:
     suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))

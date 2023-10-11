@@ -1007,6 +1007,18 @@ struct DispatchArgs {
     }
     Loc blockLoc(const GlobalState &gs) const;
 
+    Loc errLoc() const {
+        auto funLoc = this->funLoc();
+        auto recvLoc = this->receiverLoc();
+        if (funLoc.exists() && !funLoc.empty()) {
+            return funLoc;
+        } else if (this->name == Names::squareBrackets() && recvLoc.exists() && !recvLoc.empty()) {
+            return core::Loc(this->locs.file, recvLoc.endPos(), this->callLoc().endPos());
+        } else {
+            return this->callLoc();
+        }
+    }
+
     DispatchArgs withSelfAndThisRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
     DispatchArgs withErrorsSuppressed() const;

@@ -14,14 +14,14 @@ end
 extend T::Sig
 sig {params(xy: T.any(MyEnum::X[Integer], MyEnum::Y[Integer])).void}
 #                     ^^^^^^^^^^^^^^^^^^ error: Expected a class or module
-#                     ^^^^^^^^^^^^^^^^^^ error: Method `[]` does not exist
+#                              ^^^^^^^^^ error: Method `[]` does not exist
 #                                         ^^^^^^^^^^^^^^^^^^ error: Expected a class or module
-#                                         ^^^^^^^^^^^^^^^^^^ error: Method `[]` does not exist
+#                                                  ^^^^^^^^^ error: Method `[]` does not exist
 def foo(xy)
 end
 
 XY = T.type_alias {T.any(MyEnum::X[Integer], MyEnum::Y[Integer])}
 #                        ^^^^^^^^^^^^^^^^^^ error: Expected a class or module
-#                        ^^^^^^^^^^^^^^^^^^ error: Method `[]` does not exist
+#                                 ^^^^^^^^^ error: Method `[]` does not exist
 #                                            ^^^^^^^^^^^^^^^^^^ error: Expected a class or module
-#                                            ^^^^^^^^^^^^^^^^^^ error: Method `[]` does not exist
+#                                                     ^^^^^^^^^ error: Method `[]` does not exist
