@@ -549,6 +549,7 @@ class SystemCallError < StandardError
 
   # Return `true` if the receiver is a generic `SystemCallError`, or if the
   # error numbers `self` and *other* are the same.
+  sig { params(_: T.anything).returns(T::Boolean) }
   def self.===(_); end
 end
 
