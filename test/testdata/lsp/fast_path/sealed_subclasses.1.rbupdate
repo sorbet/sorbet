@@ -1,0 +1,16 @@
+# typed: true
+
+class Parent
+  extend T::Helpers
+  sealed!
+end
+
+class Child < Parent
+  extend T::Sig
+
+  sig { override.returns(Integer) }
+  def self.sealed_subclasses
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Return type `Integer` does not match return type of overridden method `Parent.sealed_subclasses`
+    0
+  end
+end
