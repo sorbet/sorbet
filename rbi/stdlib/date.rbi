@@ -444,9 +444,6 @@ class Date
   sig {returns(T.self_type)}
   def succ(); end
 
-  sig {returns(T.untyped)}
-  def to_utc_time(); end
-
   # Returns the Julian day number. This is a whole number, which is adjusted by
   # the offset as the local time.
   #

@@ -523,9 +523,6 @@ class DateTime < Date
   sig {returns(T.untyped)}
   def blank?(); end
 
-  sig {returns(T.untyped)}
-  def to_utc_time(); end
-
   sig do
     params(
       locale: T.untyped,
