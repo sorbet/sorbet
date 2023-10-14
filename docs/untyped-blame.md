@@ -81,6 +81,8 @@ No errors! Great job.
     [{"path":"https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi","package":"<none>","owner":"T.class_of(T)","name":"unsafe","count":1}]
     ```
 
+[Quickstart]: https://github.com/sorbet/sorbet/#quickstart
+
 ## Collecting untyped blame information
 
 Sorbet collects untyped blame information by type checking a project, and
