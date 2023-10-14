@@ -293,9 +293,9 @@ Sorbet source repo:
 →
 [Blaming usages of untyped to definitions](https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md)
 
-\
+<br>
 
-\
+<br>
 
 ## Metrics philosophy
 
