@@ -140,7 +140,6 @@ struct Options {
     std::optional<std::string> suggestUnsafe = std::nullopt;
     bool silenceErrors = false;
     bool silenceDevMessage = false;
-    bool suggestSig = false;
     bool suppressNonCriticalErrors = false;
     bool runLSP = false;
     bool disableWatchman = false;
