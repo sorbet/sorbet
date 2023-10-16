@@ -15,10 +15,6 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
     for (auto [kind, used] : symbolTypes) {
         for (uint32_t idx = 1; idx < used; idx++) {
             auto sym = core::SymbolRef(gs, kind, idx);
-            if (!sym.exists()) {
-                continue;
-            }
-
             auto locs = sym.locs(gs);
             for (auto loc : locs) {
                 if (!frefs.contains(loc.file())) {
