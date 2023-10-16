@@ -2572,7 +2572,7 @@ public:
             auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, receiver->type);
             if (auto e = gs.beginError(args.argLoc(0), what)) {
                 e.setHeader("Call to method `{}` on `{}`", fn.show(gs), "T.untyped");
-                TypeErrorDiagnostics::explainUntyped(gs, e, what, args.fullType, args.originForUninitialized);
+                TypeErrorDiagnostics::explainUntyped(gs, e, what, *receiver, args.originForUninitialized);
             }
 
             res.returnType = receiver->type;
