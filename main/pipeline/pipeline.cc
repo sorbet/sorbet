@@ -853,9 +853,12 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     auto reresolved =
                         pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
                     ENFORCE(reresolved.size() == 1);
-                    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(
-                        *gs, reresolved[0].file, 0, prohibitedLines);
                 }
+                UnorderedSet<core::FileRef> frefs;
+                for (auto &f : what) {
+                    frefs.insert(f.file);
+                }
+                sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, frefs);
                 ENFORCE(symbolsBefore == gs->symbolsUsedTotal(),
                         "Stressing the incremental resolver should not add any new symbols");
             }

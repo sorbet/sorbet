@@ -3,8 +3,7 @@
 
 namespace sorbet::pipeline::definition_checker {
 
-void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, core::FileRef fref, int prohibitedLinesStart,
-                                             int prohibitedLinesEnd) {
+void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet<core::FileRef> &frefs) {
     std::vector<std::pair<core::SymbolRef::Kind, uint32_t>> symbolTypes = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
@@ -22,11 +21,12 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, core::FileRe
 
             auto locs = sym.locs(gs);
             for (auto loc : locs) {
-                if (loc.file() != fref) {
+                if (!frefs.contains(loc.file())) {
                     continue;
                 }
-                auto [detailStart, detailEnd] = loc.position(gs);
-                ENFORCE(!(detailStart.line >= prohibitedLinesStart && detailEnd.line <= prohibitedLinesEnd));
+                auto midPoint = loc.file().data(gs).source().size() / 2;
+
+                ENFORCE(loc.beginPos() >= midPoint && loc.endPos() >= midPoint);
             }
         }
     }

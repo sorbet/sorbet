@@ -824,10 +824,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
 
+    UnorderedSet<core::FileRef> frefs;
     for (auto &f : trees) {
-        sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, f.file, 0,
-                                                                                      prohibitedLinesMap[f.file]);
+        frefs.insert(f.file);
     }
+    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, frefs);
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
