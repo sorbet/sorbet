@@ -33,7 +33,7 @@
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
-#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
+#include "main/pipeline/DefinitionLinesDenylistEnforcer.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"

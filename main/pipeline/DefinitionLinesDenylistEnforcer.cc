@@ -1,4 +1,4 @@
-#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
+#include "main/pipeline/DefinitionLinesDenylistEnforcer.h"
 #include "ast/treemap/treemap.h"
 
 namespace sorbet::pipeline::definition_checker {
