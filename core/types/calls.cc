@@ -433,8 +433,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     continue;
                 }
             } else {
-                if (mentionsBlockArg && lastArg.type != nullptr && lastArg.type.isFullyDefined() &&
-                    !Types::isSubType(gs, Types::nilClass(), lastArg.type)) {
+                if (mentionsBlockArg && lastArg.type != nullptr &&
+                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
