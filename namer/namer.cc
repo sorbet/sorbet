@@ -1263,9 +1263,7 @@ private:
             auto classOfKlass = symbolData->singletonClass(ctx);
             auto loc = ctx.locAt(mod.loc);
             auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
-            if (absl::c_count(sealedSubclasses.data(ctx)->locs(), loc) == 0) {
-                sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            }
+            sealedSubclasses.data(ctx)->addLoc(ctx, loc);
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
