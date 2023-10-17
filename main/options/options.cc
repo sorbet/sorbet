@@ -500,9 +500,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("statsd-host", "StatsD sever hostname",
                                cxxopts::value<string>()->default_value(empty.statsdHost), "host");
     options.add_options("dev")("counters", "Print all internal counters");
-    if (sorbet::debug_mode) {
-        options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
-    }
 
     options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
     options.add_options("dev")("suggest-unsafe",
@@ -1053,10 +1050,6 @@ void readOptions(Options &opts,
         if (!opts.isolateErrorCode.empty() && !opts.suppressErrorCode.empty()) {
             logger->error("You can't pass both `{}` and `{}`", "--isolate-error-code", "--suppress-error-code");
             throw EarlyReturnWithCode(1);
-        }
-
-        if (sorbet::debug_mode) {
-            opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&

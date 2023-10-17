@@ -1,4 +1,17 @@
-# Suggesting Sigs
+# [archived] Suggesting Sigs
+
+> **Note** The information in this doc is no longer relevant, as the option has
+> been removed in current versions of Sorbet. It remains here as a reference for
+> those using older Sorbet versions.
+>
+> In new Sorbet versions, this functionality has been replaced with [Untyped
+> Blame](untyped-blame.md) tracking, which is a more powerful and precise
+> mechanism to achieve a similar goal.
+>
+> The first version to remove the `--suggest-sig` flag was
+> [0.5.10841](https://github.com/sorbet/sorbet/commit/f7b1eafdbb0cd4526c906b4c68d1063933964bba).
+
+- - - - -
 
 It's possible to build Sorbet in a way that it can suggest the "most impactful"
 methods to add a signature to, something like this:

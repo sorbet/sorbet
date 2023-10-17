@@ -56,6 +56,9 @@ const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD
 #ifdef DEBUG_MODE
     " debug_mode=true"
 #endif
+#ifdef TRACK_UNTYPED_BLAME_MODE
+    " untyped_blame=true"
+#endif
     ;
 
 const char *sorbet_getVersion() {
