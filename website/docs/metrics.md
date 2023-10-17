@@ -260,8 +260,14 @@ entries for these files will also lack an `"untyped_usages"` key.
 
 ### Blaming usages of untyped back to methods
 
-Sorbet can attribute usages of untyped to the original source of untyped. For
-example:
+Sorbet can attribute usages of untyped to the original source of untyped. The
+docs for doing this live in the Sorbet source repo, because it involves a
+slightly more involved process than other metrics:
+
+→
+[Blaming usages of untyped to definitions](https://github.com/sorbet/sorbet/blob/master/docs/untyped-blame.md)
+
+To show how it works, consider an example like this:
 
 ```ruby
 def method_without_a_sig_1 = 0
@@ -287,11 +293,9 @@ have the best return on investment for adding a signature.
 Unfortunately, tracking this information forces Sorbet change the memory layout
 of certain internal data structures, which substantially increases the amount of
 memory it uses when type checking. As such, blaming usages of untyped back to a
-method requires building Sorbet from source. The docs for doing this live in the
-Sorbet source repo:
-
-→
-[Blaming usages of untyped to definitions](https://github.com/sorbet/sorbet/blob/master/docs/suggest-sig.md)
+method requires building Sorbet from source. See
+[Blaming usages of untyped to definitions](https://github.com/sorbet/sorbet/blob/master/docs/untyped-blame.md)
+for more.
 
 <br>
 
