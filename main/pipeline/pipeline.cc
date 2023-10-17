@@ -38,7 +38,7 @@
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
-#include "main/pipeline/definition_checker/DefinitionLinesDenylistEnforcer.h"
+#include "main/pipeline/DefinitionLinesDenylistEnforcer.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
