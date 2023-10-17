@@ -1215,6 +1215,11 @@ private:
 
                 auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
                 singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                auto attachedClassTM =
+                    singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                if (attachedClassTM.exists() && attachedClassTM.isTypeMember()) {
+                    attachedClassTM.asTypeMemberRef().data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                }
 
                 // This willDeleteOldDefs condition is a hack to improve performance when editing within a method body.
                 // Ideally, we would be able to make finalizeSymbols fast/incremental enough to run on all edits.
