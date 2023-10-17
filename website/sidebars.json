@@ -59,6 +59,7 @@
     "Experimental Features": [
       "tuples",
       "shapes",
+      "overloads",
       "requires-ancestor"
     ]
   },

@@ -2196,32 +2196,7 @@ If this workaround will not work in your case, the final alternative is to
 either omit a signature for the method in question (or define an explicit
 signature where all parameters that cannot be typed accurately use `T.untyped`).
 
-**Why are overloads not well-supported in Sorbet?**
-
-Consider how overloading works in typed, compiled languages like C++ or Java;
-each overload is a separate method. They actually have separate implementations,
-are type checked separately, compile (with link-time name mangling) to separate
-symbols in the compiled object, and the compiler knows how to resolve each call
-site to a specific overload ahead of time, either statically or dynamically via
-virtual dispatch.
-
-Meanwhile, Ruby itself doesn't have overloading—there's only ever one method
-registered with a given name in the VM, regardless of what arguments it accepts.
-That complicates things. It becomes unclear how Sorbet should typecheck the body
-of the method (against all sigs? against one sig? against the component-wise
-union of their arguments?). There's no clear answer, and anything we choose will
-be bound to confuse or surprise someone.
-
-Also because Sorbet doesn't control whether the method can be dispatched to,
-even if it were going to make a static claim about whether the code type checks,
-it doesn't get to control which (fake) overload will get dispatched to at the
-call site (again: there's only one version of the method in the VM).
-
-Finally this choice is somewhat philosophical: codebases that make heavy use of
-overloading (even in typed languages where overloading is supported) tend to be
-harder for readers to understand at a glance. The above workaround of defining
-multiple methods with unique names solves this readability problem, because now
-each overload has a descriptive name.
+For more, see [Methods with Overloaded Signatures](overloads.md).
 
 ## 5041
 
