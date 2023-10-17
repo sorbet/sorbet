@@ -425,10 +425,19 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             MethodRef candidate = *it;
             const auto &args = candidate.data(gs)->arguments;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
-            auto mentionsBlockArg = !args.back().isSyntheticBlockArgument();
-            if (mentionsBlockArg != hasBlock) {
-                it = leftCandidates.erase(it);
-                continue;
+            const auto &lastArg = args.back();
+            auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
+            if (hasBlock) {
+                if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
+            } else {
+                if (mentionsBlockArg && lastArg.type != nullptr &&
+                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
             }
             ++it;
         }

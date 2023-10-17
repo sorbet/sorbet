@@ -101,3 +101,96 @@ T.reveal_type(po1) # error: Revealed type: `NilClass`
 
 po2 = PrivateOverloads.new.foo(0) # error: Non-private call to private method
 T.reveal_type(po2) # error: Revealed type: `Integer`
+
+
+class A; end
+class B; end
+
+class BlockOverloads
+  extend T::Sig
+
+  sig { returns(A) }
+  sig { params(blk: T.proc.void).returns(B) }
+  def simple(&blk); end
+
+  sig { params(blk: NilClass).returns(A) }
+  sig { params(blk: T.proc.void).returns(B) }
+  def explicit_nilclass(&blk); end
+
+  sig { returns(A) }
+  sig { params(blk: T.nilable(T.proc.void)).returns(B) }
+  def ambiguous_nilable_a(&blk); end
+  sig { params(blk: T.nilable(T.proc.void)).returns(B) }
+  sig { returns(A) }
+  def ambiguous_nilable_b(&blk); end
+
+  sig { returns(A) }
+  sig { params(blk: T.untyped).returns(B) }
+  def ambiguous_untyped_a(&blk); end
+  sig { params(blk: T.untyped).returns(B) }
+  sig { returns(A) }
+  def ambiguous_untyped_b(&blk); end
+
+  sig { returns(A) }
+  sig do
+    type_parameters(:U)
+      .params(blk: T.proc.returns(T.type_parameter(:U)))
+      .returns(T.type_parameter(:U))
+  end
+  def not_fully_defined(&blk); end
+  sig do
+    type_parameters(:U)
+      .params(blk: T.proc.returns(T.type_parameter(:U)))
+      .returns(T.type_parameter(:U))
+  end
+  sig { returns(A) }
+  def not_fully_defined_flipped(&blk); end
+
+  def test
+    x = simple
+    T.reveal_type(x) # error: `A`
+    x = simple {}
+    T.reveal_type(x) # error: `B`
+    x = simple(&:to_s)
+    T.reveal_type(x) # error: `B`
+
+
+    x = explicit_nilclass
+    T.reveal_type(x) # error: `A`
+    x = explicit_nilclass {}
+    T.reveal_type(x) # error: `B`
+
+
+    x = ambiguous_nilable_a
+    T.reveal_type(x) # error: `A`
+    x = ambiguous_nilable_a {}
+    T.reveal_type(x) # error: `B`
+
+    x = ambiguous_nilable_b
+    T.reveal_type(x) # error: `B`
+    x = ambiguous_nilable_b {}
+    T.reveal_type(x) # error: `B`
+
+
+    x = ambiguous_untyped_a
+    T.reveal_type(x) # error: `A`
+    x = ambiguous_untyped_a {}
+    T.reveal_type(x) # error: `B`
+
+    x = ambiguous_untyped_b
+    T.reveal_type(x) # error: `B`
+    x = ambiguous_untyped_b {}
+    T.reveal_type(x) # error: `B`
+
+
+    x = not_fully_defined
+    T.reveal_type(x) # error: `A`
+    x = not_fully_defined {B.new}
+    T.reveal_type(x) # error: `B`
+
+    x = not_fully_defined_flipped
+    T.reveal_type(x) # error: `A`
+    x = not_fully_defined_flipped {B.new}
+    T.reveal_type(x) # error: `B`
+  end
+end
