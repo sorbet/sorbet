@@ -6,6 +6,7 @@ class A < T::Struct
 end
 
 class B
+  # AttrReader rewriter doesn't run in autogen
   sig { returns(T.nilable(Integer)) }
   attr_reader :bar
 end

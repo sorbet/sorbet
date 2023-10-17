@@ -53,6 +53,10 @@ struct LocOffsets {
 };
 CheckSize(LocOffsets, 8, 4);
 
+template <typename H> H AbslHashValue(H h, const LocOffsets &m) {
+    return H::combine(std::move(h), m.beginLoc, m.endLoc);
+}
+
 } // namespace sorbet::core
 
 #endif // SORBET_CORE_LOCOFFSETS_H
