@@ -366,9 +366,9 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
     MethodRef fallback = primary;
-    vector<pair<size_t, MethodRef>> allCandidates;
+    vector<MethodRef> allCandidates;
 
-    allCandidates.emplace_back(0, primary);
+    allCandidates.emplace_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         size_t i = 0;
         MethodRef current = primary;
@@ -379,19 +379,17 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
             } else {
-                allCandidates.emplace_back(i, overload);
+                allCandidates.emplace_back(overload);
                 current = overload;
             }
         }
 
         fast_sort(allCandidates, [&](const auto &s1, const auto &s2) -> bool {
-            const auto &[s1_idx, s1_sym] = s1;
-            const auto &[s2_idx, s2_sym] = s2;
-            if (getArity(gs, s1_sym) < getArity(gs, s2_sym)) {
+            if (getArity(gs, s1) < getArity(gs, s2)) {
                 return true;
             }
-            if (getArity(gs, s1_sym) == getArity(gs, s2_sym)) {
-                return s1_idx < s2_idx;
+            if (getArity(gs, s1) == getArity(gs, s2)) {
+                return s1.id() < s2.id();
             }
             return false;
         });
@@ -399,7 +397,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     vector<GuessOverloadCandidate> allCandidatesWithConstraints;
 
-    for (const auto &[_idx, candidate] : allCandidates) {
+    for (const auto &candidate : allCandidates) {
         if (!candidate.data(gs)->flags.isGenericMethod) {
             allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, nullptr});
             continue;
