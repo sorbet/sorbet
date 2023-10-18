@@ -12,6 +12,15 @@
 using namespace std;
 namespace sorbet::infer {
 
+bool Inference::willRun(core::Context ctx, core::MethodRef method) {
+    if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || method.data(ctx)->flags.isOverloaded ||
+        (method.data(ctx)->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True)) {
+        return false;
+    }
+
+    return true;
+}
+
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
