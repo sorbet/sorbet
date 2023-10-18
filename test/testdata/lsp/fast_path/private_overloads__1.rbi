@@ -1,0 +1,14 @@
+# typed: strict
+# spacer for exclude-from-file-update
+
+# Must be at least one `hover` in this file to trigger the
+# LSPTypechecker::retypecheck codepath (fast path with no edit)
+
+class PrivateOverloads
+  #     ^ hover: T.class_of(PrivateOverloads)
+  extend T::Sig
+
+  sig {returns(NilClass)}
+  sig {params(x: Integer).returns(Integer)}
+  private def foo(x=nil); end
+end
