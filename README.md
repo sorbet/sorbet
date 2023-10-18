@@ -854,6 +854,9 @@ assertion replaces the spacer line, instead of being inserted into the file as a
 completely new line. Search for `spacer` in some of the `fast_path` tests to see
 an example.
 
+To craft an update to an RBI file, use `.rbiupdate` instead of `.rbupdate`,
+unless you mean to simulate the effect of converting an RBI file to an RB file.
+
 ### LSP recorded tests
 
 It is possible to record an LSP session and use it as a test. We are attempting to move away from this form of
