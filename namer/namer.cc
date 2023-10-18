@@ -1353,7 +1353,6 @@ private:
             }
         }
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
-        sym.data(ctx)->addLoc(ctx, ctx.locAt(staticField.lhsLoc));
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
         sym.data(ctx)->resultType = nullptr;
