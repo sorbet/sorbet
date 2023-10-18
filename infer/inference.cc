@@ -12,13 +12,36 @@
 using namespace std;
 namespace sorbet::infer {
 
-bool Inference::willRun(core::Context ctx, core::MethodRef method) {
+bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True) {
         return false;
     }
 
-    if (method.data(ctx)->flags.isOverloaded ||
-        (method.data(ctx)->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True)) {
+    const auto &methodData = method.data(ctx);
+    auto name = methodData->name;
+    auto isMangleRenameOverload = name.kind() == core::NameKind::UNIQUE &&
+                                  name.dataUnique(ctx)->uniqueNameKind == core::UniqueNameKind::MangleRenameOverload;
+    if (isMangleRenameOverload || methodData->flags.isOverloaded) {
+        if (!ctx.file.data(ctx).permitOverloadDefinitions()) {
+            if (auto e = ctx.beginError(loc, core::errors::Infer::TypecheckOverloadBody)) {
+                e.setHeader("Refusing to typecheck `{}` against an overloaded signature", method.show(ctx));
+                auto overloadMethod = method;
+                if (isMangleRenameOverload) {
+                    overloadMethod =
+                        methodData->owner.data(ctx)->findMember(ctx, name.dataUnique(ctx)->original).asMethodRef();
+                }
+                e.addErrorLine(overloadMethod.data(ctx)->loc(), "Given an overloaded signature here");
+                e.addErrorNote("Overloads are only supported in RBI files.\n"
+                               "    To silence this error, mark this file `{}`\n"
+                               "    Read the error doc for how to avoid using overloaded methods in the first place.",
+                               "# typed: false");
+            }
+        }
+
+        return false;
+    }
+
+    if (methodData->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
         return false;
     }
 

@@ -4335,6 +4335,10 @@ See also:
 [How can I fix type errors that arise from `super`?]:
   /docs/faq#how-can-i-fix-type-errors-that-arise-from-super
 
+## 7049
+
+See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

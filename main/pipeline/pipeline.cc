@@ -57,7 +57,7 @@ public:
 
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        if (!infer::Inference::willRun(ctx, m.symbol)) {
+        if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
         }
 

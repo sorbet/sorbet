@@ -30,8 +30,6 @@ public:
     Context(const MutableContext &other) noexcept;
 
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
-    bool permitOverloadDefinitions(FileRef sigLoc) const;
-    static bool permitOverloadDefinitions(const core::GlobalState &gs, FileRef sigLoc, core::SymbolRef owner);
 
     Context withOwner(SymbolRef sym) const;
     Context withFile(FileRef file) const;
@@ -65,8 +63,6 @@ public:
     // `self.singleton_class` (We model classes as being normal instances of
     // their singleton classes for most purposes)
     ClassOrModuleRef selfClass();
-
-    bool permitOverloadDefinitions(FileRef sigLoc) const;
 
     MutableContext withOwner(SymbolRef sym) const;
     MutableContext withFile(FileRef file) const;
