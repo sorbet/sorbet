@@ -803,6 +803,14 @@ class OptionParser
       .returns(T.untyped)
   end
   sig do
+    params(
+      type: T.any(T.class_of(Shellwords), T.class_of(Array)),
+      opts: T.untyped,
+      block: T.nilable(T.proc.params(arg0: T::Array[String]).void)
+    )
+      .returns(T.untyped)
+  end
+  sig do
     type_parameters(:Type)
       .params(
         type: T::Class[T.type_parameter(:Type)],
