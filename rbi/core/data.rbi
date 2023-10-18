@@ -226,12 +226,10 @@ class Data < Object
   #     return Qnil;
   # }
   # ```
-  sig { params(args: T.untyped).returns(Data) }
-  sig { params(kwargs: T.untyped).returns(Data) }
+  sig { params(args: T.untyped, kwargs: T.untyped).returns(Data) }
   def new(*args, **kwargs); end
 
-  sig { params(args: T.untyped).returns(Data) }
-  sig { params(kwargs: T.untyped).returns(Data) }
+  sig { params(args: T.untyped, kwargs: T.untyped).returns(Data) }
   def self.[](*args, **kwargs); end
 
   # Returns `true` if `other` is the same class as `self`, and all members are
