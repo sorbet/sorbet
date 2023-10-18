@@ -13,7 +13,11 @@ using namespace std;
 namespace sorbet::infer {
 
 bool Inference::willRun(core::Context ctx, core::MethodRef method) {
-    if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || method.data(ctx)->flags.isOverloaded ||
+    if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True) {
+        return false;
+    }
+
+    if (method.data(ctx)->flags.isOverloaded ||
         (method.data(ctx)->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True)) {
         return false;
     }
