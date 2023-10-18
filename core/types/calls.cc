@@ -343,11 +343,9 @@ size_t getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(method.data(gs)->arguments.back().flags.isBlock, "Last arg should be the block arg.");
 
     const auto &arguments = method.data(gs)->arguments;
-    auto restArg =
-        absl::c_find_if(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; });
-    if (restArg != arguments.end()) {
+    if (absl::c_any_of(arguments, [&](const auto &arg) { return arg.flags.isRepeated && !arg.flags.isKeyword; })) {
         return SIZE_MAX;
-    }
+    };
 
     // Don't count the block arg in the arity
     return method.data(gs)->arguments.size() - 1;
@@ -385,10 +383,12 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         }
 
         fast_sort(allCandidates, [&](const auto &s1, const auto &s2) -> bool {
-            if (getArity(gs, s1) < getArity(gs, s2)) {
+            auto s1Arity = getArity(gs, s1);
+            auto s2Arity = getArity(gs, s2);
+            if (s1Arity < s2Arity) {
                 return true;
             }
-            if (getArity(gs, s1) == getArity(gs, s2)) {
+            if (s1Arity == s2Arity) {
                 return s1.id() < s2.id();
             }
             return false;
