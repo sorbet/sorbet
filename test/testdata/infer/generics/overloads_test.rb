@@ -43,7 +43,6 @@ example2(Integer, "--jobs=<n>") do |x|
   T.reveal_type(x) # error: `Integer`
 end
 example2(Integer, "-j<n>", "--jobs=<n>") do |x|
-  # We pick the wrong overload, because our arity is weird in guessOverload
   T.reveal_type(x) # error: `Integer`
 end
 example2("foo", /bar/) do |x|
