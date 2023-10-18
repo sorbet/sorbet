@@ -47,6 +47,6 @@ example2(Integer, "-j<n>", "--jobs=<n>") do |x|
   T.reveal_type(x) # error: `Integer`
 end
 example2("foo", /bar/) do |x|
-  T.reveal_type(x) # => `T.untyped`
+  T.reveal_type(x) # error: `T.untyped`
 end
 
