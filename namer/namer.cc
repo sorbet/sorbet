@@ -1266,8 +1266,9 @@ private:
             symbolData->flags.isSealed = true;
 
             auto classOfKlass = symbolData->singletonClass(ctx);
-            auto sealedSubclasses =
-                ctx.state.enterMethodSymbol(ctx.locAt(mod.loc), classOfKlass, core::Names::sealedSubclasses());
+            auto loc = ctx.locAt(mod.loc);
+            auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
+            sealedSubclasses.data(ctx)->addLoc(ctx, loc);
             auto &blkArg =
                 ctx.state.enterMethodArgumentSymbol(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
             blkArg.flags.isBlock = true;
