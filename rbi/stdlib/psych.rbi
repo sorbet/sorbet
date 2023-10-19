@@ -613,10 +613,11 @@ module Psych
       filename: T.nilable(String),
       fallback: T.untyped,
       kwargs: T.untyped,
+      block: T.nilable(T.proc.params(node: T.untyped).void),
     )
     .returns(T::Array[T.untyped])
   end
-  def self.load_stream(yaml, filename: nil, fallback: [], **kwargs); end
+  def self.load_stream(yaml, filename: nil, fallback: [], **kwargs, &block); end
 
   ###
   # Load the document contained in `filename`. Returns the yaml contained in
