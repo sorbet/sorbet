@@ -20,8 +20,7 @@
 # access that's out of bounds when reporting errors.
 #
 class B
-  extend T::Generic
   R = 1
-  R = type_member
-# ^ error: Redefining constant `R` as a type member or type template
 end
+
+T.reveal_type(B::R) # error: Revealed type: `Integer`
