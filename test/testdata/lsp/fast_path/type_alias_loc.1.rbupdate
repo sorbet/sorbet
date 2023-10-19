@@ -1,0 +1,6 @@
+# typed: true
+
+X = T.type_alias {String}
+
+T.reveal_type(X) # error: Revealed type: `Runtime object representing type: String`
+

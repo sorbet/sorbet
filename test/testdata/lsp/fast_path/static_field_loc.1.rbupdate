@@ -1,0 +1,7 @@
+# typed: true
+#
+class B
+  R = 1
+end
+
+T.reveal_type(B::R) # error: Revealed type: `Integer`

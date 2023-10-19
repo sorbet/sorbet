@@ -1426,7 +1426,11 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     if (store.exists()) {
         ENFORCE(store.isStaticField(*this), "existing symbol is not a static field");
         counterInc("symbols.hit");
-        return store.asFieldRef();
+
+        // Ensures that locs get properly updated on the fast path
+        auto fieldRef = store.asFieldRef();
+        fieldRef.data(*this)->addLoc(*this, loc);
+        return fieldRef;
     }
 
     ENFORCE(!symbolTableFrozen);
