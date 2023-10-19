@@ -287,8 +287,6 @@ template <class To> bool isa_tree(const ExpressionPtr &what) {
 
 bool isa_reference(const ExpressionPtr &what);
 
-bool isa_declaration(const ExpressionPtr &what);
-
 template <class To> To *cast_tree(ExpressionPtr &what) {
     if (isa_tree<To>(what)) {
         return reinterpret_cast<To *>(what.get());

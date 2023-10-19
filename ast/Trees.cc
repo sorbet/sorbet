@@ -123,10 +123,6 @@ bool isa_reference(const ExpressionPtr &what) {
            isa_tree<ShadowArg>(what);
 }
 
-bool isa_declaration(const ExpressionPtr &what) {
-    return isa_tree<MethodDef>(what) || isa_tree<ClassDef>(what);
-}
-
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
  *  [] - prototype only
