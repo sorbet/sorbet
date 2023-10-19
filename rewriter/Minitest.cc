@@ -108,8 +108,21 @@ public:
 };
 
 ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
-    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(expr.loc(), {}), std::move(expr));
+    core::LocOffsets declLoc;
+    if (auto *mdef = ast::cast_tree<ast::MethodDef>(expr)) {
+        declLoc = mdef->declLoc;
+    } else if (auto *cdef = ast::cast_tree<ast::MethodDef>(expr)) {
+        declLoc = cdef->declLoc;
+    } else {
+        declLoc = expr.loc();
+    }
+    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(declLoc, {}), std::move(expr));
 }
+
+core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
+    return send.loc.copyWithZeroLength().join(send.block()->loc.copyWithZeroLength());
+}
+
 } // namespace
 
 ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body);
@@ -229,11 +242,12 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
             }
 
-            auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
+            auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(),
                                             send->loc.copyWithZeroLength(), move(blk));
             // put that into a method def named the appropriate thing
-            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, move(name), move(each)));
+            auto declLoc = declLocForSendWithBlock(*send);
+            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && send->hasBlock() &&
@@ -353,7 +367,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto iteratee = getIteratee(send->getPosArg(0));
         // and then reconstruct the send but with a modified body
         return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, send->funLoc, 1,
+            send->loc, ast::MK::Self(send->recv.loc()), send->fun, send->funLoc, 1,
             ast::MK::SendArgs(
                 move(send->getPosArg(0)),
                 ast::MK::Block(block->loc,
@@ -377,8 +391,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::beforeAngles();
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
+        auto declLoc = declLocForSendWithBlock(*send);
         auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, isClass, std::move(block->body))));
+            ast::MK::SyntheticMethod0(send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -402,13 +417,15 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body)));
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
+        auto declLoc = declLocForSendWithBlock(*send);
+        return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name),
+        auto declLoc = declLocForSendWithBlock(*send);
+        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
                                                            prepareBody(ctx, bodyIsClass, std::move(block->body))));
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
