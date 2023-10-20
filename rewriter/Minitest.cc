@@ -111,9 +111,8 @@ ast::ExpressionPtr addSigVoid(ast::ExpressionPtr expr) {
     core::LocOffsets declLoc;
     if (auto *mdef = ast::cast_tree<ast::MethodDef>(expr)) {
         declLoc = mdef->declLoc;
-    } else if (auto *cdef = ast::cast_tree<ast::MethodDef>(expr)) {
-        declLoc = cdef->declLoc;
     } else {
+        ENFORCE(false, "Added a sig to something that wasn't a method def");
         declLoc = expr.loc();
     }
     return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(declLoc, {}), std::move(expr));
