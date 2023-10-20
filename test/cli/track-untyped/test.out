@@ -5,6 +5,9 @@ a.rb:6: Call to method `foo` on `T.untyped` https://srb.help/7018
     a.rb:5:
      5 |def example_untyped(arg0)
                             ^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
@@ -15,6 +18,9 @@ a.rb:8: Conditional branch on `T.untyped` https://srb.help/7018
     a.rb:6:
      6 |  result = arg0.foo
                    ^^^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
@@ -32,6 +38,9 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
     a.rb:8:
      8 |  if result
              ^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
@@ -45,6 +54,9 @@ a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
     a.rb:8:
      8 |  if result
              ^^^^^^
+    a.rb:5: Blames to `Object#example_untyped`, defined here
+     5 |def example_untyped(arg0)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
@@ -55,6 +67,9 @@ b.rb:4: Call to method `foo` on `T.untyped` https://srb.help/7018
     b.rb:4:
      4 |T.unsafe(nil).foo
         ^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: Blames to `T.unsafe`, defined here
+    NN |  def self.unsafe(value); end
+          ^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 Errors: 5
