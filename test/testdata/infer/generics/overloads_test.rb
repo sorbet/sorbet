@@ -20,3 +20,32 @@ T.reveal_type(res) # error: `T.nilable(Integer)`
 
 res = example('')
 T.reveal_type(res) # error: `T.nilable(String)`
+
+sig do
+  params(
+    type: T::Class[Integer],
+    args: T.untyped,
+    blk: T.nilable(T.proc.params(arg0: Integer).void)
+  )
+  .void
+end
+sig do
+   params(
+      args: T.untyped,
+      blk: T.untyped
+    )
+    .void
+end
+def self.example2(type=T.unsafe(nil), *args, &blk)
+end
+
+example2(Integer, "--jobs=<n>") do |x|
+  T.reveal_type(x) # error: `Integer`
+end
+example2(Integer, "-j<n>", "--jobs=<n>") do |x|
+  T.reveal_type(x) # error: `Integer`
+end
+example2("foo", /bar/) do |x|
+  T.reveal_type(x) # error: `T.untyped`
+end
+
