@@ -60,8 +60,8 @@ The benefits of this approach:
 
 The biggest downside of this approach deals with sharing code.
 
-In most cases, possible to implement one methods in terms of the others. For
-example, with our `find_one`/`find_many` example above:
+In most cases, it's possible to implement one methods in terms of the others.
+For example, with our `find_one`/`find_many` example above:
 
 ```ruby
 sig { params(id: String).returns(MyModel) }
@@ -133,7 +133,14 @@ Overloaded signatures:
 1.  prevent the implementation of that method from being type checked.
 
     If Sorbet sees the method in a source file (in addition to the overloaded
-    definition in an RBI file), it **will not type check** the method's body.
+    definition in an RBI file), it **will not type check** the method's body. In
+    fact, Sorbet will report an error in `# typed: true` files or higher when
+    this happens.
+
+    It's expected that overloaded methods are only used to type external gems'
+    methods, which can't be rewritten to avoid overloads using the techniques
+    mentioned in the
+    [Consider not using overloads](#consider-not-using-overloads) section.
 
 1.  are scanned top-to-bottom when attempting to select a suitable overload.
 
@@ -171,7 +178,7 @@ Overloaded signatures:
 
 ### Why these restrictions?
 
-Consider how overloading works in typed, compiled languages like C++ or Java;
+Consider how overloading works in typed, compiled languages like C++ or Java:
 each overload is a separate method. They actually have separate implementations,
 are type checked separately, compile (with link-time name mangling) to separate
 symbols in the compiled object, and the compiler knows how to resolve each call
