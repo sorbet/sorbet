@@ -346,6 +346,11 @@ int getArity(const GlobalState &gs, MethodRef method) {
     return method.data(gs)->arguments.size() - 1;
 }
 
+struct GuessOverloadCandidate {
+    MethodRef candidate;
+    shared_ptr<TypeConstraint> constr;
+};
+
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
@@ -383,12 +388,37 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         });
     }
 
-    vector<MethodRef> leftCandidates = allCandidates;
+    vector<GuessOverloadCandidate> allCandidatesWithConstraints;
+
+    for (const auto candidate : allCandidates) {
+        if (!candidate.data(gs)->flags.isGenericMethod) {
+            allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, nullptr});
+            continue;
+        }
+
+        // Make a new TypeConstraint with everything in the domain solving to `T.untyped`.
+        //
+        // This allows Sorbet to consider or reject an overload with a parameter like
+        // `T::Array[T.type_parameter(:U)]` based on whether the argument is `String`--in that case,
+        // it doesn't matter what the `T.type_parameter(:U)` is, because `String` is not an `Array`.
+        auto constr = make_unique<TypeConstraint>();
+        for (auto typeArgument : candidate.data(gs)->typeArguments()) {
+            constr->rememberIsSubtype(gs, typeArgument.data(gs)->resultType, Types::untypedUntracked());
+        }
+        if (!constr->solve(gs)) {
+            Exception::raise("Constraint should always solve after creating TypeConstraint with only untyped bounds");
+        }
+
+        allCandidatesWithConstraints.emplace_back(GuessOverloadCandidate{candidate, move(constr)});
+    }
+
+    // Copy the vector
+    auto leftCandidates = allCandidatesWithConstraints;
 
     {
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-                MethodRef candidate = *it;
+                const auto &[candidate, constr] = *it;
                 if (i >= getArity(gs, candidate)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -396,9 +426,16 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
                 auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments[i].type,
                                                            candidate.data(gs)->owner, inClass, targs);
-                if (argType.isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
-                    it = leftCandidates.erase(it);
-                    continue;
+                if (constr == nullptr) {
+                    if (!Types::isSubType(gs, arg, argType)) {
+                        it = leftCandidates.erase(it);
+                        continue;
+                    }
+                } else {
+                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible)) {
+                        it = leftCandidates.erase(it);
+                        continue;
+                    }
                 }
                 ++it;
             }
@@ -415,14 +452,14 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         }
     }
     if (leftCandidates.empty()) {
-        leftCandidates = allCandidates;
+        leftCandidates = allCandidatesWithConstraints;
     } else {
-        fallback = leftCandidates[0];
+        fallback = leftCandidates[0].candidate;
     }
 
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-            MethodRef candidate = *it;
+            const auto &[candidate, constr] = *it;
             const auto &args = candidate.data(gs)->arguments;
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             const auto &lastArg = args.back();
@@ -447,12 +484,12 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         struct Comp {
             const GlobalState &gs;
 
-            bool operator()(MethodRef s, int i) const {
-                return getArity(gs, s) < i;
+            bool operator()(GuessOverloadCandidate &s, int i) const {
+                return getArity(gs, s.candidate) < i;
             }
 
-            bool operator()(int i, MethodRef s) const {
-                return i < getArity(gs, s);
+            bool operator()(int i, GuessOverloadCandidate &s) const {
+                return i < getArity(gs, s.candidate);
             }
 
             Comp(const GlobalState &gs) : gs(gs){};
@@ -465,7 +502,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     }
 
     if (!leftCandidates.empty()) {
-        return leftCandidates[0];
+        return leftCandidates[0].candidate;
     }
     return fallback;
 }
