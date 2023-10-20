@@ -1,5 +1,4 @@
 #include "core/Context.h"
-#include "common/FileOps.h"
 #include "core/GlobalState.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <algorithm>
@@ -18,30 +17,6 @@ ClassOrModuleRef MutableContext::selfClass() {
         return this->owner.asClassOrModuleRef().data(this->state)->singletonClass(this->state);
     }
     return this->owner.enclosingClass(this->state);
-}
-
-bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sigLoc, core::SymbolRef owner) {
-    if (!owner.exists()) {
-        return false;
-    }
-    for (auto loc : owner.locs(gs)) {
-        auto &file = loc.file().data(gs);
-        if ((file.isPayload() || file.isStdlib()) && owner != Symbols::root() &&
-            (owner != Symbols::Object() || sigLoc.data(gs).isStdlib())) {
-            return true;
-        }
-    }
-
-    constexpr string_view whitelistedTest = "overloads_test.rb"sv;
-    return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
-}
-
-bool Context::permitOverloadDefinitions(FileRef sigLoc) const {
-    return Context::permitOverloadDefinitions(state, sigLoc, owner);
-}
-
-bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {
-    return Context::permitOverloadDefinitions(state, sigLoc, owner);
 }
 
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner), file(other.file) {}

@@ -361,8 +361,6 @@ struct GuessOverloadCandidate {
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
-            "overload not permitted here");
     MethodRef fallback = primary;
     vector<MethodRef> allCandidates;
 

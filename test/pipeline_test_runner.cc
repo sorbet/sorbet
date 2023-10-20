@@ -68,11 +68,10 @@ public:
     vector<unique_ptr<cfg::CFG>> cfgs;
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-
-        if (m.symbol.data(ctx)->flags.isOverloaded ||
-            (m.symbol.data(ctx)->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True)) {
+        if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
             return;
         }
+
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
         auto symbol = cfg->symbol;
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));

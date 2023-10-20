@@ -1,4 +1,5 @@
 #include "core/Files.h"
+#include "common/FileOps.h"
 #include "core/Context.h"
 #include "core/FileHash.h"
 #include "core/GlobalState.h"
@@ -332,6 +333,16 @@ bool File::isRBI() const {
 
 bool File::isStdlib() const {
     return this->originalSigil == StrictLevel::Stdlib;
+}
+
+namespace {
+
+constexpr string_view OVERLOADS_TEST_RB = "overloads_test.rb"sv;
+
+}
+
+bool File::permitOverloadDefinitions() const {
+    return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB;
 }
 
 bool File::isPackage() const {

@@ -8,6 +8,7 @@
 namespace sorbet::infer {
 class Inference final {
 public:
+    static bool willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method);
     static std::unique_ptr<cfg::CFG> run(core::Context ctx, std::unique_ptr<cfg::CFG> cfg);
 };
 } // namespace sorbet::infer

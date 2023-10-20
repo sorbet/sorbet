@@ -86,15 +86,15 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
         string source_file_path = absl::StrCat(exp.folder, filePath.substr(0, kind_start));
         exp.expectations[kind][source_file_path] = filePath;
         return true;
-    } else if (absl::EndsWith(filePath, ".rbupdate")) {
-        int suffixLength = strlen(".rbupdate");
-
-        auto pos = filePath.rfind('.', filePath.length() - suffixLength - 1);
+    } else if (absl::EndsWith(filePath, ".rbupdate") || absl::EndsWith(filePath, ".rbiupdate")) {
+        auto suffixStart = filePath.rfind('.');
+        auto pos = filePath.rfind('.', suffixStart - 1);
         if (pos != string::npos) {
-            int version = stoi(string(filePath.substr(pos + 1, filePath.length() - suffixLength)));
+            int version = stoi(string(filePath.substr(pos + 1, suffixStart)));
 
             auto &updates = exp.sourceLSPFileUpdates[version];
-            updates.emplace_back(absl::StrCat(filePath.substr(0, pos), ".rb"), filePath);
+            auto suffix = absl::EndsWith(filePath, ".rbupdate") ? ".rb" : ".rbi";
+            updates.emplace_back(absl::StrCat(filePath.substr(0, pos), suffix), filePath);
         } else {
             cout << "Ignoring " << filePath << ": No version number provided (expected .[number].rbupdate).\n";
         }
@@ -106,8 +106,8 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
 
 vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
     unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());
-    vector<string> names =
-        sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".exp"}, *workerPool, recursive, {}, {});
+    vector<string> names = sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".rbiupdate", ".exp"},
+                                                           *workerPool, recursive, {}, {});
     const int prefixLen = dir.length() + 1;
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
