@@ -1430,6 +1430,7 @@ private:
                         }) != members.end());
             }
             sym = existingTypeMember;
+            sym.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
         } else {
             auto name = typeMember.name;
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, name);
