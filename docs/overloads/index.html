@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Methods with Overloaded Signatures · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Sorbet has minimal support for defining methods with overloaded signatures."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Methods with Overloaded Signatures · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Sorbet has minimal support for defining methods with overloaded signatures."/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments); }
+              gtag('js', new Date());
+              gtag('config', 'G-5H7PQ9Z8KF');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Experimental Features</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/why-type-annotations">Why type annotations?</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/unsupported">Unsupported Ruby Features</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">sig</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations (non-sig)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">T.let, T.cast, T.must, T.bind</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types (Integer, String)</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types (T.nilable)</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types (T.any)</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow-Sensitivity (is_a?, nil?)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">T.type_alias</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness (T.absurd)</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/anything">T.anything</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types (T.all)</a></li><li class="navListItem"><a class="navItem" href="/docs/generics">Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li><li class="navListItem"><a class="navItem" href="/docs/strong">Banning untyped</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Editor Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sig-suggestion">Suggesting sigs</a></li><li class="navListItem"><a class="navItem" href="/docs/highlight-untyped">Highlighting untyped</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/overloads">Overloads</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/overloads.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Methods with Overloaded Signatures</h1></header><article><div><span><p>Sorbet has minimal support for defining methods with overloaded signatures.</p>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> Integer).returns(Integer) }
+sig { params(<span class="hljs-symbol">x:</span> String).returns(String) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="consider-not-using-overloads"></a><a href="#consider-not-using-overloads" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Consider not using overloads</h2>
+<p>Overloads have multiple downsides:</p>
+<ul>
+<li>They encourage unwieldy signatures, which are confusing to understand.</li>
+<li>They aren’t as precise <a href="/docs/gradual">gradually typed</a> languages like Sorbet as
+they are in typed languages which lack <a href="/docs/untyped"><code>T.untyped</code></a>.</li>
+<li>Their implementation in Sorbet is somewhat second class (due in part to the
+previous two points).</li>
+</ul>
+<p>Instead of using overloaded methods, consider simply defining multiple methods.</p>
+<p>For example, instead of defining a method like this, which accepts either a
+string or an array of strings and returns either a single <code>MyModel</code> or an array
+of <code>MyModel</code>s:</p>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">what:</span> String).returns(MyModel) }
+sig { params(<span class="hljs-symbol">what:</span> T::Array[String]).returns(T::Array[MyModel]) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find</span><span class="hljs-params">(what)</span></span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>Consider instead simply defining two methods, each with a descriptive name:</p>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">id:</span> String).returns(MyModel) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_one</span><span class="hljs-params">(id)</span></span>; <span class="hljs-keyword">end</span>
+
+sig { params(<span class="hljs-symbol">ids:</span> T::Array[String]).returns(T::Array[MyModel]) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_many</span><span class="hljs-params">(ids)</span></span>; <span class="hljs-keyword">end</span>
+</code></pre>
+<p>The benefits of this approach:</p>
+<ul>
+<li>Each method has a descriptive name, making the meaning more well-understood at
+the call site.</li>
+<li>The argument names can be unique in each definition as well. In this example:
+<code>id</code> vs <code>ids</code>.</li>
+<li>Each method can be documented independently. Documentation above a method
+definition is surfaced when hovering over a method call and when selecting
+completion items.</li>
+<li>Since the method name controls which method is selected, untyped arguments do
+not interfere with the inferred return type of a method call.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="multiple-methods-but-sharing-a-common-implementation"></a><a href="#multiple-methods-but-sharing-a-common-implementation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multiple methods, but sharing a common implementation</h3>
+<p>The biggest downside of this approach deals with sharing code.</p>
+<p>In most cases, it’s possible to implement one methods in terms of the others.
+For example, with our <code>find_one</code>/<code>find_many</code> example above:</p>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">id:</span> String).returns(MyModel) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_one</span><span class="hljs-params">(id)</span></span>
+  result = find_many([id])
+  raise <span class="hljs-string">"find_many did not return a single result"</span> <span class="hljs-keyword">unless</span> result.size == <span class="hljs-number">1</span>
+  result.fetch(<span class="hljs-number">0</span>)
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In cases when this is not possible, another option is to do something like this:</p>
+<pre><code class="hljs css language-ruby">sig <span class="hljs-keyword">do</span>
+  params(<span class="hljs-symbol">what:</span> T.any(String, T::Array[String]))
+    .returns(T.any(MyModel, T::Array[MyModel]))
+<span class="hljs-keyword">end</span>
+private <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_find_impl</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+
+sig { params(<span class="hljs-symbol">id:</span> String).returns(MyModel) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_one</span><span class="hljs-params">(id)</span></span>
+  T.unsafe(_find_impl(id))
+<span class="hljs-keyword">end</span>
+
+sig { params(<span class="hljs-symbol">ids:</span> T::Array[String]).returns(T::Array[MyModel]) }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">find_many</span><span class="hljs-params">(ids)</span></span>
+  T.unsafe(_find_impl(ids))
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>In this example, we define the common logic in a private <code>_find_impl</code> method
+with a signature that accepts the superset of all arguments, and returns a
+superset of all return types. We then call that method inside public methods
+with more specific types, using <code>T.unsafe</code>. This keeps usage of <code>T.untyped</code>
+internal to the class’s private implementation while exposing a typed public
+API.</p>
+<p>There are a couple other ways to accomplish a similar effect:</p>
+<ul>
+<li><p>Mark the return type of <code>_find_impl</code> as <code>T.untyped</code>, to avoid needing a
+<code>T.unsafe</code> at each call site. Or omit the signature on <code>_find_impl</code> entirely.</p></li>
+<li><p>Define the signatures for <code>find_one</code> and <code>find_many</code> in an <a href="/docs/rbi">RBI file</a>
+alongside the source file, and use something like</p>
+<pre><code class="hljs css language-ruby">T.unsafe(<span class="hljs-keyword">self</span>).alias_method(<span class="hljs-symbol">:find_one</span>, <span class="hljs-symbol">:_find_impl</span>)
+T.unsafe(<span class="hljs-keyword">self</span>).alias_method(<span class="hljs-symbol">:find_many</span>, <span class="hljs-symbol">:_find_impl</span>)
+</code></pre>
+<p>to create method aliases to the <code>_find_impl</code> method, but using <code>T.unsafe</code> to
+hide those aliases from Sorbet, so that the RBI definitions are all Sorbet
+sees.</p></li>
+</ul>
+<p>Any of the options presented here will offer a more first-class experience than
+attempting to define a method with overloaded signatures.</p>
+<h2><a class="anchor" aria-hidden="true" id="restrictions-on-overloaded-methods"></a><a href="#restrictions-on-overloaded-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Restrictions on overloaded methods</h2>
+<p>Support for overloaded methods is minimal because there are restrictions on when
+they are allowed to appear and how they are allowed to be used.</p>
+<p>Overloaded signatures:</p>
+<ol>
+<li><p>may only appear in RBI files, not in Ruby source files.</p></li>
+<li><p>prevent the implementation of that method from being type checked.</p>
+<p>If Sorbet sees the method in a source file (in addition to the overloaded
+definition in an RBI file), it <strong>will not type check</strong> the method’s body. In
+fact, Sorbet will report an error in <code># typed: true</code> files or higher when
+this happens.</p>
+<p>It’s expected that overloaded methods are only used to type external gems’
+methods, which can’t be rewritten to avoid overloads using the techniques
+mentioned in the
+<a href="#consider-not-using-overloads">Consider not using overloads</a> section.</p></li>
+<li><p>are scanned top-to-bottom when attempting to select a suitable overload.</p>
+<p>If no suitable overload is found, the first overload is selected, which may
+be wrong. If multiple suitable overloads are found, the first suitable
+candidate is used.</p></li>
+<li><p>use a very simplistic, sometimes-wrong heuristic for selecting an overload.</p>
+<p>Some examples of the limitations of this heuristic:</p>
+<ul>
+<li><p>Overloads which are <a href="/docs/generics">generic methods</a>, only get approximate
+constraint resolution, which means that Sorbet may select an overload
+optimistically that causes errors when it could have picked another
+overload without errors.</p></li>
+<li><p>Exactly one overload candidate is selected in the end. More specifically,
+Sorbet will never attempt to select two overloads and merge their results
+together. (For example, if there is an overload which accepts <code>String</code>
+arguments, and another which accepts <code>Integer</code> arguments, when passed an
+argument of type <code>T.any(Integer, String)</code> Sorbet will find no suitable
+overload, and default to the first, which only accepts <code>Integer</code>.)</p>
+<p>The usual workaround for cases like these is to manually declare a final
+overload which accepts a superset of all types that the method should be
+able to accept.</p></li>
+</ul></li>
+<li><p>are thwarted by untyped arguments.</p>
+<p>In the presence of untyped arguments, chances are high that the first
+overload is selected, which might not be desired.</p></li>
+<li><p>do not support using the presence, absence, or types of keyword parameters
+for deciding whether a given overload is selected.</p></li>
+</ol>
+<h3><a class="anchor" aria-hidden="true" id="why-these-restrictions"></a><a href="#why-these-restrictions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why these restrictions?</h3>
+<p>Consider how overloading works in typed, compiled languages like C++ or Java:
+each overload is a separate method. They actually have separate implementations,
+are type checked separately, compile (with link-time name mangling) to separate
+symbols in the compiled object, and the compiler knows how to resolve each call
+site to a specific overload ahead of time, either statically or dynamically via
+virtual dispatch.</p>
+<p>Meanwhile, Ruby itself doesn’t have overloading—there’s only ever one method
+registered with a given name in the VM, regardless of what parameters it
+accepts. That complicates things. It becomes unclear how Sorbet should typecheck
+the body of the method (against all sigs? against one sig? against the
+component-wise union of their arguments?). There’s no clear answer, and anything
+we choose will be bound to confuse or surprise someone.</p>
+<p>Also because Sorbet doesn’t control whether the method can be dispatched to,
+even if it were going to make a static claim about whether the code type checks,
+it doesn’t get to control which (fake) overload will get dispatched to at the
+call site (again: there’s only one version of the method in the VM).</p>
+<p>Finally this choice is somewhat philosophical: codebases that make heavy use of
+overloading (even in typed languages where overloading is supported) tend to be
+harder for readers to understand at a glance. The above workaround of defining
+multiple methods with unique names solves this readability problem, because now
+each overload has a descriptive name.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-methods-with-overloaded-signatures"></a><a href="#defining-methods-with-overloaded-signatures" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining methods with overloaded signatures</h2>
+<p>Unlike other methods, where every parameter in the method definition must also
+have a type in the signature, overloaded signatures are allowed to omit
+parameters. For example:</p>
+<pre><code class="hljs css language-ruby">sig { returns(Enumerator[Integer]) }
+sig { params(<span class="hljs-symbol">blk:</span> T.proc.params(<span class="hljs-symbol">x:</span> Integer).void).void }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(&amp;blk)</span></span>; <span class="hljs-keyword">end</span>
+
+x = example
+T.reveal_type(x) <span class="hljs-comment"># =&gt; Enumerator[Integer]</span>
+
+y = example { <span class="hljs-params">|x|</span> p(x) }
+T.reveal_type(y) <span class="hljs-comment"># =&gt; void</span>
+</code></pre>
+<p>Notice how the first overloaded signature omits giving a type for the <code>blk</code>
+parameter. Sorbet uses the presence or absence of an argument (including a block
+argument) to select a suitable overload.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/shapes"><span class="arrow-prev">← </span><span>Shapes</span></a><a class="docs-next button" href="/docs/requires-ancestor"><span>Requiring Ancestors</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#consider-not-using-overloads">Consider not using overloads</a><ul class="toc-headings"><li><a href="#multiple-methods-but-sharing-a-common-implementation">Multiple methods, but sharing a common implementation</a></li></ul></li><li><a href="#restrictions-on-overloaded-methods">Restrictions on overloaded methods</a><ul class="toc-headings"><li><a href="#why-these-restrictions">Why these restrictions?</a></li></ul></li><li><a href="#defining-methods-with-overloaded-signatures">Defining methods with overloaded signatures</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
