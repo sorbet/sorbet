@@ -17,16 +17,16 @@ def example(x); end
 Overloads have multiple downsides:
 
 - They encourage unwieldy signatures, which are confusing to understand.
-- They aren't as precise [gradually typed](gradual.md) languages like Sorbet as
-  they are in typed languages which lack [`T.untyped`](untyped.md).
+- They aren't as precise in [gradually typed](gradual.md) languages like Sorbet
+  as they are in typed languages which lack [`T.untyped`](untyped.md).
 - Their implementation in Sorbet is somewhat second class (due in part to the
   previous two points).
 
 Instead of using overloaded methods, consider simply defining multiple methods.
 
-For example, instead of defining a method like this, which accepts either a
-string or an array of strings and returns either a single `MyModel` or an array
-of `MyModel`s:
+For example, instead of defining a method like the following, which accepts
+either a string or an array of strings and returns either a single `MyModel` or
+an array of `MyModel`s:
 
 ```ruby
 sig { params(what: String).returns(MyModel) }
@@ -58,10 +58,10 @@ The benefits of this approach:
 
 ### Multiple methods, but sharing a common implementation
 
-The biggest downside of this approach deals with sharing code.
+The biggest downside of this approach has to do with sharing code.
 
-In most cases, it's possible to implement one methods in terms of the others.
-For example, with our `find_one`/`find_many` example above:
+In most cases, it's possible to implement one method in terms of the other. For
+example, with our `find_one`/`find_many` example above:
 
 ```ruby
 sig { params(id: String).returns(MyModel) }
