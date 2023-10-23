@@ -1299,6 +1299,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             counterInc("symbols.hit");
+            typeArg.data(*this)->addLoc(*this, loc);
             return typeArg;
         }
     }
