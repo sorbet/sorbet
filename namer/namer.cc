@@ -1192,6 +1192,23 @@ private:
         if (symbol != core::Symbols::root()) {
             symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
 
+            // we want to force create singleton class only if it's a known definition
+            core::ClassOrModuleRef singletonClass;
+            if (isUnknown) {
+                singletonClass = symbol.data(ctx)->lookupSingletonClass(ctx);
+            } else {
+                singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            }
+
+            if (singletonClass.exists()) {
+                singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                auto attachedClassTM =
+                    singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
+                if (attachedClassTM.exists() && attachedClassTM.isTypeMember()) {
+                    attachedClassTM.asTypeMemberRef().data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                }
+            }
+
             if (!isUnknown) {
                 if (klass.definesBehavior) {
                     auto &behaviorLocs = classBehaviorLocs[symbol];
