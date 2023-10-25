@@ -1,0 +1,33 @@
+test/cli/setter-does-not-exist/test.rb:11: Setter method `foo=` does not exist on `A` https://srb.help/7003
+    11 |A.new(foo: 0).foo = 1
+                      ^^^^^
+  Got `A` originating from:
+    test/cli/setter-does-not-exist/test.rb:11:
+    11 |A.new(foo: 0).foo = 1
+        ^^^^^^^^^^^^^
+    test/cli/setter-does-not-exist/test.rb:4: Method `foo` defined here without a corresponding setter
+     4 |  const :foo, Integer
+          ^^^^^^^^^^^^^^^^^^^
+
+test/cli/setter-does-not-exist/test.rb:12: Setter method `bar=` does not exist on `A` https://srb.help/7003
+    12 |A.new(foo: 0).bar = 1
+                      ^^^^^
+  Got `A` originating from:
+    test/cli/setter-does-not-exist/test.rb:12:
+    12 |A.new(foo: 0).bar = 1
+        ^^^^^^^^^^^^^
+    test/cli/setter-does-not-exist/test.rb:6: Method `bar` defined here without a corresponding setter
+     6 |  attr_reader :bar
+          ^^^^^^^^^^^^^^^^
+
+test/cli/setter-does-not-exist/test.rb:13: Setter method `qux=` does not exist on `A` https://srb.help/7003
+    13 |A.new(foo: 0).qux = 1
+                      ^^^^^
+  Got `A` originating from:
+    test/cli/setter-does-not-exist/test.rb:13:
+    13 |A.new(foo: 0).qux = 1
+        ^^^^^^^^^^^^^
+    test/cli/setter-does-not-exist/test.rb:8: Method `qux` defined here without a corresponding setter
+     8 |  def qux; end
+          ^^^^^^^
+Errors: 3

@@ -5,4 +5,4 @@ end
 
 a = Foo::Bar.new(1)
 a.x = 2
-a.y = 3 # error: Method `y=` does not exist on `Foo::Bar`
+a.y = 3 # error: Setter method `y=` does not exist on `Foo::Bar`

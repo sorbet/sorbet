@@ -134,5 +134,5 @@ class ImmutableTest
 
   obj = Immutable.new(b: "foo")
   obj.b = "bar"
-    # ^^^ error: Method `b=` does not exist on `Immutable`
+    # ^^^ error: Setter method `b=` does not exist on `Immutable`
 end

@@ -105,9 +105,9 @@ def main
     T.reveal_type(AdvancedODM.new.hash_of) # error: Revealed type: `T::Hash[Symbol, String]`
 
     T.reveal_type(AdvancedODM.new.const_explicit) # error: Revealed type: `String`
-    AdvancedODM.new.const_explicit = 'b' # error: Method `const_explicit=` does not exist on `AdvancedODM`
+    AdvancedODM.new.const_explicit = 'b' # error: Setter method `const_explicit=` does not exist on `AdvancedODM`
     T.reveal_type(AdvancedODM.new.const) # error: Revealed type: `String`
-    AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
+    AdvancedODM.new.const = 'b' # error: Setter method `const=` does not exist on `AdvancedODM`
 
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
@@ -132,13 +132,13 @@ def main
     PropHelpers2.new.token = nil # error: does not match expected type
 
     T.reveal_type(PropHelpers2.new.created) # error: Revealed type: `Float`
-    PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
+    PropHelpers2.new.created = 0.0 # error: Setter method `created=` does not exist
 
     T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
     T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
-    EncryptedProp.new.bar = "hello" # error: Method `bar=` does not exist
+    EncryptedProp.new.bar = "hello" # error: Setter method `bar=` does not exist
 
     T.reveal_type(AdvancedODM.new.ifunset) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`
