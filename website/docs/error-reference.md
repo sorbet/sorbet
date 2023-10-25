@@ -1993,18 +1993,27 @@ intent to create a new type alias.)
 
 ## 5035
 
-A method was marked `override`, but sorbet was unable to find a method in the
-class's ancestors that would be overridden. Ensure that the method being
-overridden exists in the ancestors of the class defining the `override` method,
-or remove `override` from the signature that's raising the error. See
-[Override Checking](override-checking.md) for more information about `override`.
+There are two cases when Sorbet might produce this error code:
 
-If the parent method definitely exists at runtime, it might be hidden in a
-[`# typed: ignore`](static#file-level-granularity-strictness-levels) file.
-Sorbet will not see it and this error will be raised. In that case you will need
-to either raise the `typed` sigil of that file above `ignore`, or generate an
-[RBI file](rbi) that contains signatures for the classes and methods that file
-defines.
+1.  A method was marked `override`, but sorbet was unable to find a method in
+    the class's ancestors that would be overridden. Ensure that the method being
+    overridden exists in the ancestors of the class defining the `override`
+    method, or remove `override` from the signature that's raising the error.
+
+    If the parent method definitely exists at runtime, it might be hidden in a
+    [`# typed: ignore`](static#file-level-granularity-strictness-levels) file,
+    or defined via metaprogramming. To fix, either raise the `typed` sigil of
+    that file above `ignore`, or generate an [RBI file](rbi) that contains
+    signatures for the classes and methods that file defines.
+
+1.  Sorbet found the method that this method overrides, but the override method
+    is not valid. An override method must accept at least as many arguments as
+    the parent method, with types at least as wide as the parent's types, and
+    return a value that is at most as wide as the parent's return type. This is
+    in keeping with the
+    [Liskov substitution principle](https://en.wikipedia.org/wiki/Liskov_substitution_principle).
+
+See [Override Checking](override-checking.md) for more.
 
 ## 5036
 
