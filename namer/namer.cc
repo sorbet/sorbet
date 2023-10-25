@@ -1464,6 +1464,9 @@ private:
                 auto alias =
                     ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeTemplateAliasName);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
+            } else {
+                auto alias = ctx.state.lookupStaticFieldSymbol(context, typeTemplateAliasName);
+                alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
             }
         }
 
