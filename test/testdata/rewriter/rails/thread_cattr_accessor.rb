@@ -13,13 +13,13 @@ class GoodUsages
     self.both = 1
 
     no_instance # error: Method `no_instance` does not exist
-    self.no_instance = 1 # error: Method `no_instance=` does not exist
+    self.no_instance = 1 # error: Setter method `no_instance=` does not exist
 
     no_instance_reader # error: Method `no_instance_reader` does not exist
     self.no_instance_reader= 1
 
     no_instance_writer
-    self.no_instance_writer = 1 # error: Method `no_instance_writer=` does not exist
+    self.no_instance_writer = 1 # error: Setter method `no_instance_writer=` does not exist
   end
 
   both

@@ -41,7 +41,7 @@ class MerchantTokenPropModel
 end
 
 T.reveal_type(MerchantPropModel.new.merchant) # error: Revealed type: `String`
-MerchantPropModel.new.merchant = "hi" # error: Method `merchant=` does not exist
+MerchantPropModel.new.merchant = "hi" # error: Setter method `merchant=` does not exist
 
 T.reveal_type(MerchantTokenPropModel.new.merchant) # error: Revealed type: `Opus::Autogen::Tokens::AccountModelMerchant::Token`
-MerchantTokenPropModel.new.merchant = nil # error: Method `merchant=` does not exist
+MerchantTokenPropModel.new.merchant = nil # error: Setter method `merchant=` does not exist

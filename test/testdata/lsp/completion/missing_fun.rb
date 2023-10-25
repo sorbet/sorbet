@@ -72,7 +72,7 @@ sig {params(x: M).void}
 def test_before_var_assign(x)
   x.
   # ^ completion: bar, foo, qux, ...
-  y = nil # error: Method `y=` does not exist on `M`
+  y = nil # error: Setter method `y=` does not exist on `M`
 end
 
 # This is also technically a valid Ruby program, but Sorbet doesn't support it

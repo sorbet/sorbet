@@ -37,6 +37,6 @@ class ConstantCompletion
     case x # error: Hint: this "case" token might not be properly closed
     when ConstantCompletion::
     #                        ^ completion: A, B, ...
-    y = nil # error: Method `y=` does not exist on `T.class_of(ConstantCompletion)`
+    y = nil # error: Setter method `y=` does not exist on `T.class_of(ConstantCompletion)`
   end
 end # error: unexpected token "end of file"

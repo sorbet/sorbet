@@ -67,7 +67,7 @@ class BadUsages
 
   C = Data.define(:c)
   c_data = C.new(1)
-  c_data.c = 6 # error: Method `c=` does not exist on `BadUsages::C`
+  c_data.c = 6 # error: Setter method `c=` does not exist on `BadUsages::C`
 end
 
 class Main

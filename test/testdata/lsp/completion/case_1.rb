@@ -34,6 +34,6 @@ class MethodCompletion
     case x # error: Hint: this "case" token might not be properly closed
     when MethodCompletion.
     #                     ^ completion: test1, test2, test3, test4, ...
-    y = nil # error: Method `y=` does not exist on `T.class_of(MethodCompletion)`
+    y = nil # error: Setter method `y=` does not exist on `T.class_of(MethodCompletion)`
   end
 end # error: unexpected token "end of file"

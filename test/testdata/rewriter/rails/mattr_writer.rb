@@ -9,8 +9,8 @@ class GoodUsages
   sig {void}
   def usages
     self.both = 1
-    self.no_instance = 1 # error: Method `no_instance=` does not exist
-    self.no_instance_writer = 1 # error: Method `no_instance_writer=` does not exist
+    self.no_instance = 1 # error: Setter method `no_instance=` does not exist
+    self.no_instance_writer = 1 # error: Setter method `no_instance_writer=` does not exist
   end
 
   self.both = 1
