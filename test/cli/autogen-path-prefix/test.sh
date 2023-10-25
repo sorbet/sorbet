@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-main/sorbet --silence-dev-message --stop-after namer --autogen-version=4 \
+main/sorbet --silence-dev-message --stop-after namer --autogen-version=5 \
   -p autogen:autogen.txt -p autogen-msgpack:autogen.msgpack \
   --remove-path-prefix=test/cli/ \
   test/cli/autogen-path-prefix \
