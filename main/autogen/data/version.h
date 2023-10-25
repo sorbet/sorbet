@@ -5,7 +5,7 @@ namespace sorbet::autogen {
 
 class AutogenVersion {
 public:
-    constexpr static int MIN_VERSION = 2;
+    constexpr static int MIN_VERSION = 5;
     constexpr static int MAX_VERSION = 5;
 
     // Version history:
