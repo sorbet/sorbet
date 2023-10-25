@@ -2200,10 +2200,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                     }
 
-                    auto whenBody = MK::Nil(when->loc);
-                    if (when->body != nullptr) {
-                        whenBody = node2TreeImpl(dctx, std::move(when->body));
-                    }
+                    auto whenBody =
+                        (when->body == nullptr) ? MK::Nil(when->loc) : node2TreeImpl(dctx, std::move(when->body));
 
                     res = MK::If(when->loc, std::move(cond), std::move(whenBody), std::move(res));
                 }
