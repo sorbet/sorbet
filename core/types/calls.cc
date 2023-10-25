@@ -695,11 +695,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (e) {
             string thisStr = args.thisType.show(gs);
             auto ancestorsOf = args.name == Names::super() ? "ancestors of " : "";
+            auto isSetter = targetName.isSetter(gs);
+            auto methodPrefix = isSetter ? "Setter method" : "Method";
             if (args.fullType.type != args.thisType) {
-                e.setHeader("Method `{}` does not exist on {}`{}` component of `{}`", targetName.show(gs), ancestorsOf,
-                            thisStr, args.fullType.type.show(gs));
+                e.setHeader("{} `{}` does not exist on {}`{}` component of `{}`", methodPrefix, targetName.show(gs),
+                            ancestorsOf, thisStr, args.fullType.type.show(gs));
             } else {
-                e.setHeader("Method `{}` does not exist on {}`{}`", targetName.show(gs), ancestorsOf, thisStr);
+                e.setHeader("{} `{}` does not exist on {}`{}`", methodPrefix, targetName.show(gs), ancestorsOf,
+                            thisStr);
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
@@ -764,6 +767,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     if (!possibleSymbol.isClassOrModule() &&
                         (!possibleSymbol.isMethod() ||
                          (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        continue;
+                    }
+
+                    if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
+                        e.addErrorLine(possibleSymbol.loc(gs),
+                                       "Method `{}` defined here without a corresponding setter",
+                                       possibleSymbol.name(gs).show(gs));
                         continue;
                     }
 
