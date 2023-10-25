@@ -137,9 +137,6 @@ struct Reference {
     core::LocOffsets loc;
     core::LocOffsets definitionLoc;
 
-    // this is always true
-    // TODO(gdritter): delete this, of course
-    bool is_resolved_statically;
     // `true` if this is the appearance of the constant name associated with a definition: i.e. the name of a class or
     // module or the LHS of a casgn
     bool is_defining_ref;

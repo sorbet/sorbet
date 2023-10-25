@@ -251,7 +251,6 @@ public:
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
-        ref.is_resolved_statically = true;
         ref.is_defining_ref = false;
         // if we're already in the scope of the class (which will be the newest-created one) then we're looking at the
         // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
