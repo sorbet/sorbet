@@ -165,6 +165,9 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     char *body;
     size_t bodySize;
     mpack_writer_init_growable(&writer, &body, &bodySize);
+
+    bool symbolsInBody = version >= 6;
+
     mpack_start_array(&writer, 6);
 
     mpack_write_true(&writer); // did_resolution
@@ -179,6 +182,10 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_finish_array(&writer);
 
     size_t preDefsSize = mpack_writer_buffer_used(&writer);
+
+    if (symbolsInBody) {
+        writeSymbols(ctx, &writer, symbols);
+    }
 
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
@@ -204,7 +211,9 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
 
     mpack_start_array(&writer, pfAttrs.size());
 
-    writeSymbols(ctx, &writer, symbols);
+    if (!symbolsInBody) {
+        writeSymbols(ctx, &writer, symbols);
+    }
 
     if (version >= 6) {
         uint32_t value = 0;
@@ -235,11 +244,15 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_write_u32(&writer, pf.refs.size());
     mpack_write_u32(&writer, pf.defs.size());
 
-    // v5 and up record the size of refs and defs to enable fast skipping
+    if (symbolsInBody) {
+        mpack_write_u32(&writer, symbols.size());
+    }
+
+    // v5 and up record the size of the parsed file's body to enable fast skipping
     // of the entire data chunk, rather than reading and discarding
     // individual msgpack fields.
-    size_t defsAndRefsSize = bodySize - preDefsSize;
-    mpack_write_u64(&writer, defsAndRefsSize);
+    size_t fieldsSize = bodySize - preDefsSize;
+    mpack_write_u64(&writer, fieldsSize);
 
     mpack_write_object_bytes(&writer, body, bodySize);
     MPACK_FREE(body);
@@ -306,11 +319,11 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
     {
         6,
         {
-            "symbols",
             "typed_level",
             "ref_count",
             "def_count",
-            "defs_and_refs_size",
+            "sym_count"
+            "body_size",
         },
     },
 };
