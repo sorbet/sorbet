@@ -150,6 +150,17 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
 MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)) {}
 
+void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
+    int i = -1;
+    mpack_start_array(writer, symbols.size());
+    for (auto sym : symbols) {
+        ++i;
+        auto str = sym.shortName(ctx);
+        packString(writer, str);
+    }
+    mpack_finish_array(writer);
+}
+
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *body;
     size_t bodySize;
@@ -193,14 +204,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
 
     mpack_start_array(&writer, pfAttrs.size());
 
-    int i = -1;
-    mpack_start_array(&writer, symbols.size());
-    for (auto sym : symbols) {
-        ++i;
-        auto str = sym.shortName(ctx);
-        packString(&writer, str);
-    }
-    mpack_finish_array(&writer);
+    writeSymbols(ctx, &writer, symbols);
 
     if (version >= 6) {
         uint32_t value = 0;
