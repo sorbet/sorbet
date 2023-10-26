@@ -1566,17 +1566,25 @@ B = T.type_alias {A}
 Basically, Sorbet can emit more reliable warnings when users declare their
 intent to create a new type alias.)</p>
 <h2><a class="anchor" aria-hidden="true" id="5035"></a><a href="#5035" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5035</h2>
-<p>A method was marked <code>override</code>, but sorbet was unable to find a method in the
-class’s ancestors that would be overridden. Ensure that the method being
-overridden exists in the ancestors of the class defining the <code>override</code> method,
-or remove <code>override</code> from the signature that’s raising the error. See
-<a href="/docs/override-checking">Override Checking</a> for more information about <code>override</code>.</p>
+<p>There are two cases when Sorbet might produce this error code:</p>
+<ol>
+<li><p>A method was marked <code>override</code>, but sorbet was unable to find a method in
+the class’s ancestors that would be overridden. Ensure that the method being
+overridden exists in the ancestors of the class defining the <code>override</code>
+method, or remove <code>override</code> from the signature that’s raising the error.</p>
 <p>If the parent method definitely exists at runtime, it might be hidden in a
-<a href="static#file-level-granularity-strictness-levels"><code># typed: ignore</code></a> file.
-Sorbet will not see it and this error will be raised. In that case you will need
-to either raise the <code>typed</code> sigil of that file above <code>ignore</code>, or generate an
-<a href="rbi">RBI file</a> that contains signatures for the classes and methods that file
-defines.</p>
+<a href="static#file-level-granularity-strictness-levels"><code># typed: ignore</code></a> file,
+or defined via metaprogramming. To fix, either raise the <code>typed</code> sigil of
+that file above <code>ignore</code>, or generate an <a href="rbi">RBI file</a> that contains
+signatures for the classes and methods that file defines.</p></li>
+<li><p>Sorbet found the method that this method overrides, but the override method
+is not valid. An override method must accept at least as many arguments as
+the parent method, with types at least as wide as the parent’s types, and
+return a value that is at most as wide as the parent’s return type. This is
+in keeping with the
+<a href="https://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a>.</p></li>
+</ol>
+<p>See <a href="/docs/override-checking">Override Checking</a> for more.</p>
 <h2><a class="anchor" aria-hidden="true" id="5036"></a><a href="#5036" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>5036</h2>
 <p>See <a href="#5014">5014</a>. 5036 is the same error as <a href="#5014">5014</a> but slightly modified
 to allow more common Ruby idioms to pass by in <code># typed: true</code> (5036 is only
