@@ -147,10 +147,8 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     mpack_finish_array(&writer);
 }
 
-// symbols[0..(typeCount-1)] are reserved for the Type aliases
 MsgpackWriter::MsgpackWriter(int version)
-    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
-      symbols(typeCount.at(version)) {}
+    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)) {}
 
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *body;
@@ -196,42 +194,10 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     mpack_start_array(&writer, pfAttrs.size());
 
     int i = -1;
-    int numTypes = typeCount.at(version);
     mpack_start_array(&writer, symbols.size());
     for (auto sym : symbols) {
         ++i;
-        string_view str;
-        if (i < numTypes) {
-            switch ((Definition::Type)i) {
-                case Definition::Type::Module:
-                    str = "module"sv;
-                    break;
-                case Definition::Type::Class:
-                    str = "class"sv;
-                    break;
-                case Definition::Type::Casgn:
-                    str = "casgn"sv;
-                    break;
-                case Definition::Type::Alias:
-                    str = "alias"sv;
-                    break;
-                case Definition::Type::TypeAlias:
-                    str = "typealias"sv;
-                    break;
-                default: {
-                    // shouldn't happen
-                    auto v = sym.shortName(ctx);
-                    static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
-                    str = v;
-                    break;
-                }
-            }
-        } else {
-            auto v = sym.shortName(ctx);
-            static_assert(std::is_same_v<decltype(v), string_view>, "shortName doesn't return the right thing");
-            str = v;
-        }
-
+        auto str = sym.shortName(ctx);
         packString(&writer, str);
     }
     mpack_finish_array(&writer);
@@ -322,15 +288,6 @@ string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
 
     return header;
 }
-
-// Support back-compat down to V2. V3 includes an additional
-// symbol for definition Type, namely TypeAlias.
-const map<int, int> MsgpackWriter::typeCount{
-    // v5 requires clients to have their own representation for common
-    // definition types, rather than stuffing symbols into the symbol
-    // array.
-    {5, 0},
-};
 
 const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
     {
