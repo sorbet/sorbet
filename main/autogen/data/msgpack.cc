@@ -236,6 +236,32 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     }
     mpack_finish_array(&writer);
 
+    if (version >= 6) {
+        uint32_t value = 0;
+
+        switch (pf.tree.file.data(ctx).strictLevel) {
+            case sorbet::core::StrictLevel::Ignore:
+                value = 1;
+                break;
+            case sorbet::core::StrictLevel::False:
+                value = 2;
+                break;
+            case sorbet::core::StrictLevel::True:
+                value = 3;
+                break;
+            case sorbet::core::StrictLevel::Strict:
+                value = 4;
+                break;
+            case sorbet::core::StrictLevel::Strong:
+                value = 5;
+                break;
+            default:
+                // Default value already set at 0.
+                break;
+        }
+        mpack_write_u32(&writer, value);
+    }
+
     mpack_write_u32(&writer, pf.refs.size());
     mpack_write_u32(&writer, pf.defs.size());
 
@@ -316,10 +342,33 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
             "defs_and_refs_size",
         },
     },
+    {
+        6,
+        {
+            "symbols",
+            "typed_level",
+            "ref_count",
+            "def_count",
+            "defs_and_refs_size",
+        },
+    },
 };
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{
     {5,
+     {
+         "scope",
+         "name",
+         "nesting",
+         "expr_range_start",
+         "expr_range_len",
+         "expr_pos_range_start",
+         "expr_pos_range_len",
+         "resolved",
+         "is_defining_ref",
+         "parent_of",
+     }},
+    {6,
      {
          "scope",
          "name",
@@ -337,6 +386,18 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
 const map<int, vector<string>> MsgpackWriter::defAttrMap{
     {
         5,
+        {
+            "raw_full_name",
+            "type",
+            "defines_behavior",
+            "is_empty",
+            "parent_ref",
+            "aliased_ref",
+            "defining_ref",
+        },
+    },
+    {
+        6,
         {
             "raw_full_name",
             "type",
