@@ -117,10 +117,11 @@ class BasicObject
   # 1.eql? 1.0   #=> false
   # ```
   sig do
-    params(
-        other: BasicObject,
-    )
-    .returns(T::Boolean)
+    overridable
+      .params(
+        other: T.anything,
+      )
+      .returns(T::Boolean)
   end
   def ==(other); end
 
