@@ -13,7 +13,7 @@ class ::<root> < ::Object ()
     method ::<Class:A>#<static-init> (<blk>) @ test/testdata/resolver/multi_alias_method.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=??? end=???}
   class ::B < ::Object () @ test/testdata/resolver/multi_alias_method.rb:12
-    method ::B#from (does_not_exist1, does_not_exist2) -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:13
+    method ::B#from (does_not_exist1, does_not_exist2) -> <Alias: ::Sorbet::Private::Static#<bad-method-alias-stub> > @ test/testdata/resolver/multi_alias_method.rb:14
       argument does_not_exist1<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=13:23 end=13:39}
       argument does_not_exist2<keyword> @ Loc {file=test/testdata/resolver/multi_alias_method.rb start=14:23 end=14:39}
   class ::<Class:B>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/resolver/multi_alias_method.rb:12
