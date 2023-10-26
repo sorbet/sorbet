@@ -1399,6 +1399,8 @@ private:
 
         core::TypeMemberRef sym;
         auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeMember.name);
+        auto typeMemberName = typeMember.name;
+
         if (existingTypeMember.exists()) {
             // if we already have a type member but it was constructed in a different file from the one we're
             // looking at, then we need to raise an error
@@ -1432,27 +1434,31 @@ private:
             sym = existingTypeMember;
             sym.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
         } else {
-            auto name = typeMember.name;
-            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, name);
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMemberName);
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
-                name = ctx.state.nextMangledName(onSymbol, name);
+                typeMemberName = ctx.state.nextMangledName(onSymbol, typeMemberName);
             }
-            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, name, variance);
+            sym = ctx.state.enterTypeMember(ctx.locAt(typeMember.asgnLoc), onSymbol, typeMemberName, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
             auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
             sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
+        }
 
-            if (isTypeTemplate) {
-                auto typeTemplateAliasName = typeMember.name;
-                auto context = ctx.owner.enclosingClass(ctx);
+        if (isTypeTemplate) {
+            auto typeTemplateAliasName = typeMember.name;
+            auto context = ctx.owner.enclosingClass(ctx);
+            if (existingTypeMember.exists()) {
+                auto alias = ctx.state.lookupStaticFieldSymbol(context, typeTemplateAliasName);
+                alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
+            } else {
                 auto oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeTemplateAliasName);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, typeMember.nameLoc, name, core::SymbolRef::Kind::TypeMember,
-                                               oldSym);
+                    emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMemberName,
+                                               core::SymbolRef::Kind::TypeMember, oldSym);
                     typeTemplateAliasName = ctx.state.nextMangledName(context, typeTemplateAliasName);
                 }
                 // This static field with an AliasType is how we get `MyTypeTemplate` to resolve,
