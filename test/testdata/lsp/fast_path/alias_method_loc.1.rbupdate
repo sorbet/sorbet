@@ -1,0 +1,9 @@
+# typed: true
+
+class Alias
+  def foo; end
+
+  alias_method :method_with_specific_name, :foo
+end
+
+Alias.new.method_with_specific_nam
