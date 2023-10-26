@@ -1450,7 +1450,10 @@ private:
         if (isTypeTemplate) {
             auto typeTemplateAliasName = typeMember.name;
             auto context = ctx.owner.enclosingClass(ctx);
-            if (!existingTypeMember.exists()) {
+            if (existingTypeMember.exists()) {
+                auto alias = ctx.state.lookupStaticFieldSymbol(context, typeTemplateAliasName);
+                alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
+            } else {
                 auto oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeTemplateAliasName);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
@@ -1464,9 +1467,6 @@ private:
                 auto alias =
                     ctx.state.enterStaticFieldSymbol(ctx.locAt(typeMember.asgnLoc), context, typeTemplateAliasName);
                 alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
-            } else {
-                auto alias = ctx.state.lookupStaticFieldSymbol(context, typeTemplateAliasName);
-                alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
             }
         }
 
