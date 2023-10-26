@@ -963,10 +963,12 @@ private:
             return;
         }
 
-        auto pluralization = (missingAbstractMethods.size() > 1 ? "s" : "");
-        auto suffix =
-            (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(ctx)));
-        errorBuilder.setHeader("Missing definition{} for abstract method{}{}", pluralization, pluralization, suffix);
+        if (missingAbstractMethods.size() > 1) {
+            errorBuilder.setHeader("Missing definitions for abstract methods");
+        } else {
+            errorBuilder.setHeader("Missing definition for abstract method `{}`",
+                                   missingAbstractMethods.front().show(ctx));
+        }
 
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
         auto hasSingleLineDefinition =
