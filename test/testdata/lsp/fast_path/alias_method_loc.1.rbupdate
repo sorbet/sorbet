@@ -7,3 +7,4 @@ class Alias
 end
 
 Alias.new.method_with_specific_nam
+#         ^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `method_with_specific_nam` does not exist on `Alias`
