@@ -2597,7 +2597,9 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto alias = ctx.state.enterMethodSymbol(ctx.locAt(job.fromNameLoc), job.owner, job.fromName);
+        auto loc = ctx.locAt(job.fromNameLoc);
+        auto alias = ctx.state.enterMethodSymbol(loc, job.owner, job.fromName);
+        alias.data(ctx)->addLoc(ctx, loc);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
 
         // Add a fake keyword argument to remember the toName (for fast path hashing).
