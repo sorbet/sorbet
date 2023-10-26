@@ -1017,7 +1017,9 @@ private:
         }
 
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
-            fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""), edits});
+            fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
+            edits,
+        });
     }
 
     vector<core::MethodRef> findMissingAbstractMethods(const core::Context ctx, core::ClassOrModuleRef sym) {
