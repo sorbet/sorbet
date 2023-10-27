@@ -278,20 +278,16 @@ end
 
 ## Why is `super` untyped, even when the parent method has a `sig`?
 
-Sorbet can't always know what the parent method is. For example, when calling
-`super` from a method defined in a module, the method that `super` dispatches to
-changes for each place where that module is mixed into something else. This
-means there's not necessarily a single way to treat a call to `super`
-statically.
+By default, Sorbet type checks all calls to `super` that it can, but there are
+still cases where it can't statically check calls to `super`.
 
-That's a lot of words, so here's an example:
+See below.
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0Amodule%20MyModule%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%0A%20%20%20%20%23%20Can't%20know%20super%20until%20we%20know%20which%20module%20we're%20mixed%20into%0A%20%20%20%20res%20%3D%20super%0A%20%20%20%20T.reveal_type%28res%29%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Amodule%20ParentModule1%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Amodule%20ParentModule2%0A%20%20extend%20T%3A%3ASig%0A%20%20%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20foo%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20MyClass1%0A%20%20include%20ParentModule1%0A%20%20include%20MyModule%0Aend%0A%0Aclass%20MyClass2%0A%20%20include%20ParentModule2%0A%20%20include%20MyModule%0Aend%0A%0AMyClass1.new.foo%0AMyClass2.new.foo%0A">→
-View on sorbet.run</a>
+Note that like with most parts of Sorbet, support for typing `super` is expected
+to improve over time, which might introduce new type errors upon upgrading to a
+newer Sorbet version.
 
-To typecheck this example, Sorbet would have to typecheck `MyModule#foo`
-multiple times, once for each place that method might be used from, or place
-restrictions on how and where this module can be included.
+## When are calls to `super` typed, and when are they untyped?
 
 Over time, we have improved support for `super` in certain circumstances. In
 particular, if all of these things are true, Sorbet will type check the call to
@@ -299,7 +295,10 @@ particular, if all of these things are true, Sorbet will type check the call to
 
 - The usage of `super` must be in a method defined in a `class`, not a module.
 
-  (Why? → See the example above.)
+  (Why? → Inside a module, the method that `super` dispatches to [is different
+  each time][module_super] the module is mixed into a different class. This
+  means there's not necessarily a single way to analyze a call to `super`
+  statically.)
 
 - The usage of `super` must not be inside a Ruby block (like `do ... end`)
 
@@ -307,16 +306,15 @@ particular, if all of these things are true, Sorbet will type check the call to
   `define_method`, or otherwise [executed in a context different from the
   enclosing context][define_method_super].)
 
+[module_super]:
+  https://sorbet.run/#%23%20typed%3A%20true%0Amodule%20MyModule%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%0A%20%20%20%20%23%20Can't%20know%20super%20until%20we%20know%20which%20module%20we're%20mixed%20into%0A%20%20%20%20res%20%3D%20super%0A%20%20%20%20T.reveal_type%28res%29%0A%20%20%20%20res%0A%20%20end%0Aend%0A%0Amodule%20ParentModule1%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Amodule%20ParentModule2%0A%20%20extend%20T%3A%3ASig%0A%20%20%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20foo%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20MyClass1%0A%20%20include%20ParentModule1%0A%20%20include%20MyModule%0Aend%0A%0Aclass%20MyClass2%0A%20%20include%20ParentModule2%0A%20%20include%20MyModule%0Aend%0A%0AMyClass1.new.foo%0AMyClass2.new.foo%0A
 [define_method_super]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0A%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.bar%0A%20%20%20%20''%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20define_method%28%3Abar%29%20do%0A%20%20%20%20%20%20x%20%3D%20super%0A%20%20%20%20%20%20T.reveal_type%28x%29%0A%20%20%20%20%20%20%23%20-%3E%20should%20reveal%20String%2C%20but%20Sorbet%20doesn't%20know%20that%0A%20%20%20%20end%0A%0A%20%20%20%200%0A%20%20end%0Aend
 
-By default, Sorbet type checks all calls to `super` that it can. To opt out of
-type checking `super`, pass the `--typed-super=false` command line flag to
-Sorbet. Note that like with most parts of Sorbet, support for typing `super` is
-expected to improve over time, which might introduce new type errors upon
-upgrading to a newer Sorbet version.
+To opt out of type checking `super`, pass the `--typed-super=false` command line
+flag to Sorbet.
 
-### How can I fix type errors that arise from `super`?
+## How can I fix type errors that arise from `super`?
 
 1.  "Method does not exist" type errors can happen when Sorbet does not see that
     a method with the same name actually exists on an ancestor of the current
