@@ -473,3 +473,6 @@ module T::NonForcingConstants
   sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass, package: nil); end
 end
+
+class T::MustTypeError < TypeError
+end
