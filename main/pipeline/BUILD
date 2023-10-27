@@ -1,11 +1,11 @@
 cc_library(
     name = "pipeline",
     srcs = [
+        "DefinitionLinesDenylistEnforcer.cc",
+        "DefinitionLinesDenylistEnforcer.h",
         "ProgressIndicator.cc",
         "ProgressIndicator.h",
         "pipeline.cc",
-        "DefinitionLinesDenylistEnforcer.h",
-        "DefinitionLinesDenylistEnforcer.cc",
     ],
     hdrs = ["pipeline.h"],
     linkstatic = select({
@@ -45,11 +45,11 @@ cc_library(
 cc_library(
     name = "pipeline-orig",
     srcs = [
+        "DefinitionLinesDenylistEnforcer.cc",
+        "DefinitionLinesDenylistEnforcer.h",
         "ProgressIndicator.cc",
         "ProgressIndicator.h",
         "pipeline.cc",
-        "DefinitionLinesDenylistEnforcer.h",
-        "DefinitionLinesDenylistEnforcer.cc",
     ],
     hdrs = ["pipeline.h"],
     defines = ["SORBET_REALMAIN_MIN"],
