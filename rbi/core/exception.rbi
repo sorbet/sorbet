@@ -186,6 +186,45 @@ class Exception < Object
   sig {returns(T.nilable(Exception))}
   def cause(); end
 
+  # Processes a string returned by
+  # [`message`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-message).
+  #
+  # It may add the class name of the exception to the end of the first line.
+  # Also, when `highlight` keyword is true, it adds ANSI escape sequences to
+  # make the message bold.
+  #
+  # If you override this method, it must be tolerant for unknown keyword
+  # arguments. All keyword arguments passed to
+  # [`full_message`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-full_message)
+  # are delegated to this method.
+  #
+  # This method is overridden by did\_you\_mean and error\_highlight to add
+  # their information.
+  #
+  # A user-defined exception class can also define their own `detailed_message`
+  # method to add supplemental information. When `highlight` is true, it can
+  # return a string containing escape sequences, but use widely-supported ones.
+  # It is recommended to limit the following codes:
+  #
+  # *   Reset (`\e[0m`)
+  # *   Bold (`\e[1m`)
+  # *   Underline (`\e[4m`)
+  # *   Foreground color except white and black
+  #     *   Red (`\e[31m`)
+  #     *   Green (`\e[32m`)
+  #     *   Yellow (`\e[33m`)
+  #     *   Blue (`\e[34m`)
+  #     *   Magenta (`\e[35m`)
+  #     *   Cyan (`\e[36m`)
+  #
+  #
+  #
+  # Use escape sequences carefully even if `highlight` is true. Do not use
+  # escape sequences to express essential information; the message should be
+  # readable even if all escape sequences are ignored.
+  sig { overridable.params(highlight: T.nilable(T::Boolean), opts: T.untyped).returns(String) }
+  def detailed_message(highlight: nil, **opts); end
+
   # With no argument, or if the argument is the same as the receiver, return the
   # receiver. Otherwise, create a new exception object of the same class as the
   # receiver, but with a message equal to `string.to_str`.
