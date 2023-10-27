@@ -86,7 +86,7 @@ module RubyVM::AbstractSyntaxTree
       error_tolerant: T::Boolean,
       keep_tokens: T::Boolean,
     )
-    .returns(RubyVM::AbstractSyntaxTree::Node)
+    .returns(T.nilable(RubyVM::AbstractSyntaxTree::Node))
   end
   def self.of(arg, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 
