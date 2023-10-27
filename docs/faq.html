@@ -301,6 +301,19 @@ return a narrower output. In these cases, before and/or after calling
 <code>super</code>, the child method will need to handle the cases that the parent
 method’s type is unable to handle. (Or, if possible: adjust the parent’s
 signature to match the child’s signature.)</p></li>
+<li><p>All <code>initialize</code> calls in Sorbet are typed as returning <code>.void</code>, regardless
+of what they actually return. Usually, calls to <code>initialize</code> simply return
+<code>self</code>. So instead of doing this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+  <span class="hljs-keyword">super</span>.foo
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>do this:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+  <span class="hljs-keyword">super</span>
+  <span class="hljs-keyword">self</span>.foo
+<span class="hljs-keyword">end</span>
+</code></pre></li>
 <li><p>Unlike method calls, it’s <strong>not possible</strong> to do something like
 <code>T.unsafe(self).super</code> to silence errors from a single usage of <code>super</code>
 (<code>super</code> is a keyword in Ruby, not a method call).</p>
