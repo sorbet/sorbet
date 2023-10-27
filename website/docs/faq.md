@@ -340,6 +340,25 @@ upgrading to a newer Sorbet version.
     method's type is unable to handle. (Or, if possible: adjust the parent's
     signature to match the child's signature.)
 
+1.  All `initialize` calls in Sorbet are typed as returning `.void`, regardless
+    of what they actually return. Usually, calls to `initialize` simply return
+    `self`. So instead of doing this:
+
+    ```ruby
+    def initialize
+      super.foo
+    end
+    ```
+
+    do this:
+
+    ```ruby
+    def initialize
+      super
+      self.foo
+    end
+    ```
+
 1.  Unlike method calls, it's **not possible** to do something like
     `T.unsafe(self).super` to silence errors from a single usage of `super`
     (`super` is a keyword in Ruby, not a method call).
