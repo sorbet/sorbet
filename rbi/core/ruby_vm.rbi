@@ -81,12 +81,12 @@ module RubyVM::AbstractSyntaxTree
   # for explanation of keyword argument meaning and usage.
   sig do
     params(
-      arg: T.any(T::proc.void, Method),
+      arg: T.any(T::proc.void, Method, Thread::Backtrace::Location),
       keep_script_lines: T::Boolean,
       error_tolerant: T::Boolean,
       keep_tokens: T::Boolean,
     )
-    .returns(RubyVM::AbstractSyntaxTree::Node)
+    .returns(T.nilable(RubyVM::AbstractSyntaxTree::Node))
   end
   def self.of(arg, keep_script_lines: false, error_tolerant: false, keep_tokens: false); end
 
