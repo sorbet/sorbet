@@ -480,6 +480,14 @@ class SyncRDoc
       opts = RDoc::Options.new
       opts.parse(['--all'])
       opts.setup_generator("darkfish")
+
+      $LOAD_PATH.each do |path|
+        darkfish_dir = File.join(path, 'rdoc/generator/template/darkfish/')
+        next unless File.directory?(darkfish_dir)
+        opts.template_dir = darkfish_dir
+        break
+      end
+
       opts
     end
   end
@@ -531,10 +539,10 @@ class SyncRDoc
 
   def process_file!(file)
     to_replace = []
-    puts file.path
     DocParser.new(file).each_doc do |path, def_node, doc_range, indentation|
       next if SKIP.any? {|s| s.is_a?(String) ? path == s : path =~ s}
-      next unless ONLY_IN_FILE[path] == file.path
+      only_in_file = ONLY_IN_FILE[path]
+      next if only_in_file && only_in_file != file.path
       namespace, separator, name = path.rpartition(/::|\.|\#/)
       code_obj = case separator
       when ""
