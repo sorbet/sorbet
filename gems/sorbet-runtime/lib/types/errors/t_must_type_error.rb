@@ -2,7 +2,7 @@
 # typed: true
 
 class T::MustTypeError < TypeError
-  # This approximates what the error_highlight gem does
+  # This approximates what the error_highlight gem does.
   if RubyVM::AbstractSyntaxTree.method(:of).parameters.include?([:key, :keep_script_lines])
     def generate_snippet
       # The line at index 1 in the backtrace is the call to T.must
@@ -29,8 +29,12 @@ class T::MustTypeError < TypeError
 
   private :generate_snippet
 
-  if Exception.method_defined?(:detailed_message)
-    # New in Ruby 3.2
+  if defined?(ErrorHighlight::CoreExt) && self < ErrorHighlight::CoreExt
+    # If we're running with a version of error_highlight that has already
+    # monkeypatched TypeError, we don't need to define our own detailed_message
+    # override.
+  elsif Exception.method_defined?(:detailed_message)
+    # For Ruby 3.2 but with an older version of error_highlight than is bundled with Ruby 3.2
     def detailed_message(highlight: false, error_highlight: true, **)
       return super unless error_highlight
       snippet = generate_snippet
