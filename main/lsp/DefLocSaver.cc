@@ -117,7 +117,9 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             }
 
             core::lsp::ConstantResponse::Scopes scopes;
-            if (symbol == core::Symbols::StubModule()) {
+            if (symbolBeforeDealias == core::Symbols::StubModule()) {
+                // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
+                // have resolutionScopes.
                 scopes = *lit->resolutionScopes;
             } else {
                 scopes = {symbol.owner(ctx)};
