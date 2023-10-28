@@ -30,6 +30,11 @@ class Box
     box_elem
   end
 
+  # Sorbet doesn't check this statically yet. Once it does, this will cause
+  # problems for some of the tricks we're using here (unfortunately, with no
+  # workarounds except `T.untyped`)
+  private_class_method :new
+
   sig do
     type_parameters(:U)
       .params(x: T.type_parameter(:U))
@@ -45,9 +50,12 @@ class Box
     T.reveal_type(res) # error: `T.attached_class (of Box)`
 
     # Wild that this syntax works, even at runtime!
+    # Though, it's a non-private call, so you have to either pick private or typed :/
     res = self[T.type_parameter(:U)].new(x) # !!
-    # Drops attached class, also non-private
-    T.reveal_type(res) # error: `Box[T.type_parameter(:U) (of Box.make)]`
+    T.reveal_type(res) # error: `T.all(Box[T.type_parameter(:U) (of Box.make)], T.attached_class (of Box))`
+
+    self[T.type_parameter(:U)].new(0)
+    #                              ^ error: Expected `T.type_parameter(:U) (of Box.make)` but found `Integer(0)` for argument `val`
 
     new(x)
   end

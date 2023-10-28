@@ -1559,8 +1559,12 @@ namespace {
 // Determines whether we will allow `new` on a type wrapped by a `MetaType`. Note that this function is conservative,
 // in that there are some cases we want to reject but cannot detect here.
 bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
-    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped)) {
+    if (isa_type<OrType>(wrapped)) {
         return false;
+    }
+
+    if (auto *andType = cast_type<AndType>(wrapped)) {
+        return canCallNew(gs, andType->left) || canCallNew(gs, andType->right);
     }
 
     if (isa_type<ClassType>(wrapped)) {
@@ -2147,7 +2151,17 @@ public:
             return;
         }
 
-        res.returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
+        auto appliedTypeArguments = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
+
+        if (auto *selfApp = cast_type<AppliedType>(args.thisType)) {
+            auto instanceTy =
+                Types::extractTypeMember(gs, *selfApp, Symbols::Class(), Names::Constants::AttachedClass());
+
+            auto *metaType = cast_type<MetaType>(appliedTypeArguments);
+            appliedTypeArguments = make_type<MetaType>(Types::all(gs, instanceTy, metaType->wrapped));
+        }
+
+        res.returnType = appliedTypeArguments;
     }
 } T_Generic_squareBrackets;
 
