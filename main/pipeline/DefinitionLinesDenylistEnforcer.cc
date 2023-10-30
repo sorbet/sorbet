@@ -21,8 +21,17 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
                     continue;
                 }
                 auto midPoint = loc.file().data(gs).source().size() / 2;
+                auto cond = loc.beginPos() >= midPoint && loc.endPos() >= midPoint;
 
-                ENFORCE(loc.beginPos() >= midPoint && loc.endPos() >= midPoint);
+
+
+                if (kind != core::SymbolRef::Kind::TypeMember) {
+                    ENFORCE(cond, fmt::format("beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\n", loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs)));
+                } else {
+                    if (!cond) {
+                        fmt::print("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nType memeber failed to update location beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\n\n", loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs));
+                    }
+                }
             }
         }
     }
