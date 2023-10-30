@@ -15,7 +15,20 @@ class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;
     vector<core::NameRef> requireStatements;
-    vector<DefinitionRef> nesting;
+    vector<vector<DefinitionRef>> nestings;
+
+    struct NestingStackEntry {
+        DefinitionRef ref;
+        optional<uint32_t> nestingEntry;
+
+        NestingStackEntry() = default;
+        NestingStackEntry(DefinitionRef ref) : ref(ref) {}
+
+        NestingStackEntry(NestingStackEntry &&) = default;
+        NestingStackEntry &operator=(NestingStackEntry &&) = default;
+    };
+
+    vector<NestingStackEntry> nestingStack;
     const AutogenConfig *autogenCfg;
 
     enum class ScopeType { Class, Block };
@@ -73,7 +86,7 @@ public:
         def.type = Definition::Type::Module;
         def.defines_behavior = false;
         def.is_empty = false;
-        nesting.emplace_back(def.id);
+        nestingStack.emplace_back(def.id);
         autogenCfg = &autogenConfig;
     }
 
@@ -138,7 +151,7 @@ public:
 
         // The rest of the ancestors are all references inside the class body (i.e. uses of `include` or `extend`) so
         // add the current class to the scoping
-        nesting.emplace_back(def.id);
+        nestingStack.emplace_back(def.id);
 
         // ...and then run the treemap over all the includes and extends
         for (; ait != original.ancestors.end(); ++ait) {
@@ -182,7 +195,7 @@ public:
         }
 
         // remove the stuff added to handle the class scope here
-        nesting.pop_back();
+        nestingStack.pop_back();
         scopeTypes.pop_back();
     }
 
@@ -207,6 +220,36 @@ public:
         return false;
     }
 
+    void setNestingAndScope(Reference &ref, const ast::ConstantLit &cnstRef) {
+        // if it's a constant we can resolve from the root...
+        if (isCBaseConstant(cnstRef)) {
+            // then its scope is easy
+            ref.scope = nestingStack.front().ref;
+        } else {
+            // otherwise we need to figure out how it's nested in the current scope and mark that
+            auto &entry = nestingStack.back();
+
+            if (!entry.nestingEntry.has_value()) {
+                vector<DefinitionRef> refs;
+                refs.reserve(nestingStack.size());
+                // This is effectively trying to do:
+                //
+                // transform(nestingStack.begin(), nestingStack.end() ...);
+                // reverse(refs.begin(), refs.end());
+                // refs.pop_back();
+                //
+                // in a single call.
+                transform(nestingStack.rbegin(), nestingStack.rend() - 1, back_inserter(refs),
+                          [](auto &entry) { return entry.ref; });
+                auto nestingId = nestings.size();
+                nestings.emplace_back(move(refs));
+                entry.nestingEntry.emplace(nestingId);
+            }
+            ref.nestingId = *entry.nestingEntry;
+            ref.scope = entry.ref;
+        }
+    }
+
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
@@ -227,18 +270,7 @@ public:
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
-
-        // if it's a constant we can resolve from the root...
-        if (isCBaseConstant(original)) {
-            // then its scope is easy
-            ref.scope = nesting.front();
-        } else {
-            // otherwise we need to figure out how it's nested in the current scope and mark that
-            ref.nesting = nesting;
-            reverse(ref.nesting.begin(), ref.nesting.end());
-            ref.nesting.pop_back();
-            ref.scope = nesting.back();
-        }
+        setNestingAndScope(ref, original);
         ref.loc = original.loc;
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
@@ -255,7 +287,7 @@ public:
         // if we're already in the scope of the class (which will be the newest-created one) then we're looking at the
         // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
         // we're looking at the first `class Child < Parent` relationship, so we change `is_subclassing` to true.
-        if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
+        if (!defs.empty() && !nestingStack.empty() && defs.back().id._id != nestingStack.back().ref._id) {
             ref.parentKind = ClassKind::Class;
         }
         // now, add it to the refmap
@@ -366,6 +398,7 @@ public:
         ENFORCE(scopeTypes.empty());
 
         ParsedFile out;
+        out.nestings = move(nestings);
         out.refs = move(refs);
         out.defs = move(defs);
         out.requireStatements = move(requireStatements);

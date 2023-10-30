@@ -122,7 +122,8 @@ string ParsedFile::toString(const core::GlobalState &gs, int version) const {
     fmt::format_to(std::back_inserter(out), "## refs:\n");
     for (auto &ref : refs) {
         vector<string> nestingStrings;
-        for (auto &scope : ref.nesting) {
+        auto &nesting = nestings[ref.nestingId];
+        for (auto &scope : nesting) {
             auto fullScopeName = showFullName(gs, scope);
             nestingStrings.emplace_back(fmt::format("[{}]", fmt::map_join(fullScopeName, " ", nameToString)));
         }

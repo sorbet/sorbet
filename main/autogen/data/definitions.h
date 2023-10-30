@@ -128,8 +128,8 @@ struct Reference {
 
     // its full qualified name
     QualifiedName name;
-    // the full nesting of this constant. If it's a constant resolved from the root, this will be an empty vector
-    std::vector<DefinitionRef> nesting;
+    // the nesting ID of this constant
+    uint32_t nestingId;
     // the resolved name iff we have it from Sorbet
     QualifiedName resolved;
 
@@ -163,6 +163,8 @@ struct ParsedFile {
     uint32_t cksum;
     // the path on disk to this file
     std::string path;
+    // nesting for every ref in this file
+    std::vector<std::vector<DefinitionRef>> nestings;
     // every statically-known constant defined by this file
     std::vector<Definition> defs;
     // every static constant usage in this file
