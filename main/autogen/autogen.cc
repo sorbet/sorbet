@@ -207,6 +207,20 @@ public:
         return false;
     }
 
+    void setNestingAndScope(Reference &ref, const ast::ConstantLit &cnstRef) {
+        // if it's a constant we can resolve from the root...
+        if (isCBaseConstant(cnstRef)) {
+            // then its scope is easy
+            ref.scope = nestingStack.front();
+        } else {
+            // otherwise we need to figure out how it's nested in the current scope and mark that
+            ref.nesting = nestingStack;
+            reverse(ref.nesting.begin(), ref.nesting.end());
+            ref.nesting.pop_back();
+            ref.scope = nestingStack.back();
+        }
+    }
+
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
@@ -227,18 +241,7 @@ public:
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
-
-        // if it's a constant we can resolve from the root...
-        if (isCBaseConstant(original)) {
-            // then its scope is easy
-            ref.scope = nestingStack.front();
-        } else {
-            // otherwise we need to figure out how it's nested in the current scope and mark that
-            ref.nesting = nestingStack;
-            reverse(ref.nesting.begin(), ref.nesting.end());
-            ref.nesting.pop_back();
-            ref.scope = nestingStack.back();
-        }
+        setNestingAndScope(ref, original);
         ref.loc = original.loc;
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
