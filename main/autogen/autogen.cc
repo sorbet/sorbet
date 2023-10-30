@@ -229,11 +229,16 @@ public:
             // otherwise we need to figure out how it's nested in the current scope and mark that
             vector<DefinitionRef> refs;
             refs.reserve(nestingStack.size());
-            absl::c_transform(nestingStack, back_inserter(refs),
-                              [](auto &entry) { return entry.ref; });
+            // This is effectively trying to do:
+            //
+            // transform(nestingStack.begin(), nestingStack.end() ...);
+            // reverse(refs.begin(), refs.end());
+            // refs.pop_back();
+            //
+            // in a single call.
+            transform(nestingStack.rbegin(), nestingStack.rend() - 1, back_inserter(refs),
+                      [](auto &entry) { return entry.ref; });
             ref.nesting = move(refs);
-            reverse(ref.nesting.begin(), ref.nesting.end());
-            ref.nesting.pop_back();
             ref.scope = nestingStack.back().ref;
         }
     }
