@@ -195,7 +195,7 @@ public:
     }
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
-    bool isCBaseConstant(ast::ConstantLit &cnstRef) {
+    bool isCBaseConstant(const ast::ConstantLit &cnstRef) {
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
             auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
