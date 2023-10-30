@@ -120,11 +120,16 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     packNames(ref.name.nameParts);
 
     // nesting
-    mpack_start_array(&writer, ref.nesting.size());
-    for (auto &scope : ref.nesting) {
-        packDefinitionRef(scope.id());
+    if (version >= 6) {
+        mpack_write_u32(&writer, ref.nestingId);
+    } else {
+        auto &nesting = pf.nestings[ref.nestingId];
+        mpack_start_array(&writer, nesting.size());
+        for (auto &scope : nesting) {
+            packDefinitionRef(scope.id());
+        }
+        mpack_finish_array(&writer);
     }
-    mpack_finish_array(&writer);
 
     // expression_range
     auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
@@ -191,8 +196,20 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     for (auto &def : pf.defs) {
         packDefinition(ctx, pf, def, autogenCfg);
     }
-
     mpack_finish_array(&writer);
+
+    if (version >= 6) {
+        mpack_start_array(&writer, pf.nestings.size());
+        for (auto &nesting : pf.nestings) {
+            mpack_start_array(&writer, nesting.size());
+            for (auto &scope : nesting) {
+                packDefinitionRef(scope.id());
+            }
+            mpack_finish_array(&writer);
+        }
+        mpack_finish_array(&writer);
+    }
+
     mpack_start_array(&writer, pf.refs.size());
     for (auto &ref : pf.refs) {
         packReference(ctx, pf, ref);

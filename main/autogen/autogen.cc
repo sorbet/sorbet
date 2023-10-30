@@ -227,19 +227,26 @@ public:
             ref.scope = nestingStack.front().ref;
         } else {
             // otherwise we need to figure out how it's nested in the current scope and mark that
-            vector<DefinitionRef> refs;
-            refs.reserve(nestingStack.size());
-            // This is effectively trying to do:
-            //
-            // transform(nestingStack.begin(), nestingStack.end() ...);
-            // reverse(refs.begin(), refs.end());
-            // refs.pop_back();
-            //
-            // in a single call.
-            transform(nestingStack.rbegin(), nestingStack.rend() - 1, back_inserter(refs),
-                      [](auto &entry) { return entry.ref; });
-            ref.nesting = move(refs);
-            ref.scope = nestingStack.back().ref;
+            auto &entry = nestingStack.back();
+
+            if (!entry.nestingEntry.has_value()) {
+                vector<DefinitionRef> refs;
+                refs.reserve(nestingStack.size());
+                // This is effectively trying to do:
+                //
+                // transform(nestingStack.begin(), nestingStack.end() ...);
+                // reverse(refs.begin(), refs.end());
+                // refs.pop_back();
+                //
+                // in a single call.
+                transform(nestingStack.rbegin(), nestingStack.rend() - 1, back_inserter(refs),
+                          [](auto &entry) { return entry.ref; });
+                auto nestingId = nestings.size();
+                nestings.emplace_back(move(refs));
+                entry.nestingEntry.emplace(nestingId);
+            }
+            ref.nestingId = *entry.nestingEntry;
+            ref.scope = entry.ref;
         }
     }
 
@@ -391,6 +398,7 @@ public:
         ENFORCE(scopeTypes.empty());
 
         ParsedFile out;
+        out.nestings = move(nestings);
         out.refs = move(refs);
         out.defs = move(defs);
         out.requireStatements = move(requireStatements);

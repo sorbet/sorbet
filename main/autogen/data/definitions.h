@@ -128,8 +128,8 @@ struct Reference {
 
     // its full qualified name
     QualifiedName name;
-    // the full nesting of this constant. If it's a constant resolved from the root, this will be an empty vector
-    std::vector<DefinitionRef> nesting;
+    // the nesting ID of this constant
+    uint32_t nestingId;
     // the resolved name iff we have it from Sorbet
     QualifiedName resolved;
 
