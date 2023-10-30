@@ -163,6 +163,8 @@ struct ParsedFile {
     uint32_t cksum;
     // the path on disk to this file
     std::string path;
+    // nesting for every ref in this file
+    std::vector<std::vector<DefinitionRef>> nestings;
     // every statically-known constant defined by this file
     std::vector<Definition> defs;
     // every static constant usage in this file
