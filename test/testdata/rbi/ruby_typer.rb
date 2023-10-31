@@ -7,5 +7,5 @@ extend T::Sig
 
 sig {params(x: Sorbet::Private::Static::IOLike).void}
 def foo(x)
-  T.reveal_type(x) # error: Revealed type: `T.any(IO, StringIO)`
+  T.reveal_type(x) # error: Revealed type: `T.any(IO, StringIO, Tempfile)`
 end
