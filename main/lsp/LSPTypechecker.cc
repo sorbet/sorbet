@@ -676,6 +676,10 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
     return errorCollector->drainErrors();
 }
 
+ast::ExpressionPtr LSPTypechecker::getDesugared(core::FileRef fref) const {
+    return pipeline::desugarOne(config->opts, *gs, fref);
+}
+
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     const auto id = fref.id();
     auto treeFinalGS = indexedFinalGS.find(id);
@@ -776,6 +780,10 @@ const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) co
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
     return typechecker.getResolved(frefs);
+}
+
+ast::ExpressionPtr LSPTypecheckerDelegate::getDesugared(core::FileRef fref) const {
+    return typechecker.getDesugared(fref);
 }
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
