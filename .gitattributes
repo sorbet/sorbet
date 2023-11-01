@@ -1,6 +1,8 @@
 *.rbi linguist-language=Ruby
+*.rbedited linguist-language=Ruby
 *.rb diff=ruby
 *.rbi diff=ruby
+*.rbedited diff=ruby
 *.md diff=markdown
 test/**/*.out diff
 test/cli/windows-line-endings/windows-line-endings.rb eol=crlf
