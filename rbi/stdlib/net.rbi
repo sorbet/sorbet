@@ -1882,6 +1882,14 @@ class Net::HTTP < Net::Protocol
   # object.
   def lock(path, body, initheader=T.unsafe(nil)); end
 
+  def max_retries(); end
+
+  # Maximum number of times to retry an idempotent request in case of
+  # Net::ReadTimeout, IOError, EOFError, Errno::ECONNRESET, Errno::ECONNABORTED,
+  # Errno::EPIPE, OpenSSL::SSL::SSLError, Timeout::Error.
+  # Should be a non-negative integer number. Zero means no retries. The default value is 1.
+  def max_retries=(retries); end
+
   # Sends a MKCOL request to the `path` and gets a response, as an HTTPResponse
   # object.
   def mkcol(path, body=T.unsafe(nil), initheader=T.unsafe(nil)); end
