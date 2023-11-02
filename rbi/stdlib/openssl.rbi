@@ -649,6 +649,21 @@ module OpenSSL
     .returns(::T.untyped)
   end
   def self.fips_mode=(fips_mode); end
+
+  # Constant time memory comparison for fixed length strings, such as results
+  # of HMAC calculations.
+  #
+  # Returns +true+ if the strings are identical, +false+ if they are of the same
+  # length but not identical. If the length is different, +ArgumentError+ is
+  # raised.
+  sig { params(a: String, b: String).returns(T::Boolean) }
+  def self.fixed_length_secure_compare(a, b); end
+
+  # Constant time memory comparison. Inputs are hashed using SHA-256 to mask
+  # the length of the secret. Returns +true+ if the strings are identical,
+  # +false+ otherwise.
+  sig { params(a: String, b: String).returns(T::Boolean) }
+  def self.secure_compare(a, b); end
 end
 
 # Abstract Syntax Notation One (or ASN.1) is a notation syntax to describe data
