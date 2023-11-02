@@ -224,7 +224,15 @@ public:
         // if it's a constant we can resolve from the root...
         if (isCBaseConstant(cnstRef)) {
             // then its scope is easy
-            ref.scope = nestingStack.front().ref;
+            auto &entry = nestingStack.front();
+            if (!entry.nestingEntry.has_value()) {
+                vector<DefinitionRef> refs;
+                auto nestingId = nestings.size();
+                nestings.emplace_back(move(refs));
+                entry.nestingEntry.emplace(nestingId);
+            }
+            ref.nestingId = *entry.nestingEntry;
+            ref.scope = entry.ref;
         } else {
             // otherwise we need to figure out how it's nested in the current scope and mark that
             auto &entry = nestingStack.back();
