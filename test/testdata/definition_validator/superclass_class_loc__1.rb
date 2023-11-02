@@ -3,5 +3,5 @@
 module Parent
 end
 
-class Child < Parent
+class Child < Parent # error: does not derive from `Class`
 end

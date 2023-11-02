@@ -13,6 +13,6 @@
 # the other file. With a sufficiently long comment, that causes an array access
 # out of bounds.
 
-class Child < Parent
+class Child < Parent # error: does not derive from `Class`
   def example; end
 end
