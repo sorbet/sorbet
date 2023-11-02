@@ -167,6 +167,23 @@ child class.
 
 ### Alternative
 
+1.  Override the parent method in the child, and have the implementation just
+    call `super`:
+
+    ```ruby
+    class Parent
+      def defined_in_parent; end
+    end
+
+    class Child < Parent
+      def defined_in_parent
+        super
+      end
+
+      alias_method :defined_in_child, :defined_in_parent
+    end
+    ```
+
 1.  Use [RBI files](rbi.md) to define the methods that would be defined this
     way:
 
@@ -177,16 +194,18 @@ child class.
     end
 
     class Child < Parent
+      # Hide the alias_method call from Sorbet to silence the error
       T.unsafe(self).alias_method :defined_in_child, :defined_in_parent
     end
 
     # -- foo.rbi --
     class Child < Parent
+      # Define the method that will be defined with `alias_method` at runtime
       def defined_in_child; end
     end
     ```
 
-2.  Use an [Escape Hatch](troubleshooting.md#escape-hatches) to silence errors
+1.  Use an [Escape Hatch](troubleshooting.md#escape-hatches) to silence errors
     at call sites.
 
 ### Why?
