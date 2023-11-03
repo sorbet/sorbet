@@ -54,7 +54,8 @@ module Config
   sig {returns(Integer)}
   def self.accidentally_untyped
     @accidentally_untyped ||= T.let(T.unsafe(nil), T.nilable(String))
-    T.must(@accidentally_untyped) # error: `T.must` called on `T.untyped`, which is redundant
+    # No errors are expected
+    T.must(@accidentally_untyped)
   end
 
   sig {void}
