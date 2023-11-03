@@ -1857,14 +1857,9 @@ public:
             return;
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
-        if (ret == args.args[0]->type) {
+        if (ret == args.args[0]->type && !args.args[0]->type.isUntyped()) {
             if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
-                if (args.args[0]->type.isUntyped()) {
-                    e.setHeader("`{}` called on `{}`, which is redundant", methodName, args.args[0]->type.show(gs));
-                } else {
-                    e.setHeader("`{}` called on `{}`, which is never `{}`", methodName, args.args[0]->type.show(gs),
-                                "nil");
-                }
+                e.setHeader("`{}` called on `{}`, which is never `{}`", methodName, args.args[0]->type.show(gs), "nil");
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 auto replaceLoc = args.callLoc();
                 const auto locWithoutTMust = args.argLoc(0);
