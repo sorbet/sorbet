@@ -1858,8 +1858,9 @@ public:
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
-            if (auto e = gs.beginError(args.argLoc(0), errors::Infer::InvalidCast)) {
-                if (args.args[0]->type.isUntyped()) {
+            auto code = args.args[0]->type.isUntyped() ? errors::Infer::MustOnUntyped : errors::Infer::InvalidCast;
+            if (auto e = gs.beginError(args.argLoc(0), code)) {
+                if (code == errors::Infer::MustOnUntyped) {
                     e.setHeader("`{}` called on `{}`, which is redundant", methodName, args.args[0]->type.show(gs));
                 } else {
                     e.setHeader("`{}` called on `{}`, which is never `{}`", methodName, args.args[0]->type.show(gs),

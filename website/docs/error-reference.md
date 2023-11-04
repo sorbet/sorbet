@@ -4348,6 +4348,16 @@ See also:
 
 See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
 
+## 7050
+
+Calling `T.must` with an untyped object is an indication that code that was
+considered typed (and `T.must` was ensuring that the value was not `nil`) is not
+typed anymore.
+
+This was separated from [7015](#7015) to maintain this error in
+`# typed: strict` and above, but allow for [7015](#7015) to be enforced at lower
+strictness levels.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
