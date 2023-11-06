@@ -154,32 +154,55 @@ to call `.new`, which is defined on every Ruby class. Typing the result as
 
 ## How do I override `==`? What signature should I use?
 
-Your method should accept `BasicObject` and return `T::Boolean`.
+The same suggestions also apply for overriding `eql?`. `==` is typically used
+for custom/structural equality operators. `eql?` is typically used for reference
+equality. But from the perspective of the type system, they both have the same
+signature.
 
-Unfortunately, not all `BasicObject`s have `is_a?`, so we have to do one extra
-step in our `==` function: check whether `Object === other`. (In Ruby, `==` and
-`===` are completely unrelated. The latter has to do with [case subsumption]).
-The idiomatic way to write `Object === other` in Ruby is to use `case`:
+Your method should accept `T.anything` and return `T::Boolean`. For more
+information, see the docs for [`T.anything`](anything.md) and the blog post
+[Problems typing equality in Ruby].
+
+[Problems typing equality in Ruby]:
+  https://blog.jez.io/problems-typing-ruby-equality/
+
+If you want the implementation to branch on the type of the argument, you'll
+want to use `case`/`when` (or `Module#===` directly) instead of `is_a?`.
+
+Example using `case`/`when`:
 
 ```ruby
-case other
-when Object
+class A
   # ...
+  attr_reader :foo
+
+  sig { params(other: T.anything).returns(T::Boolean) }
+  def ==(other)
+    case other
+    when A
+      self.foo == other.foo
+    else
+      false
+    end
+  end
+end
+```
+
+Example using [`===` directly][case subsumption]:
+
+```ruby
+class A
+  # ...
+  attr_reader :foo
+
+  sig { params(other: T.anything).returns(T::Boolean) }
+  def ==(other)
+    (A === other) && (self.foo == other.foo)
+  end
 end
 ```
 
 [case subsumption]: https://stackoverflow.com/questions/3422223/vs-in-ruby
-
-Here's a complete example that uses `case` to implement `==`:
-
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20IntBox%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Breturns(Integer)%7D%0A%20%20attr_reader%20%3Aval%0A%20%20%0A%20%20sig%20%7Bparams(val%3A%20Integer).void%7D%0A%20%20def%20initialize(val)%0A%20%20%20%20%40val%20%3D%20val%0A%20%20end%0A%20%20%0A%20%20sig%20%7Bparams(other%3A%20BasicObject).returns(T::Boolean)%7D%0A%20%20def%20%3D%3D(other)%0A%20%20%20%20case%20other%0A%20%20%20%20when%20IntBox%0A%20%20%20%20%20%20other.val%20%3D%3D%20val%0A%20%20%20%20else%0A%20%20%20%20%20%20false%0A%20%20%20%20end%0A%20%20end%0Aend">
-  → View on sorbet.run
-</a>
-
-You may also be interested in [Problems typing equality in Ruby].
-
-[Problems typing equality in Ruby]:
-  https://blog.jez.io/problems-typing-ruby-equality/
 
 ## I use `T.must` a lot with arrays and hashes. Is there a way around this?
 
