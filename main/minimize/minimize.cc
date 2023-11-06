@@ -219,7 +219,8 @@ void serializeMethods(const core::GlobalState &sourceGS, const core::GlobalState
         // probably update this pass to also serialize any new type information.
 
         auto isSingleton = rbiClass.data(rbiGS)->isSingletonClass(rbiGS);
-        outfile.fmt("  def {}{}(", isSingleton ? "self." : "", rbiEntryShortName);
+        auto isPrivate = rbiEntry.data(rbiGS)->flags.isPrivate;
+        outfile.fmt("  {}def {}{}(", isPrivate ? "private " : "", isSingleton ? "self." : "", rbiEntryShortName);
 
         auto &rbiParameters = rbiEntry.data(rbiGS)->arguments;
         if (rbiParameters.size() == 3 && rbiParameters[1].name == core::Names::fwdKwargs()) {
