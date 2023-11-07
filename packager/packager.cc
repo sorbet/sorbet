@@ -1343,13 +1343,13 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
 } // namespace
 
 // Validate that the package file is marked `# typed: strict`.
-ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
+void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
-    auto &absPkg = packageDB.getPackageForFile(ctx, file.file);
+    auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
     if (!absPkg.exists()) {
         // We already produced an error on this package when producing its package info.
         // The correct course of action is to abort the transform.
-        return file;
+        return;
     }
 
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
@@ -1389,13 +1389,11 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     }
 
     // Sanity check: __package.rb files _must_ be typed: strict
-    if (file.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
+    if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
         if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
             e.setHeader("Package files must be at least `{}`", "# typed: strict");
         }
     }
-
-    return file;
 }
 
 void rewritePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1442,7 +1440,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
                                      gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
             }
             // Re-write imports and exports:
-            file = validatePackage(ctx, move(file));
+            validatePackage(ctx);
         } else {
             rewritePackagedFile(ctx, file.tree);
         }
@@ -1586,7 +1584,7 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
                     if (file.isPackage()) {
-                        job = validatePackage(ctx, move(job));
+                        validatePackage(ctx);
                     } else {
                         rewritePackagedFile(ctx, job.tree);
                     }
