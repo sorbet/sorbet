@@ -1398,8 +1398,8 @@ ast::ParsedFile validatePackage(core::Context ctx, ast::ParsedFile file) {
     return file;
 }
 
-ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFile) {
-    auto &file = parsedFile.file.data(ctx);
+void rewritePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
+    auto &file = ctx.file.data(ctx);
     ENFORCE(!file.isPackage());
 
     if (file.isPayload()) {
@@ -1410,7 +1410,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
         //
         // We normally skip running the packager when building in sorbet-orig mode, which computes
         // the stored state, but payload files can be retypechecked by the fast path during LSP.
-        return parsedFile;
+        return;
     }
 
     auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
@@ -1421,15 +1421,13 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile parsedFil
                         "of its parent directories",
                         ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
         }
-        return parsedFile;
+        return;
     }
 
     auto &pkgImpl = PackageInfoImpl::from(pkg);
 
     EnforcePackagePrefix enforcePrefix(ctx, pkgImpl, file.isPackagedTest());
-    ast::ShallowWalk::apply(ctx, enforcePrefix, parsedFile.tree);
-
-    return parsedFile;
+    ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 
 // Re-write source files to be in packages. This is only called if no package definitions were changed.
@@ -1446,7 +1444,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
             // Re-write imports and exports:
             file = validatePackage(ctx, move(file));
         } else {
-            file = rewritePackagedFile(ctx, move(file));
+            rewritePackagedFile(ctx, file.tree);
         }
     }
     return files;
@@ -1590,7 +1588,7 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
                     if (file.isPackage()) {
                         job = validatePackage(ctx, move(job));
                     } else {
-                        job = rewritePackagedFile(ctx, move(job));
+                        rewritePackagedFile(ctx, job.tree);
                     }
                 }
             }
