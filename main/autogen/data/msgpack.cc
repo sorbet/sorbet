@@ -140,6 +140,8 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     // resolved
     if (ref.resolved.empty()) {
         mpack_write_nil(&writer);
+    } else if (version >= 6 && absl::c_equal(ref.name.nameParts, ref.resolved.nameParts)) {
+        mpack_write_true(&writer);
     } else {
         packNames(ref.resolved.nameParts);
     }
