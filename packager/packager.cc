@@ -391,7 +391,7 @@ public:
     }
 };
 
-void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
+void checkPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
     while (constLit != nullptr) {
         if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between mangled names and
@@ -412,7 +412,7 @@ void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
     }
 }
 
-FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConstantLit *constantLit) {
+FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
     fqn.loc = ctx.locAt(constantLit->loc);
     while (constantLit != nullptr) {
@@ -425,7 +425,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, ast::UnresolvedConst
 }
 
 // Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit *constantLit) {
+PackageName getPackageName(core::MutableContext ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
@@ -439,7 +439,7 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     return pName;
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
+bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
@@ -465,7 +465,7 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     return scope;
 }
 
-ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
+const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
@@ -920,7 +920,7 @@ struct PackageInfoFinder {
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
-    void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformCast(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
         if (!ast::isa_tree<ast::Literal>(cast.typeExpr)) {
             if (auto e = ctx.beginError(cast.typeExpr.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -1117,7 +1117,7 @@ struct PackageInfoFinder {
         }
     }
 
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -1227,59 +1227,59 @@ struct PackageInfoFinder {
         }
     }
 
-    void preTransformIf(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformIf(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`if`");
     }
 
-    void preTransformWhile(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`while`");
     }
 
-    void postTransformBreak(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformBreak(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`break`");
     }
 
-    void postTransformRetry(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformRetry(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`retry`");
     }
 
-    void postTransformNext(core::Context ctx, ast::ExpressionPtr &original) {
+    void postTransformNext(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`next`");
     }
 
-    void preTransformReturn(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformReturn(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`return`");
     }
 
-    void preTransformRescueCase(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformRescueCase(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue case`");
     }
 
-    void preTransformRescue(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue`");
     }
 
-    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`=`");
     }
 
-    void preTransformHash(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformHash(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "hash literals");
     }
 
-    void preTransformArray(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformArray(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "array literals");
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "method definitions");
     }
 
-    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "blocks");
     }
 
-    void preTransformInsSeq(core::Context ctx, ast::ExpressionPtr &original) {
+    void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`begin` and `end`");
     }
 };
