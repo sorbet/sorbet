@@ -920,7 +920,7 @@ struct PackageInfoFinder {
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
-    void postTransformCast(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+    void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
         if (!ast::isa_tree<ast::Literal>(cast.typeExpr)) {
             if (auto e = ctx.beginError(cast.typeExpr.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -929,6 +929,8 @@ struct PackageInfoFinder {
         }
     }
 
+    // Only reason PackageInfoFinder needs MutableContext is so that the `Send` and `ClassDef` cases
+    // can enter new NameRefs for mangled package names.
     void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
@@ -1079,6 +1081,8 @@ struct PackageInfoFinder {
         }
     }
 
+    // Only reason PackageInfoFinder needs MutableContext is so that the `Send` and `ClassDef` cases
+    // can enter new NameRefs for mangled package names.
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
@@ -1113,7 +1117,7 @@ struct PackageInfoFinder {
         }
     }
 
-    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -1124,7 +1128,7 @@ struct PackageInfoFinder {
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::MutableContext ctx) {
+    void finalize(core::Context ctx) {
         if (info == nullptr) {
             // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
             // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
@@ -1217,65 +1221,65 @@ struct PackageInfoFinder {
 
     /* Forbid arbitrary computation in packages */
 
-    void illegalNode(core::MutableContext ctx, core::LocOffsets loc, string_view type) {
+    void illegalNode(core::Context ctx, core::LocOffsets loc, string_view type) {
         if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
             e.setHeader("Invalid expression in package: {} not allowed", type);
         }
     }
 
-    void preTransformIf(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformIf(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`if`");
     }
 
-    void preTransformWhile(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformWhile(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`while`");
     }
 
-    void postTransformBreak(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void postTransformBreak(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`break`");
     }
 
-    void postTransformRetry(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void postTransformRetry(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`retry`");
     }
 
-    void postTransformNext(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void postTransformNext(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`next`");
     }
 
-    void preTransformReturn(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformReturn(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`return`");
     }
 
-    void preTransformRescueCase(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformRescueCase(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue case`");
     }
 
-    void preTransformRescue(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformRescue(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`rescue`");
     }
 
-    void preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`=`");
     }
 
-    void preTransformHash(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformHash(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "hash literals");
     }
 
-    void preTransformArray(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformArray(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "array literals");
     }
 
-    void preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "method definitions");
     }
 
-    void preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "blocks");
     }
 
-    void preTransformInsSeq(core::MutableContext ctx, ast::ExpressionPtr &original) {
+    void preTransformInsSeq(core::Context ctx, ast::ExpressionPtr &original) {
         illegalNode(ctx, original.loc(), "`begin` and `end`");
     }
 };
@@ -1435,6 +1439,9 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
         core::Context ctx(gs, core::Symbols::root(), file.file);
         if (file.file.data(gs).isPackage()) {
             {
+                // Even though the package DB should not have changed on the fast path, we still
+                // need to runPackageInfoFinder to rewrite __package.rb files. We also can't use an
+                // immutable Context because runPackageInfoFinder enters new names.
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
                                      gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
