@@ -1469,21 +1469,6 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
                 continue;
             }
 
-            if (file.file.data(gs).strictLevel == core::StrictLevel::Ignore) {
-                // if the `__package.rb` file is at `typed:
-                // ignore`, then we haven't even parsed it, which
-                // means none of the other stuff here is going to
-                // actually work (since it all assumes we've got a
-                // file to actually analyze.) If we've got a
-                // `typed: ignore` package, then skip it.
-
-                // `File::isPackage` is determined by the filename, so we need to clear it explicitly at this point
-                // to ensure that the file is no longer treated as a package.
-                file.file.data(gs).setIsPackage(false);
-
-                continue;
-            }
-
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
             auto pkg = runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
                                             gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
