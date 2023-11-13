@@ -146,6 +146,7 @@ struct ReportedRubyException {
 enum class TreeMapKind {
     Map,
     Walk,
+    ConstWalk,
 };
 
 template <TreeMapKind> struct MapFunctions;
@@ -168,6 +169,15 @@ template <> struct MapFunctions<TreeMapKind::Walk> {
     GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<ExpressionPtr &>());
 };
 
+template <> struct MapFunctions<TreeMapKind::ConstWalk> {
+    using return_type = void;
+    using arg_type = const ExpressionPtr &;
+    static const ExpressionPtr &pass(const ExpressionPtr &p) {
+        return p;
+    }
+    GENERATE_METAPROGRAMMING_FOR(std::declval<core::MutableContext>(), std::declval<const ExpressionPtr &>());
+};
+
 enum class TreeMapDepthKind {
     Full,
     Shallow,
@@ -185,6 +195,8 @@ private:
     friend class ShallowMap;
     friend class TreeWalk;
     friend class ShallowWalk;
+    friend class ConstTreeWalk;
+    friend class ConstShallowWalk;
 
     using Funcs = MapFunctions<Kind>;
     using return_type = typename Funcs::return_type;
@@ -208,6 +220,8 @@ private:
             v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v)); \
         } else if (Kind == TreeMapKind::Walk) {                                                          \
             Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));     \
+        } else if (Kind == TreeMapKind::ConstWalk) {                                                     \
+            Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));     \
         }                                                                                                \
     }
 
@@ -221,13 +235,19 @@ private:
         if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                            \
             Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));        \
         }                                                                                                    \
+    } else if constexpr (Kind == TreeMapKind::ConstWalk) {                                                   \
+        if constexpr (Funcs::template HAS_MEMBER_postTransform##member<FUNC>()) {                            \
+            Funcs::template CALL_MEMBER_postTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));        \
+        }                                                                                                    \
     }
 
-#define CALL_MAP(tree, ctx)                           \
-    if constexpr (Kind == TreeMapKind::Map) {         \
-        tree = mapIt(Funcs::pass(tree), ctx);         \
-    } else if constexpr (Kind == TreeMapKind::Walk) { \
-        mapIt(Funcs::pass(tree), ctx);                \
+#define CALL_MAP(tree, ctx)                                \
+    if constexpr (Kind == TreeMapKind::Map) {              \
+        tree = mapIt(Funcs::pass(tree), ctx);              \
+    } else if constexpr (Kind == TreeMapKind::Walk) {      \
+        mapIt(Funcs::pass(tree), ctx);                     \
+    } else if constexpr (Kind == TreeMapKind::ConstWalk) { \
+        mapIt(Funcs::pass(tree), ctx);                     \
     }
 
     return_type mapClassDef(arg_type v, CTX ctx) {
@@ -339,6 +359,8 @@ private:
             if constexpr (Kind == TreeMapKind::Map) {
                 el = mapRescueCase(Funcs::pass(el), ctx);
             } else if constexpr (Kind == TreeMapKind::Walk) {
+                mapRescueCase(Funcs::pass(el), ctx);
+            } else if constexpr (Kind == TreeMapKind::ConstWalk) {
                 mapRescueCase(Funcs::pass(el), ctx);
             }
             ENFORCE(isa_tree<RescueCase>(el), "rescue case was mapped into non-rescue case");
@@ -466,6 +488,8 @@ private:
                 return what;
             } else if constexpr (Kind == TreeMapKind::Walk) {
                 return;
+            } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                return;
             }
         }
 
@@ -476,6 +500,8 @@ private:
                     what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
                 } else if constexpr (Kind == TreeMapKind::Walk) {
                     Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                    Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
                 }
             }
 
@@ -484,6 +510,8 @@ private:
                     if constexpr (Kind == TreeMapKind::Map) {
                         return what;
                     } else if constexpr (Kind == TreeMapKind::Walk) {
+                        return;
+                    } else if constexpr (Kind == TreeMapKind::ConstWalk) {
                         return;
                     }
 
@@ -573,6 +601,8 @@ private:
                         return what;
                     } else if constexpr (Kind == TreeMapKind::Walk) {
                         return;
+                    } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                        return;
                     }
 
                 case Tag::Block:
@@ -630,6 +660,22 @@ public:
     }
 };
 
+class ConstTreeWalk {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, const ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::ConstWalk, TreeMapDepthKind::Full> walker(func);
+        try {
+            walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
 class ShallowMap {
 public:
     template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
@@ -650,6 +696,22 @@ class ShallowWalk {
 public:
     template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, ExpressionPtr &to) {
         TreeMapper<FUNC, CTX, TreeMapKind::Walk, TreeMapDepthKind::Shallow> walker(func);
+        try {
+            walker.mapIt(to, ctx);
+        } catch (ReportedRubyException &exception) {
+            Exception::failInFuzzer();
+            if (auto e = ctx.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
+    }
+};
+
+class ConstShallowWalk {
+public:
+    template <typename CTX, typename FUNC> static void apply(CTX ctx, FUNC &func, const ExpressionPtr &to) {
+        TreeMapper<FUNC, CTX, TreeMapKind::ConstWalk, TreeMapDepthKind::Shallow> walker(func);
         try {
             walker.mapIt(to, ctx);
         } catch (ReportedRubyException &exception) {
