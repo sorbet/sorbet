@@ -1400,7 +1400,7 @@ void validatePackage(core::Context ctx) {
     }
 }
 
-void rewritePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
+void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     auto &file = ctx.file.data(ctx);
     ENFORCE(!file.isPackage());
 
@@ -1449,7 +1449,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
             // Re-write imports and exports:
             validatePackage(ctx);
         } else {
-            rewritePackagedFile(ctx, file.tree);
+            validatePackagedFile(ctx, file.tree);
         }
     }
     return files;
@@ -1593,7 +1593,7 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
                     if (file.isPackage()) {
                         validatePackage(ctx);
                     } else {
-                        rewritePackagedFile(ctx, job.tree);
+                        validatePackagedFile(ctx, job.tree);
                     }
                 }
             }
