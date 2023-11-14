@@ -946,8 +946,7 @@ private:
             return;
         }
 
-        auto classOrModuleDeclaredAt = sym.data(ctx)->loc();
-        if (classOrModuleDeclaredAt.exists() && classOrModuleDeclaredAt.file().data(ctx).isRBI()) {
+        if (ctx.file.data(ctx).isRBI()) {
             return;
         }
 
@@ -956,8 +955,7 @@ private:
             return;
         }
 
-        auto errorBuilder =
-            ctx.beginError(classOrModuleDeclaredAt.offsets(), core::errors::Resolver::BadAbstractMethod);
+        auto errorBuilder = ctx.beginError(classDef.declLoc, core::errors::Resolver::BadAbstractMethod);
         if (!errorBuilder) {
             return;
         }
@@ -967,6 +965,7 @@ private:
             (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(ctx)));
         errorBuilder.setHeader("Missing definition{} for abstract method{}{}", pluralization, pluralization, suffix);
 
+        auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
         auto hasSingleLineDefinition =
             classOrModuleDeclaredAt.position(ctx).first.line == classOrModuleEndsAt.position(ctx).second.line;
