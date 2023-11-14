@@ -174,10 +174,6 @@ public:
         return declLoc_;
     }
 
-    bool legacyAutoloaderCompatibility() const {
-        return legacyAutoloaderCompatibility_;
-    }
-
     bool exportAll() const {
         return exportAll_;
     }
@@ -199,10 +195,6 @@ public:
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
     vector<Export> exports_;
-
-    // Code in this package is _completely incompatible_ for path-based autoloading, and only works with the 'legacy'
-    // Sorbet-generated autoloader.
-    bool legacyAutoloaderCompatibility_;
 
     // Whether this package should just export everything
     bool exportAll_;
@@ -1008,47 +1000,6 @@ struct PackageInfoFinder {
             info->exportAll_ = true;
         }
 
-        if (send.fun == core::Names::autoloaderCompatibility() && send.numPosArgs() == 1) {
-            // Parse autoloader_compatibility DSL and set strict bit on PackageInfoImpl if configured
-            auto *compatibilityAnnotationLit = ast::cast_tree<ast::Literal>(send.getPosArg(0));
-            if (compatibilityAnnotationLit == nullptr || !compatibilityAnnotationLit->isString()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` must be a string literal", send.fun.show(ctx));
-
-                    if (compatibilityAnnotationLit != nullptr && compatibilityAnnotationLit->isSymbol()) {
-                        auto symbol = compatibilityAnnotationLit->asSymbol();
-                        if (symbol == core::Names::strict() || symbol == core::Names::legacy()) {
-                            e.replaceWith("Convert to string arg", ctx.locAt(compatibilityAnnotationLit->loc), "\"{}\"",
-                                          symbol.shortName(ctx));
-                        }
-                    }
-                }
-
-                return;
-            }
-
-            auto compatibilityAnnotation = compatibilityAnnotationLit->asString();
-            if (compatibilityAnnotation != core::Names::legacy()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidConfiguration)) {
-                    if (compatibilityAnnotation == core::Names::strict()) {
-                        e.setHeader("The 'strict' argument has been deprecated as an argument to `{}`",
-                                    send.fun.show(ctx));
-                        e.addErrorNote("If you wish to mark your "
-                                       "package as strictly path-based-autoloading compatible, do not provide an "
-                                       "autoloader_compatibility annotation");
-                    } else {
-                        e.setHeader("Argument to `{}` can only be 'legacy'", send.fun.show(ctx));
-                    }
-                }
-
-                return;
-            }
-
-            if (compatibilityAnnotation == core::Names::legacy()) {
-                info->legacyAutoloaderCompatibility_ = true;
-            }
-        }
-
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
             if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
                 // the only valid literal here is `visible_to "tests"`; others should be rejected
@@ -1198,7 +1149,6 @@ struct PackageInfoFinder {
             case core::Names::testImport().rawId():
             case core::Names::export_().rawId():
             case core::Names::restrictToService().rawId():
-            case core::Names::autoloaderCompatibility().rawId():
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
                 return true;
