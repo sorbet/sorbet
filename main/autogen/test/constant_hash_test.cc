@@ -186,18 +186,6 @@ TEST_CASE("Require") { // NOLINT
                                      "do_the_thing!"));
 }
 
-TEST_CASE("Package Autoloader Compatibility") { // NOLINT
-    Helper helper;
-
-    auto req = helper.hashExample("autoloader_compatibility 'legacy'\n");
-
-    // removing the annotation should affect the hash
-    CHECK_NE(req, helper.hashExample("\n"));
-
-    // changing the annotation should affect the hash
-    CHECK_NE(req, helper.hashExample("autoloader_compatibility 'strict'\n"));
-}
-
 TEST_CASE("Extend/Include") {
     Helper helper;
 

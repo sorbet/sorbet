@@ -634,11 +634,6 @@ void GlobalState::initEmpty() {
     method = this->staticInitForClass(core::Symbols::root(), Loc::none());
     ENFORCE(method == Symbols::rootStaticInit());
 
-    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::autoloaderCompatibility())
-                 .arg(Names::arg0())
-                 .build();
-    ENFORCE(method == Symbols::PackageSpec_autoloader_compatibility());
-
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::visibleTo()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_visible_to());
 

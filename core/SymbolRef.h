@@ -1053,16 +1053,12 @@ public:
         return MethodRef::fromRaw(16);
     }
 
-    static MethodRef PackageSpec_autoloader_compatibility() {
+    static MethodRef PackageSpec_visible_to() {
         return MethodRef::fromRaw(17);
     }
 
-    static MethodRef PackageSpec_visible_to() {
-        return MethodRef::fromRaw(18);
-    }
-
     static MethodRef PackageSpec_export_all() {
-        return MethodRef::fromRaw(19);
+        return MethodRef::fromRaw(18);
     }
 
     static ClassOrModuleRef Sorbet_Private_Static_ResolvedSig() {
@@ -1106,7 +1102,7 @@ public:
     }
 
     static MethodRef T_Generic_squareBrackets() {
-        return MethodRef::fromRaw(20);
+        return MethodRef::fromRaw(19);
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
