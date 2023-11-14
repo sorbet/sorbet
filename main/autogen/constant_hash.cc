@@ -74,16 +74,6 @@ struct ConstantHashWalk {
                 hashConstant(ctx, arg);
             }
             hashSoFar = core::mix(hashSoFar, core::_hash(")"));
-        } else if (send.fun == core::Names::autoloaderCompatibility()) {
-            hashSoFar = core::mix(hashSoFar, core::_hash("(a"));
-            if (send.hasPosArgs()) {
-                if (auto str = ast::cast_tree<ast::Literal>(send.posArgs().front())) {
-                    if (str->isString()) {
-                        hashSoFar = core::mix(hashSoFar, core::_hash(str->asString().shortName(ctx)));
-                    }
-                }
-            }
-            hashSoFar = core::mix(hashSoFar, core::_hash(")"));
         }
     }
 

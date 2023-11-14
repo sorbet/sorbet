@@ -23,7 +23,7 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 54;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
 const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 73;
