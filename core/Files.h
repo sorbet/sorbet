@@ -55,7 +55,6 @@ public:
     static bool isPackagePath(std::string_view path);
 
     bool isPackage() const;
-    void setIsPackage(bool isPackage);
 
     // Whether the file is open in the LSP client. (Always false if not running under LSP.)
     bool isOpenInClient() const;
