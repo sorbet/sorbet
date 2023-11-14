@@ -13,7 +13,6 @@ private:
     int version;
     const std::vector<std::string> &refAttrs;
     const std::vector<std::string> &defAttrs;
-    mpack_writer_t writer;
 
     std::vector<core::NameRef> symbols;
     UnorderedMap<core::NameRef, uint32_t> symbolIds;
@@ -23,14 +22,14 @@ private:
     static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
 
     // a bunch of helpers
-    void packName(core::NameRef nm);
-    void packNames(std::vector<core::NameRef> &names);
-    void packBool(bool b);
-    void packReferenceRef(ReferenceRef ref);
-    void packDefinitionRef(DefinitionRef ref);
-    void packRange(uint32_t begin, uint32_t end);
-    void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def, const AutogenConfig &autogenCfg);
-    void packReference(core::Context ctx, ParsedFile &pf, Reference &ref);
+    void packName(mpack_writer_t *writer, core::NameRef nm);
+    void packNames(mpack_writer_t *writer, std::vector<core::NameRef> &names);
+    void packBool(mpack_writer_t *writer, bool b);
+    void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
+    void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
+    void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
+    void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def, const AutogenConfig &autogenCfg);
+    void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
         if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
             Exception::raise("msgpack version {} not in available range [{}, {}]", version, AutogenVersion::MIN_VERSION,

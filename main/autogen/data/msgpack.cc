@@ -9,7 +9,7 @@
 using namespace std;
 namespace sorbet::autogen {
 
-void MsgpackWriter::packName(core::NameRef nm) {
+void MsgpackWriter::packName(mpack_writer_t *writer, core::NameRef nm) {
     uint32_t id;
     typename decltype(symbolIds)::value_type v{nm, 0};
     auto [it, inserted] = symbolIds.insert(v);
@@ -20,48 +20,48 @@ void MsgpackWriter::packName(core::NameRef nm) {
     } else {
         id = it->second;
     }
-    mpack_write_u32(&writer, id);
+    mpack_write_u32(writer, id);
 }
 
-void MsgpackWriter::packNames(vector<core::NameRef> &names) {
-    mpack_start_array(&writer, names.size());
+void MsgpackWriter::packNames(mpack_writer_t *writer, vector<core::NameRef> &names) {
+    mpack_start_array(writer, names.size());
     for (auto nm : names) {
-        packName(nm);
+        packName(writer, nm);
     }
-    mpack_finish_array(&writer);
+    mpack_finish_array(writer);
 }
 
 void packString(mpack_writer_t *writer, string_view str) {
     mpack_write_str(writer, str.data(), str.size());
 }
 
-void MsgpackWriter::packBool(bool b) {
+void MsgpackWriter::packBool(mpack_writer_t *writer, bool b) {
     if (b) {
-        mpack_write_true(&writer);
+        mpack_write_true(writer);
     } else {
-        mpack_write_false(&writer);
+        mpack_write_false(writer);
     }
 }
 
-void MsgpackWriter::packReferenceRef(ReferenceRef ref) {
+void MsgpackWriter::packReferenceRef(mpack_writer_t *writer, ReferenceRef ref) {
     if (!ref.exists()) {
-        mpack_write_nil(&writer);
+        mpack_write_nil(writer);
     } else {
-        mpack_write_u16(&writer, ref.id());
+        mpack_write_u16(writer, ref.id());
     }
 }
 
-void MsgpackWriter::packDefinitionRef(DefinitionRef ref) {
+void MsgpackWriter::packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref) {
     if (!ref.exists()) {
-        mpack_write_nil(&writer);
+        mpack_write_nil(writer);
     } else {
-        mpack_write_u16(&writer, ref.id());
+        mpack_write_u16(writer, ref.id());
     }
 }
 
-void MsgpackWriter::packRange(uint32_t begin, uint32_t end) {
+void MsgpackWriter::packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end) {
     if (version <= 4) {
-        mpack_write_u64(&writer, ((uint64_t)begin << 32) | end);
+        mpack_write_u64(writer, ((uint64_t)begin << 32) | end);
     } else {
         // The above scheme almost certainly implies that the value written
         // will be larger than 2**32 and therefore will take up a full nine
@@ -71,25 +71,25 @@ void MsgpackWriter::packRange(uint32_t begin, uint32_t end) {
         // advantage of being written as a fixuint/u8/u16/u32 in the output;
         // the length of the range will be usually a fixuint or a u8, resulting
         // in even smaller output than writing the endpoint of the range.
-        mpack_write_u32(&writer, begin);
-        mpack_write_u32(&writer, end - begin);
+        mpack_write_u32(writer, begin);
+        mpack_write_u32(writer, end - begin);
     }
 }
 
-void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition &def,
+void MsgpackWriter::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                                    const AutogenConfig &autogenCfg) {
-    mpack_start_array(&writer, defAttrs[version].size());
+    mpack_start_array(writer, defAttrs[version].size());
 
     // raw_full_name
     auto raw_full_name = pf.showFullName(ctx, def.id);
-    packNames(raw_full_name);
+    packNames(writer, raw_full_name);
 
     // type
     auto defType = def.type;
-    mpack_write_u8(&writer, static_cast<uint64_t>(defType));
+    mpack_write_u8(writer, static_cast<uint64_t>(defType));
 
     // defines_behavior
-    packBool(def.defines_behavior);
+    packBool(writer, def.defines_behavior);
     const auto &filePath = ctx.file.data(ctx).path();
     ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI() ||
                 absl::c_any_of(autogenCfg.behaviorAllowedInRBIsPaths,
@@ -97,61 +97,61 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
             "RBI files should never define behavior");
 
     // isEmpty
-    packBool(def.is_empty);
+    packBool(writer, def.is_empty);
 
     // parent_ref
-    packReferenceRef(def.parent_ref);
+    packReferenceRef(writer, def.parent_ref);
 
     // aliased_ref
-    packReferenceRef(def.aliased_ref);
+    packReferenceRef(writer, def.aliased_ref);
 
     // defining_ref
-    packReferenceRef(def.defining_ref);
-    mpack_finish_array(&writer);
+    packReferenceRef(writer, def.defining_ref);
+    mpack_finish_array(writer);
 }
 
-void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &ref) {
-    mpack_start_array(&writer, refAttrs[version].size());
+void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
+    mpack_start_array(writer, refAttrs[version].size());
 
     // scope
-    packDefinitionRef(ref.scope.id());
+    packDefinitionRef(writer, ref.scope.id());
 
     // name
-    packNames(ref.name.nameParts);
+    packNames(writer, ref.name.nameParts);
 
     // nesting
     if (version >= 6) {
-        mpack_write_u32(&writer, ref.nestingId);
+        mpack_write_u32(writer, ref.nestingId);
     } else {
         auto &nesting = pf.nestings[ref.nestingId];
-        mpack_start_array(&writer, nesting.size());
+        mpack_start_array(writer, nesting.size());
         for (auto &scope : nesting) {
-            packDefinitionRef(scope.id());
+            packDefinitionRef(writer, scope.id());
         }
-        mpack_finish_array(&writer);
+        mpack_finish_array(writer);
     }
 
     // expression_range
     auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
-    packRange(expression_range.first.line, expression_range.second.line);
+    packRange(writer, expression_range.first.line, expression_range.second.line);
     // expression_pos_range
-    packRange(ref.loc.beginPos(), ref.loc.endPos());
+    packRange(writer, ref.loc.beginPos(), ref.loc.endPos());
 
     // resolved
     if (ref.resolved.empty()) {
-        mpack_write_nil(&writer);
+        mpack_write_nil(writer);
     } else if (version >= 6 && absl::c_equal(ref.name.nameParts, ref.resolved.nameParts)) {
-        mpack_write_true(&writer);
+        mpack_write_true(writer);
     } else {
-        packNames(ref.resolved.nameParts);
+        packNames(writer, ref.resolved.nameParts);
     }
 
     // is_defining_ref
-    packBool(ref.is_defining_ref);
+    packBool(writer, ref.is_defining_ref);
 
     // parent_of
-    packDefinitionRef(ref.parent_of);
-    mpack_finish_array(&writer);
+    packDefinitionRef(writer, ref.parent_of);
+    mpack_finish_array(writer);
 }
 
 MsgpackWriter::MsgpackWriter(int version)
@@ -171,6 +171,7 @@ void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::
 string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
     char *body;
     size_t bodySize;
+    mpack_writer_t writer;
     mpack_writer_init_growable(&writer, &body, &bodySize);
 
     bool symbolsInBody = version >= 6;
