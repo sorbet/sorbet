@@ -1999,6 +1999,8 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
         auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
+    } else {
+        ancestors.data(gs)->addLoc(gs, ancestor.loc);
     }
 
     // Do not require the same ancestor twice
