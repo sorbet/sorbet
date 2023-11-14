@@ -191,33 +191,49 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
 
     size_t preDefsSize = mpack_writer_buffer_used(&writer);
 
+    // This is a little awkward.  We want to write the symbols used by
+    // defs and refs here, but the symbols hash isn't populated until after
+    // we've written the defs and refs.  So we're going to redirect
+    // everything into a temporary buffer, write the now-populated
+    // symbols, then write the temporary buffer as raw bytes.
+    char *temporary;
+    size_t temporarySize;
+    mpack_writer_t temporaryWriter;
+    mpack_writer_init_growable(&temporaryWriter, &temporary, &temporarySize);
+    {
+        mpack_start_array(&temporaryWriter, pf.defs.size());
+        for (auto &def : pf.defs) {
+            packDefinition(&temporaryWriter, ctx, pf, def, autogenCfg);
+        }
+        mpack_finish_array(&temporaryWriter);
+
+        if (version >= 6) {
+            mpack_start_array(&temporaryWriter, pf.nestings.size());
+            for (auto &nesting : pf.nestings) {
+                mpack_start_array(&temporaryWriter, nesting.size());
+                for (auto &scope : nesting) {
+                    packDefinitionRef(&temporaryWriter, scope.id());
+                }
+                mpack_finish_array(&temporaryWriter);
+            }
+            mpack_finish_array(&temporaryWriter);
+        }
+
+        mpack_start_array(&temporaryWriter, pf.refs.size());
+        for (auto &ref : pf.refs) {
+            packReference(&temporaryWriter, ctx, pf, ref);
+        }
+        mpack_finish_array(&temporaryWriter);
+    }
+
     if (symbolsInBody) {
         writeSymbols(ctx, &writer, symbols);
     }
 
-    mpack_start_array(&writer, pf.defs.size());
-    for (auto &def : pf.defs) {
-        packDefinition(ctx, pf, def, autogenCfg);
-    }
-    mpack_finish_array(&writer);
+    mpack_writer_destroy(&temporaryWriter);
+    mpack_write_object_bytes(&writer, temporary, temporarySize);
+    MPACK_FREE(temporary);
 
-    if (version >= 6) {
-        mpack_start_array(&writer, pf.nestings.size());
-        for (auto &nesting : pf.nestings) {
-            mpack_start_array(&writer, nesting.size());
-            for (auto &scope : nesting) {
-                packDefinitionRef(scope.id());
-            }
-            mpack_finish_array(&writer);
-        }
-        mpack_finish_array(&writer);
-    }
-
-    mpack_start_array(&writer, pf.refs.size());
-    for (auto &ref : pf.refs) {
-        packReference(ctx, pf, ref);
-    }
-    mpack_finish_array(&writer);
     mpack_finish_array(&writer);
 
     mpack_writer_destroy(&writer);
