@@ -347,7 +347,7 @@ bool File::permitOverloadDefinitions() const {
 
 bool File::isPackage() const {
     // If the `__package.rb` file is at `typed: ignore`, then we haven't even parsed it.
-    // Any loop over "all package files" is really only wants "all non-ignored package files."
+    // Any loop over "all package files" really only wants "all non-ignored package files."
     return flags.isPackage && this->strictLevel != StrictLevel::Ignore;
 }
 
