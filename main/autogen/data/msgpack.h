@@ -28,7 +28,8 @@ private:
     void packReferenceRef(mpack_writer_t *writer, ReferenceRef ref);
     void packDefinitionRef(mpack_writer_t *writer, DefinitionRef ref);
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
-    void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def, const AutogenConfig &autogenCfg);
+    void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
+                        const AutogenConfig &autogenCfg);
     void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
         if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
