@@ -1206,35 +1206,37 @@ struct PackageInfoFinder {
     }
 };
 
-unique_ptr<PackageInfoImpl> rewritePackageSpec(core::Context ctx, ast::ParsedFile &package,
+unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package,
                                                const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                                const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
     ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(ctx).isPackage());
+    ENFORCE(package.file.data(gs).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
     // for `typed: ignore` files, so we should make sure to catch that
     // elsewhere.)
     ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
     ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
     PackageInfoFinder finder;
+    core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, finder, package.tree);
     finder.finalize(ctx);
     return move(finder.info);
 }
 
 unique_ptr<PackageInfoImpl>
-runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
+runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package,
                      const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                      const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
-    auto info = rewritePackageSpec(ctx, package, extraPackageFilesDirectoryUnderscorePrefixes,
+    auto info = rewritePackageSpec(gs, package, extraPackageFilesDirectoryUnderscorePrefixes,
                                    extraPackageFilesDirectorySlashPrefixes);
     if (info) {
-        populateMangledName(ctx, info->name);
+        populateMangledName(gs, info->name);
         for (auto &importedPackageName : info->importedPackageNames) {
-            populateMangledName(ctx, importedPackageName.name);
+            populateMangledName(gs, importedPackageName.name);
 
             if (importedPackageName.name.mangledName == info->name.mangledName) {
-                if (auto e = ctx.beginError(importedPackageName.name.loc, core::errors::Packager::NoSelfImport)) {
+                if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
+                                           core::errors::Packager::NoSelfImport)) {
                     string import_;
                     switch (importedPackageName.type) {
                         case ImportType::Normal:
@@ -1244,18 +1246,18 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
                             import_ = "test_import";
                             break;
                     }
-                    e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), import_);
+                    e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
                 }
             }
         }
 
         for (auto &visibleTo : info->visibleTo_) {
-            populateMangledName(ctx, visibleTo);
+            populateMangledName(gs, visibleTo);
 
             if (visibleTo.mangledName == info->name.mangledName) {
-                if (auto e = ctx.beginError(visibleTo.loc, core::errors::Packager::NoSelfImport)) {
-                    e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to",
-                                info->name.toString(ctx));
+                if (auto e =
+                        gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
+                    e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
                 }
             }
         }
@@ -1263,10 +1265,10 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
         const auto numPrefixes =
             extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
         info->packagePathPrefixes.reserve(numPrefixes);
-        auto packageFilePath = package.file.data(ctx).path();
+        auto packageFilePath = package.file.data(gs).path();
         ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
         info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        const string_view shortName = info->name.mangledName.shortName(ctx.state);
+        const string_view shortName = info->name.mangledName.shortName(gs);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1404,8 +1406,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
                 // need to runPackageInfoFinder to rewrite __package.rb files. We also can't use an
                 // immutable Context because runPackageInfoFinder enters new names.
                 // TODO(jez) This is not true anymore--we can call the treewalk directly to avoid mutating GlobalState
-                core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-                runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
+                runPackageInfoFinder(gs, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
                                      gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
             }
             // Re-write imports and exports:
