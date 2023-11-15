@@ -91,10 +91,6 @@ struct PackageName {
 enum class ImportType {
     Normal,
     Test, // test_import
-
-    // "friend-import": This represents code that is re-mapped into a package's own public->private mapping or
-    // its private test namespace.
-    Friend,
 };
 
 struct Import {
@@ -376,9 +372,6 @@ public:
                 return core::packages::ImportType::Normal;
             case ImportType::Test:
                 return core::packages::ImportType::Test;
-            case ImportType::Friend:
-                ENFORCE(false, "Should not happen");
-                return nullopt;
         }
     }
 };
