@@ -1206,10 +1206,9 @@ struct PackageInfoFinder {
     }
 };
 
-unique_ptr<PackageInfoImpl>
-runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
-                     const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                     const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
+unique_ptr<PackageInfoImpl> rewritePackageSpec(core::Context ctx, ast::ParsedFile &package,
+                                               const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                                               const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(ctx).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1217,17 +1216,24 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
     // elsewhere.)
     ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
     ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
-    auto packageFilePath = package.file.data(ctx).path();
-    ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     PackageInfoFinder finder;
     ast::TreeWalk::apply(ctx, finder, package.tree);
     finder.finalize(ctx);
-    if (finder.info) {
-        populateMangledName(ctx, finder.info->name);
-        for (auto &importedPackageName : finder.info->importedPackageNames) {
+    return move(finder.info);
+}
+
+unique_ptr<PackageInfoImpl>
+runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
+                     const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                     const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
+    auto info = rewritePackageSpec(ctx, package, extraPackageFilesDirectoryUnderscorePrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes);
+    if (info) {
+        populateMangledName(ctx, info->name);
+        for (auto &importedPackageName : info->importedPackageNames) {
             populateMangledName(ctx, importedPackageName.name);
 
-            if (importedPackageName.name.mangledName == finder.info->name.mangledName) {
+            if (importedPackageName.name.mangledName == info->name.mangledName) {
                 if (auto e = ctx.beginError(importedPackageName.name.loc, core::errors::Packager::NoSelfImport)) {
                     string import_;
                     switch (importedPackageName.type) {
@@ -1238,33 +1244,35 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
                             import_ = "test_import";
                             break;
                     }
-                    e.setHeader("Package `{}` cannot {} itself", finder.info->name.toString(ctx), import_);
+                    e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), import_);
                 }
             }
         }
 
-        for (auto &visibleTo : finder.info->visibleTo_) {
+        for (auto &visibleTo : info->visibleTo_) {
             populateMangledName(ctx, visibleTo);
 
-            if (visibleTo.mangledName == finder.info->name.mangledName) {
+            if (visibleTo.mangledName == info->name.mangledName) {
                 if (auto e = ctx.beginError(visibleTo.loc, core::errors::Packager::NoSelfImport)) {
                     e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to",
-                                finder.info->name.toString(ctx));
+                                info->name.toString(ctx));
                 }
             }
         }
 
         const auto numPrefixes =
             extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
-        finder.info->packagePathPrefixes.reserve(numPrefixes);
-        finder.info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        const string_view shortName = finder.info->name.mangledName.shortName(ctx.state);
+        info->packagePathPrefixes.reserve(numPrefixes);
+        auto packageFilePath = package.file.data(ctx).path();
+        ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
+        info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+        const string_view shortName = info->name.mangledName.shortName(ctx.state);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
             // Project_FooBar -- munge with underscore
             string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-            finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
 
         for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
@@ -1291,10 +1299,10 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
             ss << '/';
 
             std::string additionalDirPath(ss.str());
-            finder.info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }
-    return move(finder.info);
+    return info;
 }
 
 } // namespace
