@@ -8,8 +8,8 @@ class Parent
   def self.foo; end
 end
 
-class Child < Parent
-  class << self # error: Missing definition for abstract method `Parent.foo`
+class Child < Parent # error: Missing definition for abstract method `Parent.foo`
+  class << self
     extend T::Sig
   end
 end
