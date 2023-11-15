@@ -70,7 +70,7 @@ struct FullyQualifiedName {
 
 struct PackageName {
     core::LocOffsets loc;
-    core::NameRef mangledName = core::NameRef::noName();
+    core::packages::MangledName mangledName;
     FullyQualifiedName fullName;
     FullyQualifiedName fullTestPkgName;
 
@@ -150,7 +150,7 @@ public:
 
 class PackageInfoImpl final : public core::packages::PackageInfo {
 public:
-    core::NameRef mangledName() const {
+    core::packages::MangledName mangledName() const {
         return name.mangledName;
     }
 
@@ -356,7 +356,7 @@ public:
         return rv;
     }
 
-    std::optional<core::packages::ImportType> importsPackage(core::NameRef mangledName) const {
+    std::optional<core::packages::ImportType> importsPackage(core::packages::MangledName mangledName) const {
         if (!mangledName.exists()) {
             return std::nullopt;
         }
@@ -491,8 +491,8 @@ uint16_t findPackageIndex(core::Context ctx, const PackageInfoImpl &pkg) {
 class PackageNamespaces final {
     using Bound = pair<uint16_t, uint16_t>;
 
-    const vector<core::NameRef> &packages; // Mangled names sorted lexicographically
-    const PackageInfoImpl &filePkg;        // Package for current file
+    const vector<core::packages::MangledName> &packages; // Mangled names sorted lexicographically
+    const PackageInfoImpl &filePkg;                      // Package for current file
     // Current bounds:
     uint16_t begin;
     uint16_t end;
@@ -506,7 +506,7 @@ class PackageNamespaces final {
     vector<Bound> bounds;
     vector<core::NameRef> nameParts;
     vector<core::LocOffsets> namePartsLocs;
-    vector<pair<core::NameRef, uint16_t>> curPkg;
+    vector<pair<core::packages::MangledName, uint16_t>> curPkg;
     core::NameRef foundTestNS = core::NameRef::noName();
     core::LocOffsets foundTestNSLoc;
 
@@ -538,9 +538,9 @@ public:
         return res;
     }
 
-    core::NameRef packageForNamespace() const {
+    core::packages::MangledName packageForNamespace() const {
         if (curPkg.empty()) {
-            return core::NameRef::noName();
+            return core::packages::MangledName();
         }
         return curPkg.back().first;
     }
@@ -1266,7 +1266,7 @@ unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::Par
         auto packageFilePath = package.file.data(gs).path();
         ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
         info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        const string_view shortName = info->name.mangledName.shortName(gs);
+        const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
         const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
         for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1429,7 +1429,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
-    std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
+    std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
     // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
@@ -1455,7 +1455,7 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
 }
 
 void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const core::FileRef> files) {
-    std::vector<std::pair<core::FileRef, core::NameRef>> mapping;
+    std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
     // Step 1a, add package references to every file.
@@ -1579,13 +1579,14 @@ struct PackageFiles {
 
 class PackageInfoFormatter final {
     const core::GlobalState &gs;
-    const UnorderedMap<core::NameRef, PackageFiles> &packageFiles;
+    const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles;
 
 public:
-    PackageInfoFormatter(const core::GlobalState &gs, const UnorderedMap<core::NameRef, PackageFiles> &packageFiles)
+    PackageInfoFormatter(const core::GlobalState &gs,
+                         const UnorderedMap<core::packages::MangledName, PackageFiles> &packageFiles)
         : gs(gs), packageFiles(packageFiles) {}
 
-    void operator()(std::string *out, core::NameRef mangledName) const {
+    void operator()(std::string *out, core::packages::MangledName mangledName) const {
         const auto &pkg = gs.packageDB().getPackageInfo(mangledName);
         out->append("{{");
         out->append("\"name\":");
@@ -1613,7 +1614,7 @@ public:
 void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFile) {
     const auto &pkgDB = gs.packageDB();
     // package => files
-    UnorderedMap<core::NameRef, PackageFiles> packageFiles;
+    UnorderedMap<core::packages::MangledName, PackageFiles> packageFiles;
     for (uint32_t i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
         const auto &pkg = pkgDB.getPackageForFile(gs, file);

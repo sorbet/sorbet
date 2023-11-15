@@ -1,6 +1,5 @@
 #include "core/packages/PackageDB.h"
 #include "absl/strings/match.h"
-#include "absl/strings/str_replace.h"
 #include "common/sort/sort.h"
 #include "core/AutocorrectSuggestion.h"
 #include "core/GlobalState.h"
@@ -13,8 +12,8 @@ namespace sorbet::core::packages {
 namespace {
 class NonePackage final : public PackageInfo {
 public:
-    core::NameRef mangledName() const {
-        return NameRef::noName();
+    MangledName mangledName() const {
+        return MangledName();
     }
 
     const vector<core::NameRef> &fullName() const {
@@ -81,7 +80,7 @@ public:
         return vector<vector<core::NameRef>>();
     }
 
-    std::optional<ImportType> importsPackage(core::NameRef mangledName) const {
+    std::optional<ImportType> importsPackage(MangledName mangledName) const {
         notImplemented();
         return nullopt;
     }
@@ -115,7 +114,7 @@ UnfreezePackages::~UnfreezePackages() {
     db.frozen = true;
 }
 
-NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
+MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     ENFORCE(!frozen);
     ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
     auto nr = pkg->mangledName();
@@ -138,17 +137,17 @@ NameRef PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
-const NameRef PackageDB::getPackageNameForFile(FileRef file) const {
+const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     if (this->packageForFile_.size() <= file.id()) {
-        return NameRef::noName();
+        return MangledName();
     }
 
     return this->packageForFile_[file.id()];
 }
 
-void PackageDB::setPackageNameForFile(FileRef file, NameRef mangledName) {
+void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     if (this->packageForFile_.size() <= file.id()) {
-        this->packageForFile_.resize(file.id() + 1, NameRef::noName());
+        this->packageForFile_.resize(file.id() + 1, MangledName());
     }
 
     this->packageForFile_[file.id()] = mangledName;
@@ -191,25 +190,14 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
 }
 
 const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
-    auto mangled = absl::StrCat(absl::StrReplaceAll(nameStr, {{"::", "_"}}), core::PACKAGE_SUFFIX);
-    auto utf8Name = gs.lookupNameUTF8(mangled);
-    if (!utf8Name.exists()) {
-        return NONE_PKG;
-    }
-
-    auto packagerName = gs.lookupNameUnique(core::UniqueNameKind::Packager, utf8Name, 1);
-    if (!packagerName.exists()) {
-        return NONE_PKG;
-    }
-
-    auto cnst = gs.lookupNameConstant(packagerName);
+    auto cnst = core::packages::MangledName::mangledNameFromHuman(gs, nameStr);
     if (!cnst.exists()) {
         return NONE_PKG;
     }
     return getPackageInfo(cnst);
 }
 
-const PackageInfo &PackageDB::getPackageInfo(core::NameRef mangledName) const {
+const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     auto it = packages_.find(mangledName);
     if (it == packages_.end()) {
         return NONE_PKG;
@@ -221,7 +209,7 @@ bool PackageDB::empty() const {
     return packages_.empty();
 }
 
-const vector<core::NameRef> &PackageDB::packages() const {
+const vector<MangledName> &PackageDB::packages() const {
     return mangledNames;
 }
 
@@ -245,7 +233,7 @@ const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
 
-bool PackageDB::allowRelaxedPackagerChecksFor(core::NameRef mangledName) const {
+bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
     return absl::c_find(allowRelaxedPackagerChecksFor_, mangledName) != allowRelaxedPackagerChecksFor_.end();
 }
 

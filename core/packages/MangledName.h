@@ -1,16 +1,39 @@
 #ifndef SORBET_CORE_PACKAGES_MANGLEDNAME_H
 #define SORBET_CORE_PACKAGES_MANGLEDNAME_H
 
-#include "core/GlobalState.h"
 #include "core/LocOffsets.h"
 #include "core/NameRef.h"
 #include <vector>
 
+namespace sorbet::core {
+class GlobalState;
+} // namespace sorbet::core
+
 namespace sorbet::core::packages {
 class MangledName final {
+    explicit MangledName(core::NameRef mangledName) : mangledName(mangledName) {}
+
 public:
-    static core::NameRef mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts);
-    static core::NameRef mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts);
+    core::NameRef mangledName;
+
+    MangledName() = default;
+
+    static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts);
+    static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts);
+    // Opus::Foo::Bar -> Opus_Foo_Bar__Package
+    static MangledName mangledNameFromHuman(const core::GlobalState &gs, std::string_view human);
+
+    bool operator==(const MangledName &rhs) const {
+        return mangledName == rhs.mangledName;
+    }
+
+    bool operator!=(const MangledName &rhs) const {
+        return !(rhs == *this);
+    }
+
+    bool exists() const {
+        return this->mangledName.exists();
+    }
 };
 
 class NameFormatter final {
@@ -26,5 +49,9 @@ public:
         out->append(p.first.shortName(gs));
     }
 };
+
+template <typename H> H AbslHashValue(H h, const MangledName &m) {
+    return H::combine(std::move(h), m.mangledName);
+}
 } // namespace sorbet::core::packages
 #endif

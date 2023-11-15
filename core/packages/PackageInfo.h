@@ -3,6 +3,7 @@
 
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
+#include "core/packages/MangledName.h"
 #include <optional>
 #include <vector>
 
@@ -23,7 +24,7 @@ enum class ImportType {
 
 class PackageInfo {
 public:
-    virtual core::NameRef mangledName() const = 0;
+    virtual MangledName mangledName() const = 0;
     virtual const std::vector<core::NameRef> &fullName() const = 0;
     virtual const std::vector<std::string> &pathPrefixes() const = 0;
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
@@ -41,7 +42,7 @@ public:
     core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) const;
     core::ClassOrModuleRef getPackageTestScope(const core::GlobalState &gs) const;
 
-    virtual std::optional<ImportType> importsPackage(core::NameRef mangledName) const = 0;
+    virtual std::optional<ImportType> importsPackage(MangledName mangledName) const = 0;
 
     // autocorrects
     virtual std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
@@ -78,15 +79,15 @@ public:
 class ImportInfo final {
 public:
     // The mangled name of the package whose imports are described.
-    core::NameRef package;
+    MangledName package;
 
     // Imported packages whose name is a prefix of `package`. For example, if the package `Foo::Bar` imports `Foo` that
     // package's name would be in `parentImports` because its name is a prefix of `Foo::Bar`.
-    std::vector<core::NameRef> parentImports;
+    std::vector<MangledName> parentImports;
 
     // The mangled names of packages that are imported by this package, minus any imports that fall in the parent
     // namespace of this package.
-    std::vector<core::NameRef> regularImports;
+    std::vector<MangledName> regularImports;
 
     static ImportInfo fromPackage(const core::GlobalState &gs, const PackageInfo &info);
 };

@@ -8,7 +8,7 @@ class ReferenceParams;
 class ReferencesTask final : public LSPRequestTask {
     std::unique_ptr<ReferenceParams> params;
     std::vector<core::SymbolRef> getSymsToCheckWithinPackage(const core::GlobalState &gs, core::SymbolRef symInPackage,
-                                                             core::NameRef packageName);
+                                                             core::packages::MangledName packageName);
     core::SymbolRef findSym(const core::GlobalState &gs, const std::vector<core::NameRef> &fullName,
                             core::SymbolRef underNamespace);
 

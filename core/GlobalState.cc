@@ -2384,7 +2384,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTe
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
 
-    std::vector<core::NameRef> allowRelaxedPackagerChecksFor_;
+    std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {
         std::vector<string_view> pkgNameParts = absl::StrSplit(pkgName, "::");
         auto mangledName = core::packages::MangledName::mangledNameFromParts(*this, pkgNameParts);
