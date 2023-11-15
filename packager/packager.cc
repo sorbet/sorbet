@@ -963,16 +963,14 @@ struct PackageInfoFinder {
 
         if ((send.fun == core::Names::import() || send.fun == core::Names::testImport()) && send.numPosArgs() == 1) {
             // null indicates an invalid import.
-            if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto name = getPackageName(ctx, target);
-
+            if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->importedPackageNames.emplace_back(move(name), method2ImportType(send));
+                info->importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -999,15 +997,13 @@ struct PackageInfoFinder {
                     return;
                 }
                 info->visibleToTests_ = true;
-            } else if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
-                auto name = getPackageName(ctx, target);
-
+            } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->visibleTo_.emplace_back(move(name));
+                info->visibleTo_.emplace_back(getPackageName(ctx, target));
             }
         }
     }
@@ -1028,9 +1024,8 @@ struct PackageInfoFinder {
             auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
             info = make_unique<PackageInfoImpl>();
             checkPackageName(ctx, nameTree);
-            auto packageName = getPackageName(ctx, nameTree);
 
-            info->name = move(packageName);
+            info->name = getPackageName(ctx, nameTree);
             info->loc = ctx.locAt(classDef.loc);
             info->declLoc_ = ctx.locAt(classDef.declLoc);
 
