@@ -1393,23 +1393,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 
-// Re-write source files to be in packages. This is only called if no package definitions were changed.
-vector<ast::ParsedFile> rewriteFilesFast(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "packager.rewriteFilesFast");
-    for (auto &file : files) {
-        core::Context ctx(gs, core::Symbols::root(), file.file);
-        if (file.file.data(gs).isPackage()) {
-            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
-            // report some syntactic packager errors.
-            auto _info = rewritePackageSpec(gs, file);
-            validatePackage(ctx);
-        } else {
-            validatePackagedFile(ctx, file.tree);
-        }
-    }
-    return files;
-}
-
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
@@ -1548,7 +1531,18 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
-    files = rewriteFilesFast(gs, move(files));
+    Timer timeit(gs.tracer(), "packager.runIncremental");
+    for (auto &file : files) {
+        core::Context ctx(gs, core::Symbols::root(), file.file);
+        if (file.file.data(gs).isPackage()) {
+            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+            // report some syntactic packager errors.
+            auto _info = rewritePackageSpec(gs, file);
+            validatePackage(ctx);
+        } else {
+            validatePackagedFile(ctx, file.tree);
+        }
+    }
     return files;
 }
 
