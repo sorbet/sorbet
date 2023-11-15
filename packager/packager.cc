@@ -88,7 +88,7 @@ struct PackageName {
     }
 };
 
-enum class ImportType {
+enum class ImportType : uint8_t {
     Normal,
     Test, // test_import
 };
