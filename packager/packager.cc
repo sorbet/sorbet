@@ -418,10 +418,14 @@ PackageName getPackageName(core::MutableContext ctx, const ast::UnresolvedConsta
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
     pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
-    // Foo::Bar => Foo_Bar_Package
-    pName.mangledName = core::packages::MangledName::mangledNameFromParts(ctx.state, pName.fullName.parts);
+    populateMangledName(ctx, pName);
 
     return pName;
+}
+
+void populateMangledName(core::GlobalState &gs, PackageName &pName) {
+    // Foo::Bar => Foo_Bar_Package
+    pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
 bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
