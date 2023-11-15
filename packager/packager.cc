@@ -410,7 +410,7 @@ FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::Unresolve
 }
 
 // Gets the package name in `tree` if applicable.
-PackageName getPackageName(core::MutableContext ctx, const ast::UnresolvedConstantLit *constantLit) {
+PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     ENFORCE(constantLit != nullptr);
 
     PackageName pName;
@@ -418,7 +418,7 @@ PackageName getPackageName(core::MutableContext ctx, const ast::UnresolvedConsta
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
     pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
 
-    populateMangledName(ctx, pName);
+    // pname.mangledName will be populated later, when we have a mutable GlobalState
 
     return pName;
 }
@@ -918,9 +918,7 @@ struct PackageInfoFinder {
         }
     }
 
-    // Only reason PackageInfoFinder needs MutableContext is so that the `Send` and `ClassDef` cases
-    // can enter new NameRefs for mangled package names.
-    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
@@ -967,13 +965,6 @@ struct PackageInfoFinder {
             // null indicates an invalid import.
             if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
-                ENFORCE(name.mangledName.exists());
-
-                if (name.mangledName == info->name.mangledName) {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                        e.setHeader("Package `{}` cannot {} itself", info->name.toString(ctx), send.fun.toString(ctx));
-                    }
-                }
 
                 // Transform: `import Foo` -> `import <PackageSpecRegistry>::Foo`
                 auto importArg = move(send.getPosArg(0));
@@ -1010,14 +1001,6 @@ struct PackageInfoFinder {
                 info->visibleToTests_ = true;
             } else if (auto target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto name = getPackageName(ctx, target);
-                ENFORCE(name.mangledName.exists());
-
-                if (name.mangledName == info->name.mangledName) {
-                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::NoSelfImport)) {
-                        e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to",
-                                    info->name.toString(ctx));
-                    }
-                }
 
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
@@ -1029,9 +1012,7 @@ struct PackageInfoFinder {
         }
     }
 
-    // Only reason PackageInfoFinder needs MutableContext is so that the `Send` and `ClassDef` cases
-    // can enter new NameRefs for mangled package names.
-    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -1048,7 +1029,6 @@ struct PackageInfoFinder {
             info = make_unique<PackageInfoImpl>();
             checkPackageName(ctx, nameTree);
             auto packageName = getPackageName(ctx, nameTree);
-            ENFORCE(packageName.mangledName.exists());
 
             info->name = move(packageName);
             info->loc = ctx.locAt(classDef.loc);
@@ -1248,6 +1228,37 @@ runPackageInfoFinder(core::MutableContext ctx, ast::ParsedFile &package,
     ast::TreeWalk::apply(ctx, finder, package.tree);
     finder.finalize(ctx);
     if (finder.info) {
+        populateMangledName(ctx, finder.info->name);
+        for (auto &importedPackageName : finder.info->importedPackageNames) {
+            populateMangledName(ctx, importedPackageName.name);
+
+            if (importedPackageName.name.mangledName == finder.info->name.mangledName) {
+                if (auto e = ctx.beginError(importedPackageName.name.loc, core::errors::Packager::NoSelfImport)) {
+                    string import_;
+                    switch (importedPackageName.type) {
+                        case ImportType::Normal:
+                            import_ = "import";
+                            break;
+                        case ImportType::Test:
+                            import_ = "test_import";
+                            break;
+                    }
+                    e.setHeader("Package `{}` cannot {} itself", finder.info->name.toString(ctx), import_);
+                }
+            }
+        }
+
+        for (auto &visibleTo : finder.info->visibleTo_) {
+            populateMangledName(ctx, visibleTo);
+
+            if (visibleTo.mangledName == finder.info->name.mangledName) {
+                if (auto e = ctx.beginError(visibleTo.loc, core::errors::Packager::NoSelfImport)) {
+                    e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to",
+                                finder.info->name.toString(ctx));
+                }
+            }
+        }
+
         const auto numPrefixes =
             extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
         finder.info->packagePathPrefixes.reserve(numPrefixes);
@@ -1389,6 +1400,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
                 // Even though the package DB should not have changed on the fast path, we still
                 // need to runPackageInfoFinder to rewrite __package.rb files. We also can't use an
                 // immutable Context because runPackageInfoFinder enters new names.
+                // TODO(jez) This is not true anymore--we can call the treewalk directly to avoid mutating GlobalState
                 core::MutableContext ctx(gs, core::Symbols::root(), file.file);
                 runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
                                      gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
