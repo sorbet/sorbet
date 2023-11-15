@@ -1394,19 +1394,14 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 }
 
 // Re-write source files to be in packages. This is only called if no package definitions were changed.
-vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> rewriteFilesFast(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "packager.rewriteFilesFast");
     for (auto &file : files) {
         core::Context ctx(gs, core::Symbols::root(), file.file);
         if (file.file.data(gs).isPackage()) {
-            {
-                // Even though the package DB should not have changed on the fast path, we still
-                // need to runPackageInfoFinder to rewrite __package.rb files. We also can't use an
-                // immutable Context because runPackageInfoFinder enters new names.
-                // TODO(jez) This is not true anymore--we can call the treewalk directly to avoid mutating GlobalState
-                runPackageInfoFinder(gs, file);
-            }
-            // Re-write imports and exports:
+            // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
+            // report some syntactic packager errors.
+            auto _info = rewritePackageSpec(gs, file);
             validatePackage(ctx);
         } else {
             validatePackagedFile(ctx, file.tree);
@@ -1549,13 +1544,11 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     }
 }
 
-vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> files) {
+vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by
     // building in an understanding of the dependencies between packages.
-    auto namesUsed = gs.namesUsedTotal();
     files = rewriteFilesFast(gs, move(files));
-    ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }
 
