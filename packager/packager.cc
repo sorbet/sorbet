@@ -1206,9 +1206,7 @@ struct PackageInfoFinder {
     }
 };
 
-unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package,
-                                               const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                                               const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
+unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(gs).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1223,12 +1221,8 @@ unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast:
     return move(finder.info);
 }
 
-unique_ptr<PackageInfoImpl>
-runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package,
-                     const vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                     const vector<std::string> &extraPackageFilesDirectorySlashPrefixes) {
-    auto info = rewritePackageSpec(gs, package, extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes);
+unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package) {
+    auto info = rewritePackageSpec(gs, package);
     if (info) {
         populateMangledName(gs, info->name);
         for (auto &importedPackageName : info->importedPackageNames) {
@@ -1261,6 +1255,10 @@ runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package,
                 }
             }
         }
+
+        auto extraPackageFilesDirectoryUnderscorePrefixes =
+            gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+        auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
         const auto numPrefixes =
             extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
@@ -1406,8 +1404,7 @@ vector<ast::ParsedFile> rewriteFilesFast(core::GlobalState &gs, vector<ast::Pars
                 // need to runPackageInfoFinder to rewrite __package.rb files. We also can't use an
                 // immutable Context because runPackageInfoFinder enters new names.
                 // TODO(jez) This is not true anymore--we can call the treewalk directly to avoid mutating GlobalState
-                runPackageInfoFinder(gs, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
-                                     gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
+                runPackageInfoFinder(gs, file);
             }
             // Re-write imports and exports:
             validatePackage(ctx);
@@ -1433,8 +1430,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
 
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = runPackageInfoFinder(ctx, file, gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes(),
-                                            gs.packageDB().extraPackageFilesDirectorySlashPrefixes());
+            auto pkg = runPackageInfoFinder(ctx, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
