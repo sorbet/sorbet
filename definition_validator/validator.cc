@@ -960,10 +960,12 @@ private:
             return;
         }
 
-        auto pluralization = (missingAbstractMethods.size() > 1 ? "s" : "");
-        auto suffix =
-            (missingAbstractMethods.size() > 1 ? "" : fmt::format(" `{}`", missingAbstractMethods.front().show(ctx)));
-        errorBuilder.setHeader("Missing definition{} for abstract method{}{}", pluralization, pluralization, suffix);
+        if (missingAbstractMethods.size() > 1) {
+            errorBuilder.setHeader("Missing definitions for abstract methods");
+        } else {
+            errorBuilder.setHeader("Missing definition for abstract method `{}`",
+                                   missingAbstractMethods.front().show(ctx));
+        }
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
@@ -1012,8 +1014,10 @@ private:
             return;
         }
 
-        errorBuilder.addAutocorrect(
-            core::AutocorrectSuggestion{fmt::format("Define inherited abstract method{}", pluralization), edits});
+        errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
+            fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
+            edits,
+        });
     }
 
     vector<core::MethodRef> findMissingAbstractMethods(const core::Context ctx, core::ClassOrModuleRef sym) {
