@@ -97,7 +97,7 @@ LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &confi
 }
 
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
-                                  core::SymbolRef symbol, core::NameRef pkgName) {
+                                  core::SymbolRef symbol, core::packages::MangledName pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");
     ENFORCE(symbol.exists());
     vector<core::FileRef> frefs;

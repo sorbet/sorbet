@@ -19,7 +19,7 @@ bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
 
 vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::GlobalState &gs,
                                                                     core::SymbolRef symInPackage,
-                                                                    core::NameRef packageName) {
+                                                                    core::packages::MangledName packageName) {
     std::vector<core::NameRef> fullName;
 
     auto sym = symInPackage;

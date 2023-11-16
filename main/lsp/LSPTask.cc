@@ -301,7 +301,7 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::Symbol
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::NameRef packageName,
+LSPTask::getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
                                         core::SymbolRef symbol,
                                         vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {

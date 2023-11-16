@@ -20,7 +20,7 @@ public:
 
     // Exposed for testing.
     static UnorderedSet<core::ClassOrModuleRef> buildPackageNamespace(core::GlobalState &gs, WorkerPool &workers);
-    static RBIOutput runOnce(const core::GlobalState &gs, core::NameRef pkg,
+    static RBIOutput runOnce(const core::GlobalState &gs, core::packages::MangledName pkg,
                              const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces);
 
     // Generate RBIs for all packages present in the package database of `gs`.
@@ -29,7 +29,7 @@ public:
 
     // Generate RBIs for a single package, provided as the mangled package name `package`.
     static void runSinglePackage(core::GlobalState &gs, const UnorderedSet<core::ClassOrModuleRef> &packageNamespaces,
-                                 core::NameRef package, std::string outputDir, WorkerPool &workers);
+                                 core::packages::MangledName package, std::string outputDir, WorkerPool &workers);
 };
 } // namespace sorbet::packager
 

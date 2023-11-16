@@ -41,7 +41,7 @@ protected:
                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::NameRef packageName,
+    getReferencesToSymbolInPackage(LSPTypecheckerDelegate &typechecker, core::packages::MangledName packageName,
                                    core::SymbolRef symbol,
                                    std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 

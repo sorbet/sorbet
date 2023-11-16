@@ -391,7 +391,7 @@ private:
     static const int MAX_SUGGESTION_COUNT = 10;
 
     struct PackageStub {
-        core::NameRef packageId;
+        core::packages::MangledName packageId;
         vector<core::NameRef> fullName;
 
         PackageStub(const core::packages::PackageInfo &info)
