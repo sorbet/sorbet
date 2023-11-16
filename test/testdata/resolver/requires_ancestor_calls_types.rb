@@ -144,8 +144,8 @@ module Test7
 
     def m1
       m = tuple
-      T.must(m.first).foo
-      T.must(m.last).bar
+      m.first.foo
+      m.last.bar
     end
 
     sig { returns([M1, M1]) }
