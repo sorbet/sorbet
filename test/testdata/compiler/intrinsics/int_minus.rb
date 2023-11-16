@@ -15,4 +15,4 @@ puts(1 - T.unsafe(Float::INFINITY))
 puts(1 - T.unsafe(-Float::INFINITY))
 
 # T_BIGNUM, *
-puts(T.cast(100*100, Integer) - 1)
+puts(T.cast(100**100, Integer) - 1)
