@@ -358,7 +358,7 @@ const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
             "typed_level",
             "ref_count",
             "def_count",
-            "sym_count"
+            "sym_count",
             "body_size",
         },
     },
