@@ -219,7 +219,12 @@ module T
     return arg if arg == false
 
     begin
-      raise TypeError.new("Passed `nil` into T.must")
+      loc = caller_locations(1, 1)
+      if (line = loc[0])
+        raise TypeError.new("Passed `nil` into T.must (at #{line.path}:#{line.lineno})")
+      else
+        raise TypeError.new("Passed `nil` into T.must")
+      end
     rescue TypeError => e # raise into rescue to ensure e.backtrace is populated
       T::Configuration.inline_type_error_handler(e, {kind: 'T.must', value: arg, type: nil})
     end
