@@ -1081,8 +1081,7 @@ public:
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
     std::string nodeName() const;
-    std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
-        const core::GlobalState &gs) const;
+    std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(core::Context ctx) const;
 
     void _sanityCheck();
 };

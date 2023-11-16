@@ -300,12 +300,11 @@ ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, Expressio
     _sanityCheck();
 }
 
-optional<pair<core::SymbolRef, vector<core::NameRef>>>
-ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
+optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolvedPath(core::Context ctx) const {
     if (this->symbol != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty());
+    ENFORCE(this->resolutionScopes != nullptr && !this->resolutionScopes->empty(), "loc={}", this->loc.showRaw(ctx));
 
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
