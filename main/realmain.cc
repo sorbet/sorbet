@@ -414,6 +414,7 @@ int realmain(int argc, char *argv[]) {
             vector<spdlog::sink_ptr> sinks{stderrColorSink, fileSink};
             auto combinedLogger = make_shared<spdlog::logger>("consoleAndFile", begin(sinks), end(sinks));
             combinedLogger->flush_on(spdlog::level::err);
+            combinedLogger->set_pattern("[%Y-%m-%dT%T.%f] [%n] [%l] %v");
             combinedLogger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
 
             spdlog::register_logger(combinedLogger);
