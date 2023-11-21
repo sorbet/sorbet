@@ -1151,16 +1151,19 @@ private:
 
             // Get the fake property holding the mixes
             auto mixMethod = ownerKlass.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
+            auto loc = core::Loc{todo.file, send->loc};
             if (!mixMethod.exists()) {
                 // We never stored a mixin in this symbol
                 // Create a the fake property that will hold the mixed in modules
-                mixMethod = gs.enterMethodSymbol(core::Loc{todo.file, send->loc}, ownerKlass,
-                                                 core::Names::mixedInClassMethods());
+                mixMethod = gs.enterMethodSymbol(loc, ownerKlass, core::Names::mixedInClassMethods());
+
                 mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(vector<core::TypePtr>{});
 
                 // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
                 auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
                 arg.flags.isBlock = true;
+            } else {
+                mixMethod.data(gs)->addLoc(gs, loc);
             }
 
             auto type = core::make_type<core::ClassType>(idSymbol);
