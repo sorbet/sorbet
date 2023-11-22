@@ -3977,8 +3977,7 @@ public:
             core::MethodRef overloadSym;
             if (isOverloaded) {
                 auto loc = ctx.locAt(sig.loc);
-                overloadSym =
-                    ctx.state.enterNewMethodOverload(loc, mdef.symbol, originalName, i, sig.argsToKeep);
+                overloadSym = ctx.state.enterNewMethodOverload(loc, mdef.symbol, originalName, i, sig.argsToKeep);
                 overloadSym.data(ctx)->addLoc(ctx, loc);
 
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
