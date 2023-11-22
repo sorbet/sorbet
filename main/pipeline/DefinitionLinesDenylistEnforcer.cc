@@ -2,6 +2,22 @@
 #include "ast/treemap/treemap.h"
 
 namespace sorbet::pipeline::definition_checker {
+namespace {
+bool shouldSkip(core::GlobalState &gs, core::SymbolRef sym) {
+    auto name = sym.name(gs);
+    if (name == core::Names::staticInit()) {
+        return true;
+    }
+
+    if (name.kind() == core::NameKind::UNIQUE) {
+        auto data = name.dataUnique(gs);
+        if (data->original == core::Names::staticInit()) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
 
 void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet<core::FileRef> &frefs) {
     std::vector<std::pair<core::SymbolRef::Kind, uint32_t>> symbolTypes = {
@@ -15,8 +31,8 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
     for (auto [kind, used] : symbolTypes) {
         for (uint32_t idx = 1; idx < used; idx++) {
             auto sym = core::SymbolRef(gs, kind, idx);
-            auto name = sym.name(gs);
-            if (name == core::Names::staticInit()) {
+
+            if (shouldSkip(gs, sym)) {
                 continue;
             }
 
