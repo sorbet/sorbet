@@ -3976,8 +3976,11 @@ public:
             i++;
             core::MethodRef overloadSym;
             if (isOverloaded) {
+                auto loc = ctx.locAt(sig.loc);
                 overloadSym =
-                    ctx.state.enterNewMethodOverload(ctx.locAt(sig.loc), mdef.symbol, originalName, i, sig.argsToKeep);
+                    ctx.state.enterNewMethodOverload(loc, mdef.symbol, originalName, i, sig.argsToKeep);
+                overloadSym.data(ctx)->addLoc(ctx, loc);
+
                 overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
                 overloadSym.data(ctx)->intrinsicOffset = mdef.symbol.data(ctx)->intrinsicOffset;
                 if (i != sigs.size() - 1) {
