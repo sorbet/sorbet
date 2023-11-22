@@ -3710,7 +3710,7 @@ sig {params(xs: Integer).void}
 def foo(*xs); end
 
 xs = Array.new(3) {|i| i}
-T.unsafe(self).foo(xs)
+T.unsafe(self).foo(*xs)
 # ---------------------------------------------
 ```
 
