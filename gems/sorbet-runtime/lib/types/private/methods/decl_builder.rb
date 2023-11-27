@@ -23,15 +23,22 @@ module T::Private::Methods
 
     class BuilderError < StandardError; end
 
+    def raise_after_reset(error)
+      # Because some signatures raise before even running the block, we need to cleanup after ourselves or else the other
+      # tests think there's an active declaration without a corresponding method definition
+      T::Private::DeclState.current.reset!
+      raise error
+    end
+
     private def check_live!
       if decl.finalized
-        raise BuilderError.new("You can't modify a signature declaration after it has been used.")
+        raise_after_reset BuilderError.new("You can't modify a signature declaration after it has been used.")
       end
     end
 
     private def check_sig_block_is_unset!
       if T::Private::DeclState.current.active_declaration&.blk
-        raise BuilderError.new(
+        raise_after_reset BuilderError.new(
           "Cannot add more signature statements after the declaration block."
         )
       end
@@ -41,7 +48,8 @@ module T::Private::Methods
     # proc, because this is valid and would lead to a false positive: `T.type_alias { T.proc.params(a: Integer).void }`
     private def check_running_inside_block!(method_name)
       unless @inside_sig_block || decl.mod == T::Private::Methods::PROC_TYPE
-        raise BuilderError.new(
+        T::Private::DeclState.current.reset!
+        raise_after_reset BuilderError.new(
           "Can't invoke #{method_name} outside of a signature declaration block"
         )
       end
@@ -77,19 +85,19 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if !decl.params.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .params twice")
+        raise_after_reset BuilderError.new("You can't call .params twice")
       end
 
       if unused_positional_params.any?
         some_or_only = params.any? ? "some" : "only"
-        raise BuilderError.new(<<~MSG)
+        raise_after_reset BuilderError.new(<<~MSG)
           'params' was called with #{some_or_only} positional arguments, but it needs to be called with keyword arguments.
           The keyword arguments' keys must match the name and order of the method's parameters.
         MSG
       end
 
       if params.empty?
-        raise BuilderError.new(<<~MSG)
+        raise_after_reset BuilderError.new(<<~MSG)
           'params' was called without any arguments, but it needs to be called with keyword arguments.
           The keyword arguments' keys must match the name and order of the method's parameters.
 
@@ -107,10 +115,10 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if decl.returns.is_a?(T::Private::Types::Void)
-        raise BuilderError.new("You can't call .returns after calling .void.")
+        raise_after_reset BuilderError.new("You can't call .returns after calling .void.")
       end
       if !decl.returns.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .returns multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .returns multiple times in a signature.")
       end
 
       decl.returns = type
@@ -123,7 +131,7 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if !decl.returns.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .void after calling .returns.")
+        raise_after_reset BuilderError.new("You can't call .void after calling .returns.")
       end
 
       decl.returns = T::Private::Types::Void::Private::INSTANCE
@@ -136,7 +144,7 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if !decl.bind.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .bind multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .bind multiple times in a signature.")
       end
 
       decl.bind = type
@@ -149,13 +157,13 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .checked multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .checked multiple times in a signature.")
       end
       if (level == :never || level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
+        raise_after_reset BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
-        raise BuilderError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
+        raise_after_reset BuilderError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
       end
 
       decl.checked = level
@@ -168,10 +176,10 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
       if decl.checked == :never || decl.checked == :compiled
-        raise BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
+        raise_after_reset BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
       end
 
       decl.on_failure = args
@@ -186,9 +194,9 @@ module T::Private::Methods
       when Modes.standard
         decl.mode = Modes.abstract
       when Modes.abstract
-        raise BuilderError.new(".abstract cannot be repeated in a single signature")
+        raise_after_reset BuilderError.new(".abstract cannot be repeated in a single signature")
       else
-        raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
+        raise_after_reset BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
       check_sig_block_is_unset!
@@ -204,17 +212,17 @@ module T::Private::Methods
       check_live!
 
       if !decl.final.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .final multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .final multiple times in a signature.")
       end
 
       if @inside_sig_block
-        raise BuilderError.new(
+        raise_after_reset BuilderError.new(
           "Unlike other sig annotations, the `final` annotation must remain outside the sig block, " \
           "using either `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}"
         )
       end
 
-      raise BuilderError.new(".final cannot be repeated in a single signature") if final?
+      raise_after_reset BuilderError.new(".final cannot be repeated in a single signature") if final?
 
       decl.final = true
 
@@ -239,11 +247,11 @@ module T::Private::Methods
         decl.mode = Modes.override
         decl.override_allow_incompatible = allow_incompatible
       when Modes.override, Modes.overridable_override
-        raise BuilderError.new(".override cannot be repeated in a single signature")
+        raise_after_reset BuilderError.new(".override cannot be repeated in a single signature")
       when Modes.overridable
         decl.mode = Modes.overridable_override
       else
-        raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
+        raise_after_reset BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
       check_sig_block_is_unset!
@@ -260,13 +268,13 @@ module T::Private::Methods
 
       case decl.mode
       when Modes.abstract
-        raise BuilderError.new("`.overridable` cannot be combined with `.#{decl.mode}`")
+        raise_after_reset BuilderError.new("`.overridable` cannot be combined with `.#{decl.mode}`")
       when Modes.override
         decl.mode = Modes.overridable_override
       when Modes.standard
         decl.mode = Modes.overridable
       when Modes.overridable, Modes.overridable_override
-        raise BuilderError.new(".overridable cannot be repeated in a single signature")
+        raise_after_reset BuilderError.new(".overridable cannot be repeated in a single signature")
       end
 
       check_sig_block_is_unset!
@@ -294,11 +302,11 @@ module T::Private::Methods
       check_running_inside_block!(__method__)
 
       names.each do |name|
-        raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+        raise_after_reset BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You can't call .type_parameters multiple times in a signature.")
+        raise_after_reset BuilderError.new("You can't call .type_parameters multiple times in a signature.")
       end
 
       decl.type_parameters = names
@@ -310,7 +318,7 @@ module T::Private::Methods
       check_live!
 
       if decl.returns.equal?(ARG_NOT_PROVIDED)
-        raise BuilderError.new("You must provide a return type; use the `.returns` or `.void` builder methods.")
+        raise_after_reset BuilderError.new("You must provide a return type; use the `.returns` or `.void` builder methods.")
       end
 
       if decl.bind.equal?(ARG_NOT_PROVIDED)
@@ -319,7 +327,7 @@ module T::Private::Methods
       if decl.checked.equal?(ARG_NOT_PROVIDED)
         default_checked_level = T::Private::RuntimeLevels.default_checked_level
         if (default_checked_level == :never || default_checked_level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
+          raise_after_reset BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
         end
         decl.checked = default_checked_level
       end

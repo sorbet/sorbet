@@ -26,8 +26,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def bar; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "raises when trying use final twice" do
@@ -39,9 +37,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def bar; end
         end
       end
-
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "raises when trying use override twice" do
@@ -93,8 +88,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def baz; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "raises when chaining override after a block has already been set" do
@@ -107,8 +100,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def baz; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "raises when chaining abstract after a block has already been set" do
@@ -121,8 +112,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def baz; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "raises when chaining final after a block has already been set" do
@@ -135,8 +124,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def baz; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
   end
 
@@ -193,8 +180,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo(number); end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "is invalid to invoke returns" do
@@ -207,8 +192,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "is invalid to invoke void" do
@@ -221,8 +204,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "is invalid to invoke bind" do
@@ -235,8 +216,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "is invalid to invoke checked" do
@@ -249,8 +228,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
 
     it "is invalid to invoke on_failure" do
@@ -263,8 +240,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
   end
 
@@ -290,16 +265,6 @@ class Opus::Types::Test::ChainedSigTest < Critic::Unit::UnitTest
           def foo; end
         end
       end
-    ensure
-      cleanup_leftover_declaration
     end
-  end
-
-  private
-
-  def cleanup_leftover_declaration
-    # Because some signatures raise before even running the block, we need to cleanup after ourselves or else the other
-    # tests think there's an active declaration without a corresponding method definition
-    T::Private::DeclState.current.reset!
   end
 end
