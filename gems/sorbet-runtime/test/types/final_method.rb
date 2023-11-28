@@ -417,7 +417,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   it "forbids chaining final inside sig block" do
-    assert_raises(ArgumentError) do
+    err = assert_raises(ArgumentError) do
       c = Class.new do
         extend T::Sig
 
@@ -427,6 +427,8 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
 
       c.foo
     end
+
+    assert_includes(err.message, "Unlike other sig annotations, the `final` annotation must remain outside the sig block")
   end
 
   it "allows redefining a regular instance method to be final" do

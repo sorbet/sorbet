@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 struct ChainedSigWalk {
-    // The previousSigSend is used to allow us to add errors to `sig` with missing block wihtout accidentally adding it
+    // The previousSigSend is used to allow us to add errors to `sig` with missing block without accidentally adding it
     // to a chained sig. E.g.:
     // `sig` -> error no block
     // `sig.final {}` -> no error. Need to prevent adding the error when we receive `sig` by itself
@@ -17,8 +17,9 @@ struct ChainedSigWalk {
         auto *send = ast::cast_tree<ast::Send>(tree);
         ast::Send *sigSend = ast::cast_tree<ast::Send>(send->recv);
 
-        // Make sure the first receiver is sig. E.g.: `sig.abstract {}`, `sig.override.final {}`
-        if (send->fun != core::Names::sig() && (sigSend == nullptr || !firstReceiverIsSig(sigSend))) {
+        // Return early unless the `send` chain begins with a `sig` invocation
+        // E.g.: `sig.abstract {}`,`sig.override.final {}`
+        if (send->fun != core::Names::sig() && (sigSend == nullptr || !firstSendIsSig(sigSend))) {
             return tree;
         }
 
@@ -42,7 +43,9 @@ struct ChainedSigWalk {
             return tree;
         }
 
-        // This is still an invocation where `sig` is the first receiver, but there is still no block. We need to pop
+        // TODO: This comment looks outdated
+        //
+        // This is a `sig` invocation, but there is still no block. We need to pop
         // the last entry for incomplete sigs and add the current send to account for multiple methods chained on sig
         //
         // E.g.: `sig.override.final {}`
@@ -50,7 +53,7 @@ struct ChainedSigWalk {
         // If we never find a send where the first receiver is a `sig` and the last invocation has the declaration
         // block, then we add the error later on
         if (!send->hasBlock()) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+            if (auto e = ctx.beginError(send->funLoc, core::errors::Rewriter::InvalidChainedSig)) {
                 e.setHeader("Signature declarations expect a block");
                 e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
             }
@@ -63,10 +66,10 @@ struct ChainedSigWalk {
         auto *block = send->block();
         auto blockBody = ast::cast_tree<ast::Send>(block->body);
 
-        // If the blockBody is not a send, then we have a sequence of instructions inside the signature block
+        // If the blockBody is not a send, then we have a sequence of expressions inside the signature block
         if (blockBody == nullptr) {
             if (auto e = ctx.beginError(block->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                e.setHeader("Malformed signature: cannot have multiple instructions inside a signature block");
+                e.setHeader("Malformed signature: cannot have multiple statements inside a signature block");
             }
 
             return tree;
@@ -75,7 +78,7 @@ struct ChainedSigWalk {
         return buildReplacement(ctx, send, blockBody);
     }
 
-    bool firstReceiverIsSig(ast::Send *send) {
+    bool firstSendIsSig(ast::Send *send) {
         do {
             if (send->fun == core::Names::sig()) {
                 this->previousSigSend = send;
@@ -87,15 +90,17 @@ struct ChainedSigWalk {
         return false;
     }
 
-    void checkDuplicates(core::MutableContext ctx, ast::Send *sigBlock, core::NameRef fun) {
-        while (sigBlock) {
-            if (sigBlock->fun == fun) {
-                if (auto e = ctx.beginError(sigBlock->loc, core::errors::Rewriter::InvalidChainedSig)) {
-                    e.setHeader("Duplicate invocation of `{}` in signature declaration", fun.toString(ctx));
+    void checkDuplicates(core::MutableContext ctx, ast::Send *sendFromSigBlock, core::NameRef sendCopyFun,
+                         core::LocOffsets sendCopyFunLoc) {
+        while (sendFromSigBlock) {
+            if (sendFromSigBlock->fun == sendCopyFun) {
+                if (auto e = ctx.beginError(sendFromSigBlock->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                    e.setHeader("Duplicate invocation of `{}` in signature declaration", sendCopyFun.toString(ctx));
+                    e.addErrorLine(ctx.locAt(sendCopyFunLoc), "Initial invocation made here");
                 }
             }
 
-            sigBlock = ast::cast_tree<ast::Send>(sigBlock->recv);
+            sendFromSigBlock = ast::cast_tree<ast::Send>(sendFromSigBlock->recv);
         }
     }
 
@@ -104,7 +109,7 @@ struct ChainedSigWalk {
             send->fun == core::Names::void_() || send->fun == core::Names::bind() ||
             send->fun == core::Names::checked() || send->fun == core::Names::onFailure() ||
             send->fun == core::Names::typeParameters()) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+            if (auto e = ctx.beginError(send->funLoc, core::errors::Rewriter::InvalidChainedSig)) {
                 e.setHeader("Cannot use `{}` outside of a sig block", send->fun.toString(ctx));
             }
 
@@ -122,7 +127,7 @@ struct ChainedSigWalk {
         // Go through each part of the chained sig and make sure it's not duplicated inside the block
         // E.g.: `sig.abstract { abstract.void }`
         while (sendCopy && sendCopy->fun != core::Names::sig()) {
-            checkDuplicates(ctx, blockBody, sendCopy->fun);
+            checkDuplicates(ctx, blockBody, sendCopy->fun, sendCopy->funLoc);
 
             sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
         }
@@ -149,8 +154,9 @@ struct ChainedSigWalk {
             // If a previous receiver has a block, then we need to add an error to prevent signatures like this:
             // `sig.final {}.override{}
             if (sendCopy->hasBlock()) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Rewriter::InvalidChainedSig)) {
+                if (auto e = ctx.beginError(send->funLoc, core::errors::Rewriter::InvalidChainedSig)) {
                     e.setHeader("Cannot add more signature statements after the declaration block");
+                    e.addErrorLine(ctx.locAt(sendCopy->block()->loc), "Initial statement defined here");
                 }
             }
         } while (sendCopy && sendCopy->fun != core::Names::sig());

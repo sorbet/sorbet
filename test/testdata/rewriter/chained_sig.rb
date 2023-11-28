@@ -44,44 +44,34 @@ class InvalidInvocationsOnSig
   extend T::Sig
 
   sig.params(a: Integer)
-# ^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `params` outside of a sig block
+    # ^^^^^^ error: Cannot use `params` outside of a sig block
     # ^^^^^^ error: Method `params` does not exist on `NilClass`
   def foo(a); end
 
   sig.returns(Integer)
-# ^^^^^^^^^^^^^^^^^^^^ error: Cannot use `returns` outside of a sig block
+    # ^^^^^^^ error: Cannot use `returns` outside of a sig block
     # ^^^^^^^ error: Method `returns` does not exist on `NilClass`
   def bar; end
 
   sig.void
-# ^^^^^^^^ error: Cannot use `void` outside of a sig block
+    # ^^^^ error: Cannot use `void` outside of a sig block
     # ^^^^ error: Method `void` does not exist on `NilClass`
   def baz; end
 
   sig.checked(:never)
-# ^^^^^^^^^^^^^^^^^^^ error: Cannot use `checked` outside of a sig block
+    # ^^^^^^^ error: Cannot use `checked` outside of a sig block
     # ^^^^^^^ error: Method `checked` does not exist on `NilClass`
   def blah; end
 
   sig.on_failure(:soft, notify: "me")
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `on_failure` outside of a sig block
+    # ^^^^^^^^^^ error: Cannot use `on_failure` outside of a sig block
     # ^^^^^^^^^^ error: Method `on_failure` does not exist on `NilClass`
   def bip; end
 
   sig.type_parameters(:T)
-# ^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `type_parameters` outside of a sig block
+    # ^^^^^^^^^^^^^^^ error: Cannot use `type_parameters` outside of a sig block
     # ^^^^^^^^^^^^^^^ error: Method `type_parameters` does not exist on `NilClass`
   def bop; end
-end
-
-module Interface
-  extend T::Sig
-  extend T::Helpers
-
-  interface!
-
-  sig.abstract { void }
-  def foo; end
 end
 
 class DuplicateBlock
@@ -89,7 +79,7 @@ class DuplicateBlock
   include Interface
 
   sig.override { void }.final { void }
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot add more signature statements after the declaration block
+                      # ^^^^^ error: Cannot add more signature statements after the declaration block
   def foo; end
 end
 
@@ -101,12 +91,12 @@ class WithoutRuntime
   def baz; end
 
   T::Sig::WithoutRuntime.sig.params(a: Integer)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `params` outside of a sig block
+                           # ^^^^^^ error: Cannot use `params` outside of a sig block
                            # ^^^^^^ error: Method `params` does not exist on `NilClass`
   def bar(a); end
 
   T::Sig::WithoutRuntime.sig.override { void }.final { void }
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot add more signature statements after the declaration block
+                                             # ^^^^^ error: Cannot add more signature statements after the declaration block
   def foo; end
 end
 
@@ -121,13 +111,28 @@ class MissingBlocks
 # ^^^^^^^^^ error: Signature declarations expect a block
     # ^^^^^ error: Method `final` does not exist on `NilClass`
   def bar; end
+
+  sig.abstract
+# ^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^ error: Method `abstract` does not exist on `NilClass`
+  def baz; end
+
+  sig.override
+# ^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^ error: Method `override` does not exist on `NilClass`
+  def qux; end
+
+  sig.overridable
+# ^^^^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^^^^ error: Method `overridable` does not exist on `NilClass`
+  def quux; end
 end
 
 class InstructionSequenceInSig
   extend T::Sig
 
   sig.final { Kernel.puts ""; void }
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed signature: cannot have multiple instructions inside a signature block
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed signature: cannot have multiple statements inside a signature block
     # ^^^^^ error: Method `final` does not exist on `NilClass`
                             # ^^^^ error: Method `void` does not exist on `T.class_of(InstructionSequenceInSig)`
   def foo; end
@@ -159,7 +164,6 @@ class DuplicateButMissingBlock
 
   sig.final { void }.override
                    # ^^^^^^^^ error: Method `override` does not exist on `NilClass`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
   def foo; end
 # ^^^^^^^ error: Method `DuplicateButMissingBlock#foo` implements an abstract method `Interface#foo` but is not declared with `override.`
 end
@@ -168,15 +172,37 @@ class InvalidInvocationAfterBlock
   extend T::Sig
 
   sig.final { void }.checked(:never)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot use `checked` outside of a sig block
+                   # ^^^^^^^ error: Cannot use `checked` outside of a sig block
                    # ^^^^^^^ error: Method `checked` does not exist on `NilClass`
   def foo; end
 end
 
+module ValidInterface
+  extend T::Sig
+  extend T::Helpers
+
+  interface!
+
+  sig.abstract { void }
+  def foo; end
+
+  sig.abstract { void }
+  def bar; end
+
+  sig.abstract { void }
+  def baz; end
+end
+
 class ValidDoubleChain
   extend T::Sig
-  include Interface
+  include ValidInterface
 
   sig.override.final { void }
   def foo; end
+
+  sig(:final).override { void }
+  def bar; end
+
+  sig(:final).override(allow_incompatible: true) { void }
+  def baz; end
 end

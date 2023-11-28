@@ -137,24 +137,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of bop>
   end
 
-  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
-    ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.abstract().void()
-    end
-
-    def foo<<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
-
-    <self>.interface!()
-
-    <runtime method definition of foo>
-  end
-
   class <emptyTree>::<C DuplicateBlock><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override().void()
@@ -220,6 +202,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    <self>.sig()
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def quux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <runtime method definition of foo>
@@ -227,6 +227,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     nil.final()
 
     <runtime method definition of bar>
+
+    nil.abstract()
+
+    <runtime method definition of baz>
+
+    nil.override()
+
+    <runtime method definition of qux>
+
+    nil.overridable()
+
+    <runtime method definition of quux>
   end
 
   class <emptyTree>::<C InstructionSequenceInSig><<C <todo sym>>> < (::<todo sym>)
@@ -322,6 +334,44 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of foo>
   end
 
+  module <emptyTree>::<C ValidInterface><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
+  end
+
   class <emptyTree>::<C ValidDoubleChain><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override().void()
@@ -331,10 +381,30 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override(:allow_incompatible, true).void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    <self>.include(<emptyTree>::<C Interface>)
+    <self>.include(<emptyTree>::<C ValidInterface>)
 
     <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
   end
 end
