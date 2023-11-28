@@ -50,7 +50,7 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 
-go_register_toolchains()
+go_register_toolchains(version = "1.20.7")
 
 load("@rules_ragel//ragel:ragel.bzl", "ragel_register_toolchains")
 
@@ -86,6 +86,14 @@ rust_register_toolchains(
         "1.58.1",
     ],
 )
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
+
+aspect_bazel_lib_dependencies()
 
 BAZEL_VERSION = "6.3.2"
 
