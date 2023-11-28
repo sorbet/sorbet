@@ -193,14 +193,14 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
         }
 
         for (auto &intrinsic : intrinsics) {
-            auto clazName = intrinsic.klass.data(cs)->name.shortName(cs);
-            llvm::StringRef clazNameRef(clazName.data(), clazName.size());
+            auto klassName = intrinsic.klass.data(cs)->name.shortName(cs);
+            llvm::StringRef klassNameRef(klassName.data(), klassName.size());
 
             auto alternative = llvm::BasicBlock::Create(
-                cs, llvm::Twine("alternativeCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                cs, llvm::Twine("alternativeCallIntrinsic_") + klassNameRef + "_" + methodNameRef,
                 builder.GetInsertBlock()->getParent());
             auto fastPath =
-                llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
+                llvm::BasicBlock::Create(cs, llvm::Twine("fastSymCallIntrinsic_") + klassNameRef + "_" + methodNameRef,
                                          builder.GetInsertBlock()->getParent());
 
             auto *typeTest = intrinsic.method->receiverFastPathTest(mcctx, intrinsic.klass);
