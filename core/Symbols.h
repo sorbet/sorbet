@@ -594,8 +594,8 @@ public:
         return superClass_;
     }
 
-    inline void setSuperClass(ClassOrModuleRef claz) {
-        superClass_ = claz;
+    inline void setSuperClass(ClassOrModuleRef klass) {
+        superClass_ = klass;
     }
 
     Flags flags;

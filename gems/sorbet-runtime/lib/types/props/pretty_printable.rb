@@ -7,13 +7,13 @@ module T::Props::PrettyPrintable
 
   # Override the PP gem with something that's similar, but gives us a hook to do redaction and customization
   def pretty_print(pp)
-    clazz = T.unsafe(T.cast(self, Object).class).decorator
+    klass = T.unsafe(T.cast(self, Object).class).decorator
     multiline = pp.is_a?(PP)
-    pp.group(1, "<#{clazz.inspect_class_with_decoration(self)}", ">") do
-      clazz.all_props.sort.each do |prop|
+    pp.group(1, "<#{klass.inspect_class_with_decoration(self)}", ">") do
+      klass.all_props.sort.each do |prop|
         pp.breakable
-        val = clazz.get(self, prop)
-        rules = clazz.prop_rules(prop)
+        val = klass.get(self, prop)
+        rules = klass.prop_rules(prop)
         pp.text("#{prop}=")
         if (custom_inspect = rules[:inspect])
           inspected = if T::Utils.arity(custom_inspect) == 1
@@ -28,7 +28,7 @@ module T::Props::PrettyPrintable
           val.pretty_print(pp)
         end
       end
-      clazz.pretty_print_extra(self, pp)
+      klass.pretty_print_extra(self, pp)
     end
   end
 
