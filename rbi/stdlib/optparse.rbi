@@ -800,7 +800,7 @@ class OptionParser
       opts: T.untyped,
       block: T.nilable(T.proc.params(arg0: T::Boolean).void)
     )
-      .returns(T.untyped)
+      .returns(OptionParser)
   end
   sig do
     params(
@@ -808,7 +808,7 @@ class OptionParser
       opts: T.untyped,
       block: T.nilable(T.proc.params(arg0: T::Array[String]).void)
     )
-      .returns(T.untyped)
+      .returns(OptionParser)
   end
   sig do
     type_parameters(:Type)
@@ -817,9 +817,9 @@ class OptionParser
         opts: T.untyped,
         block: T.nilable(T.proc.params(arg0: T.type_parameter(:Type)).void)
       )
-      .returns(T.untyped)
+      .returns(OptionParser)
   end
-  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  sig {params(opts: T.untyped, block: T.untyped).returns(OptionParser)}
   def on(type=T.unsafe(nil), *opts, &block); end
 
   # Also aliased as:
@@ -835,7 +835,7 @@ class OptionParser
   # Add option switch like with
   # [`on`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on),
   # but at head of summary.
-  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  sig {params(opts: T.untyped, block: T.untyped).returns(OptionParser)}
   def on_head(*opts, &block); end
 
   # Also aliased as:
@@ -851,7 +851,7 @@ class OptionParser
   # Add option switch like with
   # [`on`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on),
   # but at tail of summary.
-  sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
+  sig {params(opts: T.untyped, block: T.untyped).returns(OptionParser)}
   def on_tail(*opts, &block); end
 
   # Add separator in summary.
