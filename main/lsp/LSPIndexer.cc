@@ -75,6 +75,9 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
+// This function was prevously called canTakeFastPath, but we changed it in ancitipation of adding
+// incremental mode(s) that lied between the original fast and slow path. Leaving this comment here
+// because old habits die hard and I still can only remember the name "canTakeFastPath"
 TypecheckingPath
 LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
