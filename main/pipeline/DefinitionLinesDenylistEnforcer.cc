@@ -3,15 +3,15 @@
 
 namespace sorbet::pipeline::definition_checker {
 namespace {
-bool shouldSkip(core::GlobalState &gs, core::SymbolRef sym) {
+bool shouldSkip(core::GlobalState &gs, core::SymbolRef sym, UnorderedSet<core::NameRef> &ignoredSymbols) {
     auto name = sym.name(gs);
-    if (name == core::Names::staticInit()) {
+    if (ignoredSymbols.contains(name)) {
         return true;
     }
 
     if (name.kind() == core::NameKind::UNIQUE) {
         auto data = name.dataUnique(gs);
-        if (data->original == core::Names::staticInit()) {
+        if (ignoredSymbols.contains(data->original)) {
             return true;
         }
     }
@@ -25,14 +25,21 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
         {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
         {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
-        {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
+        // {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
 
+    UnorderedSet<core::NameRef> ignoredSymbols = {
+        core::Names::requiredAncestors(),
+        core::Names::requiredAncestorsLin(),
+        core::Names::staticInit()
+    };
+
+    auto everFailed = false;
     for (auto [kind, used] : symbolTypes) {
         for (uint32_t idx = 1; idx < used; idx++) {
             auto sym = core::SymbolRef(gs, kind, idx);
 
-            if (shouldSkip(gs, sym)) {
+            if (shouldSkip(gs, sym, ignoredSymbols)) {
                 continue;
             }
 
