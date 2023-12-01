@@ -51,17 +51,15 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
                 auto midPoint = loc.file().data(gs).source().size() / 2;
                 auto cond = loc.beginPos() >= midPoint && loc.endPos() >= midPoint;
 
-
-
-                if (kind != core::SymbolRef::Kind::TypeMember) {
-                    ENFORCE(cond, fmt::format("beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\n", loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs)));
-                } else {
-                    if (!cond) {
-                        fmt::print("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nType memeber failed to update location beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\n\n", loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs));
-                    }
+                if (!cond) {
+                    everFailed = true;
+                    fmt::print("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nSymbol failed to update location "
+                               "beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\nfile: {}\n\n",
+                               loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs), loc.file().data(gs).path());
                 }
             }
         }
     }
+    ENFORCE(!everFailed);
 }
 } // namespace sorbet::pipeline::definition_checker
