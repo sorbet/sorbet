@@ -1329,8 +1329,7 @@ private:
             const bool possibleGenericType = false;
             if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (loadScopeDepth_ == 0 && (!constant->symbol.isClassOrModule() ||
-                                             constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
+                if (loadScopeDepth_ == 0) {
                     // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
                     // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
                     // Sorbet should be taught to emit errors when these references are not actually defined,
