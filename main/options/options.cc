@@ -729,9 +729,13 @@ void readOptions(Options &opts,
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
-        opts.lspDocumentFormatRubyfmtEnabled =
-            FileOps::exists(opts.rubyfmtPath) &&
-            (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>());
+        if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
+            if (!FileOps::exists(opts.rubyfmtPath)) {
+                logger->error("`{}` does not exist, LSP rubyfmt integration will not be enabled", opts.rubyfmtPath);
+            } else {
+                opts.lspDocumentFormatRubyfmtEnabled = true;
+            }
+        }
         opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
         opts.trackUntyped = raw["track-untyped"].as<bool>();
 
