@@ -147,6 +147,7 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   public async update(section: string, value: any): Promise<void> {
     const key = `sorbet.${section}`;
     await this.workspaceState.update(key, value);
+    await this.cachedSorbetConfiguration.update(section, value);
     this.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration: () => true,
     });
