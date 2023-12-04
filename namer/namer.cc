@@ -1214,7 +1214,13 @@ private:
                 }
 
                 auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+
+                // See the comment above for context understanding updateLoc
+                // If we update the class loc, we also need to update any singleton class which
+                // might have been synthesized for it.
+                ENFORCE(updateLoc);
                 singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+
                 auto attachedClassTM =
                     singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
                 if (attachedClassTM.exists() && attachedClassTM.isTypeMember()) {
@@ -1240,6 +1246,17 @@ private:
                                       .asTypeMemberRef();
                         tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
                     }
+                }
+            } else if (updateLoc) {
+                auto maybeSingletonClass = symbol.data(ctx)->lookupSingletonClass(ctx);
+                if (maybeSingletonClass.exists()) {
+                    // In this case, `symbol` is not declared (`!isDeclared`), but a singletonClass
+                    // might have been synthesized for it anyways. That happens in GlobalPass when
+                    // we force every class to have a singleton class. If such a singleton class has
+                    // been created, we'll need to update it's loc. Otherwise, we're on a slow path
+                    // and no such singleton class has been created yet--just let GlobalPass create
+                    // it like normal.
+                    maybeSingletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
                 }
             }
         }
