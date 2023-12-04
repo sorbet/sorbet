@@ -143,7 +143,7 @@ export class SorbetExtensionConfig implements Disposable {
    * LSP {@link SorbetLspConfig configurations}.
    */
   public get lspConfigs(): ReadonlyArray<SorbetLspConfig> {
-    return this.getConfigValue("lspConfigs", []);
+    return this.getLspConfigsConfigValue("lspConfigs");
   }
 
   /**
@@ -155,7 +155,7 @@ export class SorbetExtensionConfig implements Disposable {
    * since change is not intended to be checked-in regardless nad adds
    */
   public get userLspConfigs(): ReadonlyArray<SorbetLspConfig> {
-    return this.getConfigValue("userLspConfigs", []);
+    return this.getLspConfigsConfigValue("userLspConfigs");
   }
 
   public get typedFalseCompletionNudges(): boolean {
@@ -204,6 +204,20 @@ export class SorbetExtensionConfig implements Disposable {
     return workspace
       .getConfiguration(SORBET_CONFIG_SECTION)
       .get(name, defaultValue);
+  }
+
+  private getLspConfigsConfigValue(
+    name: string,
+  ): ReadonlyArray<SorbetLspConfig> {
+    // BEWARE: JSON deserialization does not know how to instantiate `SorbetLspConfig`
+    // objects, it can only hydrate `SorbetLspConfig`-shaped hashes.
+    const pureDataConfigs = workspace
+      .getConfiguration(SORBET_CONFIG_SECTION)
+      .get<ReadonlyArray<SorbetLspConfig>>(name, []);
+
+    return pureDataConfigs.map(
+      (c) => new SorbetLspConfig(c.id, c.name, c.description, c.cwd, c.command),
+    );
   }
 
   private async updateConfigValue<T>(name: string, value?: T): Promise<void> {

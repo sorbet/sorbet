@@ -2,7 +2,7 @@ import { deepEqual } from "./utils";
 
 export class SorbetLspConfig {
   /**
-   * Configuratiomn Id.
+   * Configuration Id.
    */
   public readonly id: string;
   /**
