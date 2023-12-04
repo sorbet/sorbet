@@ -5,8 +5,9 @@ import * as sinon from "sinon";
 
 import { createLogStub } from "../testUtils";
 import { showSorbetConfigurationPicker } from "../../commands/showSorbetConfigurationPicker";
-import { SorbetExtensionConfig, SorbetLspConfig } from "../../config";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
+import { SorbetExtensionConfig } from "../../sorbetExtensionConfig";
+import { SorbetLspConfig } from "../../sorbetLspConfig";
 
 suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
   let testRestorables: { restore: () => void }[];
@@ -20,20 +21,14 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
   });
 
   test("showSorbetConfigurationPicker: Shows dropdown (no-selection)", async () => {
-    const activeLspConfig = new SorbetLspConfig({
-      id: "test-config-id-active",
-      name: "test-config-id-active",
-      description: "",
-      cwd: "",
-      command: [],
-    });
-    const otherLspConfig = new SorbetLspConfig({
-      id: "test-config-id",
-      name: "test-config-id",
-      description: "",
-      cwd: "",
-      command: [],
-    });
+    const activeLspConfig = new SorbetLspConfig(
+      "test-config-id-active",
+      "test-config-name-active",
+    );
+    const otherLspConfig = new SorbetLspConfig(
+      "test-config-id",
+      "test-config-name",
+    );
 
     const showQuickPickSingleStub = sinon
       .stub(vscode.window, "showQuickPick")
@@ -43,7 +38,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const log = createLogStub();
     const configuration = <SorbetExtensionConfig>(<unknown>{
       activeLspConfig,
-      lspConfigs: [activeLspConfig, otherLspConfig],
+      getLspConfigs: () => [activeLspConfig, otherLspConfig],
     });
     const context = <SorbetExtensionContext>{ log, configuration };
 

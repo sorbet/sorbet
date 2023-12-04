@@ -7,8 +7,8 @@ import { savePackageFiles } from "./commands/savePackageFiles";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
 import { showSorbetConfigurationPicker } from "./commands/showSorbetConfigurationPicker";
-import { toggleUntypedCodeHighlighting } from "./commands/toggleUntypedCodeHighlighting";
 import { toggleTypedFalseCompletionNudges } from "./commands/toggleTypedFalseCompletionNudges";
+import { toggleUntypedCodeHighlighting } from "./commands/toggleUntypedCodeHighlighting";
 import { getLogLevelFromEnvironment, LogLevel } from "./log";
 import { SorbetContentProvider, SORBET_SCHEME } from "./sorbetContentProvider";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
@@ -24,13 +24,12 @@ export function activate(context: ExtensionContext) {
 
   context.subscriptions.push(
     sorbetExtensionContext,
-    sorbetExtensionContext.configuration.onLspConfigChange(
-      async ({ oldLspConfig, newLspConfig }) => {
+    sorbetExtensionContext.configuration.onDidChangeLspConfig(
+      async ({ previous, current }) => {
         const { statusProvider } = sorbetExtensionContext;
-        if (oldLspConfig && newLspConfig) {
-          // Something about the config changed, so restart
+        if (previous && current) {
           await statusProvider.restartSorbet(RestartReason.CONFIG_CHANGE);
-        } else if (oldLspConfig) {
+        } else if (previous) {
           await statusProvider.stopSorbet(ServerStatus.DISABLED);
         } else {
           await statusProvider.startSorbet();

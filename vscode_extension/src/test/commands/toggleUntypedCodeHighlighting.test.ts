@@ -4,7 +4,7 @@ import * as sinon from "sinon";
 
 import { createLogStub } from "../testUtils";
 import { toggleUntypedCodeHighlighting } from "../../commands/toggleUntypedCodeHighlighting";
-import { SorbetExtensionConfig } from "../../config";
+import { SorbetExtensionConfig } from "../../sorbetExtensionConfig";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetStatusProvider } from "../../sorbetStatusProvider";
 import { RestartReason } from "../../types";

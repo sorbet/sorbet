@@ -25,7 +25,7 @@ export class SorbetStatusBarEntry implements Disposable {
     this.statusBarItem.command = SHOW_ACTIONS_COMMAND_ID;
 
     this.disposable = Disposable.from(
-      this.context.configuration.onLspConfigChange(() => this.render()),
+      this.context.configuration.onDidChangeLspConfig(() => this.render()),
       this.context.statusProvider.onStatusChanged((e) =>
         this.onServerStatusChanged(e),
       ),
