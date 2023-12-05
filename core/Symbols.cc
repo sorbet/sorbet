@@ -591,7 +591,6 @@ bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_stor
     bool result = false;
 
     for (auto &loc : locs) {
-
         if (loc.file() != file) {
             return false;
         }
