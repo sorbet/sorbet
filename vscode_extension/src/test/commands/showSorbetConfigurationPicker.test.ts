@@ -37,7 +37,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
 
     const log = createLogStub();
     const configuration = <SorbetExtensionConfig>(<unknown>{
-      activeLspConfig,
+      getActiveLspConfig: () => activeLspConfig,
       getLspConfigs: () => [activeLspConfig, otherLspConfig],
     });
     const context = <SorbetExtensionContext>{ log, configuration };

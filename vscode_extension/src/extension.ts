@@ -24,7 +24,7 @@ export function activate(context: ExtensionContext) {
 
   context.subscriptions.push(
     sorbetExtensionContext,
-    sorbetExtensionContext.configuration.onDidChangeLspConfig(
+    sorbetExtensionContext.configuration.onDidChangeActiveLspConfig(
       async ({ previous, current }) => {
         const { statusProvider } = sorbetExtensionContext;
         if (previous && current) {

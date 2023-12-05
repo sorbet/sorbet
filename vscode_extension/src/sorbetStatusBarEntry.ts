@@ -25,7 +25,9 @@ export class SorbetStatusBarEntry implements Disposable {
     this.statusBarItem.command = SHOW_ACTIONS_COMMAND_ID;
 
     this.disposable = Disposable.from(
-      this.context.configuration.onDidChangeLspConfig(() => this.render()),
+      this.context.configuration.onDidChangeActiveLspConfig(() =>
+        this.render(),
+      ),
       this.context.statusProvider.onStatusChanged((e) =>
         this.onServerStatusChanged(e),
       ),
@@ -66,8 +68,9 @@ export class SorbetStatusBarEntry implements Disposable {
   }
 
   private render() {
+    const activeLspConfig = this.context.configuration.getActiveLspConfig();
+    const { highlightUntyped } = this.context.configuration;
     const { operations } = this.context.statusProvider;
-    const { activeLspConfig, highlightUntyped } = this.context.configuration;
     const sorbetName = activeLspConfig?.name ?? "Sorbet";
 
     let text: string;

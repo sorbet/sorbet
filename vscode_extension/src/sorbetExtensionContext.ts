@@ -13,7 +13,7 @@ export class SorbetExtensionContext implements Disposable {
   private readonly wrappedLog: OutputChannelLog;
 
   constructor(context: ExtensionContext) {
-    this.configuration = new SorbetExtensionConfig();
+    this.configuration = new SorbetExtensionConfig(context);
     this.extensionContext = context;
     this.metrics = new MetricClient(this);
     this.statusProvider = new SorbetStatusProvider(this);

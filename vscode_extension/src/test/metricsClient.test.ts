@@ -31,7 +31,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const client = new MetricClient(
       <SorbetExtensionContext>{
         configuration: {
-          activeLspConfig: undefined,
+          getActiveLspConfig: () => undefined,
         },
         log: createLogStub(),
       },
@@ -63,7 +63,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const client = new MetricClient(
       <SorbetExtensionContext>{
         configuration: {
-          activeLspConfig: undefined,
+          getActiveLspConfig: () => undefined,
         },
         log: createLogStub(),
       },

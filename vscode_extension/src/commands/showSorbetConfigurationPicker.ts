@@ -13,10 +13,7 @@ export interface LspConfigQuickPickItem extends QuickPickItem {
 export async function showSorbetConfigurationPicker(
   context: SorbetExtensionContext,
 ): Promise<void> {
-  const {
-    configuration: { activeLspConfig },
-  } = context;
-
+  const activeLspConfig = context.configuration.getActiveLspConfig();
   const items: LspConfigQuickPickItem[] = context.configuration
     .getLspConfigs()
     .map((lspConfig) => ({

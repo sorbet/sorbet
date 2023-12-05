@@ -80,8 +80,9 @@ export class MetricClient {
    * @returns Tag set.
    */
   private buildTags(tags: Tags) {
+    const activeLspConfg = this.context.configuration.getActiveLspConfig();
     return {
-      config_id: this.context.configuration.activeLspConfig?.id ?? "disabled",
+      config_id: activeLspConfg?.id ?? "disabled",
       sorbet_extension_version: this.sorbetExtensionVersion,
       ...tags,
     };

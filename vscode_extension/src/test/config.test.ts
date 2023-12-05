@@ -10,7 +10,7 @@
 // } from "vscode";
 
 // import * as fs from "fs";
-// import { SorbetExtensionConfig2 } from "../sorbetExtensionConfig";
+// import { SorbetExtensionConfig } from "../config";
 // import { SorbetLspConfig } from "../sorbetLspConfig";
 
 // // Helpers
