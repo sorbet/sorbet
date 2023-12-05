@@ -591,9 +591,6 @@ bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_stor
     bool result = false;
 
     for (auto &loc : locs) {
-        if (loc.file().data(gs).isRBI()) {
-            continue;
-        }
 
         if (loc.file() != file) {
             return false;
@@ -607,10 +604,6 @@ bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_stor
 
 // Returns true if the given symbol is only defined in a given file (not accounting for RBIs).
 bool SymbolRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
-    if (file.data(gs).isRBI()) {
-        return false;
-    }
-
     return singleFileDefinition(gs, locs(gs), file);
 }
 
