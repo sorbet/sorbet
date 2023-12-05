@@ -2,9 +2,8 @@
 # typed: false
 
 module Foo
-  # This reports an error despite Foo::X also having a definition in the RBI file.
-  A = X 
-  #   ^ error: `Foo::X` referenced before it is defined
+  # Sorbet doesn't report an error because Foo::X also has a definition in the RBI file.
+  A = X
 
   def self.foo(arg:)
     X # this is ok
