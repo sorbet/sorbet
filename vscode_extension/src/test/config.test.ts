@@ -2,19 +2,16 @@ import * as assert from "assert";
 import * as sinon from "sinon";
 import {
   EventEmitter,
+  extensions,
   ConfigurationTarget,
   ConfigurationChangeEvent,
   Uri,
-  WorkspaceFolder,
-  extensions,
+  workspace,
 } from "vscode";
 
 import * as fs from "fs";
-import {
-  SorbetExtensionConfig,
-  SorbetLspConfig,
-  ISorbetWorkspaceContext,
-} from "../config";
+import { SorbetExtensionConfig, ISorbetWorkspaceContext } from "../config";
+import { SorbetLspConfig } from "../sorbetLspConfig";
 
 // Helpers
 
@@ -85,10 +82,6 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
 
   get onDidChangeConfiguration() {
     return this.configurationChangeEmitter.event;
-  }
-
-  workspaceFolders() {
-    return [{ uri: { fsPath: "/fake/path/to/project" } }] as WorkspaceFolder[];
   }
 
   initializeEnabled(enabled: boolean): void {
@@ -175,7 +168,6 @@ suite("SorbetLspConfig", () => {
       new SorbetLspConfig({ ...json, cwd: "different cwd" }),
       new SorbetLspConfig({ ...json, command: ["different", "command"] }),
       undefined,
-      null,
     ];
 
     test(".isEqualTo(other)", () => {
@@ -226,7 +218,7 @@ suite("SorbetExtensionConfig", async () => {
         );
         assert.strictEqual(
           sorbetConfig.activeLspConfig,
-          null,
+          undefined,
           "should not have an active LSP config",
         );
       });
@@ -234,15 +226,21 @@ suite("SorbetExtensionConfig", async () => {
 
     suite("when a sorbet/config file exists", async () => {
       test("sorbet is enabled", async () => {
-        sinon
+        const expectedWorkspacePath = "/fake/path/to/project";
+        const existsSyncStub = sinon
           .stub(fs, "existsSync")
-          .withArgs("/fake/path/to/project/sorbet/config")
+          .withArgs(`${expectedWorkspacePath}/sorbet/config`)
           .returns(true);
+        sinon
+          .stub(workspace, "workspaceFolders")
+          .value([{ uri: { fsPath: expectedWorkspacePath } }]);
 
         const workspaceConfig = new FakeWorkspaceConfiguration();
         const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
 
         assert.strictEqual(sorbetConfig.enabled, true, "should be enabled");
+
+        sinon.assert.calledOnce(existsSyncStub);
         sinon.restore();
       });
     });
@@ -281,10 +279,14 @@ suite("SorbetExtensionConfig", async () => {
 
     suite("when workspace has *some* sorbet settings", async () => {
       test("when `sorbet.enabled` is missing", async () => {
-        sinon
+        const expectedWorkspacePath = "/fake/path/to/project";
+        const existsSyncStub = sinon
           .stub(fs, "existsSync")
-          .withArgs("/fake/path/to/project/sorbet/config")
+          .withArgs(`${expectedWorkspacePath}/sorbet/config`)
           .returns(false);
+        sinon
+          .stub(workspace, "workspaceFolders")
+          .value([{ uri: { fsPath: expectedWorkspacePath } }]);
 
         const workspaceConfig = new FakeWorkspaceConfiguration([
           ["lspConfigs", [fooLspConfig, barLspConfig]],
@@ -304,10 +306,11 @@ suite("SorbetExtensionConfig", async () => {
         );
         assert.strictEqual(
           sorbetConfig.activeLspConfig,
-          null,
+          undefined,
           "but should not have an active LSP config",
         );
 
+        sinon.assert.calledOnce(existsSyncStub);
         sinon.restore();
       });
 
@@ -470,7 +473,7 @@ suite("SorbetExtensionConfig", async () => {
         assert.deepStrictEqual(
           listener.getCall(0).args[0],
           {
-            oldLspConfig: null,
+            oldLspConfig: undefined,
             newLspConfig: barLspConfig,
           },
           "should have transitioned from no config to bar config",
@@ -497,7 +500,7 @@ suite("SorbetExtensionConfig", async () => {
           listener.getCall(0).args[0],
           {
             oldLspConfig: barLspConfig,
-            newLspConfig: null,
+            newLspConfig: undefined,
           },
           "should have transitioned from bar config to no config",
         );
