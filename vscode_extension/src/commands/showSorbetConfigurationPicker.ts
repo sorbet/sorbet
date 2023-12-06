@@ -1,6 +1,6 @@
 import { QuickPickItem, window } from "vscode";
-import { SorbetLspConfig } from "../config";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
+import { SorbetLspConfig } from "../sorbetLspConfig";
 
 export interface LspConfigQuickPickItem extends QuickPickItem {
   lspConfig?: SorbetLspConfig;
