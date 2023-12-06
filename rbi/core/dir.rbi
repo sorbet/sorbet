@@ -589,9 +589,10 @@ class Dir < Object
     params(
         pattern: T.any(String, Pathname),
         base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean,
         blk: T.nilable(T.proc.params(arg0: String).returns(BasicObject))
     )
     .returns(T::Array[String])
   end
-  def self.[](*pattern, base: nil, &blk); end
+  def self.[](*pattern, base: nil, sort: true, &blk); end
 end
