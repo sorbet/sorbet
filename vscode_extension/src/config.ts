@@ -10,74 +10,12 @@ import {
   WorkspaceFolder,
 } from "vscode";
 import * as fs from "fs";
+import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
+import { deepEqual } from "./utils";
 
-/**
- * Compare two `string` arrays for deep, in-order equality.
- */
-function deepEqual(a: ReadonlyArray<string>, b: ReadonlyArray<string>) {
-  return a.length === b.length && a.every((itemA, index) => itemA === b[index]);
-}
-
-interface ISorbetLspConfig {
-  readonly id: string;
-  /** Display name suitable for short-form fields like menu items or status fields. */
-  readonly name: string;
-  /** Human-readable long-form description suitable for hover text or help. */
-  readonly description: string;
-  readonly cwd: string;
-  readonly command: ReadonlyArray<string>;
-}
-
-export class SorbetLspConfig {
-  public readonly id: string;
-  public readonly name: string;
-  public readonly description: string;
-  public readonly cwd: string;
-  public readonly command: ReadonlyArray<string>;
-
-  constructor({ id, name, description, cwd, command }: ISorbetLspConfig) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
-    this.cwd = cwd;
-    this.command = command;
-  }
-
-  public toString(): string {
-    return `${this.name}: ${this.description} [cmd: "${this.command.join(
-      " ",
-    )}"]`;
-  }
-
-  /** Deep equality. */
-  public isEqualTo(other: any): boolean {
-    if (
-      this !== other &&
-      (!(other instanceof SorbetLspConfig) ||
-        this.id !== other.id ||
-        this.name !== other.name ||
-        this.description !== other.description ||
-        this.cwd !== other.cwd ||
-        !deepEqual(this.command, other.command))
-    ) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /** Deep equality, suitable for use when left and/or right may be null or undefined. */
-  public static areEqual(
-    left: SorbetLspConfig | undefined | null,
-    right: SorbetLspConfig | undefined | null,
-  ) {
-    return left ? left.isEqualTo(right) : left === right;
-  }
-}
-
-export class SorbetLspConfigChangeEvent {
-  public readonly oldLspConfig: SorbetLspConfig | null | undefined;
-  public readonly newLspConfig: SorbetLspConfig | null | undefined;
+export interface SorbetLspConfigChangeEvent {
+  readonly oldLspConfig: SorbetLspConfig | undefined;
+  readonly newLspConfig: SorbetLspConfig | undefined;
 }
 
 /**
@@ -95,9 +33,6 @@ export interface ISorbetWorkspaceContext extends Disposable {
 
   /** See `vscode.workspace.onDidChangeConfiguration` */
   onDidChangeConfiguration: Event<ConfigurationChangeEvent>;
-
-  /** See `vscode.workspace.workspaceFolders` */
-  workspaceFolders(): ReadonlyArray<WorkspaceFolder> | undefined;
 
   initializeEnabled(enabled: boolean): void;
 }
@@ -226,10 +161,13 @@ export class SorbetExtensionConfig implements Disposable {
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
 
-    const workspaceFolders = this.sorbetWorkspaceContext.workspaceFolders();
-    this.wrappedEnabled = workspaceFolders?.length
-      ? fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`)
-      : false;
+    // Any workspace with a `…/sorbet/config` file is considered Sorbet-enabled
+    // by default. This implementation does not work in the general case with
+    // multi-root workspaces.
+    const { workspaceFolders } = workspace;
+    this.wrappedEnabled =
+      !!workspaceFolders?.length &&
+      fs.existsSync(`${workspaceFolders[0].uri.fsPath}/sorbet/config`);
 
     this.disposables = [
       this.onLspConfigChangeEmitter,
@@ -298,11 +236,11 @@ export class SorbetExtensionConfig implements Disposable {
     });
 
     this.standardLspConfigs = this.sorbetWorkspaceContext
-      .get<ISorbetLspConfig[]>("lspConfigs", [])
+      .get<SorbetLspConfigData[]>("lspConfigs", [])
       .map((c) => new SorbetLspConfig(c));
 
     this.userLspConfigs = this.sorbetWorkspaceContext
-      .get<ISorbetLspConfig[]>("userLspConfigs", [])
+      .get<SorbetLspConfigData[]>("userLspConfigs", [])
       .map((c) => new SorbetLspConfig(c));
 
     this.selectedLspConfigId = this.sorbetWorkspaceContext.get<
@@ -334,90 +272,105 @@ export class SorbetExtensionConfig implements Disposable {
   }
 
   /**
-   * Returns a copy of the current SorbetLspConfig objects.
-   */
-  public get lspConfigs(): ReadonlyArray<SorbetLspConfig> {
-    const results = new Map<string, SorbetLspConfig>(
-      this.standardLspConfigs.map((c) => [c.id, c]),
-    );
-    // Override default configs with user's
-    this.userLspConfigs.forEach((c) => results.set(c.id, c));
-    return [...results.values()];
-  }
-
-  /**
-   * Returns the active `SorbetLspConfig`.
+   * Get the active {@link SorbetLspConfig LSP config}.
    *
-   * If the Sorbet extension is disabled, returns `null`, otherwise
-   * returns a `SorbetLspConfig` or `undefined` as per `selectedLspConfig`.
+   * A {@link selectedLspConfig selected} config is only active when {@link enabled}
+   * is `true`.
    */
-  public get activeLspConfig(): SorbetLspConfig | null | undefined {
-    return this.enabled ? this.selectedLspConfig : null;
-  }
-
-  /**
-   * Returns the selected `SorbetLspConfig`, even if the extension is disabled.
-   *
-   * If the configuration does not specify a `selectedLspConfigId`, or if
-   * the `id` refers to a `SorbetLspConfig` that does not exist, return `undefined`.
-   */
-  public get selectedLspConfig(): SorbetLspConfig | undefined {
-    return this.lspConfigs.find((c) => c.id === this.selectedLspConfigId);
-  }
-
-  /**
-   * Select the given `SorbetLspConfig`.
-   *
-   * (Note that if the extension is disabled, this does not *enable* the
-   * configuration.)
-   */
-  public async setSelectedLspConfigId(id: string): Promise<void> {
-    await this.sorbetWorkspaceContext.update("selectedLspConfigId", id);
-    this.refresh();
-  }
-
-  /**
-   * Select the given `SorbetLspConfig` and enable the extension, if
-   * the extension is disabled.
-   *
-   * This is equivalent to calling `selectedLspConfigId = id; enabled=true`.
-   */
-  public async setActiveLspConfigId(id: string): Promise<void> {
-    await Promise.all([
-      this.sorbetWorkspaceContext.update("selectedLspConfigId", id),
-      this.sorbetWorkspaceContext.update("enabled", true),
-    ]);
-    this.refresh();
-  }
-
-  public get revealOutputOnError(): boolean {
-    return this.wrappedRevealOutputOnError;
-  }
-
-  public get highlightUntyped(): boolean {
-    return this.wrappedHighlightUntyped;
-  }
-
-  public get typedFalseCompletionNudges(): boolean {
-    return this.wrappedTypedFalseCompletionNudges;
+  public get activeLspConfig(): SorbetLspConfig | undefined {
+    return this.enabled ? this.selectedLspConfig : undefined;
   }
 
   public get enabled(): boolean {
     return this.wrappedEnabled;
   }
 
-  public async setEnabled(b: boolean): Promise<void> {
-    await this.sorbetWorkspaceContext.update("enabled", b);
+  public get highlightUntyped(): boolean {
+    return this.wrappedHighlightUntyped;
+  }
+
+  /**
+   * Returns a copy of the current SorbetLspConfig objects.
+   */
+  public get lspConfigs(): ReadonlyArray<SorbetLspConfig> {
+    const results = new Map<string, SorbetLspConfig>(
+      this.userLspConfigs.map((c) => [c.id, c]),
+    );
+    // Add missing, do not override
+    this.standardLspConfigs.forEach(
+      (c) => !results.has(c.id) && results.set(c.id, c),
+    );
+    return [...results.values()];
+  }
+
+  public get revealOutputOnError(): boolean {
+    return this.wrappedRevealOutputOnError;
+  }
+
+  /**
+   * Get the currently selected {@link SorbetLspConfig LSP config}.
+   *
+   * Returns `undefined` if {@link selectedLspConfigId} has not been set or if
+   * its value does not map to a config in {@link lspConfigs}.
+   */
+  public get selectedLspConfig(): SorbetLspConfig | undefined {
+    return this.lspConfigs.find((c) => c.id === this.selectedLspConfigId);
+  }
+
+  public get typedFalseCompletionNudges(): boolean {
+    return this.wrappedTypedFalseCompletionNudges;
+  }
+
+  /**
+   * Set active {@link SorbetLspConfig LSP config}.
+   *
+   * If {@link enabled} is `false`, this will change it to `true`.
+   */
+  public async setActiveLspConfigId(id: string): Promise<void> {
+    const updates: Array<Thenable<void>> = [];
+
+    if (this.activeLspConfig?.id !== id) {
+      updates.push(
+        this.sorbetWorkspaceContext.update("selectedLspConfigId", id),
+      );
+    }
+    if (!this.enabled) {
+      updates.push(this.sorbetWorkspaceContext.update("enabled", true));
+    }
+
+    if (updates.length) {
+      await Promise.all(updates);
+      this.refresh();
+    }
+  }
+
+  public async setEnabled(enabled: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update("enabled", enabled);
     this.refresh();
   }
 
-  public async setHighlightUntyped(b: boolean): Promise<void> {
-    await this.sorbetWorkspaceContext.update("highlightUntyped", b);
+  public async setHighlightUntyped(enabled: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update("highlightUntyped", enabled);
     this.refresh();
   }
 
-  public async setTypedFalseCompletionNudges(b: boolean): Promise<void> {
-    await this.sorbetWorkspaceContext.update("typedFalseCompletionNudges", b);
+  /**
+   * Set selected {@link SorbetLspConfig LSP config}.
+   *
+   * This does not change {@link enabled}.
+   */
+  public async setSelectedLspConfigId(id: string): Promise<void> {
+    if (this.selectedLspConfigId !== id) {
+      await this.sorbetWorkspaceContext.update("selectedLspConfigId", id);
+      this.refresh();
+    }
+  }
+
+  public async setTypedFalseCompletionNudges(enabled: boolean): Promise<void> {
+    await this.sorbetWorkspaceContext.update(
+      "typedFalseCompletionNudges",
+      enabled,
+    );
     this.refresh();
   }
 }

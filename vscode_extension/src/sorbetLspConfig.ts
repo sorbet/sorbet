@@ -82,7 +82,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
       this.name = idOrData.name;
       this.description = idOrData.description;
       this.cwd = idOrData.cwd;
-      this.command = idOrData.command;
+      this.command = [...idOrData.command];
     }
   }
 
@@ -109,5 +109,15 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     }
 
     return true;
+  }
+
+  /**
+   * Deep equality, suitable for use when left and/or right may be null or undefined.
+   */
+  public static areEqual(
+    left: SorbetLspConfig | undefined | null,
+    right: SorbetLspConfig | undefined | null,
+  ) {
+    return left ? left.isEqualTo(right) : left === right;
   }
 }

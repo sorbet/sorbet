@@ -5,8 +5,8 @@ import * as sinon from "sinon";
 
 import { createLogStub } from "../testUtils";
 import { showSorbetConfigurationPicker } from "../../commands/showSorbetConfigurationPicker";
-import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetExtensionConfig } from "../../sorbetExtensionConfig";
+import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetLspConfig } from "../../sorbetLspConfig";
 
 suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
