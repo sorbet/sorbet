@@ -824,12 +824,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // resolver
     trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
 
-    UnorderedSet<core::FileRef> frefs;
-    for (auto &f : trees) {
-        frefs.insert(f.file);
-    }
-    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, frefs);
-
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
     }
@@ -838,6 +832,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
     }
+
+    UnorderedSet<core::FileRef> frefs;
+    for (auto &f : trees) {
+        frefs.insert(f.file);
+    }
+    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, frefs);
 
     handler.checkExpectations("[stress-incremental] ");
 
