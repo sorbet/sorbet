@@ -64,7 +64,7 @@ class FakeWorkspaceConfiguration implements ISorbetWorkspaceContext {
     section: string,
     value: any,
     configurationTarget?: boolean | ConfigurationTarget | undefined,
-  ): Thenable<void> {
+  ): Promise<void> {
     if (configurationTarget) {
       assert.fail(
         `fake does not (yet) support ConfigurationTarget, given: ${configurationTarget}`,
