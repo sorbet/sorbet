@@ -1395,9 +1395,10 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
+    // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
-    // Step 1: Find packages and determine their imports/exports.
+    // Find packages and determine their imports/exports.
     {
         Timer timeit(gs.tracer(), "packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
@@ -1432,8 +1433,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
-    // no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1458,8 +1457,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file.
-    // This could be parallel if needed, file access will be unique and no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1478,8 +1475,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
             packages.db.setPackageNameForFile(file, package);
         }
     }
-
-    return;
 }
 
 void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
@@ -1490,9 +1485,6 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     findPackages(gs, files);
     setPackageNameOnFiles(gs, files);
 
-    // Step 2:
-    // * Find package files and rewrite them into virtual AST mappings.
-    // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 
