@@ -37,6 +37,11 @@ const users = [
     infoLink: 'https://flexport.com/',
   },
   {
+    caption: 'GitHub',
+    image: 'img/github-mark.svg',
+    infoLink: 'https://github.com'
+  },
+  {
     caption: 'Grailed',
     image: 'img/grailed-logo.png',
     infoLink: 'https://www.grailed.com/',
