@@ -7,15 +7,14 @@ import {
   FileSystemWatcher,
   Memento,
   workspace,
-  WorkspaceFolder,
 } from "vscode";
 import * as fs from "fs";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
 export interface SorbetLspConfigChangeEvent {
-  readonly oldLspConfig: SorbetLspConfig | undefined;
-  readonly newLspConfig: SorbetLspConfig | undefined;
+  readonly oldLspConfig?: SorbetLspConfig;
+  readonly newLspConfig?: SorbetLspConfig;
 }
 
 /**
@@ -25,13 +24,27 @@ export interface SorbetLspConfigChangeEvent {
  * to make it easier to stub out behavior in tests.
  */
 export interface ISorbetWorkspaceContext extends Disposable {
-  /** See `vscode.Memento.get`. */
-  get<T>(section: string, defaultValue: T): T;
+  /**
+   * Get value from {@link ExtensionContext.workspaceState}, if not defined
+   * fallback to {@link workspace.getConfiguration}, otherwise `defaultValue`.
+   * @param name Setting name (do not include 'sorbet' prefix).
+   * @param defaultValue Value to use if no datastore defines the value.
+   */
+  get<T>(name: string, defaultValue: T): T;
 
-  /** See `vscode.Memento.update`. */
-  update(section: string, value: any): Thenable<void>;
+  /**
+   * Set value. Value is saved to {@link extensionContext.workspaceState} unless it
+   * matches state in {@link workspace.getConfiguration} in which case it is removed
+   * (effectively setting `value` due to {@link get}'s fallback logic). One caveat is
+   * that using `undefined` only resets {@link extensionContext.workspaceState}.
+   * @param name Setting name (do not include 'sorbet' prefix).
+   * @param value Setting value.
+   */
+  update(name: string, value: any): Promise<void>;
 
-  /** See `vscode.workspace.onDidChangeConfiguration` */
+  /**
+   * An event emitted when configuration has changed.
+   */
   onDidChangeConfiguration: Event<ConfigurationChangeEvent>;
 
   initializeEnabled(enabled: boolean): void;
@@ -48,12 +61,11 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
 
   constructor(extensionContext: ExtensionContext) {
     this.cachedSorbetConfiguration = workspace.getConfiguration("sorbet");
-    this.onDidChangeConfigurationEmitter = new EventEmitter<
-      ConfigurationChangeEvent
-    >();
+    this.onDidChangeConfigurationEmitter = new EventEmitter();
     this.workspaceState = extensionContext.workspaceState;
 
     this.disposables = [
+      this.onDidChangeConfigurationEmitter,
       workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration("sorbet")) {
           // update the cached configuration before firing
@@ -64,35 +76,38 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
     ];
   }
 
-  /**
-   * Dispose and free associated resources.
-   */
   public dispose() {
     Disposable.from(...this.disposables).dispose();
   }
 
   public get<T>(section: string, defaultValue: T): T {
-    const workspaceStateValue = this.workspaceState.get<T>(`sorbet.${section}`);
-    if (workspaceStateValue !== undefined) {
-      return workspaceStateValue;
-    }
-    return this.cachedSorbetConfiguration.get(section, defaultValue);
+    const stateKey = `sorbet.${section}`;
+    return (
+      this.workspaceState.get<T>(stateKey) ??
+      this.cachedSorbetConfiguration.get(section, defaultValue)
+    );
   }
 
   public async update(section: string, value: any): Promise<void> {
-    const key = `sorbet.${section}`;
-    await this.workspaceState.update(key, value);
+    const stateKey = `sorbet.${section}`;
+
+    const configValue = this.cachedSorbetConfiguration.get(section, value);
+    if (configValue === value) {
+      // Remove value from state since configuration's is enough.
+      await this.workspaceState.update(stateKey, undefined);
+    } else {
+      // Save to state since it is being customized.
+      await this.workspaceState.update(stateKey, value);
+    }
+
     this.onDidChangeConfigurationEmitter.fire({
-      affectsConfiguration: () => true,
+      affectsConfiguration: (section: string) =>
+        /"^sorbet($|\.)"/.test(section),
     });
   }
 
   public get onDidChangeConfiguration(): Event<ConfigurationChangeEvent> {
     return this.onDidChangeConfigurationEmitter.event;
-  }
-
-  public workspaceFolders(): readonly WorkspaceFolder[] | undefined {
-    return workspace.workspaceFolders;
   }
 
   /**
@@ -358,7 +373,7 @@ export class SorbetExtensionConfig implements Disposable {
   /**
    * Set selected {@link SorbetLspConfig LSP config}.
    *
-   * This does not change {@link enabled}.
+   * This does not change {@link enabled} state.
    */
   public async setSelectedLspConfigId(id: string): Promise<void> {
     if (this.selectedLspConfigId !== id) {

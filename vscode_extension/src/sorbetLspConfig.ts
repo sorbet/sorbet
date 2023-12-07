@@ -47,7 +47,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
    */
   public readonly cwd: string;
   /**
-   * Command and arguments to execute, e.g. `["srb", "typecheck", "--lsp"]`.
+   * Command and arguments to execute, e.g. `["bundle", "exec", "srb", "typecheck", "--lsp"]`.
    */
   public readonly command: ReadonlyArray<string>;
 
