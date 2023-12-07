@@ -1142,12 +1142,16 @@ struct PackageInfoFinder {
 
     void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &original) {
         auto tag = original.tag();
-        if (tag == ast::Tag::ClassDef || tag == ast::Tag::Send || tag == ast::Tag::UnresolvedConstantLit ||
-            tag == ast::Tag::ConstantLit || tag == ast::Tag::Literal || tag == ast::Tag::EmptyTree) {
-            return;
-        }
-
-        if (original.isSelfReference()) {
+        if ( // PackageSpec definition; handled above explicitly
+            tag == ast::Tag::ClassDef ||
+            // Various DSL methods; handled above explicitly
+            tag == ast::Tag::Send ||
+            // Arguments to DSL methods; always allowed
+            tag == ast::Tag::UnresolvedConstantLit || tag == ast::Tag::ConstantLit || tag == ast::Tag::Literal ||
+            // Technially only in scopes of constant literals, but easier to just always allow
+            tag == ast::Tag::EmptyTree ||
+            // Technically only as receiver of DSL method, but easier to just always allow
+            original.isSelfReference()) {
             return;
         }
 
