@@ -1133,71 +1133,25 @@ struct PackageInfoFinder {
     }
 
     /* Forbid arbitrary computation in packages */
-
-    void illegalNode(core::Context ctx, core::LocOffsets loc, string_view type) {
-        if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
-            e.setHeader("Invalid expression in package: {} not allowed", type);
+    void illegalNode(core::Context ctx, const ast::ExpressionPtr &original) {
+        if (auto e = ctx.beginError(original.loc(), core::errors::Packager::InvalidPackageExpression)) {
+            e.setHeader("Invalid expression in package: `{}` not allowed", original.nodeName());
+            e.addErrorNote("To learn about what's allowed in `{}` files, see http://go/package-layout", "__package.rb");
         }
     }
 
-    void postTransformCast(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "type assertion");
-    }
+    void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &original) {
+        auto tag = original.tag();
+        if (tag == ast::Tag::ClassDef || tag == ast::Tag::Send || tag == ast::Tag::UnresolvedConstantLit ||
+            tag == ast::Tag::ConstantLit || tag == ast::Tag::Literal || tag == ast::Tag::EmptyTree) {
+            return;
+        }
 
-    void preTransformIf(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`if`");
-    }
+        if (original.isSelfReference()) {
+            return;
+        }
 
-    void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`while`");
-    }
-
-    void postTransformBreak(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`break`");
-    }
-
-    void postTransformRetry(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`retry`");
-    }
-
-    void postTransformNext(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`next`");
-    }
-
-    void preTransformReturn(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`return`");
-    }
-
-    void preTransformRescueCase(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`rescue case`");
-    }
-
-    void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`rescue`");
-    }
-
-    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`=`");
-    }
-
-    void preTransformHash(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "hash literals");
-    }
-
-    void preTransformArray(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "array literals");
-    }
-
-    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "method definitions");
-    }
-
-    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "blocks");
-    }
-
-    void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`begin` and `end`");
+        illegalNode(ctx, original);
     }
 };
 
