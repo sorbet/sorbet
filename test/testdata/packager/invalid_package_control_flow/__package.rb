@@ -41,6 +41,6 @@ class MyPackage < PackageSpec
   # Var defs / assignments are not OK
   @hello = T.let(nil, T.nilable(String))
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `=`
-#                     ^^^^^^^^^^^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: type assertion not allowed
 #                               ^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
 end
