@@ -178,29 +178,29 @@ public:
         return visibleToTests_;
     }
 
-    // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<std::string> packagePathPrefixes;
     PackageName name;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
+    // The possible path prefixes associated with files in the package, including path separator at end.
+    vector<std::string> packagePathPrefixes = {};
     // The names of each package imported by this package.
-    vector<Import> importedPackageNames;
+    vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<Export> exports_;
+    vector<Export> exports_ = {};
 
     // Whether this package should just export everything
-    bool exportAll_;
+    bool exportAll_ = false;
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
-    vector<PackageName> visibleTo_;
+    vector<PackageName> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
-    bool visibleToTests_;
+    bool visibleToTests_ = false;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -223,7 +223,7 @@ public:
         return this->mangledName() == pkg.mangledName();
     }
 
-    PackageInfoImpl() = default;
+    PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
@@ -1207,13 +1207,6 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         return nullptr;
     }
 
-    // TODO(jez) Eventually make these required args in the constructor.
-    auto info = make_unique<PackageInfoImpl>();
-    info->loc = ctx.locAt(packageSpecClass->loc);
-    info->declLoc_ = ctx.locAt(packageSpecClass->declLoc);
-
-    info->name = getPackageName(ctx, nameTree);
-
     // ---- Mutates the tree ----
     // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
     // This removes the PackageSpec's themselves from the top-level namespace
@@ -1226,7 +1219,8 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
     // value in going that far (even namer mutates the trees; the packager fills a similar role).
     packageSpecClass->name = prependName(move(packageSpecClass->name), core::Names::Constants::PackageSpecRegistry());
 
-    return info;
+    return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+                                        ctx.locAt(packageSpecClass->declLoc));
 }
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
