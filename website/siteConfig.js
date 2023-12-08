@@ -39,7 +39,7 @@ const users = [
   {
     caption: 'GitHub',
     image: 'img/github-mark.svg',
-    infoLink: 'https://github.com'
+    infoLink: 'https://github.com',
   },
   {
     caption: 'Grailed',
