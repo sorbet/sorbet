@@ -944,12 +944,9 @@ private:
 };
 
 struct PackageSpecBodyWalk {
-    PackageSpecBodyWalk(unique_ptr<PackageInfoImpl> &info) : info(info) {
-        // TODO(jez) No need for this to be a unique_ptr anymore--written this way only to make the refactor diff small
-        ENFORCE(info != nullptr);
-    }
+    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
 
-    unique_ptr<PackageInfoImpl> &info;
+    PackageInfoImpl &info;
     vector<Export> exported;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -981,11 +978,6 @@ struct PackageSpecBodyWalk {
             }
         }
 
-        if (info == nullptr) {
-            // We haven't yet entered the package class.
-            return;
-        }
-
         if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
@@ -1004,7 +996,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
+                info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -1017,7 +1009,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
-            info->exportAll_ = true;
+            info.exportAll_ = true;
         }
 
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
@@ -1030,14 +1022,14 @@ struct PackageSpecBodyWalk {
                     }
                     return;
                 }
-                info->visibleToTests_ = true;
+                info.visibleToTests_ = true;
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->visibleTo_.emplace_back(getPackageName(ctx, target));
+                info.visibleTo_.emplace_back(getPackageName(ctx, target));
             }
         }
     }
@@ -1067,14 +1059,14 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        if (info->exportAll()) {
+        if (info.exportAll()) {
             // we're only here because exports exist, which means if
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info->name.toString(ctx), "export_all!");
+                                info.name.toString(ctx), "export_all!");
                 }
             }
         }
@@ -1109,8 +1101,8 @@ struct PackageSpecBodyWalk {
             exported.erase(exported.begin() + *indIt);
         }
 
-        ENFORCE(info->exports_.empty());
-        std::swap(exported, info->exports_);
+        ENFORCE(info.exports_.empty());
+        std::swap(exported, info.exports_);
     }
 
     bool isSpecMethod(const sorbet::ast::Send &send) const {
@@ -1237,7 +1229,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
     return info;
 }
 
-void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, unique_ptr<PackageInfoImpl> &info) {
+void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
@@ -1251,7 +1243,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     }
     populateMangledName(gs, info->name);
 
-    rewritePackageSpec(gs, package, info);
+    rewritePackageSpec(gs, package, *info);
     for (auto &importedPackageName : info->importedPackageNames) {
         populateMangledName(gs, importedPackageName.name);
 
@@ -1556,7 +1548,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
             // report some syntactic packager errors.
             auto info = definePackage(gs, file);
             if (info != nullptr) {
-                rewritePackageSpec(gs, file, info);
+                rewritePackageSpec(gs, file, *info);
             }
             validatePackage(ctx);
         } else {
