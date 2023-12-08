@@ -1148,7 +1148,7 @@ struct PackageInfoFinder {
             tag == ast::Tag::Send ||
             // Arguments to DSL methods; always allowed
             tag == ast::Tag::UnresolvedConstantLit || tag == ast::Tag::ConstantLit || tag == ast::Tag::Literal ||
-            // Technially only in scopes of constant literals, but easier to just always allow
+            // Technically only in scopes of constant literals, but easier to just always allow
             tag == ast::Tag::EmptyTree ||
             // Technically only as receiver of DSL method, but easier to just always allow
             original.isSelfReference()) {
