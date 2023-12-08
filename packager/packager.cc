@@ -1193,85 +1193,88 @@ unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast:
 
 unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package) {
     auto info = rewritePackageSpec(gs, package);
-    if (info) {
-        populateMangledName(gs, info->name);
-        for (auto &importedPackageName : info->importedPackageNames) {
-            populateMangledName(gs, importedPackageName.name);
+    if (info == nullptr) {
+        return info;
+    }
 
-            if (importedPackageName.name.mangledName == info->name.mangledName) {
-                if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
-                                           core::errors::Packager::NoSelfImport)) {
-                    string import_;
-                    switch (importedPackageName.type) {
-                        case ImportType::Normal:
-                            import_ = "import";
-                            break;
-                        case ImportType::Test:
-                            import_ = "test_import";
-                            break;
-                    }
-                    e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
+    populateMangledName(gs, info->name);
+    for (auto &importedPackageName : info->importedPackageNames) {
+        populateMangledName(gs, importedPackageName.name);
+
+        if (importedPackageName.name.mangledName == info->name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
+                                       core::errors::Packager::NoSelfImport)) {
+                string import_;
+                switch (importedPackageName.type) {
+                    case ImportType::Normal:
+                        import_ = "import";
+                        break;
+                    case ImportType::Test:
+                        import_ = "test_import";
+                        break;
                 }
+                e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
             }
-        }
-
-        for (auto &visibleTo : info->visibleTo_) {
-            populateMangledName(gs, visibleTo);
-
-            if (visibleTo.mangledName == info->name.mangledName) {
-                if (auto e =
-                        gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
-                    e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
-                }
-            }
-        }
-
-        auto extraPackageFilesDirectoryUnderscorePrefixes =
-            gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-        auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
-
-        const auto numPrefixes =
-            extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
-        info->packagePathPrefixes.reserve(numPrefixes);
-        auto packageFilePath = package.file.data(gs).path();
-        ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
-        info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
-        const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
-
-        for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-            // Project_FooBar -- munge with underscore
-            string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
-        }
-
-        for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
-            // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-            std::stringstream ss;
-            ss << prefix;
-            for (int i = 0; i < dirNameFromShortName.length(); i++) {
-                if (dirNameFromShortName[i] == '_') {
-                    ss << '/';
-                } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
-                    // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
-                    // which tend to be all lower case
-                    char upper = std::toupper(dirNameFromShortName[i]);
-                    ss << std::move(upper);
-                } else {
-                    if (isupper(dirNameFromShortName[i])) {
-                        ss << '_'; // snake-case munging
-                    }
-
-                    char lower = std::tolower(dirNameFromShortName[i]);
-                    ss << std::move(lower);
-                }
-            }
-            ss << '/';
-
-            std::string additionalDirPath(ss.str());
-            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }
+
+    for (auto &visibleTo : info->visibleTo_) {
+        populateMangledName(gs, visibleTo);
+
+        if (visibleTo.mangledName == info->name.mangledName) {
+            if (auto e =
+                    gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
+                e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
+            }
+        }
+    }
+
+    auto extraPackageFilesDirectoryUnderscorePrefixes =
+        gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+
+    const auto numPrefixes =
+        extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    info->packagePathPrefixes.reserve(numPrefixes);
+    auto packageFilePath = package.file.data(gs).path();
+    ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
+    info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+    const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
+    const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
+
+    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
+        // Project_FooBar -- munge with underscore
+        string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
+        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+        // project/Foo_bar -- convert camel-case to snake-case and munge with slash
+        std::stringstream ss;
+        ss << prefix;
+        for (int i = 0; i < dirNameFromShortName.length(); i++) {
+            if (dirNameFromShortName[i] == '_') {
+                ss << '/';
+            } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
+                // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
+                // which tend to be all lower case
+                char upper = std::toupper(dirNameFromShortName[i]);
+                ss << std::move(upper);
+            } else {
+                if (isupper(dirNameFromShortName[i])) {
+                    ss << '_'; // snake-case munging
+                }
+
+                char lower = std::tolower(dirNameFromShortName[i]);
+                ss << std::move(lower);
+            }
+        }
+        ss << '/';
+
+        std::string additionalDirPath(ss.str());
+        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
     return info;
 }
 
