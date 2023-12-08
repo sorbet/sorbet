@@ -1222,15 +1222,13 @@ unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::Par
         populateMangledName(gs, visibleTo);
 
         if (visibleTo.mangledName == info->name.mangledName) {
-            if (auto e =
-                    gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
+            if (auto e = gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
                 e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
             }
         }
     }
 
-    auto extraPackageFilesDirectoryUnderscorePrefixes =
-        gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
     const auto numPrefixes =
