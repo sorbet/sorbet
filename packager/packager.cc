@@ -376,11 +376,16 @@ public:
     }
 };
 
-void checkPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
+[[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
+    bool valid = true;
     while (constLit != nullptr) {
         if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
-            // By forbidding package names to have an underscore, we can trivially convert between mangled names and
-            // unmangled names by replacing `_` with `::`.
+            // By forbidding package names to have an underscore, we can trivially convert between
+            // mangled names and unmangled names by replacing `_` with `::`.
+            //
+            // Even with packages into the symbol table this restriction is useful, because we have
+            // a lot of tooling that will create directory structures like Foo_Bar to store
+            // generated files associated with package Foo::Bar
             if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
                 e.setHeader("Package names cannot contain an underscore");
                 auto replacement = absl::StrReplaceAll(constLit->cnst.shortName(ctx), {{"_", ""}});
@@ -392,9 +397,12 @@ void checkPackageName(core::Context ctx, const ast::UnresolvedConstantLit *const
                     fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
                     {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
             }
+            valid = false;
         }
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
+
+    return valid;
 }
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
@@ -1011,24 +1019,33 @@ struct PackageInfoFinder {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::InvalidPackageDefinition)) {
                 e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
             }
-        } else if (info == nullptr) {
-            auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
-            info = make_unique<PackageInfoImpl>();
-            checkPackageName(ctx, nameTree);
 
-            info->name = getPackageName(ctx, nameTree);
-            info->loc = ctx.locAt(classDef.loc);
-            info->declLoc_ = ctx.locAt(classDef.declLoc);
+            return;
+        }
 
-            // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
-            // This removes the PackageSpec's themselves from the top-level namespace
-            classDef.name = prependName(move(classDef.name), core::Names::Constants::PackageSpecRegistry());
-        } else {
+        if (info != nullptr) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
                 e.addErrorLine(info->loc, "Previous package declaration found here");
             }
+
+            return;
         }
+
+        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        if (!validatePackageName(ctx, nameTree)) {
+            return;
+        }
+
+        info = make_unique<PackageInfoImpl>();
+
+        info->name = getPackageName(ctx, nameTree);
+        info->loc = ctx.locAt(classDef.loc);
+        info->declLoc_ = ctx.locAt(classDef.declLoc);
+
+        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // This removes the PackageSpec's themselves from the top-level namespace
+        classDef.name = prependName(move(classDef.name), core::Names::Constants::PackageSpecRegistry());
     }
 
     void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
