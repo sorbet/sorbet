@@ -943,8 +943,8 @@ private:
     }
 };
 
-struct PackageInfoFinder {
-    PackageInfoFinder(unique_ptr<PackageInfoImpl> &info) : info(info) {
+struct PackageSpecBodyWalk {
+    PackageSpecBodyWalk(unique_ptr<PackageInfoImpl> &info) : info(info) {
         // TODO(jez) No need for this to be a unique_ptr anymore--written this way only to make the refactor diff small
         ENFORCE(info != nullptr);
     }
@@ -1238,13 +1238,13 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
 }
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, unique_ptr<PackageInfoImpl> &info) {
-    PackageInfoFinder finder(info);
+    PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
-    ast::TreeWalk::apply(ctx, finder, package.tree);
-    finder.finalize(ctx);
+    ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+    bodyWalk.finalize(ctx);
 }
 
-unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package) {
+unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
     auto info = definePackage(gs, package);
     if (info == nullptr) {
         return info;
@@ -1434,7 +1434,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
 
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = runPackageInfoFinder(ctx, file);
+            auto pkg = createAndPopulatePackageInfo(ctx, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
