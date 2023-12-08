@@ -909,15 +909,6 @@ struct PackageInfoFinder {
     unique_ptr<PackageInfoImpl> info = nullptr;
     vector<Export> exported;
 
-    void postTransformCast(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
-        if (!ast::isa_tree<ast::Literal>(cast.typeExpr)) {
-            if (auto e = ctx.beginError(cast.typeExpr.loc(), core::errors::Packager::InvalidPackageExpression)) {
-                e.setHeader("Invalid expression in package: Arguments to functions must be literals");
-            }
-        }
-    }
-
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
@@ -1142,67 +1133,29 @@ struct PackageInfoFinder {
     }
 
     /* Forbid arbitrary computation in packages */
-
-    void illegalNode(core::Context ctx, core::LocOffsets loc, string_view type) {
-        if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageExpression)) {
-            e.setHeader("Invalid expression in package: {} not allowed", type);
+    void illegalNode(core::Context ctx, const ast::ExpressionPtr &original) {
+        if (auto e = ctx.beginError(original.loc(), core::errors::Packager::InvalidPackageExpression)) {
+            e.setHeader("Invalid expression in package: `{}` not allowed", original.nodeName());
+            e.addErrorNote("To learn about what's allowed in `{}` files, see http://go/package-layout", "__package.rb");
         }
     }
 
-    void preTransformIf(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`if`");
-    }
+    void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &original) {
+        auto tag = original.tag();
+        if ( // PackageSpec definition; handled above explicitly
+            tag == ast::Tag::ClassDef ||
+            // Various DSL methods; handled above explicitly
+            tag == ast::Tag::Send ||
+            // Arguments to DSL methods; always allowed
+            tag == ast::Tag::UnresolvedConstantLit || tag == ast::Tag::ConstantLit || tag == ast::Tag::Literal ||
+            // Technically only in scopes of constant literals, but easier to just always allow
+            tag == ast::Tag::EmptyTree ||
+            // Technically only as receiver of DSL method, but easier to just always allow
+            original.isSelfReference()) {
+            return;
+        }
 
-    void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`while`");
-    }
-
-    void postTransformBreak(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`break`");
-    }
-
-    void postTransformRetry(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`retry`");
-    }
-
-    void postTransformNext(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`next`");
-    }
-
-    void preTransformReturn(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`return`");
-    }
-
-    void preTransformRescueCase(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`rescue case`");
-    }
-
-    void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`rescue`");
-    }
-
-    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`=`");
-    }
-
-    void preTransformHash(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "hash literals");
-    }
-
-    void preTransformArray(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "array literals");
-    }
-
-    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "method definitions");
-    }
-
-    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "blocks");
-    }
-
-    void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &original) {
-        illegalNode(ctx, original.loc(), "`begin` and `end`");
+        illegalNode(ctx, original);
     }
 };
 
@@ -1395,9 +1348,10 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
 void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> files) {
     // Ensure files are in canonical order.
+    // TODO(jez) Is this sort redundant? Should we move this sort to callers?
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });
 
-    // Step 1: Find packages and determine their imports/exports.
+    // Find packages and determine their imports/exports.
     {
         Timer timeit(gs.tracer(), "packager.findPackages");
         core::UnfreezeNameTable unfreeze(gs);
@@ -1432,8 +1386,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const ast
     std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file. This could be parallel if needed, file access will be unique and
-    // no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1458,8 +1410,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
     std::vector<std::pair<core::FileRef, core::packages::MangledName>> mapping;
     mapping.reserve(files.size());
 
-    // Step 1a, add package references to every file.
-    // This could be parallel if needed, file access will be unique and no symbols will be allocated.
     {
         auto &db = gs.packageDB();
         for (auto &f : files) {
@@ -1478,8 +1428,6 @@ void Packager::setPackageNameOnFiles(core::GlobalState &gs, absl::Span<const cor
             packages.db.setPackageNameForFile(file, package);
         }
     }
-
-    return;
 }
 
 void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::ParsedFile> files) {
@@ -1490,9 +1438,6 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     findPackages(gs, files);
     setPackageNameOnFiles(gs, files);
 
-    // Step 2:
-    // * Find package files and rewrite them into virtual AST mappings.
-    // * Find files within each package and rewrite each to be wrapped by their virtual package namespace.
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagesAndFiles");
 

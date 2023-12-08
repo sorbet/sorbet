@@ -3,7 +3,7 @@
 # enable-packager: true
 
 # Constant definitions/assignments are not OK
-SomeConstant = PackageSpec # error: Invalid expression in package: `=`
+SomeConstant = PackageSpec # error: Invalid expression in package: `Assign`
 
 class MyPackage < PackageSpec
   extend T::Helpers # error: Invalid expression in package: `extend` is not allowed
@@ -18,10 +18,10 @@ class MyPackage < PackageSpec
   # Complex args are not OK (we can choose to relax this)
   some_method([0,1,2])
   #           ^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
-  #           ^^^^^^^ error: Invalid expression in package: array
+  #           ^^^^^^^ error: Invalid expression in package: `Array`
   some_method({prop: 10})
   #           ^^^^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
-  #           ^^^^^^^^^^ error: Invalid expression in package: hash
+  #           ^^^^^^^^^^ error: Invalid expression in package: `Hash`
 
   # Literals should be fine.
   some_method "Literal"
@@ -29,18 +29,21 @@ class MyPackage < PackageSpec
 
   # Methods defs are not OK
   sig {void} # error: Invalid expression in package: Arguments to functions must be literals
-# ^^^^^^^^^^ error: Invalid expression in package: blocks not allowed
+# ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
   def package_method; end
-# ^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: method definition
+# ^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
+# ^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`
 
   sig {void} # error: Invalid expression in package: Arguments to functions must be literals
-# ^^^^^^^^^^ error: Invalid expression in package: blocks not allowed
+# ^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
   def self.static_method; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: method definition
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
+# ^^^^^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`
 
   # Var defs / assignments are not OK
   @hello = T.let(nil, T.nilable(String))
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `=`
-#                     ^^^^^^^^^^^^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
+# ^^^^^^                                 error: Invalid expression in package: `UnresolvedIdent`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `Assign`
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `Cast` not allowed
 #                               ^^^^^^ error: Invalid expression in package: Arguments to functions must be literals
 end
