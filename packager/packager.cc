@@ -376,8 +376,8 @@ public:
     }
 };
 
-[[nodiscard]] bool checkPackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
-    bool hasError = false;
+[[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
+    bool valid = true;
     while (constLit != nullptr) {
         if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between
@@ -397,12 +397,12 @@ public:
                     fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
                     {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
             }
-            hasError = true;
+            valid = false;
         }
         constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
     }
 
-    return hasError;
+    return valid;
 }
 
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
@@ -1042,7 +1042,7 @@ struct PackageInfoFinder {
         }
 
         auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
-        if (!checkPackageName(ctx, nameTree)) {
+        if (!validatePackageName(ctx, nameTree)) {
             return;
         }
 
