@@ -441,7 +441,7 @@ bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr)
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
-unique_ptr<PackageInfoImpl> mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
+void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
     if (!ctx.file.data(ctx).source().empty()) {
@@ -452,9 +452,6 @@ unique_ptr<PackageInfoImpl> mustContainPackageDef(core::Context ctx, core::LocOf
                            "class Foo::Bar < PackageSpec");
         }
     }
-
-    // Don't return a PackageInfoImpl. Code downstream will know to skip further processing in this package file.
-    return nullptr;
 }
 
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
@@ -948,6 +945,7 @@ struct PackageSpecBodyWalk {
 
     PackageInfoImpl &info;
     vector<Export> exported;
+    bool foundFirstPackageSpec = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -1047,9 +1045,15 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        if (!startsWithPackageSpecRegistry(nameTree)) {
-            // This is not the top-level package definition class
-            illegalNode(ctx, tree);
+        if (startsWithPackageSpecRegistry(nameTree)) {
+            this->foundFirstPackageSpec = true;
+        } else if (this->foundFirstPackageSpec) {
+            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
+                e.setHeader("Package files can only declare one package");
+                e.addErrorLine(info.loc, "Previous package declaration found here");
+            }
+        } else {
+            mustContainPackageDef(ctx, tree.loc());
         }
     }
 
@@ -1171,56 +1175,65 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
 
     auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
 
-    if (rootClass.rhs.empty()) {
-        return mustContainPackageDef(ctx, core::LocOffsets{0, 0});
-    }
-
-    if (rootClass.rhs.size() > 1) {
-        for (auto rootStmt = rootClass.rhs.begin() + 1; rootStmt != rootClass.rhs.end(); rootStmt++) {
-            // "loc exists" guards against something like EmptyTree in RHS (uncofirmed/defensive, but seems plausible)
-            if (rootStmt->loc().exists()) {
-                if (auto e = ctx.beginError(rootStmt->loc(), core::errors::Packager::InvalidPackageDefinition)) {
-                    e.setHeader("`{}` file must contain exactly one top-level statement for the package definition",
-                                "__package.rb");
-                    e.addErrorLine(ctx.locAt(rootClass.rhs[0].loc()), "First top-level statement here");
-                    e.addErrorNote("For more information, see http://go/package-layout");
-                }
-            }
+    unique_ptr<PackageInfoImpl> info;
+    bool reportedError = false;
+    for (auto &rootStmt : rootClass.rhs) {
+        if (info != nullptr) {
+            // No error here; let the error be reported in the tree walk later as a bad node type.
+            continue;
         }
+
+        auto *packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
+        if (packageSpecClass == nullptr) {
+            // No error here; let this be reported in the tree walk later as a bad node type,
+            // or at the end of this function if no PackageSpec is found.
+            continue;
+        }
+
+        if (packageSpecClass->ancestors.size() != 1 ||
+            !ast::isa_tree<ast::UnresolvedConstantLit>(packageSpecClass->name)) {
+            mustContainPackageDef(ctx, packageSpecClass->declLoc);
+            reportedError = true;
+            continue;
+        }
+
+        if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
+            mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
+            reportedError = true;
+            continue;
+        }
+
+        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        if (!validatePackageName(ctx, nameTree)) {
+            reportedError = true;
+            continue;
+        }
+
+        // ---- Mutates the tree ----
+        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // This removes the PackageSpec's themselves from the top-level namespace
+        //
+        // We can't do this rewrite in rewriter, because this rewrite should only happen if
+        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
+        // which would double the size of Sorbet's disk cache.
+        //
+        // Other than being able to say "we don't mutate the trees in packager" there's not much
+        // value in going that far (even namer mutates the trees; the packager fills a similar role).
+        packageSpecClass->name =
+            prependName(move(packageSpecClass->name), core::Names::Constants::PackageSpecRegistry());
+
+        info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+                                            ctx.locAt(packageSpecClass->declLoc));
     }
 
-    auto *packageSpecClass = ast::cast_tree<ast::ClassDef>(rootClass.rhs[0]);
-    if (packageSpecClass == nullptr) {
-        return mustContainPackageDef(ctx, rootClass.rhs[0].loc());
+    // Only report an error if we didn't already
+    // (the one we reported will have been more descriptive than this one)
+    if (info == nullptr && !reportedError) {
+        auto errLoc = rootClass.rhs.empty() ? core::LocOffsets{0, 0} : rootClass.rhs[0].loc();
+        mustContainPackageDef(ctx, errLoc);
     }
 
-    if (packageSpecClass->ancestors.size() != 1 || !ast::isa_tree<ast::UnresolvedConstantLit>(packageSpecClass->name)) {
-        return mustContainPackageDef(ctx, packageSpecClass->declLoc);
-    }
-
-    if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
-        return mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
-    }
-
-    auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
-    if (!validatePackageName(ctx, nameTree)) {
-        return nullptr;
-    }
-
-    // ---- Mutates the tree ----
-    // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
-    // This removes the PackageSpec's themselves from the top-level namespace
-    //
-    // We can't do this rewrite in rewriter, because this rewrite should only happen if
-    // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
-    // which would double the size of Sorbet's disk cache.
-    //
-    // Other than being able to say "we don't mutate the trees in packager" there's not much
-    // value in going that far (even namer mutates the trees; the packager fills a similar role).
-    packageSpecClass->name = prependName(move(packageSpecClass->name), core::Names::Constants::PackageSpecRegistry());
-
-    return make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
-                                        ctx.locAt(packageSpecClass->declLoc));
+    return info;
 }
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
