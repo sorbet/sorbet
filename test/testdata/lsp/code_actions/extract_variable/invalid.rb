@@ -26,6 +26,20 @@ class A
 #       ^ apply-code-action: [A] Extract Variable
   x = 1 + 1
 # ^ apply-code-action: [A] Extract Variable
+
+  def multiple_return_break_next
+    1.times do
+      if 1 == 2
+        break 1, 2
+#       ^^^^^^^^^^ apply-code-action: [A] Extract Variable
+      else
+        next 1, 2
+#       ^^^^^^^^^^ apply-code-action: [A] Extract Variable
+      end
+    end
+    return 1, 2
+#   ^^^^^^^^^^^ apply-code-action: [A] Extract Variable
+  end
 end
 
   A.new.a &&= 1
