@@ -474,6 +474,10 @@ private:
     static std::string toIdentifier(std::string_view val) {
         // Split string into components.
         auto components = absl::StrSplit(val, absl::ByAnyChar("._/"));
+        // Handle empty string.
+        if (val.empty()) {
+            return "Empty";
+        }
         // Capitalize each component.
         return fmt::format("{}", fmt::map_join(components, "", [](auto component) -> std::string {
                                if (component.length() == 0) {
