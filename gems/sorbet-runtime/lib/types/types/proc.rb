@@ -8,21 +8,25 @@ module T::Types
   # At present, we only support fixed-arity procs with no optional or
   # keyword arguments.
   class Proc < Base
-    attr_reader :arg_types
-    attr_reader :returns
-
     def initialize(arg_types, returns)
-      @arg_types = {}
-      arg_types.each do |key, raw_type|
-        @arg_types[key] = T::Utils.coerce(raw_type)
-      end
-      @returns = T::Utils.coerce(returns)
+      @inner_arg_types = arg_types
+      @inner_returns = returns
+    end
+
+    def arg_types
+      @arg_types ||= @inner_arg_types.map do |key, raw_type|
+        [key, T::Utils.coerce(raw_type)]
+      end.to_h
+    end
+
+    def returns
+      @returns ||= T::Utils.coerce(@inner_returns)
     end
 
     # overrides Base
     def name
       args = []
-      @arg_types.each do |k, v|
+      arg_types.each do |k, v|
         args << "#{k}: #{v.name}"
       end
       "T.proc.params(#{args.join(', ')}).returns(#{returns})"

@@ -233,6 +233,10 @@ module Opus::Types::Test
 
         it 'valid? does not allocate' do
           skip unless check_alloc_counts
+
+          # Call a method on the type to trigger the lazy initialization
+          assert_equal("T.nilable(T.any(Integer, T::Boolean))", @type.name)
+
           allocs_when_valid = counting_allocations {@type.valid?(0)}
           assert_equal(0, allocs_when_valid)
 
@@ -372,6 +376,9 @@ module Opus::Types::Test
         @klass.include(Mixin1)
         @klass.include(Mixin2)
 
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", @type.name)
+
         allocs_when_valid = counting_allocations {@type.valid?(@klass)}
         assert_equal(0, allocs_when_valid)
 
@@ -407,6 +414,10 @@ module Opus::Types::Test
 
       it 'valid? does not allocate' do
         skip unless check_alloc_counts
+
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("[String, T::Boolean]", @type.name)
+
         arr = ["foo", false]
         allocs_when_valid = counting_allocations {@type.valid?(arr)}
         assert_equal(0, allocs_when_valid)
@@ -459,6 +470,10 @@ module Opus::Types::Test
 
       it 'valid? does not allocate' do
         skip unless check_alloc_counts
+
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("{a: String, b: T::Boolean, c: T.nilable(Numeric)}", @type.name)
+
         h = {a: 'foo', b: false, c: nil}
         allocs_when_valid = counting_allocations {@type.valid?(h)}
         assert_equal(0, allocs_when_valid)

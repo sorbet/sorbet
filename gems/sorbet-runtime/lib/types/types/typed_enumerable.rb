@@ -6,10 +6,12 @@ module T::Types
   # `case` statement below in `describe_obj` in order to get better
   # error messages.
   class TypedEnumerable < Base
-    attr_reader :type
-
     def initialize(type)
-      @type = T::Utils.coerce(type)
+      @inner_type = type
+    end
+
+    def type
+      @type ||= T::Utils.coerce(@inner_type)
     end
 
     def underlying_class
@@ -18,7 +20,7 @@ module T::Types
 
     # overrides Base
     def name
-      "T::Enumerable[#{@type.name}]"
+      "T::Enumerable[#{type.name}]"
     end
 
     # overrides Base
@@ -34,20 +36,20 @@ module T::Types
         begin
           it = 0
           while it < obj.count
-            return false unless @type.recursively_valid?(obj[it])
+            return false unless type.recursively_valid?(obj[it])
             it += 1
           end
           true
         end
       when Hash
-        return false unless @type.is_a?(FixedArray)
-        types = @type.types
+        return false unless type.is_a?(FixedArray)
+        types = type.types
         return false if types.count != 2
         key_type = types[0]
         value_type = types[1]
         obj.each_pair do |key, val|
           # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
-          # iterate over a [key, value] array, so we can't juse use the @type.recursively_valid?(v)
+          # iterate over a [key, value] array, so we can't juse use the type.recursively_valid?(v)
           return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
         end
         true
@@ -65,10 +67,10 @@ module T::Types
         # boundlessness, it does not express a type. For example `(nil...nil)` is not a T::Range[NilClass], its a range
         # of unknown types (T::Range[T.untyped]).
         # Similarly, `(nil...1)` is not a `T::Range[T.nilable(Integer)]`, it's a boundless range of Integer.
-        (obj.begin.nil? || @type.recursively_valid?(obj.begin)) && (obj.end.nil? || @type.recursively_valid?(obj.end))
+        (obj.begin.nil? || type.recursively_valid?(obj.begin)) && (obj.end.nil? || type.recursively_valid?(obj.end))
       when Set
         obj.each do |item|
-          return false unless @type.recursively_valid?(item)
+          return false unless type.recursively_valid?(item)
         end
 
         true
@@ -90,7 +92,7 @@ module T::Types
         # should be invariant because they are mutable and support
         # both reading and writing. However, Sorbet treats *all*
         # Enumerable subclasses as covariant for ease of adoption.
-        @type.subtype_of?(other.type)
+        type.subtype_of?(other.type)
       elsif other.class <= Simple
         underlying_class <= other.raw_type
       else
