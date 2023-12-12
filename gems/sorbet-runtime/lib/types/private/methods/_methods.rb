@@ -208,13 +208,12 @@ module T::Private::Methods
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
-  def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
+  def self._on_method_added(hook_mod, mod, method_name)
     if T::Private::DeclState.current.skip_on_method_added
       return
     end
 
     current_declaration = T::Private::DeclState.current.active_declaration
-    mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
@@ -539,14 +538,14 @@ module T::Private::Methods
   module MethodHooks
     def method_added(name)
       super(name)
-      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: false)
+      ::T::Private::Methods._on_method_added(self, self, name)
     end
   end
 
   module SingletonMethodHooks
     def singleton_method_added(name)
       super(name)
-      ::T::Private::Methods._on_method_added(self, name, is_singleton_method: true)
+      ::T::Private::Methods._on_method_added(self, singleton_class, name)
     end
   end
 
