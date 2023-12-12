@@ -222,9 +222,9 @@ class Digest::Class
   # [`Digest.hexencode`](https://docs.ruby-lang.org/en/2.7.0/Digest.html#method-c-hexencode)([`Digest::Class.new(*parameters)`](https://docs.ruby-lang.org/en/2.7.0/Digest/Instance.html#method-i-new).digest(string)).
   sig do
     params(
-      _: ::T.untyped,
+      _: String,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def self.hexdigest(*_); end
 end
@@ -324,9 +324,9 @@ module Digest::Instance
   # the process.
   sig do
     params(
-      _: ::T.untyped,
+      _: String,
     )
-    .returns(::T.untyped)
+    .returns(String)
   end
   def hexdigest(*_); end
 
