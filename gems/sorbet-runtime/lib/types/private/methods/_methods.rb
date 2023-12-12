@@ -191,12 +191,11 @@ module T::Private::Methods
     end
   end
 
-  def self.add_module_with_final_method(mod, method_name, is_singleton_method)
-    m = is_singleton_method ? mod.singleton_class : mod
-    methods = @modules_with_final[m]
+  def self.add_module_with_final_method(mod, method_name)
+    methods = @modules_with_final[mod]
     if methods.nil?
       methods = {}
-      @modules_with_final[m] = methods
+      @modules_with_final[mod] = methods
     end
     methods[method_name] = true
     nil
@@ -286,7 +285,7 @@ module T::Private::Methods
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
       note_module_deals_with_final(hook_mod)
-      add_module_with_final_method(hook_mod, method_name, is_singleton_method)
+      add_module_with_final_method(mod, method_name)
     end
   end
 
