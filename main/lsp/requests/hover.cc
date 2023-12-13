@@ -42,7 +42,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
 
     const core::GlobalState &gs = typechecker.state();
     auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::TextDocumentHover);
+                                  LSPMethod::TextDocumentHover, false);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -56,9 +56,11 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         if (level < core::StrictLevel::True) {
-            auto text = fmt::format("This file is `# typed: {}`.\n"
-                                    "Hover, Go To Definition, and other features are disabled in this file.",
-                                    level == core::StrictLevel::Ignore ? "ignore" : "false");
+            auto text = level == core::StrictLevel::Ignore
+                            ? "This file is `# typed: ignore`.\n"
+                              "No Sorbet IDE features will work in this file."
+                            : "This file is `# typed: false`.\n"
+                              "Most Hover results will not appear until the file is `# typed: true` or higher.";
             response->result = make_unique<Hover>(make_unique<MarkupContent>(clientHoverMarkupKind, text));
         } else {
             // Note: Need to specifically specify the variant type here so the null gets placed into the proper slot.

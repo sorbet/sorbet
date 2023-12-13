@@ -1,15 +1,18 @@
 # typed: false
 
 class Foo
-    # ^ hover: This file is `# typed: false`.
-    # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
+    # ^ hover: T.class_of(Foo)
 
   def foo
-    # ^ hover: This file is `# typed: false`.
-    # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
+    # ^ hover: sig { returns(T.untyped) }
+    # ^ hover: def foo; end
     x = 10
   # ^ hover: This file is `# typed: false`.
-  # ^ hover: Hover, Go To Definition, and other features are disabled in this file.
+  # ^ hover: Most Hover results will not appear until the file is `# typed: true` or higher.
     x
   end
+
+  X = 1
+  p(X)
+  # ^ hover: Integer
 end
