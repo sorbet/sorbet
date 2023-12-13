@@ -26,6 +26,7 @@ module T::Types
     def build_type
       arg_types
       returns
+      nil
     end
 
     # overrides Base

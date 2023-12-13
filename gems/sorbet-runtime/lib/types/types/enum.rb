@@ -13,7 +13,7 @@ module T::Types
     end
 
     def build_type
-      # no-op
+      nil
     end
 
     # overrides Base

@@ -24,6 +24,7 @@ module T::Types
 
     def build_type
       types
+      nil
     end
 
     # overrides Base

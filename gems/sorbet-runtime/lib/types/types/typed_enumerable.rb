@@ -16,6 +16,7 @@ module T::Types
 
     def build_type
       type
+      nil
     end
 
     def underlying_class

@@ -8,7 +8,7 @@ module T::Types
     def initialize; end
 
     def build_type
-      # no-op
+      nil
     end
 
     # overrides Base
