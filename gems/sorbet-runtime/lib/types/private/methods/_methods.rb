@@ -431,7 +431,7 @@ module T::Private::Methods
     run_sig_block_for_key(method_to_key(method))
   end
 
-  private_class_method def self.run_sig_block_for_key(key)
+  private_class_method def self.run_sig_block_for_key(key, force_type_init: false)
     blk = @sig_wrappers[key]
     if !blk
       sig = @signatures_by_method[key]
@@ -454,14 +454,17 @@ module T::Private::Methods
     end
 
     @sig_wrappers.delete(key)
+
+    sig.force_type_init if force_type_init
+
     sig
   end
 
-  def self.run_all_sig_blocks
+  def self.run_all_sig_blocks(force_type_init: true)
     loop do
       break if @sig_wrappers.empty?
       key, = @sig_wrappers.first
-      run_sig_block_for_key(key)
+      run_sig_block_for_key(key, force_type_init: force_type_init)
     end
   end
 

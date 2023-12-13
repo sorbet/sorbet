@@ -79,8 +79,8 @@ module T::Utils
   end
 
   # Unwraps all the sigs.
-  def self.run_all_sig_blocks
-    T::Private::Methods.run_all_sig_blocks
+  def self.run_all_sig_blocks(force_type_init: true)
+    T::Private::Methods.run_all_sig_blocks(force_type_init: force_type_init)
   end
 
   # Return the underlying type for a type alias. Otherwise returns type.

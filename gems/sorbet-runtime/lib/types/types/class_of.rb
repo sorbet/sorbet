@@ -10,6 +10,10 @@ module T::Types
       @type = type
     end
 
+    def build_type
+      # no-op
+    end
+
     # overrides Base
     def name
       "T.class_of(#{@type})"

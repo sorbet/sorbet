@@ -14,6 +14,10 @@ module T::Types
       @types ||= @inner_types.map {|type| T::Utils.coerce(type)}
     end
 
+    def build_type
+      types
+    end
+
     # overrides Base
     def name
       "[#{types.join(', ')}]"

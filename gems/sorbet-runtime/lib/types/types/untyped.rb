@@ -7,6 +7,10 @@ module T::Types
 
     def initialize; end
 
+    def build_type
+      # no-op
+    end
+
     # overrides Base
     def name
       "T.untyped"

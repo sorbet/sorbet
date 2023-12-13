@@ -14,6 +14,10 @@ module T::Types
       @type ||= T::Utils.coerce(@inner_type)
     end
 
+    def build_type
+      type
+    end
+
     def underlying_class
       Enumerable
     end

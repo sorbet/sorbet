@@ -22,6 +22,10 @@ module T::Types
       end.uniq
     end
 
+    def build_type
+      types
+    end
+
     # overrides Base
     def name
       # Use the attr_reader here so we can override it in SimplePairUnion

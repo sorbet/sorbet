@@ -13,6 +13,10 @@ module T::Types
       @types ||= @inner_types.transform_values {|v| T::Utils.coerce(v)}
     end
 
+    def build_type
+      types
+    end
+
     # overrides Base
     def name
       serialize_hash(types)

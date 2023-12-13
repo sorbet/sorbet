@@ -10,6 +10,10 @@ module T::Types
       @val = val
     end
 
+    def build_type
+      # no-op
+    end
+
     # overrides Base
     def name
       # Strips the #<...> off, just leaving the ...

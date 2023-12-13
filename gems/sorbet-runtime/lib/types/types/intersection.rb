@@ -20,6 +20,10 @@ module T::Types
       end.uniq
     end
 
+    def build_type
+      types
+    end
+
     # overrides Base
     def name
       "T.all(#{types.map(&:name).compact.sort.join(', ')})"

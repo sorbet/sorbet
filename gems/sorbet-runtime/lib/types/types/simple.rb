@@ -13,6 +13,10 @@ module T::Types
       @raw_type = raw_type
     end
 
+    def build_type
+      # no-op
+    end
+
     # overrides Base
     def name
       # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)

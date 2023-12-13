@@ -33,6 +33,11 @@ module T::Types
       raise NotImplementedError
     end
 
+    # Force the lazy type initialization
+    def build_type
+      raise NotImplementedError
+    end
+
     # Equality is based on name, so be sure the name reflects all relevant state when implementing.
     def name
       raise NotImplementedError

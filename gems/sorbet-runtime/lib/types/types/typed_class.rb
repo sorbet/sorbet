@@ -11,6 +11,10 @@ module T::Types
       @type ||= T::Utils.coerce(@inner_type)
     end
 
+    def build_type
+      type
+    end
+
     # overrides Base
     def name
       "T::Class[#{type.name}]"

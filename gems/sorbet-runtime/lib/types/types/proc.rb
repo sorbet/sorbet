@@ -23,6 +23,11 @@ module T::Types
       @returns ||= T::Utils.coerce(@inner_returns)
     end
 
+    def build_type
+      arg_types
+      returns
+    end
+
     # overrides Base
     def name
       args = []
