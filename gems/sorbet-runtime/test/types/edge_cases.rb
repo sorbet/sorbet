@@ -637,6 +637,19 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_instance_of(String, klass.new(type: String))
   end
 
+  it 'allows abstract classes to redclare tap' do
+    superclass = Class.new do
+      extend T::Helpers
+      abstract!
+
+      attr_reader :tap
+    end
+
+    klass = Class.new(superclass)
+
+    assert_instance_of(klass, klass.new)
+  end
+
   it 'handles class scope change when already hooked' do
     klass = Class.new do
       extend T::Sig
