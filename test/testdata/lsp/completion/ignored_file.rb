@@ -1,4 +1,4 @@
-# typed: false
+# typed: ignore
 
 class AnImportantClass
   def important_method(important_parameter)
@@ -7,8 +7,8 @@ class AnImportantClass
   end
 end
 
-An # error: Unable to resolve constant
-# ^ completion: AnImportantClass
+An
+# ^ completion: (file is not `# typed: true` or higher)
 
 AnImportantClass.n
 #                 ^ completion: (file is not `# typed: true` or higher)
