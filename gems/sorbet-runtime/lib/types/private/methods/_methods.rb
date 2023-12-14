@@ -8,7 +8,7 @@ module T::Private::Methods
   @sigs_that_raised = {}
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
-  @was_ever_final_names = {}
+  @was_ever_final_names = {}.compare_by_identity
   # maps from a module's object_id to the set of final methods declared in that module.
   # we also overload entries slightly: if the value is nil, that means that the
   # module has final methods somewhere along its ancestor chain, but does not itself
@@ -20,7 +20,7 @@ module T::Private::Methods
   # twice is permitted).  we could do this with two tables, but it seems slightly
   # cleaner with a single table.
   # Effectively T::Hash[Module, T.nilable(Set))]
-  @modules_with_final = Hash.new {|hash, key| hash[key] = nil}
+  @modules_with_final = Hash.new {|hash, key| hash[key] = nil}.compare_by_identity
   # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
@@ -132,7 +132,7 @@ module T::Private::Methods
     source_ancestors = nil
     # use reverse_each to check farther-up ancestors first, for better error messages.
     target_ancestors.reverse_each do |ancestor|
-      final_methods = @modules_with_final.fetch(ancestor.object_id, nil)
+      final_methods = @modules_with_final.fetch(ancestor, nil)
       # In this case, either ancestor didn't have any final methods anywhere in its
       # ancestor chain, or ancestor did have final methods somewhere in its ancestor
       # chain, but no final methods defined in ancestor itself.  Either way, there
@@ -150,13 +150,13 @@ module T::Private::Methods
             # filter out things without actual final methods just to make sure that
             # the below checks (which should be uncommon) go as quickly as possible.
             source_ancestors.select! do |a|
-              @modules_with_final.fetch(a.object_id, nil)
+              @modules_with_final.fetch(a, nil)
             end
           end
           # final-ness means that there should be no more than one index for which
           # the below block returns true.
           defining_ancestor_idx = source_ancestors.index do |a|
-            @modules_with_final.fetch(a.object_id).include?(method_name)
+            @modules_with_final.fetch(a).include?(method_name)
           end
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
         end
@@ -193,11 +193,10 @@ module T::Private::Methods
 
   def self.add_module_with_final_method(mod, method_name, is_singleton_method)
     m = is_singleton_method ? mod.singleton_class : mod
-    mid = m.object_id
-    methods = @modules_with_final[mid]
+    methods = @modules_with_final[m]
     if methods.nil?
       methods = {}
-      @modules_with_final[mid] = methods
+      @modules_with_final[m] = methods
     end
     methods[method_name] = true
     nil
@@ -205,8 +204,8 @@ module T::Private::Methods
 
   def self.note_module_deals_with_final(mod)
     # Side-effectfully initialize the value if it's not already there
-    @modules_with_final[mod.object_id]
-    @modules_with_final[mod.singleton_class.object_id]
+    @modules_with_final[mod]
+    @modules_with_final[mod.singleton_class]
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
@@ -222,7 +221,7 @@ module T::Private::Methods
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
-    if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod.object_id)
+    if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod)
       _check_final_ancestors(mod, mod.ancestors, [method_name], nil)
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
@@ -474,8 +473,8 @@ module T::Private::Methods
   def self._hook_impl(target, singleton_class, source)
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
-    if !@modules_with_final.include?(target.object_id)
-      if !@modules_with_final.include?(source.object_id)
+    if !@modules_with_final.include?(target)
+      if !@modules_with_final.include?(source)
         return
       end
       note_module_deals_with_final(target)
