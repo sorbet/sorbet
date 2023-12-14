@@ -12,12 +12,12 @@ module T::Types
       @inner_values = values
     end
 
-    # Technically we don't need these, but they is a nice api
+    # Technically we don't need this, but it is a nice api
     def keys
       @keys ||= T::Utils.coerce(@inner_keys)
     end
 
-    # Technically we don't need these, but they is a nice api
+    # Technically we don't need this, but it is a nice api
     def values
       @values ||= T::Utils.coerce(@inner_values)
     end
