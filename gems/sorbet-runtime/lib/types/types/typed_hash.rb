@@ -27,9 +27,9 @@ module T::Types
     end
 
     def build_type
-      super
       keys
       values
+      super
     end
 
     # overrides Base
