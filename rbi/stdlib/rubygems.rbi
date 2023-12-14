@@ -7044,6 +7044,10 @@ class Gem::Security::DIGEST_ALGORITHM < OpenSSL::Digest
   def self.hexdigest(data); end
 end
 
+# [`Gem::Security`](https://docs.ruby-lang.org/en/2.7.0/Gem/Security.html)
+# default exception type
+class Gem::Security::Exception < Gem::Exception; end
+
 class Gem::Security::Policy
   include Gem::UserInteraction
 
