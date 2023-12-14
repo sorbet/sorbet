@@ -61,7 +61,7 @@ module T::Types
       end
 
       def freeze
-        type # force lazy initialization before freezing the object
+        build_type # force lazy initialization before freezing the object
         super
       end
 
