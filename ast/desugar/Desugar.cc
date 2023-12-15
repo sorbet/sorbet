@@ -1594,6 +1594,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     if (auto e =
                             dctx.ctx.beginError(method->singleton->loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
+                        e.addErrorNote("When it's imperative to define a singleton method on an object,\n"
+                                       "    use `{}` instead.\n"
+                                       "    The method will NOT be visible to Sorbet.",
+                                       "EXPRESSION.define_singleton_method(:method) { ... }");
                     }
                 }
                 bool isSelf = true;
