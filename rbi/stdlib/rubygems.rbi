@@ -2744,7 +2744,7 @@ class Gem::Version < Object
         Gem::Version, # Will return the same version object
         NilClass # Depracated, and will issue a warning
       )
-    ).returns(T.self_type)
+    ).returns(Gem::Version)
   end
   def self.new(version); end
 end
