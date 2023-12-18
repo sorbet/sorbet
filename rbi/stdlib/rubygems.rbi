@@ -2634,9 +2634,14 @@ class Gem::Version < Object
 
   sig do
     params(
-      version: T.any(String, Gem::Version),
-    )
-    .void
+      version: T.any(
+        String,
+        Integer,
+        Float, # Technically, any `to_s`able object would work.
+        Gem::Version, # Will return the same version object
+        NilClass # Depracated, and will issue a warning
+      )
+    ).void
   end
   def initialize(version); end
 
@@ -2644,17 +2649,21 @@ class Gem::Version < Object
 
   def _split_segments(); end
 
+  sig { returns(String) }
   def _version(); end
 
   # A recommended version for use with a ~> Requirement.
+  sig { returns(String) }
   def approximate_recommendation(); end
 
   # Return a new version object where the next to the last revision number is
   # one greater (e.g., 5.3.1 => 5.4).
   #
   # Pre-release (alpha) parts, e.g, 5.3.1.b.2 => 5.4, are ignored.
+  sig { returns(Gem::Version) }
   def bump(); end
 
+  sig { returns(T::Array[String]) }
   def canonical_segments(); end
 
   def encode_with(coder); end
@@ -2663,27 +2672,34 @@ class Gem::Version < Object
   # eql? to another version if it's specified to the same precision.
   # [`Version`](https://docs.ruby-lang.org/en/2.7.0/Gem/Version.html) "1.0" is
   # not the same as version "1".
+  sig { params(other: T.untyped).returns(T::Boolean) }
   def eql?(other); end
 
   def init_with(coder); end
 
   # Dump only the raw version string, not the complete object. It's a string for
   # backwards (RubyGems 1.3.5 and earlier) compatibility.
+  sig { returns(T::Array[T.untyped]) }
   def marshal_dump(); end
 
   # Load custom marshal format. It's a string for backwards (RubyGems 1.3.5 and
   # earlier) compatibility.
+  sig { params(array: T::Array[T.untyped]).void }
   def marshal_load(array); end
 
   # A version is considered a prerelease if it contains a letter.
+  sig { returns(T::Boolean) }
   def prerelease?(); end
 
   # The release for this version (e.g. 1.2.0.a -> 1.2.0). Non-prerelease
   # versions return themselves.
+  sig { returns(Gem::Version) }
   def release(); end
 
+  sig { returns(T::Array[String]) }
   def segments(); end
 
+  sig { returns(T::Array[String]) }
   def to_yaml_properties(); end
 
   # A string representation of this
@@ -2691,11 +2707,13 @@ class Gem::Version < Object
   #
   # Also aliased as:
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Gem/Version.html#method-i-to_s)
+  sig { returns(String) }
   def version(); end
 
   def yaml_initialize(tag, map); end
 
   # True if the `version` string matches RubyGems' requirements.
+  sig { params(version: T.untyped).returns(T::Boolean) }
   def self.correct?(version); end
 
   # Factory method to create a
@@ -2710,12 +2728,24 @@ class Gem::Version < Object
   # ver2 = Version.create(ver1)       # -> (ver1)
   # ver3 = Version.create(nil)        # -> nil
   # ```
+  sig { params(input: T.any(NilClass, String, Gem::Version)).returns(T.nilable(Gem::Version)) }
   def self.create(input); end
 
   # Constructs a
   # [`Version`](https://docs.ruby-lang.org/en/2.7.0/Gem/Version.html) from the
   # `version` string. A version string is a series of digits or ASCII letters
   # separated by dots.
+  sig do
+    params(
+      version: T.any(
+        String,
+        Integer,
+        Float, # Technically, any `to_s`able object would work.
+        Gem::Version, # Will return the same version object
+        NilClass # Depracated, and will issue a warning
+      )
+    ).returns(Gem::Version)
+  end
   def self.new(version); end
 end
 
