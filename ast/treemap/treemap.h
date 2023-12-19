@@ -18,6 +18,8 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is responsible to handle it
+    ExpressionPtr preTransformExpression(core::MutableContext ctx, ExpressionPtr original);
+
     ExpressionPtr preTransformClassDef(core::MutableContext ctx, ClassDef *original);
     ExpressionPtr postTransformClassDef(core::MutableContext ctx, ExpressionPtr original);
 

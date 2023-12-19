@@ -4,6 +4,7 @@
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/ExtractVariable.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
@@ -14,6 +15,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
+
 const UnorderedSet<string> OPERATORS = {"+",  "−",  "*",   "/",   "%",   "**",    "==",     "!=",  ">",
                                         "<",  ">=", "<=",  "<=>", "===", ".eql?", "equal?", "=",   "+=",
                                         "-=", "*=", "/=",  "%=",  "**=", "&",     "|",      "^",   "~",
@@ -260,6 +262,23 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             action->kind = CodeActionKind::RefactorRewrite;
             action->edit = move(workspaceEdit);
             result.emplace_back(move(action));
+        } else {
+            if (loc.beginPos() != loc.endPos()) {
+                auto documentEdits = getExtractVariableEdits(typechecker, config, std::move(params->range), loc);
+                if (!documentEdits.empty()) {
+                    auto action = make_unique<CodeAction>("Extract Variable");
+                    action->kind = CodeActionKind::RefactorExtract;
+
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    workspaceEdit->documentChanges = move(documentEdits);
+
+                    action->edit = move(workspaceEdit);
+                    result.emplace_back(move(action));
+
+                    // TODO(neil): trigger a rename for newVariable
+                    // TODO(neil): replace other occurences of this expression with newVariable
+                }
+            }
         }
     }
 

@@ -40,6 +40,8 @@ struct LocOffsets {
         return LocOffsets{endPos(), endPos()};
     }
 
+    bool contains(const LocOffsets &other) const;
+
     std::string showRaw(const Context ctx) const;
     std::string showRaw(const MutableContext ctx) const;
     std::string showRaw(const GlobalState &gs, const FileRef file) const;
