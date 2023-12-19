@@ -10,8 +10,7 @@ class AnImportantClass
 end
 
 An # error: Unable to resolve constant
-# ^ completion: (nothing)
+# ^ completion: AnImportantClass
 
 AnImportantClass.n
 #                 ^ completion: (nothing)
-
