@@ -23,7 +23,7 @@ module T::Types
     end
 
     def type
-      @type ||= T::Utils.coerce([@inner_keys, @inner_values])
+      @type ||= T::Utils.coerce([keys, values])
     end
 
     def build_type
