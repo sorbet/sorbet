@@ -19,9 +19,9 @@ public:
     MangledName() = default;
 
     // ["Foo", "Bar"] => :Foo_Bar_Package
-    static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts);
+    static MangledName mangledNameFromParts(core::GlobalState &gs, const std::vector<std::string_view> &parts);
     // [:Foo, :Bar] => :Foo_Bar_Package
-    static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts);
+    static MangledName mangledNameFromParts(core::GlobalState &gs, const std::vector<core::NameRef> &parts);
     // "Foo::Bar" -> :Foo_Bar_Package
     static MangledName mangledNameFromHuman(const core::GlobalState &gs, std::string_view human);
 
