@@ -1,0 +1,20 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+
+begin
+  newVariable = 1
+  1 + newVariable
+#     ^ apply-code-action: [A] Extract Variable
+rescue Errno::ENOENT
+  2 + 2
+#     ^ apply-code-action: [B] Extract Variable
+rescue ArgumentError
+  3 + 3
+#     ^ apply-code-action: [C] Extract Variable
+else
+  4 + 4
+#     ^ apply-code-action: [D] Extract Variable
+ensure
+  5 + 5
+#     ^ apply-code-action: [E] Extract Variable
+end
