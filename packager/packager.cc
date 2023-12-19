@@ -178,29 +178,29 @@ public:
         return visibleToTests_;
     }
 
-    // The possible path prefixes associated with files in the package, including path separator at end.
-    vector<std::string> packagePathPrefixes;
     PackageName name;
 
     // loc for the package definition. Full loc, from class to end keyword. Used for autocorrects.
     core::Loc loc;
     // loc for the package definition. Single line (just the class def). Used for error messages.
     core::Loc declLoc_;
+    // The possible path prefixes associated with files in the package, including path separator at end.
+    vector<std::string> packagePathPrefixes = {};
     // The names of each package imported by this package.
-    vector<Import> importedPackageNames;
+    vector<Import> importedPackageNames = {};
     // List of exported items that form the body of this package's public API.
     // These are copied into every package that imports this package.
-    vector<Export> exports_;
+    vector<Export> exports_ = {};
 
     // Whether this package should just export everything
-    bool exportAll_;
+    bool exportAll_ = false;
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
-    vector<PackageName> visibleTo_;
+    vector<PackageName> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
-    bool visibleToTests_;
+    bool visibleToTests_ = false;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -223,7 +223,7 @@ public:
         return this->mangledName() == pkg.mangledName();
     }
 
-    PackageInfoImpl() = default;
+    PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}
     explicit PackageInfoImpl(const PackageInfoImpl &) = default;
     PackageInfoImpl &operator=(const PackageInfoImpl &) = delete;
 
@@ -431,14 +431,27 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     return pName;
 }
 
+// TODO(jez) Rename this to lookupMangledName, and make it take a const GlobalState
 void populateMangledName(core::GlobalState &gs, PackageName &pName) {
-    // Foo::Bar => Foo_Bar_Package
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
 bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
+}
+
+void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
+    // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
+    // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
+    if (!ctx.file.data(ctx).source().empty()) {
+        if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidPackageDefinition)) {
+            e.setHeader("`{}` file must contain a package definition", "__package.rb");
+            e.addErrorNote("Package definitions are class definitions like `{}`.\n"
+                           "    For more information, see http://go/package-layout",
+                           "class Foo::Bar < PackageSpec");
+        }
+    }
 }
 
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
@@ -450,6 +463,20 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
     lastConstLit->scope =
         ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
     return scope;
+}
+
+bool startsWithPackageSpecRegistry(ast::UnresolvedConstantLit *cnst) {
+    while (cnst != nullptr) {
+        if (auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
+            return scope->symbol == core::Symbols::PackageSpecRegistry();
+        } else if (auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
+            return startsWithPackageSpecRegistry(scope);
+        } else {
+            return false;
+        }
+    }
+
+    return false;
 }
 
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
@@ -913,9 +940,12 @@ private:
     }
 };
 
-struct PackageInfoFinder {
-    unique_ptr<PackageInfoImpl> info = nullptr;
+struct PackageSpecBodyWalk {
+    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
+
+    PackageInfoImpl &info;
     vector<Export> exported;
+    bool foundFirstPackageSpec = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -946,11 +976,6 @@ struct PackageInfoFinder {
             }
         }
 
-        if (info == nullptr) {
-            // We haven't yet entered the package class.
-            return;
-        }
-
         if (send.fun == core::Names::export_() && send.numPosArgs() == 1) {
             // null indicates an invalid export.
             if (auto target = verifyConstant(ctx, core::Names::export_(), send.getPosArg(0))) {
@@ -969,7 +994,7 @@ struct PackageInfoFinder {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
+                info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -982,7 +1007,7 @@ struct PackageInfoFinder {
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
-            info->exportAll_ = true;
+            info.exportAll_ = true;
         }
 
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
@@ -995,14 +1020,14 @@ struct PackageInfoFinder {
                     }
                     return;
                 }
-                info->visibleToTests_ = true;
+                info.visibleToTests_ = true;
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
 
-                info->visibleTo_.emplace_back(getPackageName(ctx, target));
+                info.visibleTo_.emplace_back(getPackageName(ctx, target));
             }
         }
     }
@@ -1014,77 +1039,38 @@ struct PackageInfoFinder {
             return;
         }
 
-        if (classDef.ancestors.size() != 1 || !isReferenceToPackageSpec(ctx, classDef.ancestors[0]) ||
-            !ast::isa_tree<ast::UnresolvedConstantLit>(classDef.name)) {
-            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::InvalidPackageDefinition)) {
-                e.setHeader("Expected package definition of form `Foo::Bar < PackageSpec`");
-            }
-
+        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
+        if (nameTree == nullptr) {
+            // Already reported an error
             return;
         }
 
-        if (info != nullptr) {
+        if (startsWithPackageSpecRegistry(nameTree)) {
+            this->foundFirstPackageSpec = true;
+        } else if (this->foundFirstPackageSpec) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
-                e.addErrorLine(info->loc, "Previous package declaration found here");
+                e.addErrorLine(info.loc, "Previous package declaration found here");
             }
-
-            return;
+        } else {
+            mustContainPackageDef(ctx, tree.loc());
         }
-
-        auto nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(classDef.name);
-        if (!validatePackageName(ctx, nameTree)) {
-            return;
-        }
-
-        info = make_unique<PackageInfoImpl>();
-
-        info->name = getPackageName(ctx, nameTree);
-        info->loc = ctx.locAt(classDef.loc);
-        info->declLoc_ = ctx.locAt(classDef.declLoc);
-
-        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
-        // This removes the PackageSpec's themselves from the top-level namespace
-        classDef.name = prependName(move(classDef.name), core::Names::Constants::PackageSpecRegistry());
-    }
-
-    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        if (classDef.symbol == core::Symbols::root()) {
-            // Ignore top-level <root>
-            return;
-        }
-
-        return;
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
     void finalize(core::Context ctx) {
-        if (info == nullptr) {
-            // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
-            // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
-            // Additional note: immutable incremental packager mode now depends on being allowed to set `info = nullptr`
-            // for the sake of doing best-effort packager runs.
-            if (!ctx.file.data(ctx).source().empty()) {
-                if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
-                    e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
-                }
-            }
-            return;
-        }
-
         if (exported.empty()) {
             return;
         }
 
-        if (info->exportAll()) {
+        if (info.exportAll()) {
             // we're only here because exports exist, which means if
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info->name.toString(ctx), "export_all!");
+                                info.name.toString(ctx), "export_all!");
                 }
             }
         }
@@ -1119,8 +1105,8 @@ struct PackageInfoFinder {
             exported.erase(exported.begin() + *indIt);
         }
 
-        ENFORCE(info->exports_.empty());
-        std::swap(exported, info->exports_);
+        ENFORCE(info.exports_.empty());
+        std::swap(exported, info.exports_);
     }
 
     bool isSpecMethod(const sorbet::ast::Send &send) const {
@@ -1176,7 +1162,7 @@ struct PackageInfoFinder {
     }
 };
 
-unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package) {
+unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
     ENFORCE(package.file.exists());
     ENFORCE(package.file.data(gs).isPackage());
     // Assumption: Root of AST is <root> class. (This won't be true
@@ -1184,94 +1170,162 @@ unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast:
     // elsewhere.)
     ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
     ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
-    PackageInfoFinder finder;
+
     core::Context ctx(gs, core::Symbols::root(), package.file);
-    ast::TreeWalk::apply(ctx, finder, package.tree);
-    finder.finalize(ctx);
-    return move(finder.info);
+
+    auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
+
+    unique_ptr<PackageInfoImpl> info;
+    bool reportedError = false;
+    for (auto &rootStmt : rootClass.rhs) {
+        if (info != nullptr) {
+            // No error here; let the error be reported in the tree walk later as a bad node type.
+            continue;
+        }
+
+        auto *packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
+        if (packageSpecClass == nullptr) {
+            // No error here; let this be reported in the tree walk later as a bad node type,
+            // or at the end of this function if no PackageSpec is found.
+            continue;
+        }
+
+        if (packageSpecClass->ancestors.size() != 1 ||
+            !ast::isa_tree<ast::UnresolvedConstantLit>(packageSpecClass->name)) {
+            mustContainPackageDef(ctx, packageSpecClass->declLoc);
+            reportedError = true;
+            continue;
+        }
+
+        if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
+            mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
+            reportedError = true;
+            continue;
+        }
+
+        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
+        if (!validatePackageName(ctx, nameTree)) {
+            reportedError = true;
+            continue;
+        }
+
+        // ---- Mutates the tree ----
+        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // This removes the PackageSpec's themselves from the top-level namespace
+        //
+        // We can't do this rewrite in rewriter, because this rewrite should only happen if
+        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
+        // which would double the size of Sorbet's disk cache.
+        //
+        // Other than being able to say "we don't mutate the trees in packager" there's not much
+        // value in going that far (even namer mutates the trees; the packager fills a similar role).
+        packageSpecClass->name =
+            prependName(move(packageSpecClass->name), core::Names::Constants::PackageSpecRegistry());
+
+        info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
+                                            ctx.locAt(packageSpecClass->declLoc));
+    }
+
+    // Only report an error if we didn't already
+    // (the one we reported will have been more descriptive than this one)
+    if (info == nullptr && !reportedError) {
+        auto errLoc = rootClass.rhs.empty() ? core::LocOffsets{0, 0} : rootClass.rhs[0].loc();
+        mustContainPackageDef(ctx, errLoc);
+    }
+
+    return info;
 }
 
-unique_ptr<PackageInfoImpl> runPackageInfoFinder(core::GlobalState &gs, ast::ParsedFile &package) {
-    auto info = rewritePackageSpec(gs, package);
-    if (info) {
-        populateMangledName(gs, info->name);
-        for (auto &importedPackageName : info->importedPackageNames) {
-            populateMangledName(gs, importedPackageName.name);
+void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
+    PackageSpecBodyWalk bodyWalk(info);
+    core::Context ctx(gs, core::Symbols::root(), package.file);
+    ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+    bodyWalk.finalize(ctx);
+}
 
-            if (importedPackageName.name.mangledName == info->name.mangledName) {
-                if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
-                                           core::errors::Packager::NoSelfImport)) {
-                    string import_;
-                    switch (importedPackageName.type) {
-                        case ImportType::Normal:
-                            import_ = "import";
-                            break;
-                        case ImportType::Test:
-                            import_ = "test_import";
-                            break;
-                    }
-                    e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
+unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
+    auto info = definePackage(gs, package);
+    if (info == nullptr) {
+        return info;
+    }
+    populateMangledName(gs, info->name);
+
+    rewritePackageSpec(gs, package, *info);
+    for (auto &importedPackageName : info->importedPackageNames) {
+        populateMangledName(gs, importedPackageName.name);
+
+        if (importedPackageName.name.mangledName == info->name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, importedPackageName.name.loc),
+                                       core::errors::Packager::NoSelfImport)) {
+                string import_;
+                switch (importedPackageName.type) {
+                    case ImportType::Normal:
+                        import_ = "import";
+                        break;
+                    case ImportType::Test:
+                        import_ = "test_import";
+                        break;
                 }
+                e.setHeader("Package `{}` cannot {} itself", info->name.toString(gs), import_);
             }
-        }
-
-        for (auto &visibleTo : info->visibleTo_) {
-            populateMangledName(gs, visibleTo);
-
-            if (visibleTo.mangledName == info->name.mangledName) {
-                if (auto e =
-                        gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
-                    e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
-                }
-            }
-        }
-
-        auto extraPackageFilesDirectoryUnderscorePrefixes =
-            gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-        auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
-
-        const auto numPrefixes =
-            extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
-        info->packagePathPrefixes.reserve(numPrefixes);
-        auto packageFilePath = package.file.data(gs).path();
-        ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
-        info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-        const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
-        const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
-
-        for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-            // Project_FooBar -- munge with underscore
-            string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
-            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
-        }
-
-        for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
-            // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-            std::stringstream ss;
-            ss << prefix;
-            for (int i = 0; i < dirNameFromShortName.length(); i++) {
-                if (dirNameFromShortName[i] == '_') {
-                    ss << '/';
-                } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
-                    // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
-                    // which tend to be all lower case
-                    char upper = std::toupper(dirNameFromShortName[i]);
-                    ss << std::move(upper);
-                } else {
-                    if (isupper(dirNameFromShortName[i])) {
-                        ss << '_'; // snake-case munging
-                    }
-
-                    char lower = std::tolower(dirNameFromShortName[i]);
-                    ss << std::move(lower);
-                }
-            }
-            ss << '/';
-
-            std::string additionalDirPath(ss.str());
-            info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
         }
     }
+
+    for (auto &visibleTo : info->visibleTo_) {
+        populateMangledName(gs, visibleTo);
+
+        if (visibleTo.mangledName == info->name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
+                e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
+            }
+        }
+    }
+
+    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
+
+    const auto numPrefixes =
+        extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    info->packagePathPrefixes.reserve(numPrefixes);
+    auto packageFilePath = package.file.data(gs).path();
+    ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
+    info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
+    const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
+    const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
+
+    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
+        // Project_FooBar -- munge with underscore
+        string additionalDirPath = absl::StrCat(prefix, dirNameFromShortName, "/");
+        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+        // project/Foo_bar -- convert camel-case to snake-case and munge with slash
+        std::stringstream ss;
+        ss << prefix;
+        for (int i = 0; i < dirNameFromShortName.length(); i++) {
+            if (dirNameFromShortName[i] == '_') {
+                ss << '/';
+            } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
+                // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
+                // which tend to be all lower case
+                char upper = std::toupper(dirNameFromShortName[i]);
+                ss << std::move(upper);
+            } else {
+                if (isupper(dirNameFromShortName[i])) {
+                    ss << '_'; // snake-case munging
+                }
+
+                char lower = std::tolower(dirNameFromShortName[i]);
+                ss << std::move(lower);
+            }
+        }
+        ss << '/';
+
+        std::string additionalDirPath(ss.str());
+        info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
     return info;
 }
 
@@ -1379,7 +1433,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
             }
 
             core::MutableContext ctx(gs, core::Symbols::root(), file.file);
-            auto pkg = runPackageInfoFinder(ctx, file);
+            auto pkg = createAndPopulatePackageInfo(ctx, file);
             if (pkg == nullptr) {
                 // There was an error creating a PackageInfoImpl for this file, and getPackageInfo has already
                 // surfaced that error to the user. Nothing to do here.
@@ -1499,7 +1553,10 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
         if (file.file.data(gs).isPackage()) {
             // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
             // report some syntactic packager errors.
-            auto _info = rewritePackageSpec(gs, file);
+            auto info = definePackage(gs, file);
+            if (info != nullptr) {
+                rewritePackageSpec(gs, file, *info);
+            }
             validatePackage(ctx);
         } else {
             validatePackagedFile(ctx, file.tree);

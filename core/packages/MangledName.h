@@ -18,9 +18,11 @@ public:
 
     MangledName() = default;
 
+    // ["Foo", "Bar"] => :Foo_Bar_Package
     static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<std::string_view> &parts);
+    // [:Foo, :Bar] => :Foo_Bar_Package
     static MangledName mangledNameFromParts(core::GlobalState &gs, std::vector<core::NameRef> &parts);
-    // Opus::Foo::Bar -> Opus_Foo_Bar__Package
+    // "Foo::Bar" -> :Foo_Bar_Package
     static MangledName mangledNameFromHuman(const core::GlobalState &gs, std::string_view human);
 
     bool operator==(const MangledName &rhs) const {
