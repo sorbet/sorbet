@@ -20,6 +20,10 @@ module T::Types
       @name = name
     end
 
+    def build_type
+      nil
+    end
+
     def self.make(name)
       cached = Private.cached_entry(name)
       return cached if cached

@@ -1105,7 +1105,29 @@ module Opus::Types::Test
       end
     end
 
+    describe 'NotTyped' do
+      it 'builds properly' do
+        type = T::Private::Types::NotTyped.new
+        type.build_type
+        assert_equal('<NOT-TYPED>', type.name)
+      end
+    end
+
+    describe 'StringHolder' do
+      it 'builds properly' do
+        type = T::Private::Types::StringHolder.new("String")
+        type.build_type
+        assert_equal('String', type.name)
+      end
+    end
+
     describe 'TypeAlias' do
+      it 'builds properly' do
+        type = T.type_alias { String }
+        type.build_type
+        assert_equal('String', type.name)
+      end
+
       it 'delegates name' do
         type = T.type_alias {T.any(Integer, String)}
         assert_equal('T.any(Integer, String)', type.name)
@@ -1690,6 +1712,12 @@ module Opus::Types::Test
       end
 
       describe 'type variables' do
+        it 'builds properly' do
+          type = T::Types::TypeParameter.new(:FOO)
+          type.build_type
+          assert_equal('T.type_parameter(:FOO)', type.name)
+        end
+
         it 'type members are subtypes of everything' do
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)
           assert_subtype(T::Types::TypeMember.new(:in), String)

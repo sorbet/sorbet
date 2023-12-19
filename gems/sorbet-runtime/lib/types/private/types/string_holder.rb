@@ -9,6 +9,10 @@ class T::Private::Types::StringHolder < T::Types::Base
     @string = string
   end
 
+  def build_type
+    nil
+  end
+
   # overrides Base
   def name
     string
