@@ -1701,15 +1701,21 @@ public:
                 return aLoc.endLoc > bLoc.endLoc;
             });
 
+            core::Loc newLoc;
             if (amountOfUnknownns >= 1) {
                 for (auto &loc : locs) {
                     if (!loc.first) {
-                        sym.data(ctx)->addLoc(ctx, ctx.locAt(loc.second));
+                        newLoc = ctx.locAt(loc.second);
                         break;
                     }
                 }
             } else {
-                sym.data(ctx)->addLoc(ctx, ctx.locAt(locs[0].second));
+                newLoc = ctx.locAt(locs[0].second);
+            }
+            sym.data(ctx)->addLoc(ctx, newLoc);
+            auto maybeSingletonClass = sym.data(ctx)->lookupSingletonClass(ctx);
+            if (maybeSingletonClass.exists()) {
+                maybeSingletonClass.data(ctx)->addLoc(ctx, newLoc);
             }
         }
         return state;
