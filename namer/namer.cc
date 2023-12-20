@@ -711,6 +711,14 @@ public:
         // See getOwnerSymbol for how both of these work.
         vector<core::ClassOrModuleRef> definedClasses;
 
+        //{ClassOrModuleRef -> [(isUnknown, LocOffsets)]}
+        UnorderedMap<core::ClassOrModuleRef, vector<pair<bool, core::LocOffsets>>> foundLocs;
+        // TODO(iz): to fix updates for locations store a map symbol -> possible updated location
+        // after the namer finishes we can go through those locations and pick one per symbol
+        // 1) if there is one location which is !isUnknown -> pick it
+        // 2) if there is multipole locations which is !isUnknown -> pick it the last one
+        // 3) no !isUnknown locations at all -> pick the last one
+
         State() = default;
         State(const State &) = delete;
         State &operator=(const State &) = delete;
@@ -1169,7 +1177,7 @@ private:
         return symbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, State &state, const core::FoundClass &klass,
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
@@ -1200,12 +1208,14 @@ private:
             // If the unknown class loc is from the same file, it's still possible that it is from a real
             // definition in that file. In which case, we check the declared bit on the class.
             // We only set the loc if the class is not declared.
-            bool updateLoc = !isUnknown || (!symbol.data(ctx)->isDeclared() &&
-                                            absl::c_any_of(symbol.data(ctx)->locs(),
-                                                           [&](const auto &loc) { return loc.file() == ctx.file; }));
+            bool hasLocInThisFile =
+                absl::c_any_of(symbol.data(ctx)->locs(), [&](const auto &loc) { return loc.file() == ctx.file; });
+            bool updateLoc = !isUnknown || (!symbol.data(ctx)->isDeclared() && hasLocInThisFile);
+
             if (updateLoc) {
-                symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                // symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
             }
+            state.foundLocs[symbol].emplace_back(isUnknown, klass.declLoc);
 
             if (!isUnknown) {
                 if (klass.definesBehavior) {
@@ -1678,6 +1688,30 @@ public:
                                                           klass, willDeleteOldDefs, classBehaviorLocs));
         }
 
+        for (auto &[sym, locs] : state.foundLocs) {
+            auto amountOfUnknownns =
+                absl::c_count_if(locs, [](const auto &isUnknownAndLocs) { return !isUnknownAndLocs.first; });
+
+            fast_sort(locs, [](const auto &a, const auto &b) {
+                auto [_, aLoc] = a;
+                auto [__, bLoc] = b;
+                if (aLoc.beginLoc != bLoc.beginLoc) {
+                    return aLoc.beginLoc > bLoc.beginLoc;
+                }
+                return aLoc.endLoc > bLoc.endLoc;
+            });
+
+            if (amountOfUnknownns >= 1) {
+                for (auto &loc : locs) {
+                    if (!loc.first) {
+                        sym.data(ctx)->addLoc(ctx, ctx.locAt(loc.second));
+                        break;
+                    }
+                }
+            } else {
+                sym.data(ctx)->addLoc(ctx, ctx.locAt(locs[0].second));
+            }
+        }
         return state;
     }
 
