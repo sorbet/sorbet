@@ -1,5 +1,5 @@
 diff --git gc.c gc.c
-index 6f4ae3a397..d4666b1406 100644
+index 6f4ae3a397..567cc31240 100644
 --- gc.c
 +++ gc.c
 @@ -6709,6 +6709,119 @@ gc_aging(rb_objspace_t *objspace, VALUE obj)
@@ -37,7 +37,7 @@ index 6f4ae3a397..d4666b1406 100644
 +
 +    // Skip the entry that has T_NONEs, it probably caused the error condition.
 +    // We care about surrounding context.
-+    if (UNLIKELY(RB_TYPE_P(k_obj, T_NONE) || RB_TYPE_P(k_obj, T_NONE))) {
++    if (UNLIKELY(RB_TYPE_P(k_obj, T_NONE) || RB_TYPE_P(v_obj, T_NONE))) {
 +        return ST_CONTINUE;
 +    }
 +
@@ -62,7 +62,7 @@ index 6f4ae3a397..d4666b1406 100644
 +            if (!NIL_P(class_path)) {
 +                APPENDF((BUFF_ARGS, "v:T_OBJECT(%s),", RSTRING_PTR(class_path)));
 +            } else {
-+                APPENDF((BUFF_ARGS, "k:T_OBJECT,"));
++                APPENDF((BUFF_ARGS, "v:T_OBJECT,"));
 +            }
 +        } else {
 +            APPENDF((BUFF_ARGS, "v:%s; ", obj_type_name(v_obj)));
