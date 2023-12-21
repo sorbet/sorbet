@@ -1,9 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
 
-def a = 1 + 123
-#           ^^^ apply-code-action: [A] Extract Variable
-
 def b; 1 + 123; end
 #          ^^^ apply-code-action: [B] Extract Variable
 
