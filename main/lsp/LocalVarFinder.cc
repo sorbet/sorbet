@@ -6,10 +6,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void LocalVarFinder::preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+void LocalVarFinder::preTransformBlock(core::Context ctx, const ast::Block &block) {
     ENFORCE(!methodStack.empty());
-
-    auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
     auto loc = ctx.locAt(block.loc);
 
     if (methodStack.back() != this->targetMethod) {
@@ -26,10 +24,8 @@ void LocalVarFinder::preTransformBlock(core::Context ctx, ast::ExpressionPtr &tr
     }
 }
 
-void LocalVarFinder::postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+void LocalVarFinder::postTransformAssign(core::Context ctx, const ast::Assign &assign) {
     ENFORCE(!methodStack.empty());
-
-    auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
 
     auto *local = ast::cast_tree<ast::Local>(assign.lhs);
     if (local == nullptr) {
@@ -41,9 +37,7 @@ void LocalVarFinder::postTransformAssign(core::Context ctx, ast::ExpressionPtr &
     }
 }
 
-void LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-
+void LocalVarFinder::preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
 
@@ -59,12 +53,11 @@ void LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr
     this->methodStack.emplace_back(currentMethod);
 }
 
-void LocalVarFinder::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void LocalVarFinder::postTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
     this->methodStack.pop_back();
 }
 
-void LocalVarFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+void LocalVarFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
@@ -74,7 +67,7 @@ void LocalVarFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr 
     this->methodStack.emplace_back(currentMethod);
 }
 
-void LocalVarFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void LocalVarFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
     this->methodStack.pop_back();
 }
 

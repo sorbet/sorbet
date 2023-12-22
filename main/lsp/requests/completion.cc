@@ -637,7 +637,7 @@ vector<core::NameRef> localNamesForMethod(LSPTypecheckerDelegate &typechecker, c
     LocalVarFinder localVarFinder(method, queryLoc);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        ast::TreeWalk::apply(ctx, localVarFinder, t.tree);
+        ast::ConstTreeWalk::apply(ctx, localVarFinder, t.tree);
     }
 
     auto result = localVarFinder.result();
