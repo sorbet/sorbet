@@ -663,7 +663,7 @@ class Set < Object
   # ```
   sig do
     params(
-        set: T::Set[Elem],
+        set: T::Enumerable[Elem],
     )
     .returns(T::Boolean)
   end
