@@ -11,14 +11,12 @@ FieldFinder::FieldFinder(core::ClassOrModuleRef target, ast::UnresolvedIdent::Ki
     ENFORCE(queryKind != ast::UnresolvedIdent::Kind::Local);
 }
 
-void FieldFinder::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &tree) {
+void FieldFinder::postTransformUnresolvedIdent(core::Context ctx, const ast::UnresolvedIdent &ident) {
     ENFORCE(!this->classStack.empty());
 
     if (this->classStack.back() != this->targetClass) {
         return;
     }
-
-    auto &ident = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
 
     if (ident.kind != this->queryKind) {
         return;
@@ -31,16 +29,14 @@ void FieldFinder::postTransformUnresolvedIdent(core::Context ctx, ast::Expressio
     this->result_.emplace_back(ident.name);
 }
 
-void FieldFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-
+void FieldFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
     this->classStack.push_back(classDef.symbol);
 }
 
-void FieldFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void FieldFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     this->classStack.pop_back();
 }
 

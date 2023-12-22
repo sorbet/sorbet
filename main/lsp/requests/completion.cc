@@ -598,7 +598,7 @@ vector<core::NameRef> allSimilarFieldsForClass(LSPTypecheckerDelegate &typecheck
         FieldFinder fieldFinder(klass, kind);
         for (auto &t : resolved) {
             auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-            ast::TreeWalk::apply(ctx, fieldFinder, t.tree);
+            ast::ConstTreeWalk::apply(ctx, fieldFinder, t.tree);
         }
         auto fields = fieldFinder.result();
 
