@@ -826,11 +826,11 @@ public:
         ENFORCE(file.exists());
     };
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
+        checkSym(ctx, tree.symbol);
     }
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
+        checkSym(ctx, tree.symbol);
     }
 };
 
