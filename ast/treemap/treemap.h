@@ -226,9 +226,9 @@ private:
     if constexpr (Funcs::template HAS_MEMBER_preTransform##member<FUNC>()) {                                       \
         if constexpr (Kind == TreeMapKind::Map) {                                                                  \
             v = Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));           \
-        } else if (Kind == TreeMapKind::Walk) {                                                                    \
+        } else if constexpr (Kind == TreeMapKind::Walk) {                                                          \
             Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, Funcs::pass(v));               \
-        } else if (Kind == TreeMapKind::ConstWalk) {                                                               \
+        } else if constexpr (Kind == TreeMapKind::ConstWalk) {                                                     \
             Funcs::template CALL_MEMBER_preTransform##member<FUNC>::call(func, ctx, cast_tree_nonnull<member>(v)); \
         }                                                                                                          \
     }
