@@ -607,7 +607,7 @@ void tryApplyLocalVarSaver(const core::GlobalState &gs, vector<ast::ParsedFile> 
             signature = sig_finder::SigFinder::findSignature(ctx, t.tree, queryLoc);
         }
         LocalVarSaver localVarSaver(ctx.locAt(t.tree.loc()), move(signature));
-        ast::TreeWalk::apply(ctx, localVarSaver, t.tree);
+        ast::ConstTreeWalk::apply(ctx, localVarSaver, t.tree);
     }
 }
 

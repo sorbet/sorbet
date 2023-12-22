@@ -21,8 +21,7 @@ core::MethodRef enclosingMethod(core::Context ctx) {
 }
 } // namespace
 
-void LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
+void LocalVarSaver::postTransformBlock(core::Context ctx, const ast::Block &block) {
     auto method = enclosingMethod(ctx);
 
     for (auto &arg : block.args) {
@@ -38,8 +37,7 @@ void LocalVarSaver::postTransformBlock(core::Context ctx, ast::ExpressionPtr &tr
     }
 }
 
-void LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
+void LocalVarSaver::postTransformLocal(core::Context ctx, const ast::Local &local) {
     auto method = enclosingMethod(ctx);
 
     bool lspQueryMatch = ctx.state.lspQuery.matchesVar(method, local.localVariable);
@@ -53,13 +51,12 @@ void LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr &tr
     }
 }
 
-void LocalVarSaver::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    this->enclosingMethodDefLoc.emplace_back(ctx.locAt(tree.loc()));
+void LocalVarSaver::preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
+    this->enclosingMethodDefLoc.emplace_back(ctx.locAt(methodDef.loc));
 }
 
-void LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void LocalVarSaver::postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     this->enclosingMethodDefLoc.pop_back();
-    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     // Check args.
     for (auto &arg : methodDef.args) {

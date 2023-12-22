@@ -16,10 +16,10 @@ public:
     LocalVarSaver(core::Loc rootLoc, std::optional<resolver::ParsedSig> &&signature)
         : enclosingMethodDefLoc({rootLoc}), signature(move(signature)) {}
 
-    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &local);
-    void postTransformLocal(core::Context ctx, ast::ExpressionPtr &local);
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
+    void postTransformBlock(core::Context ctx, const ast::Block &local);
+    void postTransformLocal(core::Context ctx, const ast::Local &local);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef);
+    void postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef);
 };
 }; // namespace sorbet::realmain::lsp
 
