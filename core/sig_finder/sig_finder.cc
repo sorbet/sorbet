@@ -29,8 +29,8 @@ core::SymbolRef getEffectiveOwner(core::Context ctx) {
 
 } // namespace
 
-void SigFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto loc = core::Loc(ctx.file, tree.loc());
+void SigFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
+    auto loc = ctx.locAt(tree.loc);
 
     if (!this->narrowestClassDefRange.exists()) {
         // No narrowestClassDefRange yet, so take the loc of the first ClassDef we see
@@ -51,15 +51,14 @@ void SigFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree
     this->scopeContainsQueryLoc.emplace_back(loc.contains(this->queryLoc));
 }
 
-void SigFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void SigFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
     ENFORCE(!this->scopeContainsQueryLoc.empty());
     this->scopeContainsQueryLoc.pop_back();
 }
 
-void SigFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void SigFinder::preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
     if (this->result_.has_value()) {
-        if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
-            tree.loc().endPos() <= queryLoc.beginPos()) {
+        if (this->result_->origSend->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
@@ -67,10 +66,9 @@ void SigFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tre
     }
 }
 
-void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, ast::ExpressionPtr &tree) {
+void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, const ast::RuntimeMethodDefinition &tree) {
     if (this->result_.has_value()) {
-        if (this->result_->origSend->loc.endPos() <= tree.loc().beginPos() &&
-            tree.loc().endPos() <= queryLoc.beginPos()) {
+        if (this->result_->origSend->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
             // There is a method definition between the current result sig and the queryLoc,
             // so the sig we found is not for the right method.
             this->result_ = nullopt;
@@ -78,9 +76,7 @@ void SigFinder::postTransformRuntimeMethodDefinition(core::Context ctx, ast::Exp
     }
 }
 
-void SigFinder::preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-
+void SigFinder::preTransformSend(core::Context ctx, const ast::Send &send) {
     if (!resolver::TypeSyntax::isSig(ctx, send)) {
         return;
     }
@@ -93,7 +89,7 @@ void SigFinder::preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto currentLoc = ctx.locAt(tree.loc());
+    auto currentLoc = ctx.locAt(send.loc);
     if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
         return;
@@ -131,10 +127,10 @@ void SigFinder::preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
     }
 }
 
-optional<resolver::ParsedSig> SigFinder::findSignature(core::Context ctx, ast::ExpressionPtr &tree,
+optional<resolver::ParsedSig> SigFinder::findSignature(core::Context ctx, const ast::ExpressionPtr &tree,
                                                        core::Loc queryLoc) {
     SigFinder sigFinder(queryLoc);
-    ast::TreeWalk::apply(ctx, sigFinder, tree);
+    ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
     return move(sigFinder.result_);
 }
 
