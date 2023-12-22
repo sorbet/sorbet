@@ -719,8 +719,7 @@ public:
         ENFORCE(pkg.exists());
     }
 
-    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
             return;
@@ -752,8 +751,7 @@ public:
         }
     }
 
-    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
             ENFORCE(rootConsts == 0);
@@ -777,12 +775,11 @@ public:
         popConstantLit(constantLit);
     }
 
-    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
+    void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
         }
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
 
         if (lhs != nullptr && rootConsts == 0) {
@@ -800,36 +797,35 @@ public:
         }
     }
 
-    void postTransformAssign(core::Context ctx, const ast::ExpressionPtr &original) {
+    void postTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &def) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
         }
-        auto &def = ast::cast_tree_nonnull<ast::MethodDef>(original);
         checkBehaviorLoc(ctx, def.declLoc);
     }
 
-    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &original) {
+    void postTransformMethodDef(core::Context ctx, const ast::MethodDef &def) {
         if (errorDepth > 0) {
             errorDepth--;
         }
     }
 
-    void preTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
+    void preTransformSend(core::Context ctx, const ast::Send &send) {
         if (errorDepth > 0) {
             errorDepth++;
             return;
         }
-        checkBehaviorLoc(ctx, original.loc());
+        checkBehaviorLoc(ctx, send.loc);
     }
 
-    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &original) {
+    void postTransformSend(core::Context ctx, const ast::Send &send) {
         if (errorDepth > 0) {
             errorDepth--;
         }
