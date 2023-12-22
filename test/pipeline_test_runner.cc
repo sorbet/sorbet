@@ -33,6 +33,7 @@
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/version.h"
 #include "main/minimize/minimize.h"
+#include "main/pipeline/DefinitionLinesDenylistEnforcer.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
@@ -747,6 +748,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     auto symbolsBefore = gs->symbolsUsedTotal();
 
     vector<ast::ParsedFile> newTrees;
+    UnorderedMap<core::FileRef, int> prohibitedLinesMap;
     for (auto &f : trees) {
         if (f.file.data(*gs).strictLevel == core::StrictLevel::Ignore) {
             newTrees.emplace_back(move(f));
@@ -755,6 +757,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         const int prohibitedLines = f.file.data(*gs).source().size();
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.file.data(*gs).source());
+        prohibitedLinesMap[f.file] = prohibitedLines;
         auto newFile =
             make_shared<core::File>(string(f.file.data(*gs).path()), move(newSource), f.file.data(*gs).sourceType);
         gs->replaceFile(f.file, move(newFile));
@@ -829,6 +832,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
         handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
     }
+
+    UnorderedSet<core::FileRef> frefs;
+    for (auto &f : trees) {
+        frefs.insert(f.file);
+    }
+    sorbet::pipeline::definition_checker::checkNoDefinitionsInsideProhibitedLines(*gs, frefs);
 
     handler.checkExpectations("[stress-incremental] ");
 

@@ -711,6 +711,14 @@ public:
         // See getOwnerSymbol for how both of these work.
         vector<core::ClassOrModuleRef> definedClasses;
 
+        //{ClassOrModuleRef -> [(isUnknown, LocOffsets)]}
+        UnorderedMap<core::ClassOrModuleRef, vector<pair<bool, core::LocOffsets>>> foundLocs;
+        // TODO(iz): to fix updates for locations store a map symbol -> possible updated location
+        // after the namer finishes we can go through those locations and pick one per symbol
+        // 1) if there is one location which is !isUnknown -> pick it
+        // 2) if there is multipole locations which is !isUnknown -> pick it the last one
+        // 3) no !isUnknown locations at all -> pick the last one
+
         State() = default;
         State(const State &) = delete;
         State &operator=(const State &) = delete;
@@ -1169,7 +1177,7 @@ private:
         return symbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, State &state, const core::FoundClass &klass,
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
@@ -1200,11 +1208,14 @@ private:
             // If the unknown class loc is from the same file, it's still possible that it is from a real
             // definition in that file. In which case, we check the declared bit on the class.
             // We only set the loc if the class is not declared.
-            bool updateLoc =
-                !isUnknown || (!symbol.data(ctx)->isDeclared() && symbol.data(ctx)->loc().file() == ctx.file);
+            bool hasLocInThisFile =
+                absl::c_any_of(symbol.data(ctx)->locs(), [&](const auto &loc) { return loc.file() == ctx.file; });
+            bool updateLoc = !isUnknown || (!symbol.data(ctx)->isDeclared() && hasLocInThisFile);
+
             if (updateLoc) {
-                symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                // symbol.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
             }
+            state.foundLocs[symbol].emplace_back(isUnknown, klass.declLoc);
 
             if (!isUnknown) {
                 if (klass.definesBehavior) {
@@ -1214,7 +1225,13 @@ private:
                 }
 
                 auto singletonClass = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+
+                // See the comment above for context understanding updateLoc
+                // If we update the class loc, we also need to update any singleton class which
+                // might have been synthesized for it.
+                ENFORCE(updateLoc);
                 singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+
                 auto attachedClassTM =
                     singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
                 if (attachedClassTM.exists() && attachedClassTM.isTypeMember()) {
@@ -1240,6 +1257,17 @@ private:
                                       .asTypeMemberRef();
                         tp.data(ctx)->resultType = core::make_type<core::LambdaParam>(tp, todo, todo);
                     }
+                }
+            } else if (updateLoc) {
+                auto maybeSingletonClass = symbol.data(ctx)->lookupSingletonClass(ctx);
+                if (maybeSingletonClass.exists()) {
+                    // In this case, `symbol` is not declared (`!isDeclared`), but a singletonClass
+                    // might have been synthesized for it anyways. That happens in GlobalPass when
+                    // we force every class to have a singleton class. If such a singleton class has
+                    // been created, we'll need to update it's loc. Otherwise, we're on a slow path
+                    // and no such singleton class has been created yet--just let GlobalPass create
+                    // it like normal.
+                    maybeSingletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
                 }
             }
         }
@@ -1660,6 +1688,36 @@ public:
                                                           klass, willDeleteOldDefs, classBehaviorLocs));
         }
 
+        for (auto &[sym, locs] : state.foundLocs) {
+            auto amountOfUnknownns =
+                absl::c_count_if(locs, [](const auto &isUnknownAndLocs) { return !isUnknownAndLocs.first; });
+
+            fast_sort(locs, [](const auto &a, const auto &b) {
+                auto [_, aLoc] = a;
+                auto [__, bLoc] = b;
+                if (aLoc.beginLoc != bLoc.beginLoc) {
+                    return aLoc.beginLoc > bLoc.beginLoc;
+                }
+                return aLoc.endLoc > bLoc.endLoc;
+            });
+
+            core::Loc newLoc;
+            if (amountOfUnknownns >= 1) {
+                for (auto &loc : locs) {
+                    if (!loc.first) {
+                        newLoc = ctx.locAt(loc.second);
+                        break;
+                    }
+                }
+            } else {
+                newLoc = ctx.locAt(locs[0].second);
+            }
+            sym.data(ctx)->addLoc(ctx, newLoc);
+            auto maybeSingletonClass = sym.data(ctx)->lookupSingletonClass(ctx);
+            if (maybeSingletonClass.exists()) {
+                maybeSingletonClass.data(ctx)->addLoc(ctx, newLoc);
+            }
+        }
         return state;
     }
 

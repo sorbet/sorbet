@@ -1,6 +1,8 @@
 cc_library(
     name = "pipeline",
     srcs = [
+        "DefinitionLinesDenylistEnforcer.cc",
+        "DefinitionLinesDenylistEnforcer.h",
         "ProgressIndicator.cc",
         "ProgressIndicator.h",
         "pipeline.cc",
@@ -43,6 +45,8 @@ cc_library(
 cc_library(
     name = "pipeline-orig",
     srcs = [
+        "DefinitionLinesDenylistEnforcer.cc",
+        "DefinitionLinesDenylistEnforcer.h",
         "ProgressIndicator.cc",
         "ProgressIndicator.h",
         "pipeline.cc",

@@ -150,8 +150,10 @@ class PropagateVisibility final {
             }
 
             if (packageSym.exists()) {
-                auto file = packageSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                auto packageLoc = packageSym.data(ctx)->loc();
+                if (db.getPackageNameForFile(packageLoc.file()) != this->package.mangledName() ||
+                    // Second condition is for if we're on the fast path and need to update a loc
+                    (packageLoc.file() == ctx.file && packageLoc != ctx.locAt(loc))) {
                     packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
@@ -176,8 +178,10 @@ class PropagateVisibility final {
             }
 
             if (testSym.exists()) {
-                auto file = testSym.data(ctx)->loc().file();
-                if (db.getPackageNameForFile(file) != this->package.mangledName()) {
+                auto packageLoc = testSym.data(ctx)->loc();
+                if (db.getPackageNameForFile(packageLoc.file()) != this->package.mangledName() ||
+                    // Second condition is for if we're on the fast path and need to update a loc
+                    (packageLoc.file() == ctx.file && packageLoc != ctx.locAt(loc))) {
                     testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
             }
