@@ -94,7 +94,7 @@ public:
     GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral, arg_types);                 \
     GENERATE_HAS_MEMBER_VISITOR(preTransformRuntimeMethodDefinition, arg_types); \
                                                                                  \
-    GENERATE_POSTPONE_PRECLASS(Expression, arg_types);                           \
+    GENERATE_POSTPONE_PRECLASS(ExpressionPtr, arg_types);                        \
     GENERATE_POSTPONE_PRECLASS(ClassDef, arg_types);                             \
     GENERATE_POSTPONE_PRECLASS(MethodDef, arg_types);                            \
     GENERATE_POSTPONE_PRECLASS(If, arg_types);                                   \
@@ -495,13 +495,14 @@ private:
 
         try {
             // TODO: reorder by frequency
-            if constexpr (Funcs::template HAS_MEMBER_preTransformExpression<FUNC>()) {
+            if constexpr (Funcs::template HAS_MEMBER_preTransformExpressionPtr<FUNC>()) {
                 if constexpr (Kind == TreeMapKind::Map) {
-                    what = Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                    what =
+                        Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
                 } else if constexpr (Kind == TreeMapKind::Walk) {
-                    Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                    Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
                 } else if constexpr (Kind == TreeMapKind::ConstWalk) {
-                    Funcs::template CALL_MEMBER_preTransformExpression<FUNC>::call(func, ctx, Funcs::pass(what));
+                    Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
                 }
             }
 

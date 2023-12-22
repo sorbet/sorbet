@@ -8,7 +8,7 @@ class VerifierWalker {
     uint32_t methodDepth = 0;
 
 public:
-    void preTransformExpression(core::Context ctx, ExpressionPtr &original) {
+    void preTransformExpressionPtr(core::Context ctx, ExpressionPtr &original) {
         if (!isa_tree<EmptyTree>(original)) {
             ENFORCE(original.loc().exists(), "location is unset");
         }

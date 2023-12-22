@@ -1143,7 +1143,7 @@ struct PackageSpecBodyWalk {
         }
     }
 
-    void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &original) {
+    void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &original) {
         auto tag = original.tag();
         if ( // PackageSpec definition; handled above explicitly
             tag == ast::Tag::ClassDef ||
