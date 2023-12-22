@@ -664,7 +664,7 @@ core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const
     NextMethodFinder nextMethodFinder(queryLoc);
     for (auto &t : resolved) {
         auto ctx = core::Context(gs, core::Symbols::root(), t.file);
-        ast::TreeWalk::apply(ctx, nextMethodFinder, t.tree);
+        ast::ConstTreeWalk::apply(ctx, nextMethodFinder, t.tree);
     }
 
     return nextMethodFinder.result();
