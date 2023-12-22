@@ -549,7 +549,7 @@ void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef
     }
 }
 
-void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass, ast::ExpressionPtr &tree,
+void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ExpressionPtr &tree,
                                const core::ClassOrModuleRef errMsgClass) {
     if (!klass.data(ctx)->flags.isFinal) {
         return;
@@ -581,7 +581,7 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
     }
 }
 
-void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, ast::ExpressionPtr &tree) {
+void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ExpressionPtr &tree) {
     const ast::ClassDef &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists()) {
@@ -941,7 +941,7 @@ private:
         return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefintion)};
     }
 
-    void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, ast::ClassDef &classDef) {
+    void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
         if (sym.data(ctx)->flags.isAbstract) {
             return;
         }
@@ -1054,7 +1054,7 @@ private:
     }
 
 public:
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
@@ -1078,7 +1078,7 @@ public:
         }
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
@@ -1107,7 +1107,7 @@ public:
         validateOverriding(ctx, methodDef.symbol);
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.fun != core::Names::new_()) {
             return;
