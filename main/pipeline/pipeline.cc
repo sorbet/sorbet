@@ -768,8 +768,8 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
-    void postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto unresolvedPath = ast::cast_tree_nonnull<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
+    void postTransformConstantLit(core::MutableContext ctx, const ast::ConstantLit &tree) {
+        auto unresolvedPath = tree.fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
@@ -784,7 +784,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
         core::MutableContext ctx(gs, core::Symbols::root(), resolved.file);
-        ast::TreeWalk::apply(ctx, walk, resolved.tree);
+        ast::ConstTreeWalk::apply(ctx, walk, resolved.tree);
     }
     auto &missing = walk.unresolvedConstants;
     fast_sort(missing);
