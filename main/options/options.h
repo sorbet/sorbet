@@ -237,6 +237,9 @@ struct Options {
     std::vector<std::string> autogenBehaviorAllowedInRBIFilesPaths;
     AutogenConstCacheConfig autogenConstantCacheConfig;
 
+    // TODO(jez) Find a proper place for this in the list
+    std::vector<std::string> jezExperimentalRootPackages;
+
     // List of directories not available editor-side. References to files in these directories should be sent via
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;

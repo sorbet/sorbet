@@ -59,6 +59,9 @@ public:
 
     static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
+    static absl::Span<core::FileRef> jezPrototype(const core::GlobalState &gs, absl::Span<core::FileRef> files,
+                                                  const std::vector<std::string> &rootPackages);
+
     Packager() = delete;
 };
 } // namespace sorbet::packager
