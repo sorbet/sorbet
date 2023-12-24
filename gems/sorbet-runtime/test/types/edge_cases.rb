@@ -55,9 +55,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
   end
 
   private def counting_allocations
-    before = GC.stat[:total_allocated_objects]
+    before = GC.stat(:total_allocated_objects)
     yield
-    GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
+    GC.stat(:total_allocated_objects) - before
   end
 
   private def check_alloc_counts
@@ -512,6 +512,68 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
         assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
         assert_equal(["-1", "-2", "-3"], klass.foo(["-1", "-2", "-3"]))
+      end
+    end
+
+    describe 'eager evaluation' do
+      it 'works for alias_method' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol)}
+          def foo
+            :foo
+          end
+          alias_method :bar, :foo
+        end
+
+        T::Private::Methods.run_sig_block_for_method(klass.instance_method(:foo))
+
+        T::Private::Methods.send(
+          :unwrap_aliasing_method,
+          klass.instance_method(:bar),
+          klass.instance_method(:foo),
+          T::Private::Methods.signature_for_method(klass.instance_method(:foo)),
+        )
+
+        # Should use fast path immediately
+        obj = klass.new
+        result = nil
+        allocs = counting_allocations do
+          result = obj.bar
+        end
+        assert_equal(:foo, result)
+        assert_operator(allocs, :<, 5) if check_alloc_counts
+      end
+
+      it 'works for alias' do
+        klass = Class.new do
+          extend T::Sig
+          extend T::Helpers
+          sig {returns(Symbol)}
+          def foo
+            :foo
+          end
+          alias bar foo
+        end
+
+        T::Private::Methods.run_sig_block_for_method(klass.instance_method(:foo))
+
+        T::Private::Methods.send(
+          :unwrap_aliasing_method,
+          klass.instance_method(:bar),
+          klass.instance_method(:foo),
+          T::Private::Methods.signature_for_method(klass.instance_method(:foo)),
+        )
+
+        # Should use fast path immediately
+        obj = klass.new
+        result = nil
+        allocs = counting_allocations do
+          result = obj.bar
+        end
+        assert_equal(:foo, result)
+        assert_operator(allocs, :<, 5) if check_alloc_counts
       end
     end
   end

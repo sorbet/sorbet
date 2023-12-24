@@ -25,6 +25,8 @@ module T::Private::Methods
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
   @old_hooks = nil
+  # maps keys for methods created by `alias` or `alias_method` to the key for each aliased original method
+  @aliases = {}
 
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
@@ -226,9 +228,19 @@ module T::Private::Methods
       current_declaration = T::Private::DeclState.current.active_declaration
     end
 
+    original_method = mod.instance_method(method_name)
+
     if current_declaration.nil?
+      if original_method.original_name != method_name
+        aliased_key = method_owner_and_name_to_key(mod, original_method.original_name)
+        if has_sig_block_for_key(aliased_key)
+          @aliases[method_owner_and_name_to_key(mod, method_name)] = aliased_key
+        end
+      end
+
       return
     end
+
     T::Private::DeclState.current.reset!
 
     if method_name == :method_added || method_name == :singleton_method_added
@@ -238,7 +250,6 @@ module T::Private::Methods
       )
     end
 
-    original_method = mod.instance_method(method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
     end
@@ -317,9 +328,11 @@ module T::Private::Methods
     # that here.
     receiving_method = receiving_class.instance_method(callee)
     if receiving_method != original_method && receiving_method.original_name == original_method.name
-      aliasing_mod = receiving_method.owner
-      method_sig = method_sig.as_alias(callee)
-      unwrap_method(aliasing_mod, method_sig, original_method)
+      unwrap_aliasing_method(
+        receiving_method,
+        original_method,
+        method_sig
+      )
     end
 
     method_sig
@@ -451,6 +464,7 @@ module T::Private::Methods
     end
 
     @sig_wrappers.delete(key)
+    @aliases.delete(key) # We could hit this case if we call an alias without having called `run_all_sig_blocks`
     sig
   end
 
@@ -460,6 +474,23 @@ module T::Private::Methods
       key, = @sig_wrappers.first
       run_sig_block_for_key(key)
     end
+
+    @aliases.each do |aliasing_key, aliased_key|
+      unwrap_aliasing_method(
+        key_to_method(aliasing_key),
+        key_to_method(aliased_key),
+        signature_for_key(aliased_key)
+      )
+    end
+    @aliases.clear
+  end
+
+  private_class_method def self.unwrap_aliasing_method(aliasing_method, original_method, method_sig)
+    unwrap_method(
+      aliasing_method.owner,
+      method_sig.as_alias(aliasing_method.name),
+      original_method
+    )
   end
 
   def self.all_checked_tests_sigs
