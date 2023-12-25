@@ -692,7 +692,7 @@ module Kernel
   # ```
   sig do
     params(
-      blk: T.proc.params(x: T.untyped).void
+      blk: T.proc.params(x: T.self_type).void
     )
     .returns(T.self_type)
   end
