@@ -5,10 +5,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-
-    auto loc = ctx.locAt(tree.loc());
+void NextMethodFinder::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
+    auto loc = ctx.locAt(classDef.loc);
 
     if (!this->narrowestClassDefRange.exists()) {
         // No narrowestClassDefRange yet, so take the <root> loc
@@ -28,13 +26,12 @@ void NextMethodFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPt
     this->scopeContainsQueryLoc.emplace_back(loc.contains(this->queryLoc));
 }
 
-void NextMethodFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+void NextMethodFinder::postTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
     ENFORCE(!this->scopeContainsQueryLoc.empty());
     this->scopeContainsQueryLoc.pop_back();
 }
 
-void NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+void NextMethodFinder::preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
 
@@ -48,7 +45,7 @@ void NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionP
 
     auto currentMethod = methodDef.symbol;
 
-    auto currentLoc = ctx.locAt(tree.loc());
+    auto currentLoc = ctx.locAt(methodDef.loc);
     if (!currentLoc.exists()) {
         // Defensive in case location information is disabled (e.g., certain fuzzer modes)
         return;
