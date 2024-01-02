@@ -236,8 +236,7 @@ class PropagateVisibility final {
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
-    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+    void postTransformSend(core::MutableContext ctx, const ast::Send &send) {
         if (send.fun != core::Names::export_()) {
             return;
         }
@@ -301,9 +300,7 @@ public:
         }
     }
 
-    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-
+    void preTransformClassDef(core::MutableContext ctx, const ast::ClassDef &original) {
         if (original.symbol == core::Symbols::root()) {
             return;
         }
@@ -330,7 +327,7 @@ public:
         pass.exportPackageRoots(gs);
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        ast::TreeWalk::apply(ctx, pass, f.tree);
+        ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         // if we used `export_all`, then there were no `export`
         // directives in the previous pass; we should instead export

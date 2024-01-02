@@ -24,13 +24,13 @@ public:
         : queryLoc(queryLoc), narrowestClassDefRange(core::Loc::none()), scopeContainsQueryLoc(std::vector<bool>{}),
           result_(std::nullopt) {}
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree);
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree);
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree);
-    void postTransformRuntimeMethodDefinition(core::Context ctx, ast::ExpressionPtr &tree);
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &tree);
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &tree);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree);
+    void postTransformRuntimeMethodDefinition(core::Context ctx, const ast::RuntimeMethodDefinition &tree);
+    void preTransformSend(core::Context ctx, const ast::Send &tree);
 
-    static std::optional<resolver::ParsedSig> findSignature(core::Context ctx, ast::ExpressionPtr &tree,
+    static std::optional<resolver::ParsedSig> findSignature(core::Context ctx, const ast::ExpressionPtr &tree,
                                                             core::Loc queryLoc);
 };
 

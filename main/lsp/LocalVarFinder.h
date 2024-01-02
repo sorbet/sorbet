@@ -20,12 +20,12 @@ class LocalVarFinder {
 public:
     LocalVarFinder(core::MethodRef targetMethod, core::Loc queryLoc) : targetMethod(targetMethod), queryLoc(queryLoc) {}
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &assign);
-    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block);
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &methodDef);
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &classDef);
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &classDef);
+    void postTransformAssign(core::Context ctx, const ast::Assign &assign);
+    void preTransformBlock(core::Context ctx, const ast::Block &block);
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef);
+    void postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
 
     const std::vector<core::NameRef> &result() const;
 };

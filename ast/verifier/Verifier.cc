@@ -8,7 +8,7 @@ class VerifierWalker {
     uint32_t methodDepth = 0;
 
 public:
-    void preTransformExpression(core::Context ctx, ExpressionPtr &original) {
+    void preTransformExpressionPtr(core::Context ctx, const ExpressionPtr &original) {
         if (!isa_tree<EmptyTree>(original)) {
             ENFORCE(original.loc().exists(), "location is unset");
         }
@@ -16,17 +16,16 @@ public:
         original._sanityCheck();
     }
 
-    void preTransformMethodDef(core::Context ctx, ExpressionPtr &original) {
+    void preTransformMethodDef(core::Context ctx, const MethodDef &original) {
         methodDepth++;
     }
 
-    void postTransformMethodDef(core::Context ctx, ExpressionPtr &original) {
+    void postTransformMethodDef(core::Context ctx, const MethodDef &original) {
         methodDepth--;
     }
 
-    void postTransformAssign(core::Context ctx, ExpressionPtr &original) {
-        auto *assign = cast_tree<Assign>(original);
-        if (ast::isa_tree<ast::UnresolvedConstantLit>(assign->lhs)) {
+    void postTransformAssign(core::Context ctx, const Assign &assign) {
+        if (ast::isa_tree<ast::UnresolvedConstantLit>(assign.lhs)) {
             ENFORCE(methodDepth == 0, "Found constant definition inside method definition");
         }
     }
@@ -41,7 +40,7 @@ ExpressionPtr Verifier::run(core::Context ctx, ExpressionPtr node) {
         return node;
     }
     VerifierWalker vw;
-    TreeWalk::apply(ctx, vw, node);
+    ConstTreeWalk::apply(ctx, vw, node);
     return node;
 }
 
