@@ -9,7 +9,7 @@ class ExtractVariableWalk {
     // The selection loc
     core::Loc targetLoc;
     core::LocOffsets matchingLoc;
-    // It's not valid to extract an arg, or the lhs of an assign.
+    // It's not valid to extract a parameter, or the lhs of an assign.
     // This vector stores the locs for those nodes, so that in
     // preTransformExpression, we can skip them.
     std::vector<core::LocOffsets> skippedLocs;
@@ -32,6 +32,7 @@ class ExtractVariableWalk {
         }
     }
 
+    // NOTE: Might want to profile and switch to UnorderedSet.
     bool shouldSkipLoc(core::LocOffsets loc) {
         return absl::c_find(skippedLocs, loc) != skippedLocs.end();
     }
@@ -126,7 +127,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
                                                              const core::Loc selectionLoc) {
     auto loc = selectionLoc;
     auto file = loc.file();
-    const core::GlobalState &gs = typechecker.state();
+    const auto &gs = typechecker.state();
     vector<unique_ptr<TextEdit>> edits;
 
     ExtractVariableWalk extractVariableWalk(loc);
@@ -138,7 +139,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
         vector<unique_ptr<TextEdit>> edits;
 
         auto locOffsets = loc.offsets();
-        core::LocOffsets whereToInsert = core::LocOffsets::none();
+        auto whereToInsert = core::LocOffsets::none();
         auto enclosingScope = extractVariableWalk.enclosingScope;
         // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
         // the same as what we're pulling out from the ExpressionPtr, but we'll just get it directly
