@@ -262,7 +262,14 @@ module T::Private::Methods::SignatureValidation
     end
 
     # return types must be covariant
-    if !signature.return_type.subtype_of?(super_signature.return_type)
+    super_signature_return_type = super_signature.return_type
+
+    if super_signature_return_type == T::Private::Types::Void::Private::INSTANCE
+      # Treat `.void` as `T.anything` (see corresponding comment in definition_valitor for more)
+      super_signature_return_type = T::Types::Anything::Private::INSTANCE
+    end
+
+    if !signature.return_type.subtype_of?(super_signature_return_type)
       raise "Incompatible return type in signature for #{mode_noun} of method `#{signature.method_name}`:\n" \
             "* Base: `#{super_signature.return_type}` (in #{method_loc_str(super_signature.method)})\n" \
             "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
