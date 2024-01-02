@@ -97,3 +97,10 @@ class LineBreakOnlyAtEnd
     self
   end
 end
+
+class TProcReturnsInInitializeSig
+  extend T::Sig
+  sig { params(blk: T.proc.returns(T.untyped)).returns(T.anything) }
+  def initialize(&blk)
+  end
+end
