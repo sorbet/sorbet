@@ -110,6 +110,11 @@ public:
 
     /**
      * Returns the parsed file for the given file, up to the desugar pass.
+     *
+     * This is never cached, which means that the file will be re-parsed from scratch.
+     * This is slower than getting the indexed tree (everything before namer), so if
+     * You can use the indexed tree that will be more performant. Certain IDE actions
+     * need particularly fine-grained fidelity in the AST (precludes rewriter).
      */
     ast::ExpressionPtr getDesugared(core::FileRef fref) const;
     /**
