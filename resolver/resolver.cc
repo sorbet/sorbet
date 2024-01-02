@@ -2989,8 +2989,15 @@ public:
             // make sure that it's even possible to be valid.
             auto *cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
             ENFORCE(cnst != nullptr, "Rewriter should always use const for typeExpr, which should now be resolved");
-            if (!cnst->symbol.isClassOrModule() || cnst->symbol.asClassOrModuleRef().data(ctx)->flags.isModule ||
-                cnst->symbol.asClassOrModuleRef().data(ctx)->typeArity(ctx) > 0) {
+
+            // Dealias to mimic how type_syntax parsing will work for constant lit node (e.g., want
+            // to allow class aliases).
+            auto dealiased = cnst->symbol.dealias(ctx);
+
+            // Don't want the dealias to apply to the type alias, because MyTypeAlias.new is a runtime error.
+            if (cnst->symbol.isTypeAlias(ctx) || !dealiased.isClassOrModule() ||
+                dealiased.asClassOrModuleRef().data(ctx)->flags.isModule ||
+                dealiased.asClassOrModuleRef().data(ctx)->typeArity(ctx) > 0) {
                 // The rewriter was over-eager in attempting to infer type `A` for `A.new` because
                 // `A` was not a class (or was a generic class, and thus generated the wrong annotation).
                 // Get rid of the cast, replace it with the original arg.
