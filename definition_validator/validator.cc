@@ -412,12 +412,24 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
     {
         // make sure the return types are compatible
-        auto &superReturn = superMethod.data(ctx)->resultType;
+
+        auto superReturn = superMethod.data(ctx)->resultType;
+        if (superReturn == core::Types::void_()) {
+            // Mimics how `.void` methods are handled in cfg::Return case of environment.cc
+            superReturn = core::Types::top();
+        }
+
         auto &methodReturn = method.data(ctx)->resultType;
+        // Don't have to do the void -> top trick, because if parent is top, the child method return
+        // type can be whatever. And if parent is not top, then neither void nor T.anything in the
+        // child return will be compatible with the parent, so we may as well keep it as `void` for
+        // the sake of showing an error message in the terms that the user wrote ("where did this
+        // T.anything come from? I wrote .void").
 
         if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
+                auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
+                e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturnShow,
                             supermethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
