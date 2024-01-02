@@ -1444,7 +1444,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
-                if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
+                if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
