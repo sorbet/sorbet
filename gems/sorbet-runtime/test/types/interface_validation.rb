@@ -144,7 +144,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     T::Private::Abstract::Validate.validate_abstract_module(base)
   end
 
-  it "raises an error if a void method has an incompatible implementation" do
+  it "does not raise an error if a void method does not have a void implementation" do
     base = Module.new do
       extend T::Sig
       extend T::Helpers
@@ -169,10 +169,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
       include mod
     end
 
-    err = assert_raises(RuntimeError) do
-      klass.new.foo
-    end
-    assert_includes(err.message, "Incompatible return type in signature for implementation of method")
+    klass.new.foo
   end
 
 end
