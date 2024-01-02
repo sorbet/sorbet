@@ -7,10 +7,11 @@
 
 namespace sorbet::realmain::lsp {
 
-std::vector<std::unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDelegate &typechecker,
-                                                                       const LSPConfiguration &config,
-                                                                       std::unique_ptr<Range> selectionRange,
-                                                                       const core::Loc selectionLoc);
+class VariableExtractor {
+public:
+    static std::vector<std::unique_ptr<TextDocumentEdit>>
+    getEdits(LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config, const core::Loc selectionLoc);
+};
 
 } // namespace sorbet::realmain::lsp
 

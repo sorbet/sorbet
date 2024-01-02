@@ -268,7 +268,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 // until the user has actually selected the action. We can't do that here because
                 // we need to do the core computation to know if extract the current selection is
                 // valid in the first place, to decide if we can show the code action or not.
-                auto documentEdits = getExtractVariableEdits(typechecker, config, std::move(params->range), loc);
+                Timer timeit(gs.tracer(), "Extract to Variable");
+
+                auto documentEdits = VariableExtractor::getEdits(typechecker, config, loc);
                 if (!documentEdits.empty()) {
                     auto action = make_unique<CodeAction>("Extract Variable");
                     action->kind = CodeActionKind::RefactorExtract;
