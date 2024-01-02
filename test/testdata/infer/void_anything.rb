@@ -14,12 +14,12 @@ end
 
 sig { params(x: M).returns(Object) }
 def foo2(x)
-  x
+  x # error: Expected `Object` but found `M` for method result type
 end
 
 sig { params(x: M).returns(Kernel) }
 def foo3(x)
-  x
+  x # error: Expected `Kernel` but found `M` for method result type
 end
 
 sig { params(x: M).returns(BasicObject) }
