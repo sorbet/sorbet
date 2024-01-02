@@ -172,5 +172,21 @@ module Opus::Types::Test
       child.new.example
     end
 
+    it "allows returns(T.anything) to be compatible with .void" do
+      parent = Class.new do
+        extend T::Sig
+        sig {overridable.void}
+        def example; end
+      end
+
+      child = Class.new(parent) do
+        extend T::Sig
+        sig {override.returns(T.anything)}
+        def example; end
+      end
+
+      child.new.example
+    end
+
   end
 end
