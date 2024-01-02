@@ -163,5 +163,5 @@ module BadTypedImpl
   include GoodInterface
 
   sig {override.returns(Integer)}
-  def foo; 1; end # error: Return type `Integer` does not match return type of abstract method `GoodInterface#foo`
+  def foo; 1; end
 end

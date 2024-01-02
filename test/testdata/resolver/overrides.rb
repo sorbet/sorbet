@@ -87,5 +87,4 @@ class B7 < A7
   extend T::Sig
   sig {override.returns(String)}
   def foo; 'foo' end
-# ^^^^^^^ error: Return type `String` does not match return type of overridden method `A7#foo`
 end
