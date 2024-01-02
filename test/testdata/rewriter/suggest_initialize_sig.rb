@@ -4,6 +4,7 @@ class SimpleReturns
   extend T::Sig
 
   sig {params(x: Integer).returns(Integer).on_failure(:soft, notify: 'sorbet')}
+  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -13,7 +14,7 @@ class SimpleMultiLineReturns
   extend T::Sig
 
   sig do
-    params(
+    params( # error: The initialize method should always return void
       x: Integer
     )
     .returns(Integer)
@@ -27,7 +28,7 @@ class MultiLineReturnsWithCombinators
   extend T::Sig
 
   sig do
-    params(
+    params( # error: The initialize method should always return void
       x: T::Array[T.any(String, T::Enum)]
     )
     .returns(T::Array[T.any(String, T::Enum)])
@@ -41,6 +42,7 @@ class SingleLineReturnsWithCombinators
   extend T::Sig
 
   sig {params(x: T.nilable(Integer)).returns(T.nilable(Integer)).on_failure(:soft, notify: 'sorbet')}
+  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -50,6 +52,7 @@ class SingleLineNoAfterStatements
   extend T::Sig
 
   sig {params(x: T.any(Integer, String)).returns(T.any(Integer, String))}
+  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -68,7 +71,7 @@ class LineBreakAfterReturns
   extend T::Sig
 
   sig do
-    params(
+    params( # error: The initialize method should always return void
       path: String,
       key: String
     )
@@ -76,6 +79,7 @@ class LineBreakAfterReturns
     .checked(:tests)
   end
   def initialize(path, key)
+    self
   end
 end
 
@@ -83,12 +87,13 @@ class LineBreakOnlyAtEnd
   extend T::Sig
 
   sig do
-    params(
+    params( # error: The initialize method should always return void
       path: String,
       key: String
     )
     .returns(T.self_type).checked(:tests)
   end
   def initialize(path, key)
+    self
   end
 end
