@@ -4,7 +4,7 @@ class SimpleReturns
   extend T::Sig
 
   sig {params(x: Integer).returns(Integer).on_failure(:soft, notify: 'sorbet')}
-  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
+  #                       ^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -14,10 +14,11 @@ class SimpleMultiLineReturns
   extend T::Sig
 
   sig do
-    params( # error: The initialize method should always return void
+    params(
       x: Integer
     )
     .returns(Integer)
+    #^^^^^^^ error: The initialize method should always return void
   end
   def initialize(x)
     @x = x
@@ -28,10 +29,11 @@ class MultiLineReturnsWithCombinators
   extend T::Sig
 
   sig do
-    params( # error: The initialize method should always return void
+    params(
       x: T::Array[T.any(String, T::Enum)]
     )
     .returns(T::Array[T.any(String, T::Enum)])
+    #^^^^^^^ error: The initialize method should always return void
   end
   def initialize(x)
     @x = x
@@ -42,7 +44,7 @@ class SingleLineReturnsWithCombinators
   extend T::Sig
 
   sig {params(x: T.nilable(Integer)).returns(T.nilable(Integer)).on_failure(:soft, notify: 'sorbet')}
-  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
+  #                                  ^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -52,7 +54,7 @@ class SingleLineNoAfterStatements
   extend T::Sig
 
   sig {params(x: T.any(Integer, String)).returns(T.any(Integer, String))}
-  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: The initialize method should always return void
+  #                                      ^^^^^^^ error: The initialize method should always return void
   def initialize(x)
     @x = x
   end
@@ -71,11 +73,12 @@ class LineBreakAfterReturns
   extend T::Sig
 
   sig do
-    params( # error: The initialize method should always return void
+    params(
       path: String,
       key: String
     )
     .returns(T.self_type)
+    #^^^^^^^ error: The initialize method should always return void
     .checked(:tests)
   end
   def initialize(path, key)
@@ -87,11 +90,12 @@ class LineBreakOnlyAtEnd
   extend T::Sig
 
   sig do
-    params( # error: The initialize method should always return void
+    params(
       path: String,
       key: String
     )
     .returns(T.self_type).checked(:tests)
+    #^^^^^^^ error: The initialize method should always return void
   end
   def initialize(path, key)
     self
@@ -101,6 +105,7 @@ end
 class TProcReturnsInInitializeSig
   extend T::Sig
   sig { params(blk: T.proc.returns(T.untyped)).returns(T.anything) }
+  #                                            ^^^^^^^ error: The initialize method should always return void
   def initialize(&blk)
   end
 end
