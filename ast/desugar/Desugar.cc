@@ -1929,6 +1929,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {
+                    auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
@@ -1940,7 +1941,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    ExpressionPtr arr = MK::Array(loc, std::move(elems));
+                    ExpressionPtr arr = MK::Array(arrayLoc, std::move(elems));
                     ExpressionPtr res = MK::Return(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {
@@ -1961,6 +1962,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Break *ret) {
                 if (ret->exprs.size() > 1) {
+                    auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
@@ -1972,7 +1974,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    ExpressionPtr arr = MK::Array(loc, std::move(elems));
+                    ExpressionPtr arr = MK::Array(arrayLoc, std::move(elems));
                     ExpressionPtr res = MK::Break(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {
@@ -1993,6 +1995,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Next *ret) {
                 if (ret->exprs.size() > 1) {
+                    auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
@@ -2004,7 +2007,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         }
                         elems.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                     };
-                    ExpressionPtr arr = MK::Array(loc, std::move(elems));
+                    ExpressionPtr arr = MK::Array(arrayLoc, std::move(elems));
                     ExpressionPtr res = MK::Next(loc, std::move(arr));
                     result = std::move(res);
                 } else if (ret->exprs.size() == 1) {

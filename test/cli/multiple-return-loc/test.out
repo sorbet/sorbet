@@ -1,0 +1,20 @@
+test.rb:6: Expected `T::Array[Integer]` but found `[Integer(1), String("")]` for method result type https://srb.help/7005
+     6 |  return 1, ""
+          ^^^^^^^^^^^^
+  Expected `T::Array[Integer]` for result type of method `foo`:
+    test.rb:5:
+     5 |def foo
+        ^^^^^^^
+  Got `[Integer(1), String("")] (2-tuple)` originating from:
+    test.rb:6:
+     6 |  return 1, ""
+                 ^^^^^
+
+test.rb:13: Revealed type: `[Integer(1), Integer(2)] (2-tuple)` https://srb.help/7014
+    13 |T.reveal_type(x)
+        ^^^^^^^^^^^^^^^^
+  Got `[Integer(1), Integer(2)] (2-tuple)` originating from:
+    test.rb:10:
+    10 |  break 1, 2
+                ^^^^
+Errors: 2
