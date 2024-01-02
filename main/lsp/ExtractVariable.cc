@@ -14,7 +14,7 @@ class ExtractVariableWalk {
     // preTransformExpression, we can skip them.
     std::vector<core::LocOffsets> skippedLocs;
 
-    void updateEnclosingScope(ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
+    void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
             return;
         }
@@ -38,16 +38,19 @@ class ExtractVariableWalk {
     }
 
 public:
-    // After the walk is complete, this should point to the deepest scope
-    // (block, method or class) that contains targetLoc
-    ast::ExpressionPtr *enclosingScope;
+    // After the walk is complete, this should point to the deepest scope that contains targetLoc
+    const ast::ExpressionPtr *enclosingScope;
+    // enclosingScope is the ClassDef/MethodDef/etc. that contains targetLoc.
+    // enclosingScopeLoc stores the Loc of the body of that scope.
+    // For example, the RHS of the ClassDef doesn't have an ExpressionPtr with a Loc,
+    // but enclosingScopeLoc will be a Loc that represents the body of the ClassDef RHS
+    // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
-    // Is there a syntax node that has the exact same location as targetLoc?
 
     ExtractVariableWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), matchingLoc(core::LocOffsets::none()), enclosingScopeLoc(core::LocOffsets::none()) {}
 
-    void preTransformExpression(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
             // It's not valid to extract the following node types
             if (!ast::isa_tree<ast::Break>(tree) && !ast::isa_tree<ast::Next>(tree) &&
@@ -62,17 +65,17 @@ public:
         return matchingLoc.exists() && !shouldSkipLoc(matchingLoc);
     }
 
-    void preTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
         updateEnclosingScope(tree, insSeq.loc);
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         updateEnclosingScope(tree, classDef.rhs.front().loc().join(classDef.rhs.back().loc()));
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         for (auto &arg : methodDef.args) {
             skipLoc(arg.loc());
@@ -80,7 +83,7 @@ public:
         updateEnclosingScope(tree, methodDef.rhs.loc());
     }
 
-    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
         for (auto &arg : block.args) {
             skipLoc(arg.loc());
@@ -88,25 +91,25 @@ public:
         updateEnclosingScope(tree, block.body.loc());
     }
 
-    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
         skipLoc(assign.lhs.loc());
     }
 
-    void preTransformIf(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
         updateEnclosingScope(tree, if_.thenp.loc());
         updateEnclosingScope(tree, if_.elsep.loc());
     }
 
-    void preTransformRescue(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(tree);
         updateEnclosingScope(tree, rescue.body.loc());
         updateEnclosingScope(tree, rescue.else_.loc());
         updateEnclosingScope(tree, rescue.ensure.loc());
     }
 
-    void preTransformRescueCase(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformRescueCase(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(tree);
         updateEnclosingScope(tree, rescueCase.body.loc());
         skipLoc(rescueCase.var.loc());
@@ -115,30 +118,25 @@ public:
         }
     }
 
-    void preTransformWhile(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
         updateEnclosingScope(tree, while_.body.loc());
     }
 };
 
-vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDelegate &typechecker,
-                                                             const LSPConfiguration &config,
-                                                             unique_ptr<Range> selectionRange,
-                                                             const core::Loc selectionLoc) {
-    auto loc = selectionLoc;
-    auto file = loc.file();
+vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerDelegate &typechecker,
+                                                                 const LSPConfiguration &config,
+                                                                 const core::Loc selectionLoc) {
+    auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
-    vector<unique_ptr<TextEdit>> edits;
 
-    ExtractVariableWalk extractVariableWalk(loc);
+    ExtractVariableWalk extractVariableWalk(selectionLoc);
     auto desugaredTree = typechecker.getDesugared(file);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, extractVariableWalk, desugaredTree);
 
     if (extractVariableWalk.foundExactMatch()) {
-        vector<unique_ptr<TextEdit>> edits;
-
-        auto locOffsets = loc.offsets();
+        auto locOffsets = selectionLoc.offsets();
         auto whereToInsert = core::LocOffsets::none();
         auto enclosingScope = extractVariableWalk.enclosingScope;
         // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
@@ -156,7 +154,6 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
                 ENFORCE(!ast::isa_tree<ast::InsSeq>(insSeq->expr));
                 whereToInsert = insSeq->expr.loc();
             }
-            ENFORCE(whereToInsert.exists());
         } else if (auto block = ast::cast_tree<ast::Block>(*enclosingScope)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
             whereToInsert = block->body.loc();
@@ -165,14 +162,8 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
             ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
             whereToInsert = methodDef->rhs.loc();
         } else if (auto classDef = ast::cast_tree<ast::ClassDef>(*enclosingScope)) {
-            // TODO(neil): this would be much simpler if we just had ClassDef
-            // do the same thing as methodDef and block (ClassDef#rhs is a ExpressionPtr
-            // and we use InsSeq for multiple statements). Maybe we can change ClassDef to do that?
             if (classDef->rhs.size() == 0) {
                 ENFORCE(false);
-            } else if (classDef->rhs.size() == 1) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(classDef->rhs.front()));
-                whereToInsert = classDef->rhs.front().loc();
             } else {
                 for (auto &stat : classDef->rhs) {
                     if (stat.loc().contains(locOffsets)) {
@@ -181,7 +172,6 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
                         break;
                     }
                 }
-                ENFORCE(whereToInsert.exists());
             }
         } else if (auto if_ = ast::cast_tree<ast::If>(*enclosingScope)) {
             if (if_->thenp.loc().contains(locOffsets)) {
@@ -213,29 +203,31 @@ vector<unique_ptr<TextDocumentEdit>> getExtractVariableEdits(LSPTypecheckerDeleg
         } else {
             ENFORCE(false);
         }
+        ENFORCE(whereToInsert.exists());
+
         auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
-        auto whereToInsertRange = Range::fromLoc(gs, whereToInsertLoc);
         auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
 
-        string trailing;
-        if (whereToInsertLoc.beginPos() == startOfLine.beginPos()) {
-            // If we're inserting at the start of the line (ignoring whitespace),
-            // let's put the declaration on a new line (above the current one) instead.
-            trailing = fmt::format("\n{}", string(numSpaces, ' '));
-        } else {
-            trailing = fmt::format("; ", string(numSpaces, ' '));
-        }
-        if (whereToInsertLoc.endPos() == loc.beginPos()) {
+        auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
+                            // If we're inserting at the start of the line (ignoring whitespace),
+                            // let's put the declaration on a new line (above the current one) instead.
+                            ? fmt::format("\n{}", string(numSpaces, ' '))
+                            : "; ";
+
+        vector<unique_ptr<TextEdit>> edits;
+
+        if (whereToInsertLoc.endPos() == selectionLoc.beginPos()) {
             // if insertion point is touching the selection, let's merge the 2 edits into one,
             // to prevent an "overlapping" edit.
-            whereToInsertLoc = whereToInsertLoc.join(loc);
-            whereToInsertRange = Range::fromLoc(gs, whereToInsertLoc);
-            edits.emplace_back(
-                make_unique<TextEdit>(move(whereToInsertRange),
-                                      fmt::format("newVariable = {}{}newVariable", loc.source(gs).value(), trailing)));
-        } else {
+            whereToInsertLoc = whereToInsertLoc.join(selectionLoc);
             edits.emplace_back(make_unique<TextEdit>(
-                move(whereToInsertRange), fmt::format("newVariable = {}{}", loc.source(gs).value(), trailing)));
+                Range::fromLoc(gs, whereToInsertLoc),
+                fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
+        } else {
+            edits.emplace_back(
+                make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
+                                      fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
+            auto selectionRange = Range::fromLoc(gs, selectionLoc);
             edits.emplace_back(make_unique<TextEdit>(std::move(selectionRange), "newVariable"));
         }
         auto docEdit = make_unique<TextDocumentEdit>(
