@@ -180,6 +180,8 @@ core::TrackUntyped text2TrackUntyped(string_view key, spdlog::logger &logger) {
         return core::TrackUntyped::Everywhere;
     } else if (key == "nowhere") {
         return core::TrackUntyped::Nowhere;
+    } else if (key == "everywhere-but-tests") {
+        return core::TrackUntyped::EverywhereButTests;
     } else if (key == "everywhere") {
         return core::TrackUntyped::Everywhere;
     } else {
@@ -430,7 +432,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("check-out-of-order-constant-references",
                                     "Enable out-of-order constant reference checks (error 5027)");
     options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output",
-                                    cxxopts::value<string>()->implicit_value("everywhere"), "{[nowhere],everywhere}");
+                                    cxxopts::value<string>()->implicit_value("everywhere"),
+                                    "{[nowhere],everywhere,everywhere-but-tests}");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
