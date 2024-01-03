@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include "common/strings/ConstExprStr.h"
 #include "core/StrictLevel.h"
+#include "core/TrackUntyped.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
 #include <optional>
@@ -251,7 +252,7 @@ struct Options {
     bool lspSignatureHelpEnabled = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;
-    bool trackUntyped = false;
+    core::TrackUntyped trackUntyped = core::TrackUntyped::Nowhere;
 
     // Experimental feature `requires_ancestor`
     bool requiresAncestorEnabled = false;

@@ -722,7 +722,8 @@ void LSPTypechecker::setSlowPathBlocked(bool blocked) {
 }
 
 void LSPTypechecker::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
-    this->gs->trackUntyped = options.settings->highlightUntyped.value_or(this->gs->trackUntyped);
+    this->gs->trackUntyped =
+        LSPClientConfiguration::parseEnableHighlightUntyped(*options.settings, this->gs->trackUntyped);
 
     if (options.settings->enableTypecheckInfo.has_value() ||
         options.settings->enableTypedFalseCompletionNudges.has_value() ||

@@ -5,7 +5,7 @@ namespace sorbet::core::errors::Infer {
 
 ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypePtr &untyped) {
     prodCounterInc("types.input.untyped.usages");
-    if (!gs.trackUntyped) {
+    if (gs.trackUntyped == TrackUntyped::Nowhere) {
         return UntypedValue;
     }
 

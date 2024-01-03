@@ -9,6 +9,7 @@ namespace sorbet::realmain::lsp {
 
 class LSPOutput;
 class InitializeParams;
+class SorbetInitializationOptions;
 class Position;
 class Location;
 
@@ -34,8 +35,8 @@ public:
     /** If true, then LSP sends metadata to the client every time it typechecks files. Used in tests. */
     bool enableTypecheckInfo = false;
 
-    /** If true, then LSP outputs a warning for untyped values */
-    bool enableHighlightUntyped = false;
+    /** Where LSP should output an information diagnostic for untyped values */
+    core::TrackUntyped enableHighlightUntyped = core::TrackUntyped::Nowhere;
 
     /** If false, nudges in `typed: false` files are disabled */
     bool enableTypedFalseCompletionNudges = true;
@@ -56,6 +57,9 @@ public:
     bool clientCodeActionDataSupport = false;
 
     LSPClientConfiguration(const InitializeParams &initializeParams);
+
+    static core::TrackUntyped parseEnableHighlightUntyped(const SorbetInitializationOptions &options,
+                                                          core::TrackUntyped defaultIfUnset);
 };
 
 /**

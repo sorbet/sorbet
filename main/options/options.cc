@@ -175,6 +175,19 @@ const vector<StopAfterOptions> stop_after_options({
     {"inferencer", Phase::INFERENCER},
 });
 
+core::TrackUntyped text2TrackUntyped(string_view key, spdlog::logger &logger) {
+    if (key == "") {
+        return core::TrackUntyped::Everywhere;
+    } else if (key == "nowhere") {
+        return core::TrackUntyped::Nowhere;
+    } else if (key == "everywhere") {
+        return core::TrackUntyped::Everywhere;
+    } else {
+        logger.error("Unknown --track-untyped option: `{}`", key);
+        throw EarlyReturnWithCode(1);
+    }
+}
+
 core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> logger) {
     if (key == "ignore") {
         return core::StrictLevel::Ignore;
@@ -413,7 +426,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<bool>()->default_value("true"));
     options.add_options("advanced")("check-out-of-order-constant-references",
                                     "Enable out-of-order constant reference checks (error 5027)");
-    options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output");
+    options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output",
+                                    cxxopts::value<string>()->implicit_value("everywhere"), "{[nowhere],everywhere}");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
@@ -737,7 +751,9 @@ void readOptions(Options &opts,
             }
         }
         opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
-        opts.trackUntyped = raw["track-untyped"].as<bool>();
+        if (raw.count("track-untyped") > 0) {
+            opts.trackUntyped = text2TrackUntyped(raw["track-untyped"].as<string>(), *logger);
+        }
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
@@ -820,7 +836,7 @@ void readOptions(Options &opts,
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
         }
 
-        if (opts.print.UntypedBlame.enabled && !opts.trackUntyped) {
+        if (opts.print.UntypedBlame.enabled && opts.trackUntyped != core::TrackUntyped::Nowhere) {
             logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
             throw EarlyReturnWithCode(1);
         }
