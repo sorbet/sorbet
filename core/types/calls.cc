@@ -790,9 +790,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                              move(eitherLine),
                                          }));
 
-                        if (args.receiverLoc().empty()) {
+                        if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
-                        } else {
+                        } else if (args.receiverLoc().exists()) {
                             e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
                         }
                         canSkipFuzzyMatch = true;
