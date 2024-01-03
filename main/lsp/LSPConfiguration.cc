@@ -59,7 +59,7 @@ core::TrackUntyped LSPClientConfiguration::parseEnableHighlightUntyped(const Sor
     if (!options.highlightUntyped.has_value()) {
         return defaultIfUnset;
     } else if (auto *enabled = get_if<bool>(&options.highlightUntyped.value())) {
-        return enabled ? core::TrackUntyped::Everywhere : core::TrackUntyped::Nowhere;
+        return *enabled ? core::TrackUntyped::Everywhere : core::TrackUntyped::Nowhere;
     } else {
         auto &highlightUntyped = get<string>(options.highlightUntyped.value());
         if (highlightUntyped == "" || highlightUntyped == "everywhere") {
