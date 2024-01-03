@@ -198,7 +198,6 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                 if (location == nullptr) {
                     // This was probably from an addErrorNote call. Still want to report the note.
                     location = config->loc2Location(gs, error->loc);
-                    message = "\n    " + message;
                 }
                 if (location == nullptr) {
                     continue;
