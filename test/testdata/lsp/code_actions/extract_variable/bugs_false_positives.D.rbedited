@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 #
 # This file contain cases where we should disallow the user from extracting to variable,
 # but incorrectly allow it.

@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 # assert-no-code-action: refactor.extract
 def example(x)
 #           ^ apply-code-action: [A] Extract Variable

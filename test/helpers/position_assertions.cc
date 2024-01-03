@@ -258,6 +258,7 @@ const UnorderedMap<
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
+        {"enable-experimental-lsp-extract-to-variable", BooleanPropertyAssertion::make},
         {"selective-apply-code-action", StringPropertyAssertions::make},
         {"use-code-action-resolve", BooleanPropertyAssertion::make},
         {"assert-no-code-action", StringPropertyAssertions::make},

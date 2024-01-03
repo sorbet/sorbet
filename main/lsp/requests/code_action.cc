@@ -263,7 +263,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             action->edit = move(workspaceEdit);
             result.emplace_back(move(action));
         } else {
-            if (loc.beginPos() != loc.endPos()) {
+            if (loc.beginPos() != loc.endPos() && config.opts.lspExtractToVariableEnabled) {
                 // For move method to new module we use canResolveLazily to defer the computation
                 // until the user has actually selected the action. We can't do that here because
                 // we need to do the core computation to know if extract the current selection is

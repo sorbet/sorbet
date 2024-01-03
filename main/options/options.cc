@@ -351,6 +351,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("enable-experimental-requires-ancestor",
                                     "Enable experimental `requires_ancestor` annotation");
 
+    options.add_options("advanced")("enable-experimental-lsp-extract-to-variable",
+                                    "Enable experimental LSP feature: Extract To Variable");
+
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -728,6 +731,8 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.lspExtractToVariableEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-extract-to-variable"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
         if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
             if (!FileOps::exists(opts.rubyfmtPath)) {
