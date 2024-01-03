@@ -5,15 +5,17 @@ suggest_static.rb:11: Method `foo` does not exist on `A` https://srb.help/7003
     suggest_static.rb:11:
     11 |A.new.foo
         ^^^^^
-  Note:
-    Did you mean to call `A.foo` which is a singleton class method?
+  There is a singleton class method with the same name:
+    suggest_static.rb:3: Defined here
+     3 |  def self.foo
+          ^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it, or
+    - remove `self.` from its definition to make it an instance method
   Autocorrect: Done
     suggest_static.rb:11: Inserted `.class`
     11 |A.new.foo
              ^
-    suggest_static.rb:3: `foo` defined here
-     3 |  def self.foo
-          ^^^^^^^^^^^^
 
 suggest_static.rb:21: Method `on_both` does not exist on `Left` component of `T.any(Left, Right)` https://srb.help/7003
     21 |left_or_right.on_both
@@ -22,15 +24,17 @@ suggest_static.rb:21: Method `on_both` does not exist on `Left` component of `T.
     suggest_static.rb:20:
     20 |left_or_right = T.let(Left.new, T.any(Left, Right))
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Did you mean to call `Left.on_both` which is a singleton class method?
+  There is a singleton class method with the same name:
+    suggest_static.rb:14: Defined here
+    14 |  def self.on_both; end
+          ^^^^^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it, or
+    - remove `self.` from its definition to make it an instance method
   Autocorrect: Done
     suggest_static.rb:21: Inserted `.class`
     21 |left_or_right.on_both
                      ^
-    suggest_static.rb:14: `on_both` defined here
-    14 |  def self.on_both; end
-          ^^^^^^^^^^^^^^^^
 
 suggest_static.rb:21: Method `on_both` does not exist on `Right` component of `T.any(Left, Right)` https://srb.help/7003
     21 |left_or_right.on_both
@@ -39,28 +43,33 @@ suggest_static.rb:21: Method `on_both` does not exist on `Right` component of `T
     suggest_static.rb:20:
     20 |left_or_right = T.let(Left.new, T.any(Left, Right))
                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Did you mean to call `Right.on_both` which is a singleton class method?
+  There is a singleton class method with the same name:
+    suggest_static.rb:17: Defined here
+    17 |  def self.on_both; end
+          ^^^^^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it, or
+    - remove `self.` from its definition to make it an instance method
   Autocorrect: Done
     suggest_static.rb:21: Inserted `.class`
     21 |left_or_right.on_both
                      ^
-    suggest_static.rb:17: `on_both` defined here
-    17 |  def self.on_both; end
-          ^^^^^^^^^^^^^^^^
 
 suggest_static.rb:7: Method `foo` does not exist on `A` https://srb.help/7003
      7 |    foo
             ^^^
-  Note:
-    Did you mean to call `A.foo` which is a singleton class method?
+  There is a singleton class method with the same name:
+    suggest_static.rb:3: Defined here
+     3 |  def self.foo
+          ^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it,
+    - remove `self.` from its definition to make it an instance method, or
+    - define the current method as a singleton class method using `def self.`
   Autocorrect: Done
     suggest_static.rb:7: Inserted `self.class.`
      7 |    foo
             ^
-    suggest_static.rb:3: `foo` defined here
-     3 |  def self.foo
-          ^^^^^^^^^^^^
 Errors: 4
 
 --------------------------------------------------------------------------

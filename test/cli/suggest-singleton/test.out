@@ -19,15 +19,17 @@ suggest-singleton.rb:13: Method `bar` does not exist on `A` https://srb.help/700
     suggest-singleton.rb:13:
     13 |A.new.bar
         ^^^^^
-  Note:
-    Did you mean to call `A.bar` which is a singleton class method?
+  There is a singleton class method with the same name:
+    suggest-singleton.rb:5: Defined here
+     5 |  def self.bar
+          ^^^^^^^^^^^^
+    Either:
+    - use `.class` to call it, or
+    - remove `self.` from its definition to make it an instance method
   Autocorrect: Done
     suggest-singleton.rb:13: Inserted `.class`
     13 |A.new.bar
              ^
-    suggest-singleton.rb:5: `bar` defined here
-     5 |  def self.bar
-          ^^^^^^^^^^^^
 
 suggest-singleton.rb:14: Method `my_attribute` does not exist on `T.class_of(A)` https://srb.help/7003
     14 |A.my_attribute

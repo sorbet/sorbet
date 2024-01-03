@@ -754,14 +754,51 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                   args.receiverLoc().source(gs).value());
                 }
             } else {
+                auto canSkipFuzzyMatch = false;
                 if (symbol.data(gs)->isModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
+                } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
+                           symbol.data(gs)->lookupSingletonClass(gs).exists()) {
+                    auto singleton = symbol.data(gs)->lookupSingletonClass(gs);
+                    auto methodOnSingleton = singleton.data(gs)->findMethodTransitive(gs, args.name);
+                    if (methodOnSingleton.exists()) {
+                        // isPrivateOk implies that the singleton class of the receiver is also the
+                        // singleton class of the enclosing method, because the receiver is not a
+                        // module and is syntactically `self`.
+                        auto eitherLine =
+                            args.isPrivateOk
+                                ? ErrorLine::fromWithoutLoc(
+                                      "Either:\n"
+                                      "    - use `{}` to call it,\n"
+                                      "    - remove `{}` from its definition to make it an instance method, or\n"
+                                      "    - define the current method as a singleton class method using `{}`",
+                                      ".class", "self.", "def self.")
+                                : ErrorLine::fromWithoutLoc(
+                                      "Either:\n"
+                                      "    - use `{}` to call it, or\n"
+                                      "    - remove `{}` from its definition to make it an instance method",
+                                      ".class", "self.");
+
+                        e.addErrorSection(
+                            ErrorSection("There is a singleton class method with the same name:",
+                                         {
+                                             ErrorLine::from(methodOnSingleton.data(gs)->loc(), "Defined here"),
+                                             move(eitherLine),
+                                         }));
+
+                        if (args.receiverLoc().empty()) {
+                            e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
+                        } else {
+                            e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
+                        }
+                        canSkipFuzzyMatch = true;
+                    }
                 }
-                auto canSkipFuzzyMatch = false;
+
                 if (!canSkipFuzzyMatch) {
                     auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
@@ -818,16 +855,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             } else {
                                 e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
                             }
-                        } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
-                            e.addErrorNote("Did you mean to call `{}` which is a singleton class method?",
-                                           possibleSymbol.show(gs));
-                            if (args.receiverLoc().empty()) {
-                                e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(),
-                                              "self.class.");
-                            } else {
-                                e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
-                            }
-                            e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
                         }
                     }
                 }

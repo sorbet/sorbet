@@ -5,10 +5,10 @@ class A
   def self.my_singleton_class_method; end
 
   def example
-    singleton_method # error: does not exist
-    self.singleton_method # error: does not exist
+    self.class.my_singleton_class_method # error: does not exist
+    self.class.my_singleton_class_method # error: does not exist
     a = A.new
-    a.singleton_method # error: does not exist
+    a.class.my_singleton_class_method # error: does not exist
   end
 end
 # ------------------------------
