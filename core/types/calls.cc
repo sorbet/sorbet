@@ -761,6 +761,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
+                auto canSkipFuzzyMatch = false;
+                if (!canSkipFuzzyMatch) {
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                 for (auto alternative : alternatives) {
                     auto possibleSymbol = alternative.symbol;
@@ -826,6 +828,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         }
                         e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
                     }
+                }
                 }
             }
         }
