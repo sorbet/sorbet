@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 
 begin
   1 + 1

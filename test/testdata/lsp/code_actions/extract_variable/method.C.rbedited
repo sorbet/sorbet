@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 
 def b; 1 + 123; end
 #          ^^^ apply-code-action: [B] Extract Variable

@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 
 [].each { |x| return x.foo if x.foo}
 #                             ^^^^^ apply-code-action: [A] Extract Variable
