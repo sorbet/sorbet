@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 
 if 1 == 2
   newVariable = 1

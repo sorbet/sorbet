@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
 
 class A; newVariable = 123; 1 + newVariable; end
 #            ^^^ apply-code-action: [A] Extract Variable
