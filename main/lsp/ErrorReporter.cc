@@ -185,6 +185,15 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
             }
 
             for (auto &errorLine : section.messages) {
+                auto location = config->loc2Location(gs, errorLine.loc);
+                if (location == nullptr) {
+                    // This was probably from an addErrorNote call. Still want to report the note.
+                    location = config->loc2Location(gs, error->loc);
+                }
+                if (location == nullptr) {
+                    continue;
+                }
+
                 string message;
                 if (section.isAutocorrectDescription && section.isDidYouMean) {
                     message = fmt::format("{} (fix available)", sectionHeader);
@@ -194,14 +203,6 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                     message = sectionHeader;
                 }
 
-                auto location = config->loc2Location(gs, errorLine.loc);
-                if (location == nullptr) {
-                    // This was probably from an addErrorNote call. Still want to report the note.
-                    location = config->loc2Location(gs, error->loc);
-                }
-                if (location == nullptr) {
-                    continue;
-                }
                 relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(std::move(location), message));
             }
         }
