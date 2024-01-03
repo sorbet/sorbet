@@ -54,6 +54,22 @@ void LSPConfiguration::assertHasClientConfig() const {
     }
 }
 
+core::TrackUntyped LSPClientConfiguration::parseEnableHighlightUntyped(const SorbetInitializationOptions &options,
+                                                                       core::TrackUntyped defaultIfUnset) {
+    if (!options.highlightUntyped.has_value()) {
+        return defaultIfUnset;
+    } else if (auto *enabled = get_if<bool>(&options.highlightUntyped.value())) {
+        return enabled ? core::TrackUntyped::Everywhere : core::TrackUntyped::Nowhere;
+    } else {
+        auto &highlightUntyped = get<string>(options.highlightUntyped.value());
+        if (highlightUntyped == "" || highlightUntyped == "everywhere") {
+            return core::TrackUntyped::Everywhere;
+        } else {
+            return core::TrackUntyped::Nowhere;
+        }
+    }
+}
+
 LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     // Note: Default values for fields are set in class definition.
     if (auto rootUriString = get_if<string>(&params.rootUri)) {
@@ -103,7 +119,7 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);
         enableTypecheckInfo = initOptions->enableTypecheckInfo.value_or(false);
         enableSorbetURIs = initOptions->supportsSorbetURIs.value_or(false);
-        enableHighlightUntyped = initOptions->highlightUntyped.value_or(false);
+        enableHighlightUntyped = parseEnableHighlightUntyped(*initOptions, core::TrackUntyped::Nowhere);
         enableTypedFalseCompletionNudges = initOptions->enableTypedFalseCompletionNudges.value_or(true);
     }
 }

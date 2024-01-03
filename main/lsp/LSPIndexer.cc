@@ -399,7 +399,8 @@ const core::File &LSPIndexer::getFile(core::FileRef fref) const {
 }
 
 void LSPIndexer::updateGsFromOptions(const DidChangeConfigurationParams &options) const {
-    initialGS->trackUntyped = options.settings->highlightUntyped.value_or(initialGS->trackUntyped);
+    initialGS->trackUntyped =
+        LSPClientConfiguration::parseEnableHighlightUntyped(*options.settings, initialGS->trackUntyped);
 }
 
 } // namespace sorbet::realmain::lsp
