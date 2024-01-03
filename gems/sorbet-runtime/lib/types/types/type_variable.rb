@@ -19,6 +19,10 @@ module T::Types
       @variance = variance
     end
 
+    def build_type
+      nil
+    end
+
     def valid?(obj)
       true
     end

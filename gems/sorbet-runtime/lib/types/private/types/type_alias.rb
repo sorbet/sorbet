@@ -9,6 +9,10 @@ module T::Private::Types
       @callable = callable
     end
 
+    def build_type
+      nil
+    end
+
     def aliased_type
       @aliased_type ||= T::Utils.coerce(@callable.call)
     end

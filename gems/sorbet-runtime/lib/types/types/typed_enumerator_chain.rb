@@ -3,15 +3,13 @@
 
 module T::Types
   class TypedEnumeratorChain < TypedEnumerable
-    attr_reader :type
-
     def underlying_class
       Enumerator::Chain
     end
 
     # overrides Base
     def name
-      "T::Enumerator::Chain[#{@type.name}]"
+      "T::Enumerator::Chain[#{type.name}]"
     end
 
     # overrides Base

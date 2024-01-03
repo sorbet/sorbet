@@ -3,15 +3,13 @@
 
 module T::Types
   class TypedEnumeratorLazy < TypedEnumerable
-    attr_reader :type
-
     def underlying_class
       Enumerator::Lazy
     end
 
     # overrides Base
     def name
-      "T::Enumerator::Lazy[#{@type.name}]"
+      "T::Enumerator::Lazy[#{type.name}]"
     end
 
     # overrides Base

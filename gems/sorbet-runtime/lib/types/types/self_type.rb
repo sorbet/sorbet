@@ -8,6 +8,10 @@ module T::Types
 
     def initialize(); end
 
+    def build_type
+      nil
+    end
+
     # overrides Base
     def name
       "T.self_type"

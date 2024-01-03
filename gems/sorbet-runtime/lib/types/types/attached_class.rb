@@ -10,6 +10,10 @@ module T::Types
 
     def initialize(); end
 
+    def build_type
+      nil
+    end
+
     # overrides Base
     def name
       "T.attached_class"

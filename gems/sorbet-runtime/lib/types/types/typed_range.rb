@@ -3,15 +3,13 @@
 
 module T::Types
   class TypedRange < TypedEnumerable
-    attr_reader :type
-
     def underlying_class
       Hash
     end
 
     # overrides Base
     def name
-      "T::Range[#{@type.name}]"
+      "T::Range[#{type.name}]"
     end
 
     # overrides Base

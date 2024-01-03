@@ -12,6 +12,10 @@ module T::Types
       @values = values
     end
 
+    def build_type
+      nil
+    end
+
     # overrides Base
     def valid?(obj)
       @values.member?(obj)

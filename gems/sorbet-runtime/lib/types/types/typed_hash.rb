@@ -3,22 +3,38 @@
 
 module T::Types
   class TypedHash < TypedEnumerable
-    # Technically we don't need these, but they are a nice api
-    attr_reader :keys, :values
-
     def underlying_class
       Hash
     end
 
     def initialize(keys:, values:)
-      @keys = T::Utils.coerce(keys)
-      @values = T::Utils.coerce(values)
-      @type = T::Utils.coerce([keys, values])
+      @inner_keys = keys
+      @inner_values = values
+    end
+
+    # Technically we don't need this, but it is a nice api
+    def keys
+      @keys ||= T::Utils.coerce(@inner_keys)
+    end
+
+    # Technically we don't need this, but it is a nice api
+    def values
+      @values ||= T::Utils.coerce(@inner_values)
+    end
+
+    def type
+      @type ||= T::Utils.coerce([keys, values])
+    end
+
+    def build_type
+      keys
+      values
+      super
     end
 
     # overrides Base
     def name
-      "T::Hash[#{@keys.name}, #{@values.name}]"
+      "T::Hash[#{keys.name}, #{values.name}]"
     end
 
     # overrides Base

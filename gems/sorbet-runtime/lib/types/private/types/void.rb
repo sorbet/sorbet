@@ -18,6 +18,10 @@ module T::Private::Types
       freeze
     end
 
+    def build_type
+      nil
+    end
+
     # overrides Base
     def name
       "<VOID>"

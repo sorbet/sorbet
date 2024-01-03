@@ -5,7 +5,7 @@ module T::Types
   class TypedArray < TypedEnumerable
     # overrides Base
     def name
-      "T::Array[#{@type.name}]"
+      "T::Array[#{type.name}]"
     end
 
     def underlying_class
@@ -58,6 +58,11 @@ module T::Types
 
       def valid?(obj)
         obj.is_a?(Array)
+      end
+
+      def freeze
+        build_type # force lazy initialization before freezing the object
+        super
       end
 
       module Private

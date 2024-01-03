@@ -233,6 +233,10 @@ module Opus::Types::Test
 
         it 'valid? does not allocate' do
           skip unless check_alloc_counts
+
+          # Call a method on the type to trigger the lazy initialization
+          assert_equal("T.nilable(T.any(Integer, T::Boolean))", @type.name)
+
           allocs_when_valid = counting_allocations {@type.valid?(0)}
           assert_equal(0, allocs_when_valid)
 
@@ -372,6 +376,9 @@ module Opus::Types::Test
         @klass.include(Mixin1)
         @klass.include(Mixin2)
 
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("T.all(Opus::Types::Test::TypesTest::Mixin1, Opus::Types::Test::TypesTest::Mixin2)", @type.name)
+
         allocs_when_valid = counting_allocations {@type.valid?(@klass)}
         assert_equal(0, allocs_when_valid)
 
@@ -407,6 +414,10 @@ module Opus::Types::Test
 
       it 'valid? does not allocate' do
         skip unless check_alloc_counts
+
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("[String, T::Boolean]", @type.name)
+
         arr = ["foo", false]
         allocs_when_valid = counting_allocations {@type.valid?(arr)}
         assert_equal(0, allocs_when_valid)
@@ -459,6 +470,10 @@ module Opus::Types::Test
 
       it 'valid? does not allocate' do
         skip unless check_alloc_counts
+
+        # Call a method on the type to trigger the lazy initialization
+        assert_equal("{a: String, b: T::Boolean, c: T.nilable(Numeric)}", @type.name)
+
         h = {a: 'foo', b: false, c: nil}
         allocs_when_valid = counting_allocations {@type.valid?(h)}
         assert_equal(0, allocs_when_valid)
@@ -1090,7 +1105,29 @@ module Opus::Types::Test
       end
     end
 
+    describe 'NotTyped' do
+      it 'builds properly' do
+        type = T::Private::Types::NotTyped.new
+        type.build_type
+        assert_equal('<NOT-TYPED>', type.name)
+      end
+    end
+
+    describe 'StringHolder' do
+      it 'builds properly' do
+        type = T::Private::Types::StringHolder.new("String")
+        type.build_type
+        assert_equal('String', type.name)
+      end
+    end
+
     describe 'TypeAlias' do
+      it 'builds properly' do
+        type = T.type_alias {String}
+        type.build_type
+        assert_equal('String', type.name)
+      end
+
       it 'delegates name' do
         type = T.type_alias {T.any(Integer, String)}
         assert_equal('T.any(Integer, String)', type.name)
@@ -1675,6 +1712,12 @@ module Opus::Types::Test
       end
 
       describe 'type variables' do
+        it 'builds properly' do
+          type = T::Types::TypeParameter.new(:FOO)
+          type.build_type
+          assert_equal('T.type_parameter(:FOO)', type.name)
+        end
+
         it 'type members are subtypes of everything' do
           assert_subtype(T::Types::TypeMember.new(:in), T.untyped)
           assert_subtype(T::Types::TypeMember.new(:in), String)

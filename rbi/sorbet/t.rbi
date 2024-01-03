@@ -443,7 +443,7 @@ module T::Utils
   def self.coerce(val); end
 
   def self.resolve_alias(type); end
-  def self.run_all_sig_blocks; end
+  def self.run_all_sig_blocks(force_type_init: true); end
   def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end

@@ -6,6 +6,10 @@
 class T::Private::Types::NotTyped < T::Types::Base
   ERROR_MESSAGE = "Validation is being done on a `NotTyped`. Please report this bug at https://github.com/sorbet/sorbet/issues"
 
+  def build_type
+    nil
+  end
+
   # overrides Base
   def name
     "<NOT-TYPED>"

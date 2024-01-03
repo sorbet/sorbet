@@ -6,6 +6,10 @@ module T::Types
   class NoReturn < Base
     def initialize; end
 
+    def build_type
+      nil
+    end
+
     # overrides Base
     def name
       "T.noreturn"

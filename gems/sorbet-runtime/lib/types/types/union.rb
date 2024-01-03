@@ -4,12 +4,14 @@
 module T::Types
   # Takes a list of types. Validates that an object matches at least one of the types.
   class Union < Base
-    attr_reader :types
-
     # Don't use Union.new directly, use `Private::Pool.union_of_types`
     # inside sorbet-runtime and `T.any` elsewhere.
     def initialize(types)
-      @types = types.flat_map do |type|
+      @inner_types = types
+    end
+
+    def types
+      @types ||= @inner_types.flat_map do |type|
         type = T::Utils.coerce(type)
         if type.is_a?(Union)
           # Simplify nested unions (mostly so `name` returns a nicer value)
@@ -18,6 +20,11 @@ module T::Types
           type
         end
       end.uniq
+    end
+
+    def build_type
+      types
+      nil
     end
 
     # overrides Base
@@ -51,12 +58,12 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      @types.any? {|type| type.recursively_valid?(obj)}
+      types.any? {|type| type.recursively_valid?(obj)}
     end
 
     # overrides Base
     def valid?(obj)
-      @types.any? {|type| type.valid?(obj)}
+      types.any? {|type| type.valid?(obj)}
     end
 
     # overrides Base

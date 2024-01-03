@@ -33,6 +33,12 @@ module T::Types
       raise NotImplementedError
     end
 
+    # Force any lazy initialization that this type might need to do
+    # It's unusual to call this directly; you probably want to call it indirectly via `T::Utils.run_all_sig_blocks`.
+    def build_type
+      raise NotImplementedError
+    end
+
     # Equality is based on name, so be sure the name reflects all relevant state when implementing.
     def name
       raise NotImplementedError
