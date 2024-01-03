@@ -1123,7 +1123,7 @@ module Opus::Types::Test
 
     describe 'TypeAlias' do
       it 'builds properly' do
-        type = T.type_alias { String }
+        type = T.type_alias {String}
         type.build_type
         assert_equal('String', type.name)
       end
