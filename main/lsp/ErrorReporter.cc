@@ -184,6 +184,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                 continue;
             }
 
+            bool usedSectionHeader = false;
             for (auto &errorLine : section.messages) {
                 auto location = config->loc2Location(gs, errorLine.loc);
                 if (location == nullptr) {
@@ -197,7 +198,13 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
                 string message;
                 if (section.isAutocorrectDescription && section.isDidYouMean) {
                     message = fmt::format("{} (fix available)", sectionHeader);
+                    usedSectionHeader = true;
                 } else if (errorLine.formattedMessage.length() > 0) {
+                    if (!usedSectionHeader) {
+                        relatedInformation.push_back(
+                            make_unique<DiagnosticRelatedInformation>(location->copy(), sectionHeader));
+                        usedSectionHeader = true;
+                    }
                     message = errorLine.formattedMessage;
                 } else {
                     message = sectionHeader;
