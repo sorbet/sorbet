@@ -2,7 +2,7 @@
 # selective-apply-code-action: refactor.extract
 # enable-experimental-lsp-extract-to-variable: true
 
-def b; 1 + 123; end
+def b; newVariable = 123; 1 + newVariable; end
 #          ^^^ apply-code-action: [A] Extract Variable
 
 def c; 1 + 1; 1 + 123; end
@@ -15,8 +15,7 @@ end
 
 def e
   1 + 1
-  newVariable = 123
-  1 + newVariable
+  1 + 123
 #     ^^^ apply-code-action: [D] Extract Variable
 end
 
