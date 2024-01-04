@@ -261,7 +261,7 @@
           "default": false
         },
         "sorbet.highlightUntyped": {
-          "type": "string",
+          "enum": ["nowhere", "everywhere"],
           "description": "Shows warning for untyped values.",
           "default": "nowhere"
         },

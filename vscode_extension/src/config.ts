@@ -12,16 +12,19 @@ import * as fs from "fs";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
-function maybeUpgradeHighlightUntyped(
-  value: boolean | TrackUntyped,
+function coerceTrackUntypedSetting(
+  value: boolean | string,
 ): TrackUntyped {
   switch (value) {
     case true:
       return "everywhere";
     case false:
       return "nowhere";
-    default:
+    case "nowhere":
+    case "everywhere":
       return value;
+    default:
+      return "nowhere";
   }
 }
 
@@ -244,7 +247,7 @@ export class SorbetExtensionConfig implements Disposable {
       "highlightUntyped",
       this.highlightUntyped,
     );
-    this.wrappedHighlightUntyped = maybeUpgradeHighlightUntyped(
+    this.wrappedHighlightUntyped = coerceTrackUntypedSetting(
       highlightUntyped,
     );
     this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
