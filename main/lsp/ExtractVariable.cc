@@ -50,7 +50,7 @@ public:
     ExtractVariableWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), matchingLoc(core::LocOffsets::none()), enclosingScopeLoc(core::LocOffsets::none()) {}
 
-    void preTransformExpression(core::Context ctx, const ast::ExpressionPtr &tree) {
+    void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
             // It's not valid to extract the following node types
             if (!ast::isa_tree<ast::Break>(tree) && !ast::isa_tree<ast::Next>(tree) &&
