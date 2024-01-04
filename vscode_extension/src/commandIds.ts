@@ -55,6 +55,12 @@ export const TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID =
   "sorbet.toggleHighlightUntyped";
 
 /**
+ * Configure highlighting of untyped code.
+ */
+export const CONFIGURE_HIGHLIGHT_UNTYPED_COMMAND_ID =
+  "sorbet.configureHighlightUntyped";
+
+/**
  * Toggle the auto-complete nudge in `typed: false` files.
  */
 export const TOGGLE_TYPED_FALSE_COMPLETION_NUDGES_COMMAND_ID =

@@ -30,6 +30,7 @@
     "onCommand:sorbet.setLogLevel",
     "onCommand:sorbet.showOutput",
     "onCommand:sorbet.toggleHighlightUntyped",
+    "onCommand:sorbet.configureHighlightUntyped",
     "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
@@ -95,6 +96,12 @@
       {
         "command": "sorbet.toggleHighlightUntyped",
         "title": "Toggle highlighting untyped code",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
+      },
+      {
+        "command": "sorbet.configureHighlightUntyped",
+        "title": "Configure untyped code highlighting",
         "category": "Sorbet",
         "enablement": "workbenchState != empty"
       },
