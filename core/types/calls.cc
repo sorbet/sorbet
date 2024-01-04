@@ -754,77 +754,108 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                   args.receiverLoc().source(gs).value());
                 }
             } else {
+                auto canSkipFuzzyMatch = false;
                 if (symbol.data(gs)->isModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
                         e.addErrorNote("Did you mean to `{}` in this module?",
                                        fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
-                }
-                auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
-                for (auto alternative : alternatives) {
-                    auto possibleSymbol = alternative.symbol;
-                    if (!possibleSymbol.isClassOrModule() &&
-                        (!possibleSymbol.isMethod() ||
-                         (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
-                        continue;
-                    }
+                } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
+                           symbol.data(gs)->lookupSingletonClass(gs).exists()) {
+                    auto singleton = symbol.data(gs)->lookupSingletonClass(gs);
+                    auto methodOnSingleton = singleton.data(gs)->findMethodTransitive(gs, args.name);
+                    if (methodOnSingleton.exists()) {
+                        // isPrivateOk implies that the singleton class of the receiver is also the
+                        // singleton class of the enclosing method, because the receiver is not a
+                        // module and is syntactically `self`.
+                        auto eitherLine =
+                            args.isPrivateOk
+                                ? ErrorLine::fromWithoutLoc(
+                                      "Either:\n"
+                                      "    - use `{}` to call it,\n"
+                                      "    - remove `{}` from its definition to make it an instance method, or\n"
+                                      "    - define the current method as a singleton class method using `{}`",
+                                      ".class", "self.", "def self.")
+                                : ErrorLine::fromWithoutLoc(
+                                      "Either:\n"
+                                      "    - use `{}` to call it, or\n"
+                                      "    - remove `{}` from its definition to make it an instance method",
+                                      ".class", "self.");
 
-                    if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
-                        e.addErrorLine(possibleSymbol.loc(gs),
-                                       "Method `{}` defined here without a corresponding setter",
-                                       possibleSymbol.name(gs).show(gs));
-                        continue;
-                    }
+                        e.addErrorSection(
+                            ErrorSection("There is a singleton class method with the same name:",
+                                         {
+                                             ErrorLine::from(methodOnSingleton.data(gs)->loc(), "Defined here"),
+                                             move(eitherLine),
+                                         }));
 
-                    const auto toReplace = args.name.toString(gs);
-                    if (args.funLoc().source(gs) != toReplace) {
-                        auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
-                                                                              : possibleSymbol.show(gs);
-                        e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
-                        continue;
-                    }
-
-                    if (possibleSymbol.isClassOrModule()) {
-                        if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
-                            // If this call was in type syntax, we might have already have built an
-                            // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
-                            continue;
-                        }
-                        e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
-                        e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
-                        continue;
-                    }
-
-                    const auto replacement = possibleSymbol.name(gs).toString(gs);
-                    if (replacement != toReplace) {
-                        e.didYouMean(replacement, args.funLoc());
-                        e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
-                        continue;
-                    }
-
-                    auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
-                    if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
-                        auto defKeyword = "def ";
-                        auto defKeywordLen = char_traits<char>::length(defKeyword);
-                        auto prefixLen = defKeywordLen + toReplace.size();
-                        auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
-                        e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
-                        if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
-                            e.replaceWith("Define method with `self.`",
-                                          possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0), "self.");
-                        } else {
-                            e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
-                        }
-                    } else if (symbol.data(gs)->lookupSingletonClass(gs) == possibleSymbolOwner) {
-                        e.addErrorNote("Did you mean to call `{}` which is a singleton class method?",
-                                       possibleSymbol.show(gs));
-                        if (args.receiverLoc().empty()) {
+                        if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Insert `self.class.`", args.funLoc().copyWithZeroLength(), "self.class.");
-                        } else {
+                        } else if (args.receiverLoc().exists()) {
                             e.replaceWith("Insert `.class`", args.receiverLoc().copyEndWithZeroLength(), ".class");
                         }
-                        e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+                        canSkipFuzzyMatch = true;
+                    }
+                }
+
+                if (!canSkipFuzzyMatch) {
+                    auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
+                    for (auto alternative : alternatives) {
+                        auto possibleSymbol = alternative.symbol;
+                        if (!possibleSymbol.isClassOrModule() &&
+                            (!possibleSymbol.isMethod() ||
+                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                            continue;
+                        }
+
+                        if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
+                            e.addErrorLine(possibleSymbol.loc(gs),
+                                           "Method `{}` defined here without a corresponding setter",
+                                           possibleSymbol.name(gs).show(gs));
+                            continue;
+                        }
+
+                        const auto toReplace = args.name.toString(gs);
+                        if (args.funLoc().source(gs) != toReplace) {
+                            auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
+                                                                                  : possibleSymbol.show(gs);
+                            e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                            continue;
+                        }
+
+                        if (possibleSymbol.isClassOrModule()) {
+                            if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
+                                // If this call was in type syntax, we might have already have built an
+                                // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
+                                continue;
+                            }
+                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                            continue;
+                        }
+
+                        const auto replacement = possibleSymbol.name(gs).toString(gs);
+                        if (replacement != toReplace) {
+                            e.didYouMean(replacement, args.funLoc());
+                            e.addErrorLine(possibleSymbol.loc(gs), "Defined here");
+                            continue;
+                        }
+
+                        auto possibleSymbolOwner = possibleSymbol.asMethodRef().data(gs)->owner;
+                        if (possibleSymbolOwner.data(gs)->lookupSingletonClass(gs) == symbol) {
+                            auto defKeyword = "def ";
+                            auto defKeywordLen = char_traits<char>::length(defKeyword);
+                            auto prefixLen = defKeywordLen + toReplace.size();
+                            auto declLocPrefix = possibleSymbol.loc(gs).adjustLen(gs, 0, prefixLen);
+                            e.addErrorNote("Did you mean to define `{}` as a singleton class method?", toReplace);
+                            if (declLocPrefix.source(gs) == fmt::format("{}{}", defKeyword, toReplace)) {
+                                e.replaceWith("Define method with `self.`",
+                                              possibleSymbol.loc(gs).adjustLen(gs, defKeywordLen, 0), "self.");
+                            } else {
+                                e.addErrorLine(possibleSymbol.loc(gs), "`{}` defined here", toReplace);
+                            }
+                        }
                     }
                 }
             }

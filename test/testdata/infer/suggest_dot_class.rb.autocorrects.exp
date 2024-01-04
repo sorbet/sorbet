@@ -1,0 +1,14 @@
+# -- test/testdata/infer/suggest_dot_class.rb --
+# typed: true
+
+class A
+  def self.my_singleton_class_method; end
+
+  def example
+    self.class.my_singleton_class_method # error: does not exist
+    self.class.my_singleton_class_method # error: does not exist
+    a = A.new
+    a.class.my_singleton_class_method # error: does not exist
+  end
+end
+# ------------------------------
