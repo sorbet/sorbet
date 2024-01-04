@@ -145,6 +145,9 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
     // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
     // the same as what we're pulling out from the ExpressionPtr, but we'll just get it directly
     // for consistency.
+    // The ENFORCE(!ast::isa_tree<ast::InsSeq>(...)) are there check that the enclosingScope returned
+    // by the TreeWalk doesn't contain a further InsSeq, because the preTransformInsSeq should have
+    // matched on that (if it contains the selectionLoc).
     if (auto insSeq = ast::cast_tree<ast::InsSeq>(*enclosingScope)) {
         for (auto &stat : insSeq->stats) {
             if (stat.loc().contains(locOffsets)) {
@@ -157,13 +160,6 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
             ENFORCE(!ast::isa_tree<ast::InsSeq>(insSeq->expr));
             whereToInsert = insSeq->expr.loc();
         }
-    } else if (auto block = ast::cast_tree<ast::Block>(*enclosingScope)) {
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
-        whereToInsert = block->body.loc();
-    } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(*enclosingScope)) {
-        // TODO(neil): this will fail for endless methods
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
-        whereToInsert = methodDef->rhs.loc();
     } else if (auto classDef = ast::cast_tree<ast::ClassDef>(*enclosingScope)) {
         if (classDef->rhs.size() == 0) {
             ENFORCE(false);
@@ -176,32 +172,57 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
                 }
             }
         }
+    } else if (auto block = ast::cast_tree<ast::Block>(*enclosingScope)) {
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
+        ENFORCE(block->body.loc() == extractVariableWalk.enclosingScopeLoc,
+                "loc on node doesn't match the loc found in the tree walk");
+        whereToInsert = block->body.loc();
+    } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(*enclosingScope)) {
+        // TODO(neil): this will fail for endless methods
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
+        ENFORCE(methodDef->rhs.loc() == extractVariableWalk.enclosingScopeLoc,
+                "loc on node doesn't match the loc found in the tree walk");
+        whereToInsert = methodDef->rhs.loc();
     } else if (auto if_ = ast::cast_tree<ast::If>(*enclosingScope)) {
         if (if_->thenp.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
             whereToInsert = if_->thenp.loc();
+            ENFORCE(if_->thenp.loc() == extractVariableWalk.enclosingScopeLoc,
+                    "loc on node doesn't match the loc found in the tree walk");
         } else {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->elsep));
             whereToInsert = if_->elsep.loc();
+            ENFORCE(if_->elsep.loc() == extractVariableWalk.enclosingScopeLoc,
+                    "loc on node doesn't match the loc found in the tree walk");
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(*enclosingScope)) {
         if (rescue->body.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->body));
+            ENFORCE(rescue->body.loc() == extractVariableWalk.enclosingScopeLoc,
+                    "loc on node doesn't match the loc found in the tree walk");
             whereToInsert = rescue->body.loc();
         } else if (rescue->else_.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->else_));
+            ENFORCE(rescue->else_.loc() == extractVariableWalk.enclosingScopeLoc,
+                    "loc on node doesn't match the loc found in the tree walk");
             whereToInsert = rescue->else_.loc();
         } else if (rescue->ensure.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->ensure));
+            ENFORCE(rescue->ensure.loc() == extractVariableWalk.enclosingScopeLoc,
+                    "loc on node doesn't match the loc found in the tree walk");
             whereToInsert = rescue->ensure.loc();
         } else {
             ENFORCE(false)
         }
     } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(*enclosingScope)) {
         ENFORCE(!ast::isa_tree<ast::InsSeq>(rescueCase->body));
+        ENFORCE(rescueCase->body.loc() == extractVariableWalk.enclosingScopeLoc,
+                "loc on node doesn't match the loc found in the tree walk");
         whereToInsert = rescueCase->body.loc();
     } else if (auto while_ = ast::cast_tree<ast::While>(*enclosingScope)) {
         ENFORCE(!ast::isa_tree<ast::InsSeq>(while_->body));
+        ENFORCE(while_->body.loc() == extractVariableWalk.enclosingScopeLoc,
+                "loc on node doesn't match the loc found in the tree walk");
         whereToInsert = while_->body.loc();
     } else {
         ENFORCE(false);
