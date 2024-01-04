@@ -135,109 +135,109 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, extractVariableWalk, desugaredTree);
 
-    if (extractVariableWalk.foundExactMatch()) {
-        auto locOffsets = selectionLoc.offsets();
-        auto whereToInsert = core::LocOffsets::none();
-        auto enclosingScope = extractVariableWalk.enclosingScope;
-        // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
-        // the same as what we're pulling out from the ExpressionPtr, but we'll just get it directly
-        // for consistency.
-        if (auto insSeq = ast::cast_tree<ast::InsSeq>(*enclosingScope)) {
-            for (auto &stat : insSeq->stats) {
+    if (!extractVariableWalk.foundExactMatch()) {
+        return {};
+    }
+
+    auto locOffsets = selectionLoc.offsets();
+    auto whereToInsert = core::LocOffsets::none();
+    auto enclosingScope = extractVariableWalk.enclosingScope;
+    // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
+    // the same as what we're pulling out from the ExpressionPtr, but we'll just get it directly
+    // for consistency.
+    if (auto insSeq = ast::cast_tree<ast::InsSeq>(*enclosingScope)) {
+        for (auto &stat : insSeq->stats) {
+            if (stat.loc().contains(locOffsets)) {
+                ENFORCE(!ast::isa_tree<ast::InsSeq>(stat));
+                whereToInsert = stat.loc();
+                break;
+            }
+        }
+        if (insSeq->expr.loc().contains(locOffsets)) {
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(insSeq->expr));
+            whereToInsert = insSeq->expr.loc();
+        }
+    } else if (auto block = ast::cast_tree<ast::Block>(*enclosingScope)) {
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
+        whereToInsert = block->body.loc();
+    } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(*enclosingScope)) {
+        // TODO(neil): this will fail for endless methods
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
+        whereToInsert = methodDef->rhs.loc();
+    } else if (auto classDef = ast::cast_tree<ast::ClassDef>(*enclosingScope)) {
+        if (classDef->rhs.size() == 0) {
+            ENFORCE(false);
+        } else {
+            for (auto &stat : classDef->rhs) {
                 if (stat.loc().contains(locOffsets)) {
                     ENFORCE(!ast::isa_tree<ast::InsSeq>(stat));
                     whereToInsert = stat.loc();
                     break;
                 }
             }
-            if (insSeq->expr.loc().contains(locOffsets)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(insSeq->expr));
-                whereToInsert = insSeq->expr.loc();
-            }
-        } else if (auto block = ast::cast_tree<ast::Block>(*enclosingScope)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
-            whereToInsert = block->body.loc();
-        } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(*enclosingScope)) {
-            // TODO(neil): this will fail for endless methods
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
-            whereToInsert = methodDef->rhs.loc();
-        } else if (auto classDef = ast::cast_tree<ast::ClassDef>(*enclosingScope)) {
-            if (classDef->rhs.size() == 0) {
-                ENFORCE(false);
-            } else {
-                for (auto &stat : classDef->rhs) {
-                    if (stat.loc().contains(locOffsets)) {
-                        ENFORCE(!ast::isa_tree<ast::InsSeq>(stat));
-                        whereToInsert = stat.loc();
-                        break;
-                    }
-                }
-            }
-        } else if (auto if_ = ast::cast_tree<ast::If>(*enclosingScope)) {
-            if (if_->thenp.loc().contains(locOffsets)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
-                whereToInsert = if_->thenp.loc();
-            } else {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->elsep));
-                whereToInsert = if_->elsep.loc();
-            }
-        } else if (auto rescue = ast::cast_tree<ast::Rescue>(*enclosingScope)) {
-            if (rescue->body.loc().contains(locOffsets)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->body));
-                whereToInsert = rescue->body.loc();
-            } else if (rescue->else_.loc().contains(locOffsets)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->else_));
-                whereToInsert = rescue->else_.loc();
-            } else if (rescue->ensure.loc().contains(locOffsets)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->ensure));
-                whereToInsert = rescue->ensure.loc();
-            } else {
-                ENFORCE(false)
-            }
-        } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(*enclosingScope)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescueCase->body));
-            whereToInsert = rescueCase->body.loc();
-        } else if (auto while_ = ast::cast_tree<ast::While>(*enclosingScope)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(while_->body));
-            whereToInsert = while_->body.loc();
-        } else {
-            ENFORCE(false);
         }
-        ENFORCE(whereToInsert.exists());
-
-        auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
-        auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
-
-        auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
-                            // If we're inserting at the start of the line (ignoring whitespace),
-                            // let's put the declaration on a new line (above the current one) instead.
-                            ? fmt::format("\n{}", string(numSpaces, ' '))
-                            : "; ";
-
-        vector<unique_ptr<TextEdit>> edits;
-
-        if (whereToInsertLoc.endPos() == selectionLoc.beginPos()) {
-            // if insertion point is touching the selection, let's merge the 2 edits into one,
-            // to prevent an "overlapping" edit.
-            whereToInsertLoc = whereToInsertLoc.join(selectionLoc);
-            edits.emplace_back(make_unique<TextEdit>(
-                Range::fromLoc(gs, whereToInsertLoc),
-                fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
+    } else if (auto if_ = ast::cast_tree<ast::If>(*enclosingScope)) {
+        if (if_->thenp.loc().contains(locOffsets)) {
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
+            whereToInsert = if_->thenp.loc();
         } else {
-            edits.emplace_back(
-                make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
-                                      fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
-            auto selectionRange = Range::fromLoc(gs, selectionLoc);
-            edits.emplace_back(make_unique<TextEdit>(std::move(selectionRange), "newVariable"));
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->elsep));
+            whereToInsert = if_->elsep.loc();
         }
-        auto docEdit = make_unique<TextDocumentEdit>(
-            make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits));
-
-        vector<unique_ptr<TextDocumentEdit>> res;
-        res.emplace_back(move(docEdit));
-        return res;
+    } else if (auto rescue = ast::cast_tree<ast::Rescue>(*enclosingScope)) {
+        if (rescue->body.loc().contains(locOffsets)) {
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->body));
+            whereToInsert = rescue->body.loc();
+        } else if (rescue->else_.loc().contains(locOffsets)) {
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->else_));
+            whereToInsert = rescue->else_.loc();
+        } else if (rescue->ensure.loc().contains(locOffsets)) {
+            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->ensure));
+            whereToInsert = rescue->ensure.loc();
+        } else {
+            ENFORCE(false)
+        }
+    } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(*enclosingScope)) {
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(rescueCase->body));
+        whereToInsert = rescueCase->body.loc();
+    } else if (auto while_ = ast::cast_tree<ast::While>(*enclosingScope)) {
+        ENFORCE(!ast::isa_tree<ast::InsSeq>(while_->body));
+        whereToInsert = while_->body.loc();
+    } else {
+        ENFORCE(false);
     }
+    ENFORCE(whereToInsert.exists());
 
-    return {};
+    auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
+    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
+
+    auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
+                        // If we're inserting at the start of the line (ignoring whitespace),
+                        // let's put the declaration on a new line (above the current one) instead.
+                        ? fmt::format("\n{}", string(numSpaces, ' '))
+                        : "; ";
+
+    vector<unique_ptr<TextEdit>> edits;
+
+    if (whereToInsertLoc.endPos() == selectionLoc.beginPos()) {
+        // if insertion point is touching the selection, let's merge the 2 edits into one,
+        // to prevent an "overlapping" edit.
+        whereToInsertLoc = whereToInsertLoc.join(selectionLoc);
+        edits.emplace_back(make_unique<TextEdit>(
+            Range::fromLoc(gs, whereToInsertLoc),
+            fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
+    } else {
+        edits.emplace_back(
+            make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
+                                  fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
+        auto selectionRange = Range::fromLoc(gs, selectionLoc);
+        edits.emplace_back(make_unique<TextEdit>(std::move(selectionRange), "newVariable"));
+    }
+    auto docEdit = make_unique<TextDocumentEdit>(
+        make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits));
+
+    vector<unique_ptr<TextDocumentEdit>> res;
+    res.emplace_back(move(docEdit));
+    return res;
 }
 } // namespace sorbet::realmain::lsp
