@@ -12,6 +12,19 @@ import * as fs from "fs";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
+function maybeUpgradeHighlightUntyped(
+  value: boolean | TrackUntyped,
+): TrackUntyped {
+  switch (value) {
+    case true:
+      return "everywhere";
+    case false:
+      return "nowhere";
+    default:
+      return value;
+  }
+}
+
 export interface SorbetLspConfigChangeEvent {
   readonly oldLspConfig?: SorbetLspConfig;
   readonly newLspConfig?: SorbetLspConfig;
@@ -144,6 +157,8 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   }
 }
 
+export type TrackUntyped = "nowhere" | "everywhere";
+
 export class SorbetExtensionConfig implements Disposable {
   private configFilePatterns: ReadonlyArray<string>;
   private configFileWatchers: ReadonlyArray<FileSystemWatcher>;
@@ -159,7 +174,7 @@ export class SorbetExtensionConfig implements Disposable {
   /** "Custom" LSP configs that override/supplement "standard" LSP configs. */
   private userLspConfigs: ReadonlyArray<SorbetLspConfig>;
   private wrappedEnabled: boolean;
-  private wrappedHighlightUntyped: boolean;
+  private wrappedHighlightUntyped: TrackUntyped;
   private wrappedTypedFalseCompletionNudges: boolean;
   private wrappedRevealOutputOnError: boolean;
 
@@ -172,7 +187,7 @@ export class SorbetExtensionConfig implements Disposable {
     this.sorbetWorkspaceContext = sorbetWorkspaceContext;
     this.standardLspConfigs = [];
     this.userLspConfigs = [];
-    this.wrappedHighlightUntyped = false;
+    this.wrappedHighlightUntyped = "nowhere";
     this.wrappedTypedFalseCompletionNudges = true;
     this.wrappedRevealOutputOnError = false;
 
@@ -225,9 +240,12 @@ export class SorbetExtensionConfig implements Disposable {
       "revealOutputOnError",
       this.revealOutputOnError,
     );
-    this.wrappedHighlightUntyped = this.sorbetWorkspaceContext.get(
+    const highlightUntyped = this.sorbetWorkspaceContext.get(
       "highlightUntyped",
       this.highlightUntyped,
+    );
+    this.wrappedHighlightUntyped = maybeUpgradeHighlightUntyped(
+      highlightUntyped,
     );
     this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
       "typedFalseCompletionNudges",
@@ -300,7 +318,7 @@ export class SorbetExtensionConfig implements Disposable {
     return this.wrappedEnabled;
   }
 
-  public get highlightUntyped(): boolean {
+  public get highlightUntyped(): TrackUntyped {
     return this.wrappedHighlightUntyped;
   }
 
@@ -365,8 +383,8 @@ export class SorbetExtensionConfig implements Disposable {
     this.refresh();
   }
 
-  public async setHighlightUntyped(enabled: boolean): Promise<void> {
-    await this.sorbetWorkspaceContext.update("highlightUntyped", enabled);
+  public async setHighlightUntyped(trackWhere: TrackUntyped): Promise<void> {
+    await this.sorbetWorkspaceContext.update("highlightUntyped", trackWhere);
     this.refresh();
   }
 
