@@ -168,6 +168,25 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
+ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file) {
+    auto &print = opts.print;
+
+    Timer timeit(gs.tracer(), "desugarOne", {{"file", string(file.data(gs).path())}});
+    try {
+        if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
+            return ast::MK::EmptyTree();
+        }
+        auto parseTree = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
+        return runDesugar(gs, file, move(parseTree), print);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception desugaring file: `{}` (backtrace is above)", file.data(gs).path());
+        }
+        return ast::MK::EmptyTree();
+    }
+}
+
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;

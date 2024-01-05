@@ -109,6 +109,15 @@ public:
                          WorkerPool &workers) const;
 
     /**
+     * Returns the parsed file for the given file, up to the desugar pass.
+     *
+     * This is never cached, which means that the file will be re-parsed from scratch.
+     * This is slower than getting the indexed tree (everything before namer), so if
+     * You can use the indexed tree that will be more performant. Certain IDE actions
+     * need particularly fine-grained fidelity in the AST (precludes rewriter).
+     */
+    ast::ExpressionPtr getDesugared(core::FileRef fref) const;
+    /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
      */
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
@@ -188,6 +197,7 @@ public:
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery) const;
     const ast::ParsedFile &getIndexed(core::FileRef fref) const;
     std::vector<ast::ParsedFile> getResolved(const std::vector<core::FileRef> &frefs) const;
+    ast::ExpressionPtr getDesugared(core::FileRef fref) const;
     const core::GlobalState &state() const;
 
     void updateGsFromOptions(const DidChangeConfigurationParams &options) const;

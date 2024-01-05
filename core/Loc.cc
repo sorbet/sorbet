@@ -23,6 +23,12 @@ LocOffsets LocOffsets::join(LocOffsets other) const {
     return LocOffsets{min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos())};
 }
 
+bool LocOffsets::contains(const LocOffsets &other) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(other.exists());
+    return other.beginPos() >= beginPos() && other.endPos() <= endPos();
+}
+
 Loc Loc::join(Loc other) const {
     if (!this->exists()) {
         return other;
@@ -298,7 +304,7 @@ optional<string_view> Loc::source(const GlobalState &gs) const {
 bool Loc::contains(const Loc &other) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(other.exists());
-    return file() == other.file() && other.beginPos() >= beginPos() && other.endPos() <= endPos();
+    return file() == other.file() && offsets().contains(other.offsets());
 }
 
 bool Loc::operator==(const Loc &rhs) const {
