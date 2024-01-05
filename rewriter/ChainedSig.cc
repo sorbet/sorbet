@@ -13,19 +13,19 @@ struct ChainedSigWalk {
     // `sig.final {}` -> no error. Need to prevent adding the error when we receive `sig` by itself
     ast::Send *previousSigSend;
 
-    ast::ExpressionPtr preTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    void preTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
         ast::Send *sigSend = ast::cast_tree<ast::Send>(send->recv);
 
         // Return early unless the `send` chain begins with a `sig` invocation
         // E.g.: `sig.abstract {}`,`sig.override.final {}`
         if (send->fun != core::Names::sig() && (sigSend == nullptr || !firstSendIsSig(sigSend))) {
-            return tree;
+            return;
         }
 
         // Return early if we identify things like `params` being invoked on `sig`
         if (invalidChainedStatement(ctx, send)) {
-            return tree;
+            return;
         }
 
         if (send->fun == core::Names::sig() && !send->hasBlock() && send != previousSigSend) {
@@ -34,13 +34,13 @@ struct ChainedSigWalk {
                 e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
             }
 
-            return tree;
+            return;
         }
 
         // Return early unless it's one of the sends we are interested in
         if (send->fun != core::Names::abstract() && send->fun != core::Names::final_() &&
             send->fun != core::Names::override_() && send->fun != core::Names::overridable()) {
-            return tree;
+            return;
         }
 
         // TODO: This comment looks outdated
@@ -58,7 +58,7 @@ struct ChainedSigWalk {
                 e.addErrorNote("Complete the signature by adding a block declaration: sig `{}`", "{ ... }");
             }
 
-            return tree;
+            return;
         }
 
         // For all other cases, we have to re-write the block
@@ -72,10 +72,10 @@ struct ChainedSigWalk {
                 e.setHeader("Malformed signature: cannot have multiple statements inside a signature block");
             }
 
-            return tree;
+            return;
         }
 
-        return buildReplacement(ctx, send, blockBody);
+        tree = buildReplacement(ctx, send, blockBody);
     }
 
     bool firstSendIsSig(ast::Send *send) {
@@ -179,6 +179,7 @@ struct ChainedSigWalk {
 
 ast::ExpressionPtr ChainedSig::run(core::MutableContext &ctx, ast::ExpressionPtr tree) {
     ChainedSigWalk walker;
-    return ast::TreeMap::apply(ctx, walker, std::move(tree));
+    ast::TreeWalk::apply(ctx, walker, tree);
+    return tree;
 }
 } // namespace sorbet::rewriter
