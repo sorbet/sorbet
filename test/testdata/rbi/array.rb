@@ -79,3 +79,8 @@ x = [[3.4], [1, "a"]]
 T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
 x = [[3.4, "a"], [:a, 5]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
+
+# sample
+array = T.let([1, 2, 3], T::Array[Integer])
+T.reveal_type(array.sample) # error: Revealed type: `T.nilable(Integer)`
+T.reveal_type(array.sample(1)) # error: Revealed type: `T.nilable(T.any(Integer, T::Array[Integer]))
