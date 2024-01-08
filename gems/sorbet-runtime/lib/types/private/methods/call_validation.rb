@@ -71,10 +71,10 @@ module T::Private::Methods::CallValidation
     return_is_ignorable =
       (method_sig.return_type.eql?(T::Types::Untyped::Private::INSTANCE) ||
        method_sig.return_type.eql?(T::Types::Anything::Private::INSTANCE) ||
+       method_sig.return_type.eql?(T::Types::AttachedClassType::Private::INSTANCE) ||
+       method_sig.return_type.eql?(T::Types::SelfType::Private::INSTANCE) ||
        method_sig.return_type.is_a?(T::Types::TypeParameter) ||
        method_sig.return_type.is_a?(T::Types::TypeVariable) ||
-       method_sig.return_type.is_a?(T::Types::AttachedClassType::Private::INSTANCE) ||
-       method_sig.return_type.is_a?(T::Types::SelfType::Private::INSTANCE) ||
        (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type == BasicObject))
 
     returns_anything_method = all_args_are_simple && return_is_ignorable
