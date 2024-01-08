@@ -39,20 +39,20 @@ function backwardsCompatibleValue(
 export async function toggleUntypedCodeHighlighting(
   context: SorbetExtensionContext,
 ): Promise<TrackUntyped> {
-  const toggled = toggle(context.log, context.configuration.highlightUntyped);
-  await context.configuration.setHighlightUntyped(toggled);
-  context.log.info(`ToggleUntyped: Untyped code highlighting: ${toggled}`);
+  const targetState = toggle(context.log, context.configuration.highlightUntyped);
+  await context.configuration.setHighlightUntyped(targetState);
+  context.log.info(`ToggleUntyped: Untyped code highlighting: ${targetState}`);
 
   const { activeLanguageClient: client } = context.statusProvider;
   if (client) {
     client.sendNotification("workspace/didChangeConfiguration", {
       settings: {
-        highlightUntyped: backwardsCompatibleValue(context.log, toggled),
+        highlightUntyped: backwardsCompatibleValue(context.log, targetState),
       },
     });
   } else {
     context.log.debug("ToggleUntyped: No active Sorbet LSP to notify.");
   }
 
-  return toggled;
+  return targetState;
 }
