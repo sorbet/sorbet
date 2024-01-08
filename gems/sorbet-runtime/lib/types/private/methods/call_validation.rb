@@ -67,14 +67,30 @@ module T::Private::Methods::CallValidation
     simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
     simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
+    # All the types for which valid? unconditionally returns `true`
+    return_is_ignorable =
+      (method_sig.return_type == T::Types::Untyped::Private::INSTANCE ||
+       method_sig.return_type == T::Types::Anything::Private::INSTANCE ||
+       method_sig.return_type.is_a?(T::Types::TypeParameter) ||
+       method_sig.return_type.is_a?(T::Types::TypeVariable) ||
+       method_sig.return_type.is_a?(T::Types::AttachedClassType) ||
+       method_sig.return_type.is_a?(T::Types::SelfType) ||
+       (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type == BasicObject))
+
+    returns_anything_method = all_args_are_simple && return_is_ignorable
+
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
         if simple_method
           create_validator_method_fast(mod, original_method, method_sig, original_visibility)
+        elsif returns_anything_method
+          create_validator_method_skip_return_fast(mod, original_method, method_sig, original_visibility)
         elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
+        elsif ok_for_fast_path && return_is_ignorable
+          create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
         elsif can_skip_block_type
