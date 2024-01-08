@@ -47,10 +47,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       statusProvider,
     };
 
-    assert.strictEqual(
-      await toggleUntypedCodeHighlighting(context),
-      !initialState,
-    );
+    assert.strictEqual(await toggleUntypedCodeHighlighting(context), "nowhere");
 
     sinon.assert.calledOnce(setHighlightUntypedSpy);
     sinon.assert.calledWithExactly(setHighlightUntypedSpy, "nowhere");
