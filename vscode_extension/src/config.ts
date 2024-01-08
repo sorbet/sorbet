@@ -12,9 +12,9 @@ import * as fs from "fs";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
-function coerceTrackUntypedSetting(
-  value: boolean | string,
-): TrackUntyped {
+export type TrackUntyped = "nowhere" | "everywhere";
+
+function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
   switch (value) {
     case true:
       return "everywhere";
@@ -160,8 +160,6 @@ export class DefaultSorbetWorkspaceContext implements ISorbetWorkspaceContext {
   }
 }
 
-export type TrackUntyped = "nowhere" | "everywhere";
-
 export class SorbetExtensionConfig implements Disposable {
   private configFilePatterns: ReadonlyArray<string>;
   private configFileWatchers: ReadonlyArray<FileSystemWatcher>;
@@ -247,9 +245,7 @@ export class SorbetExtensionConfig implements Disposable {
       "highlightUntyped",
       this.highlightUntyped,
     );
-    this.wrappedHighlightUntyped = coerceTrackUntypedSetting(
-      highlightUntyped,
-    );
+    this.wrappedHighlightUntyped = coerceTrackUntypedSetting(highlightUntyped);
     this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
       "typedFalseCompletionNudges",
       this.typedFalseCompletionNudges,

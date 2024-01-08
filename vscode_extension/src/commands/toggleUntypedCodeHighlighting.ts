@@ -22,7 +22,10 @@ function toggle(log: Log, trackWhere: TrackUntyped): TrackUntyped {
 export async function toggleUntypedCodeHighlighting(
   context: SorbetExtensionContext,
 ): Promise<TrackUntyped> {
-  const targetState = toggle(context.log, context.configuration.highlightUntyped);
+  const targetState = toggle(
+    context.log,
+    context.configuration.highlightUntyped,
+  );
   await context.configuration.setHighlightUntyped(targetState);
   context.log.info(`ToggleUntyped: Untyped code highlighting: ${targetState}`);
 
