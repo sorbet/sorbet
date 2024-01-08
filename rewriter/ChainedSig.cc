@@ -126,13 +126,13 @@ struct ChainedSigWalk {
 
         // Go through each part of the chained sig and make sure it's not duplicated inside the block
         // E.g.: `sig.abstract { abstract.void }`
-        while (sendCopy && sendCopy->fun != core::Names::sig()) {
-            checkDuplicates(ctx, blockBody, sendCopy->fun, sendCopy->funLoc);
+        auto sendCopyIter = sendCopy;
+        while (sendCopyIter && sendCopyIter->fun != core::Names::sig()) {
+            checkDuplicates(ctx, blockBody, sendCopyIter->fun, sendCopyIter->funLoc);
 
-            sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
+            sendCopyIter = ast::cast_tree<ast::Send>(sendCopyIter->recv);
         }
 
-        sendCopy = ast::cast_tree<ast::Send>(treeCopy);
         bool isFinal = false;
 
         // Create a new receiver for the block to move the statements chained on sig inside. Also, finds out whether the
