@@ -1,4 +1,10 @@
 /**
+ * Configure highlighting of untyped code.
+ */
+export const CONFIGURE_HIGHLIGHT_UNTYPED_COMMAND_ID =
+  "sorbet.configureHighlightUntyped";
+
+/**
  * Copy Symbol to Clipboard.
  */
 export const COPY_SYMBOL_COMMAND_ID = "sorbet.copySymbolToClipboard";
@@ -53,13 +59,6 @@ export const SORBET_SAVE_PACKAGE_FILES = "sorbet.savePackageFiles";
  */
 export const TOGGLE_HIGHLIGHT_UNTYPED_COMMAND_ID =
   "sorbet.toggleHighlightUntyped";
-
-/**
- * Configure highlighting of untyped code.
- */
-export const CONFIGURE_HIGHLIGHT_UNTYPED_COMMAND_ID =
-  "sorbet.configureHighlightUntyped";
-
 /**
  * Toggle the auto-complete nudge in `typed: false` files.
  */

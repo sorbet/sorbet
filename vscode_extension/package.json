@@ -24,13 +24,13 @@
   ],
   "activationEvents": [
     "onCommand:sorbet.configure",
+    "onCommand:sorbet.configureHighlightUntyped",
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
     "onCommand:sorbet.setLogLevel",
     "onCommand:sorbet.showOutput",
     "onCommand:sorbet.toggleHighlightUntyped",
-    "onCommand:sorbet.configureHighlightUntyped",
     "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
