@@ -57,6 +57,12 @@
         "category": "Sorbet"
       },
       {
+        "command": "sorbet.configureHighlightUntyped",
+        "title": "Configure untyped code highlighting",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
+      },
+      {
         "command": "sorbet.copySymbolToClipboard",
         "title": "Copy Symbol to Clipboard",
         "category": "Sorbet",
@@ -96,12 +102,6 @@
       {
         "command": "sorbet.toggleHighlightUntyped",
         "title": "Toggle highlighting untyped code",
-        "category": "Sorbet",
-        "enablement": "workbenchState != empty"
-      },
-      {
-        "command": "sorbet.configureHighlightUntyped",
-        "title": "Configure untyped code highlighting",
         "category": "Sorbet",
         "enablement": "workbenchState != empty"
       },
