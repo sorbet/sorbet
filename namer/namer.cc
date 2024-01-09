@@ -1230,7 +1230,8 @@ private:
                 // If we update the class loc, we also need to update any singleton class which
                 // might have been synthesized for it.
                 ENFORCE(updateLoc);
-                singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                // singletonClass.data(ctx)->addLoc(ctx, ctx.locAt(klass.declLoc));
+                state.foundLocs[singletonClass].emplace_back(isUnknown, klass.declLoc);
 
                 auto attachedClassTM =
                     singletonClass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
@@ -1689,7 +1690,9 @@ public:
         }
 
         for (auto &[sym, locs] : state.foundLocs) {
-            auto amountOfUnknownns =
+            ENFORCE(!locs.empty());
+
+            auto amountOfKnownns =
                 absl::c_count_if(locs, [](const auto &isUnknownAndLocs) { return !isUnknownAndLocs.first; });
 
             fast_sort(locs, [](const auto &a, const auto &b) {
@@ -1702,21 +1705,18 @@ public:
             });
 
             core::Loc newLoc;
-            if (amountOfUnknownns >= 1) {
+            if (amountOfKnownns >= 1) {
                 for (auto &loc : locs) {
-                    if (!loc.first) {
-                        newLoc = ctx.locAt(loc.second);
-                        break;
+                    if (loc.first) {
+                        continue;
                     }
+                    newLoc = ctx.locAt(loc.second);
+                    break;
                 }
             } else {
                 newLoc = ctx.locAt(locs[0].second);
             }
             sym.data(ctx)->addLoc(ctx, newLoc);
-            auto maybeSingletonClass = sym.data(ctx)->lookupSingletonClass(ctx);
-            if (maybeSingletonClass.exists()) {
-                maybeSingletonClass.data(ctx)->addLoc(ctx, newLoc);
-            }
         }
         return state;
     }
