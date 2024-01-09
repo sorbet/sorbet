@@ -541,11 +541,15 @@ public:
                         const auto &package = gs.packageDB().getPackageInfo(pkgName);
                         VisibilityCheckerPass pass{ctx, package};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
-                        for (const auto &[symbol, loc] : pass.imports) {
-                            reportMissingImport(ctx, package, symbol, loc);
+                        for (auto &[symbol, locs] : pass.imports) {
+                            fast_sort(locs,
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+                            reportMissingImport(ctx, package, symbol, locs);
                         }
-                        for (const auto &[symbol, loc] : pass.testImports) {
-                            reportMissingTestImport(ctx, package, symbol, loc);
+                        for (auto &[symbol, locs] : pass.testImports) {
+                            fast_sort(locs,
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+                            reportMissingTestImport(ctx, package, symbol, locs);
                         }
                     }
                 }
