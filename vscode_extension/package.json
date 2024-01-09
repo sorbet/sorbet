@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.28",
+  "version": "0.3.27",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -261,9 +261,9 @@
           "default": false
         },
         "sorbet.highlightUntyped": {
-          "type": "boolean",
+          "enum": ["nowhere", "everywhere"],
           "description": "Shows warning for untyped values.",
-          "default": false
+          "default": "nowhere"
         },
         "sorbet.typedFalseCompletionNudges": {
           "type": "boolean",

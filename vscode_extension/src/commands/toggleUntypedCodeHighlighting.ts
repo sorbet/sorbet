@@ -1,4 +1,35 @@
+import { TrackUntyped } from "../config";
+import { Log } from "../log";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
+
+function toggle(log: Log, trackWhere: TrackUntyped): TrackUntyped {
+  switch (trackWhere) {
+    case "nowhere":
+      return "everywhere";
+    case "everywhere":
+      return "nowhere";
+    default:
+      const exhaustiveCheck: never = trackWhere;
+      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
+      return "nowhere";
+  }
+}
+
+function backwardsCompatibleValue(
+  log: Log,
+  trackWhere: TrackUntyped,
+): boolean | TrackUntyped {
+  switch (trackWhere) {
+    case "nowhere":
+      return false;
+    case "everywhere":
+      return true;
+    default:
+      const exhaustiveCheck: never = trackWhere;
+      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
+      return false;
+  }
+}
 
 /**
  * Toggle highlighting of untyped code.
@@ -7,20 +38,19 @@ import { SorbetExtensionContext } from "../sorbetExtensionContext";
  */
 export async function toggleUntypedCodeHighlighting(
   context: SorbetExtensionContext,
-): Promise<boolean> {
-  const targetState = !context.configuration.highlightUntyped;
-  await context.configuration.setHighlightUntyped(targetState);
-  context.log.info(
-    `ToggleUntyped: Untyped code highlighting: ${
-      targetState ? "enabled" : "disabled"
-    }`,
+): Promise<TrackUntyped> {
+  const targetState = toggle(
+    context.log,
+    context.configuration.highlightUntyped,
   );
+  await context.configuration.setHighlightUntyped(targetState);
+  context.log.info(`ToggleUntyped: Untyped code highlighting: ${targetState}`);
 
   const { activeLanguageClient: client } = context.statusProvider;
   if (client) {
     client.sendNotification("workspace/didChangeConfiguration", {
       settings: {
-        highlightUntyped: targetState,
+        highlightUntyped: backwardsCompatibleValue(context.log, targetState),
       },
     });
   } else {
