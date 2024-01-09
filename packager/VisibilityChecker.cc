@@ -30,6 +30,58 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
     return core::Symbols::noSymbol();
 }
 
+static void reportMissingTestImport(const core::Context &ctx, const core::packages::PackageInfo &package,
+                                    core::SymbolRef symbol, std::vector<core::LocOffsets> locs) {
+    auto importAdded = false;
+    for (auto it = locs.rbegin(); it != locs.rend(); ++it) {
+        auto loc = *it;
+        if (auto e = ctx.beginError(loc, core::errors::Packager::UsedTestOnlyName)) {
+            auto otherFile = symbol.loc(ctx).file();
+            auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+            e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", symbol.show(ctx));
+            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+            if (!importAdded) {
+                if (auto exp = package.addImport(ctx, pkg, false)) {
+                    e.addAutocorrect(std::move(exp.value()));
+                }
+            }
+            e.addErrorLine(pkg.declLoc(), "Defined here");
+        }
+    }
+}
+
+static void reportMissingImport(const core::Context &ctx, const core::packages::PackageInfo &package,
+                                core::SymbolRef symbol, std::vector<core::LocOffsets> locs) {
+    auto importAdded = false;
+    for (auto it = locs.rbegin(); it != locs.rend(); ++it) {
+        auto loc = *it;
+        if (auto e = ctx.beginError(loc, core::errors::Packager::MissingImport)) {
+            auto otherFile = symbol.loc(ctx).file();
+            auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+            e.setHeader("`{}` resolves but its package is not imported", symbol.show(ctx));
+            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+            e.addErrorLine(pkg.declLoc(), "Exported from package here");
+
+            if (!importAdded) {
+                if (auto exp = package.addImport(ctx, pkg, isTestImport)) {
+                    e.addAutocorrect(std::move(exp.value()));
+                    importAdded = true;
+                }
+            }
+
+            if (!ctx.file.data(ctx).isPackaged()) {
+                e.addErrorNote("A `{}` file is allowed to define constants outside of the package's namespace,\n    "
+                               "but must still respect its enclosing package's imports.",
+                               "# packaged: false");
+            }
+
+            if (!ctx.state.packageDB().errorHint().empty()) {
+                e.addErrorNote("{}", ctx.state.packageDB().errorHint());
+            }
+        }
+    }
+}
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     const core::packages::PackageInfo &package;
@@ -353,6 +405,8 @@ public:
 
 class VisibilityCheckerPass final {
 public:
+    UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> imports;
+    UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> testImports;
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
 
@@ -451,36 +505,10 @@ public:
         auto importType = this->package.importsPackage(otherPackage);
         if (!importType.has_value()) {
             // We failed to import the package that defines the symbol
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-
-                if (!ctx.file.data(ctx).isPackaged()) {
-                    e.addErrorNote(
-                        "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
-                        "but must still respect its enclosing package's imports.",
-                        "# packaged: false");
-                }
-
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
-            }
+            imports[lit.symbol].emplace_back(lit.loc);
         } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
             // We used a symbol from a `test_import` in a non-test context
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                e.addErrorLine(pkg.declLoc(), "Defined here");
-            }
+            testImports[lit.symbol].emplace_back(lit.loc);
         }
     }
 
@@ -510,8 +538,15 @@ public:
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
-                        VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                        const auto &package = gs.packageDB().getPackageInfo(pkgName);
+                        VisibilityCheckerPass pass{ctx, package};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
+                        for (const auto &[symbol, loc] : pass.imports) {
+                            reportMissingImport(ctx, package, symbol, loc);
+                        }
+                        for (const auto &[symbol, loc] : pass.testImports) {
+                            reportMissingTestImport(ctx, package, symbol, loc);
+                        }
                     }
                 }
             }
