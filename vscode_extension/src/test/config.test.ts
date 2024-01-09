@@ -376,30 +376,6 @@ suite("SorbetExtensionConfig", async () => {
         );
       });
 
-      suite("sorbet.highlightUntyped", async () => {
-        test("true instead of a string", async () => {
-          const workspaceConfig = new FakeWorkspaceConfiguration([
-            ["highlightUntyped", true],
-          ]);
-          const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
-          assert.strictEqual(sorbetConfig.highlightUntyped, "everywhere");
-        });
-        test("false instead of a string", async () => {
-          const workspaceConfig = new FakeWorkspaceConfiguration([
-            ["highlightUntyped", false],
-          ]);
-          const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
-          assert.strictEqual(sorbetConfig.highlightUntyped, "nowhere");
-        });
-        test("unrecognized string", async () => {
-          const workspaceConfig = new FakeWorkspaceConfiguration([
-            ["highlightUntyped", "nope"],
-          ]);
-          const sorbetConfig = new SorbetExtensionConfig(workspaceConfig);
-          assert.strictEqual(sorbetConfig.highlightUntyped, "nowhere");
-        });
-      });
-
       test("multiple instances of SorbetExtensionConfig stay in sync with each other", async () => {
         const workspaceConfig = new FakeWorkspaceConfiguration([
           ["enabled", true],

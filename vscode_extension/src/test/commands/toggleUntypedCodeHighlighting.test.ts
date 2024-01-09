@@ -4,7 +4,7 @@ import * as sinon from "sinon";
 
 import { createLogStub } from "../testUtils";
 import { toggleUntypedCodeHighlighting } from "../../commands/toggleUntypedCodeHighlighting";
-import { SorbetExtensionConfig, TrackUntyped } from "../../config";
+import { SorbetExtensionConfig } from "../../config";
 import { SorbetExtensionContext } from "../../sorbetExtensionContext";
 import { SorbetStatusProvider } from "../../sorbetStatusProvider";
 import { RestartReason } from "../../types";
@@ -21,12 +21,12 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
   });
 
   test("toggleUntypedCodeHighlighting", async () => {
-    const initialState = "everywhere";
+    const initialState = true;
     let currentState = initialState;
 
     const log = createLogStub();
 
-    const setHighlightUntypedSpy = sinon.spy((value: TrackUntyped) => {
+    const setHighlightUntypedSpy = sinon.spy((value: boolean) => {
       currentState = value;
     });
     const configuration = <SorbetExtensionConfig>(<unknown>{
@@ -47,9 +47,12 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       statusProvider,
     };
 
-    assert.strictEqual(await toggleUntypedCodeHighlighting(context), "nowhere");
+    assert.strictEqual(
+      await toggleUntypedCodeHighlighting(context),
+      !initialState,
+    );
 
     sinon.assert.calledOnce(setHighlightUntypedSpy);
-    sinon.assert.calledWithExactly(setHighlightUntypedSpy, "nowhere");
+    sinon.assert.calledWithExactly(setHighlightUntypedSpy, !initialState);
   });
 });
