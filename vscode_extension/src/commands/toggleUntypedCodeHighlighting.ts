@@ -1,4 +1,4 @@
-import { TrackUntyped } from "../config";
+import { TrackUntyped, backwardsCompatibleTrackUntyped } from "../config";
 import { Log } from "../log";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 
@@ -12,22 +12,6 @@ function toggle(log: Log, trackWhere: TrackUntyped): TrackUntyped {
       const exhaustiveCheck: never = trackWhere;
       log.warning(`Got unexpected state: ${exhaustiveCheck}`);
       return "nowhere";
-  }
-}
-
-function backwardsCompatibleValue(
-  log: Log,
-  trackWhere: TrackUntyped,
-): boolean | TrackUntyped {
-  switch (trackWhere) {
-    case "nowhere":
-      return false;
-    case "everywhere":
-      return true;
-    default:
-      const exhaustiveCheck: never = trackWhere;
-      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
-      return false;
   }
 }
 
@@ -50,7 +34,10 @@ export async function toggleUntypedCodeHighlighting(
   if (client) {
     client.sendNotification("workspace/didChangeConfiguration", {
       settings: {
-        highlightUntyped: backwardsCompatibleValue(context.log, targetState),
+        highlightUntyped: backwardsCompatibleTrackUntyped(
+          context.log,
+          targetState,
+        ),
       },
     });
   } else {

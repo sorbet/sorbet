@@ -9,6 +9,7 @@ import {
   workspace,
 } from "vscode";
 import * as fs from "fs";
+import { Log } from "./log";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
@@ -25,6 +26,22 @@ function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
       return value;
     default:
       return "nowhere";
+  }
+}
+
+export function backwardsCompatibleTrackUntyped(
+  log: Log,
+  trackWhere: TrackUntyped,
+): boolean | TrackUntyped {
+  switch (trackWhere) {
+    case "nowhere":
+      return false;
+    case "everywhere":
+      return true;
+    default:
+      const exhaustiveCheck: never = trackWhere;
+      log.warning(`Got unexpected state: ${exhaustiveCheck}`);
+      return false;
   }
 }
 
@@ -245,6 +262,8 @@ export class SorbetExtensionConfig implements Disposable {
       "highlightUntyped",
       this.highlightUntyped,
     );
+    // Always store the setting as a TrackUntyped enum value internally.
+    // We'll convert it to legacy-style boolean options (potentially) at the call sites.
     this.wrappedHighlightUntyped = coerceTrackUntypedSetting(highlightUntyped);
     this.wrappedTypedFalseCompletionNudges = this.sorbetWorkspaceContext.get(
       "typedFalseCompletionNudges",
