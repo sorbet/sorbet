@@ -23,7 +23,7 @@ module T::Props::Constructor::DecoratorMethods
     props_without_defaults&.each_pair do |p, setter_proc|
       begin
         val = hash[p]
-        instance.instance_exec(val, &setter_proc)
+        setter_proc.call(instance, val)
         if val || hash.key?(p)
           result += 1
         end

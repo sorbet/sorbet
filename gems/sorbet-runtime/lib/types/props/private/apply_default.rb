@@ -157,7 +157,7 @@ module T::Props
       def set_default(instance)
         # Use the actual setter to validate the factory returns a legitimate
         # value every time
-        instance.instance_exec(default, &@setter_proc)
+        @setter_proc.call(instance, default)
       end
 
       # checked(:never) - O(object construction x prop count)

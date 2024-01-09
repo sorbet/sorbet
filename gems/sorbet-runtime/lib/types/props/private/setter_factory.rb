@@ -6,7 +6,7 @@ module T::Props
     module SetterFactory
       extend T::Sig
 
-      SetterProc = T.type_alias {T.proc.params(val: T.untyped).void}
+      SetterProc = T.type_alias {T.proc.params(obj: T.untyped, val: T.untyped).void}
       ValidateProc = T.type_alias {T.proc.params(prop: Symbol, value: T.untyped).void}
 
       sig do
@@ -58,7 +58,7 @@ module T::Props
         .returns(SetterProc)
       end
       private_class_method def self.simple_non_nil_proc(prop, accessor_key, non_nil_type, klass)
-        proc do |val|
+        proc do |obj, val|
           unless val.is_a?(non_nil_type)
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
@@ -67,7 +67,7 @@ module T::Props
               val,
             )
           end
-          instance_variable_set(accessor_key, val)
+          obj.instance_variable_set(accessor_key, val)
         end
       end
 
@@ -82,7 +82,7 @@ module T::Props
         .returns(SetterProc)
       end
       private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
-        proc do |val|
+        proc do |obj, val|
           # this use of recursively_valid? is intentional: unlike for
           # methods, we want to make sure data at the 'edge'
           # (e.g. models that go into databases or structs serialized
@@ -98,7 +98,7 @@ module T::Props
               val,
             )
           end
-          instance_variable_set(accessor_key, val)
+          obj.instance_variable_set(accessor_key, val)
         end
       end
 
@@ -112,11 +112,11 @@ module T::Props
         .returns(SetterProc)
       end
       private_class_method def self.simple_nilable_proc(prop, accessor_key, non_nil_type, klass)
-        proc do |val|
+        proc do |obj, val|
           if val.nil?
-            instance_variable_set(accessor_key, nil)
+            obj.instance_variable_set(accessor_key, nil)
           elsif val.is_a?(non_nil_type)
-            instance_variable_set(accessor_key, val)
+            obj.instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
@@ -124,7 +124,7 @@ module T::Props
               T::Utils.coerce(non_nil_type),
               val,
             )
-            instance_variable_set(accessor_key, val)
+            obj.instance_variable_set(accessor_key, val)
           end
         end
       end
@@ -140,9 +140,9 @@ module T::Props
         .returns(SetterProc)
       end
       private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
-        proc do |val|
+        proc do |obj, val|
           if val.nil?
-            instance_variable_set(accessor_key, nil)
+            obj.instance_variable_set(accessor_key, nil)
           # this use of recursively_valid? is intentional: unlike for
           # methods, we want to make sure data at the 'edge'
           # (e.g. models that go into databases or structs serialized
@@ -150,7 +150,7 @@ module T::Props
           # checks there
           elsif non_nil_type.recursively_valid?(val)
             validate&.call(prop, val)
-            instance_variable_set(accessor_key, val)
+            obj.instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
