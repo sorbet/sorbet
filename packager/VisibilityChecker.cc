@@ -543,12 +543,12 @@ public:
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                         for (auto &[symbol, locs] : pass.imports) {
                             fast_sort(locs,
-                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
                             reportMissingImport(ctx, package, symbol, locs);
                         }
                         for (auto &[symbol, locs] : pass.testImports) {
                             fast_sort(locs,
-                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
                             reportMissingTestImport(ctx, package, symbol, locs);
                         }
                     }
