@@ -28,11 +28,8 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
         // {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
 
-    UnorderedSet<core::NameRef> ignoredSymbols = {
-        core::Names::requiredAncestors(),
-        core::Names::requiredAncestorsLin(),
-        core::Names::staticInit()
-    };
+    UnorderedSet<core::NameRef> ignoredSymbols = {core::Names::requiredAncestors(), core::Names::requiredAncestorsLin(),
+                                                  core::Names::staticInit()};
 
     auto everFailed = false;
     for (auto [kind, used] : symbolTypes) {
@@ -55,7 +52,8 @@ void checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, UnorderedSet
                     everFailed = true;
                     fmt::print("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nSymbol failed to update location "
                                "beginPos: {}, endPos: {}, midPoint: {}, kind: {}, name: {}\nfile: {}\n\n",
-                               loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs), loc.file().data(gs).path());
+                               loc.beginPos(), loc.endPos(), midPoint, kind, sym.toStringFullName(gs),
+                               loc.file().data(gs).path());
                 }
             }
         }
