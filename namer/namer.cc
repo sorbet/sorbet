@@ -1692,6 +1692,18 @@ public:
         for (auto &[sym, locs] : state.foundLocs) {
             ENFORCE(!locs.empty());
 
+            // Consider code like this
+            //
+            // `module Net::SSH::Authentication::CustomModule; end`
+            //
+            // `::Net` would have one loc, it would be `isUnknown = true`,
+            // and we don't want to update it
+            //
+            // See related test //test/cli:test_symbol-table
+            if (locs.size() == 1 && locs[0].first) {
+                continue;
+            }
+
             auto amountOfKnownns =
                 absl::c_count_if(locs, [](const auto &isUnknownAndLocs) { return !isUnknownAndLocs.first; });
 
