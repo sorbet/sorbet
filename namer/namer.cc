@@ -716,7 +716,7 @@ public:
         // TODO(iz): to fix updates for locations store a map symbol -> possible updated location
         // after the namer finishes we can go through those locations and pick one per symbol
         // 1) if there is one location which is !isUnknown -> pick it
-        // 2) if there is multipole locations which is !isUnknown -> pick it the last one
+        // 2) if there is multiple locations which is !isUnknown -> pick it the last one
         // 3) no !isUnknown locations at all -> pick the last one
 
         State() = default;
