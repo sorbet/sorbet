@@ -261,9 +261,9 @@
           "default": false
         },
         "sorbet.highlightUntyped": {
-          "type": "boolean",
+          "enum": ["nowhere", "everywhere"],
           "description": "Shows warning for untyped values.",
-          "default": false
+          "default": "nowhere"
         },
         "sorbet.typedFalseCompletionNudges": {
           "type": "boolean",
