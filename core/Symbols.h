@@ -511,6 +511,10 @@ public:
         }
     }
 
+    inline void unsetClassOrModuleLinearizationComputed() {
+        flags.isLinearizationComputed = false;
+    }
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     MethodRef findMethod(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
@@ -647,10 +651,6 @@ private:
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
     SymbolRef findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
-
-    inline void unsetClassOrModuleLinearizationComputed() {
-        flags.isLinearizationComputed = false;
-    }
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
