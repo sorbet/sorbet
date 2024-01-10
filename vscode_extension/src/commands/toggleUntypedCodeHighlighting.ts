@@ -88,7 +88,7 @@ export async function configureUntypedCodeHighlighting(
     const targetState = selectedItem.trackWhere;
     await context.configuration.setHighlightUntyped(targetState);
     context.log.info(
-      `ToggleUntyped: Untyped code highlighting: ${targetState}`,
+      `ConfigureUntyped: Untyped code highlighting: ${targetState}`,
     );
 
     const { activeLanguageClient: client } = context.statusProvider;
@@ -99,7 +99,7 @@ export async function configureUntypedCodeHighlighting(
         },
       });
     } else {
-      context.log.debug("ToggleUntyped: No active Sorbet LSP to notify.");
+      context.log.debug("ConfigureUntyped: No active Sorbet LSP to notify.");
     }
   }
 }
