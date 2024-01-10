@@ -1,5 +1,9 @@
 import { QuickPickItem, window } from "vscode";
-import { TrackUntyped, backwardsCompatibleTrackUntyped, SorbetExtensionConfig } from "../config";
+import {
+  TrackUntyped,
+  backwardsCompatibleTrackUntyped,
+  SorbetExtensionConfig,
+} from "../config";
 import { Log } from "../log";
 import { SorbetExtensionContext } from "../sorbetExtensionContext";
 
