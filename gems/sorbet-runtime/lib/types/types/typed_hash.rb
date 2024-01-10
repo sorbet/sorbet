@@ -26,12 +26,6 @@ module T::Types
       @type ||= T::Utils.coerce([keys, values])
     end
 
-    def build_type
-      keys
-      values
-      super
-    end
-
     # overrides Base
     def name
       "T::Hash[#{keys.name}, #{values.name}]"
