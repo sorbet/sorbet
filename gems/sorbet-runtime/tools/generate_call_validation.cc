@@ -13,6 +13,7 @@ struct Options {
 
 enum class ValidatorKind {
     Method,
+    MethodSkipReturn,
     Procedure,
 };
 
@@ -25,6 +26,8 @@ string_view validatorKindToString(ValidatorKind kind) {
     switch (kind) {
         case ValidatorKind::Method:
             return "method"sv;
+        case ValidatorKind::MethodSkipReturn:
+            return "method_skip_return"sv;
         case ValidatorKind::Procedure:
             return "procedure"sv;
     }
@@ -79,6 +82,8 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
                        "    end\n",
                        typeString);
             break;
+        case ValidatorKind::MethodSkipReturn:
+            break;
         case ValidatorKind::Procedure:
             break;
     }
@@ -125,6 +130,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
         case ValidatorKind::Method:
             returnTypeArg = ", return_type";
             break;
+        case ValidatorKind::MethodSkipReturn:
         case ValidatorKind::Procedure:
             returnTypeArg = "";
             break;
@@ -182,6 +188,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
         case ValidatorKind::Method:
             returnValueVar = "return_value = ";
             break;
+        case ValidatorKind::MethodSkipReturn:
         case ValidatorKind::Procedure:
             returnValueVar = "";
             break;
@@ -197,22 +204,25 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
     }
     fmt::print("&blk)\n");
 
-    const char *returnValueTypecheck;
-    switch (type) {
-        case TypeKind::Simple:
-            returnValueTypecheck = "return_value.is_a?(return_type)";
-            break;
-        case TypeKind::Complex:
-            returnValueTypecheck = "return_type.valid?(return_value)";
-            break;
-    }
-
     switch (kind) {
         case ValidatorKind::Procedure:
             fmt::print("      T::Private::Types::Void::VOID\n");
             break;
 
-        case ValidatorKind::Method:
+        case ValidatorKind::MethodSkipReturn:
+            break;
+
+        case ValidatorKind::Method: {
+            const char *returnValueTypecheck;
+            switch (type) {
+                case TypeKind::Simple:
+                    returnValueTypecheck = "return_value.is_a?(return_type)";
+                    break;
+                case TypeKind::Complex:
+                    returnValueTypecheck = "return_type.valid?(return_value)";
+                    break;
+            }
+
             fmt::print("      unless {}\n"
                        "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
                        "        if message\n"
@@ -230,6 +240,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
                        "      return_value\n",
                        returnValueTypecheck);
             break;
+        }
     }
 
     fmt::print("    end\n"
@@ -252,6 +263,11 @@ int generateCallValidation(const Options &options) {
         generateCreateValidatorFast(options, ValidatorKind::Method, TypeKind::Simple, i);
     }
 
+    generateCreateValidatorFastDispatcher(ValidatorKind::MethodSkipReturn, TypeKind::Simple);
+    for (size_t i = 0; i <= MAX_ARITY; i++) {
+        generateCreateValidatorFast(options, ValidatorKind::MethodSkipReturn, TypeKind::Simple, i);
+    }
+
     generateCreateValidatorFastDispatcher(ValidatorKind::Procedure, TypeKind::Simple);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
         generateCreateValidatorFast(options, ValidatorKind::Procedure, TypeKind::Simple, i);
@@ -260,6 +276,11 @@ int generateCallValidation(const Options &options) {
     generateCreateValidatorFastDispatcher(ValidatorKind::Method, TypeKind::Complex);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
         generateCreateValidatorFast(options, ValidatorKind::Method, TypeKind::Complex, i);
+    }
+
+    generateCreateValidatorFastDispatcher(ValidatorKind::MethodSkipReturn, TypeKind::Complex);
+    for (size_t i = 0; i <= MAX_ARITY; i++) {
+        generateCreateValidatorFast(options, ValidatorKind::MethodSkipReturn, TypeKind::Complex, i);
     }
 
     generateCreateValidatorFastDispatcher(ValidatorKind::Procedure, TypeKind::Complex);
