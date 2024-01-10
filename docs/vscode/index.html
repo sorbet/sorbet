@@ -153,22 +153,34 @@ extension always pass these command line flags when starting Sorbet.</p>
 </video>
 <p>(If you are not using the Sorbet VS Code, you can reimplement this feature in
 your preferred LSP client using the <a href="https://github.com/sorbet/sorbet/blob/ec02be89e3d1895ea51bc72464538073d27b812c/vscode_extension/src/LanguageClient.ts#L154-L179"><code>sorbet/showSymbol</code> LSP request</a>.)</p>
-<p>Highlight <code>T.untyped</code> code. This feature is in beta.</p>
+<p>Highlight <code>T.untyped</code> code.</p>
 <p>This feature reports diagnostics to the editor for occurrences of <code>T.untyped</code>
 code. Note that it is not yet perfect and may miss occurrences of such values.</p>
 <p>It can be enabled by adding the following to your VS Code <code>settings.json</code> and
-either reopening VS Code or restarting Sorbet.</p>
-<pre><code class="hljs css language-json">"sorbet.highlightUntyped": true
+either reopening VS Code or restarting Sorbet:</p>
+<pre><code class="hljs css language-json">"sorbet.highlightUntyped": "everywhere"
 </code></pre>
-<p>or by using the <code>Sorbet: Toggle Highlight untyped values</code> command from the
-command palette (note this causes a full restart of Sorbet).</p>
+<blockquote>
+<p><strong>Note</strong>: In versions of the Sorbet VS Code extension before v0.3.29, this
+option was a simple <code>true</code>/<code>false</code> setting. If you had specified it as a
+boolean in your config, you will want to convert <code>true</code> to <code>&quot;everywhere&quot;</code> or
+<code>false</code> to <code>&quot;nowhere&quot;</code>, though the legacy boolean option remains supported.
+The default (<code>false</code> / <code>&quot;nowhere&quot;</code>) remains the same.</p>
+</blockquote>
+<p>You can also using the <code>Sorbet: Toggle Highlight untyped values</code> command from
+the command palette (note this causes a full restart of Sorbet).</p>
 <p>To enable this feature in other language clients, configure your language client
-to send</p>
+to send this when sending the LSP initialize request to the Sorbet language
+server:</p>
 <pre><code class="hljs css language-json">"initializationOptions": {
-  "highlightUntyped": true
+  "highlightUntyped": "everywhere"
 }
 </code></pre>
-<p>when sending the LSP initialize request to the Sorbet language server.</p>
+<blockquote>
+<p><strong>Note</strong>: In versions of the Sorbet language server before <code>v0.5.11175</code>, this
+option was a simple <code>true</code>/<code>false</code> setting. The legacy boolean option remains
+supported.</p>
+</blockquote>
 <p><img src="/img/lsp/highlight_untyped.png" /></p>
 <h2><a class="anchor" aria-hidden="true" id="switching-between-configurations"></a><a href="#switching-between-configurations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Switching between configurations</h2>
 <p>The Sorbet extension supports switching between multiple configurations to make
