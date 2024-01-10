@@ -9,7 +9,12 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
         return UntypedValue;
     }
 
-    auto isOpenInClient = file.data(gs).isOpenInClient();
+    const auto &fileData = file.data(gs);
+    if (gs.trackUntyped == TrackUntyped::EverywhereButTests && fileData.isPackagedTest()) {
+        return UntypedValue;
+    }
+
+    auto isOpenInClient = fileData.isOpenInClient();
     if (gs.printingFileTable) {
         // Note: this metric, despite being a prod metric, will not get reported in the normal way
         // to the metrics file, the web trace file, nor statsd. We call getAndClearHistogram BEFORE
@@ -32,7 +37,7 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
         prodHistogramInc("untyped.blames", untyped.untypedBlame().rawId());
     }
 
-    if (isOpenInClient && file.data(gs).strictLevel < core::StrictLevel::Strong) {
+    if (isOpenInClient && fileData.strictLevel < core::StrictLevel::Strong) {
         return UntypedValueInformation;
     } else {
         return UntypedValue;

@@ -64,6 +64,8 @@ core::TrackUntyped LSPClientConfiguration::parseEnableHighlightUntyped(const Sor
         auto &highlightUntyped = get<string>(options.highlightUntyped.value());
         if (highlightUntyped == "" || highlightUntyped == "everywhere") {
             return core::TrackUntyped::Everywhere;
+        } else if (highlightUntyped == "everywhere-but-tests") {
+            return core::TrackUntyped::EverywhereButTests;
         } else {
             return core::TrackUntyped::Nowhere;
         }
