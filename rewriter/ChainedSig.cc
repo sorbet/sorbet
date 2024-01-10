@@ -43,15 +43,6 @@ struct ChainedSigWalk {
             return;
         }
 
-        // TODO: This comment looks outdated
-        //
-        // This is a `sig` invocation, but there is still no block. We need to pop
-        // the last entry for incomplete sigs and add the current send to account for multiple methods chained on sig
-        //
-        // E.g.: `sig.override.final {}`
-        //
-        // If we never find a send where the first receiver is a `sig` and the last invocation has the declaration
-        // block, then we add the error later on
         if (!send->hasBlock()) {
             if (auto e = ctx.beginError(send->funLoc, core::errors::Rewriter::InvalidChainedSig)) {
                 e.setHeader("Signature declarations expect a block");
