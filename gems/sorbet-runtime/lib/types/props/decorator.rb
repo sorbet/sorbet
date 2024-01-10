@@ -100,10 +100,7 @@ class T::Props::Decorator
   # checked(:never) - potentially O(prop accesses) depending on usage pattern
   sig {params(prop: Symbol, val: T.untyped).void.checked(:never)}
   def validate_prop_value(prop, val)
-    # We call `setter_proc` here without binding to an instance, so it'll run
-    # `instance_variable_set` if validation passes, but nothing will care.
-    # We only care about the validation.
-    prop_rules(prop).fetch(:setter_proc).call(val)
+    prop_rules(prop).fetch(:value_validate_proc).call(val)
   end
 
   # For performance, don't use named params here.
@@ -378,7 +375,11 @@ class T::Props::Decorator
       end
     end
 
-    rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+    setter_proc, value_validate_proc = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules)
+    setter_proc.freeze
+    value_validate_proc.freeze
+    rules[:setter_proc] = setter_proc
+    rules[:value_validate_proc] = value_validate_proc
 
     add_prop_definition(name, rules)
 
