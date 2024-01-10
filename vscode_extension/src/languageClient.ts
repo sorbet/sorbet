@@ -15,6 +15,7 @@ import { stopProcess } from "./connections";
 import { Tags } from "./metricsClient";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus, RestartReason } from "./types";
+import { backwardsCompatibleTrackUntyped } from "./config";
 
 const VALID_STATE_TRANSITIONS: ReadonlyMap<
   ServerStatus,
@@ -58,7 +59,10 @@ function createClient(
       supportsOperationNotifications: true,
       // Let Sorbet know that we can handle sorbet:// URIs for generated files.
       supportsSorbetURIs: true,
-      highlightUntyped: context.configuration.highlightUntyped,
+      highlightUntyped: backwardsCompatibleTrackUntyped(
+        context.log,
+        context.configuration.highlightUntyped,
+      ),
       enableTypedFalseCompletionNudges:
         context.configuration.typedFalseCompletionNudges,
     },
