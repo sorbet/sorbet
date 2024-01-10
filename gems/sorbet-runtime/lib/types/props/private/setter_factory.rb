@@ -113,19 +113,15 @@ module T::Props
       end
       private_class_method def self.simple_nilable_proc(prop, accessor_key, non_nil_type, klass)
         proc do |val|
-          if val.nil?
-            instance_variable_set(accessor_key, nil)
-          elsif val.is_a?(non_nil_type)
-            instance_variable_set(accessor_key, val)
-          else
+          unless val.nil? || val.is_a?(non_nil_type)
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
               prop,
               T::Utils.coerce(non_nil_type),
               val,
             )
-            instance_variable_set(accessor_key, val)
           end
+          instance_variable_set(accessor_key, val)
         end
       end
 
