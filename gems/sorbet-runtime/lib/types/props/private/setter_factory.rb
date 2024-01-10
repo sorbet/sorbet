@@ -80,7 +80,7 @@ module T::Props
                 val,
               )
             end
-          end
+          end,
         ]
       end
 
@@ -130,7 +130,7 @@ module T::Props
                 val,
               )
             end
-          end
+          end,
         ]
       end
 
@@ -165,7 +165,7 @@ module T::Props
                 val,
               )
             end
-          end
+          end,
         ]
       end
 
@@ -219,7 +219,7 @@ module T::Props
                 val,
               )
             end
-          end
+          end,
         ]
       end
 
