@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.31",
+  "version": "0.3.30",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -24,6 +24,7 @@
   ],
   "activationEvents": [
     "onCommand:sorbet.configure",
+    "onCommand:sorbet.configureHighlightUntyped",
     "onCommand:sorbet.disable",
     "onCommand:sorbet.enable",
     "onCommand:sorbet.restart",
@@ -54,6 +55,12 @@
         "command": "sorbet.configure",
         "title": "Configure",
         "category": "Sorbet"
+      },
+      {
+        "command": "sorbet.configureHighlightUntyped",
+        "title": "Configure untyped code highlighting",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty"
       },
       {
         "command": "sorbet.copySymbolToClipboard",
