@@ -6,7 +6,6 @@
 namespace sorbet::core {
 enum class TrackUntyped : uint8_t {
     Nowhere,
-    EverywhereButTests,
     Everywhere,
 };
 } // namespace sorbet::core
