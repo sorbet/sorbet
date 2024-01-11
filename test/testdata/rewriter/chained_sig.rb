@@ -8,6 +8,9 @@ module Interface
 
   sig.abstract { void }
   def foo; end
+
+  sig { void }
+  def bar; end
 end
 
 class Override
@@ -108,22 +111,22 @@ class MissingBlocks
   def foo; end
 
   sig.final
-# ^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^ error: Signature declarations expect a block
     # ^^^^^ error: Method `final` does not exist on `NilClass`
   def bar; end
 
   sig.abstract
-# ^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^ error: Signature declarations expect a block
     # ^^^^^^^^ error: Method `abstract` does not exist on `NilClass`
   def baz; end
 
   sig.override
-# ^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^ error: Signature declarations expect a block
     # ^^^^^^^^ error: Method `override` does not exist on `NilClass`
   def qux; end
 
   sig.overridable
-# ^^^^^^^^^^^^^^^ error: Signature declarations expect a block
+    # ^^^^^^^^^^^ error: Signature declarations expect a block
     # ^^^^^^^^^^^ error: Method `overridable` does not exist on `NilClass`
   def quux; end
 end
@@ -164,6 +167,7 @@ class DuplicateButMissingBlock
 
   sig.final { void }.override
                    # ^^^^^^^^ error: Method `override` does not exist on `NilClass`
+                   # ^^^^^^^^ error: Signature declarations expect a block
   def foo; end
 # ^^^^^^^ error: Method `DuplicateButMissingBlock#foo` implements an abstract method `Interface#foo` but is not declared with `override.`
 end
@@ -191,6 +195,9 @@ module ValidInterface
 
   sig.abstract { void }
   def baz; end
+
+  sig.abstract { void }
+  def qux; end
 end
 
 class ValidDoubleChain
@@ -205,4 +212,27 @@ class ValidDoubleChain
 
   sig(:final).override(allow_incompatible: true) { void }
   def baz; end
+
+  sig.override.final { void }
+  def qux; end
+end
+
+class IncorrectOverrideOnFinal < ValidDoubleChain
+  extend T::Sig
+
+  sig.override { void }
+  def foo; end
+# ^^^^^^^ error: `ValidDoubleChain#foo` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#foo`
+
+  sig.override { void }
+  def bar; end
+  # ^^^^^^^ error: `ValidDoubleChain#bar` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#bar
+
+  sig.override { void }
+  def baz; end
+  # ^^^^^^^ error: `ValidDoubleChain#baz` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#baz
+
+  sig.override { void }
+  def qux; end
+  # ^^^^^^^ error: `ValidDoubleChain#qux` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#qux
 end

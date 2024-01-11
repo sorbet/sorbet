@@ -359,6 +359,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.extend(<emptyTree>::<C T>::<C Helpers>)
@@ -370,6 +378,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of bar>
 
     <runtime method definition of baz>
+
+    <runtime method definition of qux>
   end
 
   class <emptyTree>::<C ValidDoubleChain><<C <todo sym>>> < (::<todo sym>)
@@ -397,6 +407,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.override().void()
+    end
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.include(<emptyTree>::<C ValidInterface>)
@@ -406,5 +424,51 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of bar>
 
     <runtime method definition of baz>
+
+    <runtime method definition of qux>
+  end
+
+  class <emptyTree>::<C IncorrectOverrideOnFinal><<C <todo sym>>> < (<emptyTree>::<C ValidDoubleChain>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of baz>
+
+    <runtime method definition of qux>
   end
 end

@@ -1589,7 +1589,7 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(TestRescue), <block-pre-cal
 # backedges
 # - bb6(rubyRegionId=2)
 bb7[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$26: Sorbet::Private::Static::Void, <selfRestore>$27: T.class_of(TestRescue)):
-    <statTemp>$22: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$26, sig>
+    <statTemp>$22: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$26, sig>
     <self>: T.class_of(TestRescue) = <selfRestore>$27
     <cfgAlias>$46: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$48: T.class_of(T) = alias <C T>

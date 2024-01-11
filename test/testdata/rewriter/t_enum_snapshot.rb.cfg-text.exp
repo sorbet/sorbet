@@ -81,7 +81,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-te
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(MyEnum), <C X>$41: MyEnum::X, <C Y>$60: MyEnum::Y, <C Z>$80: MyEnum::Z):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
+    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$8, sig>
     <self>: T.class_of(MyEnum) = <selfRestore>$9
     <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$15: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).extend(<cfgAlias>$18: T.class_of(T::Helpers))
@@ -313,7 +313,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-ca
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(EnumsDoEnum), <C X>$41: EnumsDoEnum::X, <C Y>$60: EnumsDoEnum::Y, <C Z>$80: EnumsDoEnum::Z):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
+    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$8, sig>
     <self>: T.class_of(EnumsDoEnum) = <selfRestore>$9
     <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$15: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).extend(<cfgAlias>$18: T.class_of(T::Helpers))
@@ -488,7 +488,7 @@ bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(BadConsts), <block-pre-call
 # backedges
 # - bb2(rubyRegionId=1)
 bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$8: Sorbet::Private::Static::Void, <selfRestore>$9: T.class_of(BadConsts), <C Before>$36: BadConsts::Before, <C StaticField1>$43: Integer, <C Inside>$62: BadConsts::Inside, <C StaticField2>$69: Integer, <C After>$84: BadConsts::After, <C StaticField3>$91: Integer, <C StaticField4>$93: Integer):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$8, sig>
+    <statTemp>$3: T::Private::Methods::DeclBuilder = Solve<<block-pre-call-temp>$8, sig>
     <self>: T.class_of(BadConsts) = <selfRestore>$9
     <cfgAlias>$18: T.class_of(T::Helpers) = alias <C Helpers>
     <statTemp>$15: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).extend(<cfgAlias>$18: T.class_of(T::Helpers))
