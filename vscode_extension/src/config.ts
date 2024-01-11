@@ -13,7 +13,7 @@ import { Log } from "./log";
 import { SorbetLspConfig, SorbetLspConfigData } from "./sorbetLspConfig";
 import { deepEqual } from "./utils";
 
-export type TrackUntyped = "nowhere" | "everywhere-but-tests" | "everywhere";
+export type TrackUntyped = "nowhere" | "everywhere";
 
 function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
   switch (value) {
@@ -22,7 +22,6 @@ function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
     case false:
       return "nowhere";
     case "nowhere":
-    case "everywhere-but-tests":
     case "everywhere":
       return value;
     default:
@@ -39,8 +38,6 @@ export function backwardsCompatibleTrackUntyped(
       return false;
     case "everywhere":
       return true;
-    case "everywhere-but-tests":
-      return trackWhere;
     default:
       const exhaustiveCheck: never = trackWhere;
       log.warning(`Got unexpected state: ${exhaustiveCheck}`);
@@ -342,8 +339,6 @@ export class SorbetExtensionConfig implements Disposable {
   public get highlightUntyped(): TrackUntyped {
     return this.wrappedHighlightUntyped;
   }
-
-  public oldHighlightUntyped: TrackUntyped | undefined = undefined;
 
   /**
    * Returns a copy of the current SorbetLspConfig objects.
