@@ -251,7 +251,7 @@ You can read about all the DSL RBI compilers supplied by Tapioca in the
 > Add Tapioca to your Gemfile then run `bundle install` to install it:
 >
 > ```ruby
-> gem "tapioca", require: false, :group => :development
+> gem "tapioca", require: false, :group => [:development, :test]
 > ```
 >
 > Once Tapioca is installed, simply run `tapioca init` to initialize your

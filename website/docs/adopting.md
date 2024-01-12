@@ -22,7 +22,7 @@ We'll declare them in our Gemfile and install them with Bundler:
 
 gem 'sorbet', :group => :development
 gem 'sorbet-runtime'
-gem 'tapioca', require: false, :group => :development
+gem 'tapioca', require: false, :group => [:development, :test]
 ```
 
 ```plaintext
@@ -40,7 +40,7 @@ Alternatively we can use the `sorbet-static-and-runtime` gem to install both
 # -- Gemfile --
 
 gem 'sorbet-static-and-runtime'
-gem 'tapioca', require: false, :group => :development
+gem 'tapioca', require: false, :group => [:development, :test]
 ```
 
 Note that this is not the recommended way to add Sorbet to our project if we

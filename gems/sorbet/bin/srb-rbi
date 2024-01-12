@@ -43,7 +43,7 @@ module Sorbet::Private::Main
 
       To switch, add Tapioca to your Gemfile then run #{cyan("bundle install")} to install it:
 
-          #{cyan("gem \"tapioca\", require: false, :group => :development")}
+          #{cyan("gem \"tapioca\", require: false, :group => [:development, :test]")}
 
       Once Tapioca is installed, simply run #{cyan("tapioca init")} to initialize your project with Sorbet and generate the necessary RBI files:
 
