@@ -548,8 +548,8 @@ annotation because `T.attached_class` is only allowed in output positions.
 ## 3515
 
 You are using the chained `sig` syntax however it is malformed. Ensure a block
-is passed and there are no methods invoked twice. You can only chain
-`abstract`, `final`, `override` and `overridable` methods on a `sig`.
+is passed and there are no methods invoked twice. You can only chain `abstract`,
+`final`, `override` and `overridable` methods on a `sig`.
 
 ```ruby
 sig.final { void }
