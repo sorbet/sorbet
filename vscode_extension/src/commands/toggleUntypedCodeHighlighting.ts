@@ -1,6 +1,8 @@
 import { QuickPickItem, window } from "vscode";
 import {
   TrackUntyped,
+  ALL_TRACK_UNTYPED,
+  labelForTrackUntypedSetting,
   backwardsCompatibleTrackUntyped,
   SorbetExtensionConfig,
 } from "../config";
@@ -76,21 +78,15 @@ export async function toggleUntypedCodeHighlighting(
  */
 export async function configureUntypedCodeHighlighting(
   context: SorbetExtensionContext,
-): Promise<void> {
-  const items: TrackUntypedQuickPickItem[] = [
-    {
-      label: "Nowhere",
-      trackWhere: "nowhere",
+): Promise<TrackUntyped | null> {
+  const items: TrackUntypedQuickPickItem[] = ALL_TRACK_UNTYPED.map(
+    (trackWhere) => {
+      return {
+        label: labelForTrackUntypedSetting(trackWhere),
+        trackWhere,
+      };
     },
-    {
-      label: "Everywhere but tests",
-      trackWhere: "everywhere-but-tests",
-    },
-    {
-      label: "Everywhere",
-      trackWhere: "everywhere",
-    },
-  ];
+  );
 
   const selectedItem = await window.showQuickPick(items, {
     placeHolder: "Select where to highlight untyped code",
@@ -110,5 +106,9 @@ export async function configureUntypedCodeHighlighting(
     } else {
       context.log.debug("ConfigureUntyped: No active Sorbet LSP to notify.");
     }
+
+    return targetState;
   }
+
+  return null;
 }
