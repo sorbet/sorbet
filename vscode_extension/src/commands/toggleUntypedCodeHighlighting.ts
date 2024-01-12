@@ -30,6 +30,18 @@ function toggle(log: Log, configuration: SorbetExtensionConfig): TrackUntyped {
   }
 }
 
+async function cycleStates(
+  context: SorbetExtensionContext,
+  targetState: TrackUntyped,
+  forCommand: string,
+) {
+  const oldHighlightUntyped = context.configuration.highlightUntyped;
+  context.configuration.oldHighlightUntyped = oldHighlightUntyped;
+
+  await context.configuration.setHighlightUntyped(targetState);
+  context.log.info(`${forCommand}: Untyped code highlighting: ${targetState}`);
+}
+
 /**
  * Toggle highlighting of untyped code.
  * @param context Sorbet extension context.
@@ -39,8 +51,7 @@ export async function toggleUntypedCodeHighlighting(
   context: SorbetExtensionContext,
 ): Promise<TrackUntyped> {
   const targetState = toggle(context.log, context.configuration);
-  await context.configuration.setHighlightUntyped(targetState);
-  context.log.info(`ToggleUntyped: Untyped code highlighting: ${targetState}`);
+  await cycleStates(context, targetState, "ToggleUntyped");
 
   const { activeLanguageClient: client } = context.statusProvider;
   if (client) {
@@ -86,14 +97,8 @@ export async function configureUntypedCodeHighlighting(
   });
 
   if (selectedItem) {
-    const oldHighlightUntyped = context.configuration.highlightUntyped;
-    context.configuration.oldHighlightUntyped = oldHighlightUntyped;
-
     const targetState = selectedItem.trackWhere;
-    await context.configuration.setHighlightUntyped(targetState);
-    context.log.info(
-      `ConfigureUntyped: Untyped code highlighting: ${targetState}`,
-    );
+    await cycleStates(context, targetState, "ConfigureUntyped");
 
     const { activeLanguageClient: client } = context.statusProvider;
     if (client) {
