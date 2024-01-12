@@ -262,7 +262,7 @@ instead.</strong></p>
 <p>This command will be removed in future versions and all RBI generation will be
 done through Tapioca.</p>
 <p>Add Tapioca to your Gemfile then run <code>bundle install</code> to install it:</p>
-<pre><code class="hljs css language-ruby">gem <span class="hljs-string">"tapioca"</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
+<pre><code class="hljs css language-ruby">gem <span class="hljs-string">"tapioca"</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; [<span class="hljs-symbol">:development</span>, <span class="hljs-symbol">:test</span>]
 </code></pre>
 <p>Once Tapioca is installed, simply run <code>tapioca init</code> to initialize your
 project with Sorbet and generate the necessary RBI files:</p>

@@ -74,7 +74,7 @@ with gems and metaprogramming. We recommend using
 
 gem <span class="hljs-string">'sorbet'</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
 gem <span class="hljs-string">'sorbet-runtime'</span>
-gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
+gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; [<span class="hljs-symbol">:development</span>, <span class="hljs-symbol">:test</span>]
 </code></pre>
 <pre><code class="hljs css language-plaintext">❯ bundle install
 </code></pre>
@@ -86,7 +86,7 @@ for some important caveats.</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- Gemfile --</span>
 
 gem <span class="hljs-string">'sorbet-static-and-runtime'</span>
-gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; <span class="hljs-symbol">:development</span>
+gem <span class="hljs-string">'tapioca'</span>, <span class="hljs-symbol">require:</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:group</span> =&gt; [<span class="hljs-symbol">:development</span>, <span class="hljs-symbol">:test</span>]
 </code></pre>
 <p>Note that this is not the recommended way to add Sorbet to our project if we
 work on a gem as it would declare <code>sorbet</code> as a runtime dependency instead of a
