@@ -398,11 +398,11 @@ class Enumerator < Object
   # `offset`
   # :   the starting index to use
   sig do
-    params(
+    type_parameters(:U).params(
       offset: Integer,
-      blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject)
+      blk: T.proc.params(arg0: Elem, arg1: Integer).returns(T.type_parameter(:U))
     )
-      .returns(T.untyped)
+                       .returns(T::Enumerator[T.type_parameter(:U)])
   end
   sig do
     params(
@@ -813,7 +813,7 @@ class Enumerator::Lazy < Enumerator
   def grep_v(_); end
 
   # Returns self.
-  sig {returns(T.self_type)}
+  sig { returns(T.self_type) }
   def lazy; end
 
   # Like
@@ -1033,7 +1033,7 @@ class Enumerator::Chain < Enumerator
 
   sig do
     type_parameters(:U).params(
-      arg0: T::Enumerable[T.type_parameter(:U)],
+      arg0: T::Enumerable[T.type_parameter(:U)]
     ).returns(
       T::Enumerator::Chain[T.type_parameter(:U)]
     )
