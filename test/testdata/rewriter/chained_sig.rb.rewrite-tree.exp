@@ -391,7 +391,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override().void()
     end
 
@@ -399,7 +399,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.sig(<self>) do ||
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
       <self>.override(:allow_incompatible, true).void()
     end
 

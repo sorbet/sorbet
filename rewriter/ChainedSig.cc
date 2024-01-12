@@ -130,27 +130,38 @@ struct ChainedSigWalk {
         // signature is final or not
         ast::ExpressionPtr newBlockReceiver = std::move(blockBody->recv);
         do {
-            if (sendCopy->fun != core::Names::final_()) {
+            // Handle the case where final is a positional argument, i.e. `sig(:final)`
+            if (sendCopy->fun == core::Names::sig()) {
+                if (sendCopy->hasPosArgs()) {
+                    auto *arg0 = ast::cast_tree<ast::Literal>(sendCopy->getPosArg(0));
+                    if (arg0 && arg0->isSymbol() && arg0->asSymbol() == core::Names::final_()) {
+                        isFinal = true;
+                    }
+                }
+                break;
+            }
+
+            if (sendCopy->fun == core::Names::final_()) {
+                isFinal = true;
+            } else {
                 if (sendCopy->hasBlock()) {
                     // Drop the block argument before moving the arguments.
                     sendCopy->setBlock(nullptr);
                 }
                 newBlockReceiver = sendCopy->withNewBody(sendCopy->loc, std::move(newBlockReceiver), sendCopy->fun);
-            } else {
-                isFinal = true;
             }
 
             sendCopy = ast::cast_tree<ast::Send>(sendCopy->recv);
 
-            // If a previous receiver has a block, then we need to add an error to prevent signatures like this:
-            // `sig.final {}.override{}
+            // If we encounter a block in the receiver (assigned above) we need to add an error to prevent signatures
+            // with a block in the middle of the chain i.e. `sig.final {}.override{}
             if (sendCopy->hasBlock()) {
                 if (auto e = ctx.beginError(send->funLoc, core::errors::Rewriter::InvalidChainedSig)) {
                     e.setHeader("Cannot add more signature statements after the declaration block");
                     e.addErrorLine(ctx.locAt(sendCopy->block()->loc), "Initial statement defined here");
                 }
             }
-        } while (sendCopy && sendCopy->fun != core::Names::sig());
+        } while (sendCopy);
 
         // If the signature is final, we need the `:final` positional argument
         if (isFinal) {

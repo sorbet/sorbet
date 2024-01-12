@@ -8,9 +8,6 @@ module Interface
 
   sig.abstract { void }
   def foo; end
-
-  sig { void }
-  def bar; end
 end
 
 class Override
@@ -226,13 +223,13 @@ class IncorrectOverrideOnFinal < ValidDoubleChain
 
   sig.override { void }
   def bar; end
-  # ^^^^^^^ error: `ValidDoubleChain#bar` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#bar
+# ^^^^^^^ error: `ValidDoubleChain#bar` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#bar
 
   sig.override { void }
   def baz; end
-  # ^^^^^^^ error: `ValidDoubleChain#baz` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#baz
+# ^^^^^^^ error: `ValidDoubleChain#baz` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#baz
 
   sig.override { void }
   def qux; end
-  # ^^^^^^^ error: `ValidDoubleChain#qux` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#qux
+# ^^^^^^^ error: `ValidDoubleChain#qux` was declared as final and cannot be overridden by `IncorrectOverrideOnFinal#qux
 end
