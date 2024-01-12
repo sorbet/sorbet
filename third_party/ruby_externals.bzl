@@ -92,7 +92,8 @@ def register_ruby_dependencies():
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by-3_1.patch",  # https://github.com/ruby/ruby/pull/6791
             "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-more-t-none-context.patch",
         ],
     )
 
