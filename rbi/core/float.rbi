@@ -117,6 +117,12 @@ class Float < Numeric
     )
     .returns(BigDecimal)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def %(arg0); end
 
   # Returns a new [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)
@@ -157,6 +163,12 @@ class Float < Numeric
     )
     .returns(Float)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def *(arg0); end
 
   # Raises `float` to the power of `other`.
@@ -193,6 +205,12 @@ class Float < Numeric
         arg0: Complex,
     )
     .returns(Complex)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def **(arg0); end
 
@@ -233,6 +251,12 @@ class Float < Numeric
         arg0: T.any(Integer, Float),
     )
     .returns(Float)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def +(arg0); end
 
@@ -277,6 +301,12 @@ class Float < Numeric
     )
     .returns(Float)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def -(arg0); end
 
   # Returns `float`, negated.
@@ -320,6 +350,12 @@ class Float < Numeric
         arg0: T.any(Integer, Float),
     )
     .returns(Float)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def /(arg0); end
 
