@@ -47,6 +47,25 @@ function createClient(
   serverOptions: ServerOptions,
   errorHandler: ErrorHandler,
 ) {
+  const initializationOptions = {
+    // Opt in to sorbet/showOperation notifications.
+    supportsOperationNotifications: true,
+    // Let Sorbet know that we can handle sorbet:// URIs for generated files.
+    supportsSorbetURIs: true,
+    highlightUntyped: backwardsCompatibleTrackUntyped(
+      context.log,
+      context.configuration.highlightUntyped,
+    ),
+    enableTypedFalseCompletionNudges:
+      context.configuration.typedFalseCompletionNudges,
+  };
+
+  context.log.debug(
+    `Initializing with initializationOptions=${JSON.stringify(
+      initializationOptions,
+    )}`,
+  );
+
   const client = new LanguageClient("ruby", "Sorbet", serverOptions, {
     documentSelector: [
       { language: "ruby", scheme: "file" },
@@ -54,18 +73,7 @@ function createClient(
       { language: "ruby", scheme: "sorbet" },
     ],
     outputChannel: context.logOutputChannel,
-    initializationOptions: {
-      // Opt in to sorbet/showOperation notifications.
-      supportsOperationNotifications: true,
-      // Let Sorbet know that we can handle sorbet:// URIs for generated files.
-      supportsSorbetURIs: true,
-      highlightUntyped: backwardsCompatibleTrackUntyped(
-        context.log,
-        context.configuration.highlightUntyped,
-      ),
-      enableTypedFalseCompletionNudges:
-        context.configuration.typedFalseCompletionNudges,
-    },
+    initializationOptions,
     errorHandler,
     revealOutputChannelOn: context.configuration.revealOutputOnError
       ? RevealOutputChannelOn.Error

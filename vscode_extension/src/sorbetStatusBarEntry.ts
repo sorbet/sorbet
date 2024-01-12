@@ -5,6 +5,7 @@ import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { StatusChangedEvent } from "./sorbetStatusProvider";
 import { RestartReason, ServerStatus } from "./types";
+import { TrackUntyped } from "./config";
 
 export class SorbetStatusBarEntry implements Disposable {
   private readonly context: SorbetExtensionContext;
@@ -80,7 +81,7 @@ export class SorbetStatusBarEntry implements Disposable {
     ) {
       const latestOp = operations[operations.length - 1];
       text = `${sorbetName}: ${latestOp.description} ${this.getSpinner()}`;
-      tooltip = getRunningTooltip();
+      tooltip = this.getRunningTooltip(highlightUntyped);
     } else {
       switch (this.serverStatus) {
         case ServerStatus.DISABLED:
@@ -105,7 +106,7 @@ export class SorbetStatusBarEntry implements Disposable {
           break;
         case ServerStatus.RUNNING:
           text = `${sorbetName}: Idle`;
-          tooltip = getRunningTooltip();
+          tooltip = this.getRunningTooltip(highlightUntyped);
           break;
         default:
           this.context.log.error(`Invalid ServerStatus: ${this.serverStatus}`);
@@ -117,13 +118,23 @@ export class SorbetStatusBarEntry implements Disposable {
 
     this.statusBarItem.text = text;
     this.statusBarItem.tooltip = tooltip;
+  }
 
-    function getRunningTooltip() {
-      let txt = "The Sorbet server is currently running.";
-      if (highlightUntyped) {
-        txt += "\n  - Highlight untyped code";
-      }
-      return txt;
+  private getRunningTooltip(highlightUntyped: TrackUntyped) {
+    let txt = "The Sorbet server is currently running.";
+    switch (highlightUntyped) {
+      case "everywhere":
+        txt += "\n  - Highlight untyped code everywhere";
+        break;
+      case "everywhere-but-tests":
+        txt += "\n  - Highlight untyped code everywhere but tests";
+        break;
+      case "nowhere":
+        break;
+      default:
+        const unexpected: never = highlightUntyped;
+        this.context.log.warning(`Got unexpected state: ${unexpected}`);
     }
+    return txt;
   }
 }
