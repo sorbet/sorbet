@@ -15,6 +15,12 @@ import { deepEqual } from "./utils";
 
 export type TrackUntyped = "nowhere" | "everywhere-but-tests" | "everywhere";
 
+export const ALL_TRACK_UNTYPED: TrackUntyped[] = [
+  "nowhere",
+  "everywhere-but-tests",
+  "everywhere",
+];
+
 function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
   switch (value) {
     case true:
@@ -27,6 +33,20 @@ function coerceTrackUntypedSetting(value: boolean | string): TrackUntyped {
       return value;
     default:
       return "nowhere";
+  }
+}
+
+export function labelForTrackUntypedSetting(value: TrackUntyped): string {
+  switch (value) {
+    case "nowhere":
+      return "Nowhere";
+    case "everywhere-but-tests":
+      return "Everywhere but tests";
+    case "everywhere":
+      return "Everywhere";
+    default:
+      const unexpected: never = value;
+      throw new Error(`Unexpected value: ${unexpected}`);
   }
 }
 
