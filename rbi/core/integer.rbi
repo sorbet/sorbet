@@ -41,6 +41,12 @@ class Integer < Numeric
     )
     .returns(T.any(Integer, Float))
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def %(arg0); end
 
   # Bitwise AND.
@@ -89,6 +95,12 @@ class Integer < Numeric
         arg0: T.any(Integer, Float),
     )
     .returns(T.any(Integer, Float))
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def *(arg0); end
 
@@ -139,6 +151,12 @@ class Integer < Numeric
     )
     .returns(Complex)
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def **(arg0); end
 
   # Performs addition: the class of the resulting object depends on the class of
@@ -178,6 +196,12 @@ class Integer < Numeric
         arg0: T.any(Integer, Float),
     )
     .returns(T.any(Integer, Float))
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def +(arg0); end
 
@@ -222,6 +246,12 @@ class Integer < Numeric
     )
     .returns(T.any(Integer, Float))
   end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
+  end
   def -(arg0); end
 
   # Returns `int`, negated.
@@ -265,6 +295,12 @@ class Integer < Numeric
         arg0: T.any(Integer, Float),
     )
     .returns(T.any(Integer, Float))
+  end
+  sig do
+    params(
+        arg0: Numeric,
+    )
+    .returns(Numeric)
   end
   def /(arg0); end
 
