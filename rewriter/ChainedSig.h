@@ -14,11 +14,15 @@ namespace sorbet::rewriter {
  *
  * sig.abstract { void }
  * sig.final { void }
+ * sig.override { void }
+ * sig.overridable { void }
  *
  * into
  *
  * sig { abstract.void }
- * sig { final.void }
+ * sig(:final) { void }
+ * sig { override.void }
+ * sig { overridable.void }
  *
  */
 class ChainedSig {
