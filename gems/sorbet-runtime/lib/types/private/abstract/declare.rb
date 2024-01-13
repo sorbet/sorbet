@@ -18,7 +18,6 @@ module T::Private::Abstract::Declare
     Abstract::Data.set(mod, :abstract_type, type)
 
     mod.extend(Abstract::Hooks)
-    mod.extend(T::InterfaceWrapper::Helpers)
 
     if mod.is_a?(Class)
       if type == :interface
