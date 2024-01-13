@@ -11,8 +11,8 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
         if (seenLoc.file() != loc.file()) {
             continue;
         }
-        // Check exactly equal for zero-width locs
-        if (seenLoc == loc) {
+        // Check exactly equal for non-zero-width locs
+        if (loc.beginPos() != loc.endPos() && seenLoc == loc) {
             return true;
         }
         // Check for overlapping
