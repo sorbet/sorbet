@@ -198,7 +198,7 @@ module T
   # Statically, declares to Sorbet that the argument is never `nil`, despite
   # what the type system would otherwise infer for the type.
   #
-  # At runtime, raises an exception contining the provided reason if the
+  # At runtime, raises an exception containing the provided reason if the
   # argument is ever `nil`.
   #
   # Takes the reason as a block that should return a `String`, so that the code

@@ -313,7 +313,7 @@ public:
         if (curMethodSet().stack.empty()) {
             return;
         }
-        // if this class is dirrectly nested inside a method, we want to steal it
+        // if this class is directly nested inside a method, we want to steal it
         auto md = methods.popScope();
         ENFORCE(md);
 

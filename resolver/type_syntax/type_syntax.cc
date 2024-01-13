@@ -568,7 +568,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
     return sig;
 }
 
-// This function recurses through an OrType, and accumlates all the class names,
+// This function recurses through an OrType, and accumulates all the class names,
 // wrapped in T.class_of, and checks if the type is only made up of Classes and OrTypes
 bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::string> &v) {
     if (auto *o = core::cast_type<core::OrType>(type)) {
@@ -1146,7 +1146,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
                     // 3. if it's a type_member type, be used in an instance method
                     if (usedOnSourceClass &&
                         ((isTypeTemplate && ctxIsSingleton) || !(isTypeTemplate || ctxIsSingleton))) {
-                        // At this point, we maake a skolemized variable that will be unwrapped at the end of type
+                        // At this point, we make a skolemized variable that will be unwrapped at the end of type
                         // parsing using Types::unwrapSkolemVariables. The justification for this is that type
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
                         result.type = core::make_type<core::SelfTypeParam>(sym);

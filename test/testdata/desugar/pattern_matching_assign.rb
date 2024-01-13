@@ -10,7 +10,7 @@ T.reveal_type(s) # error: Revealed type: `T.untyped`
 in "b" => x # local var different from the assign line 6
   T.reveal_type(x) # error: Revealed type: `T.untyped`
   1
-in "c" => expr # local var hidding the assign line 3
+in "c" => expr # local var hiding the assign line 3
   T.reveal_type(expr) # error: Revealed type: `T.untyped`
   1
 in "d"

@@ -414,7 +414,7 @@ void sorbet_vm_register_sig(VALUE isSelf, VALUE method, VALUE self, VALUE arg, r
     // and Sorbet will accept this (so long as the multiple definitions type-check).
     //
     // Nested method definitions are also problematic: Sorbet models the *sigs*
-    // of all such definitions as occuring at the top-level, even if those signatures
+    // of all such definitions as occurring at the top-level, even if those signatures
     // are not applied until execution would reach the definition of the method, viz.
     //
     // sig {...} # sig 1

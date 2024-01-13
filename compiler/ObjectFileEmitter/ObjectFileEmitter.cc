@@ -358,7 +358,7 @@ void ObjectFileEmitter::init() {
     ENFORCE(targetMachine);
 
     // We encode this value in our `.exp` files right now so we have to hard
-    // code it to something that doesn't chance accross sytems.
+    // code it to something that doesn't chance across systems.
     // TODO stop putting it in our .exp files and then unhardcode this
     // auto targetTriple = llvm::sys::getDefaultTargetTriple();
 

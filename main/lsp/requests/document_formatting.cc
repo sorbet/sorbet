@@ -30,12 +30,12 @@ enum RubyfmtStatus {
     // rubyfmt and you should report a bug with the file that crashed rubyfmt
     RIPPER_PARSE_FAILURE = 2,
 
-    // an error occured during IO within the function, should be impossible
+    // an error occurred during IO within the function, should be impossible
     // and most likely indicates a programming error within rubyfmt, please
     // file a bug
     IO_ERROR = 3,
 
-    // some unknown ruby error occured during execution fo Rubyfmt. This indicates
+    // some unknown ruby error occurred during execution of Rubyfmt. This indicates
     // a programming error. Please file a bug report and terminate the process
     // and restart.
     OTHER_RUBY_ERROR = 4,

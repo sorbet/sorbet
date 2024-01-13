@@ -194,7 +194,7 @@ int lexer::compare_indent_level(token_t left, token_t right) {
         i++;
         if (i > 100) {
             // Attempt to defeat pathologically long whitespace prefixes.
-            // This will basically mean falling back to the indendation-agnostic behavior.
+            // This will basically mean falling back to the indentation-agnostic behavior.
             // We could alternatively attempt to return some sort of error state here.
             return 0;
         }

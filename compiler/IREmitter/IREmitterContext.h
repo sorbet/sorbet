@@ -153,7 +153,7 @@ struct IREmitterContext {
     // These insertions points hold that converts from arguments given to us via Ruby's C extension API interface
     // into the LLVM IR that lets our compiled code interact with them.
     //
-    // For simplicitly, all our compiled functions advertise themselves as variadic Ruby methods even when
+    // For simplicity, all our compiled functions advertise themselves as variadic Ruby methods even when
     // the original Ruby method had a fixed arity, so there ends up being a fair deal of argument checking logic.
     // In particular, there are many llvm::BasicBlocks involved in arguments--this map holds just the starting point.
     //
@@ -233,7 +233,7 @@ struct IREmitterContext {
     llvm::BasicBlock *postProcessBlock;
 
     // idx: cfg::BasicBlock::rubyRegionId
-    // val: The SendAndBlockLink for that region (each Ruby block correspondes to one cfg::Send)
+    // val: The SendAndBlockLink for that region (each Ruby block corresponds to one cfg::Send)
     std::vector<std::shared_ptr<core::SendAndBlockLink>> blockLinks;
 
     // idx: cfg::BasicBlock::rubyRegionId

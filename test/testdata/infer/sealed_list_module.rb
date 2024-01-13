@@ -85,7 +85,7 @@ def list_integer_to_list_string(xs)
     T.reveal_type(xs) # error: Revealed type: `List::Nil[Integer]`
     # The above error (result type) is because List::Nil does not fix the
     # type_member to T.noreturn, so each empty list can only be used at its
-    # own type, insead of being compatible with any list. This is mostly for
+    # own type, instead of being compatible with any list. This is mostly for
     # test coverage; we also have tests that test the fixed noreturn case.
     _unused = T.let(xs, List[String]) # error: Argument does not have asserted type `List[String]`
     List::Nil[String].new

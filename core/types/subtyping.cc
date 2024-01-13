@@ -177,7 +177,7 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
     return AndType::make_shared(t1, t2);
 }
 
-// only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
+// only keep knowledge in t1 that is not already present in t2. Return the same reference if unchanged
 TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     if (auto *a1 = cast_type<AndType>(t1)) {
         auto a1a = dropLubComponents(gs, a1->left, t2);
@@ -548,7 +548,7 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     //    if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
     //        return lubGround(gs, t2, t1);
     //    }
-    /** this implementation makes a bet that types are small and very likely to be collapsable.
+    /** this implementation makes a bet that types are small and very likely to be collapsible.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1 == t2) {
@@ -592,7 +592,7 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     if (t1.kind() > t1.kind()) { // force the relation to be symmentric and half the implementation
         return glbGround(gs, t2, t1);
     }
-    /** this implementation makes a bet that types are small and very likely to be collapsable.
+    /** this implementation makes a bet that types are small and very likely to be collapsible.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1 == t2) {
@@ -1400,7 +1400,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (a1o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
 
-            // this could be using glb, but we _know_ that we alredy tried to collapse it (prior
+            // this could be using glb, but we _know_ that we already tried to collapse it (prior
             // construction of types did). Thus we use AndType::make_shared instead
             return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode) &&
                    Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, *r), t2, mode);
@@ -1418,7 +1418,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
 
-            // this could be using lub, but we _know_ that we alredy tried to collapse it (prior
+            // this could be using lub, but we _know_ that we already tried to collapse it (prior
             // construction of types did). Thus we use OrType::make_shared instead
             return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode) &&
                    Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode);

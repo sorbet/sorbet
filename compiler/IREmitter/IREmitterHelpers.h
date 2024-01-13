@@ -70,7 +70,7 @@ struct KnownFunction {
     Type type;
     std::string name;
 
-    // Implicit constructor from a string for backwards compability
+    // Implicit constructor from a string for backwards compatibility
     KnownFunction(std::string name) : KnownFunction(Type::Symbol, std::move(name)) {}
 
     static KnownFunction cached(std::string name) {

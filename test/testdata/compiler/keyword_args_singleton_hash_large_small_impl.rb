@@ -21,7 +21,7 @@ p(Main.takes_keyword_args(
   prop06: 0,
   prop07: 0,
   prop08: 0,
-  prop09: 0, # The ninth element causes this hash to overlflow the "small hash" implementation.
+  prop09: 0, # The ninth element causes this hash to overflow the "small hash" implementation.
   prop10: 0, # but we add a bunch more in case Ruby ever decides to define "small" as bigger than 8
   prop11: 0,
   prop12: 0,

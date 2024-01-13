@@ -30,7 +30,7 @@ bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
 }
 
 // pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
-// defintion) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
+// definition) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
 // the class body and return it.)
 ast::ExpressionPtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
     ast::InsSeq::STATS_store inits;

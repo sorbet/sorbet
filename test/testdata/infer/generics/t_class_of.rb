@@ -144,7 +144,7 @@ def example5(klass)
   T.reveal_type(a) # error: `T.type_parameter(:U) (of Object#example5)`
   # This error message is unfortunate; had the user been able to omit the
   # `<AttachedClass>` argument in `T.class_of`, it would have defaulted to `A`
-  # and then been interesected with `T.type_parameter(:U)`.
+  # and then been intersected with `T.type_parameter(:U)`.
   #
   # (The thing that's annoying is just the verbosity--if you want to use
   # T.type_parameter with `T::Class`, there's no upper bound so you don't need

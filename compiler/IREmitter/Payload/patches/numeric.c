@@ -27,7 +27,7 @@ VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
         } else if (RB_TYPE_P(y, T_FLOAT)) {
             return DBL2NUM((double)FIX2LONG(recv) - RFLOAT_VALUE(y));
         }
-        // fall throught to coerece
+        // fall through to coerce
     } else if (RB_TYPE_P(recv, T_BIGNUM)) {
         return rb_big_minus(recv, y);
     }

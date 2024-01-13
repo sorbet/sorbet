@@ -4335,7 +4335,7 @@ f_opt_paren_args: f_paren_args
                 // (imagine that the user is in the middle of typing out the `b`, and we want to provide completion)
                 // We can't do that, because by default, the `tLABEL` (x:) that comes after the `b` tricks the parser
                 // into thinking that an fcall is coming, like how `b x: y` is valid Ruby code. But Ruby has banned
-                // that syntax in args (for the obvious reason that it's ambigous with keyword args). So it gets
+                // that syntax in args (for the obvious reason that it's ambiguous with keyword args). So it gets
                 // halfway done with parsing it as an fcall, and realizes theres an error.
                 //
                 // And the last bit is that since there's no tCOMMA (the user is still filling in the arg, hasn't

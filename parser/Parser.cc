@@ -146,7 +146,7 @@ unique_ptr<Node> Parser::run(core::GlobalState &gs, core::FileRef file, Parser::
     auto ast = builder.build(driver.get(), settings.traceParser);
 
     // Always report the original parse errors. If we need to run the parser again, we'll only
-    // report the hints. Always reporting the origial parse errors ensures that the user can always
+    // report the hints. Always reporting the original parse errors ensures that the user can always
     // see the real cause in case the hints are misleading.
     if (!driver->diagnostics.empty()) {
         file.data(gs).setHasParseErrors(true);

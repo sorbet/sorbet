@@ -21,7 +21,7 @@ namespace sorbet::rewriter {
  * which allows us to get some instance variable types 'for free' even before we have started inference. This only
  * applies to methods named `initialize` with `sig`s of the appropriate shape, and to types that we can currently copy
  * (i.e. we skip `T.type_parameter` types), and can be easily bypassed by having something other than just a single
- * local paramter on its on on the right-hand side. e.g. even something like this
+ * local parameter on its on on the right-hand side. e.g. even something like this
  *
  *   sig {params(x: Integer).void}
  *   def initialize(x)

@@ -5,7 +5,7 @@
 namespace sorbet::rewriter {
 
 /**
- * This class actually contains three different rewriters depending on the kind of `Class.new` we ecounter:
+ * This class actually contains three different rewriters depending on the kind of `Class.new` we encounter:
  *
  * Assignments to a constant literal such as
  *

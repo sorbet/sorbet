@@ -52,7 +52,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 
 // This is really just a useful helper function for this module: do not use it elsewhere.
 //
-// It makes certain assuptions that it is running for the sake of computing overrides that are not
+// It makes certain assumptions that it is running for the sake of computing overrides that are not
 // going to be true in other situations.
 bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
                   core::MethodRef subMethod, const core::TypePtr &super, core::MethodRef superMethod,
@@ -205,7 +205,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         // allow them to be declared with different names.
         //
         // The tradeoff is that this provides a cheap way to produce error messages at the
-        // individual arg that is imcompatible (versus only at the end once all constraints have
+        // individual arg that is incompatible (versus only at the end once all constraints have
         // been collected) at the cost of rejecting compatible overrides.
         //
         // (An alternative might be to collect a constraint and then after validating all arguments,
@@ -522,7 +522,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
             overridenMethod != core::Symbols::BasicObject_initialize()) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)
-            // and mark certain methods in the standard library as possible to be overridden incompatibly,
+            // and mark certain methods in the standard library as possible to be overriden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
             validateCompatibleOverride(ctx, overridenMethod, method);
         }

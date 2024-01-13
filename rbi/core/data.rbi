@@ -93,7 +93,7 @@ class Data < Object
   # ```
   #
   # Note that member-less Data is acceptable and might be a useful technique
-  # for defining several homogenous data classes, like
+  # for defining several homogeneous data classes, like
   #
   # ```ruby
   # class HTTPFetcher
@@ -152,7 +152,7 @@ class Data < Object
   # Measure.new(amount: 1, unit: 'km')
   # #=> #<data Measure amount=1, unit="km">
   #
-  # # Alternative shorter intialization with []
+  # # Alternative shorter initialization with []
   # Measure[1, 'km']
   # #=> #<data Measure amount=1, unit="km">
   # Measure[amount: 1, unit: 'km']

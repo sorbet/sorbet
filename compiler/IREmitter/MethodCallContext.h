@@ -57,7 +57,7 @@ public:
     // Use this to avoid accidentally calling Payload::varGet multiple times per one send,
     // duplicating work.
     //
-    // WARNING: this method must be called on a path that will reach all remaning cases for method dispatch, or the
+    // WARNING: this method must be called on a path that will reach all remaining cases for method dispatch, or the
     // receiver will be initialized conditionally. This will cause the generated llvm will fail verification.
     llvm::Value *varGetRecv();
 
@@ -66,7 +66,7 @@ public:
 
     // Emit a call to `sorbet_vmMethodSearch` when the cache is created.
     //
-    // WARNING: this method must be called on a path that will reach all remaning cases for method dispatch, or the
+    // WARNING: this method must be called on a path that will reach all remaining cases for method dispatch, or the
     // generated code will potentially query the inline cache without initializing it.
     void emitMethodSearch();
 

@@ -24,7 +24,7 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
     vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
-        // This is not safe to run under autogen, because we'd be outputing
+        // This is not safe to run under autogen, because we'd be outputting
         // autoloader files that predeclare the class and cause "warning:
         // already initialized constant" errors
         return empty;

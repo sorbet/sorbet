@@ -3434,7 +3434,7 @@ x = T.let(1, String) # error: Argument does not have asserted type `String`
 ```
 
 Because of the way default values are desugared by Sorbet, this error also
-occurs when Sorbet finds a mistmatch between the type specified for a parameter
+occurs when Sorbet finds a mismatch between the type specified for a parameter
 in the signature and the default value provided in the method.
 
 In this case, the signature states that `category` type is a `Category`, yet we

@@ -612,7 +612,7 @@ module OpenSSL
   sig {returns(::T.untyped)}
   def self.debug(); end
 
-  # Turns on or off debug mode. With debug mode, all erros added to the
+  # Turns on or off debug mode. With debug mode, all errors added to the
   # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) error queue
   # will be printed to stderr.
   sig do
@@ -4884,7 +4884,7 @@ end
 # single_response = basic_response.find_response(certificate_id)
 #
 # unless single_response
-#   raise 'basic_response does not have the status for the certificiate'
+#   raise 'basic_response does not have the status for the certificate'
 # end
 # ```
 #
@@ -5009,7 +5009,7 @@ class OpenSSL::OCSP::BasicResponse
   # revocation, and must be one of OpenSSL::OCSP::REVOKED\_STATUS\_\* constants.
   # *revocation\_time* is the time when the certificate is revoked.
   #
-  # *this\_update* and *next\_update* indicate the time at which ths status is
+  # *this\_update* and *next\_update* indicate the time at which the status is
   # verified to be correct and the time at or before which newer information
   # will be available, respectively. *next\_update* is optional.
   #

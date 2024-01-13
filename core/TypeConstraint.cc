@@ -33,7 +33,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         return true;
     }
 
-    // instatiate types to upper bound approximations
+    // instantiate types to upper bound approximations
     for (auto &k : upperBounds) {
         auto &tv = k.first;
         auto &bound = k.second;

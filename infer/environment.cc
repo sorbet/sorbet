@@ -1027,7 +1027,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 };
 
                 // This is the main place where we type check a method, so we default by assuming
-                // that we want to report all errors (supressing nothing).
+                // that we want to report all errors (suppressing nothing).
                 auto suppressErrors = false;
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
@@ -1729,7 +1729,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                                 if (ident->what.data(inWhat)._name == core::Names::selfRestore()) {
                                     // this is a restoration of `self` variable.
-                                    // our current analysis isn't smart enogh to see that it's safe to do this by
+                                    // our current analysis isn't smart enough to see that it's safe to do this by
                                     // construction either https://github.com/sorbet/sorbet/issues/222 or
                                     // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
                                     // case

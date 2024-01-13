@@ -154,7 +154,7 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         this->rewind_to_tok_start(endToken);
         return body;
     } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
-        // Not even the very first thing in the body is indented. Treat this like emtpy method.
+        // Not even the very first thing in the body is indented. Treat this like empty method.
         this->rewind_and_reset(headerEndPos);
         auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
         return emptyBody;

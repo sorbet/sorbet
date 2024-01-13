@@ -141,7 +141,7 @@ public:
     static TypePtr replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
      * typechecking. We should be careful to only used this type when we are trying to guess a type.
-     * We should do proper instatiation and subtype test after we have guessed type variables with
+     * We should do proper instantiation and subtype test after we have guessed type variables with
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
     static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
@@ -717,7 +717,7 @@ private:
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class ClassOrModule; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
-                                // subclass)`, but refering to it introduces a cycle
+                                // subclass)`, but referring to it introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };

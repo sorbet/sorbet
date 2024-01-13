@@ -600,7 +600,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     // we saw on the LHS.
     readArgs.reserve(numPosArgs);
     // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
-    // here: to accomodate the call to field= instead of just field.
+    // here: to accommodate the call to field= instead of just field.
     assgnArgs.reserve(numPosArgs + 1);
 
     for (auto &arg : s->posArgs()) {
@@ -925,7 +925,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                         return parser::isa_node<parser::Kwsplat>(node.get()) ||
                                                parser::isa_node<parser::ForwardedKwrestArg>(node.get());
                                     })) {
-                                    // hold a reference to the node, and remove it from the back fo the send list
+                                    // hold a reference to the node, and remove it from the back of the send list
                                     auto node = std::move(send->args[kwargsHashIndex]);
                                     send->args.erase(send->args.begin() + kwargsHashIndex);
 

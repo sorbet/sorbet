@@ -111,7 +111,7 @@ public:
     // indexer. The default implementation returns RUN.
     virtual Phase finalPhase() const;
 
-    // Some tasks, like request cancelations, need to interface with the preprocessor. The default implementation is
+    // Some tasks, like request cancellations, need to interface with the preprocessor. The default implementation is
     // a no-op. Is only ever invoked from the preprocessor thread.
     virtual void preprocess(LSPPreprocessor &preprocessor);
 

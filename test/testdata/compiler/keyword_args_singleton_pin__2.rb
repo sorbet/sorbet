@@ -5,7 +5,7 @@
 # This file is compiled, which means we will create a keywordArgsSingleton for
 # it. This will be allocated on Ruby's heap. The Init_ function will have a
 # reference to this on the C stack as a local (depending on how the
-# optimizations shake out), but there will be no naturally-occuring reference
+# optimizations shake out), but there will be no naturally-occurring reference
 # to this Hash otherwise because the Ruby GC does not look for pointers into
 # its heap in shared objects' memory spaces.
 #

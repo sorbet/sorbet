@@ -296,7 +296,7 @@ bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::Me
         !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
         // that isn't the constructor...
         childSymbol.data(ctx)->name != core::Names::initialize() &&
-        // and wasn't Rewriter synthesized (beause we can't change DSL'd sigs).
+        // and wasn't Rewriter synthesized (because we can't change DSL'd sigs).
         !parentSymbol.data(ctx)->flags.isRewriterSynthesized &&
         // It has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&

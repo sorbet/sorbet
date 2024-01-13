@@ -30,8 +30,8 @@ const core::NameRef TEST_NAME = core::Names::Constants::Test();
  *
  * to:
  *
- *   class <PackgeSpecRegistry>::Project::Foo < PackageSpec
- *    import <PackgeSpecRegistry>::Project::Bar
+ *   class <PackageSpecRegistry>::Project::Foo < PackageSpec
+ *    import <PackageSpecRegistry>::Project::Bar
  *
  *    export Package::Baz
  *   end

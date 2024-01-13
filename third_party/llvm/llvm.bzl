@@ -108,13 +108,13 @@ def _quote(s):
 def cmake_var_string(cmake_vars):
     """Converts a dictionary to an input suitable for expand_cmake_vars.
 
-    Ideally we would jist stringify in the expand_cmake_vars() rule, but select()
+    Ideally we would just stringify in the expand_cmake_vars() rule, but select()
     interacts badly with genrules.
 
     TODO(phawkins): replace the genrule() with native rule and delete this rule.
 
     Args:
-      cmake_vars: a dictionary with string keys and values that are convertable to
+      cmake_vars: a dictionary with string keys and values that are convertible to
         strings.
 
     Returns:

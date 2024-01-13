@@ -4,7 +4,7 @@ class A
   include Singleton
 end
 
-# Singleton supports inheritence, turning the sub-class into a singleton as well.
+# Singleton supports inheritance, turning the sub-class into a singleton as well.
 class B < A; end
 
 T.reveal_type(A.instance) # error: Revealed type: `A`

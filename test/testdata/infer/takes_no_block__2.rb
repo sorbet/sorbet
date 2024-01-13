@@ -27,7 +27,7 @@ TypedStrict.explicit_yield {}
 TypedTrue.never_yields {}
 TypedStrict.never_yields {} # error: does not take a block
 
-# Techically this causes problems too, but this should not happen in practice,
+# Technically this causes problems too, but this should not happen in practice,
 # because there will have been an error reported for
 # `TypedStrict.implicit_yield`
 TypedTrue.implicit_yield {}

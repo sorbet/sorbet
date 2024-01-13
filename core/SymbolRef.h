@@ -491,7 +491,7 @@ public:
     }
 
     bool inline exists() const {
-        // 0th index is reserved on all symbol vectors for the non existant symbol.
+        // 0th index is reserved on all symbol vectors for the nonexistent symbol.
         return unsafeTableIndex() != 0;
     }
 

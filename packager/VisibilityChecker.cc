@@ -80,7 +80,7 @@ class PropagateVisibility final {
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visibile to packages that have imported
+        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
         // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
         // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
         // names being exported by default.

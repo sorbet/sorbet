@@ -5,7 +5,7 @@ namespace sorbet {
 namespace {
 
 // We are using <time.h> instead of similar APIs from the C++ <chrono> library,
-// because this was measured to make timers noticably faster.
+// because this was measured to make timers noticeably faster.
 //
 // https://stackoverflow.com/questions/48609413/fastest-way-to-get-a-timestamp
 clockid_t clock_monotonic_coarse() {

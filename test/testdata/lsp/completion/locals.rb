@@ -53,7 +53,7 @@ class A
   def a_method; end
 end
 
-# If there's an explicit reciever, don't suggest similar locals.
+# If there's an explicit receiver, don't suggest similar locals.
 def no_locals_after_dot()
   a_local = nil
   A.new.a_ # error: does not exist

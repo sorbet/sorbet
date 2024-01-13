@@ -860,7 +860,7 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   # documentation for a description.
   def readlines(*_); end
 
-  # Reads at most *maxlen* bytes from the gziped stream but it blocks only if
+  # Reads at most *maxlen* bytes from the gzipped stream but it blocks only if
   # *gzipreader* has no data immediately available. If the optional *outbuf*
   # argument is present, it must reference a
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which will
@@ -1282,7 +1282,7 @@ class Zlib::ZStream
   # Returns true if the stream is closed.
   def closed?; end
 
-  # Guesses the type of the data which have been inputed into the stream. The
+  # Guesses the type of the data which have been inputted into the stream. The
   # returned value is either `BINARY`, `ASCII`, or `UNKNOWN`.
   def data_type; end
 
