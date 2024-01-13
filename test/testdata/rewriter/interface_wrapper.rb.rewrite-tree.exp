@@ -2,7 +2,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def testit<<todo method>>(&<blk>)
     begin
       s = <emptyTree>::<C SomeClass>.new()
-      wrap = <cast:let>(s, <todo sym>, <emptyTree>::<C Interface>)
+      wrap = <emptyTree>::<C Interface>.wrap_instance(s)
       <cast:assert_type!>(wrap, <todo sym>, <emptyTree>::<C Interface>)
       wrap.other_method()
       wrap.some_method()

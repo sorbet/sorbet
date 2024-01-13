@@ -462,10 +462,6 @@ module T::AbstractUtils
   def self.declared_abstract_methods_for(mod); end
 end
 
-class T::InterfaceWrapper
-  def self.dynamic_cast(obj, mod); end
-end
-
 module T::Utils::Nilable
   def self.get_type_info(prop_type); end
   def self.get_underlying_type(prop_type); end
