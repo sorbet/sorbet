@@ -504,6 +504,7 @@ Foo = Struct.new(:a, :b)
 
 class TestCarash
   extend T::Sig
+  extend T::Sig
   class Merchant
   end
 

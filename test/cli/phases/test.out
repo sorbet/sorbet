@@ -337,4 +337,3 @@ diff -r out/ast fileout/ast
 diff -r out/ast-raw fileout/ast-raw
 diff -r out/cfg-text fileout/cfg-text
 --- checking crashes ---
---- checking crashes end ---

@@ -91,5 +91,9 @@ Errors: 7
 
 class Foo::MyPackage < PackageSpec
   # import Foo::Bar::OtherPackage ## MISSING!
+  test_import Foo::Bar::OtherPackage
+  test_import Foo::Bar::OtherPackage
+  import Foo::Bar::OtherPackage
+  import Foo::Bar::OtherPackage
   import Foo::Bar::OtherPackage
 end

@@ -94,4 +94,4 @@ class Right
 end
 
 left_or_right = T.let(Left.new, T.any(Left, Right))
-left_or_right.class.on_both
+left_or_right.class.class.on_both

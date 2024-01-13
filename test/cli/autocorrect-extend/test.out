@@ -7,6 +7,7 @@ def top_level; end
 # Should only add one extend
 class SuggestSigAndExtend
   extend T::Sig
+  extend T::Sig
   sig { returns(NilClass) }
   def foo; end
 

@@ -97,11 +97,13 @@ end
 
 module S5
   extend T::Helpers
+  extend T::Helpers
   interface!
   final!
 end
 
 class S6
+  extend T::Helpers
   extend T::Helpers
   abstract!
   sealed!
