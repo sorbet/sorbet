@@ -34,7 +34,7 @@ class ExtractVariableWalk {
 
     // NOTE: Might want to profile and switch to UnorderedSet.
     bool shouldSkipLoc(core::LocOffsets loc) {
-        return absl::c_find(skippedLocs, loc) != skippedLocs.end();
+        return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
     }
 
 public:
@@ -77,16 +77,16 @@ public:
 
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        for (auto &arg : methodDef.args) {
-            skipLoc(arg.loc());
+        if (!methodDef.args.empty()) {
+            skipLoc(methodDef.args.front().loc().join(methodDef.args.back().loc()));
         }
         updateEnclosingScope(tree, methodDef.rhs.loc());
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
-        for (auto &arg : block.args) {
-            skipLoc(arg.loc());
+        if (!block.args.empty()) {
+            skipLoc(block.args.front().loc().join(block.args.back().loc()));
         }
         updateEnclosingScope(tree, block.body.loc());
     }

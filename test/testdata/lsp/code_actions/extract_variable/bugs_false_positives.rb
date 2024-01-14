@@ -14,12 +14,6 @@ def a = 1 + 123
   /W[aeiou]rd/i
 #  ^^^^^^^^^^ apply-code-action: [C] Extract Variable
 
-a = T.unsafe(nil) || T.unsafe(nil)
-#                ^^^^ apply-code-action: [D] Extract Variable
-
-a = T.unsafe(nil) && T.unsafe(nil)
-#                ^^^^ apply-code-action: [E] Extract Variable
-
 class A < T::Struct
   prop :x, String
 #      ^^ apply-code-action: [F] Extract Variable
