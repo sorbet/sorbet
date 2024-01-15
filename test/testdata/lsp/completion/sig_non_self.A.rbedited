@@ -12,6 +12,7 @@ class A
 
   Sorbet::Private::Static.sig
   #                          ^ error: Not enough arguments
+  #                          ^ error: no block
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
   #                          ^ apply-completion: [B] item: 0
   def private_static; :''; end
@@ -29,6 +30,7 @@ class Outer
 
     Sorbet::Private::Static.sig
     #                          ^ error: Not enough arguments
+    #                          ^ error: no block
   # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Signature declarations expect a block
     #                          ^ apply-completion: [D] item: 0
   end
