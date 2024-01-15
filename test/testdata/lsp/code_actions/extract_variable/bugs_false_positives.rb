@@ -6,12 +6,12 @@
 # but incorrectly allow it.
 
 /W[aeiou]rd/i
-#           ^ apply-code-action: [B] Extract Variable
+#           ^ apply-code-action: [A] Extract Variable
 
   /W[aeiou]rd/i
-#  ^^^^^^^^^^ apply-code-action: [C] Extract Variable
+#  ^^^^^^^^^^ apply-code-action: [B] Extract Variable
 
 class A < T::Struct
   prop :x, String
-#      ^^ apply-code-action: [F] Extract Variable
+#      ^^ apply-code-action: [C] Extract Variable
 end

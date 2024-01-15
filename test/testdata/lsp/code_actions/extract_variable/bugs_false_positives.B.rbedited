@@ -5,14 +5,14 @@
 # This file contain cases where we should disallow the user from extracting to variable,
 # but incorrectly allow it.
 
-newVariable = i
-/W[aeiou]rd/newVariable
-#           ^ apply-code-action: [B] Extract Variable
+/W[aeiou]rd/i
+#           ^ apply-code-action: [A] Extract Variable
 
-  /W[aeiou]rd/i
-#  ^^^^^^^^^^ apply-code-action: [C] Extract Variable
+  newVariable = W[aeiou]rd
+  /newVariable/i
+#  ^^^^^^^^^^ apply-code-action: [B] Extract Variable
 
 class A < T::Struct
   prop :x, String
-#      ^^ apply-code-action: [F] Extract Variable
+#      ^^ apply-code-action: [C] Extract Variable
 end

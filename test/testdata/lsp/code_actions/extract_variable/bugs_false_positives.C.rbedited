@@ -6,13 +6,13 @@
 # but incorrectly allow it.
 
 /W[aeiou]rd/i
-#           ^ apply-code-action: [B] Extract Variable
+#           ^ apply-code-action: [A] Extract Variable
 
-  newVariable = W[aeiou]rd
-  /newVariable/i
-#  ^^^^^^^^^^ apply-code-action: [C] Extract Variable
+  /W[aeiou]rd/i
+#  ^^^^^^^^^^ apply-code-action: [B] Extract Variable
 
 class A < T::Struct
-  prop :x, String
-#      ^^ apply-code-action: [F] Extract Variable
+  newVariable = :x
+  prop newVariable, String
+#      ^^ apply-code-action: [C] Extract Variable
 end
