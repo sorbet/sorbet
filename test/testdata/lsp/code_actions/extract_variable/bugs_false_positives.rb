@@ -5,9 +5,6 @@
 # This file contain cases where we should disallow the user from extracting to variable,
 # but incorrectly allow it.
 
-def a = 1 + 123
-#           ^^^ apply-code-action: [A] Extract Variable
-
 /W[aeiou]rd/i
 #           ^ apply-code-action: [B] Extract Variable
 

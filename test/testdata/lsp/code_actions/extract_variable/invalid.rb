@@ -119,3 +119,6 @@ class B < T::Struct
   const :baz, String
 # ^^^^^ apply-code-action: [A] Extract Variable
 end
+
+def endless_method = 1 + 123
+#                        ^^^ apply-code-action: [A] Extract Variable

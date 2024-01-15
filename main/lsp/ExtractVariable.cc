@@ -80,7 +80,14 @@ public:
         if (!methodDef.args.empty()) {
             skipLoc(methodDef.args.front().loc().join(methodDef.args.back().loc()));
         }
-        updateEnclosingScope(tree, methodDef.rhs.loc());
+        if (methodDef.loc.endPos() == methodDef.rhs.loc().endPos()) {
+            // methodDef.loc.endPos() represent the location right after the `end`,
+            // while methodDef.rhs.loc().endPos() is the location right before the `end`.
+            // If both are the same, that means that this is an endless method.
+            skipLoc(methodDef.rhs.loc());
+        } else {
+            updateEnclosingScope(tree, methodDef.rhs.loc());
+        }
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
