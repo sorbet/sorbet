@@ -26,17 +26,17 @@ public:
         switch (from.kind()) {
             case NameKind::UTF8:
                 ENFORCE(from.utf8Index() < utf8NameSubstitution.size(),
-                        "utf8 name substitution index out of bounds, got {} where subsitution size is {}",
+                        "utf8 name substitution index out of bounds, got {} where substitution size is {}",
                         std::to_string(from.rawId()), std::to_string(utf8NameSubstitution.size()));
                 return utf8NameSubstitution[from.utf8Index()];
             case NameKind::CONSTANT:
                 ENFORCE(from.constantIndex() < constantNameSubstitution.size(),
-                        "constant name substitution index out of bounds, got {} where subsitution size is {}",
+                        "constant name substitution index out of bounds, got {} where substitution size is {}",
                         std::to_string(from.rawId()), std::to_string(constantNameSubstitution.size()));
                 return constantNameSubstitution[from.constantIndex()];
             case NameKind::UNIQUE:
                 ENFORCE(from.uniqueIndex() < uniqueNameSubstitution.size(),
-                        "unique name substitution index out of bounds, got {} where subsitution size is {}",
+                        "unique name substitution index out of bounds, got {} where substitution size is {}",
                         std::to_string(from.rawId()), std::to_string(uniqueNameSubstitution.size()));
                 return uniqueNameSubstitution[from.uniqueIndex()];
         }
