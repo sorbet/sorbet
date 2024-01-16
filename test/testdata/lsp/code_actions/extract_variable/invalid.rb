@@ -18,6 +18,20 @@ def example(x)
 # ^^^^^^ apply-code-action: [A] Extract Variable
 end
 
+def extract_method_parameters(x, y); end
+#                             ^ apply-code-action: [A] Extract Variable
+
+def extract_method_parameters_2(x, y); end
+#                                  ^ apply-code-action: [A] Extract Variable
+
+# Extract block parameters
+
+[].each do |x, y| end
+#           ^ apply-code-action: [A] Extract Variable
+
+[].each do |x, y| end
+#              ^ apply-code-action: [A] Extract Variable
+
 class A
   attr_accessor :a
 
@@ -63,6 +77,12 @@ a = T.let(1, T.untyped)
   a *= 1
 # ^ apply-code-action: [A] Extract Variable
 
+a = T.unsafe(nil) || T.unsafe(nil)
+#                ^^^^ apply-code-action: [A] Extract Variable
+
+a = T.unsafe(nil) && T.unsafe(nil)
+#                ^^^^ apply-code-action: [A] Extract Variable
+
   A.new.a&.foo &&= 1
 # ^^^^^^^^^^^^ apply-code-action: [A] Extract Variable
 
@@ -99,3 +119,6 @@ class B < T::Struct
   const :baz, String
 # ^^^^^ apply-code-action: [A] Extract Variable
 end
+
+def endless_method = 1 + 123
+#                        ^^^ apply-code-action: [A] Extract Variable
