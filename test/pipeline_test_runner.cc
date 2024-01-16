@@ -229,23 +229,23 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         ast::ParsedFile localNamed;
 
         // Rewriter
-        ast::ParsedFile rewriten;
+        ast::ParsedFile rewritten;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             bool previous = gs->runningUnderAutogen;
             gs->runningUnderAutogen = test.expectations.contains("autogen");
-            rewriten =
+            rewritten =
                 testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             gs->runningUnderAutogen = previous;
         }
 
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree.showRaw(*gs); });
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
+        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
 
         handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
         handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
@@ -795,7 +795,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
     }
 
-    bool ranIncremantalNamer = false;
+    bool ranIncrementalNamer = false;
     {
         // namer
         for (auto &tree : trees) {
@@ -809,7 +809,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // Here, to complement those tests, we just run Namer::run (not Namer::runIncremental)
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
-            ENFORCE(!ranIncremantalNamer);
+            ENFORCE(!ranIncrementalNamer);
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
             tree = testSerialize(*gs, move(vTmp[0]));
 
@@ -819,7 +819,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncremantalNamer).result());
+    trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer).result());
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
