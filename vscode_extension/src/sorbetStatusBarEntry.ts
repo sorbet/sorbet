@@ -5,7 +5,6 @@ import { SHOW_ACTIONS_COMMAND_ID } from "./commandIds";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { StatusChangedEvent } from "./sorbetStatusProvider";
 import { RestartReason, ServerStatus } from "./types";
-import { TrackUntyped } from "./config";
 
 export class SorbetStatusBarEntry implements Disposable {
   private readonly context: SorbetExtensionContext;
@@ -68,7 +67,7 @@ export class SorbetStatusBarEntry implements Disposable {
 
   private render() {
     const { operations } = this.context.statusProvider;
-    const { activeLspConfig, highlightUntyped } = this.context.configuration;
+    const { activeLspConfig } = this.context.configuration;
     const sorbetName = activeLspConfig?.name ?? "Sorbet";
 
     let text: string;
@@ -81,7 +80,7 @@ export class SorbetStatusBarEntry implements Disposable {
     ) {
       const latestOp = operations[operations.length - 1];
       text = `${sorbetName}: ${latestOp.description} ${this.getSpinner()}`;
-      tooltip = this.getRunningTooltip(highlightUntyped);
+      tooltip = "The Sorbet server is currently running.";
     } else {
       switch (this.serverStatus) {
         case ServerStatus.DISABLED:
@@ -106,7 +105,7 @@ export class SorbetStatusBarEntry implements Disposable {
           break;
         case ServerStatus.RUNNING:
           text = `${sorbetName}: Idle`;
-          tooltip = this.getRunningTooltip(highlightUntyped);
+          tooltip = "The Sorbet server is currently running.";
           break;
         default:
           this.context.log.error(`Invalid ServerStatus: ${this.serverStatus}`);
@@ -118,23 +117,5 @@ export class SorbetStatusBarEntry implements Disposable {
 
     this.statusBarItem.text = text;
     this.statusBarItem.tooltip = tooltip;
-  }
-
-  private getRunningTooltip(highlightUntyped: TrackUntyped) {
-    let txt = "The Sorbet server is currently running.";
-    switch (highlightUntyped) {
-      case "everywhere":
-        txt += "\n  - Highlight untyped code everywhere";
-        break;
-      case "everywhere-but-tests":
-        txt += "\n  - Highlight untyped code everywhere but tests";
-        break;
-      case "nowhere":
-        break;
-      default:
-        const unexpected: never = highlightUntyped;
-        this.context.log.warning(`Got unexpected state: ${unexpected}`);
-    }
-    return txt;
   }
 }
