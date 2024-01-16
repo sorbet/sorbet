@@ -167,8 +167,8 @@ created by subclassing <code>T::Enum</code>, and individual values are instances
 class, created by calling <code>new</code>. Because of this, <strong>enums in Sorbet are
 naturally type-safe</strong>: one enum value cannot be used where some other enum is
 expected, and vice versa. (By comparison, existing Ruby code often uses symbols
-like <code>:spades</code> or <code>:hearts</code> for enums, but all symbols are interchangable at the
-type-level, so they provide no type safety.)</p>
+like <code>:spades</code> or <code>:hearts</code> for enums, but all symbols are interchangeable at
+the type-level, so they provide no type safety.)</p>
 <p>Enums work hand-in-hand with exhaustiveness checks by design:</p>
 <pre><code class="hljs css language-ruby">sig {params(<span class="hljs-symbol">suit:</span> Suit).void}
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">color_of_suit</span><span class="hljs-params">(suit)</span></span>

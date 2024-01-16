@@ -2675,7 +2675,7 @@ the expected type:</p>
 <pre><code class="hljs css language-rb">x = T.let(<span class="hljs-number">1</span>, String) <span class="hljs-comment"># error: Argument does not have asserted type `String`</span>
 </code></pre>
 <p>Because of the way default values are desugared by Sorbet, this error also
-occurs when Sorbet finds a mistmatch between the type specified for a parameter
+occurs when Sorbet finds a mismatch between the type specified for a parameter
 in the signature and the default value provided in the method.</p>
 <p>In this case, the signature states that <code>category</code> type is a <code>Category</code>, yet we
 try to use <code>nil</code> as default value:</p>
