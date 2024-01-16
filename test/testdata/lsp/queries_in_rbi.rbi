@@ -9,6 +9,7 @@ class A
   # to get sig completion here
 
   sig
+# ^^^ error: Signature declarations expect a block
   #  ^ completion: (nothing)
   def foo; end
 end
@@ -17,6 +18,7 @@ class B
   extend T::Sig
 
   sig
+# ^^^ error: Signature declarations expect a block
   #  ^ completion: sig
   #  ^ apply-completion: [A] item: 0
   def foo(x); end
