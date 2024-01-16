@@ -462,7 +462,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_overridden_err('foo', CLASS_CLASS_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
   end
 
-  it "allows toggling a final method's visbility in the same class" do
+  it "allows toggling a final method's visibility in the same class" do
     Class.new do
       extend T::Sig
       sig(:final) {void}

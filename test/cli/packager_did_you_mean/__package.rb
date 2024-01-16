@@ -2,6 +2,6 @@
 # typed: strict
 # enable-packager: true
 
-class ProjectWithLongDiscernableName::Foo < PackageSpec
-  export ProjectWithLongDiscernableName::Foo::Example
+class ProjectWithLongDiscernibleName::Foo < PackageSpec
+  export ProjectWithLongDiscernibleName::Foo::Example
 end

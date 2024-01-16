@@ -3,7 +3,7 @@
 #include "core/Error.h"
 
 namespace sorbet::core::errors::Namer {
-constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::False};
+constexpr ErrorClass IncludeMultipleParam{4001, StrictLevel::False};
 constexpr ErrorClass AncestorNotConstant{4002, StrictLevel::False};
 constexpr ErrorClass IncludePassedBlock{4003, StrictLevel::False};
 // constexpr ErrorClass DynamicConstantDefinition{4004, StrictLevel::True};

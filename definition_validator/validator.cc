@@ -948,9 +948,9 @@ private:
         absl::c_transform(
             absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
             [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
-        auto indentedMethodDefintion = absl::StrJoin(indentedLines, "\n");
+        auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
 
-        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefintion)};
+        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefinition)};
     }
 
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {

@@ -34,7 +34,7 @@ public:
     vector<unique_ptr<SymbolInformation>> doQuery(string_view query, size_t maxResults = MAX_RESULTS);
 
 private:
-    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformations(core::SymbolRef symRef, size_t maxLocations);
+    vector<unique_ptr<SymbolInformation>> symbolRef2SymbolInformation(core::SymbolRef symRef, size_t maxLocations);
 
     const LSPConfiguration &config;
     const core::GlobalState &gs;
@@ -71,8 +71,8 @@ SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalS
 /**
  * Converts a symbol into any (supported) SymbolInformation objects.
  */
-vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformations(core::SymbolRef symRef,
-                                                                                  size_t maxLocations) {
+vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation(core::SymbolRef symRef,
+                                                                                 size_t maxLocations) {
     vector<unique_ptr<SymbolInformation>> results;
     for (auto loc : symRef.locs(gs)) {
         if (results.size() >= maxLocations) {
@@ -315,7 +315,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
     for (auto &candidate : candidates) {
         auto ref = candidate.first;
         auto maxLocations = min(MAX_LOCATIONS_PER_SYMBOL, maxResults - results.size());
-        for (auto &symbolInformation : symbolRef2SymbolInformations(ref, maxLocations)) {
+        for (auto &symbolInformation : symbolRef2SymbolInformation(ref, maxLocations)) {
             results.emplace_back(move(symbolInformation));
         }
         if (results.size() >= maxResults) {

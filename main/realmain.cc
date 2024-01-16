@@ -583,7 +583,7 @@ int realmain(int argc, char *argv[]) {
                       "Talk ‘\\r\\n’-separated JSON-RPC to me. "
                       "More details at https://microsoft.github.io/language-server-protocol/specification."
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
-                      "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
+                      "it will enable outputting the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       sorbet_full_version_string);
 
         auto output = make_shared<lsp::LSPStdout>(logger);

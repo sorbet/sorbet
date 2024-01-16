@@ -1,6 +1,6 @@
 # typed: true
 
-class GenricClass
+class GenericClass
   extend(T::Sig)
   extend(T::Generic)
 

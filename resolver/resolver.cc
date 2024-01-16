@@ -3838,14 +3838,14 @@ private:
             [&](ast::MethodDef &mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool rewriten = mdef.flags.isRewriterSynthesized;
+                    bool rewritten = mdef.flags.isRewriterSynthesized;
                     bool isRBI = ctx.file.data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
                     } else {
                         categoryCounterInc("method.sig", "false");
                     }
-                    if (rewriten) {
+                    if (rewritten) {
                         categoryCounterInc("method.dsl", "true");
                     } else {
                         categoryCounterInc("method.dsl", "false");
@@ -3855,7 +3855,7 @@ private:
                     } else {
                         categoryCounterInc("method.rbi", "false");
                     }
-                    if (hasSig && !isRBI && !rewriten) {
+                    if (hasSig && !isRBI && !rewritten) {
                         counterInc("types.sig.human");
                     }
                 }

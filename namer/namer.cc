@@ -254,7 +254,7 @@ public:
 
         const auto numPosArgs = send->numPosArgs();
         if (numPosArgs == 0) {
-            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
+            if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMultipleParam)) {
                 e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
             }
             return;
