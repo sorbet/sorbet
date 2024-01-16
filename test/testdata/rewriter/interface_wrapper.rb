@@ -21,9 +21,9 @@ end
 
 def testit
   s = SomeClass.new
-  wrap = Interface.wrap_instance(s)
-  T.assert_type!(wrap, Interface)
-  wrap.other_method # error: does not exist
+  wrap = Interface.wrap_instance(s) # error: does not exist
+  T.reveal_type(wrap) # error: `T.untyped`
+  wrap.other_method
   wrap.some_method
 
   Other.wrap_instance("hi", "there") # error: does not exist
