@@ -90,7 +90,7 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     prop :foo5, T.nilable(T::Array[SubStruct])
   end
 
-  class StructWithReqiredField < T::Struct
+  class StructWithRequiredField < T::Struct
     prop :foo1, Integer
     prop :foo2, Integer
   end
@@ -146,30 +146,30 @@ class Opus::Types::Test::Props::StructTest < Critic::Unit::UnitTest
     end
 
     it 'tstruct need to initialize required fields' do
-      doc = StructWithReqiredField.new(foo1: 10, foo2: 20)
+      doc = StructWithRequiredField.new(foo1: 10, foo2: 20)
       assert_equal(10, doc.foo1)
       assert_equal(20, doc.foo2)
 
       assert_raises(ArgumentError) do
-        StructWithReqiredField.new(foo2: 20)
+        StructWithRequiredField.new(foo2: 20)
       end
       assert_raises(ArgumentError) do
-        StructWithReqiredField.new(foo1: 10)
+        StructWithRequiredField.new(foo1: 10)
       end
     end
 
     it 'tstruct deserialize different fields' do
-      doc = StructWithReqiredField.from_hash({'foo1' => 10, 'foo2' => 20})
+      doc = StructWithRequiredField.from_hash({'foo1' => 10, 'foo2' => 20})
       assert_equal(10, doc.foo1)
       assert_equal(20, doc.foo2)
 
       assert_raises(RuntimeError) do
-        StructWithReqiredField.from_hash({'foo2' => 20})
+        StructWithRequiredField.from_hash({'foo2' => 20})
       end
 
       # The code should behave for deserialization.
       assert_raises(RuntimeError) do
-        StructWithReqiredField.from_hash({'foo1' => 10})
+        StructWithRequiredField.from_hash({'foo1' => 10})
       end
     end
   end
