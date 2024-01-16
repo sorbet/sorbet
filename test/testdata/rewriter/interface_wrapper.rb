@@ -26,7 +26,7 @@ def testit
   wrap.other_method
   wrap.some_method
 
-  Other.wrap_instance("hi", "there") # error: does not exist
+  Other.wrap_instance("hi", "there")
   o = Other
-  o.wrap_instance("hi") # error: does not exist
+  o.wrap_instance("hi")
 end
