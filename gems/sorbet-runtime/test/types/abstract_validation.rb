@@ -273,7 +273,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       assert_equal(:impl2, klass.new.foo)
     end
 
-    it "suceeds when the method is defined directly on the receiving class" do
+    it "succeeds when the method is defined directly on the receiving class" do
       mod = Module.new do
         extend T::Helpers
         abstract!
