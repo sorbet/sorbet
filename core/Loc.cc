@@ -114,7 +114,7 @@ string leftPad(string s, int l) {
 
 constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
 constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
-static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
+static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisible by 2");
 
 void addLocLine(stringstream &buf, int line, const File &file, int tabs, int posWidth, bool censorForSnapshotTests) {
     printTabs(buf, tabs);
