@@ -120,7 +120,7 @@ actions:
           Kernel.exit(1)
         end
       else
-        puts "\nNot running interactivly. Set SRB_YES=1 environment variable to proceed"
+        puts "\nNot running interactively. Set SRB_YES=1 environment variable to proceed"
         Kernel.exit(1)
       end
     end
