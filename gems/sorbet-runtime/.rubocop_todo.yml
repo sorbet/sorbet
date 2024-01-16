@@ -126,7 +126,6 @@ Layout/MultilineMethodCallBraceLayout:
 # SupportedStyles: aligned, indented, indented_relative_to_receiver
 Layout/MultilineMethodCallIndentation:
   Exclude:
-    - 'lib/types/interface_wrapper.rb'
     - 'lib/types/props/custom_type.rb'
     - 'lib/types/props/decorator.rb'
     - 'lib/types/props/pretty_printable.rb'
@@ -365,7 +364,6 @@ Style/RedundantSelf:
   Exclude:
     - 'lib/types/compatibility_patches.rb'
     - 'lib/types/enum.rb'
-    - 'lib/types/interface_wrapper.rb'
     - 'lib/types/private/abstract/data.rb'
     - 'lib/types/private/decl_state.rb'
     - 'lib/types/private/methods/modes.rb'

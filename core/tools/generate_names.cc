@@ -275,8 +275,6 @@ NameDef names[] = {
     {"skipGetter", "skip_getter"},
     {"skipSetter", "skip_setter"},
 
-    {"wrapInstance", "wrap_instance"},
-
     {"registered"},
     {"instanceRegistered", "<instance_registered>"},
     {"helpers"},

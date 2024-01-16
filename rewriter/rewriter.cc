@@ -17,7 +17,6 @@
 #include "rewriter/Flatten.h"
 #include "rewriter/HasAttachedClass.h"
 #include "rewriter/Initializer.h"
-#include "rewriter/InterfaceWrapper.h"
 #include "rewriter/Mattr.h"
 #include "rewriter/Minitest.h"
 #include "rewriter/MixinEncryptedProp.h"
@@ -183,11 +182,6 @@ public:
         auto *send = ast::cast_tree<ast::Send>(tree);
 
         if (ClassNew::run(ctx, send)) {
-            return;
-        }
-
-        if (auto expr = InterfaceWrapper::run(ctx, send)) {
-            tree = std::move(expr);
             return;
         }
 
