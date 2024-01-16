@@ -549,7 +549,7 @@ public:
 };
 char DeleteUnusedSorbetIntrinsicsPass::ID = 0;
 
-static llvm::RegisterPass<DeleteUnusedSorbetIntrinsicsPass> Y("deleteUnusuedSorbetIntrinsics",
+static llvm::RegisterPass<DeleteUnusedSorbetIntrinsicsPass> Y("deleteUnusedSorbetIntrinsics",
                                                               "Delete Unused Sorbet Intrinsics",
                                                               false, // Only looks at CFG
                                                               false  // Analysis Pass
@@ -609,7 +609,7 @@ public:
 
 char DeleteUnusedInlineCachesPass::ID = 0;
 
-static llvm::RegisterPass<DeleteUnusedInlineCachesPass> Z("deleteUnusuedInlineCaches", "Delete Unused Inline Caches",
+static llvm::RegisterPass<DeleteUnusedInlineCachesPass> Z("deleteUnusedInlineCaches", "Delete Unused Inline Caches",
                                                           false, // Only looks at CFG
                                                           false  // Analysis Pass
 );
