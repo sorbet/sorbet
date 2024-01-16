@@ -383,7 +383,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
         "Sorbet). Strings beginning with / match against the prefix of these relative paths; others are substring "
-        "matchs. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
+        "matches. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
         "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")(
@@ -453,7 +453,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("minimize-to-rbi",
-                               "[experimental] Output a minimal RBI contining the diff between Sorbet's view of a "
+                               "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
                                "codebase and the definitions present in this file",
                                cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
@@ -525,7 +525,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("suggest-unsafe",
                                "In as many errors as possible, suggest autocorrects to wrap problem code with "
                                "<method>. Omit the =<method> to default to wrapping with T.unsafe. "
-                               "This supercedes certain autocorrects, especially T.must.",
+                               "This supersedes certain autocorrects, especially T.must.",
                                cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value(empty.statsdPrefix), "prefix");
