@@ -190,7 +190,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
-    ast::ParsedFile rewriten{nullptr, file};
+    ast::ParsedFile rewritten{nullptr, file};
 
     Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
     try {
@@ -229,8 +229,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             return emptyParsedFile(file);
         }
 
-        rewriten.tree = move(tree);
-        return rewriten;
+        rewritten.tree = move(tree);
+        return rewritten;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
