@@ -332,7 +332,7 @@ class T::Props::Decorator
 
     prop_validate_definition!(name, cls, rules, type_object)
 
-    # Retrive the possible underlying object with T.nilable.
+    # Retrieve the possible underlying object with T.nilable.
     type = T::Utils::Nilable.get_underlying_type(type)
 
     rules_sensitivity = rules[:sensitivity]

@@ -867,7 +867,7 @@ private:
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
 
                 if (swapArgs && arg.flags.isBlock) {
-                    // see commnent on if (swapArgs) above
+                    // see comment on if (swapArgs) above
                     methodData->arguments.emplace_back(move(swappedArg));
                 }
 

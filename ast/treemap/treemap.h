@@ -74,7 +74,7 @@ public:
     ExpressionPtr postTransformInsSeq(core::MutableContext ctx, ExpressionPtr original);
 };
 
-// NOTE: Implementations must use a context type parameter that `MutableContext` is convertable to.
+// NOTE: Implementations must use a context type parameter that `MutableContext` is convertible to.
 // That is, either `Context` or `MutableContext`.
 #define GENERATE_HAS_MEMBER_VISITOR(X, arg_types...) GENERATE_HAS_MEMBER(X, arg_types)
 

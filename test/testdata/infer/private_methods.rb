@@ -60,7 +60,7 @@ TestChild.new.using_symbol # error: Non-private call to private method `using_sy
 
 T.unsafe(Test.new).using_symbol
 
-# TODO: The following call should also error out. It currently does not do that due to issues with the instrinsics.
+# TODO: The following call should also error out. It currently does not do that due to issues with the intrinsics.
 Test.new.splat_call(*T.unsafe(nil)) # Currently no Error, since T.unsafe makes Magic_callWithSplat#apply return prematurely due to the untyped argument.
 
 Test.new.splat_and_block_call(*[1, 'a'], &nil) # error: Non-private call to private method `splat_and_block_call` on `Test`

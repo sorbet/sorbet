@@ -947,7 +947,7 @@ class Psych::Handler
   #
   # `value` is the string value of the scalar `anchor` is an associated anchor
   # or nil `tag` is an associated tag or nil `plain` is a boolean value `quoted`
-  # is a boolean value `style` is an integer idicating the string style
+  # is a boolean value `style` is an integer indicating the string style
   #
   # See the constants in
   # [`Psych::Nodes::Scalar`](https://docs.ruby-lang.org/en/2.7.0/Psych/Nodes/Scalar.html)

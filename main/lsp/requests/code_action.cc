@@ -282,7 +282,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     result.emplace_back(move(action));
 
                     // TODO(neil): trigger a rename for newVariable
-                    // TODO(neil): replace other occurences of this expression with newVariable
+                    // TODO(neil): replace other occurrences of this expression with newVariable
                 }
             }
         }

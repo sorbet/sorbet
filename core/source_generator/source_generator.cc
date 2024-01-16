@@ -37,7 +37,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
                           core::TypePtr retType, const core::TypeConstraint *constraint, const ShowOptions options) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
-    // handle this case anyways so that we don't crash in prod when this method is mis-used
+    // handle this case anyways so that we don't crash in prod when this method is misused
     if (!method.exists()) {
         return "";
     }
@@ -100,7 +100,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
 
 string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, const ShowOptions options) {
     ENFORCE(method.exists());
-    // handle this case anyways so that we don't crash in prod when this method is mis-used
+    // handle this case anyways so that we don't crash in prod when this method is misused
     if (!method.exists()) {
         return "";
     }

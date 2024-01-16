@@ -62,7 +62,7 @@ progressbar *progressbar_new(const char *label, unsigned long max);
 /// @param max The number of times the progressbar must be incremented before it is considered complete,
 ///            or, in other words, the number of tasks that this progressbar is tracking.
 /// @param format The format of the progressbar. The string provided must be three characters, and it will
-///               be interpretted with the first character as the left border of the bar, the second
+///               be interpreted with the first character as the left border of the bar, the second
 ///               character of the bar and the third character as the right border of the bar. For example,
 ///               "<->" would result in a bar formatted like "<------     >".
 ///

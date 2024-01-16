@@ -36,7 +36,7 @@ public:
 private:
     struct Storage {
         Kind kind : 4;
-        // When kind != Symbol, `id` stores indices into the assorted vectors on `FoundDefitions`.
+        // When kind != Symbol, `id` stores indices into the assorted vectors on `FoundDefinitions`.
         // The 28-bit limit means that a single file cannot have more than 2^28 definitions in that file.
         //
         // When kind == Symbol, `id` stores ClassOrModule IDs. This means that a FoundDefinitionRef

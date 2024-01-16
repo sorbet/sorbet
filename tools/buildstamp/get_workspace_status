@@ -38,7 +38,7 @@ git_commit_count=$(git rev-list --count HEAD)
 echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
 echo "STABLE_BUILD_SCM_COMMIT_COUNT ${git_commit_count}"
 
-# Check whether there are any uncommited changes
+# Check whether there are any uncommitted changes
 if git diff-index --quiet HEAD --; then
     clean="1"
 else

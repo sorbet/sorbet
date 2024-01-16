@@ -192,7 +192,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
                 // We have two classes (not modules), and if the class we're
                 // removing doesn't derive from `c`, there's nothing to do,
-                // because of ruby having single inheretance.
+                // because of ruby having single inheritance.
                 result = from;
             } else if (cdata->flags.isSealed && (cdata->flags.isAbstract || cdata->isModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(gs);
@@ -210,7 +210,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
                        !klass.data(gs)->derivesFrom(gs, a.klass)) {
                 // We have two classes (not modules), and if the class we're
                 // removing doesn't derive from `a`, there's nothing to do,
-                // because of ruby having single inheretance.
+                // because of ruby having single inheritance.
                 result = from;
             } else if (adata->flags.isSealed && (adata->flags.isAbstract || adata->isModule())) {
                 auto subclasses = adata->sealedSubclassesToUnion(gs);

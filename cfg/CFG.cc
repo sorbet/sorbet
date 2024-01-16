@@ -342,7 +342,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
 
     if (send->fun == core::Names::bang() && this->exprs.size() >= 2) {
         // Heuristic, because it's overwhelmingly common to see `!x.foo.nil?`, in which case the
-        // relevent receiver is the second-last, not the last, send binding.
+        // relevant receiver is the second-last, not the last, send binding.
         auto bangRecv = send->recv.variable;
         auto &secondLastBinding = this->exprs[this->exprs.size() - 2];
         auto secondLastSend = looksLikeUpdateKnowledgeSend(inWhat, secondLastBinding, bangRecv);

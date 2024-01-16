@@ -108,7 +108,7 @@ sup {
 /*
  * The default showcase section heading uses our one of the colors from our
  * siteConfig.js. This color only looks good in the headers for us, not in text
- * colors, so we're reseting it to initial (black) here.
+ * colors, so we're resetting it to initial (black) here.
  */
 .productShowcaseSection h2 {
   color: initial;

@@ -96,7 +96,7 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
     if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
-        // into the databaase.
+        // into the database.
         if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
             // Generate a new UUID, since this GS has changed since it was read.
             gs.kvstoreUuid = Random::uniformU4();

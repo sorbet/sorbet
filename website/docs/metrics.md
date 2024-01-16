@@ -101,7 +101,7 @@ metrics are reported:
 
 ## Reporting metrics directly to statsd
 
-In addition to outputing metrics to a file, Sorbet can also report metrics by
+In addition to outputting metrics to a file, Sorbet can also report metrics by
 connecting directly to a statsd service. This technique is more advanced, which
 means the instructions will heavily vary by organization and use case. At a high
 level:

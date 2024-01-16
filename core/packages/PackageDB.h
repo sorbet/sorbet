@@ -25,7 +25,7 @@ public:
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
-    // associated packge for the file.
+    // associated package for the file.
     const MangledName getPackageNameForFile(FileRef file) const;
 
     // Set the associated package for the file.

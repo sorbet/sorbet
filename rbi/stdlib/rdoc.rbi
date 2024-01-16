@@ -2184,7 +2184,7 @@ end
 
 # A PO entry in PO
 class RDoc::Generator::POT::POEntry
-  # Creates a PO entry for `msgid`. Other valus can be specified by `options`.
+  # Creates a PO entry for `msgid`. Other values can be specified by `options`.
   def self.new(msgid, options = _); end
 
   # The comment content extracted from source file
@@ -8143,7 +8143,7 @@ class RDoc::RDoc
   # Removes a siginfo handler and replaces the previous
   def remove_siginfo_handler; end
 
-  # Removes file extensions known to be unparseable from `files` and TAGS files
+  # Removes file extensions known to be unparsable from `files` and TAGS files
   # for emacs and vim.
   def remove_unparseable(files); end
 

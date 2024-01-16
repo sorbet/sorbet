@@ -29,7 +29,7 @@ public:
     //   the variable to write that instruction into)
     // - The framework will then update all reads from the variable of the `instr` assigns to to
     //   instead read from the variable of the `llvm::Value *` you just returned.
-    // - The frameowrk will delete `instr` from the module. This might unlock further optimization
+    // - The framework will delete `instr` from the module. This might unlock further optimization
     //   opportunities in later phases.
     //
     // You cannot (currently at least):

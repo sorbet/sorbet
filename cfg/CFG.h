@@ -90,7 +90,7 @@ public:
     // updateKnowledge is aware of, return information about the receiver of that `Send`.
     //
     // Should only be used to *improve* existing error messages, not as a reliable source of truth,
-    // because the implemention is only a heuristic, and may fail to find a receiver even when it
+    // because the implementation is only a heuristic, and may fail to find a receiver even when it
     // might be otherwise expected to.
     //
     // More specifically, Sorbet's CFG is not SSA, so finding the `Send` that computes the variable

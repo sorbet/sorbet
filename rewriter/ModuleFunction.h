@@ -16,7 +16,7 @@ namespace sorbet::rewriter {
  *   def self.foo(x, y, ...); end
  *
  * possibly replicating the sig for the method if possible. If it is used with a string or symbol, then it instead
- * desugars into an untyped empty method for the purposes of fowarding, so
+ * desugars into an untyped empty method for the purposes of forwarding, so
  *
  *   module function def :foo
  *

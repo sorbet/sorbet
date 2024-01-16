@@ -272,7 +272,7 @@ public:
         ENFORCE(insertionLoc.exists());
 
         // now find the appropriate place for it, specifically by
-        // finding the import that directly preceeds it, if any
+        // finding the import that directly precedes it, if any
         core::AutocorrectSuggestion suggestion(
             fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
             {{insertionLoc,
@@ -308,7 +308,7 @@ public:
         ENFORCE(insertionLoc.exists());
 
         // now find the appropriate place for it, specifically by
-        // finding the import that directly preceeds it, if any
+        // finding the import that directly precedes it, if any
         auto strName = newExport.show(gs);
         core::AutocorrectSuggestion suggestion(fmt::format("Export `{}` in package `{}`", strName, name.toString(gs)),
                                                {{insertionLoc, fmt::format("\n  export {}", strName)}});

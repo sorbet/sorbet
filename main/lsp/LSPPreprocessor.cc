@@ -499,7 +499,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     for (auto &file : queryResponse->files) {
         // Don't append rootPath if it is empty.
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
-        // Editor contents supercede file system updates.
+        // Editor contents supersede file system updates.
         if (!config->isFileIgnored(localPath) && !openFiles.contains(localPath)) {
             auto fileType = core::File::Type::Normal;
             auto fileContents = readFile(localPath, *config->opts.fs);

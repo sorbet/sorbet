@@ -1,7 +1,7 @@
 # typed: strict
 
 class Test::Opus::Foo::FooTest
-  # Check Visiblity
+  # Check Visibility
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass
   Test::Opus::Foo::Bar::BarClassTest

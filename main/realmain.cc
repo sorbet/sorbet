@@ -116,7 +116,7 @@ core::StrictLevel levelMinusOne(core::StrictLevel level) {
 core::StrictLevel levelToRecommendation(core::StrictLevel level) {
     switch (level) {
         case core::StrictLevel::Ignore:
-            // We don't suggest `# typed: ignore` because it is too common for some probem in a
+            // We don't suggest `# typed: ignore` because it is too common for some problems in a
             // generated RBI file to cause a problem that actually does need to be fixed, and not by
             // ignoring the RBI file. Ignoring the file has bad consequences, like introducing more
             // errors in other files, causing those files to be ignored, etc.
@@ -848,7 +848,7 @@ int realmain(int argc, char *argv[]) {
                 }
                 minErrorLevel = levelToRecommendation(minErrorLevel);
                 if (file.data(*gs).originalSigil == minErrorLevel) {
-                    // if the file could be strong, but is only marked strict, ensure that we don't reccomend that it be
+                    // if the file could be strong, but is only marked strict, ensure that we don't recommend that it be
                     // marked strict.
                     continue;
                 }

@@ -84,7 +84,7 @@ public:
     template <class To>
     static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(TypePtr &&what) = delete;
 
-    // Disallowing this and requiring people to cast to `const TypePtr &` is simplier
+    // Disallowing this and requiring people to cast to `const TypePtr &` is simpler
     // than creating a parallel `TypeToCastType` for non-const argument types.
     template <class To> static auto cast(TypePtr &what) = delete;
 

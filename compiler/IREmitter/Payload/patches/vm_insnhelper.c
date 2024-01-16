@@ -466,7 +466,7 @@ static inline VALUE sorbet_vm_sendish_super(struct rb_execution_context_struct *
     return Qundef;
 }
 
-// This send primitive assumes that all argumenst have been pushed to the ruby stack, and will invoke the vm machinery
+// This send primitive assumes that all arguments have been pushed to the ruby stack, and will invoke the vm machinery
 // to execute the send.
 VALUE sorbet_callFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
     rb_execution_context_t *ec = GET_EC();
@@ -483,7 +483,7 @@ VALUE sorbet_callFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
     return val;
 }
 
-// This send primitive assumes that all argumenst have been pushed to the ruby stack, and will invoke the vm machinery
+// This send primitive assumes that all arguments have been pushed to the ruby stack, and will invoke the vm machinery
 // to execute the send.
 VALUE sorbet_callSuperFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
     rb_execution_context_t *ec = GET_EC();

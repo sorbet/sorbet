@@ -60,7 +60,7 @@ Having defaults for bare generic classes is _mostly_ a hack.
 
 In almost all cases, we would probably prefer the user to give us arguments. We
 don't want to see `Array`, we want `T::Array[SomeType]`. But there are some
-complications we have to accomodate.
+complications we have to accommodate.
 
 - Pre-Sorbet type annotations.
 

@@ -155,7 +155,7 @@ public:
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
-        // args[3...] are the remaining arguements
+        // args[3...] are the remaining arguments
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
         auto &cs = mcctx.cs;
@@ -164,7 +164,7 @@ public:
         auto *send = mcctx.send;
         auto &builder = mcctx.builder;
 
-        // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
+        // TODO: this implementation generates code that is stupidly slow, we should be able to reuse intrinsics here
         // one day
         auto recv = send->args[0].variable;
         auto lit = core::cast_type_nonnull<core::NamedLiteralType>(send->args[1].type);

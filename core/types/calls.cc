@@ -906,7 +906,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
-    // p -> params, i.e., what was mentioned in the defintiion
+    // p -> params, i.e., what was mentioned in the definition
     auto pit = data->arguments.begin();
     auto pend = data->arguments.end();
 
@@ -1490,7 +1490,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
     if (args.block == nullptr) {
-        // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
+        // if block is there we do not attempt to solve the constraint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
@@ -1854,7 +1854,7 @@ class T_attached_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Most syntactically visible calls to `T.attached_class` should be handled by the
-        // `<Magic>.attached_class` intrisnic.
+        // `<Magic>.attached_class` intrinsic.
         //
         // This intrinsic remains just on the off chance that people misuse `T.attached_class` as a
         // value some other way (e.g., t = T; t.attached_class).
@@ -2146,7 +2146,7 @@ public:
         // There's also the state of things at runtime, described in this comment:
         // https://github.com/sorbet/sorbet/pull/6888/files#diff-b565686f17b8592d5c1e544cd639aaac3244869ac059f2db416a2ac24aa94675R9
         //
-        // So for now, simply swallow "misisng `initialize`" errors.
+        // So for now, simply swallow "missing `initialize`" errors.
         if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
@@ -3401,7 +3401,7 @@ public:
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
-            // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
+            // This check (with the dropLiteral's) mimics what we do for pinning errors in environment.cc
             // TODO(jez) How should this interact with highlight untyped?
             if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
                 auto argLoc = args.argLoc(1);

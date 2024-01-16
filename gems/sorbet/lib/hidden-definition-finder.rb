@@ -436,7 +436,7 @@ class Sorbet::Private::HiddenMethodFinder
     valid.split("\n").each do |line|
       category = categorize(line)
       if category == :errors
-        # Don't ever switch to errors output permanantly
+        # Don't ever switch to errors output permanently
         output[category] << line + "\n"
         next
       end

@@ -87,7 +87,7 @@ def test1
   {foo: 10, bar: "hi"}
 end
 
-# Wrap curly braces around the keyword args to [] to make the elemnt of the
+# Wrap curly braces around the keyword args to [] to make the element of the
 # array into a shape
 sig {returns(T::Array[{foo: Integer}])}
 def test2

@@ -436,7 +436,7 @@ NodeDef nodes[] = {
         "__LINE__",
         vector<FieldDef>(),
     },
-    // local variable referense
+    // local variable reference
     {
         "LVar",
         "lvar",
@@ -608,7 +608,7 @@ NodeDef nodes[] = {
         vector<FieldDef>({{"body", FieldType::Node}}),
     },
     // wraps the sole argument of a 1-arg block
-    // because there's a diffence between m {|a|} and m{|a,|}
+    // because there's a difference between m {|a|} and m{|a,|}
     {
         "Procarg0",
         "procarg0",

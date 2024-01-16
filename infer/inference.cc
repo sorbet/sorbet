@@ -281,7 +281,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         for (const auto &prevBasicBlock : bb->backEdges) {
                             const auto &prevEnv = outEnvironments[prevBasicBlock->id];
                             if (prevEnv.isDead) {
-                                // This prevous block doesn't actually matter, because it was dead
+                                // This previous block doesn't actually matter, because it was dead
                                 // (never got to evaluating its jump condition), so don't clutter
                                 // the error message.
                                 continue;

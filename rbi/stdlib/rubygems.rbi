@@ -2639,7 +2639,7 @@ class Gem::Version < Object
         Integer,
         Float, # Technically, any `to_s`able object would work.
         Gem::Version, # Will return the same version object
-        NilClass # Depracated, and will issue a warning
+        NilClass # Deprecated, and will issue a warning
       )
     ).void
   end
@@ -2742,7 +2742,7 @@ class Gem::Version < Object
         Integer,
         Float, # Technically, any `to_s`able object would work.
         Gem::Version, # Will return the same version object
-        NilClass # Depracated, and will issue a warning
+        NilClass # Deprecated, and will issue a warning
       )
     ).returns(Gem::Version)
   end
@@ -6226,7 +6226,7 @@ end
 class Gem::Resolver::Molinillo::ResolverError < StandardError
 end
 
-# Provides information about specifcations and dependencies to the resolver,
+# Provides information about specifications and dependencies to the resolver,
 # allowing the {Resolver} class to remain generic while still providing power
 # and flexibility.
 #

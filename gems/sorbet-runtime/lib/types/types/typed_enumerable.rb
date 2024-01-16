@@ -54,7 +54,7 @@ module T::Types
         value_type = types[1]
         obj.each_pair do |key, val|
           # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
-          # iterate over a [key, value] array, so we can't juse use the type.recursively_valid?(v)
+          # iterate over a [key, value] array, so we can't just use the type.recursively_valid?(v)
           return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
         end
         true

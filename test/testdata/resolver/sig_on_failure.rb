@@ -7,7 +7,7 @@ class Main
     def on_failure
     end
 
-    # Since it is an experiement, all these illegal things are ok for now
+    # Since it is an experiment, all these illegal things are ok for now
     sig {returns(NilClass).on_failure(notify: 'pt').on_failure(notify: 'pt')}
     def two_on_failure
     end

@@ -6,7 +6,7 @@
 # keyword was both (1) being used as a method name and (2) broken across two
 # lines like this.
 #
-# We decided that this was a worthwile tradeoff, because it makes it far easier
+# We decided that this was a worthwhile tradeoff, because it makes it far easier
 # for the parser to recover gracefully and locally from syntax errors.
 
 def method_named_alias(x)

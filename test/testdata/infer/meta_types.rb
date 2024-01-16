@@ -1,6 +1,6 @@
 # typed: true
 
-# Test that putting a MataType into various erroneous places doesn't
+# Test that putting a MetaType into various erroneous places doesn't
 # crash us (and raises appropriate user-level errors)
 
 class TestMetaType

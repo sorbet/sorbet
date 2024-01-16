@@ -305,7 +305,7 @@ void emitParamInitialization(CompilerState &cs, llvm::IRBuilderBase &builder, co
     int restStart = 0;  // M + N
     int postStart = 0;  // M + N + 1
     int postNum = 0;    // # of required arguments after rest (O)
-    int kwNum = 0;      // # of keyword argments (K)
+    int kwNum = 0;      // # of keyword arguments (K)
     int blockStart = 0; // M + N + 1 + O + K
     int reqKwNum = 0;   // # of required keyword arguments
     bool hasRest = false;
@@ -456,7 +456,7 @@ public:
         auto ownerSym = typeToSym(cs, send->args[0].type);
         llvm::Value *klass;
         // If we're defining the method on `T.class_of(T.class_of(X))`, we need to
-        // programatically access the class, rather than letting getRubyConstant do
+        // programmatically access the class, rather than letting getRubyConstant do
         // that work for us.
         if (ownerSym.data(cs)->isSingletonClass(cs)) {
             auto attachedClass = ownerSym.data(cs)->attachedClass(cs);

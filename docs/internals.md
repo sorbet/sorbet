@@ -214,7 +214,7 @@ of plugin system. This will allow for a wider audience of Rubyists to teach
 Sorbet about DSLs they've written. This is why we've intentionally limited the
 power of Rewriter passes.
 
-Specfically, we artificially limit what code we call from Rewriter passes.
+Specifically, we artificially limit what code we call from Rewriter passes.
 Sometimes it would be convenient to call into other phases of Sorbet (like
 resolver or infer), but instead we've reimplemented functionality in the
 Rewriter pass. This keeps the surface area of the API we'd have to present to

@@ -72,7 +72,7 @@ typecheck() {
     gems_path="${without_bin_srb%/sorbet*}"
 
     # /path/to/gems/sorbet-static-0.0.1-darwin-17/libexec/sorbet
-    # (assumes people only have one platform-depdendent gem installed per version)
+    # (assumes people only have one platform-dependent gem installed per version)
     guess_sorbet=("$gems_path/sorbet-static$version_suffix"*/libexec/sorbet)
 
     if [[ -f "${guess_sorbet[0]}" ]]; then

@@ -886,7 +886,7 @@ vector<unique_ptr<CompletionItem>> allSimilarConstantItems(const core::GlobalSta
     vector<unique_ptr<CompletionItem>> items;
 
     if (scopes.size() == 1 && !scopes[0].exists()) {
-        // This happens when there was a contant literal like C::D but `C` itself was stubbed,
+        // This happens when there was a constant literal like C::D but `C` itself was stubbed,
         // so we have no idea what `D` is or what its resolution scope is.
         return items;
     }

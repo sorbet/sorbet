@@ -42,7 +42,7 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
 }
 
 llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
-    // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
+    // TODO(trevor) we could probably handle methods with block args as well, by passing the block handler through the
     // current ruby execution context.
     if (mcctx.blk.has_value()) {
         return tryNameBasedIntrinsic(mcctx);

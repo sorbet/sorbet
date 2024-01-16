@@ -148,8 +148,8 @@ created by subclassing `T::Enum`, and individual values are instances of that
 class, created by calling `new`. Because of this, **enums in Sorbet are
 naturally type-safe**: one enum value cannot be used where some other enum is
 expected, and vice versa. (By comparison, existing Ruby code often uses symbols
-like `:spades` or `:hearts` for enums, but all symbols are interchangable at the
-type-level, so they provide no type safety.)
+like `:spades` or `:hearts` for enums, but all symbols are interchangeable at
+the type-level, so they provide no type safety.)
 
 Enums work hand-in-hand with exhaustiveness checks by design:
 

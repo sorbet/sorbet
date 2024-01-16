@@ -73,7 +73,7 @@ export async function toggleUntypedCodeHighlighting(
 }
 
 /**
- * Set highlighting of untyped code to sepcific setting.
+ * Set highlighting of untyped code to specific setting.
  * @param context Sorbet extension context.
  */
 export async function configureUntypedCodeHighlighting(

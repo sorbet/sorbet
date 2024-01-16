@@ -243,7 +243,7 @@ private:
                               const core::TypeConstraint *constraint) {
         ENFORCE(method.exists());
         ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
-        // handle this case anyways so that we don't crash in prod when this method is mis-used
+        // handle this case anyways so that we don't crash in prod when this method is misused
         if (!method.exists()) {
             return "";
         }
@@ -316,7 +316,7 @@ private:
 
     string prettyDefForMethod(core::MethodRef method) {
         ENFORCE(method.exists());
-        // handle this case anyways so that we don't crash in prod when this method is mis-used
+        // handle this case anyways so that we don't crash in prod when this method is misused
         if (!method.exists()) {
             return "";
         }

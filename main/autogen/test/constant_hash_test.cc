@@ -174,7 +174,7 @@ TEST_CASE("Require") { // NOLINT
     // changing the name of a require should affect the hash
     CHECK_NE(req, helper.hashExample("require 'bar'\n"));
 
-    // adding a new requires hould affect the hash
+    // adding a new require should affect the hash
     CHECK_NE(req, helper.hashExample("require 'foo'\n"
                                      "require 'bar'\n"));
 

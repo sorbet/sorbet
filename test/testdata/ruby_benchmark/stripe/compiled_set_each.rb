@@ -828,16 +828,16 @@ module Enumerable
 end
 
 # =begin
-# == RestricedSet class
-# RestricedSet implements a set with restrictions defined by a given
+# == RestrictedSet class
+# RestrictedSet implements a set with restrictions defined by a given
 # block.
 #
 # === Super class
 #     Set
 #
 # === Class Methods
-# --- RestricedSet::new(enum = nil) { |o| ... }
-# --- RestricedSet::new(enum = nil) { |rset, o| ... }
+# --- RestrictedSet::new(enum = nil) { |o| ... }
+# --- RestrictedSet::new(enum = nil) { |rset, o| ... }
 #     Creates a new restricted set containing the elements of the given
 #     enumerable object.  Restrictions are defined by the given block.
 #
@@ -854,7 +854,7 @@ end
 #
 # =end
 #
-# class RestricedSet < Set
+# class RestrictedSet < Set
 #   def initialize(*args, &block)
 #     @proc = block or raise ArgumentError, "missing a block"
 #

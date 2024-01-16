@@ -26,7 +26,7 @@ extend T::Sig
 #      Integer <: T.type_parameter(:T))          This should ideally remember `Integer` as lower bound
 
 # (2)
-# T.any(Integer, NilClass) <: T.any(T.type_paramater(:T), NilClass)
+# T.any(Integer, NilClass) <: T.any(T.type_parameter(:T), NilClass)
 #
 # ==> Integer <: T.any(T.type_parameter(:T), NilClass) &&
 #     NilClass <: T.any(T.type_parameter(:T), NilClass)
@@ -54,7 +54,7 @@ extend T::Sig
 # ==> (Integer <: NilClass ||
 #      Integer <: T.type_parameter(:T)) &&
 #     (NilClass <: NilClass ||
-#      NilClass <: T.type_paramater(:T))
+#      NilClass <: T.type_parameter(:T))
 
 # (4)
 # T.untyped <: T.nilable(T.type_parameter(:T))

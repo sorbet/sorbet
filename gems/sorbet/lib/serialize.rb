@@ -56,7 +56,7 @@ class Sorbet::Private::Serialize
     superclass_str = !superclass_str || superclass_str.empty? ? '' : " < #{superclass_str}"
     ret << (Sorbet::Private::RealStdlib.real_is_a?(klass, Class) ? "class #{class_name}#{superclass_str}\n" : "module #{class_name}\n")
 
-    # We don't use .included_modules since that also has all the aweful things
+    # We don't use .included_modules since that also has all the awful things
     # that are mixed into Object. This way we at least have a delimiter before
     # the awefulness starts (the superclass).
     Sorbet::Private::RealStdlib.real_ancestors(klass).each do |ancestor|
@@ -144,14 +144,14 @@ class Sorbet::Private::Serialize
       initialize = nil
     end
     if initialize && initialize.owner == klass
-      # This method never apears in the reflection list...
+      # This method never appears in the reflection list...
       instance_methods += [:initialize]
     end
     Sorbet::Private::RealStdlib.real_ancestors(klass).reject {|ancestor| @constant_cache.name_by_class(ancestor)}.each do |ancestor|
       instance_methods += ancestor.instance_methods(false)
     end
 
-    # uniq here is required because we populate additional methos from anonymous superclasses and there
+    # uniq here is required because we populate additional methods from anonymous superclasses and there
     # might be duplicates
     methods += instance_methods.sort.uniq.map do |method_sym|
       begin

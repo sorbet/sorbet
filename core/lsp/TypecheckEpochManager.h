@@ -50,7 +50,7 @@ public:
     // Run only from processing thread.
     bool tryCancelSlowPath(uint32_t newEpoch);
     // Run only from the typechecking thread.
-    // Tries to commit the given epoch. Returns true if the commit succeeeded, or false if it was canceled.
+    // Tries to commit the given epoch. Returns true if the commit succeeded, or false if it was canceled.
     // The presence of PreemptionTaskManager determines if this commit is preemptible.
     bool tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
                         std::optional<std::shared_ptr<PreemptionTaskManager>> preemptionManager,

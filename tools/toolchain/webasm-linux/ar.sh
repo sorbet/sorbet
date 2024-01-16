@@ -3,7 +3,7 @@ set -euo pipefail
 
 command -v realpath > /dev/null 2>&1 || { echo 'You need to install the "realpath" command system-wide.' ; exit 1; }
 
-ABSOLUTE_PREFIX=$(realpath "${PWD}") # bazel replaces PWD with /proc/self/cwd which is unstable under "cd", meaning that reffering to a path under relative name fails
+ABSOLUTE_PREFIX=$(realpath "${PWD}") # bazel replaces PWD with /proc/self/cwd which is unstable under "cd", meaning that referring to a path under relative name fails
 
 EM_CONFIG="LLVM_ROOT='${ABSOLUTE_PREFIX}/external/emscripten_clang_linux/';"
 EM_CONFIG+="EMSCRIPTEN_NATIVE_OPTIMIZER='${ABSOLUTE_PREFIX}/external/external/emscripten_clang_linux/optimizer';"

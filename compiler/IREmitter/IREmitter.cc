@@ -367,7 +367,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
             if (hasKWArgs) {
                 // if last argument is a hash, it's not part of positional arguments - it's going to
-                // fullfill all kw arguments instead
+                // fulfill all kw arguments instead
                 auto *minPositionalArgValue = IREmitterHelpers::buildS4(cs, minPositionalArgCount);
                 auto *hashArgsCtx =
                     builder.CreateCall(cs.getFunction("sorbet_determineKwSplatArg"),
@@ -602,7 +602,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             case FunctionType::ExceptionBegin:
             case FunctionType::Rescue:
             case FunctionType::Ensure:
-                // jump dirrectly to user body
+                // jump directly to user body
                 builder.CreateBr(irctx.userEntryBlockByFunction[rubyRegionId]);
                 break;
 

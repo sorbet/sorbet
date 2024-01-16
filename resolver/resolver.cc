@@ -708,7 +708,7 @@ private:
         }
         if (job.resolutionFailed) {
             // we only set this when a job has failed for other reasons and we've already reported an error, and
-            // continuining on will only redundantly report that we can't resolve the constant, so bail early here
+            // continuing on will only redundantly report that we can't resolve the constant, so bail early here
             job.out->symbol = core::Symbols::untyped();
             return;
         }
@@ -1393,7 +1393,7 @@ public:
 
         // Populate local first definitions table for out-of-order reference checking.
         // We only do this when we know we're going to need to consult the first definition loc and
-        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // we know the information in the symbol table is insufficient. This avoids redundant memory
         // storage overhead.
         //
         // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
@@ -1546,7 +1546,7 @@ public:
 
         // Populate local first definitions table for out-of-order reference checking.
         // We only do this when we know we're going to need to consult the first definition loc and
-        // we know the information in the symbol table is insufficient. This avoids reundant memory
+        // we know the information in the symbol table is insufficient. This avoids redundant memory
         // storage overhead.
         //
         // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in

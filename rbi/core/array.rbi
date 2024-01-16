@@ -2934,7 +2934,7 @@ class Array < Object
   ###
   ### @example returning {Integer}
   ###   T::Array[Float].new.sum(&:to_f) #=> 0
-  ### @example returing generic type
+  ### @example returning generic type
   ###   ['a', 'b'].sum{|t| t.ord.to_f} #=> 195.0
   sig do
     type_parameters(:T).params(

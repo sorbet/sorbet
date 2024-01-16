@@ -183,7 +183,7 @@ module T::Private::Methods
       self
     end
 
-    # Declares valid type paramaters which can be used with `T.type_parameter` in
+    # Declares valid type parameters which can be used with `T.type_parameter` in
     # this `sig`.
     #
     # This is used for generic methods. Example usage:
