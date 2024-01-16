@@ -98,6 +98,7 @@ export class MetricClient {
         sorbetMetricsApi = api as Api;
         if (!sorbetMetricsApi.metricsEmitter.timing) {
           this.context.log.info("Timer metrics disabled (unsupported API).");
+          sorbetMetricsApi = NoOpApi.INSTANCE;
         }
       } else {
         this.context.log.info("Metrics-gathering disabled (no API)");
