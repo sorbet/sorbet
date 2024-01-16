@@ -72,7 +72,7 @@ SymbolMatcher::SymbolMatcher(const LSPConfiguration &config, const core::GlobalS
  * Converts a symbol into any (supported) SymbolInformation objects.
  */
 vector<unique_ptr<SymbolInformation>> SymbolMatcher::symbolRef2SymbolInformation(core::SymbolRef symRef,
-                                                                                  size_t maxLocations) {
+                                                                                 size_t maxLocations) {
     vector<unique_ptr<SymbolInformation>> results;
     for (auto loc : symRef.locs(gs)) {
         if (results.size() >= maxLocations) {
