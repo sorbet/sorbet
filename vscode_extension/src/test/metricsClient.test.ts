@@ -44,9 +44,9 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       expectedTags,
     );
 
-    sinon.assert.calledOnce(incrementStub);
+    sinon.assert.calledTwice(incrementStub);
     sinon.assert.calledWithMatch(
-      incrementStub,
+      incrementStub.secondCall,
       `${METRIC_PREFIX}${expectedMetricName}`,
       expectedCount,
       expectedTags,
