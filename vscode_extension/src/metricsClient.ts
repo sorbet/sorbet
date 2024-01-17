@@ -69,9 +69,12 @@ export class MetricClient {
   constructor(context: SorbetExtensionContext, api?: Api) {
     this.apiPromise = api ? Promise.resolve(api) : this.initSorbetMetricsApi();
     this.context = context;
-    const sorbetExtension = extensions.getExtension("sorbet-vscode-extension");
+    const sorbetExtension = extensions.getExtension(
+      "sorbet.sorbet-vscode-extension",
+    );
     this.sorbetExtensionVersion =
       sorbetExtension?.packageJSON.version ?? "unknown";
+    this.emitCountMetric("metrics_client_initialized", 1);
   }
 
   /**
