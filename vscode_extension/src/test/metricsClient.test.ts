@@ -38,6 +38,8 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       new NoOpApi(),
     );
 
+    incrementStub.resetHistory();
+
     await client.emitCountMetric(
       expectedMetricName,
       expectedCount,
