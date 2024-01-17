@@ -18,7 +18,7 @@ class NilClass < Object
   # meaningful semantics in `case` statements.
   sig do
     params(
-        arg0: BasicObject,
+        arg0: T.anything,
     )
     .returns(T::Boolean)
   end
