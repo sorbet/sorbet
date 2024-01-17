@@ -112,6 +112,11 @@ class Index extends React.Component {
                   link: '/docs/talks/ruby-conf-2019',
                   venue: 'RubyConf 2019',
                 },
+                {
+                  title: 'Compiling Ruby to Native Code with Sorbet and LLVM',
+                  link: '/docs/talks/ruby-conf-2021',
+                  venue: 'RubyConf 2021',
+                },
               ]}
             />
           </div>
