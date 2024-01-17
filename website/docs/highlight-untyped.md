@@ -65,6 +65,8 @@ There are multiple ways to enable untyped code highlights.
     Sorbet treats any file in a folder named `test` or ending with the
     `.test.rb` suffix as a test file. This is not yet configurable.
 
+  The new setting will be logged in the "Sorbet" output window.
+
 - Open a Ruby file, and run the `Sorbet: Toggle highlighting untyped code`
   command from the command pallette.
 
@@ -72,6 +74,8 @@ There are multiple ways to enable untyped code highlights.
   will go back to it. If there was no "previous" setting chosen via the
   Configure command, then `Nowhere` will toggle to `Everywhere` and
   `Everywhere`/`Everywhere but tests` will toggle to `Nowhere`.
+
+  After toggling, the new setting will be logged in the "Sorbet" output window.
 
 - Set the `"sorbet.highlightUntyped": ...` setting in the VS Code preferences.
   This changes the _default_ setting--values chosen with the Configure and
