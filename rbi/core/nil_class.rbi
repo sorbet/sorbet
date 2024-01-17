@@ -16,7 +16,13 @@ class NilClass < Object
   # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html), effectively the
   # same as calling `#==`, but typically overridden by descendants to provide
   # meaningful semantics in `case` statements.
-  def ===(_); end
+  sig do
+    params(
+        arg0: T.anything,
+    )
+    .returns(T::Boolean)
+  end
+  def ===(arg0); end
 
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
