@@ -59,8 +59,20 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             return response;
         }
         const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = move(queryResponses[0]);
-        // N.B.: Ignores literals.
+
+        unique_ptr<core::lsp::QueryResponse> resp;
+        for (auto &r : queryResponses) {
+            // Never makes sense to find "references" of a literal. Bubble up to the enclosing node.
+            if (!r->isLiteral()) {
+                resp = move(r);
+                break;
+            }
+        }
+
+        if (resp == nullptr) {
+            move(queryResponses[0]);
+        }
+
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
             response->result =

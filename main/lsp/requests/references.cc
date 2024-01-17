@@ -86,8 +86,19 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
     }
     if (!queryResponses.empty()) {
-        auto resp = move(queryResponses[0]);
-        // N.B.: Ignores literals.
+        unique_ptr<core::lsp::QueryResponse> resp;
+        for (auto &r : queryResponses) {
+            // Never makes sense to find "references" of a literal. Bubble up to the enclosing node.
+            if (!r->isLiteral()) {
+                resp = move(r);
+                break;
+            }
+        }
+
+        if (resp == nullptr) {
+            move(queryResponses[0]);
+        }
+
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
             if (fref.data(gs).isPackage()) {
