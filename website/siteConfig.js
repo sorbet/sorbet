@@ -72,11 +72,6 @@ const users = [
     infoLink: 'https://marketplacer.com/',
   },
   {
-    caption: 'PhishSafety',
-    image: 'img/phishsafety-logo.png',
-    infoLink: 'https://phishsafety.com',
-  },
-  {
     caption: 'TaskRabbit',
     image: 'img/taskrabbit-logo.svg',
     infoLink: 'https://www.taskrabbit.com/',
