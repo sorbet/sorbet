@@ -184,16 +184,22 @@ defaultQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryRespo
 
 unique_ptr<core::lsp::QueryResponse>
 getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    // Find all references might show an Ident last if its a `prop`, and the Ident will be the
+    // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
         return defaultQueryResponseForFindAllReferences(queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
+        // If this query response has the same location as the first ident response, keep skipping
+        // up. Seeing a query response for the exact same loc suggests this was synthesized in
+        // rewriter.
         if ((*resp)->getLoc() == firstResp->termLoc) {
             continue;
         }
 
+        // It's always okay to skip literals for Find All References
         auto lit = (*resp)->isLiteral();
         if (lit != nullptr) {
             continue;
