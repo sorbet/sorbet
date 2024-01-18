@@ -384,4 +384,16 @@ pair<Loc, uint32_t> Loc::findStartOfLine(const GlobalState &gs) const {
     return make_pair(Loc(this->file(), startOffset, startOffset), padding);
 }
 
+Loc Loc::truncateToFirstLine(const GlobalState &gs) const {
+    auto [beginPos, endPos] = this->position(gs);
+    if (beginPos.line == endPos.line) {
+        return *this;
+    }
+
+    const auto &lineBreaks = this->file().data(gs).lineBreaks();
+    // Detail::line is 1-indexed. We want one after the 0-indexed line, so line - 1 + 1 = line
+    auto firstNewline = lineBreaks[beginPos.line];
+    return Loc(this->file(), this->beginPos(), firstNewline);
+}
+
 } // namespace sorbet::core
