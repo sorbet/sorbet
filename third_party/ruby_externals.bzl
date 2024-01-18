@@ -29,7 +29,15 @@ def register_ruby_dependencies():
         sha256 = "41d4c93a79426a7e034080cc367c696ee0ae5c26fcfef20bb58f950031c95924",
     )
 
+    # Pre Ruby 3.0 needs an older rubygems
+    http_file(
+        name = "rubygems_update_stripe_ruby2",
+        urls = _rubygems_urls("rubygems-update-3.3.3.gem"),
+        sha256 = "610aef544e0c15ff3cd5492dff3f5f46bd2062896f4f62c7191432c6f1d681c9",
+    )
+
     ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"
+    ruby_2_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_2.BUILD"
     ruby_3_3_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_3_3.BUILD"
     ruby_for_compiler_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_for_compiler.BUILD"
 
@@ -38,7 +46,7 @@ def register_ruby_dependencies():
         urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
         strip_prefix = "ruby-2.6.5",
-        build_file = ruby_build,
+        build_file = ruby_2_build,
     )
 
     urls = _ruby_urls("2.7/ruby-2.7.2.tar.gz")
@@ -50,7 +58,7 @@ def register_ruby_dependencies():
         urls = urls,
         sha256 = sha256,
         strip_prefix = strip_prefix,
-        build_file = ruby_build,
+        build_file = ruby_2_build,
     )
 
     http_archive(
@@ -58,7 +66,7 @@ def register_ruby_dependencies():
         urls = urls,
         sha256 = sha256,
         strip_prefix = strip_prefix,
-        build_file = ruby_build,
+        build_file = ruby_2_build,
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
             "@com_stripe_ruby_typer//third_party/ruby:dtoa.patch",
