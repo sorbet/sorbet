@@ -51,8 +51,8 @@ versions of Sorbet.
 There are multiple ways to enable untyped code highlights.
 
 - Open a Ruby file, and run the `Sorbet: Configure highlighting untyped code`
-  command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on
-  Windows and Linux).
+  command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows
+  and Linux).
 
   You will be able to choose where to highlight untyped code:
 
