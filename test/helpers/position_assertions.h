@@ -425,7 +425,7 @@ public:
     std::string toString() const override;
 
 private:
-    std::optional<std::pair<std::string, std::string>> expectedFile();
+    std::optional<std::pair<std::string, std::string>> expectedFile(std::string filename, std::string version);
     void assertResults(std::string expectedPath, std::string expectedContents, std::string actualContents);
     std::unique_ptr<TextDocumentEdit> sortEdits(std::unique_ptr<TextDocumentEdit> changes);
 };
