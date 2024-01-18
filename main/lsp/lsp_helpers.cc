@@ -168,19 +168,18 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     return subclasses;
 }
 
-namespace {
 unique_ptr<core::lsp::QueryResponse>
-defaultQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     for (auto &r : queryResponses) {
-        // Never makes sense to find "references" of a literal. Bubble up to the enclosing node.
-        if (!r->isLiteral()) {
+        if (r->isMethodDef()) {
             return move(r);
+        } else if (!r->isLiteral()) {
+            break;
         }
     }
 
     return move(queryResponses[0]);
 }
-} // namespace
 
 unique_ptr<core::lsp::QueryResponse>
 getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
@@ -188,7 +187,7 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        return defaultQueryResponseForFindAllReferences(queryResponses);
+        return skipLiteralIfMethodDef(queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -208,11 +207,11 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
         if ((*resp)->isMethodDef()) {
             return move(*resp);
         } else {
-            return defaultQueryResponseForFindAllReferences(queryResponses);
+            return skipLiteralIfMethodDef(queryResponses);
         }
     }
 
-    return defaultQueryResponseForFindAllReferences(queryResponses);
+    return skipLiteralIfMethodDef(queryResponses);
 }
 
 /**

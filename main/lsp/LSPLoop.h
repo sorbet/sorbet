@@ -111,6 +111,9 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
 std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
                                                       bool includeSelf);
 
+std::unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfMethodDef(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+
 // prop/const/attr setters are bogged down with a bunch of extra Ident and Literal query
 // responses, which don't make sense to use find all references on.
 std::unique_ptr<core::lsp::QueryResponse>
