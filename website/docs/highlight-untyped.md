@@ -27,39 +27,95 @@ render diagnostics with an [Information] severity.
 [information]:
   https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#diagnosticSeverity
 
-## Toggling untyped highlights
+## Version requirements
 
-**Note**: at the moment, toggling untyped highlights incurs a full restart of
-Sorbet. This limitation should be removed in the future.
+- Sorbet
+  - The `highlightUntyped` feature first appeared in Sorbet 0.5.10754
+    (2023-04-06), but was a simple `true`/`false` toggle.
+  - The `highlightUntyped` feature changed to an enum
+    (`"everywhere"`/`"nowhere"`/`"everywhere-but-tests"`) in Sorbet 0.5.11175
+    (2024-01-03).
+- VS Code extension
+  - The "Sorbet: Toggle highlighting untyped code" setting first appeared in
+    version 0.3.19 of the VS Code extension (2023-04-06).
+  - Support for `"everywhere-but-tests"` first appeared in 0.3.32 of the VS Code
+    extension (2024-01-11)
+
+Newer versions of the VS Code extension are backwards compatible with older
+versions of Sorbet.
+
+## Enabling untyped code highlights
 
 ### In VS Code
 
-1. Install version 0.3.19 (or later) of the
-   [Sorbet VS Code extension](vscode.md).
+There are multiple ways to enable untyped code highlights.
 
-2. Open a Ruby file, and run the `Sorbet: Toggle highlighting untyped code`
-   command from the command pallet (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows
-   and Linux).
+- Open a Ruby file, and run the `Sorbet: Configure highlighting untyped code`
+  command from the command palette (accessed via ⇧⌘P on macOS, or ⌃⇧P on Windows
+  and Linux).
 
-This setting should persist through restarts of VS Code.
+  You will be able to choose where to highlight untyped code:
+
+  - Nowhere (the default)
+
+  - Everywhere
+
+  - Everywhere but tests
+
+    Sorbet treats any file in a folder named `test` or ending with the
+    `.test.rb` suffix as a test file. This is not yet configurable.
+
+  The new setting will be logged in the "Sorbet" output window.
+
+- Open a Ruby file, and run the `Sorbet: Toggle highlighting untyped code`
+  command from the command palette.
+
+  The toggle command remembers the "previous" highlight untyped setting, and
+  will go back to it. If there was no "previous" setting chosen via the
+  Configure command, then `Nowhere` will toggle to `Everywhere` and
+  `Everywhere`/`Everywhere but tests` will toggle to `Nowhere`.
+
+  After toggling, the new setting will be logged in the "Sorbet" output window.
+
+- Set the `"sorbet.highlightUntyped": ...` setting in the VS Code preferences.
+  This changes the _default_ setting--values chosen with the Configure and
+  Toggle commands above will not change this value.
+
+  For example, to have a workspace default to highlighting untyped code
+  everywhere, add this to the project's `.vscode/settings.json` file:
+
+  ```json
+    "sorbet.highlightUntyped": "everywhere"
+  ```
 
 ### In other LSP clients
 
-This feature relies on the `initializationOptions` parameter to the `initialize`
-request that starts
-[every language server protocol session](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize).
+This feature relies on two LSP features:
 
-To enable this feature, ensure that the `initializationOptions` includes
+- The `initializationOptions` parameter in the `initialize` request that starts
+  [every language server protocol session](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize).
+
+- The `settings` parameter in the `workspace/didChangeConfiguration`
+  notification.
+
+For both the `initializationOptions` and `settings` parameters, Sorbet allows
+passing a JSON object containing
 
 ```json
-"highlightUntyped": true
+  "highlightUntyped": ...,
 ```
 
-as a key-value pair when launching the Sorbet language server in your preferred
-client.
+Where `...` is one of
 
-For example, in Neovim, this setting can be provided via the [`init_options`
-argument] to the `vim.lsp.start_client()` function.
+- `"nowhere"`
+- `"everywhere"`
+- `"everywhere-but-tests"`
+- `true` / `false` (for backwards compatibility only; use `"everywhere"` /
+  `"nowhere"` when possible)
+
+For example, in Neovim, this `highlightUntyped` setting can be provided via the
+[`init_options` argument] to the `vim.lsp.start_client()` function, which then
+passes it to the underlying `initialize` request.
 
 [`init_options` argument]:
   https://neovim.io/doc/user/lsp.html#:~:text=initializationOptions
