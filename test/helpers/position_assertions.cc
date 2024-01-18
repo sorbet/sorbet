@@ -13,6 +13,7 @@
 #include "test/helpers/position_assertions.h"
 #include <iterator>
 #include <regex>
+#include <string.h>
 
 using namespace std;
 
@@ -1752,8 +1753,8 @@ ApplyCodeActionAssertion::ApplyCodeActionAssertion(string_view filename, unique_
 string ApplyCodeActionAssertion::toString() const {
     return fmt::format("apply-code-action: [{}] {}", version, title);
 }
-optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile() {
-    auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
+optional<pair<string, string>> ApplyCodeActionAssertion::expectedFile(string filename, string version) {
+    auto expectedUpdatedFilePath = updatedFilePath(filename, version);
     string expectedEditedFileContents;
     try {
         expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);
@@ -1806,11 +1807,6 @@ getFileByUri(const LSPConfiguration &config,
 
 void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, const CodeAction &codeAction) {
-    auto maybeFile = expectedFile();
-    if (!maybeFile.has_value()) {
-        return;
-    }
-    auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
     const auto &config = wrapper.config();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);
@@ -1818,6 +1814,21 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         string actualEditedFileContents = string(file->source());
         c = sortEdits(move(c));
 
+        auto &td = c->textDocument;
+        auto filename = td->uri;
+        auto version = td->version;
+
+        if (!std::holds_alternative<double>(version)) {
+            continue;
+        }
+
+        const double *v = std::get_if<double>(&version);
+        auto maybeFile = expectedFile(filename, to_string(*v));
+        if (!maybeFile.has_value()) {
+            return;
+        }
+
+        auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
         for (auto &e : c->edits) {
             auto reindent = false;
             actualEditedFileContents = applyEdit(actualEditedFileContents, *file, *e->range, e->newText, reindent);
@@ -1831,12 +1842,11 @@ void ApplyCodeActionAssertion::checkAll(
     const CodeAction &codeAction) {
     const auto &config = wrapper.config();
     UnorderedMap<string, string> accumulatedOriginalEditedContents{};
+
+    // actualEditedFileContents -> (expectedUpdatedFilePath, expectedEditedFileContents)
+    // Maps original file contents to a edited filename and contents
+    UnorderedMap<string, std::pair<std::string, std::string>> fileToUpdatedFile;
     string actualEditedFileContents;
-    auto maybeFile = expectedFile();
-    if (!maybeFile.has_value()) {
-        return;
-    }
-    auto [expectedUpdatedFilePath, expectedEditedFileContents] = maybeFile.value();
     for (auto &c : *codeAction.edit.value()->documentChanges) {
         auto file = getFileByUri(config, sourceFileContents, c->textDocument->uri);
 
@@ -1844,6 +1854,22 @@ void ApplyCodeActionAssertion::checkAll(
         actualEditedFileContents = string(file->source());
 
         for (auto &e : c->edits) {
+
+            auto &td = c->textDocument;
+            auto filename = td->uri;
+            auto version = td->version;
+
+            if (!std::holds_alternative<double>(version)) {
+                continue;
+            }
+
+            const double *v = std::get_if<double>(&version);
+            auto maybeFile = expectedFile(filename, to_string(*v));
+            if (!maybeFile.has_value()) {
+                continue;
+            }
+            fileToUpdatedFile.insert_or_assign(actualEditedFileContents, maybeFile.value());
+
             string oldSource = accumulatedOriginalEditedContents.contains(actualEditedFileContents)
                                    ? accumulatedOriginalEditedContents[actualEditedFileContents]
                                    : actualEditedFileContents;
@@ -1855,6 +1881,7 @@ void ApplyCodeActionAssertion::checkAll(
     }
 
     for (auto pair : accumulatedOriginalEditedContents) {
+        auto [expectedUpdatedFilePath, expectedEditedFileContents] = fileToUpdatedFile[pair.first];
         assertResults(expectedUpdatedFilePath, expectedEditedFileContents, pair.second);
     }
 }
