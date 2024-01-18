@@ -15,8 +15,6 @@ module T::Private::Methods::CallValidation
     original_visibility = visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       T::Private::ClassUtils.replace_method(mod, method_sig.method_name, true) do |*args, &blk|
-        # TODO: write a cop to ensure that abstract methods have an empty body
-        #
         # We allow abstract methods to be implemented by things further down the ancestor chain.
         # So, if a super method exists, call it.
         if defined?(super)
