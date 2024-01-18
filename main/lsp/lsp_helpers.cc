@@ -168,6 +168,47 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     return subclasses;
 }
 
+namespace {
+unique_ptr<core::lsp::QueryResponse>
+defaultQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    for (auto &r : queryResponses) {
+        // Never makes sense to find "references" of a literal. Bubble up to the enclosing node.
+        if (!r->isLiteral()) {
+            return move(r);
+        }
+    }
+
+    return move(queryResponses[0]);
+}
+} // namespace
+
+unique_ptr<core::lsp::QueryResponse>
+getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    auto firstResp = queryResponses[0]->isIdent();
+    if (firstResp == nullptr) {
+        return defaultQueryResponseForFindAllReferences(queryResponses);
+    }
+
+    for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
+        if ((*resp)->getLoc() == firstResp->termLoc) {
+            continue;
+        }
+
+        auto lit = (*resp)->isLiteral();
+        if (lit != nullptr) {
+            continue;
+        }
+
+        if ((*resp)->isMethodDef()) {
+            return move(*resp);
+        } else {
+            return defaultQueryResponseForFindAllReferences(queryResponses);
+        }
+    }
+
+    return defaultQueryResponseForFindAllReferences(queryResponses);
+}
+
 /**
  * Retrieves the documentation above a symbol.
  * - Returned documentation has one trailing newline (if it exists)

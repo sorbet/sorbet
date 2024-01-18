@@ -453,10 +453,6 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
             return info;
         }
         info.fieldSymbol = gs.lookupFieldSymbol(ownerCls, fieldName);
-        if (!info.fieldSymbol.exists()) {
-            // field symbol does not exist, so `symbol` must not be an accessor.
-            return info;
-        }
     }
 
     if (!info.readerSymbol.exists()) {
