@@ -1,0 +1,31 @@
+b/b.rb:8: `A::Foo` resolves but its package is not imported https://srb.help/3718
+     8 |  sig {returns(A::Foo)}
+                       ^^^^^^
+    a/__package.rb:3: Exported from package here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    b/__package.rb:3: Inserted `import A`
+     3 |class B < PackageSpec
+                             ^
+
+c/c.rb:6: `B::Bar` resolves but is not exported from `B` https://srb.help/3717
+     6 |  sig{returns(B::Bar)}
+                      ^^^^^^
+    b/b.rb:6: Defined here
+     6 |  class Bar; end
+          ^^^^^^^^^
+  Autocorrect: Done
+    b/__package.rb:3: Inserted `export B::Bar`
+     3 |class B < PackageSpec
+                             ^
+Errors: 2
+
+====================
+
+# typed: strict
+
+class B < PackageSpec
+  export B::Bar
+  import A
+end
