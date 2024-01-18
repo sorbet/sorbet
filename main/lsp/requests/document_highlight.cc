@@ -1,6 +1,7 @@
 #include "main/lsp/requests/document_highlight.h"
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
@@ -59,8 +60,9 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             return response;
         }
         const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = move(queryResponses[0]);
-        // N.B.: Ignores literals.
+
+        auto resp = getQueryResponseForFindAllReferences(queryResponses);
+
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
             response->result =

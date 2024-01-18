@@ -1,5 +1,6 @@
 #include "main/lsp/requests/references.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/ShowOperation.h"
@@ -86,8 +87,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
     }
     if (!queryResponses.empty()) {
-        auto resp = move(queryResponses[0]);
-        // N.B.: Ignores literals.
+        auto resp = getQueryResponseForFindAllReferences(queryResponses);
+
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
             if (fref.data(gs).isPackage()) {

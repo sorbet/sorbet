@@ -168,6 +168,52 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     return subclasses;
 }
 
+unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    for (auto &r : queryResponses) {
+        if (r->isMethodDef()) {
+            return move(r);
+        } else if (!r->isLiteral()) {
+            break;
+        }
+    }
+
+    return move(queryResponses[0]);
+}
+
+unique_ptr<core::lsp::QueryResponse>
+getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    // Find all references might show an Ident last if its a `prop`, and the Ident will be the
+    // synthetic local variable name of the method argument.
+    auto firstResp = queryResponses[0]->isIdent();
+    if (firstResp == nullptr) {
+        return skipLiteralIfMethodDef(queryResponses);
+    }
+
+    for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
+        // If this query response has the same location as the first ident response, keep skipping
+        // up. Seeing a query response for the exact same loc suggests this was synthesized in
+        // rewriter.
+        if ((*resp)->getLoc() == firstResp->termLoc) {
+            continue;
+        }
+
+        // It's always okay to skip literals for Find All References
+        auto lit = (*resp)->isLiteral();
+        if (lit != nullptr) {
+            continue;
+        }
+
+        if ((*resp)->isMethodDef()) {
+            return move(*resp);
+        } else {
+            return skipLiteralIfMethodDef(queryResponses);
+        }
+    }
+
+    return skipLiteralIfMethodDef(queryResponses);
+}
+
 /**
  * Retrieves the documentation above a symbol.
  * - Returned documentation has one trailing newline (if it exists)

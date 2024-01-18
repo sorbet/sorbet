@@ -1,6 +1,7 @@
 #include "main/lsp/requests/definition.h"
 #include "ast/treemap/treemap.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/NextMethodFinder.h"
 #include "main/lsp/json_types.h"
@@ -66,7 +67,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = move(queryResponses[0]);
+        auto resp = skipLiteralIfMethodDef(queryResponses);
 
         // Only support go-to-definition on constants and fields in untyped files.
         if (auto c = resp->isConstant()) {
