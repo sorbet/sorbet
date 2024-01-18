@@ -134,6 +134,12 @@ public:
     // - how many characters of the start of this line are whitespace.
     //
     std::pair<Loc, uint32_t> findStartOfLine(const GlobalState &gs) const;
+
+    // If the given loc spans multiple lines, return a new location which has been truncated to
+    // one line (excluding the newline character which ends the first line).
+    //
+    // Otherwise, return the current loc unchanged.
+    Loc truncateToFirstLine(const GlobalState &gs) const;
 };
 CheckSize(Loc, 12, 4);
 

@@ -1467,7 +1467,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
-                    if (auto e = ctx.beginError(bind.loc, what)) {
+                    auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
+                    if (auto e = ctx.state.beginError(errLoc, what)) {
                         e.setHeader("Value returned from method is `{}`", "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
