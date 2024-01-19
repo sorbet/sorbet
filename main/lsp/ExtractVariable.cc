@@ -8,7 +8,6 @@ namespace sorbet::realmain::lsp {
 class ExtractVariableWalk {
     // The selection loc
     core::Loc targetLoc;
-    core::LocOffsets matchingLoc;
     // It's not valid to extract a parameter, or the lhs of an assign.
     // This vector stores the locs for those nodes, so that in
     // preTransformExpression, we can skip them.
@@ -46,9 +45,10 @@ public:
     // but enclosingScopeLoc will be a Loc that represents the body of the ClassDef RHS
     // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
+    const ast::ExpressionPtr *matchingNode;
 
     ExtractVariableWalk(core::Loc targetLoc)
-        : targetLoc(targetLoc), matchingLoc(core::LocOffsets::none()), enclosingScopeLoc(core::LocOffsets::none()) {}
+        : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
@@ -56,13 +56,13 @@ public:
             if (!ast::isa_tree<ast::Break>(tree) && !ast::isa_tree<ast::Next>(tree) &&
                 !ast::isa_tree<ast::Return>(tree) && !ast::isa_tree<ast::Retry>(tree) &&
                 !ast::isa_tree<ast::RescueCase>(tree)) {
-                matchingLoc = tree.loc();
+                matchingNode = &tree;
             }
         }
     }
 
     bool foundExactMatch() {
-        return matchingLoc.exists() && !shouldSkipLoc(matchingLoc);
+        return matchingNode && !shouldSkipLoc(matchingNode->loc());
     }
 
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -185,7 +185,6 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
                 "loc on node doesn't match the loc found in the tree walk");
         whereToInsert = block->body.loc();
     } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(*enclosingScope)) {
-        // TODO(neil): this will fail for endless methods
         ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
         ENFORCE(methodDef->rhs.loc() == extractVariableWalk.enclosingScopeLoc,
                 "loc on node doesn't match the loc found in the tree walk");
