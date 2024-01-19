@@ -1,80 +1,18 @@
 diff --git gc.c gc.c
-index 6f4ae3a397..346a77ec63 100644
+index 6f4ae3a397..033a89f8f3 100644
 --- gc.c
 +++ gc.c
-@@ -6709,6 +6709,119 @@ gc_aging(rb_objspace_t *objspace, VALUE obj)
+@@ -6709,6 +6709,49 @@ gc_aging(rb_objspace_t *objspace, VALUE obj)
  NOINLINE(static void gc_mark_ptr(rb_objspace_t *objspace, VALUE obj));
  static void reachable_objects_from_callback(VALUE obj);
  
 +/**
-+ * BEGIN Stripe debugging code. 
++ * BEGIN Stripe debugging code.
 + *
 + * Context: We are seeing instances of "try to mark T_NONE" crashes at Stripe, at times tied to T_HASH parent object.
 + * In these cases, we want to print contextual information about the parent object at the time of the crash.
 + *
 +*/
-+typedef struct {
-+  rb_objspace_t *objspace;
-+  char *buff;
-+  const int buff_size;
-+  int* pos;
-+} hash_debug_args_STRIPE;
-+
-+static int
-+gc_debug_hash_entry_STRIPE(st_data_t key, st_data_t value, st_data_t args) {
-+    #define BUFF_ARGS buff + *pos, buff_size - *pos
-+    #define APPENDF(f) if ((*pos += snprintf f) >= buff_size) goto end
-+    
-+    // Destructure args
-+    hash_debug_args_STRIPE *debug_args = (hash_debug_args_STRIPE*)args;
-+    rb_objspace_t *objspace = debug_args->objspace;
-+    char *buff = debug_args->buff;
-+    int buff_size = debug_args->buff_size;
-+    int *pos = debug_args->pos;
-+
-+    VALUE k_obj = (VALUE)key;
-+    VALUE v_obj = (VALUE)value;
-+
-+    // Skip the entry that has T_NONEs, it probably caused the error condition.
-+    // We care about surrounding context.
-+    if (UNLIKELY(RB_TYPE_P(k_obj, T_NONE) || RB_TYPE_P(v_obj, T_NONE))) {
-+        return ST_CONTINUE;
-+    }
-+
-+    if (is_markable_object(objspace, k_obj)) {
-+        if (BUILTIN_TYPE(k_obj) == T_OBJECT && !internal_object_p(k_obj) && RBASIC(k_obj)->klass && RTEST(RBASIC(k_obj)->klass)) {
-+            // If the key is a "real" object, add information about its class
-+            VALUE class_path = rb_class_path_cached(RBASIC(k_obj)->klass);
-+            if (!NIL_P(class_path)) {
-+                APPENDF((BUFF_ARGS, "k:T_OBJECT(%s),", RSTRING_PTR(class_path)));
-+            } else {
-+                APPENDF((BUFF_ARGS, "k:T_OBJECT,"));
-+            }
-+        } else {
-+            APPENDF((BUFF_ARGS, "k:%s,", obj_type_name(k_obj)));
-+        }
-+    }
-+
-+    if (is_markable_object(objspace, v_obj)) {
-+        if (BUILTIN_TYPE(v_obj) == T_OBJECT && !internal_object_p(v_obj) && RBASIC(v_obj)->klass && RTEST(RBASIC(v_obj)->klass)) {
-+            // If the value is a "real" object, add information about its class
-+            VALUE class_path = rb_class_path_cached(RBASIC(v_obj)->klass);
-+            if (!NIL_P(class_path)) {
-+                APPENDF((BUFF_ARGS, "v:T_OBJECT(%s),", RSTRING_PTR(class_path)));
-+            } else {
-+                APPENDF((BUFF_ARGS, "v:T_OBJECT,"));
-+            }
-+        } else {
-+            APPENDF((BUFF_ARGS, "v:%s; ", obj_type_name(v_obj)));
-+        }
-+    }
-+
-+  end:
-+    return ST_CONTINUE;
-+
-+    #undef BUFF_ARGS
-+    #undef APPENDF
-+}
 +
 +const char *
 +gc_debug_parent_object_STRIPE(rb_objspace_t *objspace, VALUE parent, char *buff, const int buff_size) {
@@ -96,14 +34,6 @@ index 6f4ae3a397..346a77ec63 100644
 +          }
 +          break;
 +        }
-+        case T_HASH: {
-+          // If the parent object is a hash, print information about its keys.
-+          APPENDF((BUFF_ARGS, "[ "));
-+          hash_debug_args_STRIPE args = {objspace, buff, buff_size, &pos};
-+          rb_hash_stlike_foreach(parent, gc_debug_hash_entry_STRIPE, (st_data_t)(&args));
-+          APPENDF((BUFF_ARGS, " ]"));
-+          break;
-+        }
 +        // No special handling for other types
 +    }
 +
@@ -122,7 +52,7 @@ index 6f4ae3a397..346a77ec63 100644
  static void
  gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
  {
-@@ -6729,8 +6842,22 @@ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
+@@ -6729,8 +6772,22 @@ gc_mark_ptr(rb_objspace_t *objspace, VALUE obj)
  
          if (UNLIKELY(RB_TYPE_P(obj, T_NONE))) {
              rp(obj);
