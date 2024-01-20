@@ -61,7 +61,7 @@ index 6f4ae3a397..033a89f8f3 100644
 +/***** BEGIN Stripe debugging code ***/
 +            // Note: rgengc.parent_object will be set if we followed a reference from an old-gen object to
 +            // get here.
-+            if (getenv("STRIPE_DEBUG_T_NONE") && objspace->rgengc.parent_object) {
++            if (objspace->rgengc.parent_object) {
 +                char buff[0x200];
 +                rb_bug(
 +                    "try to mark T_NONE object -- %s",
