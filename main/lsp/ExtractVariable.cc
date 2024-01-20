@@ -77,10 +77,11 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
 class ExtractVariableWalk {
     // The selection loc
     core::Loc targetLoc;
-    // It's not valid to extract a parameter, or the lhs of an assign.
-    // This vector stores the locs for those nodes, so that in
-    // preTransformExpression, we can skip them.
-    std::vector<core::LocOffsets> skippedLocs;
+    // At the end of this walk, we want to return what class/method the matching expression was part of.
+    // To do that, we can maintain a stack of classes/method, so that when we get a match, we can capture
+    // the current top of the stack as the "deepest" class/method
+    vector<const ast::ExpressionPtr *> enclosingClassStack;
+    vector<const ast::ExpressionPtr *> enclosingMethodStack;
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -115,9 +116,19 @@ public:
     // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
     const ast::ExpressionPtr *matchingNode;
+    const ast::ExpressionPtr *enclosingClass;
+    const ast::ExpressionPtr *enclosingMethod;
+    // It's not valid to extract
+    // - a parameter
+    // - the lhs of an assign
+    // - an endless method
+    // - the var for a rescueCase
+    // This vector stores the locs for those nodes, so that in preTransformExpression, we can skip them.
+    std::vector<core::LocOffsets> skippedLocs;
 
     ExtractVariableWalk(core::Loc targetLoc)
-        : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr) {}
+        : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
+          enclosingClass(nullptr), enclosingMethod(nullptr) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
@@ -126,6 +137,11 @@ public:
                 !ast::isa_tree<ast::Return>(tree) && !ast::isa_tree<ast::Retry>(tree) &&
                 !ast::isa_tree<ast::RescueCase>(tree) && !ast::isa_tree<ast::InsSeq>(tree)) {
                 matchingNode = &tree;
+                ENFORCE(!enclosingClassStack.empty());
+                enclosingClass = enclosingClassStack.back();
+                if (!enclosingMethodStack.empty()) {
+                    enclosingMethod = enclosingMethodStack.back();
+                }
             }
         }
     }
@@ -140,11 +156,17 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingClassStack.push_back(&tree);
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         updateEnclosingScope(tree, classDef.rhs.front().loc().join(classDef.rhs.back().loc()));
     }
 
+    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingClassStack.pop_back();
+    }
+
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingMethodStack.push_back(&tree);
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (!methodDef.args.empty()) {
             skipLoc(methodDef.args.front().loc().join(methodDef.args.back().loc()));
@@ -157,6 +179,10 @@ public:
         } else {
             updateEnclosingScope(tree, methodDef.rhs.loc());
         }
+    }
+
+    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingMethodStack.pop_back();
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -216,6 +242,14 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
     auto locOffsets = selectionLoc.offsets();
     auto enclosingScope = extractVariableWalk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
+    // TODO: can we avoid deepCopy?
+    matchingNode = walk.matchingNode->deepCopy();
+    if (walk.enclosingMethod) {
+        enclosingClassOrMethod = walk.enclosingMethod->deepCopy();
+    } else {
+        enclosingClassOrMethod = walk.enclosingClass->deepCopy();
+    }
+    skippedLocs = walk.skippedLocs;
 
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
     auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
