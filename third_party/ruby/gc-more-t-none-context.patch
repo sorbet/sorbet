@@ -9,7 +9,7 @@ index 346a77ec63..6e025cb200 100644
 -        gc_mark(data->objspace, (VALUE)ccs->cme);
 +        VALUE cme_obj = (VALUE)ccs->cme;
 +
-+        if (getenv("STRIPE_DEBUG_T_NONE") && UNLIKELY(RB_TYPE_P(cme_obj, T_NONE))) {
++        if (UNLIKELY(RB_TYPE_P(cme_obj, T_NONE))) {
 +            VALUE class_path = rb_class_path_cached(data->klass);
 +            if (!NIL_P(class_path)) {
 +                char *objname = rb_id2name(id);
