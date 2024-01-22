@@ -34,7 +34,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U F>> $1> < <C <U Module>> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:1 end=47:9}
     method <S <C <U F>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=47:1 end=54:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/resolution_order.rb start=??? end=???}
-  class <C <U HasError>> < <C <U Object>> (<C <U StubModule>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
+  class <C <U HasError>> < <C <U Object>> (<C <U <StubModule>>>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
   class <S <C <U HasError>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
     type-member(+) <S <C <U HasError>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U HasError>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=HasError) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=10:15}
     method <S <C <U HasError>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/resolution_order.rb start=10:1 end=12:4}
