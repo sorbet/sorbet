@@ -71,12 +71,12 @@ requires: []
  name=[T]
  nesting=[[B]]
  resolved=[T]
- loc=test/testdata/autogen/duplicate_refs.rb:9
+ loc=test/testdata/autogen/duplicate_refs.rb:10
  is_defining_ref=0
 [ref id=7]
  scope=[B]
  name=[Integer]
  nesting=[[B]]
  resolved=[Integer]
- loc=test/testdata/autogen/duplicate_refs.rb:9
+ loc=test/testdata/autogen/duplicate_refs.rb:10
  is_defining_ref=0
