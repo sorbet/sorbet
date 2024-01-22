@@ -385,7 +385,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
       prop :a, String
     end
 
-    it 'errors if a prop is overriden without override => true' do
+    it 'errors if a prop is overridden without override => true' do
       error = assert_raises(ArgumentError) do
         class OverrideProps1 < OverrideProps
           prop :a, Integer

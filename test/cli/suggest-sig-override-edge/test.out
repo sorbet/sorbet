@@ -1,6 +1,6 @@
 # typed: strict
 
-# initialize can be overriden without overridable/override
+# initialize can be overridden without overridable/override
 class ParentInitialize
   extend T::Sig
   sig {void}

@@ -55,7 +55,7 @@ module T::Props::PrettyPrintable
     end
 
     # Overridable method to specify how the first part of a `pretty_print`d object's class should look like
-    # NOTE: This is just to support Stripe's `PrettyPrintableModel` case, and not recommended to be overriden
+    # NOTE: This is just to support Stripe's `PrettyPrintableModel` case, and not recommended to be overridden
     sig {params(instance: T::Props::PrettyPrintable).returns(String)}
     def inspect_class_with_decoration(instance)
       T.unsafe(instance).class.to_s

@@ -202,7 +202,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You marked `foo` as .override, but that method doesn't already exist in this class/module to be overriden"
+        "You marked `foo` as .override, but that method doesn't already exist in this class/module to be overridden"
       )
     end
 
