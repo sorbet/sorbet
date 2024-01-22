@@ -42,36 +42,36 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:CommonToBoth>::<AttachedClass> -> T.attached_class (of CommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:3
     method ::<Class:CommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:3
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-  module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:22
-  class ::<Class:ModuleCommonToBoth> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:22
-    method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:22
+  module ::ModuleCommonToBoth < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:35
+  class ::<Class:ModuleCommonToBoth> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:35
+    method ::<Class:ModuleCommonToBoth>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:35
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-  module ::ModuleOnlyInSecond < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:23
-  class ::<Class:ModuleOnlyInSecond> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:23
-    method ::<Class:ModuleOnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:23
+  module ::ModuleOnlyInSecond < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/cli/minimize-rbi/unknown.rbi:36
+  class ::<Class:ModuleOnlyInSecond> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:36
+    method ::<Class:ModuleOnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:36
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
   class ::OnlyInSecond < ::Object (ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:9
-    method ::OnlyInSecond#<< (other, <blk>) @ test/cli/minimize-rbi/unknown.rbi:19
-      argument other<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=19:10 end=19:15}
+    method ::OnlyInSecond#<< (other, <blk>) @ test/cli/minimize-rbi/unknown.rbi:32
+      argument other<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=32:10 end=32:15}
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-    method ::OnlyInSecond#foo (x1, x2, x5, x3, x4, x6, x7) @ test/cli/minimize-rbi/unknown.rbi:13
-      argument x1<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:11 end=13:13}
-      argument x2<optional> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:15 end=13:17}
-      argument x5<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:24 end=13:26}
-      argument x3<keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:28 end=13:31}
-      argument x4<optional, keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:33 end=13:36}
-      argument x6<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:44 end=13:46}
-      argument x7<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=13:49 end=13:51}
-    method ::OnlyInSecond#fwd_args (..., ..., ...) @ test/cli/minimize-rbi/unknown.rbi:15
-      argument ...<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
-      argument ...<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
-      argument ...<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=15:16 end=15:19}
+    method ::OnlyInSecond#foo (x1, x2, x5, x3, x4, x6, x7) @ test/cli/minimize-rbi/unknown.rbi:26
+      argument x1<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:11 end=26:13}
+      argument x2<optional> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:15 end=26:17}
+      argument x5<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:24 end=26:26}
+      argument x3<keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:28 end=26:31}
+      argument x4<optional, keyword> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:33 end=26:36}
+      argument x6<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:44 end=26:46}
+      argument x7<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=26:49 end=26:51}
+    method ::OnlyInSecond#fwd_args (..., ..., ...) @ test/cli/minimize-rbi/unknown.rbi:28
+      argument ...<repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=28:16 end=28:19}
+      argument ...<keyword, repeated> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=28:16 end=28:19}
+      argument ...<block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=28:16 end=28:19}
   class ::<Class:OnlyInSecond>[<AttachedClass>] < ::<Class:Object> (ModuleOnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9
     type-member(+) ::<Class:OnlyInSecond>::<AttachedClass> -> T.attached_class (of OnlyInSecond) @ test/cli/minimize-rbi/unknown.rbi:9
     method ::<Class:OnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:9
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-    method ::<Class:OnlyInSecond>#self_method (x, <blk>) @ test/cli/minimize-rbi/unknown.rbi:17
-      argument x<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=17:24 end=17:25}
+    method ::<Class:OnlyInSecond>#self_method (x, <blk>) @ test/cli/minimize-rbi/unknown.rbi:30
+      argument x<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=30:24 end=30:25}
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
 
 # typed: true
