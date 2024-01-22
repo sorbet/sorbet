@@ -70,9 +70,6 @@ module Sorbet::Private::Static::ResolvedSig
   end
 end
 
-module Sorbet::Private::Static::StubModule
-end
-
 class Sorbet::Private::Static::ImplicitModuleSuperclass < BasicObject
 end
 

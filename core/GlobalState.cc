@@ -419,12 +419,16 @@ void GlobalState::initEmpty() {
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_StaticSingleton());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::StubModule());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::StubMixin());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    klass.data(*this)->setIsModule(true);
     ENFORCE(klass == Symbols::PlaceholderMixin());
     klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
+    klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::StubSuperClass());
     klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE(klass == Symbols::T_Enumerable());
