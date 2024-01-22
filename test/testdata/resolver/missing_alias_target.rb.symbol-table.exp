@@ -3,5 +3,5 @@ class ::<root> < ::Object ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/missing_alias_target.rb:2
       argument <blk><block> @ Loc {file=test/testdata/resolver/missing_alias_target.rb start=??? end=???}
   static-field ::A -> Integer @ test/testdata/resolver/missing_alias_target.rb:2
-  static-field ::K -> <Alias: ::Sorbet::Private::Static::StubModule > @ test/testdata/resolver/missing_alias_target.rb:4
+  static-field ::K -> <Alias: ::Sorbet::Private::Static::<StubModule> > @ test/testdata/resolver/missing_alias_target.rb:4
 
