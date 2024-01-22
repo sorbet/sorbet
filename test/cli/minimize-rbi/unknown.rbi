@@ -21,7 +21,7 @@ class OnlyInSecond
   #   (so the class would be defined at runtime, just not in the file). This is
   #   common if the error is some constant that fails to resolve inside a
   #   `T.type_alias`, or something like that.
-  # include ModuleDoesNotExist
+  include ModuleDoesNotExist
 
   def foo(x1, x2=nil, *x5, x3:, x4: nil, **x6, &x7); end
 

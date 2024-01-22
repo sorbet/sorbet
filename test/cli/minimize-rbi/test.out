@@ -50,7 +50,7 @@ class ::<root> < ::Object ()
   class ::<Class:ModuleOnlyInSecond> < ::Module () @ test/cli/minimize-rbi/unknown.rbi:36
     method ::<Class:ModuleOnlyInSecond>#<static-init> (<blk>) @ test/cli/minimize-rbi/unknown.rbi:36
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
-  class ::OnlyInSecond < ::Object (ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:9
+  class ::OnlyInSecond < ::Object (<StubModule>, ModuleCommonToBoth) @ test/cli/minimize-rbi/unknown.rbi:9
     method ::OnlyInSecond#<< (other, <blk>) @ test/cli/minimize-rbi/unknown.rbi:32
       argument other<> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=32:10 end=32:15}
       argument <blk><block> @ Loc {file=test/cli/minimize-rbi/unknown.rbi start=??? end=???}
@@ -84,6 +84,7 @@ module ::ModuleOnlyInSecond
 end
 
 class ::OnlyInSecond
+  include ::Sorbet::Private::Static::<StubModule>
   include ::ModuleCommonToBoth
   extend ::ModuleOnlyInSecond
   def <<(other); end
@@ -92,4 +93,11 @@ class ::OnlyInSecond
   def self.self_method(x); end
 end
 
-No errors! Great job.
+test/cli/minimize-rbi/unknown.rbi:24: Unable to resolve constant `ModuleDoesNotExist` https://srb.help/5002
+    24 |  include ModuleDoesNotExist
+                  ^^^^^^^^^^^^^^^^^^
+
+test/cli/minimize-rbi/unknown.rbi:24: Unable to resolve constant `ModuleDoesNotExist` https://srb.help/5002
+    24 |  include ModuleDoesNotExist
+                  ^^^^^^^^^^^^^^^^^^
+Errors: 2
