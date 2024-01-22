@@ -3,6 +3,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/common.h"
 #include "common/strings/formatting.h"
 #include "main/autogen/crc_builder.h"
 
@@ -36,6 +37,8 @@ class AutogenWalk {
     vector<ScopeType> scopeTypes;
 
     UnorderedMap<void *, ReferenceRef> refMap;
+
+    UnorderedSet<pair<core::LocOffsets, core::SymbolRef>> seenRefsByLoc;
 
     // Convert a symbol name into a fully qualified name
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
@@ -274,6 +277,12 @@ public:
             // These are not real constant references.
             return;
         }
+
+        auto entry = make_pair(tree.loc(), original.symbol);
+        if (seenRefsByLoc.contains(entry)) {
+            return;
+        }
+        seenRefsByLoc.emplace(move(entry));
 
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
