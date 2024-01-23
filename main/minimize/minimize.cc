@@ -16,6 +16,10 @@ const vector<core::SymbolRef> IGNORED_BY_SYMBOL = {
     // for type-checking. (It also sometimes gets inferred even when Sorbet already statically knows
     // about Kernel, which can cause dangling references to deleted classes.)
     core::Symbols::Kernel(),
+    // These indicate some typechecking error happened that we need to recover from--they're not real.
+    core::Symbols::StubModule(),
+    core::Symbols::StubMixin(),
+    core::Symbols::StubSuperClass(),
 };
 
 const vector<string_view> IGNORED_BY_FULL_NAME = {

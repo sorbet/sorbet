@@ -84,7 +84,6 @@ module ::ModuleOnlyInSecond
 end
 
 class ::OnlyInSecond
-  include ::Sorbet::Private::Static::<StubModule>
   include ::ModuleCommonToBoth
   extend ::ModuleOnlyInSecond
   def <<(other); end
