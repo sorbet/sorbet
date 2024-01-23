@@ -262,7 +262,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
 }
 
 core::MethodRef closestOverriddenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
-                                       core::NameRef name) {
+                                        core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
     ENFORCE(enclosingClass->flags.isLinearizationComputed, "Should have been linearized by resolver");
 
