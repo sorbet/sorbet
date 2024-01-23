@@ -1469,7 +1469,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto *intrinsic = method.data(gs)->getIntrinsic();
     if (intrinsic != nullptr) {
         intrinsic->apply(gs, args, result);
-        // the call could have overriden constraint
+        // the call could have overridden constraint
         if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
             constr = result.main.constr.get();
         }

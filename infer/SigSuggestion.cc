@@ -261,8 +261,8 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
     return argTypesForBBToPass[cfg->deadBlock()->id];
 }
 
-core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
-                                       core::NameRef name) {
+core::MethodRef closestOverriddenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
+                                        core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
     ENFORCE(enclosingClass->flags.isLinearizationComputed, "Should have been linearized by resolver");
 
@@ -282,7 +282,7 @@ core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef
     if (superMethod.exists()) {
         return superMethod;
     } else {
-        return closestOverridenMethod(ctx, superClass, name);
+        return closestOverriddenMethod(ctx, superClass, name);
     }
 }
 
@@ -360,7 +360,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
 
     auto enclosingClass = methodSymbol.enclosingClass(ctx);
-    auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
+    auto closestMethod = closestOverriddenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
 
     fmt::memory_buffer ss;
     if (closestMethod.exists()) {

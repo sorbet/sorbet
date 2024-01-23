@@ -151,7 +151,7 @@ module T::Private::Methods::SignatureValidation
         # This is a one-off hack, and we should think carefully before adding more methods here.
         nil
       else
-        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overriden.\n" \
+        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overridden.\n" \
           "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
           "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
       end

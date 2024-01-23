@@ -163,7 +163,7 @@ public:
         // This doesn't make any attempt to handle methods that are overridden.
         //
         // Technically speaking, this code action doesn't make a ton of sense if the method is
-        // overriden, because converting to a singleton method will kill dynamic dispatch.
+        // overridden, because converting to a singleton method will kill dynamic dispatch.
         //
         // We have two options:
         // 1.  Assume that there are no overrides of this method.

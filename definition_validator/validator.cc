@@ -443,7 +443,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
-    InlinedVector<core::MethodRef, 4> overridenMethods;
+    InlinedVector<core::MethodRef, 4> overriddenMethods;
 
     // Matches the behavior of the runtime checks
     // NOTE(jez): I don't think this check makes all that much sense, but I haven't thought about it.
@@ -467,17 +467,17 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMethodTransitive(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overriddenMethods.emplace_back(superMethod);
         }
     }
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMethod(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overriddenMethods.emplace_back(superMethod);
         }
     }
 
-    if (overridenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
+    if (overriddenMethods.size() == 0 && method.data(ctx)->flags.isOverride &&
         !method.data(ctx)->flags.isIncompatibleOverride) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
             e.setHeader("Method `{}` is marked `{}` but does not override anything", method.show(ctx), "override");
@@ -486,45 +486,45 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 
     // we don't raise override errors if the method implements an abstract method, which means we need to know ahead of
     // time whether any parent methods are abstract
-    auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->flags.isAbstract; });
-    for (const auto &overridenMethod : overridenMethods) {
-        if (overridenMethod.data(ctx)->flags.isFinal) {
+    auto anyIsInterface = absl::c_any_of(overriddenMethods, [&](auto &m) { return m.data(ctx)->flags.isAbstract; });
+    for (const auto &overriddenMethod : overriddenMethods) {
+        if (overriddenMethod.data(ctx)->flags.isFinal) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`", overridenMethod.show(ctx),
+                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`", overriddenMethod.show(ctx),
                             method.show(ctx));
-                e.addErrorLine(overridenMethod.data(ctx)->loc(), "original method defined here");
+                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "original method defined here");
             }
         }
         auto isRBI = absl::c_any_of(method.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isRBI(); });
         if (!method.data(ctx)->flags.isOverride && method.data(ctx)->hasSig() &&
-            (overridenMethod.data(ctx)->flags.isOverridable || overridenMethod.data(ctx)->flags.isOverride) &&
-            !anyIsInterface && overridenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized &&
+            (overriddenMethod.data(ctx)->flags.isOverridable || overriddenMethod.data(ctx)->flags.isOverride) &&
+            !anyIsInterface && overriddenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized &&
             !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
-                            method.show(ctx), overridenMethod.show(ctx), "override.");
-                e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
+                            method.show(ctx), overriddenMethod.show(ctx), "override.");
+                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
             }
         }
         if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
-            overridenMethod.data(ctx)->flags.isAbstract && overridenMethod.data(ctx)->hasSig() &&
+            overriddenMethod.data(ctx)->flags.isAbstract && overriddenMethod.data(ctx)->hasSig() &&
             !method.data(ctx)->flags.isRewriterSynthesized && !isRBI) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
-                            method.show(ctx), overridenMethod.show(ctx), "override.");
-                e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
+                            method.show(ctx), overriddenMethod.show(ctx), "override.");
+                e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if ((overridenMethod.data(ctx)->flags.isAbstract || overridenMethod.data(ctx)->flags.isOverridable ||
-             (overridenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
+        if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
+             (overriddenMethod.data(ctx)->hasSig() && method.data(ctx)->flags.isOverride)) &&
             !method.data(ctx)->flags.isIncompatibleOverride && !isRBI &&
             !method.data(ctx)->flags.isRewriterSynthesized &&
-            overridenMethod != core::Symbols::BasicObject_initialize()) {
+            overriddenMethod != core::Symbols::BasicObject_initialize()) {
             // We only ignore BasicObject#initialize for backwards compatibility.
             // One day, we may want to build something like overridable(allow_incompatible: true)
-            // and mark certain methods in the standard library as possible to be overriden incompatibly,
+            // and mark certain methods in the standard library as possible to be overridden incompatibly,
             // without needing to write `override(allow_incompatible: true)`.
-            validateCompatibleOverride(ctx, overridenMethod, method);
+            validateCompatibleOverride(ctx, overriddenMethod, method);
         }
     }
 }
