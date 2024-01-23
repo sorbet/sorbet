@@ -30,57 +30,54 @@ static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, cor
     return core::Symbols::noSymbol();
 }
 
-static void reportMissingTestImport(const core::Context &ctx, const core::packages::PackageInfo &package,
-                                    core::SymbolRef symbol, std::vector<core::LocOffsets> locs) {
-    auto importAdded = false;
-    for (auto it = locs.rbegin(); it != locs.rend(); ++it) {
-        auto loc = *it;
-        if (auto e = ctx.beginError(loc, core::errors::Packager::UsedTestOnlyName)) {
-            auto otherFile = symbol.loc(ctx).file();
-            auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
-            e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", symbol.show(ctx));
-            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            if (!importAdded) {
-                if (auto exp = package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-            }
-            e.addErrorLine(pkg.declLoc(), "Defined here");
+static void replaceTestImport(const core::Context &ctx, core::SymbolRef symbol, core::LocOffsets loc,
+                              std::optional<core::AutocorrectSuggestion> autocorrect) {
+    if (auto e = ctx.beginError(loc, core::errors::Packager::UsedTestOnlyName)) {
+        auto otherFile = symbol.loc(ctx).file();
+        auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", symbol.show(ctx));
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+        if (autocorrect.has_value()) {
+            e.addAutocorrect(std::move(autocorrect.value()));
+        }
+        e.addErrorLine(pkg.declLoc(), "Defined here");
+    }
+}
+
+static void reportMissingImport(const core::Context &ctx, core::SymbolRef symbol, core::LocOffsets loc,
+                                std::optional<core::AutocorrectSuggestion> autocorrect) {
+    if (auto e = ctx.beginError(loc, core::errors::Packager::MissingImport)) {
+        auto otherFile = symbol.loc(ctx).file();
+        auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+        e.setHeader("`{}` resolves but its package is not imported", symbol.show(ctx));
+        e.addErrorLine(pkg.declLoc(), "Exported from package here");
+
+        if (autocorrect.has_value()) {
+            e.addAutocorrect(std::move(autocorrect.value()));
+        }
+
+        if (!ctx.file.data(ctx).isPackaged()) {
+            e.addErrorNote("A `{}` file is allowed to define constants outside of the package's namespace,\n    "
+                           "but must still respect its enclosing package's imports.",
+                           "# packaged: false");
+        }
+
+        if (!ctx.state.packageDB().errorHint().empty()) {
+            e.addErrorNote("{}", ctx.state.packageDB().errorHint());
         }
     }
 }
 
-static void reportMissingImport(const core::Context &ctx, const core::packages::PackageInfo &package,
-                                core::SymbolRef symbol, std::vector<core::LocOffsets> locs) {
-    auto importAdded = false;
-    for (auto it = locs.rbegin(); it != locs.rend(); ++it) {
-        auto loc = *it;
-        if (auto e = ctx.beginError(loc, core::errors::Packager::MissingImport)) {
-            auto otherFile = symbol.loc(ctx).file();
-            auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
-            auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-            e.setHeader("`{}` resolves but its package is not imported", symbol.show(ctx));
-            bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-            e.addErrorLine(pkg.declLoc(), "Exported from package here");
-
-            if (!importAdded) {
-                if (auto exp = package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                    importAdded = true;
-                }
-            }
-
-            if (!ctx.file.data(ctx).isPackaged()) {
-                e.addErrorNote("A `{}` file is allowed to define constants outside of the package's namespace,\n    "
-                               "but must still respect its enclosing package's imports.",
-                               "# packaged: false");
-            }
-
-            if (!ctx.state.packageDB().errorHint().empty()) {
-                e.addErrorNote("{}", ctx.state.packageDB().errorHint());
-            }
-        }
-    }
+static std::optional<core::AutocorrectSuggestion>
+addImport(const core::Context &ctx, core::FileRef file, core::SymbolRef symbol) {
+    auto pkgName = ctx.state.packageDB().getPackageNameForFile(file);
+    const auto &package = ctx.state.packageDB().getPackageInfo(pkgName);
+    auto otherFile = symbol.loc(ctx).file();
+    auto &otherPackage = ctx.state.packageDB().getPackageNameForFile(otherFile);
+    auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+    bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+    return package.addImport(ctx, pkg, isTestImport);
 }
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
@@ -404,6 +401,13 @@ public:
 };
 
 class VisibilityCheckerPass final {
+    struct ImportSuggestion {
+        core::FileRef file;
+        core::SymbolRef symbol;
+        core::LocOffsets loc;
+        bool shouldReplaceTestImport;
+    };
+
 public:
     UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> imports;
     UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> testImports;
@@ -526,11 +530,12 @@ public:
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
+        auto outputq = std::make_shared<BlockingBoundedQueue<ImportSuggestion>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq, outputq]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
@@ -544,12 +549,18 @@ public:
                         for (auto &[symbol, locs] : pass.imports) {
                             fast_sort(locs,
                                       [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
-                            reportMissingImport(ctx, package, symbol, locs);
+                            for (auto loc : locs) {
+                                auto suggestion = ImportSuggestion{f.file, symbol, loc, false};
+                                outputq->push(std::move(suggestion), 1);
+                            }
                         }
                         for (auto &[symbol, locs] : pass.testImports) {
                             fast_sort(locs,
                                       [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
-                            reportMissingTestImport(ctx, package, symbol, locs);
+                            for (auto loc : locs) {
+                                auto suggestion = ImportSuggestion{f.file, symbol, loc, true};
+                                outputq->push(std::move(suggestion), 1);
+                            }
                         }
                     }
                 }
@@ -560,6 +571,27 @@ public:
 
         barrier.Wait();
 
+        ImportSuggestion threadResult;
+        UnorderedSet<core::SymbolRef> alreadyAutocorrected;
+        UnorderedSet<core::SymbolRef> alreadyReplaced;
+        for (auto result = outputq->try_pop(threadResult); !result.done(); result = outputq->try_pop(threadResult)) {
+            if (result.gotItem()) {
+                core::Context ctx{gs, core::Symbols::root(), threadResult.file};
+                if (threadResult.shouldReplaceTestImport) {
+                    auto autocorrect = alreadyReplaced.contains(threadResult.symbol)
+                                           ? std::nullopt
+                                           : addImport(ctx, threadResult.file, threadResult.symbol);
+                    replaceTestImport(ctx, threadResult.symbol, threadResult.loc, autocorrect);
+                    alreadyReplaced.insert(threadResult.symbol);
+                } else {
+                    auto autocorrect = alreadyAutocorrected.contains(threadResult.symbol)
+                                           ? std::nullopt
+                                           : addImport(ctx, threadResult.file, threadResult.symbol);
+                    reportMissingImport(ctx, threadResult.symbol, threadResult.loc, autocorrect);
+                    alreadyAutocorrected.insert(threadResult.symbol);
+                }
+            }
+        }
         return files;
     }
 };
