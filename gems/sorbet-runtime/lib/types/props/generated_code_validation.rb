@@ -262,6 +262,12 @@ module T::Props
           assert_equal(:sym, prop.type)
           assert_equal(:fetch, inner_method)
           assert_equal(s(:sym, :default), inner_arg)
+        elsif method == :default
+          # decorator.props_with_defaults.fetch(%<serialized_form>).default
+          props, props_fetch, prop = receiver.children
+          assert_equal(s(:send, s(:lvar, :decorator), :props_with_defaults), props)
+          assert_equal(:fetch, props_fetch)
+          assert_equal(:sym, prop.type)
         else
           raise ValidationError.new("Unexpected receiver in fallback assignment: #{val.inspect}")
         end

@@ -647,7 +647,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
 
       it 'has meaningful validation which complains at lurky method invocation' do
         src = ComplexStruct.decorator.send(:generate_initialize_source).to_s
-        src = src.sub(/\.deep_clone_object\b/, '.something_suspicious')
+        src = src.sub(/\.default\b/, '.something_suspicious')
         assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
           T::Props::GeneratedCodeValidation.validate_initialize(src)
         end
