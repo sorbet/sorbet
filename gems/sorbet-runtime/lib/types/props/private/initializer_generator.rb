@@ -17,12 +17,13 @@ module T::Props
       sig do
         params(
           props: T::Hash[Symbol, T::Hash[Symbol, T.untyped]],
+          defaults: T::Hash[Symbol, T::Props::Private::ApplyDefault],
           weak: T::Boolean,
         )
           .returns(String)
           .checked(:never)
       end
-      def self.generate(props, weak:)
+      def self.generate(props, defaults, weak:)
         parts = props.map do |prop, rules|
           # All of these strings should already be validated (directly or
           # indirectly) in `validate_prop_name`, so we don't bother with a nice
@@ -36,13 +37,13 @@ module T::Props
           # It seems like a bug that this affects the behavior of setters, but
           # some existing code relies on this behavior
           has_explicit_nil_default = rules.key?(:default) && rules.fetch(:default).nil?
-          need_nil_write_check = T::Props::Utils.need_nil_write_check?(rules) && !has_explicit_nil_default
+          raise_on_nil_write = T::Props::Utils.need_nil_write_check?(rules) && !has_explicit_nil_default
 
           missing_handler, needs_missing_typecheck = generate_missing_handler(
             prop: prop,
-            rules: rules,
+            default: defaults[prop],
             ivar_name: ivar_name,
-            need_nil_write_check: need_nil_write_check,
+            raise_on_nil_write: raise_on_nil_write,
             weak: weak,
           )
 
@@ -50,7 +51,7 @@ module T::Props
             prop: prop,
             rules: rules,
             ivar_name: ivar_name,
-            need_nil_write_check: need_nil_write_check,
+            raise_on_nil_write: raise_on_nil_write,
           )
 
           <<~RUBY.strip
@@ -83,59 +84,35 @@ module T::Props
       sig do
         params(
           prop: Symbol,
-          rules: T::Hash[Symbol, T.untyped],
+          default: T.nilable(ApplyDefault),
           ivar_name: String,
-          need_nil_write_check: T::Boolean,
+          raise_on_nil_write: T::Boolean,
           weak: T::Boolean,
         )
           .returns([String, T::Boolean])
           .checked(:never)
       end
-      private_class_method def self.generate_missing_handler(prop:, rules:, ivar_name:, need_nil_write_check:, weak:)
-        if rules.key?(:factory)
-          ["self.class.class_exec(&#{decorator_fetch(prop, :factory)})", true]
-        elsif rules.key?(:default)
-          default = rules.fetch(:default)
-
-          literal_default = case default
-          when Integer, Symbol, Float, TrueClass, FalseClass, NilClass
-            default.inspect
-          when String
-            if default.frozen?
-              "#{default.inspect}.freeze"
-            else
-              default.inspect
-            end
-          when T::Enum
-            # Strips the #<...> off, just leaving the ...
-            default.inspect[2..-2]
-          when Array
-            if default.empty? && default.class == Array
-              '[]'
-            end
-          when Hash
-            if default.empty? && default.default.nil? && T.unsafe(default).default_proc.nil? && default.class == Hash
-              '{}'
-            end
-          end
-
+      private_class_method def self.generate_missing_handler(
+        prop:,
+        default:,
+        ivar_name:,
+        raise_on_nil_write:,
+        weak:
+      )
+        if default
           # FIXME: Ideally we'd check here that the default is actually a valid
           # value for this field, but existing code relies on the fact that we don't.
           #
           # :(
           #
-          # The comment above was carried over from `ApplyDefault`. However, since the "default"
-          # is a fixed value, instead of doing the typecheck on initialization we could validate the
-          # default here (at load time) like:
-          # T::Utils.check_type_recursive!(rules.fetch(:default), rules.fetch(:type_object))
-
-          [literal_default || "T::Props::Utils.deep_clone_object(#{decorator_fetch(prop, :default)})", false]
+          # The comment above was carried over from `ApplyDefault`.
+          [default_value(prop, default), default.is_a?(ApplyDefaultFactory)]
         elsif weak
           [ivar_name, false]
-        elsif need_nil_write_check
+        elsif raise_on_nil_write
           ["raise(ArgumentError.new(\"Missing required prop `#{prop}` for class `\#{self.class.name}`\"))", false]
         else
-          ['val', true]
+          ['nil', true]
         end
       end
 
@@ -144,23 +121,28 @@ module T::Props
           prop: Symbol,
           rules: T::Hash[Symbol, T.untyped],
           ivar_name: String,
-          need_nil_write_check: T::Boolean,
+          raise_on_nil_write: T::Boolean,
         )
           .returns(String)
           .checked(:never)
       end
-      private_class_method def self.generate_typecheck_handler(prop:, rules:, ivar_name:, need_nil_write_check:)
+      private_class_method def self.generate_typecheck_handler(
+        prop:,
+        rules:,
+        ivar_name:,
+        raise_on_nil_write:
+      )
         # Performance optimization since if this is a required prop, nilability would be checked via the typecheck.
-        need_nil_write_check = false if T::Props::Utils.required_prop?(rules)
+        raise_on_nil_write = false if T::Props::Utils.required_prop?(rules)
         need_setter_validate = rules.key?(:setter_validate)
 
         get_non_nil_type = "T::Utils::Nilable.get_underlying_type_object(#{decorator_fetch(prop, :type_object)})"
         raise_pretty_error = "T::Props::Private::SetterFactory.raise_pretty_error(self.class, #{prop.inspect}, #{get_non_nil_type}, #{ivar_name})"
 
-        if need_nil_write_check || need_setter_validate
+        if raise_on_nil_write || need_setter_validate
           additional_validations = <<~RUBY.strip
             if #{ivar_name}.nil?
-              #{need_nil_write_check ? raise_pretty_error : ''}
+              #{raise_on_nil_write ? raise_pretty_error : ''}
             else
               #{need_setter_validate ? "#{decorator_fetch(prop, :setter_validate)}.call(#{prop.inspect}, #{ivar_name})" : ''}
             end
@@ -178,6 +160,39 @@ module T::Props
       sig {params(prop: Symbol, key: Symbol).returns(String)}
       private_class_method def self.decorator_fetch(prop, key)
         "decorator.props.fetch(#{prop.inspect}).fetch(#{key.inspect})"
+      end
+
+      sig {params(prop: Symbol, default: ApplyDefault).returns(String)}
+      private_class_method def self.default_value(prop, default)
+        default_from_props = "decorator.props_with_defaults.fetch(#{prop.inspect}).default"
+
+        case default
+        when ApplyPrimitiveDefault
+          literal = default.default
+          case literal
+          when String
+            # Always freeze strings here since non-frozen strings use `ApplyComplexDefault`
+            "#{literal.inspect}.freeze"
+          when Float
+            # Float has special values (e.g. Float::INFINITY, Float::NAN) where calling `.inspect` does not
+            # return the correct code representation.
+            if literal.finite?
+              literal.inspect
+            else
+              default_from_props
+            end
+          when Integer, Symbol, TrueClass, FalseClass, NilClass
+            literal.inspect
+          else
+            default_from_props
+          end
+        when ApplyEmptyArrayDefault
+          '[]'
+        when ApplyEmptyHashDefault
+          '{}'
+        else
+          default_from_props
+        end
       end
     end
   end

@@ -29,6 +29,10 @@ module T::Props::WeakConstructor::DecoratorMethods
   end
 
   private def generate_initialize_source
-    T::Props::Private::InitializerGenerator.generate(props, weak: true)
+    T::Props::Private::InitializerGenerator.generate(
+      props,
+      props_with_defaults || {},
+      weak: true
+    )
   end
 end
