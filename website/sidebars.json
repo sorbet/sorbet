@@ -53,6 +53,7 @@
       "strong"
     ],
     "Editor Features": [
+      "lsp",
       "sig-suggestion",
       "highlight-untyped"
     ],
