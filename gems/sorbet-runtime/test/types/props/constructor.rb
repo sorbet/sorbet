@@ -472,6 +472,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
 
   class UntypedStruct < T::Struct
     prop :untyped, T.untyped
+    prop :untyped_with_default, T.untyped, default: 123
     prop :untyped_with_raise_on_nil_write, T.untyped, raise_on_nil_write: true
   end
 
@@ -495,8 +496,16 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   it 'does not forbid nil in constructor for T.untyped' do
     UntypedStruct.new
     UntypedStruct.new(untyped: nil)
+    UntypedStruct.new(untyped_with_default: true)
     UntypedStruct.new(untyped_with_raise_on_nil_write: nil)
-    UntypedStruct.new(untyped: nil, untyped_with_raise_on_nil_write: nil)
+    UntypedStruct.new(untyped: nil, untyped_with_default: nil, untyped_with_raise_on_nil_write: nil)
+  end
+
+  it 'returns the right required props for T.untyped' do
+    assert_equal(
+      Set[:untyped, :untyped_with_default, :untyped_with_raise_on_nil_write],
+      UntypedStruct.decorator.required_props.to_set
+    )
   end
 
   class SetterValidate < T::Struct
