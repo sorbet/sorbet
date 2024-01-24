@@ -29,7 +29,7 @@ in the [Watchman docs](https://facebook.github.io/watchman/docs/install.html).
 
 To get Sorbet working with watchman, there are three options:
 
-1.  Sorbet simply install the `watchman` binary somewhere visible via the `PATH`
+1.  Simply install the `watchman` binary somewhere visible via the `PATH`
     environment variable. Sorbet will automatically discover it.
 
 1.  Install the `watchman` binary anywhere, and specify the path to it using the
