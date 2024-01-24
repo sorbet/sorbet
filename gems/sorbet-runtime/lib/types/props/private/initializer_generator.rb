@@ -47,12 +47,7 @@ module T::Props
             weak: weak,
           )
 
-          typecheck_handler = generate_typecheck_handler(
-            prop: prop,
-            rules: rules,
-            ivar_name: ivar_name,
-            raise_on_nil_write: raise_on_nil_write,
-          )
+          typecheck_handler = "#{decorator_fetch(prop, :value_validate_proc)}.call(#{ivar_name})"
 
           <<~RUBY.strip
             val = hash[#{prop.inspect}]
@@ -114,47 +109,6 @@ module T::Props
         else
           ['nil', true]
         end
-      end
-
-      sig do
-        params(
-          prop: Symbol,
-          rules: T::Hash[Symbol, T.untyped],
-          ivar_name: String,
-          raise_on_nil_write: T::Boolean,
-        )
-          .returns(String)
-          .checked(:never)
-      end
-      private_class_method def self.generate_typecheck_handler(
-        prop:,
-        rules:,
-        ivar_name:,
-        raise_on_nil_write:
-      )
-        # Performance optimization since if this is a required prop, nilability would be checked via the typecheck.
-        raise_on_nil_write = false if T::Props::Utils.required_prop?(rules)
-        need_setter_validate = rules.key?(:setter_validate)
-
-        get_non_nil_type = "T::Utils::Nilable.get_underlying_type_object(#{decorator_fetch(prop, :type_object)})"
-        raise_pretty_error = "T::Props::Private::SetterFactory.raise_pretty_error(self.class, #{prop.inspect}, #{get_non_nil_type}, #{ivar_name})"
-
-        if raise_on_nil_write || need_setter_validate
-          additional_validations = <<~RUBY.strip
-            if #{ivar_name}.nil?
-              #{raise_on_nil_write ? raise_pretty_error : ''}
-            else
-              #{need_setter_validate ? "#{decorator_fetch(prop, :setter_validate)}.call(#{prop.inspect}, #{ivar_name})" : ''}
-            end
-          RUBY
-        end
-
-        <<~RUBY.strip
-          if !#{decorator_fetch(prop, :type_object)}.recursively_valid?(#{ivar_name})
-            #{raise_pretty_error}
-          end
-          #{additional_validations}
-        RUBY
       end
 
       sig {params(prop: Symbol, key: Symbol).returns(String)}
