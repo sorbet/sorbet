@@ -277,82 +277,18 @@ module T::Props
     end
 
     private_class_method def self.validate_initialize_type_checks(clause)
-      assert_equal(:if, clause.type)
-      condition, if_body, else_body = clause.children
+      # decorator.props.fetch(%<serialized_form>).fetch(:value_validate_proc).call(@%<prop>)
+      receiver, method, arg = clause.children
+      assert_equal(:call, method)
+      assert_equal(:ivar, arg.type)
 
-      if condition.type == :send && condition.children.first.type == :ivar
-        # if #{ivar_name}.nil?
-        #   #{need_nil_write_check ? raise_pretty_error : ''}
-        # else
-        #   #{need_setter_validate ? "decorator.props.fetch(#{hash_key}).fetch(:setter_validate).call(#{hash_key}, #{ivar_name})" : ''}
-        # end
-        if if_body
-          receiver, method, arg1, arg2, arg3, arg4 = if_body.children
-          assert_equal(s(:const, s(:const, s(:const, s(:const, nil, :T), :Props), :Private), :SetterFactory), receiver)
-          assert_equal(:raise_pretty_error, method)
-
-          assert_equal(s(:send, s(:self), :class), arg1)
-          assert_equal(:sym, arg2.type)
-          assert_equal(:ivar, arg4.type)
-
-          inner_receiver, inner_method, inner_arg = arg3.children
-          props, props_fetch, prop = inner_receiver.children
-          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
-          assert_equal(:fetch, props_fetch)
-          assert_equal(:sym, prop.type)
-          assert_equal(:fetch, inner_method)
-          assert_equal(s(:sym, :type_object), inner_arg)
-        end
-
-        if else_body
-          # decorator.props.fetch(%<serialized_form>).fetch(:setter_validate).call(%<serialized_form>, @%<prop>)
-          receiver, method, arg1, arg2 = else_body.children
-          assert_equal(:call, method)
-          assert_equal(:sym, arg1.type)
-          assert_equal(:ivar, arg2.type)
-
-          inner_receiver, inner_method, inner_arg = receiver.children
-          props, props_fetch, prop = inner_receiver.children
-          assert_equal(s(:send, s(:lvar, :decorator), :props), props)
-          assert_equal(:fetch, props_fetch)
-          assert_equal(:sym, prop.type)
-          assert_equal(:fetch, inner_method)
-          assert_equal(s(:sym, :setter_validate), inner_arg)
-        end
-      else
-        # if !decorator.props.fetch(#{hash_key}).fetch(:type_object).recursively_valid?(#{ivar_name})
-        #   #{raise_pretty_error}
-        # end
-        receiver, method, arg1 = condition.children.first.children
-        assert_equal(:recursively_valid?, method)
-        assert_equal(:ivar, arg1.type)
-
-        inner_receiver, inner_method, inner_arg = receiver.children
-        props, props_fetch, prop = inner_receiver.children
-        assert_equal(s(:send, s(:lvar, :decorator), :props), props)
-        assert_equal(:fetch, props_fetch)
-        assert_equal(:sym, prop.type)
-        assert_equal(:fetch, inner_method)
-        assert_equal(s(:sym, :type_object), inner_arg)
-
-        receiver, method, arg1, arg2, arg3, arg4 = if_body.children
-        assert_equal(s(:const, s(:const, s(:const, s(:const, nil, :T), :Props), :Private), :SetterFactory), receiver)
-        assert_equal(:raise_pretty_error, method)
-
-        assert_equal(s(:send, s(:self), :class), arg1)
-        assert_equal(:sym, arg2.type)
-        assert_equal(:ivar, arg4.type)
-
-        inner_receiver, inner_method, inner_arg = arg3.children
-        props, props_fetch, prop = inner_receiver.children
-        assert_equal(s(:send, s(:lvar, :decorator), :props), props)
-        assert_equal(:fetch, props_fetch)
-        assert_equal(:sym, prop.type)
-        assert_equal(:fetch, inner_method)
-        assert_equal(s(:sym, :type_object), inner_arg)
-
-        assert_equal(nil, else_body)
-      end
+      inner_receiver, inner_method, inner_arg = receiver.children
+      props, props_fetch, prop = inner_receiver.children
+      assert_equal(s(:send, s(:lvar, :decorator), :props), props)
+      assert_equal(:fetch, props_fetch)
+      assert_equal(:sym, prop.type)
+      assert_equal(:fetch, inner_method)
+      assert_equal(s(:sym, :value_validate_proc), inner_arg)
     end
 
     private_class_method def self.validate_deserialize_hash_read(clause)
