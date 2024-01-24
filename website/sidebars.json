@@ -55,7 +55,8 @@
     "Editor Features": [
       "lsp",
       "sig-suggestion",
-      "highlight-untyped"
+      "highlight-untyped",
+      "sorbet-uris"
     ],
     "Experimental Features": [
       "tuples",
