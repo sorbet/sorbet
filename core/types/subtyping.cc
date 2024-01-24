@@ -1220,27 +1220,47 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                 ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
 
+                auto &a = a1->targs[i];
+                auto &b = a2->targs[j];
+                bool doesMemberMatch = true;
+                string variance;
+                string joiningText;
+                auto subCollector = errorDetailsCollector.newCollector();
                 if (idxTypeMember.data(gs)->flags.isCovariant) {
-                    result = Types::isSubTypeUnderConstraint(gs, constr, a1->targs[i], a2->targs[j], mode,
-                                                             errorSectionCollector);
+                    variance = "covariant";
+                    joiningText = "a subtype of";
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a, b, mode, subCollector);
                 } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                    auto &a = a1->targs[i];
-                    auto &b = a2->targs[j];
+                    variance = "invariant";
+                    joiningText = "equivalent to";
                     if (mode == UntypedMode::AlwaysCompatible) {
-                        result = Types::equivUnderConstraint(gs, constr, a, b, errorSectionCollector);
+                        doesMemberMatch = Types::equivUnderConstraint(gs, constr, a, b, subCollector);
                     } else {
                         // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
                         // except when `constr` is EmptyFrozenConstraint, so there's no observable
                         // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
                         // May as well do it for symmetry though.
-                        result = Types::equivNoUntypedUnderConstraint(gs, constr, a, b, errorSectionCollector);
+                        doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a, b, subCollector);
                     }
                 } else if (idxTypeMember.data(gs)->flags.isContravariant) {
-                    result = Types::isSubTypeUnderConstraint(gs, constr, a2->targs[j], a1->targs[i], mode,
-                                                             errorSectionCollector);
+                    variance = "contravariant";
+                    joiningText = "a supertype of";
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, b, a, mode, subCollector);
                 }
-                if (!result) {
-                    break;
+                if (!doesMemberMatch) {
+                    result = false;
+                    if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                        // TODO(neil): once we pass in whether this a covariant or contravariant call,
+                        // we should reword it in the "expected ... but got ..." form
+                        // TODO(neil): if the type member is for a Proc we should have special wording,
+                        // ie. Proc return value instead of Proc1::Return and Proc arg 1 instead of Proc1::Arg1
+                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a.show(gs),
+                                                           joiningText, b.show(gs), variance, idxTypeMember.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(subCollector);
+                    } else {
+                        break;
+                    }
                 }
                 j++;
             }
@@ -1268,33 +1288,81 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         int i = -1;
                         for (auto &el2 : a2->elems) {
                             ++i;
-                            result = Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode,
-                                                                     errorSectionCollector);
-                            if (!result) {
-                                break;
+                            auto subCollector = errorDetailsCollector.newCollector();
+                            if (!Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode, subCollector)) {
+                                result = false;
+                                if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                                    // TODO(neil): once we pass in whether this a covariant or contravariant call,
+                                    // we should reword it in the "expected ... but got ..." form
+                                    auto message = ErrorColors::format("`{}` is not a subtype of `{}` for item `{}`",
+                                                                       a1.elems[i].show(gs), el2.show(gs), i);
+                                    subCollector.message = message;
+                                    errorDetailsCollector.addErrorDetails(subCollector);
+                                } else {
+                                    break;
+                                }
                             }
                         }
+                    } else {
+                        if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                            if (a2 != nullptr) {
+                                // array too small
+                                // TODO(neil): This error isn't useful until we know if this call is covariant or
+                                // contravariant. If it's contravariant, we'll report the error "backwards".
+                            }
+                        }
+                        return;
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
                     auto *h2 = cast_type<ShapeType>(t2);
                     result = h2 != nullptr && h2->keys.size() <= h1.keys.size();
-                    if (!result) {
-                        return;
+                    if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                        if (h2 == nullptr) {
+                            return;
+                        }
+                        if (h2->keys.size() > h1.keys.size()) {
+                            // Not enough keys
+                            // TODO(neil): This error isn't useful until we know if this call is covariant or
+                            // contravariant. If it's contravariant, we'll report the error "backwards".
+                        }
+                        // If we're using this subtyping call to report an error, we should loop through all the items
+                        // even if there aren't enough keys, so we can report all the missing keys to the user, and
+                        // report an error for the incorrect keys.
+                    } else {
+                        if (!result) {
+                            return;
+                        }
                     }
-                    // have enough keys.
+                    // have enough keys (or this call is used for error reporting).
                     int i = -1;
                     for (auto &el2 : h2->keys) {
                         ++i;
                         auto optind = h1.indexForKey(el2);
+                        auto subCollector = errorDetailsCollector.newCollector();
                         if (!optind.has_value()) {
                             result = false;
-                            return;
-                        }
-                        if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()], h2->values[i], mode,
-                                                             errorSectionCollector)) {
+                            if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                                // Missing key
+                                // TODO(neil): This error isn't useful until we know if this call is covariant or
+                                // contravariant. If it's contravariant, we'll report the error "backwards".
+                            } else {
+                                return;
+                            }
+                        } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
+                                                                    h2->values[i], mode, subCollector)) {
                             result = false;
-                            return;
+                            if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                                // TODO(neil): once we pass in whether this a covariant or contravariant call,
+                                // we should reword it in the "expected ... but got ..." form
+                                auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
+                                                                   h1.values[i].show(gs),
+                                                                   h2->values[optind.value()].show(gs), el2.show(gs));
+                                subCollector.message = message;
+                                errorDetailsCollector.addErrorDetails(subCollector);
+                            } else {
+                                return;
+                            }
                         }
                     }
                 },
