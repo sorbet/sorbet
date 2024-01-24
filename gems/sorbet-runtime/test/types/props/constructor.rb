@@ -578,6 +578,8 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :array_of_substruct, T::Array[MySerializable]
     prop :hash_of_substruct, T::Hash[String, MySerializable]
     prop :infinity_float, Float, default: Float::INFINITY
+    prop :negative_infinity_float, Float, default: -Float::INFINITY
+    prop :nan_float, Float, default: Float::NAN
     prop :enum, MyEnum
     prop :nilable_enum, T.nilable(MyEnum)
     prop :default_enum, MyEnum, default: MyEnum::FooOne
@@ -616,6 +618,8 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
         "array_of_substruct" => [{"name" => "foo2"}],
         "hash_of_substruct" => {"3" => {"name" => "foo3"}},
         "infinity_float" => Float::INFINITY,
+        "negative_infinity_float" => -Float::INFINITY,
+        "nan_float" => Float::NAN,
         "enum" => "fooone",
         "default_enum" => "fooone",
         "deprecated_enum" => :foo_one,
