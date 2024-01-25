@@ -39,6 +39,10 @@ module T::Props
           has_explicit_nil_default = rules.key?(:default) && rules.fetch(:default).nil?
           raise_on_nil_write = T::Props::Utils.need_nil_write_check?(rules) && !has_explicit_nil_default
 
+          # Needed to keep behavior unchanged from the non-generated constructor where missing props
+          # don't raise if the prop is T.untyped, even though statically sorbet considered that an error.
+          raise_on_nil_write = false if rules.fetch(:type_object) == T.untyped
+
           missing_handler, needs_missing_typecheck = generate_missing_handler(
             prop: prop,
             default: defaults[prop],
