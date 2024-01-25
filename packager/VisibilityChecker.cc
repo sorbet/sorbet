@@ -410,7 +410,7 @@ class VisibilityCheckerPass final {
 
 public:
     UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> imports;
-    UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> testImports;
+    UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> testImportsToReplace;
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
 
@@ -512,7 +512,7 @@ public:
             imports[lit.symbol].emplace_back(lit.loc);
         } else if (*importType == core::packages::ImportType::Test && !this->insideTestFile) {
             // We used a symbol from a `test_import` in a non-test context
-            testImports[lit.symbol].emplace_back(lit.loc);
+            testImportsToReplace[lit.symbol].emplace_back(lit.loc);
         }
     }
 
@@ -554,7 +554,7 @@ public:
                                 outputq->push(std::move(suggestion), 1);
                             }
                         }
-                        for (auto &[symbol, locs] : pass.testImports) {
+                        for (auto &[symbol, locs] : pass.testImportsToReplace) {
                             fast_sort(locs,
                                       [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
                             for (auto loc : locs) {
