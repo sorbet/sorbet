@@ -470,6 +470,12 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :required, String, raise_on_nil_write: true
   end
 
+  class UntypedStruct < T::Struct
+    prop :untyped, T.untyped
+    prop :untyped_with_default, T.untyped, default: 123
+    prop :untyped_with_raise_on_nil_write, T.untyped, raise_on_nil_write: true
+  end
+
   it 'forbids nil in constructor if raise_on_nil_write=true' do
     err = assert_raises(ArgumentError) do
       NilFieldStruct.new
@@ -485,6 +491,21 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
       NilFieldStruct.new(foo: 1, bar: 'hey', required: nil)
     end
     assert_includes(err.message, "Can't set Opus::Types::Test::Props::ConstructorTest::NilFieldStruct.required to nil (instance of NilClass) - need a String")
+  end
+
+  it 'does not forbid nil in constructor for T.untyped' do
+    UntypedStruct.new
+    UntypedStruct.new(untyped: nil)
+    UntypedStruct.new(untyped_with_default: true)
+    UntypedStruct.new(untyped_with_raise_on_nil_write: nil)
+    UntypedStruct.new(untyped: nil, untyped_with_default: nil, untyped_with_raise_on_nil_write: nil)
+  end
+
+  it 'returns the right required props for T.untyped' do
+    assert_equal(
+      Set[:untyped, :untyped_with_default, :untyped_with_raise_on_nil_write],
+      UntypedStruct.decorator.required_props.to_set
+    )
   end
 
   class SetterValidate < T::Struct
@@ -566,6 +587,8 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :array_of_substruct, T::Array[MySerializable]
     prop :hash_of_substruct, T::Hash[String, MySerializable]
     prop :infinity_float, Float, default: Float::INFINITY
+    prop :negative_infinity_float, Float, default: -Float::INFINITY
+    prop :nan_float, Float, default: Float::NAN
     prop :enum, MyEnum
     prop :nilable_enum, T.nilable(MyEnum)
     prop :default_enum, MyEnum, default: MyEnum::FooOne
@@ -604,6 +627,8 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
         "array_of_substruct" => [{"name" => "foo2"}],
         "hash_of_substruct" => {"3" => {"name" => "foo3"}},
         "infinity_float" => Float::INFINITY,
+        "negative_infinity_float" => -Float::INFINITY,
+        "nan_float" => Float::NAN,
         "enum" => "fooone",
         "default_enum" => "fooone",
         "deprecated_enum" => :foo_one,
