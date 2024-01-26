@@ -1230,7 +1230,7 @@ class Thread < Object
 
   # Yields each frame of the current execution stack as a
   # backtrace location object.
-  sig {params(blk: T.proc.void).returns(T.untyped)}
+  sig {params(blk: T.proc.params(location: Thread::Backtrace::Location).void).returns(T.untyped)}
   def self.each_caller_location(&blk); end
 end
 
