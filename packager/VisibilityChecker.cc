@@ -71,6 +71,8 @@ static void reportMissingImport(const core::Context &ctx, core::SymbolRef symbol
 
 static std::optional<core::AutocorrectSuggestion>
 addImport(const core::Context &ctx, core::FileRef file, core::SymbolRef symbol) {
+    // pkgName => importing to this package
+    // otherPackage => importing this package
     auto pkgName = ctx.state.packageDB().getPackageNameForFile(file);
     const auto &package = ctx.state.packageDB().getPackageInfo(pkgName);
     auto otherFile = symbol.loc(ctx).file();
@@ -572,13 +574,11 @@ public:
             if (processedByThread > 0) {
                 outputq->push(std::move(suggestions), processedByThread);
             }
-
         });
 
-
         std::vector<ImportSuggestion> threadResult;
-        UnorderedSet<core::SymbolRef> alreadyAutocorrected;
-        UnorderedSet<core::SymbolRef> alreadyReplaced;
+        UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> alreadyAutocorrected;
+        UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> alreadyReplaced;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -588,17 +588,19 @@ public:
             for (const auto suggestion : threadResult) {
                 core::Context ctx{gs, core::Symbols::root(), suggestion.file};
                 if (suggestion.shouldReplaceTestImport) {
-                    auto autocorrect = alreadyReplaced.contains(suggestion.symbol)
+                    auto pkgName = ctx.state.packageDB().getPackageNameForFile(suggestion.file);
+                    auto autocorrect = alreadyReplaced[pkgName].contains(suggestion.symbol)
                                            ? std::nullopt
                                            : addImport(ctx, suggestion.file, suggestion.symbol);
                     replaceTestImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
-                    alreadyReplaced.insert(suggestion.symbol);
+                    alreadyReplaced[pkgName].insert(suggestion.symbol);
                 } else {
-                    auto autocorrect = alreadyAutocorrected.contains(suggestion.symbol)
+                    auto pkgName = ctx.state.packageDB().getPackageNameForFile(suggestion.file);
+                    auto autocorrect = alreadyAutocorrected[pkgName].contains(suggestion.symbol)
                                            ? std::nullopt
                                            : addImport(ctx, suggestion.file, suggestion.symbol);
                     reportMissingImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
-                    alreadyAutocorrected.insert(suggestion.symbol);
+                    alreadyAutocorrected[pkgName].insert(suggestion.symbol);
                 }
             }
         }
