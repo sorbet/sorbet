@@ -137,7 +137,10 @@ module T::Props
           when ApplyPrimitiveDefault
             literal = default.default
             case literal
-            when String, Integer, Symbol, Float, TrueClass, FalseClass, NilClass
+            # `Float` is intentionally left out here because `.inspect` does not produce the correct code
+            # representation for non-finite values like `Float::INFINITY` and `Float::NAN` and it's not totally
+            # clear that it won't cause issues with floating point precision.
+            when String, Integer, Symbol, TrueClass, FalseClass, NilClass
               literal.inspect
             else
               "self.class.decorator.props_with_defaults.fetch(#{prop.inspect}).default"
