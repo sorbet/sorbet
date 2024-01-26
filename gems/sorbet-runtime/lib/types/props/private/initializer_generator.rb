@@ -131,14 +131,9 @@ module T::Props
           when String
             # Always freeze strings here since non-frozen strings use `ApplyComplexDefault`
             "#{literal.inspect}.freeze"
-          when Float
-            # Float has special values (e.g. Float::INFINITY, Float::NAN) where calling `.inspect` does not
-            # return the correct code representation.
-            if literal.finite?
-              literal.inspect
-            else
-              default_from_props
-            end
+          # `Float` is intentionally left out here because `.inspect` does not produce the correct code
+          # representation for non-finite values like `Float::INFINITY` and `Float::NAN` and it's not totally
+          # clear that it won't cause issues with floating point precision.
           when Integer, Symbol, TrueClass, FalseClass, NilClass
             literal.inspect
           else
