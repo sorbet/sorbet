@@ -406,6 +406,9 @@ class VisibilityCheckerPass final {
         core::SymbolRef symbol;
         core::LocOffsets loc;
         bool shouldReplaceTestImport;
+
+        ImportSuggestion(core::FileRef file, core::SymbolRef symbol, core::LocOffsets loc, bool shouldReplaceTestImport)
+            : file{file}, symbol{symbol}, loc{loc}, shouldReplaceTestImport{shouldReplaceTestImport} {};
     };
 
 public:
@@ -528,17 +531,19 @@ public:
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
-        auto outputq = std::make_shared<BlockingBoundedQueue<ImportSuggestion>>(files.size());
+        auto outputq = std::make_shared<BlockingBoundedQueue<std::vector<ImportSuggestion>>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq, outputq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, outputq]() {
             size_t idx;
+            std::vector<ImportSuggestion> suggestions;
+            int processedByThread = 0;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
+                processedByThread++;
                 if (!f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
@@ -548,47 +553,52 @@ public:
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                         for (auto &[symbol, locs] : pass.imports) {
                             fast_sort(locs,
-                                      [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
                             for (auto loc : locs) {
-                                auto suggestion = ImportSuggestion{f.file, symbol, loc, false};
-                                outputq->push(std::move(suggestion), 1);
+                                suggestions.emplace_back(f.file, symbol, loc, false);
                             }
                         }
                         for (auto &[symbol, locs] : pass.testImportsToReplace) {
                             fast_sort(locs,
-                                      [](const auto a, const auto b) -> bool { return a.beginPos() > b.beginPos(); });
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
                             for (auto loc : locs) {
-                                auto suggestion = ImportSuggestion{f.file, symbol, loc, true};
-                                outputq->push(std::move(suggestion), 1);
+                                suggestions.emplace_back(f.file, symbol, loc, true);
                             }
                         }
                     }
                 }
             }
 
-            barrier.DecrementCount();
+            if (processedByThread > 0) {
+                outputq->push(std::move(suggestions), processedByThread);
+            }
+
         });
 
-        barrier.Wait();
 
-        ImportSuggestion threadResult;
+        std::vector<ImportSuggestion> threadResult;
         UnorderedSet<core::SymbolRef> alreadyAutocorrected;
         UnorderedSet<core::SymbolRef> alreadyReplaced;
-        for (auto result = outputq->try_pop(threadResult); !result.done(); result = outputq->try_pop(threadResult)) {
-            if (result.gotItem()) {
-                core::Context ctx{gs, core::Symbols::root(), threadResult.file};
-                if (threadResult.shouldReplaceTestImport) {
-                    auto autocorrect = alreadyReplaced.contains(threadResult.symbol)
+        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (const auto suggestion : threadResult) {
+                core::Context ctx{gs, core::Symbols::root(), suggestion.file};
+                if (suggestion.shouldReplaceTestImport) {
+                    auto autocorrect = alreadyReplaced.contains(suggestion.symbol)
                                            ? std::nullopt
-                                           : addImport(ctx, threadResult.file, threadResult.symbol);
-                    replaceTestImport(ctx, threadResult.symbol, threadResult.loc, autocorrect);
-                    alreadyReplaced.insert(threadResult.symbol);
+                                           : addImport(ctx, suggestion.file, suggestion.symbol);
+                    replaceTestImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
+                    alreadyReplaced.insert(suggestion.symbol);
                 } else {
-                    auto autocorrect = alreadyAutocorrected.contains(threadResult.symbol)
+                    auto autocorrect = alreadyAutocorrected.contains(suggestion.symbol)
                                            ? std::nullopt
-                                           : addImport(ctx, threadResult.file, threadResult.symbol);
-                    reportMissingImport(ctx, threadResult.symbol, threadResult.loc, autocorrect);
-                    alreadyAutocorrected.insert(threadResult.symbol);
+                                           : addImport(ctx, suggestion.file, suggestion.symbol);
+                    reportMissingImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
+                    alreadyAutocorrected.insert(suggestion.symbol);
                 }
             }
         }
