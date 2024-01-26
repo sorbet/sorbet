@@ -17,10 +17,6 @@ foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
   Note:
     Try running generate-packages.sh
 
@@ -30,10 +26,6 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `import Foo::Bar::OtherPackage`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
   Note:
     Try running generate-packages.sh
 
