@@ -22,10 +22,6 @@ different-files/c2.rb:6: `A::Foo` resolves but its package is not imported https
     a/__package.rb:3: Exported from package here
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    different-files/__package.rb:3: Inserted `import A`
-     3 |class C < PackageSpec
-                             ^
 
 different-files/c1.rb:6: `A::Foo` resolves but its package is not imported https://srb.help/3718
      6 |  sig{returns(A::Foo)}
