@@ -52,9 +52,9 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
-     6 |  Foo::Bar::OtherPackage::ImportMeTestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -63,9 +63,9 @@ foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its packa
      6 |  # import Foo::Bar::OtherPackage ## MISSING!
                                                      ^
 
-foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
-     4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+     6 |  Foo::Bar::OtherPackage::ImportMeTestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
