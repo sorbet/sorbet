@@ -1854,7 +1854,6 @@ void ApplyCodeActionAssertion::checkAll(
         actualEditedFileContents = string(file->source());
 
         for (auto &e : c->edits) {
-
             auto &td = c->textDocument;
             auto filename = td->uri;
             auto version = td->version;
