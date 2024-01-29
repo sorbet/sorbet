@@ -69,8 +69,8 @@ static void reportMissingImport(const core::Context &ctx, core::SymbolRef symbol
     }
 }
 
-static std::optional<core::AutocorrectSuggestion>
-addImport(const core::Context &ctx, core::FileRef file, core::SymbolRef symbol) {
+static std::optional<core::AutocorrectSuggestion> addImport(const core::Context &ctx, core::FileRef file,
+                                                            core::SymbolRef symbol) {
     // pkgName => importing to this package
     // otherPackage => importing this package
     auto pkgName = ctx.state.packageDB().getPackageNameForFile(file);
