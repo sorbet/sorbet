@@ -5,6 +5,10 @@
 #include "lmdb.h"
 #include "spdlog/spdlog.h"
 
+// TODO(jez) We do not use lmdb when building for emscripten, so we're guaranteed that the pinned
+// LLVM we compile Sorbet with has a libc++ version high enough to use `<filesystem>` (from C++17)
+#include <filesystem>
+
 #include <utility>
 
 using namespace std;
@@ -100,11 +104,24 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
     rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
     if (rc == ENOENT) {
-        fmt::print(stderr, "'{}' does not exist. When using --cache-dir, create the directory before hand.\n",
-                   this->path);
+        try {
+            filesystem::create_directories(this->path);
+        } catch (filesystem::filesystem_error &e) {
+            fmt::print(stderr,
+                       "'{}' does not exist and could not be created. "
+                       "When using --cache-dir, create the directory before hand.\n",
+                       this->path);
+            throw EarlyReturnWithCode(1);
+        }
+        rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
+        if (rc != 0) {
+            goto fail;
+        }
+    } else if (rc == ENOTDIR) {
+        fmt::print(stderr, "'{}' is not a directory, and so cannot store the Sorbet disk cache.\n", this->path);
         throw EarlyReturnWithCode(1);
     } else if (rc == EACCES) {
-        fmt::print(stderr, "No read permissions for '{}'", this->path);
+        fmt::print(stderr, "No read permissions for '{}'\n", this->path);
         throw EarlyReturnWithCode(1);
     } else if (rc != 0) {
         goto fail;

@@ -1,1 +1,3 @@
-'nope2' does not exist. When using --cache-dir, create the directory before hand.
+No errors! Great job.
+'nope3/subdir' is not a directory, and so cannot store the Sorbet disk cache.
+'nope4/subdir' does not exist and could not be created. When using --cache-dir, create the directory before hand.
