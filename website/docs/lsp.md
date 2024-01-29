@@ -216,11 +216,11 @@ Sorbet recognizes the following options in the `initializationOptions` of the
 export interface SorbetInitializationOptions {
   highlightUntyped?: boolean | string;
   enableTypedFalseCompletionNudges?: boolean;
+  supportsSorbetURIs?: boolean;
 }
 ```
 
 <!-- TODO(jez) supportsOperationNotifications -->
-<!-- TODO(jez) supportsSorbetURIs -->
 
 - `highlightUntyped`
 
@@ -231,6 +231,10 @@ export interface SorbetInitializationOptions {
 
   Whether to show a notice explaining when Sorbet refuses to provide completion
   results because a file is `# typed: false`. Default: `true`
+
+- `supportsSorbetURIs`
+
+  See [Working with Synthetic or Missing Files](sorbet-uris.md)
 
 ### `sorbet/showSymbol` request
 
@@ -257,13 +261,23 @@ _Request_:
 - method: `sorbet/showSymbol`
 - params: [`TextDocumentPositionParams`]
 
-Response:
+_Response_:
 
 - result: [`SymbolInformation`] | `null`
 
-<!-- TODO(jez) sorbet/readFile -->
+### `sorbet/readFile` request
 
-<!-- TODO(jez) sorbet/showOperation -->
+See [Working with Synthetic or Missing Files](sorbet-uris.md) for more
+information.
+
+_Request_:
+
+- method: `sorbet/readFile`
+- params: [`TextDocumentIdentifier`]
+
+_Response_:
+
+- result: [`TextDocumentItem`]
 
 ## Appendix
 
@@ -306,3 +320,7 @@ Sorbet's need for watchman.
   https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentPositionParams
 [`SymbolInformation`]:
   https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolInformation
+[`TextDocumentIdentifier`]:
+  https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentIdentifier
+[`TextDocumentItem`]:
+  https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
