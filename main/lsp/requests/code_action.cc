@@ -192,98 +192,104 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         }
     }
 
-    auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
-                                       LSPMethod::TextDocumentCodeAction, false);
+    if (loc.beginPos() == loc.endPos()) {
+        // No selection
+        auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
+                                           LSPMethod::TextDocumentCodeAction, false);
 
-    // Generate "Move method" code actions only for class method definitions
-    if (queryResult.error == nullptr) {
-        if (auto *def = hasLoneMethodResponse(gs, queryResult.responses)) {
-            unique_ptr<CodeAction> action;
-            bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                                    config.getClientConfig().clientCodeActionDataSupport;
+        // Generate "Move method" code actions only for class method definitions
+        if (queryResult.error == nullptr) {
+            if (auto *def = hasLoneMethodResponse(gs, queryResult.responses)) {
+                unique_ptr<CodeAction> action;
+                bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                                        config.getClientConfig().clientCodeActionDataSupport;
 
-            if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
-                auto action = make_unique<CodeAction>("Move method to a new module");
-                action->kind = CodeActionKind::RefactorExtract;
-
-                if (canResolveLazily) {
-                    action->data = move(params);
-                } else {
-                    auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    auto edits = getMoveMethodEdits(typechecker, config, *def);
-                    workspaceEdit->documentChanges = move(edits);
-                    action->edit = move(workspaceEdit);
-                }
-
-                result.emplace_back(move(action));
-            } else {
-                auto action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
-                action->kind = CodeActionKind::RefactorRewrite;
-
-                if (canResolveLazily) {
-                    const auto &maybeSource = def->termLoc.source(gs);
-                    if (maybeSource.has_value() && absl::StartsWith(maybeSource.value(), "def ")) {
-                        action->data = move(params);
-                        result.emplace_back(move(action));
-                    } else {
-                        // Maybe this is an attr_reader or a prop or something. Abort.
-                        // (Only have to do this logic in the lazy case, because the eager case does
-                        // it already.)
-                    }
-                } else {
-                    auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    auto edits = convertToSingletonClassMethod(typechecker, config, *def);
-                    if (!edits.empty()) {
-                        // "empty" means an error in convertToSingletonClassMethod.
-                        // Don't prevent other code actions from being reported due to this one error.
-                        // Instead, merely skip this code action.
-                        workspaceEdit->documentChanges = move(edits);
-                        action->edit = move(workspaceEdit);
-                        result.emplace_back(move(action));
-                    }
-                }
-            }
-        } else if (auto *resp = isTUnsafeOrMustResponse(gs, queryResult.responses)) {
-            auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(params->textDocument->uri), JSONNullObject());
-            auto replaceRange = Range::fromLoc(gs, resp->termLoc());
-            auto arg0Loc = core::Loc(file, resp->argLocOffsets[0]);
-            auto newContents = arg0Loc.source(gs).value();
-
-            vector<unique_ptr<TextEdit>> edits;
-            edits.emplace_back(make_unique<TextEdit>(move(replaceRange), string(newContents)));
-
-            vector<unique_ptr<TextDocumentEdit>> documentEdits;
-            documentEdits.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
-
-            auto workspaceEdit = make_unique<WorkspaceEdit>();
-            workspaceEdit->documentChanges = move(documentEdits);
-
-            auto action = make_unique<CodeAction>(fmt::format("Delete T.{}", resp->callerSideName.show(gs)));
-            action->kind = CodeActionKind::RefactorRewrite;
-            action->edit = move(workspaceEdit);
-            result.emplace_back(move(action));
-        } else {
-            if (loc.beginPos() != loc.endPos() && config.opts.lspExtractToVariableEnabled) {
-                // For move method to new module we use canResolveLazily to defer the computation
-                // until the user has actually selected the action. We can't do that here because
-                // we need to do the core computation to know if extract the current selection is
-                // valid in the first place, to decide if we can show the code action or not.
-                Timer timeit(gs.tracer(), "Extract to Variable");
-
-                auto documentEdits = VariableExtractor::getEdits(typechecker, config, loc);
-                if (!documentEdits.empty()) {
-                    auto action = make_unique<CodeAction>("Extract Variable");
+                if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
+                    auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
 
-                    auto workspaceEdit = make_unique<WorkspaceEdit>();
-                    workspaceEdit->documentChanges = move(documentEdits);
+                    if (canResolveLazily) {
+                        action->data = move(params);
+                    } else {
+                        auto workspaceEdit = make_unique<WorkspaceEdit>();
+                        auto edits = getMoveMethodEdits(typechecker, config, *def);
+                        workspaceEdit->documentChanges = move(edits);
+                        action->edit = move(workspaceEdit);
+                    }
 
-                    action->edit = move(workspaceEdit);
                     result.emplace_back(move(action));
+                } else {
+                    auto action = make_unique<CodeAction>("Convert to singleton class method (best effort)");
+                    action->kind = CodeActionKind::RefactorRewrite;
 
-                    // TODO(neil): trigger a rename for newVariable
-                    // TODO(neil): replace other occurrences of this expression with newVariable
+                    if (canResolveLazily) {
+                        const auto &maybeSource = def->termLoc.source(gs);
+                        if (maybeSource.has_value() && absl::StartsWith(maybeSource.value(), "def ")) {
+                            action->data = move(params);
+                            result.emplace_back(move(action));
+                        } else {
+                            // Maybe this is an attr_reader or a prop or something. Abort.
+                            // (Only have to do this logic in the lazy case, because the eager case does
+                            // it already.)
+                        }
+                    } else {
+                        auto workspaceEdit = make_unique<WorkspaceEdit>();
+                        auto edits = convertToSingletonClassMethod(typechecker, config, *def);
+                        if (!edits.empty()) {
+                            // "empty" means an error in convertToSingletonClassMethod.
+                            // Don't prevent other code actions from being reported due to this one error.
+                            // Instead, merely skip this code action.
+                            workspaceEdit->documentChanges = move(edits);
+                            action->edit = move(workspaceEdit);
+                            result.emplace_back(move(action));
+                        }
+                    }
                 }
+            } else if (auto *resp = isTUnsafeOrMustResponse(gs, queryResult.responses)) {
+                auto tdi =
+                    make_unique<VersionedTextDocumentIdentifier>(move(params->textDocument->uri), JSONNullObject());
+                auto replaceRange = Range::fromLoc(gs, resp->termLoc());
+                auto arg0Loc = core::Loc(file, resp->argLocOffsets[0]);
+                auto newContents = arg0Loc.source(gs).value();
+
+                vector<unique_ptr<TextEdit>> edits;
+                edits.emplace_back(make_unique<TextEdit>(move(replaceRange), string(newContents)));
+
+                vector<unique_ptr<TextDocumentEdit>> documentEdits;
+                documentEdits.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
+
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = move(documentEdits);
+
+                auto action = make_unique<CodeAction>(fmt::format("Delete T.{}", resp->callerSideName.show(gs)));
+                action->kind = CodeActionKind::RefactorRewrite;
+                action->edit = move(workspaceEdit);
+                result.emplace_back(move(action));
+            } else {
+            }
+        }
+    } else {
+        // Selection
+        if (config.opts.lspExtractToVariableEnabled) {
+            // For move method to new module we use canResolveLazily to defer the computation
+            // until the user has actually selected the action. We can't do that here because
+            // we need to do the core computation to know if extract the current selection is
+            // valid in the first place, to decide if we can show the code action or not.
+            Timer timeit(gs.tracer(), "Extract to Variable");
+
+            auto documentEdits = VariableExtractor::getEdits(typechecker, config, loc);
+            if (!documentEdits.empty()) {
+                auto action = make_unique<CodeAction>("Extract Variable");
+                action->kind = CodeActionKind::RefactorExtract;
+
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                workspaceEdit->documentChanges = move(documentEdits);
+
+                action->edit = move(workspaceEdit);
+                result.emplace_back(move(action));
+
+                // TODO(neil): trigger a rename for newVariable
+                // TODO(neil): replace other occurrences of this expression with newVariable
             }
         }
     }
