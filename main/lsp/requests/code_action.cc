@@ -265,7 +265,6 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->kind = CodeActionKind::RefactorRewrite;
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
-            } else {
             }
         }
     } else {
