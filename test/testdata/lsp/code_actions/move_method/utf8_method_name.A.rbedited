@@ -11,15 +11,15 @@ end
 
 module Foo
   extend T::Sig
-     # ^ apply-code-action: [A] Move method to a new module
+     # | apply-code-action: [A] Move method to a new module
 
   sig {void}
   def self.😱; end
-     # ^ apply-code-action: [B] Move method to a new module
+     # | apply-code-action: [B] Move method to a new module
 
   sig {void}
   def self.method_with_?; end
-     # ^ apply-code-action: [C] Move method to a new module
+     # | apply-code-action: [C] Move method to a new module
 
 end
 

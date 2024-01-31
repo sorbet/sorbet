@@ -12,7 +12,7 @@ module Foo
 
   sig {returns(String)}
   def self._greeting_
-         # ^^^^^^^^^^ apply-code-action: [A] Move method to a new module
+         # | apply-code-action: [A] Move method to a new module
     'Hello'
   end
 end

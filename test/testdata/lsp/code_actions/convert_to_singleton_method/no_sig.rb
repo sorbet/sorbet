@@ -6,7 +6,7 @@ class A
   extend T::Sig
 
   def no_sig(x)
-    # ^ apply-code-action: [A] Convert to singleton class method (best effort)
+    # | apply-code-action: [A] Convert to singleton class method (best effort)
     puts "Hello, peter."
   end
 end

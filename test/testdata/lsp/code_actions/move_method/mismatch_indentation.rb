@@ -7,7 +7,7 @@ module Foo
       extend T::Sig
       sig {void}
       def self.greeting; end
-         # ^ apply-code-action: [A] Move method to a new module
+         # | apply-code-action: [A] Move method to a new module
     end
   end
 end

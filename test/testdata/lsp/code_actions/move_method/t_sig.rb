@@ -8,5 +8,5 @@ end
 module Foo
   sig {void}
   def self.bar; end
-         # ^ apply-code-action: [A] Move method to a new module
+         # | apply-code-action: [A] Move method to a new module
 end

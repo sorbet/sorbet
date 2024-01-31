@@ -6,7 +6,7 @@ class A
   extend T::Sig
 
   def takes_block(x, &blk)
-    # ^ apply-code-action: [A] Convert to singleton class method (best effort)
+    # | apply-code-action: [A] Convert to singleton class method (best effort)
     puts "Hello, peter."
   end
 end

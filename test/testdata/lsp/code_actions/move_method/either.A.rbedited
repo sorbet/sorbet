@@ -12,7 +12,7 @@ module Either
 
   class Left
     extend T::Sig
-      # ^ apply-code-action: [A] Move method to a new module
+      # | apply-code-action: [A] Move method to a new module
   end
 
   class Right

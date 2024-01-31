@@ -8,7 +8,7 @@ module Foo
   extend T::Sig
   sig {params(obj: T.untyped).returns(T::Boolean)}
   def self.<=(obj)
-     # ^ apply-code-action: [A] Move method to a new module
+     # | apply-code-action: [A] Move method to a new module
     false
   end
 end
