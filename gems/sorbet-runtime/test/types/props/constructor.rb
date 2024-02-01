@@ -21,6 +21,9 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
     prop :untyped_prop, T.untyped, default: nil
   end
 
+  class NoProps < T::Struct
+  end
+
   it "raises when omitting a required prop" do
     err = assert_raises(ArgumentError) do
       MyStruct.new(foo: 'foo')
@@ -33,6 +36,13 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
       MyStruct.new(name: 'Alex', foo: {}, bar1: 'bar1', bar2: 'bar2')
     end
     assert_equal("Opus::Types::Test::Props::ConstructorTest::MyStruct: Unrecognized properties: bar1, bar2", err.message)
+  end
+
+  it "raises when giving unknown props to a no-prop class" do
+    err = assert_raises(ArgumentError) do
+      NoProps.new(bar1: 'bar1', bar2: 'bar2')
+    end
+    assert_equal("Opus::Types::Test::Props::ConstructorTest::NoProps: Unrecognized properties: bar1, bar2", err.message)
   end
 
   it 'allows required props to be omitted if they have a default value' do
