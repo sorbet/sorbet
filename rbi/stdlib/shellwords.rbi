@@ -212,3 +212,37 @@ module Shellwords
   sig { params(str: String).returns(T::Array[String]) }
   def self.split(str); end
 end
+
+class String
+  # call-seq:
+  #   str.shellsplit => array
+  #
+  # Splits +str+ into an array of tokens in the same way the UNIX
+  # Bourne shell does.
+  #
+  # See Shellwords.shellsplit for details.
+  sig { returns(T::Array[String]) }
+  def shellsplit; end
+
+  # call-seq:
+  #   str.shellescape => string
+  #
+  # Escapes +str+ so that it can be safely used in a Bourne shell
+  # command line.
+  #
+  # See Shellwords.shellescape for details.
+  sig { returns(String) }
+  def shellescape; end
+end
+
+class Array
+  # call-seq:
+  #   array.shelljoin => string
+  #
+  # Builds a command line string from an argument list +array+ joining
+  # all elements escaped for the Bourne shell and separated by a space.
+  #
+  # See Shellwords.shelljoin for details.
+  sig { returns(String) }
+  def shelljoin; end
+end
