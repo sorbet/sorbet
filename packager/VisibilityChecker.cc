@@ -577,6 +577,14 @@ public:
                                                          ImportSuggestion::Type::ReplaceTestImport);
                             }
                         }
+
+                        for (auto &[symbol, locs] : pass.exports) {
+                            fast_sort(locs,
+                                      [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+                            for (auto loc : locs) {
+                                suggestions.emplace_back(f.file, symbol, loc, ImportSuggestion::Type::Export);
+                            }
+                        }
                     }
                 }
             }
@@ -589,6 +597,7 @@ public:
         std::vector<ImportSuggestion> threadResult;
         UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> alreadyAutocorrected;
         UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> alreadyReplaced;
+        UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> alreadyExported;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -608,6 +617,17 @@ public:
                         break;
                     }
                     case ImportSuggestion::Type::Export: {
+                        auto &db = ctx.state.packageDB();
+                        auto otherPackage = db.getPackageNameForFile(suggestion.symbol.loc(ctx).file());
+                        auto &pkg = db.getPackageInfo(otherPackage);
+
+                        auto autocorrect = alreadyExported[pkgName].contains(suggestion.symbol)
+                                               ? std::nullopt
+                                               : pkg.addExport(ctx, suggestion.symbol);
+
+                        reportMissingExport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
+                        alreadyExported[pkgName].insert(suggestion.symbol);
+                        break;
                     }
                     case ImportSuggestion::Type::ReplaceTestImport: {
                         auto autocorrect = alreadyReplaced[pkgName].contains(suggestion.symbol)
