@@ -432,13 +432,14 @@ public:
 
 class VisibilityCheckerPass final {
     struct ImportSuggestion {
+        enum class Type { Import, Export, ReplaceTestImport };
         core::FileRef file;
         core::SymbolRef symbol;
         core::LocOffsets loc;
-        bool shouldReplaceTestImport;
+        Type type;
 
-        ImportSuggestion(core::FileRef file, core::SymbolRef symbol, core::LocOffsets loc, bool shouldReplaceTestImport)
-            : file{file}, symbol{symbol}, loc{loc}, shouldReplaceTestImport{shouldReplaceTestImport} {};
+        ImportSuggestion(core::FileRef file, core::SymbolRef symbol, core::LocOffsets loc, Type type)
+            : file{file}, symbol{symbol}, loc{loc}, type{type} {};
     };
 
 public:
@@ -565,14 +566,15 @@ public:
                             fast_sort(locs,
                                       [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
                             for (auto loc : locs) {
-                                suggestions.emplace_back(f.file, symbol, loc, false);
+                                suggestions.emplace_back(f.file, symbol, loc, ImportSuggestion::Type::Import);
                             }
                         }
                         for (auto &[symbol, locs] : pass.testImportsToReplace) {
                             fast_sort(locs,
                                       [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
                             for (auto loc : locs) {
-                                suggestions.emplace_back(f.file, symbol, loc, true);
+                                suggestions.emplace_back(f.file, symbol, loc,
+                                                         ImportSuggestion::Type::ReplaceTestImport);
                             }
                         }
                     }
@@ -595,20 +597,26 @@ public:
             }
             for (const auto suggestion : threadResult) {
                 core::Context ctx{gs, core::Symbols::root(), suggestion.file};
-                if (suggestion.shouldReplaceTestImport) {
-                    auto pkgName = ctx.state.packageDB().getPackageNameForFile(suggestion.file);
-                    auto autocorrect = alreadyReplaced[pkgName].contains(suggestion.symbol)
-                                           ? std::nullopt
-                                           : addImport(ctx, suggestion.file, suggestion.symbol);
-                    replaceTestImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
-                    alreadyReplaced[pkgName].insert(suggestion.symbol);
-                } else {
-                    auto pkgName = ctx.state.packageDB().getPackageNameForFile(suggestion.file);
-                    auto autocorrect = alreadyAutocorrected[pkgName].contains(suggestion.symbol)
-                                           ? std::nullopt
-                                           : addImport(ctx, suggestion.file, suggestion.symbol);
-                    reportMissingImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
-                    alreadyAutocorrected[pkgName].insert(suggestion.symbol);
+                auto pkgName = ctx.state.packageDB().getPackageNameForFile(suggestion.file);
+                switch (suggestion.type) {
+                    case ImportSuggestion::Type::Import: {
+                        auto autocorrect = alreadyAutocorrected[pkgName].contains(suggestion.symbol)
+                                               ? std::nullopt
+                                               : addImport(ctx, suggestion.file, suggestion.symbol);
+                        reportMissingImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
+                        alreadyAutocorrected[pkgName].insert(suggestion.symbol);
+                        break;
+                    }
+                    case ImportSuggestion::Type::Export: {
+                    }
+                    case ImportSuggestion::Type::ReplaceTestImport: {
+                        auto autocorrect = alreadyReplaced[pkgName].contains(suggestion.symbol)
+                                               ? std::nullopt
+                                               : addImport(ctx, suggestion.file, suggestion.symbol);
+                        replaceTestImport(ctx, suggestion.symbol, suggestion.loc, autocorrect);
+                        alreadyReplaced[pkgName].insert(suggestion.symbol);
+                        break;
+                    }
                 }
             }
         }
