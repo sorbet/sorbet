@@ -44,6 +44,34 @@ static void replaceTestImport(const core::Context &ctx, core::SymbolRef symbol, 
     }
 }
 
+static void reportMissingExport(const core::Context &ctx, core::SymbolRef symbol, core::LocOffsets loc,
+                                std::optional<core::AutocorrectSuggestion> autocorrect) {
+    if (auto e = ctx.beginError(loc, core::errors::Packager::UsedPackagePrivateName)) {
+        auto &db = ctx.state.packageDB();
+        auto definedHereLoc = symbol.loc(ctx);
+        auto otherFile = definedHereLoc.file();
+        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto &pkg = db.getPackageInfo(otherPackage);
+        e.setHeader("`{}` resolves but is not exported from `{}`", symbol.show(ctx), pkg.show(ctx));
+        if (definedHereLoc.file().data(ctx).isRBI()) {
+            e.addErrorSection(core::ErrorSection(
+                core::ErrorColors::format(
+                    "Consider marking this RBI file `{}` if it is meant to declare unpackaged constants",
+                    "# packaged: false"),
+                {core::ErrorLine(definedHereLoc, "")}));
+        } else {
+            e.addErrorLine(definedHereLoc, "Defined here");
+        }
+
+        if (autocorrect.has_value()) {
+            e.addAutocorrect(std::move(autocorrect.value()));
+        }
+        if (!db.errorHint().empty()) {
+            e.addErrorNote("{}", db.errorHint());
+        }
+    }
+}
+
 static void reportMissingImport(const core::Context &ctx, core::SymbolRef symbol, core::LocOffsets loc,
                                 std::optional<core::AutocorrectSuggestion> autocorrect) {
     if (auto e = ctx.beginError(loc, core::errors::Packager::MissingImport)) {
@@ -414,6 +442,7 @@ class VisibilityCheckerPass final {
     };
 
 public:
+    UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> exports;
     UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> imports;
     UnorderedMap<core::SymbolRef, std::vector<core::LocOffsets>> testImportsToReplace;
     const core::packages::PackageInfo &package;
@@ -481,33 +510,12 @@ public:
 
         // Did we use a constant that wasn't exported?
         if (!isExported && !db.allowRelaxedPackagerChecksFor(this->package.mangledName())) {
-            if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedPackagePrivateName)) {
-                auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
-                auto definedHereLoc = lit.symbol.loc(ctx);
-                if (definedHereLoc.file().data(ctx).isRBI()) {
-                    e.addErrorSection(core::ErrorSection(
-                        core::ErrorColors::format(
-                            "Consider marking this RBI file `{}` if it is meant to declare unpackaged constants",
-                            "# packaged: false"),
-                        {core::ErrorLine(definedHereLoc, "")}));
-                } else {
-                    e.addErrorLine(definedHereLoc, "Defined here");
-                }
-
-                auto symToExport = lit.symbol;
-                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                if (enumClass.exists()) {
-                    symToExport = enumClass;
-                }
-                if (auto exp = pkg.addExport(ctx, symToExport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
-                if (!db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
+            auto symToExport = lit.symbol;
+            auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+            if (enumClass.exists()) {
+                symToExport = enumClass;
             }
-
+            exports[symToExport].emplace_back(lit.loc);
             return;
         }
 
