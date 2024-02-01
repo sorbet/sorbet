@@ -8,13 +8,18 @@ module T::Props::WeakConstructor
   # checked(:never) - O(runtime object construction)
   sig {params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never)}
   def initialize(hash={})
-    __t_props_generated_initialize(hash)
+    hash_keys_matching_props = __t_props_generated_initialize(hash)
+
+    if hash_keys_matching_props < hash.size
+      raise ArgumentError.new("#{self.class}: Unrecognized properties: #{(hash.keys - self.class.decorator.props.keys).join(', ')}")
+    end
   end
 
   private def __t_props_generated_initialize(hash)
     # No-op; will be overridden if there are any props.
     #
     # To see the definition for class `Foo`, run `Foo.decorator.send(:generate_initialize_source)`
+    0
   end
 end
 
