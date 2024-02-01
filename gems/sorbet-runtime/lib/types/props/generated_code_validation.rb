@@ -83,39 +83,18 @@ module T::Props
       assert_equal(s(:args, s(:arg, :hash)), args)
 
       assert_equal(:begin, body.type)
-      found_init, decorator_init, *prop_clauses, unrecognized_check = body.children
+      found_init, decorator_init, *prop_clauses, found_return = body.children
 
       # found = %<prop_count>
       # decorator = self.class.decorator
       # ...
-      # if found < hash.size
-      #   raise ArgumentError.new("\#{self.class}: Unrecognized properties: \#{(hash.keys - decorator.props.keys).join(', ')}")
-      # end
+      # found
       assert_equal(:lvasgn, found_init.type)
       found_init_name, found_init_val = found_init.children
       assert_equal(:found, found_init_name)
       assert_equal(:int, found_init_val.type)
       assert_equal(s(:lvasgn, :decorator, self_class_decorator), decorator_init)
-
-      assert_equal(:if, unrecognized_check.type)
-      condition, if_body = unrecognized_check.children
-      assert_equal(:send, condition.type)
-      left, comparison, right = condition.children
-      assert_equal(s(:lvar, :found), left)
-      assert_equal(:<, comparison)
-      assert_equal(s(:send, s(:lvar, :hash), :size), right)
-
-      _, method, arg = if_body.children
-      assert_equal(:raise, method)
-      assert_equal(:send, arg.type)
-
-      error, _, message = arg.children
-      assert_equal(s(:const, nil, :ArgumentError), error)
-
-      interpolation1, str, interpolation2 = message.children
-      assert_equal(s(:begin, s(:send, s(:self), :class)), interpolation1)
-      assert_equal(:str, str.type)
-      assert_equal(s(:begin, s(:send, s(:begin, s(:send, s(:send, s(:lvar, :hash), :keys), :-, s(:send, s(:send, s(:lvar, :decorator), :props), :keys))), :join, s(:str, ", "))), interpolation2)
+      assert_equal(s(:lvar, :found), found_return)
 
       prop_clauses.each_with_index do |clause, i|
         if i.even?

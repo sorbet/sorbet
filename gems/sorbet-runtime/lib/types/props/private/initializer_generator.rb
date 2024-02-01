@@ -73,9 +73,7 @@ module T::Props
 
             #{parts.join("\n\n")}
 
-            if found < hash.size
-              raise ArgumentError.new("\#{self.class}: Unrecognized properties: \#{(hash.keys - decorator.props.keys).join(', ')}")
-            end
+            found
           end
         RUBY
       end
