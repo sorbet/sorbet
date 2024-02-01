@@ -9,7 +9,7 @@ module Foo
 
   sig {returns(String)}
   def self.greeting
-         # ^^^^^^^^ apply-code-action: [A] Move method to a new module
+         # | apply-code-action: [A] Move method to a new module
     'Hello'
   end
 

@@ -14,4 +14,6 @@
 class A < T::Struct
   prop :x, String
 #      ^^ apply-code-action: [C] Extract Variable
+  prop :y, String
+#          ^^^^^^ apply-code-action: [D] Extract Variable
 end

@@ -6,5 +6,5 @@
 
 class Foo < T::Struct
   prop :bar, Integer
- # ^ apply-code-action: [A] Move method to a new module
+ # | apply-code-action: [A] Move method to a new module
 end

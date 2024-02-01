@@ -6,5 +6,5 @@
 
 class TestDSLBuilder
   dsl_required :example1, String
-  #                         ^ apply-code-action: [A] Move method to a new module
+  #                         | apply-code-action: [A] Move method to a new module
 end

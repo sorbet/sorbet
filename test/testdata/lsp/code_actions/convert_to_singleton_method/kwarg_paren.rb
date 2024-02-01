@@ -3,7 +3,7 @@
 
 class A
   def example(x:)
-    # ^ apply-code-action: [A] Convert to singleton class method (best effort)
+    # | apply-code-action: [A] Convert to singleton class method (best effort)
   end
 end
 

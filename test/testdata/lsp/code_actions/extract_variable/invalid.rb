@@ -113,9 +113,6 @@ rescue Exception => e
 end
 
 class B < T::Struct
-  const :bar, String
-#             ^^^^^^ apply-code-action: [A] Extract Variable
-
   const :baz, String
 # ^^^^^ apply-code-action: [A] Extract Variable
 end

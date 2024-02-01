@@ -7,7 +7,7 @@ class A
 
   sig {params(x: Integer).void}
   def unary(x)
-    # ^ apply-code-action: [A] Convert to singleton class method (best effort)
+    # | apply-code-action: [A] Convert to singleton class method (best effort)
     puts "Hello, peter."
   end
 

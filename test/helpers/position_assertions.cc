@@ -231,7 +231,7 @@ bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::F
 
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
-const regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z0-9-]+): (.*)$");
+const regex rangeAssertionRegex("(#[ ]*)(\\^*|\\|*)[ ]*([a-zA-Z0-9-]+): (.*)$");
 
 const regex whitespaceRegex("^[ ]*$");
 
@@ -577,6 +577,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
         smatch matches;
         if (regex_search(line, matches, rangeAssertionRegex)) {
             int numCarets = matches[2].str().size();
+            bool zeroLenSelection = matches[2].str()[0] == '|';
             auto textBeforeComment = matches.prefix().str();
             bool lineHasCode = !regex_match(textBeforeComment, whitespaceRegex);
             if (numCarets != 0) {
@@ -592,6 +593,13 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                     // Ignore erroneous comment.
                     continue;
                 }
+                if (zeroLenSelection && numCarets > 1) {
+                    // Position assertion with no selection
+                    ADD_FAIL_CHECK_AT(filename.c_str(), lineNum + 1,
+                                      fmt::format("Invalid assertion comment found on line {}:\n{}\nAssertions with | "
+                                                  "should only point to 1 character",
+                                                  lineNum, line));
+                }
             }
 
             if (numCarets == 0 && lineHasCode) {
@@ -606,7 +614,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
             unique_ptr<Range> range;
             if (numCarets > 0) {
                 int caretBeginPos = textBeforeComment.size() + matches[1].str().size();
-                int caretEndPos = caretBeginPos + numCarets;
+                int caretEndPos = caretBeginPos + (zeroLenSelection ? 0 : numCarets);
                 range = RangeAssertion::makeRange(lastSourceLineNum, caretBeginPos, caretEndPos);
             } else if (assertionContents == "unexpected token tNL") {
                 range = RangeAssertion::makeRange(lineNum);

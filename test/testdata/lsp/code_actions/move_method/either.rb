@@ -8,7 +8,7 @@ module Either
     extend T::Sig
     sig {void}
     def self.foo; end
-      # ^ apply-code-action: [A] Move method to a new module
+      # | apply-code-action: [A] Move method to a new module
   end
 
   class Right
