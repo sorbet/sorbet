@@ -686,5 +686,27 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
         T::Props::HasLazilySpecializedMethods.remove_instance_variable(:@lazy_evaluation_disabled)
       end
     end
+
+    describe 'does not overwrite user-declared initialize' do
+      it 'works' do
+        m = Class.new do
+          include T::Props::WeakConstructor
+
+          prop :foo, T.nilable(String)
+
+          def initialize(foo)
+            raise "raising with #{foo}"
+          end
+        end
+
+        m.decorator.eagerly_define_lazy_methods!
+
+        ex = assert_raises(StandardError) do
+          m.new('secret value')
+        end
+
+        assert_equal('raising with secret value', ex.message)
+      end
+    end
   end
 end
