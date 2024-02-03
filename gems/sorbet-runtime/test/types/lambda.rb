@@ -13,10 +13,10 @@ module Opus::Types::Test
     end
 
     it "raises an error if arity does not match" do
-      lambda = T.lambda { |x: Integer| x + 1 }
+      lambda = T.lambda {|x: Integer| x + 1}
 
       assert_raises(ArgumentError) do
-        lambda.call()
+        lambda.call
       end
 
       assert_raises(ArgumentError) do
@@ -25,7 +25,7 @@ module Opus::Types::Test
     end
 
     it "raises an error if the parameters are not kwarg shaped" do
-      lambda = T.lambda { |x| x + 1 }
+      lambda = T.lambda {|x| x + 1}
 
       assert_raises(TypeError) do
         lambda.call(5)
