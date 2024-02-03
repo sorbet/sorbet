@@ -1,0 +1,15 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  lam = <emptyTree>::<C Proc>.new() do |x, y|
+    begin
+      x = <cast:let>(x, <todo sym>, <emptyTree>::<C Integer>)
+      y = <cast:let>(y, <todo sym>, <emptyTree>::<C String>)
+      begin
+        <emptyTree>::<C T>.reveal_type(x)
+        <emptyTree>::<C T>.reveal_type(y)
+        y.upcase().*(x)
+      end
+    end
+  end
+
+  lam.call(2, "foo")
+end
