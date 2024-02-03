@@ -48,11 +48,16 @@ bool TLambda::run(core::MutableContext ctx, ast::Send *send) {
     for (auto &arg : block->args) {
         auto optArg = ast::cast_tree<ast::OptionalArg>(arg);
         if (!optArg) {
-            // TODO: only allow kwargs with defaults! This is an error!
+            if (auto e = ctx.beginError(arg.loc(), core::errors::Rewriter::BadTLambdaSyntax)) {
+                e.setHeader("All parameters in a {} must have a type", "T.lambda");
+            }
             return false;
         }
         auto kwarg = ast::cast_tree<ast::KeywordArg>(optArg->expr);
         if (!kwarg) {
+            if (auto e = ctx.beginError(arg.loc(), core::errors::Rewriter::BadTLambdaSyntax)) {
+                e.setHeader("All paramters in a {} must use keyword syntax", "T.lambda");
+            }
             return false;
         }
 

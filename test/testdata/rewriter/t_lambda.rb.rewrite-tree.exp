@@ -12,4 +12,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   lam.call(2, "foo")
+
+  <emptyTree>::<C T>.lambda() do |num|
+    <emptyTree>
+  end
+
+  <emptyTree>::<C T>.lambda() do |num = <emptyTree>::<C Integer>|
+    <emptyTree>
+  end
 end

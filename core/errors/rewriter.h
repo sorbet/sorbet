@@ -18,5 +18,6 @@ constexpr ErrorClass NilableUntyped{3512, StrictLevel::False};
 // moved to namer:
 // constexpr ErrorClass HasAttachedClassInClass{3513, StrictLevel::False};
 constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::False};
+constexpr ErrorClass BadTLambdaSyntax{3515, StrictLevel::False};
 } // namespace sorbet::core::errors::Rewriter
 #endif
