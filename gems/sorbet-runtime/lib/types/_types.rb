@@ -278,6 +278,25 @@ module T
     end
   end
 
+  # A convenient helper for the common case of typed lambdas with positional
+  # parameters.
+  def self.lambda(&blk)
+    Proc.new do |*args|
+      params = blk.parameters
+      if params.size != args.size
+        raise ArgumentError.new("wrong number of arguments (given #{args.size}, expected #{params.size})")
+      end
+
+      kwargs = params.zip(args).map do |(type, name), value|
+        if type != :key
+          raise TypeError.new("All parameters to `T.lambda` must be given a type")
+        end
+        [name, value]
+      end.to_h
+      blk.call(**kwargs)
+    end
+  end
+
   ### Generic classes ###
 
   module Array
