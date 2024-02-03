@@ -443,6 +443,9 @@ module IRB
   # Quits irb
   def self.irb_exit(irb, ret); end
 
+  sig { params(ap_path: T.nilable(String), argv: T::Array[String]).void }
+  def self.setup(ap_path, argv: ::ARGV); end
+
   # Initializes [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) and
   # creates a new Irb.irb object at the `TOPLEVEL_BINDING`
   def self.start(ap_path = _); end
