@@ -1,9 +1,9 @@
 # typed: true
 
-lam = T.lambda do |x: Integer, y: String|
+lam = T.lambda do |x: Integer, y: T::Array[String]|
   T.reveal_type(x) # error: Revealed type: `Integer`
-  T.reveal_type(y) # error: Revealed type: `String`
-  y.upcase * x
+  T.reveal_type(y) # error: Revealed type: `T::Array[String]`
+  y.map(&:upcase) * x
 end
 
 lam.call(2, "foo")

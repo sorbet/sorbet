@@ -147,7 +147,6 @@ public:
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
-
                 },
 
                 [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },

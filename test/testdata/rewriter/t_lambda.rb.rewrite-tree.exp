@@ -2,11 +2,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   lam = <emptyTree>::<C Proc>.new() do |x, y|
     begin
       x = <cast:let>(x, <todo sym>, <emptyTree>::<C Integer>)
-      y = <cast:let>(y, <todo sym>, <emptyTree>::<C String>)
+      y = <cast:let>(y, <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
       begin
         <emptyTree>::<C T>.reveal_type(x)
         <emptyTree>::<C T>.reveal_type(y)
-        y.upcase().*(x)
+        y.map() do |*<block-pass>$2|
+          ::<Magic>.<call-with-splat>(<block-pass>$2.[](0), :upcase, ::<Magic>.<splat>(<block-pass>$2.[](1, 9223372036854775807)), nil)
+        end.*(x)
       end
     end
   end

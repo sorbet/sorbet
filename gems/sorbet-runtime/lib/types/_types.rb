@@ -281,7 +281,7 @@ module T
   # A convenient helper for the common case of typed lambdas with positional
   # parameters.
   def self.lambda(&blk)
-    Proc.new do |*args|
+    ::Proc.new do |*args|
       params = blk.parameters
       if params.size != args.size
         raise ArgumentError.new("wrong number of arguments (given #{args.size}, expected #{params.size})")

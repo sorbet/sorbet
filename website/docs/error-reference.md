@@ -545,6 +545,13 @@ This error code is from an old Sorbet version. It's equivalent to error 4023:
 The `has_attached_class!` annotation cannot be given a contravariant `:in`
 annotation because `T.attached_class` is only allowed in output positions.
 
+## 3515
+
+The `T.lambda` sugar for typed anonymous functions requires that you use Ruby
+keyword syntax in order to associate an explicit type with every parameter. You
+cannot use it with positional parameters, and you cannot use keywords without a
+static type provided.
+
 ## 3702
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are

@@ -40,7 +40,8 @@ bool TLambda::run(core::MutableContext ctx, ast::Send *send) {
     // we now know it's got a block; start assembling a fake proc we'll replace it with
 
     // We've got to do two things with the arguments: first, turn them into positional args for the block arguments;
-    // second give each one a `T.let` at the beginning of the proc to give it a type. We'll walk over the kwargs and do both simultaneously.
+    // second give each one a `T.let` at the beginning of the proc to give it a type. We'll walk over the kwargs and do
+    // both simultaneously.
     ast::InsSeq::STATS_store newBody;
     ast::MethodDef::ARGS_store newArgs;
 
@@ -73,7 +74,8 @@ bool TLambda::run(core::MutableContext ctx, ast::Send *send) {
     }
 
     // the new block
-    auto newBlock = ast::MK::Block(block->loc, ast::MK::InsSeq(block->loc, std::move(newBody), move(block->body)), std::move(newArgs));
+    auto newBlock = ast::MK::Block(block->loc, ast::MK::InsSeq(block->loc, std::move(newBody), move(block->body)),
+                                   std::move(newArgs));
 
     // pass that to `Proc.new`
     auto procConst = ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Proc());
