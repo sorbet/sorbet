@@ -190,6 +190,9 @@ class Struct < Object
   sig {returns(T::Array[Symbol])}
   def self.members; end
 
+  sig {returns(T.nilable(String))}
+  def name; end
+
   # Create a new instance of a struct subclass. The number of value parameters
   # must be less than or equal to the number of attributes defined for the
   # structure. Unset parameters default to nil.  Passing more parameters than
