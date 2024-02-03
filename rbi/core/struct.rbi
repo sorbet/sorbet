@@ -45,6 +45,77 @@ class Struct < Object
   end
   def initialize(arg0, *arg1, keyword_init: false, &blk); end
 
+  #  call-seq:
+  #    Struct.new([class_name] [, member_name]+)                        -> StructClass
+  #    Struct.new([class_name] [, member_name]+, keyword_init: true)    -> StructClass
+  #    Struct.new([class_name] [, member_name]+) {|StructClass| block } -> StructClass
+  #    StructClass.new(value, ...)                                      -> object
+  #    StructClass[value, ...]                                          -> object
+  #
+  #  The first two forms are used to create a new Struct subclass +class_name+
+  #  that can contain a value for each +member_name+.  This subclass can be
+  #  used to create instances of the structure like any other Class.
+  #
+  #  If the +class_name+ is omitted an anonymous structure class will be
+  #  created.  Otherwise, the name of this struct will appear as a constant in
+  #  class Struct, so it must be unique for all Structs in the system and
+  #  must start with a capital letter.  Assigning a structure class to a
+  #  constant also gives the class the name of the constant.
+  #
+  #     # Create a structure with a name under Struct
+  #     Struct.new("Customer", :name, :address)
+  #     #=> Struct::Customer
+  #     Struct::Customer.new("Dave", "123 Main")
+  #     #=> #<struct Struct::Customer name="Dave", address="123 Main">
+  #
+  #     # Create a structure named by its constant
+  #     Customer = Struct.new(:name, :address)
+  #     #=> Customer
+  #     Customer.new("Dave", "123 Main")
+  #     #=> #<struct Customer name="Dave", address="123 Main">
+  #
+  #  If the optional +keyword_init+ keyword argument is set to +true+,
+  #  .new takes keyword arguments instead of normal arguments.
+  #
+  #     Customer = Struct.new(:name, :address, keyword_init: true)
+  #     Customer.new(name: "Dave", address: "123 Main")
+  #     #=> #<struct Customer name="Dave", address="123 Main">
+  #
+  #  If a block is given it will be evaluated in the context of
+  #  +StructClass+, passing the created class as a parameter:
+  #
+  #     Customer = Struct.new(:name, :address) do
+  #       def greeting
+  #         "Hello #{name}!"
+  #       end
+  #     end
+  #     Customer.new("Dave", "123 Main").greeting  #=> "Hello Dave!"
+  #
+  #  This is the recommended way to customize a struct.  Subclassing an
+  #  anonymous struct creates an extra anonymous class that will never be used.
+  #
+  #  The last two forms create a new instance of a struct subclass.  The number
+  #  of +value+ parameters must be less than or equal to the number of
+  #  attributes defined for the structure.  Unset parameters default to +nil+.
+  #  Passing more parameters than number of attributes will raise
+  #  an ArgumentError.
+  #
+  #     Customer = Struct.new(:name, :address)
+  #     Customer.new("Dave", "123 Main")
+  #     #=> #<struct Customer name="Dave", address="123 Main">
+  #     Customer["Dave"]
+  #     #=> #<struct Customer name="Dave", address=nil>
+  sig do
+    params(
+        arg0: T.any(Symbol, String),
+        arg1: T.any(Symbol, String),
+        keyword_init: T::Boolean,
+        blk: T.untyped,
+    )
+    .returns(T.untyped)
+  end
+  def self.new(arg0, *arg1, keyword_init: false, &blk); end
+
   # Equality---Returns `true` if `other` has the same struct subclass and has
   # equal member values (according to Object#==).
   #
@@ -189,9 +260,6 @@ class Struct < Object
 
   sig {returns(T::Array[Symbol])}
   def self.members; end
-
-  sig {returns(T.nilable(String))}
-  def name; end
 
   # Create a new instance of a struct subclass. The number of value parameters
   # must be less than or equal to the number of attributes defined for the
