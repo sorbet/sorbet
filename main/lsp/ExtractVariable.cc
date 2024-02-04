@@ -131,9 +131,7 @@ public:
     }
 };
 
-vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerDelegate &typechecker,
-                                                                 const LSPConfiguration &config,
-                                                                 const core::Loc selectionLoc) {
+vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurrenceEdits() {
     auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
