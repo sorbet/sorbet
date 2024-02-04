@@ -771,29 +771,40 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             return;
         }
 
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
-        tp.origins.emplace_back(loc);
-        if (tp.type.isUntyped()) {
-            tp.type = core::Types::falsyTypes();
+        auto fnd = _vars.find(cond);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
+        core::TypePtr type;
+        if (taoType.isUntyped()) {
+            type = core::Types::falsyTypes();
         } else {
-            tp.type = core::Types::all(ctx, tp.type, core::Types::falsyTypes());
-            if (tp.type.isBottom()) {
+            type = core::Types::all(ctx, taoType, core::Types::falsyTypes());
+            if (type.isBottom()) {
                 isDead = true;
                 return;
             }
         }
-        setTypeAndOrigin(cond, tp);
+        if (fnd == _vars.end()) {
+            _vars.try_emplace(cond, std::move(type), loc);
+        } else {
+            fnd->second.typeAndOrigins.type = move(type);
+            fnd->second.typeAndOrigins.origins.emplace_back(loc);
+        }
     } else {
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
-        tp.origins.emplace_back(loc);
-        tp.type = core::Types::dropSubtypesOf(ctx, core::Types::dropSubtypesOf(ctx, tp.type, core::Symbols::NilClass()),
-                                              core::Symbols::FalseClass());
-        if (tp.type.isBottom()) {
+        auto fnd = _vars.find(cond);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
+        core::TypePtr type = core::Types::dropSubtypesOf(ctx, core::Types::dropSubtypesOf(ctx, taoType, core::Symbols::NilClass()),
+                                                         core::Symbols::FalseClass());
+        if (type.isBottom()) {
             isDead = true;
             return;
         }
-        setTypeAndOrigin(cond, tp);
-        _vars[cond].knownTruthy = true;
+        if (fnd == _vars.end()) {
+            fnd = _vars.try_emplace(cond, std::move(type), loc).first;
+        } else {
+            fnd->second.typeAndOrigins.type = move(type);
+            fnd->second.typeAndOrigins.origins.emplace_back(loc);
+        }
+        fnd->second.knownTruthy = true;
     }
 
     if (isDead) {
@@ -808,14 +819,20 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
-        auto glbbed = core::Types::all(ctx, tp.type, typeTested.second);
-        if (tp.type != glbbed) {
-            tp.origins.emplace_back(loc);
-            tp.type = std::move(glbbed);
+        auto fnd = _vars.find(typeTested.first);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
+        auto glbbed = core::Types::all(ctx, taoType, typeTested.second);
+        if (taoType != glbbed) {
+            if (fnd == _vars.end()) {
+                fnd = _vars.try_emplace(typeTested.first, std::move(glbbed), loc).first;
+            } else {
+                fnd->second.typeAndOrigins.type = std::move(glbbed);
+                fnd->second.typeAndOrigins.origins.emplace_back(loc);
+            }
+        } else if (fnd == _vars.end()) {
+            fnd = _vars.try_emplace(typeTested.first, uninitialized).first;
         }
-        setTypeAndOrigin(typeTested.first, tp);
-        if (tp.type.isBottom()) {
+        if (fnd->second.typeAndOrigins.type.isBottom()) {
             isDead = true;
             return;
         }
@@ -825,13 +842,18 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
-        tp.origins.emplace_back(loc);
+        auto fnd = _vars.find(typeTested.first);
+        const auto &taoType = fnd == _vars.end() ? uninitialized.type : fnd->second.typeAndOrigins.type;
 
-        if (!tp.type.isUntyped()) {
-            tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
-            setTypeAndOrigin(typeTested.first, tp);
-            if (tp.type.isBottom()) {
+        if (!taoType.isUntyped()) {
+            auto type = core::Types::approximateSubtract(ctx, taoType, typeTested.second);
+            if (fnd == _vars.end()) {
+                fnd = _vars.try_emplace(typeTested.first, std::move(type), loc).first;
+            } else {
+                fnd->second.typeAndOrigins.type = std::move(type);
+                fnd->second.typeAndOrigins.origins.emplace_back(loc);
+            }
+            if (fnd->second.typeAndOrigins.type.isBottom()) {
                 isDead = true;
                 return;
             }
