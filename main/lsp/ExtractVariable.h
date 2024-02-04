@@ -8,9 +8,15 @@
 namespace sorbet::realmain::lsp {
 
 class VariableExtractor {
+    const LSPTypecheckerDelegate &typechecker;
+    const LSPConfiguration &config;
+    const core::Loc selectionLoc;
+
 public:
-    static std::vector<std::unique_ptr<TextDocumentEdit>>
-    getEdits(LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config, const core::Loc selectionLoc);
+    VariableExtractor(const LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config,
+                      const core::Loc selectionLoc)
+        : typechecker(typechecker), config(config), selectionLoc(selectionLoc) {}
+    std::vector<std::unique_ptr<TextDocumentEdit>> getExtractSingleOccurrenceEdits();
 };
 
 } // namespace sorbet::realmain::lsp

@@ -276,7 +276,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // valid in the first place, to decide if we can show the code action or not.
             Timer timeit(gs.tracer(), "Extract to Variable");
 
-            auto documentEdits = VariableExtractor::getEdits(typechecker, config, loc);
+            VariableExtractor variableExtractor(typechecker, config, loc);
+            auto documentEdits = variableExtractor.getExtractSingleOccurrenceEdits();
             if (!documentEdits.empty()) {
                 auto action = make_unique<CodeAction>("Extract Variable");
                 action->kind = CodeActionKind::RefactorExtract;
