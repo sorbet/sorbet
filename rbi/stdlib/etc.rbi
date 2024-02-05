@@ -569,6 +569,15 @@ class Etc::Group < Struct
     extend T::Generic
     Elem = type_member {{fixed: T.untyped}}
   end
+
+  sig { returns(Integer) }
+  def gid; end
+  sig { returns(T::Array[String]) }
+  def mem; end
+  sig { returns(String) }
+  def name; end
+  sig { returns(String) }
+  def passwd; end
 end
 
 # [`Passwd`](https://docs.ruby-lang.org/en/2.6.0/Etc.html#Passwd)
