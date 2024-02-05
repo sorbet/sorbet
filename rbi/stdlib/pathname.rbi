@@ -971,7 +971,7 @@ class Pathname < Object
     )
     .returns(Integer)
   end
-  def mkdir(p1); end
+  def mkdir(p1=T.unsafe(nil)); end
 
   # Creates a full path, including any intermediate directories that don't yet
   # exist.
