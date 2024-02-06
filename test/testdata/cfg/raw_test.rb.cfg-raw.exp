@@ -7,7 +7,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     color = blue;
 
     "bb::<Class:<root>>#<static-init>_0" [
-        shape = invhouse;
+        shape = cds;
         color = black;
         label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <statTemp>>$4,\l&nbsp;&nbsp;type = Integer(0),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(0) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = NilClass,\l&nbsp;},\l&nbsp;value = Send {\l&nbsp;&nbsp;recv = <self>: T.class_of(<root>),\l&nbsp;&nbsp;fun = <U puts>,\l&nbsp;&nbsp;args = (VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <statTemp>>$4,\l&nbsp;&nbsp;&nbsp;type = Integer(0),\l&nbsp;&nbsp;}),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;},\l}\lVariableUseSite { variable = <U <unconditional>> }\l"
     ];

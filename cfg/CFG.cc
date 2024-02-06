@@ -222,7 +222,7 @@ string CFG::toString(const core::GlobalState &gs) const {
         auto text = basicBlock->toString(gs, *this);
         auto lines = absl::StrSplit(text, "\n");
 
-        auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
+        auto shape = basicBlock->id == 0 ? "cds" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(std::back_inserter(buf),
@@ -276,7 +276,7 @@ string CFG::showRaw(core::Context ctx) const {
         auto text = basicBlock->showRaw(ctx, *this);
         auto lines = absl::StrSplit(text, "\n");
 
-        auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
+        auto shape = basicBlock->id == 0 ? "cds" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(std::back_inserter(buf),
