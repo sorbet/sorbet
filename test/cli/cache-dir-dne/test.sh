@@ -15,5 +15,6 @@ mkdir nope4
 chmod -w nope4
 if main/sorbet --silence-dev-message --cache-dir=nope4/subdir -e 0 2>&1; then
   2>&1 echo 'Expected to fail!'
+  2>&1 ls -l
   exit 1
 fi
