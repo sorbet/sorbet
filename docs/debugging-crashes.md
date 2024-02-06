@@ -63,7 +63,17 @@ To do this:
     > that when invoking Sorbet via the `srb tc` command, Sorbet will also
     > add an extra argument like `@/path/to/.cache/sorbet/...` which Sorbet uses
     > to discover RBI files provided via gems' `rbi/` folders. You may or may
-    > not need to list this extra `@...` argument when running the debugger
+    > not need to list this extra `@...` argument when running the debugger.
+    >
+    > An easy way to list these extra arguments is to run:
+    >
+    > ```bash
+    > SRB_SORBET_EXE=echo srb tc
+    > ```
+    >
+    > (This works by asking `srb` to pretend that the `sorbet` binary is
+    > actually the `echo` command, which has the effect of simply printing the
+    > arguments then exiting without type checking.)
 
 1.  When the crash happens, the debugger will pause execution. You can type
 
