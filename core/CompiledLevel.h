@@ -22,7 +22,7 @@ template <> class SigilTraits<CompiledLevel> {
 public:
     static constexpr CompiledLevel NONE = CompiledLevel::None;
 
-    static constexpr std::string_view SIGIL_PREFIX = "typed:";
+    static constexpr std::string_view SIGIL_PREFIX = "compiled:";
 
     static CompiledLevel fromString(std::string_view s) {
         if (s == "false") {

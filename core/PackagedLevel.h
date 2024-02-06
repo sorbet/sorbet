@@ -16,7 +16,7 @@ template <> class SigilTraits<PackagedLevel> {
 public:
     static constexpr PackagedLevel NONE = PackagedLevel::None;
 
-    static constexpr std::string_view SIGIL_PREFIX = "typed:";
+    static constexpr std::string_view SIGIL_PREFIX = "packaged:";
 
     static PackagedLevel fromString(std::string_view s) {
         if (s == "false") {
