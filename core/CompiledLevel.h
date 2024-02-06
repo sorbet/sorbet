@@ -1,6 +1,7 @@
 #ifndef SORBET_CORE_COMPILED_LEVEL_H
 #define SORBET_CORE_COMPILED_LEVEL_H
 
+#include "core/SigilTraits.h"
 #include <stdint.h>
 
 namespace sorbet::core {
@@ -16,6 +17,24 @@ enum class CompiledLevel : uint8_t {
     // This file should be compiled.
     True = 2,
 };
-}
+
+template <> class SigilTraits<CompiledLevel> {
+public:
+    static constexpr CompiledLevel NONE = CompiledLevel::None;
+
+    static constexpr std::string_view SIGIL_PREFIX = "compiled:";
+
+    static CompiledLevel fromString(std::string_view s) {
+        if (s == "false") {
+            return CompiledLevel::False;
+        } else if (s == "true") {
+            return CompiledLevel::True;
+        } else {
+            return CompiledLevel::None;
+        }
+    }
+};
+
+} // namespace sorbet::core
 
 #endif
