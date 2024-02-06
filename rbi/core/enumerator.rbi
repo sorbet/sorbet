@@ -398,11 +398,12 @@ class Enumerator < Object
   # `offset`
   # :   the starting index to use
   sig do
-    params(
+    type_parameters(:T)
+    .params(
       offset: Integer,
-      blk: T.proc.params(arg0: Elem, arg1: Integer).returns(BasicObject)
+      blk: T.proc.params(arg0: Elem, arg1: Integer).returns(T.type_parameter(:T))
     )
-      .returns(T.untyped)
+    .returns(T.type_parameter(:T))
   end
   sig do
     params(
