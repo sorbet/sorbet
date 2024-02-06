@@ -43,7 +43,7 @@ public:
                 continue;
             }
 
-            start += 6;
+            start += SigilTraits<Sigil>::SIGIL_PREFIX.size();
             while (start < source.size() && source[start] == ' ') {
                 ++start;
             }
