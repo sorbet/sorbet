@@ -5,6 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+// This tree walk takes a Loc and looks for nodes that have that Loc exactly
 class ExtractVariableWalk {
     // The selection loc
     core::Loc targetLoc;
@@ -66,6 +67,7 @@ public:
                 ENFORCE(!enclosingClassStack.empty());
                 enclosingClass = enclosingClassStack.back();
                 if (!enclosingMethodStack.empty()) {
+                    fmt::print("enclosingMethodStack is not empty\n");
                     enclosingMethod = enclosingMethodStack.back();
                 }
             }
@@ -152,13 +154,30 @@ public:
     }
 };
 
+// This tree walk take a ExpressionPtr and looks for nodes that are the same as that node
+class ExtractVariableWalk2 {
+    ast::ExpressionPtr *targetNode;
+public:
+    int numMatches;
+    ExtractVariableWalk2(ast::ExpressionPtr *matchingNode) : targetNode(matchingNode), numMatches(0) {}
+
+    void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
+        // TODO: this just check pointer equality
+        // need a way to check object equality
+        if (tree == *targetNode) {
+            numMatches += 1;
+        }
+    }
+};
+
 vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurrenceEdits() {
-    auto file = selectionLoc.file();
+    const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
     ExtractVariableWalk extractVariableWalk(selectionLoc);
     auto desugaredTree = typechecker.getDesugared(file);
     core::Context ctx(gs, core::Symbols::root(), file);
+    // TODO: changing the TreeWalk to ConstTreeWalk causes an ENFORCE failure, figure out why
     ast::TreeWalk::apply(ctx, extractVariableWalk, desugaredTree);
 
     if (!extractVariableWalk.foundExactMatch()) {
@@ -168,6 +187,14 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
     auto locOffsets = selectionLoc.offsets();
     auto whereToInsert = core::LocOffsets::none();
     auto enclosingScope = extractVariableWalk.enclosingScope;
+    // TODO: can we avoid deepCopy?
+    matchingNode = extractVariableWalk.matchingNode->deepCopy();
+    if (extractVariableWalk.enclosingMethod) {
+        enclosingClassOrMethod = extractVariableWalk.enclosingMethod->deepCopy();
+    } else {
+        fmt::print("setting class\n");
+        enclosingClassOrMethod = extractVariableWalk.enclosingClass->deepCopy();
+    }
     // For all cases except InsSeq and ClassDef, extractVariableWalk.enclosingScopeLoc should be
     // the same as what we're pulling out from the ExpressionPtr, but we'll just get it directly
     // for consistency.
@@ -285,5 +312,21 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
     vector<unique_ptr<TextDocumentEdit>> res;
     res.emplace_back(move(docEdit));
     return res;
+}
+
+vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractMultipleOccurrenceEdits() {
+    ENFORCE(matchingNode, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
+    ENFORCE(enclosingClassOrMethod, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
+
+    const auto file = selectionLoc.file();
+    const auto &gs = typechecker.state();
+
+    ExtractVariableWalk2 extractVariableWalk(&matchingNode);
+    core::Context ctx(gs, core::Symbols::root(), file);
+    ast::ConstTreeWalk::apply(ctx, extractVariableWalk, enclosingClassOrMethod);
+
+    fmt::print("numMatches: {}\n", extractVariableWalk.numMatches);
+
+    return {};
 }
 } // namespace sorbet::realmain::lsp

@@ -11,12 +11,15 @@ class VariableExtractor {
     const LSPTypecheckerDelegate &typechecker;
     const LSPConfiguration &config;
     const core::Loc selectionLoc;
+    ast::ExpressionPtr matchingNode;
+    ast::ExpressionPtr enclosingClassOrMethod;
 
 public:
     VariableExtractor(const LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config,
                       const core::Loc selectionLoc)
-        : typechecker(typechecker), config(config), selectionLoc(selectionLoc) {}
+        : typechecker(typechecker), config(config), selectionLoc(selectionLoc), matchingNode(), enclosingClassOrMethod(nullptr) {}
     std::vector<std::unique_ptr<TextDocumentEdit>> getExtractSingleOccurrenceEdits();
+    std::vector<std::unique_ptr<TextDocumentEdit>> getExtractMultipleOccurrenceEdits();
 };
 
 } // namespace sorbet::realmain::lsp

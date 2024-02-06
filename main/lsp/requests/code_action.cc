@@ -277,13 +277,14 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             Timer timeit(gs.tracer(), "Extract to Variable");
 
             VariableExtractor variableExtractor(typechecker, config, loc);
-            auto documentEdits = variableExtractor.getExtractSingleOccurrenceEdits();
-            if (!documentEdits.empty()) {
+            auto singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits();
+            if (!singleOccurrenceDocumentEdits.empty()) {
+                auto multipleOccurrenceDocumentEdits = variableExtractor.getExtractMultipleOccurrenceEdits();
                 auto action = make_unique<CodeAction>("Extract Variable");
                 action->kind = CodeActionKind::RefactorExtract;
 
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
-                workspaceEdit->documentChanges = move(documentEdits);
+                workspaceEdit->documentChanges = move(singleOccurrenceDocumentEdits);
 
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));

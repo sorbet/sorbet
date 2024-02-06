@@ -238,6 +238,7 @@ public:
         using std::swap;
         swap(this->ptr, other.ptr);
     }
+    bool deepEqual(ExpressionPtr &other) { return false; }
 };
 
 template <class E, typename... Args> ExpressionPtr make_expression(Args &&...args) {
@@ -380,6 +381,13 @@ public:
     std::string nodeName() const;
 
     void _sanityCheck();
+
+    bool deepEqual(ExpressionPtr &other) {
+        if (auto o = ast::cast_tree<ast::ClassDef>(other)) {
+            return symbol == o->symbol && kind == o->kind && rhs == o->rhs && name == o->name && ancestors == o->ancestors;
+        }
+        return false;
+    }
 };
 CheckSize(ClassDef, 120, 8);
 
