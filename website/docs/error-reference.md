@@ -4347,6 +4347,70 @@ This was separated from [7015](#7015) to maintain this error in
 `# typed: strict` and above, but allow for [7015](#7015) to be enforced at lower
 strictness levels.
 
+## 7051
+
+When a method's signature is marked `.void`, Sorbet replaces the result value of
+the method with a special singleton value, so that callers downstream of the
+method cannot depend on whatever value the method happens to return.
+
+(See
+[`returns` & `void`: Annotating return types](sigs.md#returns--void-annotating-return-types))
+
+One thing to be aware of is that this special singleton value is truthy (because
+the only two values that are falsy in the Ruby VM are `nil` and `false`).
+
+Thus, branching on this special void singleton value is virtually always a bug.
+
+If a method **must be able to return anything** in its body, while still
+branching on the resulting value, use `.returns(T.anything)` instead:
+
+```ruby
+sig { returns(T.anything) }
+def example
+  if [true, false].sample
+    ''
+  else
+    false
+  end
+end
+```
+
+See the docs for [T.anything](anything.md) for more.
+
+This error happens if _any_ component of the type includes `void`. For example:
+
+```ruby
+result =
+  if [true, false].sample
+    returns_void
+  else
+    false
+  end
+
+T.reveal_type(result) # => T.any(Sorbet::Private::Static::Void, FalseClass)
+
+if result
+#  ^^^^^^ error
+  puts
+end
+```
+
+This is expected, and the way to fix it is again either to change `returns_void`
+to `returns(T.anything)`, or update the `if` branch to explicitly produce a
+value:
+
+```ruby
+result =
+  if [true, false].sample
+    returns_void
+    true
+  else
+    false
+  end
+
+T.reveal_type(result) # => T::Boolean
+```
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

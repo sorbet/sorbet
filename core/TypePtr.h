@@ -255,6 +255,20 @@ public:
 
     bool hasUntyped() const;
 
+    // This is a hacky, unprincipled method that simply looks for void inside the type at the top
+    // level.
+    //
+    // Before using this method or attempting to cargo-cult it, instead you almost certainly want to
+    // take the principled approach of composing calls methods like  `Types::all` or `isSubType` or
+    // `dropSubtypesOf` (etc.).
+    //
+    // We can't use those for this method because:
+    //
+    // - Checking whether a type uses `void` can't use `isSubType`, because that will say that
+    //   `Object` etc. "use" void.
+    // - Using `dropSubtypesOf` sometimes expand sealed classes to a union of subclasses.
+    bool hasTopLevelVoid() const;
+
     void sanityCheck(const GlobalState &gs) const {
         if constexpr (!debug_mode)
             return;

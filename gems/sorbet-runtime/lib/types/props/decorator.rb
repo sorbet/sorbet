@@ -293,7 +293,7 @@ class T::Props::Decorator
       cls: PropTypeOrClass,
       rules: Rules,
     )
-    .void
+    .returns(T.anything)
     .checked(:never)
   end
   private def prop_nilable?(cls, rules)

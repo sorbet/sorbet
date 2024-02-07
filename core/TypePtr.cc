@@ -221,6 +221,44 @@ bool TypePtr::hasUntyped() const {
     }
 }
 
+bool TypePtr::hasTopLevelVoid() const {
+    switch (tag()) {
+        case Tag::TypeVar:
+        case Tag::NamedLiteralType:
+        case Tag::IntegerLiteralType:
+        case Tag::FloatLiteralType:
+        case Tag::SelfType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::MetaType:
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+            // These cannot have void.
+            return false;
+
+        case Tag::AppliedType:
+        case Tag::TupleType:
+        case Tag::ShapeType:
+            // Unlike hasUntyped, we do not look in type args for this method.
+            return false;
+
+        case Tag::ClassType: {
+            auto c = cast_type_nonnull<ClassType>(*this);
+            return c.symbol == Symbols::void_();
+        }
+        case Tag::OrType: {
+            auto &o = cast_type_nonnull<OrType>(*this);
+            return o.left.hasTopLevelVoid() || o.right.hasTopLevelVoid();
+        }
+        case Tag::AndType: {
+            auto &a = cast_type_nonnull<AndType>(*this);
+            return a.left.hasTopLevelVoid() || a.right.hasTopLevelVoid();
+        }
+    }
+}
+
 core::SymbolRef TypePtr::untypedBlame() const {
     ENFORCE(hasUntyped());
     if (isa_type<BlamedUntyped>(*this)) {
