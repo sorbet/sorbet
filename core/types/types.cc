@@ -2,6 +2,7 @@
 #include "absl/base/casts.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
@@ -147,11 +148,16 @@ TypePtr Types::falsyTypes() {
     return res;
 }
 
+absl::Span<const ClassOrModuleRef> Types::falsySymbols() {
+    static InlinedVector<ClassOrModuleRef, 2> res{Symbols::NilClass(), Symbols::FalseClass()};
+    return res;
+}
+
 TypePtr Types::todo() {
     return make_type<ClassType>(Symbols::todo());
 }
 
-TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass) {
+TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::Span<const ClassOrModuleRef> klasses) {
     TypePtr result;
 
     if (from.isUntyped()) {
@@ -161,8 +167,8 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
     typecase(
         from,
         [&](const OrType &o) {
-            auto lhs = dropSubtypesOf(gs, o.left, klass);
-            auto rhs = dropSubtypesOf(gs, o.right, klass);
+            auto lhs = dropSubtypesOf(gs, o.left, klasses);
+            auto rhs = dropSubtypesOf(gs, o.right, klasses);
             if (lhs == o.left && rhs == o.right) {
                 result = from;
             } else if (lhs.isBottom()) {
@@ -174,8 +180,8 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             }
         },
         [&](const AndType &a) {
-            auto lhs = dropSubtypesOf(gs, a.left, klass);
-            auto rhs = dropSubtypesOf(gs, a.right, klass);
+            auto lhs = dropSubtypesOf(gs, a.left, klasses);
+            auto rhs = dropSubtypesOf(gs, a.right, klasses);
             if (lhs != a.left || rhs != a.right) {
                 result = Types::all(gs, lhs, rhs);
             } else {
@@ -186,51 +192,52 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
+            } else if (absl::c_any_of(klasses,
+                                      [&](auto klass) { return c.symbol == klass || c.derivesFrom(gs, klass); })) {
                 result = Types::bottom();
-            } else if (c.symbol.data(gs)->isClass() && klass.data(gs)->isClass() &&
-                       !klass.data(gs)->derivesFrom(gs, c.symbol)) {
-                // We have two classes (not modules), and if the class we're
-                // removing doesn't derive from `c`, there's nothing to do,
-                // because of ruby having single inheritance.
+            } else if (c.symbol.data(gs)->isClass() && absl::c_all_of(klasses, [&](auto klass) {
+                           return klass.data(gs)->isClass() && !klass.data(gs)->derivesFrom(gs, c.symbol);
+                       })) {
+                // We have two classes (not modules), and if all of the the classes we're removing
+                // don't derive from `c`, there's nothing to do because Ruby has single inheritance.
                 result = from;
             } else if (cdata->flags.isSealed && (cdata->flags.isAbstract || cdata->isModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(gs);
                 ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinite loop");
-                result = dropSubtypesOf(gs, subclasses, klass);
+                result = dropSubtypesOf(gs, subclasses, klasses);
             } else {
                 result = from;
             }
         },
         [&](const AppliedType &a) {
             auto adata = a.klass.data(gs);
-            if (a.klass == klass || a.derivesFrom(gs, klass)) {
+            if (absl::c_any_of(klasses, [&](auto klass) { return a.klass == klass || a.derivesFrom(gs, klass); })) {
                 result = Types::bottom();
-            } else if (a.klass.data(gs)->isClass() && klass.data(gs)->isClass() &&
-                       !klass.data(gs)->derivesFrom(gs, a.klass)) {
-                // We have two classes (not modules), and if the class we're
-                // removing doesn't derive from `a`, there's nothing to do,
-                // because of ruby having single inheritance.
+            } else if (a.klass.data(gs)->isClass() && absl::c_all_of(klasses, [&](auto klass) {
+                           return klass.data(gs)->isClass() && !klass.data(gs)->derivesFrom(gs, a.klass);
+                       })) {
+                // We have two classes (not modules), and if all of the the classes we're removing
+                // don't derive from `c`, there's nothing to do because Ruby has single inheritance.
                 result = from;
             } else if (adata->flags.isSealed && (adata->flags.isAbstract || adata->isModule())) {
                 auto subclasses = adata->sealedSubclassesToUnion(gs);
                 ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinite loop");
-                result = dropSubtypesOf(gs, subclasses, klass);
+                result = dropSubtypesOf(gs, subclasses, klasses);
                 result = Types::all(gs, from, result);
             } else {
                 result = from;
             }
         },
         [&](const TypePtr &) {
-            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klass).isBottom()) {
+            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klasses).isBottom()) {
                 result = Types::bottom();
             } else {
                 result = from;
             }
         });
     SLOW_ENFORCE(Types::isSubType(gs, result, from),
-                 "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from.toString(gs),
-                 klass.showFullName(gs), result.toString(gs));
+                 "dropSubtypesOf({}, [{}]) returned {}, which is not a subtype of the input", from.toString(gs),
+                 fmt::map_join(klasses, ", ", [&](auto klass) { return klass.showFullName(gs); }), result.toString(gs));
     return result;
 }
 
@@ -272,8 +279,8 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
     TypePtr result;
     typecase(
-        what, [&](const ClassType &c) { result = Types::dropSubtypesOf(gs, from, c.symbol); },
-        [&](const AppliedType &c) { result = Types::dropSubtypesOf(gs, from, c.klass); },
+        what, [&](const ClassType &c) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(&c.symbol, 1)); },
+        [&](const AppliedType &c) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(&c.klass, 1)); },
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
@@ -333,7 +340,9 @@ TypePtr Types::tClass(const TypePtr &attachedClass) {
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
-    return Types::dropSubtypesOf(gs, from, Symbols::NilClass());
+    static auto nilClass = core::Symbols::NilClass();
+    static auto toDrop = absl::MakeSpan(&nilClass, 1);
+    return Types::dropSubtypesOf(gs, from, toDrop);
 }
 
 std::optional<int> Types::getProcArity(const AppliedType &type) {

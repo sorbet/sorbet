@@ -786,8 +786,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
     } else {
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
         tp.origins.emplace_back(loc);
-        tp.type = core::Types::dropSubtypesOf(ctx, core::Types::dropSubtypesOf(ctx, tp.type, core::Symbols::NilClass()),
-                                              core::Symbols::FalseClass());
+        tp.type = core::Types::dropSubtypesOf(ctx, tp.type, core::Types::falsySymbols());
         if (tp.type.isBottom()) {
             isDead = true;
             return;

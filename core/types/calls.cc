@@ -3694,7 +3694,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         return;
     }
 
-    auto newSelfType = Types::dropSubtypesOf(gs, dispatched.returnType, core::Symbols::NilClass());
+    auto newSelfType = Types::dropNil(gs, dispatched.returnType);
 
     if (newSelfType.isBottom()) {
         // The result was `nil` (or maybe `T.nilable(T.noreturn)` == `nil`, or maybe just plain `T.noreturn`)
