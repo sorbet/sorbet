@@ -74,3 +74,25 @@ def example5
     puts("Hello")
   end
 end
+
+def example6
+  result =
+    if [true, false].sample
+      returns_void
+    else
+      T.unsafe(0)
+    end
+
+  # This is weird: what happens is that the simplifier makes each `if` branch
+  # jump directly to the block that starts the second block condition, so
+  # there's no intermediate block which joins the control flow and forces the
+  # `result` type to collapse, so despite the `result` variable having type
+  # `T.untyped` once we get to that block, when we check one of the two
+  # branches into that if-entry-block, there's an intermediate state where
+  # Sorbet can see `void`
+
+  if result
+    #^^^^^^ error: Branching on `void` value
+    puts("Hello")
+  end
+end
