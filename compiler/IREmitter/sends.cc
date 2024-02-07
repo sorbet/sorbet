@@ -151,7 +151,7 @@ InlinedVector<ApplicableIntrinsic, NUM_INTRINSICS> applicableIntrinsics(MethodCa
 
         auto potentialClasses = symbolBasedIntrinsic->applicableClasses(mcctx.cs);
         for (auto &c : potentialClasses) {
-            InlinedVector<ClassOrModuleRef, 1> toDrop{c};
+            auto toDrop = absl::MakeSpan(&c, 1);
             auto leftType = core::Types::dropSubtypesOf(mcctx.cs, remainingType, toDrop);
 
             if (leftType == remainingType) {

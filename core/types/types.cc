@@ -198,9 +198,8 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
             } else if (c.symbol.data(gs)->isClass() && absl::c_all_of(klasses, [&](auto klass) {
                            return klass.data(gs)->isClass() && !klass.data(gs)->derivesFrom(gs, c.symbol);
                        })) {
-                // We have two classes (not modules), and if the class we're
-                // removing doesn't derive from `c`, there's nothing to do,
-                // because of ruby having single inheritance.
+                // We have two classes (not modules), and if all of the the classes we're removing
+                // don't derive from `c`, there's nothing to do because Ruby has single inheritance.
                 result = from;
             } else if (cdata->flags.isSealed && (cdata->flags.isAbstract || cdata->isModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(gs);
@@ -217,9 +216,8 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
             } else if (a.klass.data(gs)->isClass() && absl::c_all_of(klasses, [&](auto klass) {
                            return klass.data(gs)->isClass() && !klass.data(gs)->derivesFrom(gs, a.klass);
                        })) {
-                // We have two classes (not modules), and if the class we're
-                // removing doesn't derive from `a`, there's nothing to do,
-                // because of ruby having single inheritance.
+                // We have two classes (not modules), and if all of the the classes we're removing
+                // don't derive from `c`, there's nothing to do because Ruby has single inheritance.
                 result = from;
             } else if (adata->flags.isSealed && (adata->flags.isAbstract || adata->isModule())) {
                 auto subclasses = adata->sealedSubclassesToUnion(gs);
@@ -281,13 +279,8 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
     TypePtr result;
     typecase(
-        what,
-        [&](const ClassType &c) {
-            result = Types::dropSubtypesOf(gs, from, InlinedVector<ClassOrModuleRef, 1>{c.symbol});
-        },
-        [&](const AppliedType &c) {
-            result = Types::dropSubtypesOf(gs, from, InlinedVector<ClassOrModuleRef, 1>{c.klass});
-        },
+        what, [&](const ClassType &c) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(&c.symbol, 1)); },
+        [&](const AppliedType &c) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(&c.klass, 1)); },
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
@@ -347,7 +340,8 @@ TypePtr Types::tClass(const TypePtr &attachedClass) {
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
-    static InlinedVector<ClassOrModuleRef, 1> toDrop{core::Symbols::NilClass()};
+    static auto nilClass = core::Symbols::NilClass();
+    static auto toDrop = absl::MakeSpan(&nilClass, 1);
     return Types::dropSubtypesOf(gs, from, toDrop);
 }
 
