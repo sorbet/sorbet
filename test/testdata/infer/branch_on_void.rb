@@ -96,3 +96,13 @@ def example6
     puts("Hello")
   end
 end
+
+def example7
+  xs = Array(returns_void)
+  T.reveal_type(xs) # error: `T::Array[Sorbet::Private::Static::Void]`
+
+  if xs
+    # No error for void inside applied type
+    puts(xs)
+  end
+end

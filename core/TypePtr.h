@@ -256,11 +256,13 @@ public:
     bool hasUntyped() const;
 
     // This is a hacky, unprincipled method that simply looks for void inside the type at the top
-    // level (not going into AppliedTypes).
+    // level.
     //
-    // Instead of trying to make another method like this (or like hasUntyped for that matter), in
-    // you almost certainly want to craft a call to either `Types::all` or `isSubType` or
-    // `dropSubtypesOf` (etc.) which are more principled interfaces into the type system.
+    // Before using this method or attempting to cargo-cult it, instead you almost certainly want to
+    // take the principled approach of composing calls methods like  `Types::all` or `isSubType` or
+    // `dropSubtypesOf` (etc.).
+    //
+    // We can't use those for this method because:
     //
     // - Checking whether a type uses `void` can't use `isSubType`, because that will say that
     //   `Object` etc. "use" void.

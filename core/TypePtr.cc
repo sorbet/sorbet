@@ -235,7 +235,7 @@ bool TypePtr::hasTopLevelVoid() const {
         case Tag::BlamedUntyped:
         case Tag::UnresolvedAppliedType:
         case Tag::UnresolvedClassType:
-            // These cannot have untyped.
+            // These cannot have void.
             return false;
 
         case Tag::AppliedType:
