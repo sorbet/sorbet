@@ -2718,11 +2718,11 @@ class IO < Object
   # ```
   sig do
     params(
-        arg0: Object,
+        args: Object,
     )
     .returns(Integer)
   end
-  def write(arg0); end
+  def write(*args); end
 
   # Opens the file, optionally seeks to the given *offset*, then returns
   # *length* bytes (defaulting to the rest of the file). binread ensures the
