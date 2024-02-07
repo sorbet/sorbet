@@ -385,6 +385,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 if (auto e = ctx.beginError(bb->bexit.loc, core::errors::Infer::BranchOnVoid)) {
                     e.setHeader("Branching on `{}` value", "void");
                     e.addErrorSection(bexitTpo.explainGot(ctx, methodLoc));
+                    e.addErrorNote("Methods which return `{}` and which are checked at runtime have their\n"
+                                   "    return value replaced with a special void singleton value when called.\n"
+                                   "    It does not make sense to branch on this value.");
                 }
             }
         } else {
