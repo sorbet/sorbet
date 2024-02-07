@@ -227,8 +227,15 @@ effect: <code>void</code>:</p>
 of a <code>void</code> method.</p></li>
 <li><p>In the runtime, <code>sorbet-runtime</code> will <em>throw away</em> the result of our method,
 and return a dummy value instead. (All <code>void</code> methods return the same dummy
-value.) This prevents untyped code from silently depending on what we return.</p></li>
+value.)</p>
+<p>If you do not want this behavior, either use <code>returns(T.anything)</code> instead
+(<a href="/docs/anything">docs for <code>T.anything</code></a>), or
+<a href="/docs/runtime">disable runtime checking</a> for that method (or all methods).</p></li>
 </ul>
+<p>Replacing the return value with a meaningless value prevents untyped code from
+silently depending on what a typed method returns, so that the implementation is
+free to change without worry of breaking existing code which silently depended
+on the result of the method being meaningful.</p>
 <p>Concretely, here’s a full example of how to use <code>void</code> to type methods with
 useless returns:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
