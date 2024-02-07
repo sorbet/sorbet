@@ -379,9 +379,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     e.setHeader("Conditional branch on `{}`", "T.untyped");
                     core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, bexitTpo, methodLoc);
                 }
-            } else if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() &&
-                       core::Types::approximateSubtract(ctx, bexitTpo.type, core::Types::void_()) != bexitTpo.type) {
-                // The check for unconditional is a performance optimization
+            } else if (bb->bexit.cond.variable != cfg::LocalRef::unconditional() && bexitTpo.type.hasTopLevelVoid()) {
                 if (auto e = ctx.beginError(bb->bexit.loc, core::errors::Infer::BranchOnVoid)) {
                     e.setHeader("Branching on `{}` value", "void");
                     e.addErrorSection(bexitTpo.explainGot(ctx, methodLoc));
