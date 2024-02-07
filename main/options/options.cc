@@ -434,6 +434,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output",
                                     cxxopts::value<string>()->implicit_value("everywhere"),
                                     "{[nowhere],everywhere,everywhere-but-tests}");
+    options.add_options("advanced")("suppress-payload-superclass-redefinition-for",
+                                    "Explicitly supress the superclass redefinition error for the specified class "
+                                    "defined in Sorbet's payload. May be repeated.",
+                                    cxxopts::value<vector<string>>(), "Fully::Qualified::ClassName");
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
@@ -1055,6 +1059,13 @@ void readOptions(Options &opts,
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
         opts.typedSuper = raw["typed-super"].as<bool>();
+
+        if (raw.count("suppress-payload-superclass-redefinition-for") > 0) {
+            for (auto childClassName : raw["suppress-payload-superclass-redefinition-for"].as<vector<string>>()) {
+                opts.suppressPayloadSuperclassRedefinitionFor.emplace_back(childClassName);
+            }
+        }
+
         if (raw.count("error-white-list") > 0) {
             logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
             auto rawList = raw["error-white-list"].as<vector<int>>();
