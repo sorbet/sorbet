@@ -9,7 +9,7 @@ def example1
   x = returns_void
 
   if x
-    #^ error: Branching on `void` value, which is always truthy
+    #^ error: Branching on `void` value
     puts("Hello")
   end
 end
@@ -23,7 +23,7 @@ def example2
     end
 
   if result
-    #^^^^^^ error: Branching on `void`, which might be truthy
+    #^^^^^^ error: Branching on `void`
     puts("Hello")
   end
 end
@@ -37,9 +37,9 @@ def example3
     end
 
   if result
-    #^^^^^^ error: Branching on `void`, which might be truthy
+    #^^^^^^ error: Branching on `void`
+    #^^^^^^ error: Branching on `void`
     puts("Hello")
-    T.reveal_type(result)
   end
 end
 
@@ -54,6 +54,7 @@ def example4
   puts('force control flow to join')
 
   if result
+    #^^^^^^ error: Branching on `void` value
     puts("Hello")
   end
 end
@@ -69,6 +70,7 @@ def example5
   puts('force control flow to join')
 
   if result
+    #^^^^^^ error: Branching on `void` value
     puts("Hello")
   end
 end
