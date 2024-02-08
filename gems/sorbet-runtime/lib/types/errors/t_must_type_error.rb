@@ -2,7 +2,15 @@
 # typed: true
 
 class T::MustTypeError < TypeError
-  # This approximates what the error_highlight gem does.
+  # This approximates what the error_highlight gem does (ErrorHighlight::CoreExt).
+  # We have chosen not to use that so that we can customize like the
+  # `point_type` in the call to ErrorHighlight.spot and generally just have
+  # more control over the logic as it might change across Ruby and gem versions.
+  #
+  # You are encouraged to understand this file by way of cross-referencing with
+  # https://github.com/ruby/error_highlight/blob/master/lib/error_highlight/core_ext.rb
+  # and/or
+  # https://github.com/ruby/error_highlight/blob/80ede6b8ca3219310f30cff42cd17177a7e47f25/lib/error_highlight/core_ext.rb
   if RubyVM::AbstractSyntaxTree.method(:of).parameters.include?([:key, :keep_script_lines])
     def generate_snippet
       # The line at index 1 in the backtrace is the call to T.must
