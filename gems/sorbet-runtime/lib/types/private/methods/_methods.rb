@@ -273,7 +273,7 @@ module T::Private::Methods
         elsif T::Configuration::AT_LEAST_RUBY_2_7
           original_method.bind_call(self, *args, &blk)
         else
-          original_method.bind(self).call(*args, &blk)
+          original_method.bind(self).call(*args, &blk) # rubocop:disable Performance/BindCall
         end
       end
     end
@@ -514,7 +514,7 @@ module T::Private::Methods
         if T::Configuration::AT_LEAST_RUBY_2_7
           old_included.bind_call(self, arg)
         else
-          old_included.bind(self).call(arg)
+          old_included.bind(self).call(arg) # rubocop:disable Performance/BindCall
         end
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
@@ -522,7 +522,7 @@ module T::Private::Methods
         if T::Configuration::AT_LEAST_RUBY_2_7
           old_extended.bind_call(self, arg)
         else
-          old_extended.bind(self).call(arg)
+          old_extended.bind(self).call(arg) # rubocop:disable Performance/BindCall
         end
         ::T::Private::Methods._hook_impl(arg, true, self)
       end
@@ -530,7 +530,7 @@ module T::Private::Methods
         if T::Configuration::AT_LEAST_RUBY_2_7
           old_inherited.bind_call(self, arg)
         else
-          old_inherited.bind(self).call(arg)
+          old_inherited.bind(self).call(arg) # rubocop:disable Performance/BindCall
         end
         ::T::Private::Methods._hook_impl(arg, false, self)
       end

@@ -1134,11 +1134,13 @@ module Opus::Types::Test
       end
 
       it 'delegates equality' do
+        # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
         assert(T.any(Integer, String) == T.type_alias {T.any(Integer, String)})
         assert(T.type_alias {T.any(Integer, String)} == T.any(Integer, String))
         assert(T.type_alias {T.any(Integer, String)} == T.type_alias {T.any(Integer, String)})
 
         refute(T.type_alias {T.any(Integer, Float)} == T.type_alias {T.any(Integer, String)})
+        # rubocop:enable Lint/BinaryOperatorWithIdenticalOperands
       end
 
       it 'passes a validation' do

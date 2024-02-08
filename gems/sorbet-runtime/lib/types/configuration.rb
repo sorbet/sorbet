@@ -451,7 +451,7 @@ module T::Configuration
   @default_module_name_mangler = if T::Configuration::AT_LEAST_RUBY_2_7
     ->(type) {MODULE_NAME.bind_call(type)}
   else
-    ->(type) {MODULE_NAME.bind(type).call}
+    ->(type) {MODULE_NAME.bind(type).call} # rubocop:disable Performance/BindCall
   end
 
   @module_name_mangler = nil
