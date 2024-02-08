@@ -7,12 +7,9 @@ pushd gems/sorbet-static-and-runtime
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 
-runtime_versions=(2.7.2 3.1.2)
-
-for runtime_version in "${runtime_versions[@]}"; do
-  rbenv install --skip-existing "$runtime_version"
-  rbenv shell "$runtime_version"
-done
+# Uses the version in .ruby-version
+rbenv rehash
+ruby --version
 
 echo "--- build"
 git_commit_count=$(git rev-list --count HEAD)
