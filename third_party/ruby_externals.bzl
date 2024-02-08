@@ -99,7 +99,7 @@ def register_ruby_dependencies():
     )
 
     http_archive(
-        name = "EXPERIMENTAL_sorbet_ruby_3_1",
+        name = "sorbet_ruby_3_1_experimental",
         urls = _ruby_urls("3.1/ruby-3.1.4.tar.gz"),
         sha256 = "a3d55879a0dfab1d7141fdf10d22a07dbf8e5cdc4415da1bde06127d5cc3c7b6",
         strip_prefix = "ruby-3.1.4",
