@@ -3075,14 +3075,17 @@ public:
                                         "&.");
 
                                     auto funLoc = core::Loc(args.locs.file, args.locs.fun);
-                                    if (funLoc.exists() && !funLoc.empty() &&
+                                    if (selfTyAndAnd.origins.size() == 2 && funLoc.exists() && !funLoc.empty() &&
                                         funLoc.adjustLen(gs, -1, 1).source(gs) == ".") {
-                                        auto andAndLoc = args.locs.args[2];
+                                        // Our checkAndAnd desugarer only fires if the LHS and RHS have matching Send
+                                        // nodes. In these cases, we know that there are two origins and that the first
+                                        // origin is the call on the LHS.
+                                        auto lhsLoc = selfTyAndAnd.origins[0];
                                         newErr.addAutocorrect(AutocorrectSuggestion{
                                             "Refactor to use `&.`",
                                             {
                                                 AutocorrectSuggestion::Edit{
-                                                    core::Loc(args.locs.file, andAndLoc.beginPos(), recvLoc.beginPos()),
+                                                    core::Loc(args.locs.file, lhsLoc.beginPos(), recvLoc.beginPos()),
                                                     "",
                                                 },
                                                 AutocorrectSuggestion::Edit{funLoc.adjustLen(gs, -1, 1), "&."},

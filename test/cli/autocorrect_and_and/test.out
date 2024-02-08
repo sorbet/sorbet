@@ -18,7 +18,7 @@ autocorrect_and_and.rb:57: Call to method `livemode` after `&&` assumes result t
   Autocorrect: Done
     autocorrect_and_and.rb:57: Deleted
     57 |(auth && auth.livemode)
-        ^^^^^^^^^
+         ^^^^^^^^
     autocorrect_and_and.rb:57: Replaced with `&.`
     57 |(auth && auth.livemode)
                      ^
@@ -185,4 +185,4 @@ sig { returns(T.nilable(Auth))}
 def auth
 end
 
-auth&.livemode)
+(auth&.livemode)
