@@ -844,7 +844,7 @@ void readOptions(Options &opts,
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
         }
 
-        if (opts.print.UntypedBlame.enabled && opts.trackUntyped != core::TrackUntyped::Nowhere) {
+        if (opts.print.UntypedBlame.enabled && opts.trackUntyped == core::TrackUntyped::Nowhere) {
             logger->error("-p untyped-blame:<output-path> must also include --track-untyped");
             throw EarlyReturnWithCode(1);
         }
