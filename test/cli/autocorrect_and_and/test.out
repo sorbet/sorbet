@@ -1,3 +1,28 @@
+autocorrect_and_and.rb:57: Call to method `livemode` after `&&` assumes result type doesn't change https://srb.help/7037
+    57 |(auth && auth.livemode)
+                      ^^^^^^^^
+  Got `T.nilable(Auth)` originating from:
+    autocorrect_and_and.rb:57:
+    57 |(auth && auth.livemode)
+                 ^^^^
+  Type had been narrowed to `Auth` before `&&`:
+    autocorrect_and_and.rb:57:
+    57 |(auth && auth.livemode)
+         ^^^^
+    autocorrect_and_and.rb:57:
+    57 |(auth && auth.livemode)
+             ^^^^
+  Note:
+    Sorbet never assumes that a method called twice returns the same result both times.
+    Either factor out a variable or use `&.`
+  Autocorrect: Done
+    autocorrect_and_and.rb:57: Deleted
+    57 |(auth && auth.livemode)
+        ^^^^^^^^^
+    autocorrect_and_and.rb:57: Replaced with `&.`
+    57 |(auth && auth.livemode)
+                     ^
+
 autocorrect_and_and.rb:12: Call to method `even?` after `&&` assumes result type doesn't change https://srb.help/7037
     12 |    if a.foo && a.foo.even?
                               ^^^^^
@@ -102,7 +127,7 @@ autocorrect_and_and.rb:36: Call to method `even?` after `&&` assumes result type
   Note:
     Sorbet never assumes that a method called twice returns the same result both times.
     Either factor out a variable or use `&.`
-Errors: 5
+Errors: 6
 
 --------------------------------------------------------------------------
 
@@ -145,3 +170,19 @@ class A
 
   end
 end
+
+extend T::Sig
+
+class Auth
+  extend T::Sig
+  sig { returns(T::Boolean) }
+  def livemode
+    true
+  end
+end
+
+sig { returns(T.nilable(Auth))}
+def auth
+end
+
+auth&.livemode)
