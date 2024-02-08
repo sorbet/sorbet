@@ -95,6 +95,21 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:gc-t-none-context.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-more-t-none-context.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-write-barrier-cme.patch",
+        ],
+    )
+
+    http_archive(
+        name = "EXPERIMENTAL_sorbet_ruby_3_1",
+        urls = _ruby_urls("3.1/ruby-3.1.4.tar.gz"),
+        sha256 = "a3d55879a0dfab1d7141fdf10d22a07dbf8e5cdc4415da1bde06127d5cc3c7b6",
+        strip_prefix = "ruby-3.1.4",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by-3_1.patch",  # https://github.com/ruby/ruby/pull/6791
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-more-t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-write-barrier-cme.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-weakmap-finalizer-write-barrier.patch",
         ],
     )
