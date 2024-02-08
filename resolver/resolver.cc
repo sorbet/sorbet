@@ -1744,11 +1744,11 @@ public:
         for (string_view className : gs.suppressPayloadSuperclassRedefinitionFor) {
             auto klass = resolvePayloadSuperclassClassName(gs, className);
             if (!klass.exists()) {
-                if (auto e = gs.beginError(core::Loc(trees[0].file, 0, 0), core::errors::Resolver::StubConstant)) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Resolver::StubConstant)) {
                     e.setHeader("Unable to resolve constant `{}` provided via `{}`", className,
                                 "--suppress-payload-superclass-redefinition-for");
                     e.addErrorNote("Double check that the provided class name exists, or delete this option\n"
-                                   "    (either from the command line, or from the `{}` file)",
+                                   "    (which will be either from the command line args or from the `{}` file).",
                                    "sorbet/config");
                 }
                 continue;
