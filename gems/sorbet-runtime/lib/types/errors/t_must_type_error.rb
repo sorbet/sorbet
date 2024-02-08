@@ -10,7 +10,7 @@ class T::MustTypeError < TypeError
       return "" unless backtrace_location
 
       # Newer versions of error_highlight allow passing a backtrace_location
-      # directly to ErrorHighlight.spot doign it ourself is not much work at the
+      # directly to ErrorHighlight.spot doing it ourself is not much work at the
       # benefit of working no matter what error_highlight version a project uses.
       node = RubyVM::AbstractSyntaxTree.of(backtrace_location, keep_script_lines: true)
       return "" unless node
