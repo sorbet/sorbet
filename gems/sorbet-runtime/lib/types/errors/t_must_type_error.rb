@@ -37,6 +37,14 @@ class T::MustTypeError < TypeError
 
   private :generate_snippet
 
+  # ----------------------------------------------------------------------------------------------
+  # After a few Ruby versions go by, we can probably replace everything below with just
+  #
+  # include ErrorHighlight::CoreExt
+  #
+  # Vendoring it below so that sorbet-runtime users get good error messages
+  # regardless of how new their error_highlight gem version is.
+
   if defined?(ErrorHighlight::CoreExt) && self < ErrorHighlight::CoreExt
     # If we're running with a version of error_highlight that has already
     # monkeypatched TypeError, we don't need to define our own detailed_message
