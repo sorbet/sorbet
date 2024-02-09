@@ -20,7 +20,19 @@ class T::MustTypeError < TypeError
       # Newer versions of error_highlight allow passing a backtrace_location
       # directly to ErrorHighlight.spot doing it ourself is not much work at the
       # benefit of working no matter what error_highlight version a project uses.
-      node = RubyVM::AbstractSyntaxTree.of(backtrace_location, keep_script_lines: true)
+      begin
+        node = RubyVM::AbstractSyntaxTree.of(backtrace_location, keep_script_lines: true)
+      rescue ArgumentError
+        # AbstractSyntaxTree.of raises if th backtrace_location is an eval line.
+        #
+        #     <internal:ast>:67:in `of': cannot get AST for method defined in eval (ArgumentError)
+        #
+        # It doesn't appear that there's a method exposed to Ruby to determine
+        # whether the backtrace line is an eval line (there is a C function),
+        # nor does there appear to be a way to request that `.of` return an
+        # error value (or nil) instead of raising an exception.
+        return ""
+      end
       return "" unless node
 
       spot = ErrorHighlight.spot(node, point_type: :args)
