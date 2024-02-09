@@ -8,4 +8,5 @@ No errors! Great job.
     Double check that the provided class name exists, or delete this option
     (which will be either from the command line args or from the `sorbet/config` file).
 Errors: 1
-Expected to fail!
+-- double.rb --
+No errors! Great job.
