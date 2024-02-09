@@ -29,7 +29,7 @@ task :rubocop do
   # For some reason, using RuboCop::RakeTask causes our test suite to run a
   # bazillion times. I'm guessing that something about RuboCop::RakeTask is
   # causing a file to be required that shouldn't be getting required? I have
-  # lost patience trying to debug it and am simply going to use a Suprocess.
+  # lost patience trying to debug it and am simply going to use a Subprocess.
   require 'subprocess'
   Subprocess.check_call(['rubocop'])
 end
