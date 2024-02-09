@@ -1033,6 +1033,14 @@ end
 class JSON::ParserError < JSON::JSONError
 end
 
+class Array
+  include JSON::Ext::Generator::GeneratorMethods::Array
+end
+
+class Hash
+  include JSON::Ext::Generator::GeneratorMethods::Hash
+end
+
 # source://json//lib/json/add/exception.rb#6
 class Exception
   # Methods <tt>Exception#as_json</tt> and +Exception.json_create+ may be used
