@@ -336,6 +336,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     gs->ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
     gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
+    // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
     if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);

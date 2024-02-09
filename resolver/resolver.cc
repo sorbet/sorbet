@@ -990,7 +990,9 @@ private:
         return core::Symbols::StubMixin();
     }
 
-    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
+    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
+                                   const UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor,
+                                   bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
         if (!ancestorSym.exists()) {
             if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
@@ -1058,10 +1060,30 @@ private:
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolvedClass) {
                 job.klass.data(ctx)->setSuperClass(resolvedClass);
+            } else if (!ctx.file.data(ctx).isPayload() && absl::c_any_of(job.klass.data(ctx)->locs(), [&](auto &loc) {
+                           return loc.file().data(ctx).isPayload();
+                       })) {
+                job.klass.data(ctx)->setSuperClass(resolvedClass);
+                job.klass.data(ctx)->unsetClassOrModuleLinearizationComputed();
             } else {
-                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
-                                job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                auto fileIsPayload = ctx.file.data(ctx).isPayload();
+                auto klassDefinedInPayload = absl::c_any_of(
+                    job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
+                auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
+
+                if (!fileIsPayload && klassDefinedInPayload && allowsPayloadParentOverride) {
+                    job.klass.data(ctx)->setSuperClass(resolvedClass);
+                    job.klass.data(ctx)->unsetClassOrModuleLinearizationComputed();
+                } else {
+                    if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                        e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
+                                    job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                        if (!fileIsPayload && klassDefinedInPayload) {
+                            e.addErrorNote("Add `{}` at the top of this file to silence this error.\n"
+                                           "    Only use this to work around Ruby or gem upgrade incompatibilities.",
+                                           "# allow-parent-payload-override: true");
+                        }
+                    }
                 }
             }
         } else {
@@ -1683,6 +1705,29 @@ public:
         return depth;
     }
 
+    static core::ClassOrModuleRef resolvePayloadSuperclassClassName(const core::GlobalState &gs,
+                                                                    string_view className) {
+        if (className.empty()) {
+            return core::Symbols::noClassOrModule();
+        }
+
+        auto current = core::Symbols::root();
+        for (string_view part : absl::StrSplit(className, "::")) {
+            auto partName = gs.lookupNameConstant(part);
+            if (!partName.exists()) {
+                return core::Symbols::noClassOrModule();
+            }
+
+            auto next = current.data(gs)->findMember(gs, partName);
+            if (!next.exists() || !next.isClassOrModule()) {
+                return core::Symbols::noClassOrModule();
+            }
+            current = next.asClassOrModuleRef();
+        }
+
+        return current;
+    }
+
     struct ResolveWalkResult {
         vector<ResolveItems<ConstantResolutionItem>> todo_;
         vector<ResolveItems<AncestorResolutionItem>> todoAncestors_;
@@ -1695,6 +1740,23 @@ public:
 
     static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                     WorkerPool &workers) {
+        UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor;
+        for (string_view className : gs.suppressPayloadSuperclassRedefinitionFor) {
+            auto klass = resolvePayloadSuperclassClassName(gs, className);
+            if (!klass.exists()) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Resolver::StubConstant)) {
+                    e.setHeader("Unable to resolve constant `{}` provided via `{}`", className,
+                                "--suppress-payload-superclass-redefinition-for");
+                    e.addErrorNote("Double check that the provided class name exists, or delete this option\n"
+                                   "    (which will be either from the command line args or from the `{}` file).",
+                                   "sorbet/config");
+                }
+                continue;
+            }
+
+            suppressPayloadSuperclassRedefinitionFor.emplace(klass);
+        }
+
         Timer timeit(gs.tracer(), "resolver.resolve_constants");
         const core::GlobalState &igs = gs;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
@@ -1804,11 +1866,12 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
                 // everything else.
                 long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<AncestorResolutionItem> &job) -> bool {
+                auto f = [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
+                             ResolveItems<AncestorResolutionItem> &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     const auto origSize = job.items.size();
                     auto g = [&](AncestorResolutionItem &item) -> bool {
-                        auto resolved = resolveAncestorJob(ctx, item, false);
+                        auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
                         return resolved;
                     };
                     auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
@@ -1963,9 +2026,9 @@ public:
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
-                    auto resolved = resolveAncestorJob(ctx, item, true);
+                    auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, true);
                     if (!resolved) {
-                        resolved = resolveAncestorJob(ctx, item, true);
+                        resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, true);
                         ENFORCE(resolved);
                     }
                 }

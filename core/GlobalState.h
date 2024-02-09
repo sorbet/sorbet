@@ -303,6 +303,8 @@ public:
     // Some calls to `super` are not type checked due to incomplete/imperfect information.
     bool typedSuper = true;
 
+    std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
+
     // When present, this indicates that single-package rbi generation is being performed, and contains metadata about
     // the packages that are imported by the one whose interface is being generated.
     std::optional<packages::ImportInfo> singlePackageImports;

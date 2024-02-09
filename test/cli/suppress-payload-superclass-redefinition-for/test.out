@@ -1,0 +1,12 @@
+-- complex.rbi --
+No errors! Great job.
+-- complex.rbi --
+No errors! Great job.
+-- expect constant resolution error --
+???: Unable to resolve constant `DoesNotExist` provided via `--suppress-payload-superclass-redefinition-for` https://srb.help/5002
+  Note:
+    Double check that the provided class name exists, or delete this option
+    (which will be either from the command line args or from the `sorbet/config` file).
+Errors: 1
+-- double.rb --
+No errors! Great job.
