@@ -264,7 +264,13 @@ module T::Props::Serializable::DecoratorMethods
     line_label = error.backtrace.find {|l| l.end_with?("in `#{generated_method}'")}
     return unless line_label
 
-    line_num = line_label.split(':')[1]&.to_i
+    line_num = if line_label.start_with?("(eval)")
+      # (eval):13:in `__t_props_generated_serialize'
+      line_label.split(':')[1]&.to_i
+    else
+      # (eval at /Users/jez/stripe/sorbet/gems/sorbet-runtime/lib/types/props/has_lazily_specialized_methods.rb:65):13:in `__t_props_generated_serialize'
+      line_label.split(':')[2]&.to_i
+    end
     return unless line_num
 
     source_lines = self.send(generate_source_method).split("\n")

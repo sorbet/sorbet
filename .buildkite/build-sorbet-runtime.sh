@@ -7,7 +7,7 @@ pushd gems/sorbet-runtime
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 
-runtime_versions=(2.7.7 3.1.2)
+runtime_versions=(2.7.7 3.1.2 3.3.0)
 
 for runtime_version in "${runtime_versions[@]}"; do
   rbenv install --skip-existing "$runtime_version"
