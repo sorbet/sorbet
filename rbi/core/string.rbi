@@ -290,7 +290,7 @@ class String < Object
   sig do
     params(
         arg0: Regexp,
-        arg1: String,
+        arg1: T.any(String, Symbol),
     )
     .returns(T.nilable(String))
   end
@@ -2037,7 +2037,7 @@ class String < Object
   sig do
     params(
         arg0: Regexp,
-        arg1: String,
+        arg1: T.any(String, Symbol),
     )
     .returns(T.nilable(String))
   end
@@ -2945,7 +2945,7 @@ class String < Object
   sig do
     params(
         arg0: Regexp,
-        arg1: String,
+        arg1: T.any(String, Symbol),
     )
     .returns(T.nilable(String))
   end
