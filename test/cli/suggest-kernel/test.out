@@ -2,5 +2,65 @@ test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `F
      .. |    raise "hi"
             ^^^^^
   Note:
-    Did you mean to `include Kernel` in this module?
-Errors: 1
+    `raise` is actually defined as a method on `Kernel`. To call it, either
+    `include Kernel` in this module to ensure the method is always there, or
+    call the method using `Kernel.raise` instead.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:4: Insert `Kernel.`
+     .. |    raise "hi"
+            ^
+
+test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on `Foo` https://srb.help/7003
+     .. |    Integer(0)
+            ^^^^^^^
+  Note:
+    `Integer` is actually defined as a method on `Kernel`. To call it, either
+    `include Kernel` in this module to ensure the method is always there, or
+    call the method using `Kernel.Integer` instead.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `Kernel.`
+     .. |    Integer(0)
+            ^
+  Note:
+    Ruby uses `.new` to invoke a class's constructor
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
+     .. |    Integer(0)
+                   ^
+  Note:
+    Ruby uses `.new` to invoke a class's constructor
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
+     .. |    Integer(0)
+                   ^
+  Note:
+    Ruby uses `.new` to invoke a class's constructor
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `.new`
+     .. |    Integer(0)
+                   ^
+
+test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `Foo` https://srb.help/7003
+     .. |    Array(0)
+            ^^^^^
+  Note:
+    `Array` is actually defined as a method on `Kernel`. To call it, either
+    `include Kernel` in this module to ensure the method is always there, or
+    call the method using `Kernel.Array` instead.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `Kernel.`
+     .. |    Array(0)
+            ^
+  Note:
+    Ruby uses `.new` to invoke a class's constructor
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `.new`
+     .. |    Array(0)
+                 ^
+  Note:
+    Ruby uses `.new` to invoke a class's constructor
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `.new`
+     .. |    Array(0)
+                 ^
+Errors: 3

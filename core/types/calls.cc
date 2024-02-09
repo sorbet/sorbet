@@ -758,8 +758,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (symbol.data(gs)->isModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isModule()) {
-                        e.addErrorNote("Did you mean to `{}` in this module?",
-                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
+                        auto objData = objMeth.data(gs);
+                        auto ownerName = objData->owner.data(gs)->name.show(gs);
+                        e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it, either\n"
+                                       "    `{}` in this module to ensure the method is always there, or\n"
+                                       "    call the method using `{}` instead.",
+                                       args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
+                                       fmt::format("{}.{}", ownerName, args.name.show(gs)));
+                        if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
+                            e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
+                        }
                     }
                 } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
                            symbol.data(gs)->lookupSingletonClass(gs).exists()) {
