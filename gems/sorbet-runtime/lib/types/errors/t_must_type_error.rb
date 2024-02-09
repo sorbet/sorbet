@@ -23,7 +23,7 @@ class T::MustTypeError < TypeError
       begin
         node = RubyVM::AbstractSyntaxTree.of(backtrace_location, keep_script_lines: true)
       rescue ArgumentError
-        # AbstractSyntaxTree.of raises if th backtrace_location is an eval line.
+        # AbstractSyntaxTree.of raises if the backtrace_location is an eval line.
         #
         #     <internal:ast>:67:in `of': cannot get AST for method defined in eval (ArgumentError)
         #
