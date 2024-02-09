@@ -39,3 +39,19 @@ class A
 
   end
 end
+
+extend T::Sig
+
+class Auth
+  extend T::Sig
+  sig { returns(T::Boolean) }
+  def livemode
+    true
+  end
+end
+
+sig { returns(T.nilable(Auth))}
+def auth
+end
+
+(auth && auth.livemode)
