@@ -397,8 +397,9 @@ class T::Props::Decorator
     T::Configuration.without_ruby_warnings do
       if !rules[:immutable]
         if method(:prop_set).owner != T::Props::Decorator
+          d = @class.decorator
           @class.send(:define_method, "#{name}=") do |val|
-            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
+            d.prop_set(self, name, val, rules)
           end
         else
           # Fast path (~4x faster as of Ruby 2.6)
@@ -407,8 +408,9 @@ class T::Props::Decorator
       end
 
       if method(:prop_get).owner != T::Props::Decorator || rules.key?(:ifunset)
+        d = @class.decorator
         @class.send(:define_method, name) do
-          T.unsafe(self.class).decorator.prop_get(self, name, rules)
+          d.prop_get(self, name, rules)
         end
       else
         # Fast path (~30x faster as of Ruby 2.6)
