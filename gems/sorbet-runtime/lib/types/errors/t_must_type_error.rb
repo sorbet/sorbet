@@ -26,7 +26,7 @@ class T::MustTypeError < TypeError
       spot = ErrorHighlight.spot(node, point_type: :args)
       return "" unless spot
 
-      return ErrorHighlight.formatter.message_for(spot)
+      ErrorHighlight.formatter.message_for(spot)
     end
   else
     # ErrorHighlight requires `keep_script_lines: true` to get the text source of the node
@@ -55,7 +55,7 @@ class T::MustTypeError < TypeError
       return super unless error_highlight
       snippet = generate_snippet
       if highlight && !snippet.empty?
-        snippet = "\e[1m" + snippet + "\e[m"
+        snippet = "\e[1m#{snippet}\e[m"
       end
       super + snippet
     end
