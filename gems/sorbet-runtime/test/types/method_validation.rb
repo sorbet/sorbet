@@ -120,7 +120,7 @@ module Opus::Types::Test
           mod = Module.new do
             extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
-            def self.foo(a: 1, b:)
+            def self.foo(a: 1, b:) # rubocop:disable Style/KeywordParametersOrder
               a + b
             end
           end
@@ -318,7 +318,7 @@ module Opus::Types::Test
       it "accepts T.proc" do
         @mod.sig {params(blk: T.proc.params(i: Integer).returns(Integer)).returns(Integer)}
         def @mod.foo(&blk)
-          blk.call(4)
+          yield 4
         end
 
         @mod.foo {|i| i**2}

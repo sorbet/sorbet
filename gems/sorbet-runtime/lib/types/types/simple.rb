@@ -23,7 +23,12 @@ module T::Types
       #
       # `name` isn't normally a hot path for types, but it is used in initializing a T::Types::Union,
       # and so in `T.nilable`, and so in runtime constructions like `x = T.let(nil, T.nilable(Integer))`.
+      #
+      # Care more about back compat than we do about performance here.
+      # Once 2.6 is well in the rear view mirror, we can replace this.
+      # rubocop:disable Performance/BindCall
       @name ||= (NAME_METHOD.bind(@raw_type).call || @raw_type.name).freeze
+      # rubocop:enable Performance/BindCall
     end
 
     # overrides Base

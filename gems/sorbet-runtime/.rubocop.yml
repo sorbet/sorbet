@@ -3,6 +3,7 @@ require: rubocop-performance
 
 AllCops:
   NewCops: disable
+  SuggestExtensions: false
 
 
 # Stripe in-house styles that are prevalent in the codebase already.
@@ -84,6 +85,11 @@ Performance/CollectionLiteralInLoop:
   Exclude:
     # Ok to prioritize brevity over perf in tests
     - 'test/**/*'
+Performance/BindCall:
+  Exclude:
+    # Only runs when `bind_call` is not built into the stdlib
+    - 'lib/types/private/methods/call_validation_2_6.rb'
+    - 'lib/types/private/methods/call_validation.rb'
 
 # We frequently care about the exact type of values, not just truthiness
 Style/DoubleNegation:
@@ -109,3 +115,29 @@ Layout/ArgumentAlignment:
     # matters more than the readability of the result
     - 'lib/types/private/methods/call_validation_2_6.rb'
     - 'lib/types/private/methods/call_validation_2_7.rb'
+
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: false
+Layout/EmptyLineBetweenDefs:
+  Enabled: false
+Layout/RescueEnsureAlignment:
+  Enabled: false
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
+Style/YodaCondition:
+  Enabled: false
+Style/OptionalBooleanParameter:
+  Enabled: false
+Style/MixinUsage:
+  Enabled: false
+Style/CommentAnnotation:
+  Enabled: false
+Naming/VariableNumber:
+  Enabled: false
+Style/ClassEqualityComparison:
+  Enabled: false
+Style/AccessorGrouping:
+  Enabled: false
+Style/BisectedAttrAccessor:
+  Exclude:
+    - 'lib/types/private/methods/signature.rb'

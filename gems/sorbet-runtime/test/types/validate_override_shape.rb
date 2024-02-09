@@ -219,7 +219,7 @@ module Opus::Types::Test
       klass = Class.new(AbstractBase) do
         extend T::Sig
         sig {override.void}
-        def initialize; end
+        def initialize; super; end
 
         def foo
           0
@@ -236,7 +236,7 @@ module Opus::Types::Test
           .params(x: Integer)
           .void
         end
-        def initialize(x); end
+        def initialize(x); super; end
       end
       err = assert_raises(RuntimeError) do
         klass.new(0)

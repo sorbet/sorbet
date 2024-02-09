@@ -117,7 +117,9 @@ module T::Props
       def eagerly_define_lazy_methods!
         return if lazily_defined_methods.empty?
 
+        # rubocop:disable Style/StringConcatenation
         source = "# frozen_string_literal: true\n" + lazily_defined_methods.values.map(&:call).map(&:to_s).join("\n\n")
+        # rubocop:enable Style/StringConcatenation
 
         cls = decorated_class
         cls.class_eval(source)

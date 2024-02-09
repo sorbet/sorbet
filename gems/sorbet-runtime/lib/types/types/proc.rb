@@ -14,9 +14,9 @@ module T::Types
     end
 
     def arg_types
-      @arg_types ||= @inner_arg_types.map do |key, raw_type|
-        [key, T::Utils.coerce(raw_type)]
-      end.to_h
+      @arg_types ||= @inner_arg_types.transform_values do |raw_type|
+        T::Utils.coerce(raw_type)
+      end
     end
 
     def returns

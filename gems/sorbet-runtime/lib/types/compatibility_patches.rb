@@ -38,7 +38,7 @@ if defined? ::RSpec::Mocks
 
         module MethodDoubleExtensions
           def initialize(object, method_name, proxy)
-            if ::Kernel.instance_method(:respond_to?).bind(object).call(method_name, true)
+            if ::Kernel.instance_method(:respond_to?).bind(object).call(method_name, true) # rubocop:disable Performance/BindCall
               method = ::RSpec::Support.method_handle_for(object, method_name)
               T::Private::Methods.maybe_run_sig_block_for_method(method)
             end

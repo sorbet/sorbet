@@ -4,6 +4,7 @@
 module T::Utils
   module Private
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
+      # rubocop:disable Style/CaseLikeIf
       if val.is_a?(T::Types::Base)
         if val.is_a?(T::Private::Types::TypeAlias)
           val.aliased_type
@@ -31,6 +32,7 @@ module T::Utils
         raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
               "class/module, or an array. Got a `#{val.class}`."
       end
+      # rubocop:enable Style/CaseLikeIf
     end
   end
 
@@ -173,7 +175,7 @@ module T::Utils
     def self.get_type_info(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = prop_type.unwrap_nilable
-        if non_nilable_type&.is_a?(T::Types::Simple)
+        if non_nilable_type.is_a?(T::Types::Simple)
           non_nilable_type = non_nilable_type.raw_type
         end
         TypeInfo.new(true, non_nilable_type)
@@ -188,7 +190,7 @@ module T::Utils
     def self.get_underlying_type(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = prop_type.unwrap_nilable
-        if non_nilable_type&.is_a?(T::Types::Simple)
+        if non_nilable_type.is_a?(T::Types::Simple)
           non_nilable_type = non_nilable_type.raw_type
         end
         non_nilable_type || prop_type

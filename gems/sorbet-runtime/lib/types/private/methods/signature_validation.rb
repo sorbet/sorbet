@@ -59,10 +59,9 @@ module T::Private::Methods::SignatureValidation
     # `{ new(): AbstractClass }`. We may want to consider building some
     # analogue to `T.class_of` in the future that works like this `{new():
     # ...}` type.
-    if signature.method_name == :initialize && signature.method.owner.is_a?(Class)
-      if signature.mode == Modes.standard
-        return
-      end
+    if signature.method_name == :initialize && signature.method.owner.is_a?(Class) &&
+        signature.mode == Modes.standard
+      return
     end
 
     super_method = signature.method.super_method

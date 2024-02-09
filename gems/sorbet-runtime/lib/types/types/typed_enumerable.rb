@@ -172,7 +172,7 @@ module T::Types
         if T::Configuration::AT_LEAST_RUBY_2_7
           Object.instance_method(:class).bind_call(obj)
         else
-          Object.instance_method(:class).bind(obj).call
+          Object.instance_method(:class).bind(obj).call # rubocop:disable Performance/BindCall
         end
       end
     end
