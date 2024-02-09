@@ -3081,6 +3081,7 @@ public:
                                         // nodes. In these cases, we know that there are two origins and that the first
                                         // origin is the call on the LHS.
                                         auto lhsLoc = selfTyAndAnd.origins[0];
+                                        ENFORCE(lhsLoc.beginPos() < selfTyAndAnd.origins[1].beginPos());
                                         newErr.addAutocorrect(AutocorrectSuggestion{
                                             "Refactor to use `&.`",
                                             {
