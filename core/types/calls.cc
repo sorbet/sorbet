@@ -817,7 +817,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         if (possibleSymbol.isMethod()) {
                             auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
-                            if (possibleMethod->flags.isPrivate && !args.isPrivateOk) {
+                            if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
+                                !args.isPrivateOk) {
+                                // Special-case Kernel methods, which should be treated as private, but aren't due to
+                                // this bug: https://github.com/sorbet/sorbet/issues/4434
+                                // (If we fix that bug, we can delete the `Kernel` reference above.)
                                 continue;
                             }
                         }
