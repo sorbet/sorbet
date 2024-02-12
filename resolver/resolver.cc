@@ -140,6 +140,10 @@ private:
     // Increments to track whether we're at a class top level or whether we're inside a block/method body.
     int loadScopeDepth_;
 
+    bool loadTimeScope() {
+        return loadScopeDepth_ == 0;
+    }
+
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
@@ -1355,8 +1359,8 @@ private:
             const bool possibleGenericType = false;
             if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (loadScopeDepth_ == 0 && (!constant->symbol.isClassOrModule() ||
-                                             constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
+                if (this->loadTimeScope() && (!constant->symbol.isClassOrModule() ||
+                                              constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
                     // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
                     // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
                     // Sorbet should be taught to emit errors when these references are not actually defined,
@@ -1578,7 +1582,7 @@ public:
         // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
         // more than one non-RBI file or if it's only defined once in this file.
         // Otherwise, it stores the loc of the first definition of the symbol in this file.
-        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
+        if (!ctx.file.data(ctx).isRBI() && this->loadTimeScope() &&
             id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = id->symbol.loc(ctx);
 
