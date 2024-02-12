@@ -837,34 +837,29 @@ private:
         }
     }
 
-    static bool resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
-                                   bool &resolutionFailed, const bool possibleGenericType) {
-        if (isAlreadyResolved(ctx, *out)) {
-            if (possibleGenericType) {
+    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
+        if (isAlreadyResolved(ctx, *job.out)) {
+            if (job.possibleGenericType) {
                 return false;
             }
             return true;
         }
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
-        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed);
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType != nullptr) {
-                out->symbol = resolved;
+                job.out->symbol = resolved;
                 return true;
             }
             return false;
         }
 
-        out->symbol = resolved;
+        job.out->symbol = resolved;
         return true;
-    }
-
-    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
-        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType);
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
@@ -893,7 +888,7 @@ private:
                     auto origSize = job.items.size();
                     auto fileIt =
                         remove_if(job.items.begin(), job.items.end(),
-                                  [&](ConstantResolutionItem &item) -> bool { return resolveJob(ictx, item); });
+                                  [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
                     job.items.erase(fileIt, job.items.end());
                     retries += origSize - job.items.size();
                     if (!job.items.empty()) {
@@ -1355,9 +1350,8 @@ private:
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             auto *constant = ast::cast_tree<ast::ConstantLit>(out);
-            bool resolutionFailed = false;
-            const bool possibleGenericType = false;
-            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
+            ConstantResolutionItem job{nesting_, constant};
+            if (resolveConstantJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
                 if (this->loadTimeScope() && (!constant->symbol.isClassOrModule() ||
                                               constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
@@ -1374,8 +1368,6 @@ private:
                     checkReferenceOrder(ctx, constant->symbol, *c, firstDefinitionLocs);
                 }
             } else {
-                ConstantResolutionItem job{nesting_, constant};
-                job.resolutionFailed = resolutionFailed;
                 todo_.emplace_back(std::move(job));
             }
             tree = std::move(out);
@@ -1673,7 +1665,7 @@ public:
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
                 job.possibleGenericType = true;
-                if (!resolveJob(ctx, job)) {
+                if (!resolveConstantJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));
                 }
             }
