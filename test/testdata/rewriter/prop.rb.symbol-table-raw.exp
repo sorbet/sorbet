@@ -149,7 +149,7 @@ class <C <U <root>>> < <C <U Object>> ()
     method <S <C <U NotAODM>> $1>#<U prop> (args, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=3:5 end=3:25}
       argument args<repeated> @ Loc {file=test/testdata/rewriter/prop.rb start=3:20 end=3:24}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Object>>, <C <U Kernel>>) @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed})
     method <C <U Object>>#<U main> : private (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=94:1 end=94:9}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   module <C <U Opus>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/rewriter/prop.rb start=84:7 end=84:11}

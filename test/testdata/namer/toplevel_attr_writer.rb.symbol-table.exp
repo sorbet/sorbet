@@ -2,7 +2,7 @@ class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> (Sig)
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/toplevel_attr_writer.rb:3
       argument <blk><block> @ Loc {file=test/testdata/namer/toplevel_attr_writer.rb start=??? end=???}
-  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED
+  class ::Object < ::BasicObject (Object, Kernel) @ (https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#LCENSORED, https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED)
     field ::Object#@foo -> T.untyped @ test/testdata/namer/toplevel_attr_writer.rb:6
     method ::Object#foo= : private (foo, <blk>) -> T.untyped @ test/testdata/namer/toplevel_attr_writer.rb:6
       argument foo<> -> T.untyped @ Loc {file=test/testdata/namer/toplevel_attr_writer.rb start=6:14 end=6:17}

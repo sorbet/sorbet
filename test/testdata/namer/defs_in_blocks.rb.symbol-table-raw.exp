@@ -2,7 +2,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=2:1 end=13:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Object>>, <C <U Kernel>>) @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed})
     method <C <U Object>>#<U a_method> : private (<blk>) @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=5:3 end=5:15}
       argument <blk><block> @ Loc {file=test/testdata/namer/defs_in_blocks.rb start=??? end=???}
 
