@@ -344,11 +344,10 @@ private:
         }
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::ConstantLit *out, bool &resolutionFailed) {
-        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
+    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
+        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, nesting, c.cnst);
+            auto result = resolveLhs(ctx, job.scope, c.cnst);
 
             return result;
         }
@@ -360,11 +359,11 @@ private:
                 return core::Symbols::noSymbol();
             }
 
-            if (sym.isTypeAlias(ctx) && !resolutionFailed) {
+            if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
-                resolutionFailed = true;
+                job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
 
@@ -388,12 +387,12 @@ private:
             return result;
         }
 
-        if (!resolutionFailed) {
+        if (!job.resolutionFailed) {
             if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
         }
-        resolutionFailed = true;
+        job.resolutionFailed = true;
         return core::Symbols::noSymbol();
     }
 
@@ -693,7 +692,7 @@ private:
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx, job.scope, job.out, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -845,7 +844,7 @@ private:
             }
             return true;
         }
-        auto resolved = resolveConstant(ctx, job.scope, job.out, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job);
         if (!resolved.exists()) {
             return false;
         }
