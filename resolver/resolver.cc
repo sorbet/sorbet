@@ -693,7 +693,7 @@ private:
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -845,7 +845,7 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
