@@ -35,7 +35,7 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U MM>> $1> < <C <U Module>> () @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:1 end=2:10}
     method <S <C <U MM>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=2:1 end=2:15}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
-  class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
+  class <C <U Object>> < <C <U BasicObject>> (<C <U Object>>, <C <U Kernel>>) @ (Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed})
     method <C <U Object>>#<U main> : private (<blk>) @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=30:1 end=30:9}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass_inheritance.rb start=??? end=???}
 
