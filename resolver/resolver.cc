@@ -343,23 +343,27 @@ private:
     static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
                                            const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
+            auto result = resolveLhs(ctx, nesting, c.cnst);
 
             return result;
         }
         if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol;
-            if (sym.exists() && sym.isTypeAlias(ctx) && !resolutionFailed) {
+            if (!sym.exists()) {
+                // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
+                // return noSymbol so that this job is picked up on the next time through the loop.
+                return core::Symbols::noSymbol();
+            }
+
+            if (sym.isTypeAlias(ctx) && !resolutionFailed) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
-            if (!sym.exists()) {
-                return core::Symbols::noSymbol();
-            }
-            core::SymbolRef resolved = id->symbol.dealias(ctx);
+
+            auto resolved = id->symbol.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
                 result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, c.cnst);
