@@ -345,7 +345,8 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
+                                           const ast::ConstantLit *out, bool &resolutionFailed) {
+        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, nesting, c.cnst);
 
@@ -688,12 +689,11 @@ private:
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::GlobalState &gs, core::FileRef file, ConstantResolutionItem &job,
                                          const ImportStubs &importStubs, int &suggestionCount) {
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         core::Context ctx(gs, core::Symbols::root(), file);
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx, job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job.scope, job.out, job.resolutionFailed);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -735,6 +735,7 @@ private:
 
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         if (auto *id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -844,8 +845,7 @@ private:
             }
             return true;
         }
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx, job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job.scope, job.out, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
