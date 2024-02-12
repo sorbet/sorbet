@@ -811,10 +811,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() &&
-                            (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
                             continue;
+                        }
+
+                        if (possibleSymbol.isMethod()) {
+                            auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
+                            if (possibleMethod->flags.isPrivate && !args.isPrivateOk) {
+                                continue;
+                            }
                         }
 
                         if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
