@@ -552,7 +552,7 @@ SymbolRef ClassOrModule::findMemberNoDealias(NameRef name) const {
     return fnd->second;
 }
 
-MethodRef ClassOrModule::findMethodNoDealias(const GlobalState &gs, NameRef name) const {
+MethodRef ClassOrModule::findMethodNoDealias(NameRef name) const {
     auto sym = findMemberNoDealias(name);
     if (!sym.isMethod()) {
         return Symbols::noMethod();
