@@ -2575,7 +2575,7 @@ private:
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
         ENFORCE(bspec.flags.isBlock);
-        auto for_ = ErrorColors::format("for block argument `{}` of method `{}`", bspec.argumentName(gs),
+        auto for_ = ErrorColors::format("block argument `{}` of method `{}`", bspec.argumentName(gs),
                                         dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
     }
