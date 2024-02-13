@@ -3,8 +3,13 @@
 
 module T::Private::Methods
   @installed_hooks = {}
-  @signatures_by_method = {}
-  @sig_wrappers = {}
+  if defined?(Concurrent::Hash)
+    @signatures_by_method = Concurrent::Hash.new
+    @sig_wrappers = Concurrent::Hash.new
+  else
+    @signatures_by_method = {}
+    @sig_wrappers = {}
+  end
   @sigs_that_raised = {}
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
