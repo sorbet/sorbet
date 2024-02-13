@@ -81,12 +81,13 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
 
         auto withoutNil = Types::dropNil(gs, actualType);
         if (!withoutNil.isBottom() &&
-            Types::isSubTypeUnderConstraint(gs, *constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
+            Types::isSubTypeUnderConstraint(gs, *constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible,
+                                            core::noOpErrorDetailsCollector)) {
             e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
         } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType) &&
-                   core::Types::isSubTypeUnderConstraint(gs, *constr,
-                                                         core::Symbols::T_Types_Base().data(gs)->externalType(),
-                                                         expectedType, UntypedMode::AlwaysCompatible)) {
+                   core::Types::isSubTypeUnderConstraint(
+                       gs, *constr, core::Symbols::T_Types_Base().data(gs)->externalType(), expectedType,
+                       UntypedMode::AlwaysCompatible, core::noOpErrorDetailsCollector)) {
             e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());
         }
     }

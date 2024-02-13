@@ -79,20 +79,28 @@ public:
      *
      * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
+    // TODO explain the collector
+    template <class T>
     static bool isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                         const TypePtr &t2, UntypedMode mode);
+                                         const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
-    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    template <class T>
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    template <class T>
+    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    template <class T>
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                     const TypePtr &t2);
+                                     const TypePtr &t2, T &errorDetailsCollector);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
-    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    template <class T>
+    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    template <class T>
+    static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    template <class T>
     static bool equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                              const TypePtr &t2);
+                                              const TypePtr &t2, T &errorDetailsCollector);
 
     static TypePtr top();
     static TypePtr bottom();
@@ -709,8 +717,9 @@ private:
     friend TypePtr Types::Boolean();
     friend class NameSubstitution;
     friend class serialize::SerializerImpl;
+    template <class T>
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                                const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
     friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
@@ -760,8 +769,9 @@ private:
     friend class serialize::SerializerImpl;
     friend class TypeConstraint;
 
+    template <class T>
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                                const TypePtr &t2, UntypedMode mode);
+                                                const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
