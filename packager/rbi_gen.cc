@@ -118,7 +118,7 @@ core::SymbolRef lookupFQN(const core::GlobalState &gs, const vector<core::NameRe
     core::SymbolRef scope = core::Symbols::root();
     for (auto name : fqn) {
         if (scope.isClassOrModule()) {
-            auto result = scope.asClassOrModuleRef().data(gs)->findMemberNoDealias(gs, name);
+            auto result = scope.asClassOrModuleRef().data(gs)->findMemberNoDealias(name);
             if (!result.exists()) {
                 return core::Symbols::noClassOrModule();
             }

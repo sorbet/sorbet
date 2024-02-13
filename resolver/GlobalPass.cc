@@ -116,7 +116,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                        core::ClassOrModuleRef sym,
                        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
-    core::SymbolRef my = sym.data(gs)->findMemberNoDealias(gs, name);
+    core::SymbolRef my = sym.data(gs)->findMemberNoDealias(name);
     if (!my.exists()) {
         reportRedeclarationError(gs, parent, parentTypeMember, sym);
 

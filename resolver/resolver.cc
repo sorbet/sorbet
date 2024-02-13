@@ -255,7 +255,7 @@ private:
                 // We don't want to rely on existing information in the symbol table for the
                 // fast path in LSP, but we do need to explicitly look through type template
                 // static fields to find the field on the singleton class.
-                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, name);
+                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(name);
                 if (lookup.isStaticField(ctx)) {
                     if (lookup.asFieldRef().data(ctx)->isClassAlias()) {
                         auto dealiased = lookup.dealias(ctx);
@@ -370,7 +370,7 @@ private:
             auto resolved = id->symbol.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, c.cnst);
+                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst);
             }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
@@ -2617,7 +2617,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
-        core::MethodRef toMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(ctx, job.toName);
+        core::MethodRef toMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(job.toName);
         if (toMethod.exists()) {
             toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
         }
@@ -2634,7 +2634,7 @@ class ResolveTypeMembersAndFieldsWalk {
             toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
         }
 
-        core::MethodRef fromMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(ctx, job.fromName);
+        core::MethodRef fromMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(job.fromName);
         if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
             if (auto e = ctx.beginError(job.fromNameLoc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);

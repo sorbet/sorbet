@@ -1434,7 +1434,7 @@ private:
             sym = existingTypeMember;
             sym.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
         } else {
-            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMemberName);
+            auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(typeMemberName);
             if (oldSym.exists()) {
                 emitRedefinedConstantError(ctx, typeMember.nameLoc, oldSym.name(ctx), core::SymbolRef::Kind::TypeMember,
                                            oldSym);
@@ -1454,7 +1454,7 @@ private:
                 auto alias = ctx.state.lookupStaticFieldSymbol(context, typeTemplateAliasName);
                 alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
             } else {
-                auto oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeTemplateAliasName);
+                auto oldSym = context.data(ctx)->findMemberNoDealias(typeTemplateAliasName);
                 if (oldSym.exists() &&
                     !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
                     emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMemberName,

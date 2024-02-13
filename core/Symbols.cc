@@ -528,7 +528,7 @@ uint16_t ClassOrModule::addMixinPlaceholder(const GlobalState &gs) {
 }
 
 SymbolRef ClassOrModule::findMember(const GlobalState &gs, NameRef name) const {
-    auto ret = findMemberNoDealias(gs, name);
+    auto ret = findMemberNoDealias(name);
     if (ret.exists()) {
         return ret.dealias(gs);
     }
@@ -543,7 +543,7 @@ MethodRef ClassOrModule::findMethod(const GlobalState &gs, NameRef name) const {
     return Symbols::noMethod();
 }
 
-SymbolRef ClassOrModule::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
+SymbolRef ClassOrModule::findMemberNoDealias(NameRef name) const {
     histogramInc("find_member_scope_size", members().size());
     auto fnd = members().find(name);
     if (fnd == members().end()) {
@@ -552,8 +552,8 @@ SymbolRef ClassOrModule::findMemberNoDealias(const GlobalState &gs, NameRef name
     return fnd->second;
 }
 
-MethodRef ClassOrModule::findMethodNoDealias(const GlobalState &gs, NameRef name) const {
-    auto sym = findMemberNoDealias(gs, name);
+MethodRef ClassOrModule::findMethodNoDealias(NameRef name) const {
+    auto sym = findMemberNoDealias(name);
     if (!sym.isMethod()) {
         return Symbols::noMethod();
     }
@@ -752,7 +752,7 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
     if (flags.isLinearizationComputed) {
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
-            result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
+            result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(name);
             if (result.exists()) {
                 return result;
             }
@@ -797,7 +797,7 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
         Exception::raise("findMemberTransitive hit a loop while resolving");
     }
 
-    SymbolRef result = dealias ? findMember(gs, name) : findMemberNoDealias(gs, name);
+    SymbolRef result = dealias ? findMember(gs, name) : findMemberNoDealias(name);
     if (result.exists()) {
         return result;
     }
