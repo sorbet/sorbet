@@ -601,7 +601,7 @@ bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_stor
     return result;
 }
 
-// Returns true if the given symbol is only defined in a given file (not accounting for RBIs).
+// Returns true if the given symbol is only defined in a given file.
 bool SymbolRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const {
     return singleFileDefinition(gs, locs(gs), file);
 }
