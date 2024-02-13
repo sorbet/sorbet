@@ -553,7 +553,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
+        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType, core::noOpErrorDetailsCollector)) {
             auto &whoKnows = getKnowledge(local);
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
@@ -570,7 +570,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
+        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType, core::noOpErrorDetailsCollector)) {
             auto &whoKnows = getKnowledge(local);
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
@@ -1050,7 +1050,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         auto parentRecvLoc = ctx.locAt(parentRecv.loc);
 
                         if (recvLoc.source(ctx) != parentRecvLoc.source(ctx) ||
-                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type)) {
+                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type,
+                                                         core::noOpErrorDetailsCollector)) {
                             // Safeguard against most unrelated missing method errors
                             // Out of ~~laziness~~ simplicitity, this does not account for things
                             // like `==` or `===` where the relevant type to check is arg0, not recv
@@ -1446,8 +1447,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
+                core::ErrorDetailsCollector errorDetailsCollector;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
-                                                           core::UntypedMode::AlwaysCompatible)) {
+                                                           core::UntypedMode::AlwaysCompatible,
+                                                           errorDetailsCollector)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto owner = ctx.owner;
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
@@ -1457,6 +1460,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
+                        e.addErrorSections(errorDetailsCollector);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
@@ -1479,16 +1483,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
-                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
+                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType, core::noOpErrorDetailsCollector)) {
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
+                core::ErrorDetailsCollector errorDetailsCollector;
                 if (i.link->result->main.constr) {
-                    isSubtype =
-                        core::Types::isSubTypeUnderConstraint(ctx, *i.link->result->main.constr, typeAndOrigin.type,
-                                                              expectedType, core::UntypedMode::AlwaysCompatible);
+                    isSubtype = core::Types::isSubTypeUnderConstraint(
+                        ctx, *i.link->result->main.constr, typeAndOrigin.type, expectedType,
+                        core::UntypedMode::AlwaysCompatible, errorDetailsCollector);
                 } else {
-                    isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
+                    isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType, errorDetailsCollector);
                 }
                 if (!isSubtype) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
@@ -1502,6 +1507,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
+                        e.addErrorSections(errorDetailsCollector);
                     }
                 } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
@@ -1595,19 +1601,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 // TODO(jez) Should we allow `T.let` / `T.cast` opt out of the untyped code error?
                 if (c.cast != core::Names::cast()) {
+                    core::ErrorDetailsCollector errorDetailsCollector;
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
                             e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
-                    } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
+                    } else if (!core::Types::isSubType(ctx, ty.type, castType, errorDetailsCollector)) {
                         if (c.cast == core::Names::assumeType()) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncorrectlyAssumedType)) {
                                 e.setHeader("Assumed expression had type `{}` but found `{}`", castType.show(ctx),
                                             ty.type.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                                 e.addErrorNote("Please add an explicit type annotation to correct this assumption");
+                                e.addErrorSections(errorDetailsCollector);
                                 if (bind.loc.exists() && c.valueLoc.exists()) {
                                     e.replaceWith("Add explicit annotation", ctx.locAt(bind.loc), "T.let({}, {})",
                                                   ctx.locAt(c.valueLoc).source(ctx).value(), ty.type.show(ctx));
@@ -1617,6 +1625,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                                 e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                e.addErrorSections(errorDetailsCollector);
                                 core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, ctx.locAt(c.valueLoc), constr,
                                                                              castType, ty.type);
                             }
@@ -1637,7 +1646,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                   argLoc.source(ctx).value());
                                 }
                             }
-                        } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
+                        } else if (!ty.type.isUntyped() &&
+                                   core::Types::isSubType(ctx, ty.type, castType, core::noOpErrorDetailsCollector)) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                                 e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                             ty.type.show(ctx), castType.show(ctx));
@@ -1684,8 +1694,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
             // TODO(jez) What should we do about untyped code and pinning?
+            core::ErrorDetailsCollector errorDetailsCollector;
             bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
-                                                   core::Types::dropLiteral(ctx, cur.type));
+                                                   core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 
             {
                 switch (bindMinLoops) {
@@ -1700,6 +1711,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
                                 core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, cur.type, tp.type);
+                                e.addErrorSections(errorDetailsCollector);
                                 auto replaceLoc = ctx.locAt(bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
@@ -1715,6 +1727,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
                                             "let", tp.type.show(ctx), cur.type.show(ctx));
+                                e.addErrorSections(errorDetailsCollector);
                             }
                             tp = cur;
                         }
@@ -1758,6 +1771,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
                                 }
+                                e.addErrorSections(errorDetailsCollector);
 
                                 if (!cur.origins.empty() && !tp.origins.empty() &&
                                     absl::c_any_of(cur.origins,

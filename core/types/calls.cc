@@ -276,7 +276,9 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
     expectedType = Types::replaceSelfType(gs, expectedType, selfType);
 
-    if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible)) {
+    core::ErrorDetailsCollector errorDetailsCollector;
+    if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible,
+                                        errorDetailsCollector)) {
         if (expectedType.isUntyped()) {
             // TODO(jez) We should have code like this, but currently there are too many places that
             // are fine "accepting anything" that are typed as `T.untyped`.
@@ -298,6 +300,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                     ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
                 e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
+                e.addErrorSections(errorDetailsCollector);
                 return e.build();
             }
         }
@@ -316,6 +319,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, expectedType, argTpe.type);
+        e.addErrorSections(errorDetailsCollector);
         TypeErrorDiagnostics::maybeAutocorrect(gs, e, argLoc, constr, expectedType, argTpe.type);
         return e.build();
     }
@@ -441,12 +445,13 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
                 auto argType = Types::resultTypeAsSeenFrom(gs, argTypeRaw, candidate.data(gs)->owner, inClass, targs);
                 if (constr == nullptr) {
-                    if (!Types::isSubType(gs, arg, argType)) {
+                    if (!Types::isSubType(gs, arg, argType, core::noOpErrorDetailsCollector)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
                 } else {
-                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible)) {
+                    if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible,
+                                                         core::noOpErrorDetailsCollector)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
@@ -485,7 +490,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 }
             } else {
                 if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
+                    (!lastArg.type.isFullyDefined() ||
+                     !Types::isSubType(gs, Types::nilClass(), lastArg.type, core::noOpErrorDetailsCollector))) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -1152,7 +1158,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         result.main.errors.emplace_back(e.build());
                     }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
-                                                            UntypedMode::AlwaysCompatible)) {
+                                                            UntypedMode::AlwaysCompatible,
+                                                            core::noOpErrorDetailsCollector)) {
+                    // ^ Passing in a noOp collector even though this call is used for error reporting,
+                    // because it's unlikely we'll add more details to a subtype check for Symbol
                     // TODO(jez) Highlight untyped code for this error
                     if (auto e = gs.beginError(kwSplatArgLoc, errors::Infer::MethodArgumentMismatch)) {
                         e.setHeader("Expected `{}` but found `{}` for keyword splat keys type", "Symbol",
@@ -1171,8 +1180,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             kwParamType = Types::untyped(method);
                         }
                         // TODO(jez) Highlight untyped code for this error
+                        core::ErrorDetailsCollector errorDetailsCollector;
                         if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
-                                                            UntypedMode::AlwaysCompatible)) {
+                                                            UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
                             continue;
                         }
 
@@ -1187,6 +1197,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 "A `{}` passed as a keyword splat must match the type of all keyword parameters\n"
                                 "    because Sorbet cannot see what specific keys exist in the `{}`.",
                                 "Hash", "Hash");
+                            e.addErrorSections(errorDetailsCollector);
                             maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
                             result.main.errors.emplace_back(e.build());
                         }
@@ -1523,7 +1534,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
         // TODO(jez) Highlight untyped code for this error
-        if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
+        if (blockType &&
+            !core::Types::isSubType(gs, core::Types::nilClass(), blockType, core::noOpErrorDetailsCollector)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
@@ -2509,7 +2521,7 @@ private:
             return blockType.type;
         }
 
-        if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
+        if (Types::isSubType(gs, Types::nilClass(), blockType.type, core::noOpErrorDetailsCollector)) {
             nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
             typeIsNilable = true;
 
@@ -2589,12 +2601,13 @@ private:
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
+        core::ErrorDetailsCollector errorDetailsCollector;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
-                                                             UntypedMode::AlwaysCompatible)) {
+                                                             UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
             if (isa_type<ClassType>(passedInBlockType) &&
                 cast_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
-                Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
+                Types::isSubType(gs, nonNilableBlockType, passedInBlockType, core::noOpErrorDetailsCollector)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
                 // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
@@ -2619,6 +2632,7 @@ private:
                 if (!dispatched.secondary) {
                     Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
+                e.addErrorSections(errorDetailsCollector);
             }
         }
 
@@ -2636,7 +2650,7 @@ private:
                         // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
                         Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, bspecType,
-                                                        UntypedMode::AlwaysCompatible);
+                                                        UntypedMode::AlwaysCompatible, core::noOpErrorDetailsCollector);
                     }
                 }
                 it = it->secondary.get();
@@ -3049,7 +3063,8 @@ public:
                 }
             }
 
-            if (unknownMethodOnNilClassErrors == 1 && !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type)) {
+            if (unknownMethodOnNilClassErrors == 1 &&
+                !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type, core::noOpErrorDetailsCollector)) {
                 DispatchArgs newInnerArgs{
                     fun,
                     sendLocs,
@@ -3424,7 +3439,9 @@ public:
             auto actualType = *args.args[1];
             // This check (with the dropLiteral's) mimics what we do for pinning errors in environment.cc
             // TODO(jez) How should this interact with highlight untyped?
-            if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
+            core::ErrorDetailsCollector errorDetailsCollector;
+            if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType),
+                                  errorDetailsCollector)) {
                 auto argLoc = args.argLoc(1);
 
                 if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
@@ -3434,6 +3451,7 @@ public:
                         ErrorSection("Shape originates from here:",
                                      args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
+                    e.addErrorSections(errorDetailsCollector);
 
                     if (args.fullType.origins.size() == 1 && isa_type<NamedLiteralType>(arg)) {
                         auto argLit = cast_type_nonnull<NamedLiteralType>(arg);
@@ -4043,8 +4061,8 @@ public:
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
         // TODO(jez) How should this interact with highlight untyped?
-        auto isOnlySymbol =
-            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
+        auto isOnlySymbol = Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()),
+                                             core::noOpErrorDetailsCollector);
         if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
@@ -4067,8 +4085,8 @@ public:
         }
 
         // TODO(jez) How should this interact with highlight untyped?
-        auto isOnlyString =
-            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
+        auto isOnlyString = Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()),
+                                             core::noOpErrorDetailsCollector);
 
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
@@ -4078,7 +4096,8 @@ public:
             // assumption that `Symbol` is final and thus no subclass can implement `to_str` (we
             // could also implement the actual final logic for arbitrary classes, but have opted not
             // to because it would likely be a cause for surprise).
-            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
+            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol()),
+                             core::noOpErrorDetailsCollector) &&
             Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
@@ -4137,7 +4156,8 @@ public:
         // because implicit conversions are hard in the presence of subtyping. Instead, we restrict
         // the check to only subclasses of `Exception`, not arbitrary classes.
         auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
-        if (!classArg->type.isUntyped() && !Types::isSubType(gs, classArg->type, classOfException)) {
+        if (!classArg->type.isUntyped() &&
+            !Types::isSubType(gs, classArg->type, classOfException, core::noOpErrorDetailsCollector)) {
             return;
         }
 
@@ -4261,7 +4281,7 @@ public:
         }
         auto lhs = rc.data(gs)->externalType();
         ENFORCE(!lhs.isUntyped(), "lhs of Module.=== must be typed");
-        if (Types::isSubType(gs, rhs, lhs)) {
+        if (Types::isSubType(gs, rhs, lhs, core::noOpErrorDetailsCollector)) {
             res.returnType = Types::trueClass();
             return;
         }
@@ -4332,7 +4352,7 @@ public:
             return;
         }
 
-        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs)) {
+        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs, core::noOpErrorDetailsCollector)) {
             res.returnType = Types::trueClass();
             return;
         }

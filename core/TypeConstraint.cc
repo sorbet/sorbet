@@ -73,7 +73,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
             sol = upperBound;
         }
         if (upperBound) {
-            cantSolve = !Types::isSubType(gs, findSolution(tv), upperBound);
+            cantSolve = !Types::isSubType(gs, findSolution(tv), upperBound, core::noOpErrorDetailsCollector);
             if (cantSolve) {
                 return false;
             }
@@ -84,7 +84,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         auto &tv = k.first;
         auto &lowerBound = k.second;
 
-        cantSolve = !Types::isSubType(gs, lowerBound, findSolution(tv));
+        cantSolve = !Types::isSubType(gs, lowerBound, findSolution(tv), core::noOpErrorDetailsCollector);
         if (cantSolve) {
             return false;
         }
@@ -123,16 +123,16 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
 bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) const {
     if (auto t1p = cast_type<TypeVar>(t1)) {
         if (!hasLowerBound(t1p->sym)) {
-            return Types::isSubType(gs, Types::top(), t2);
+            return Types::isSubType(gs, Types::top(), t2, core::noOpErrorDetailsCollector);
         }
-        return Types::isSubType(gs, findLowerBound(t1p->sym), t2);
+        return Types::isSubType(gs, findLowerBound(t1p->sym), t2, core::noOpErrorDetailsCollector);
     } else {
         auto t2p = cast_type<TypeVar>(t2);
         ENFORCE(t2p != nullptr);
         if (!hasUpperBound(t2p->sym)) {
-            return Types::isSubType(gs, t1, Types::bottom());
+            return Types::isSubType(gs, t1, Types::bottom(), core::noOpErrorDetailsCollector);
         }
-        return Types::isSubType(gs, t1, findUpperBound(t2p->sym));
+        return Types::isSubType(gs, t1, findUpperBound(t2p->sym), core::noOpErrorDetailsCollector);
     }
 }
 

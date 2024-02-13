@@ -2261,14 +2261,16 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a instance variable in either `initialize` or a `before do` block.
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType,
+                                               core::noOpErrorDetailsCollector)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType,
+                                               core::noOpErrorDetailsCollector)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
@@ -2286,7 +2288,8 @@ class ResolveTypeMembersAndFieldsWalk {
             // This was previously entered by namer and we are now resolving the type.
             priorField.data(ctx)->resultType = castType;
             return;
-        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType,
+                                      core::noOpErrorDetailsCollector)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short
             // circuit.
             return;
@@ -2467,7 +2470,8 @@ class ResolveTypeMembersAndFieldsWalk {
         // If the parent bounds exists, validate the new bounds against those of the parent.
         if (parentType != nullptr) {
             auto parentData = parentMember.data(ctx);
-            if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound)) {
+            core::ErrorDetailsCollector errorDetailsCollector;
+            if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound, errorDetailsCollector)) {
                 auto errLoc = lowerBoundTypeLoc.exists() ? lowerBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                     e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
@@ -2478,6 +2482,7 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
+                    e.addErrorSections(errorDetailsCollector);
                     if (lowerBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->lowerBound;
@@ -2485,7 +2490,9 @@ class ResolveTypeMembersAndFieldsWalk {
                     }
                 }
             }
-            if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound)) {
+            // TODO:
+            core::ErrorDetailsCollector errorDetailsCollector2;
+            if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound, errorDetailsCollector2)) {
                 auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                     e.setHeader("The `{}` type bound `{}` must be {} the parent's `{}` type bound `{}` "
@@ -2496,6 +2503,7 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
+                    e.addErrorSections(errorDetailsCollector2);
                     if (upperBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->upperBound;
@@ -2507,10 +2515,12 @@ class ResolveTypeMembersAndFieldsWalk {
 
         // Ensure that the new lower bound is a subtype of the upper bound.
         // This will be a no-op in the case that the type member is fixed.
-        if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound)) {
+        core::ErrorDetailsCollector errorDetailsCollector;
+        if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound, errorDetailsCollector)) {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
                 e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",
                             memberType->lowerBound.show(ctx), "upper", memberType->upperBound.show(ctx), lhs.show(ctx));
+                e.addErrorSections(errorDetailsCollector);
             }
         }
 
@@ -3646,7 +3656,10 @@ private:
                 }
 
                 arg.type = std::move(spec->type);
-                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
+                // Passing in a noOp collector even though this call is used for error reporting,
+                // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
+                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass(),
+                                                        core::noOpErrorDetailsCollector)) {
                     if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
                                     "Proc", "T.proc");
@@ -3927,7 +3940,7 @@ private:
             if (arg0.name != arg1.name) {
                 return false;
             }
-            return core::Types::equiv(ctx, arg0.type, arg1.type);
+            return core::Types::equiv(ctx, arg0.type, arg1.type, core::noOpErrorDetailsCollector);
         };
 
         // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?
