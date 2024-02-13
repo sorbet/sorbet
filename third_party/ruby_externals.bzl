@@ -95,6 +95,7 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:gc-t-none-context.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-more-t-none-context.patch",
             "@com_stripe_ruby_typer//third_party/ruby:gc-write-barrier-cme.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:thread-suspension-hook.patch",
         ],
     )
 
