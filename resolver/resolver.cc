@@ -2617,7 +2617,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
-        core::MethodRef toMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(ctx, job.toName);
+        core::MethodRef toMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(job.toName);
         if (toMethod.exists()) {
             toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
         }
@@ -2634,7 +2634,7 @@ class ResolveTypeMembersAndFieldsWalk {
             toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
         }
 
-        core::MethodRef fromMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(ctx, job.fromName);
+        core::MethodRef fromMethod = ctx.owner.asClassOrModuleRef().data(ctx)->findMethodNoDealias(job.fromName);
         if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
             if (auto e = ctx.beginError(job.fromNameLoc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
