@@ -517,7 +517,7 @@ public:
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     MethodRef findMethod(const GlobalState &gs, NameRef name) const;
-    SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
+    SymbolRef findMemberNoDealias(NameRef name) const;
     MethodRef findMethodNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const;

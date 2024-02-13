@@ -543,7 +543,7 @@ MethodRef ClassOrModule::findMethod(const GlobalState &gs, NameRef name) const {
     return Symbols::noMethod();
 }
 
-SymbolRef ClassOrModule::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
+SymbolRef ClassOrModule::findMemberNoDealias(NameRef name) const {
     histogramInc("find_member_scope_size", members().size());
     auto fnd = members().find(name);
     if (fnd == members().end()) {
