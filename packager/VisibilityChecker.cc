@@ -454,11 +454,7 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
 
                 if (!ctx.file.data(ctx).isPackaged()) {
                     e.addErrorNote(
@@ -476,9 +472,6 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
