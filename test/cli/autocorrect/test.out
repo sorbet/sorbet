@@ -93,9 +93,6 @@ autocorrect.rb:12: Setter method `bar=` does not exist on `String` component of 
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-      NN |  def warn(*msg); end
-            ^^^^^^^^^^^^^^
 
 autocorrect.rb:12: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
@@ -136,9 +133,6 @@ autocorrect.rb:13: Setter method `bar=` does not exist on `String` component of 
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-      NN |  def warn(*msg); end
-            ^^^^^^^^^^^^^^
 
 autocorrect.rb:13: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
@@ -179,9 +173,6 @@ autocorrect.rb:14: Setter method `bar=` does not exist on `String` component of 
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-      NN |  def warn(*msg); end
-            ^^^^^^^^^^^^^^
 
 autocorrect.rb:14: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
@@ -222,9 +213,6 @@ autocorrect.rb:15: Setter method `bar=` does not exist on `String` component of 
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Did you mean: `Kernel#warn`
-      NN |  def warn(*msg); end
-            ^^^^^^^^^^^^^^
 
 autocorrect.rb:15: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"

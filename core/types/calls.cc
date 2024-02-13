@@ -811,10 +811,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() &&
-                            (!possibleSymbol.isMethod() ||
-                             (possibleSymbol.asMethodRef().data(gs)->flags.isPrivate && !args.isPrivateOk))) {
+                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
                             continue;
+                        }
+
+                        if (possibleSymbol.isMethod()) {
+                            auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
+                            if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
+                                !args.isPrivateOk) {
+                                // Special-case Kernel methods, which should be treated as private, but aren't due to
+                                // this bug: https://github.com/sorbet/sorbet/issues/4434
+                                // (If we fix that bug, we can delete the `Kernel` reference above.)
+                                continue;
+                            }
                         }
 
                         if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
