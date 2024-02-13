@@ -140,6 +140,10 @@ private:
     // Increments to track whether we're at a class top level or whether we're inside a block/method body.
     int loadScopeDepth_;
 
+    bool loadTimeScope() {
+        return loadScopeDepth_ == 0;
+    }
+
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
@@ -340,26 +344,30 @@ private:
         }
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
-                                           const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
+    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
+        auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
+            auto result = resolveLhs(ctx, job.scope, c.cnst);
 
             return result;
         }
         if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol;
-            if (sym.exists() && sym.isTypeAlias(ctx) && !resolutionFailed) {
+            if (!sym.exists()) {
+                // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
+                // return noSymbol so that this job is picked up on the next time through the loop.
+                return core::Symbols::noSymbol();
+            }
+
+            if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
-                resolutionFailed = true;
+                job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
-            if (!sym.exists()) {
-                return core::Symbols::noSymbol();
-            }
-            core::SymbolRef resolved = id->symbol.dealias(ctx);
+
+            auto resolved = id->symbol.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
                 result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(ctx, c.cnst);
@@ -379,12 +387,12 @@ private:
             return result;
         }
 
-        if (!resolutionFailed) {
+        if (!job.resolutionFailed) {
             if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
         }
-        resolutionFailed = true;
+        job.resolutionFailed = true;
         return core::Symbols::noSymbol();
     }
 
@@ -680,12 +688,11 @@ private:
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::GlobalState &gs, core::FileRef file, ConstantResolutionItem &job,
                                          const ImportStubs &importStubs, int &suggestionCount) {
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         core::Context ctx(gs, core::Symbols::root(), file);
 
         bool singlePackageRbiGeneration = ctx.state.singlePackageImports.has_value();
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx, job);
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -727,6 +734,7 @@ private:
 
         bool alreadyReported = false;
         job.out->resolutionScopes = make_unique<ast::ConstantLit::ResolutionScopes>();
+        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
         if (auto *id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -829,34 +837,28 @@ private:
         }
     }
 
-    static bool resolveConstantJob(core::Context ctx, const shared_ptr<Nesting> &nesting, ast::ConstantLit *out,
-                                   bool &resolutionFailed, const bool possibleGenericType) {
-        if (isAlreadyResolved(ctx, *out)) {
-            if (possibleGenericType) {
+    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
+        if (isAlreadyResolved(ctx, *job.out)) {
+            if (job.possibleGenericType) {
                 return false;
             }
             return true;
         }
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(out->original);
-        auto resolved = resolveConstant(ctx.withOwner(nesting->scope), nesting, original, resolutionFailed);
+        auto resolved = resolveConstant(ctx, job);
         if (!resolved.exists()) {
             return false;
         }
         if (resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType != nullptr) {
-                out->symbol = resolved;
+                job.out->symbol = resolved;
                 return true;
             }
             return false;
         }
 
-        out->symbol = resolved;
+        job.out->symbol = resolved;
         return true;
-    }
-
-    static bool resolveJob(core::Context ctx, ConstantResolutionItem &job) {
-        return resolveConstantJob(ctx, job.scope, job.out, job.resolutionFailed, job.possibleGenericType);
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
@@ -885,7 +887,7 @@ private:
                     auto origSize = job.items.size();
                     auto fileIt =
                         remove_if(job.items.begin(), job.items.end(),
-                                  [&](ConstantResolutionItem &item) -> bool { return resolveJob(ictx, item); });
+                                  [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
                     job.items.erase(fileIt, job.items.end());
                     retries += origSize - job.items.size();
                     if (!job.items.empty()) {
@@ -1347,12 +1349,11 @@ private:
             auto loc = c->loc;
             auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
             auto *constant = ast::cast_tree<ast::ConstantLit>(out);
-            bool resolutionFailed = false;
-            const bool possibleGenericType = false;
-            if (resolveConstantJob(ctx, nesting_, constant, resolutionFailed, possibleGenericType)) {
+            ConstantResolutionItem job{nesting_, constant};
+            if (resolveConstantJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (loadScopeDepth_ == 0 && (!constant->symbol.isClassOrModule() ||
-                                             constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
+                if (this->loadTimeScope() && (!constant->symbol.isClassOrModule() ||
+                                              constant->symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
                     // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
                     // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
                     // Sorbet should be taught to emit errors when these references are not actually defined,
@@ -1366,8 +1367,6 @@ private:
                     checkReferenceOrder(ctx, constant->symbol, *c, firstDefinitionLocs);
                 }
             } else {
-                ConstantResolutionItem job{nesting_, constant};
-                job.resolutionFailed = resolutionFailed;
                 todo_.emplace_back(std::move(job));
             }
             tree = std::move(out);
@@ -1574,7 +1573,7 @@ public:
         // In particular, `firstDefinitionLocs` does not store anything if this symbol is defined in
         // more than one non-RBI file or if it's only defined once in this file.
         // Otherwise, it stores the loc of the first definition of the symbol in this file.
-        if (!ctx.file.data(ctx).isRBI() && loadScopeDepth_ == 0 &&
+        if (!ctx.file.data(ctx).isRBI() && this->loadTimeScope() &&
             id->symbol.isOnlyDefinedInFile(ctx.state, ctx.file)) {
             auto defLoc = id->symbol.loc(ctx);
 
@@ -1665,7 +1664,7 @@ public:
                 // possible generic types.
                 ConstantResolutionItem job{nesting_, recvAsConstantLit};
                 job.possibleGenericType = true;
-                if (!resolveJob(ctx, job)) {
+                if (!resolveConstantJob(ctx, job)) {
                     todo_.emplace_back(std::move(job));
                 }
             }
