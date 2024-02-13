@@ -130,6 +130,30 @@ string ErrorSection::toString(const GlobalState &gs) const {
     return buf.str();
 }
 
+void ErrorDetailsCollector::addErrorDetails(ErrorDetailsCollector e) {
+    children.push_back(e);
+}
+
+void toErrorSectionHelper(ErrorDetailsCollector &e, vector<ErrorLine> &result, int indentLevel = 0) {
+    ENFORCE(e.message.length() > 0);
+    std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
+    result.push_back(ErrorLine(core::Loc::none(), message, ErrorLine::LocDisplay::Hidden));
+    for (auto c : e.children) {
+        toErrorSectionHelper(c, result, indentLevel + 1);
+    }
+}
+
+std::optional<ErrorSection> ErrorDetailsCollector::toErrorSection() {
+    if (children.size() == 0) {
+        return nullopt;
+    }
+    vector<ErrorLine> lines;
+    for (auto c : children) {
+        toErrorSectionHelper(c, lines, 0);
+    }
+    return ErrorSection("Possible explanation:", lines);
+}
+
 string Error::toString(const GlobalState &gs) const {
     stringstream buf;
     buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
@@ -169,6 +193,13 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
     ENFORCE(state == State::WillBuild);
     if (section.has_value()) {
         this->sections.emplace_back(move(*section));
+    }
+}
+
+void ErrorBuilder::addErrorSections(ErrorDetailsCollector errorDetailsCollector) {
+    auto errorSection = errorDetailsCollector.toErrorSection();
+    if (errorSection) {
+        addErrorSection(errorSection.value());
     }
 }
 
