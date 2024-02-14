@@ -791,3 +791,79 @@ class RubyVM::InstructionSequence < Object
   # ```
   def self.of(_); end
 end
+
+# This module allows for introspection of YJIT, CRuby's just-in-time compiler.
+# Everything in the module is highly implementation specific and the API might
+# be less stable compared to the standard library.
+#
+# This module may not exist if YJIT does not support the particular platform
+# for which CRuby is built.
+module RubyVM::YJIT
+  # Check if YJIT is enabled.
+  sig { returns(T::Boolean) }
+  def self.enabled?; end
+
+  # Check if `--yjit-stats` is used.
+  sig { returns(T::Boolean) }
+  def self.stats_enabled?; end
+
+  # Discard statistics collected for `--yjit-stats`.
+  sig { void }
+  def self.reset_stats!; end
+
+  # Enable YJIT compilation. `stats` option decides whether to enable YJIT stats or not.
+  #
+  # * `false`: Disable stats.
+  # * `true`: Enable stats. Print stats at exit.
+  # * `:quiet`: Enable stats. Do not print stats at exit.
+  sig { params(stats: T::Boolean).returns(T::Boolean) }
+  def self.enable(stats: false); end
+
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) dumps exit locations to the given filename.
+  #
+  # Usage:
+  #
+  # If `--yjit-exit-locations` is passed, a file named
+  # "yjit_exit_locations.dump" will automatically be generated.
+  #
+  # If you want to collect traces manually, call `dump_exit_locations`
+  # directly.
+  #
+  # Note that calling this in a script will generate stats after the
+  # dump is created, so the stats data may include exits from the
+  # dump itself.
+  #
+  # In a script call:
+  #
+  # ```
+  # at_exit do
+  #   RubyVM::YJIT.dump_exit_locations("my_file.dump")
+  # end
+  # ````
+  #
+  # Then run the file with the following options:
+  #
+  # ```
+  # ruby --yjit --yjit-trace-exits test.rb
+  # ```
+  #
+  # Once the code is done running, use Stackprof to read the dump file.
+  # See Stackprof documentation for options.
+  sig { params(filename: T.any(String, Pathname)).returns(Integer) }
+  def self.dump_exit_locations(filename); end
+
+  # Return a hash for statistics generated for the `--yjit-stats` command line option.
+  # Return `nil` when option is not passed or unavailable.
+  sig { params(context: T::Boolean).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
+  def self.runtime_stats(context: false); end
+
+  # Format and print out counters as a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
+  # This returns a non-empty content only when `--yjit-stats` is enabled.
+  sig { returns(String) }
+  def self.stats_string; end
+
+  # Discard existing compiled code to reclaim memory
+  # and allow for recompilations in the future.
+  sig { void }
+  def self.code_gc; end
+end
