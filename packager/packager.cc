@@ -28,7 +28,7 @@ namespace {
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
 bool isPrimaryTestNamespace(const core::NameRef ns) {
-    return ns == TEST_NAME;
+    return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
 bool isSecondaryTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
@@ -424,7 +424,7 @@ PackageName getPackageName(core::Context ctx, const ast::UnresolvedConstantLit *
     PackageName pName;
     pName.loc = constantLit->loc;
     pName.fullName = getFullyQualifiedName(ctx, constantLit);
-    pName.fullTestPkgName = pName.fullName.withPrefix(TEST_NAME);
+    pName.fullTestPkgName = pName.fullName.withPrefix(core::packages::PackageDB::TEST_NAMESPACE);
 
     // pname.mangledName will be populated later, when we have a mutable GlobalState
 

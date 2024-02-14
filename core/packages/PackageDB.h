@@ -22,6 +22,8 @@ class PackageDB final {
     friend class core::GlobalState;
 
 public:
+    static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
+
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
