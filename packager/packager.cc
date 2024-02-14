@@ -367,6 +367,12 @@ public:
     }
 };
 
+// If the __package.rb file itself is a test file, then the whole package is a test-only package.
+// For exapmle, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
+bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
+    return pkg.loc.file().data(gs).isPackagedTest();
+}
+
 [[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
     bool valid = true;
     while (constLit != nullptr) {
@@ -593,9 +599,14 @@ public:
                 foundTestNS = name;
                 foundTestNSLoc = loc;
                 return;
-            } else if (!filePkg.loc.file().data(ctx).isPackagedTest()) {
-                // Inside a test file, but not inside a test namespace. Set bounds such that
-                // begin == end, stopping any subsequent search.
+            } else if (!isTestOnlyPackage(ctx, filePkg)) {
+                // In test-only packages, code can freely be inside the package's namespace, or the
+                // package's test namespace (i.e., either Critic or Test::Critic).
+                // Convention would say that the former is for test helpers and the latter is for
+                // runnable tests, but there is nothing enforcing this convention in Sorbet.
+                //
+                // If this *not* a test-only package, set bounds such that begin == end, stopping
+                // any subsequent search.
                 bounds.emplace_back(begin, end);
                 nameParts.emplace_back(name);
                 namePartsLocs.emplace_back(loc);
@@ -706,8 +717,7 @@ class EnforcePackagePrefix final {
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
-        : pkg(pkg),
-          mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !pkg.loc.file().data(ctx).isPackagedTest()),
+        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
           namespaces(ctx, pkg) {
         ENFORCE(pkg.exists());
     }
