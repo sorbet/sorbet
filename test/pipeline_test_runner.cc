@@ -259,7 +259,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-    vector<std::string> secondaryTestPackageNamespaces = {"Critic"};
+    vector<std::string> secondaryTestPackageNamespaces;
     vector<std::string> skipRBIExportEnforcementDirs;
     vector<std::string> allowRelaxedPackagerChecksFor;
 
