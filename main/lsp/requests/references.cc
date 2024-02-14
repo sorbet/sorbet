@@ -31,8 +31,10 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
     reverse(fullName.begin(), fullName.end());
 
     vector<core::SymbolRef> result;
-    vector<core::SymbolRef> namespacesToCheck = {core::Symbols::root(),
-                                                 core::Symbols::root().data(gs)->findMember(gs, packager::TEST_NAME)};
+    vector<core::SymbolRef> namespacesToCheck = {
+        core::Symbols::root(),
+        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
+    };
 
     for (auto &namespaceToCheck : namespacesToCheck) {
         if (!namespaceToCheck.exists()) {

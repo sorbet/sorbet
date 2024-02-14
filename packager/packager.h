@@ -9,8 +9,6 @@ class WorkerPool;
 }
 
 namespace sorbet::packager {
-const core::NameRef TEST_NAME = core::Names::Constants::Test();
-
 /**
  * This pass transforms package files (`foo/__package.rb`) from
  *
