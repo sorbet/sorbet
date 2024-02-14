@@ -162,8 +162,7 @@ public:
     FileRef findFileByPath(std::string_view path) const;
 
     const packages::PackageDB &packageDB() const;
-    void setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
-                            const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);
