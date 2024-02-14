@@ -31,13 +31,8 @@ bool isPrimaryTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool isSecondaryTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
-    const vector<core::NameRef> &secondaryTestPackageNamespaceRefs = gs.packageDB().secondaryTestPackageNamespaceRefs();
-    return absl::c_find(secondaryTestPackageNamespaceRefs, ns) != secondaryTestPackageNamespaceRefs.end();
-}
-
 bool isTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
-    return isPrimaryTestNamespace(ns) || isSecondaryTestNamespace(gs, ns);
+    return isPrimaryTestNamespace(ns);
 }
 
 struct FullyQualifiedName {
@@ -879,8 +874,7 @@ private:
         }
 
         if (prevDepth == 0 && isTestFile && namespaces.depth() > 0) {
-            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first) ||
-                               !isSecondaryTestNamespace(ctx, pkg.name.fullName.parts[0]);
+            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first);
         }
 
         tmpNameParts.clear();
