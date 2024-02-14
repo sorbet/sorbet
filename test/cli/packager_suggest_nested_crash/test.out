@@ -1,25 +1,11 @@
-test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:4: Tests in the `Project::ConsumerAuth::Data` package must define tests in the `Test::Project::ConsumerAuth::Data` namespace https://srb.help/3713
-     4 |class Project::ConsumerAuth::Data
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/packager_suggest_nested_crash/consumer_auth/data/__package.rb:4: Enclosing package declared here
-     4 |class Project::ConsumerAuth::Data < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-test/cli/packager_suggest_nested_crash/consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierType` resolves but is not exported from `Project::ConsumerAuth` https://srb.help/3717
+consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierType` resolves but is not exported from `Project::ConsumerAuth` https://srb.help/3717
      6 |    puts(Project::ConsumerAuth::IdentifierType)
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/packager_suggest_nested_crash/consumer_auth/identity_type.rb:5: Defined here
+    consumer_auth/identity_type.rb:5: Defined here
      5 |  class IdentifierType
           ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/packager_suggest_nested_crash/consumer_auth/__package.rb:6: Insert `export Project::ConsumerAuth::IdentifierType`
+    consumer_auth/__package.rb:6: Insert `export Project::ConsumerAuth::IdentifierType`
      6 |  import Project::ConsumerAuth::Data
                                             ^
-
-test/cli/packager_suggest_nested_crash/consumer_auth/identity_type.rb:4: Tests in the `Project::ConsumerAuth` package must define tests in the `Test::Project::ConsumerAuth` namespace https://srb.help/3713
-     4 |class Project::ConsumerAuth
-              ^^^^^^^^^^^^^^^^^^^^^
-    test/cli/packager_suggest_nested_crash/consumer_auth/__package.rb:5: Enclosing package declared here
-     5 |class Project::ConsumerAuth < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 3
+Errors: 1
