@@ -543,9 +543,9 @@ class PackageNamespaces final {
     static constexpr uint16_t SKIP_BOUND_VAL = 0;
 
 public:
-    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg, bool isTestFile)
+    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg)
         : packages(ctx.state.packageDB().packages()), filePkg(filePkg), begin(0), end(packages.size()),
-          isTestFile(isTestFile), filePkgIdx(findPackageIndex(ctx, filePkg)) {
+          isTestFile(ctx.file.data(ctx).isPackagedTest()), filePkgIdx(findPackageIndex(ctx, filePkg)) {
         ENFORCE(packages.size() < numeric_limits<uint16_t>::max());
     }
 
@@ -597,7 +597,7 @@ public:
                 foundTestNS = name;
                 foundTestNSLoc = loc;
                 return;
-            } else if (!isTestNamespace(ctx, name)) {
+            } else if (!isTestNamespace(ctx, name) && !filePkg.loc.file().data(ctx).isPackagedTest()) {
                 // Inside a test file, but not inside a test namespace. Set bounds such that
                 // begin == end, stopping any subsequent search.
                 bounds.emplace_back(begin, end);
@@ -697,7 +697,7 @@ public:
 // prefix.
 class EnforcePackagePrefix final {
     const PackageInfoImpl &pkg;
-    const bool isTestFile;
+    const bool mustUseTestNamespace;
     PackageNamespaces namespaces;
     // Counter to avoid duplicate errors:
     // - Only emit errors when depth is 0
@@ -709,8 +709,10 @@ class EnforcePackagePrefix final {
     vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
 
 public:
-    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg, bool isTestFile)
-        : pkg(pkg), isTestFile(isTestFile), namespaces(ctx, pkg, isTestFile) {
+    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
+        : pkg(pkg),
+          mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !pkg.loc.file().data(ctx).isPackagedTest()),
+          namespaces(ctx, pkg) {
         ENFORCE(pkg.exists());
     }
 
@@ -873,7 +875,7 @@ private:
             }
         }
 
-        if (prevDepth == 0 && isTestFile && namespaces.depth() > 0) {
+        if (prevDepth == 0 && mustUseTestNamespace && namespaces.depth() > 0) {
             useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first);
         }
 
@@ -1403,7 +1405,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
     auto &pkgImpl = PackageInfoImpl::from(pkg);
 
-    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl, file.isPackagedTest());
+    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 
