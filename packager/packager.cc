@@ -704,7 +704,16 @@ public:
 // prefix.
 class EnforcePackagePrefix final {
     const PackageInfoImpl &pkg;
+
+    // Whether code in this file must use the `Test::` namespace.
+    //
+    // Obviously tests *can* use the `Test::` namespace, but tests in test-only packages don't have to.
+    //
+    // (This is a wart of the original implementation, not an intentional design choice. It would
+    // probably be good in the future to require that runnable tests live in the `Test::` namespace
+    // for the package.)
     const bool mustUseTestNamespace;
+
     PackageNamespaces namespaces;
     // Counter to avoid duplicate errors:
     // - Only emit errors when depth is 0
