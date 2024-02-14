@@ -27,12 +27,8 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool isPrimaryTestNamespace(const core::NameRef ns) {
+bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
-}
-
-bool isTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
-    return isPrimaryTestNamespace(ns);
 }
 
 struct FullyQualifiedName {
@@ -593,11 +589,11 @@ public:
         bool boundsEmpty = bounds.empty();
 
         if (isTestFile && boundsEmpty && !foundTestNS.exists()) {
-            if (isPrimaryTestNamespace(name)) {
+            if (isTestNamespace(name)) {
                 foundTestNS = name;
                 foundTestNSLoc = loc;
                 return;
-            } else if (!isTestNamespace(ctx, name) && !filePkg.loc.file().data(ctx).isPackagedTest()) {
+            } else if (!filePkg.loc.file().data(ctx).isPackagedTest()) {
                 // Inside a test file, but not inside a test namespace. Set bounds such that
                 // begin == end, stopping any subsequent search.
                 bounds.emplace_back(begin, end);
