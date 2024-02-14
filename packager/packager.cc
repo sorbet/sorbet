@@ -876,7 +876,7 @@ private:
         }
 
         if (prevDepth == 0 && mustUseTestNamespace && namespaces.depth() > 0) {
-            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first);
+            useTestNamespace = true;
         }
 
         tmpNameParts.clear();
