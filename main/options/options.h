@@ -164,7 +164,6 @@ struct Options {
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
-    std::vector<std::string> secondaryTestPackageNamespaces;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
     std::string typedSource = "";
     std::string cacheDir = "";

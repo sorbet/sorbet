@@ -27,17 +27,8 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
-bool isPrimaryTestNamespace(const core::NameRef ns) {
+bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
-}
-
-bool isSecondaryTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
-    const vector<core::NameRef> &secondaryTestPackageNamespaceRefs = gs.packageDB().secondaryTestPackageNamespaceRefs();
-    return absl::c_find(secondaryTestPackageNamespaceRefs, ns) != secondaryTestPackageNamespaceRefs.end();
-}
-
-bool isTestNamespace(const core::GlobalState &gs, const core::NameRef ns) {
-    return isPrimaryTestNamespace(ns) || isSecondaryTestNamespace(gs, ns);
 }
 
 struct FullyQualifiedName {
@@ -376,6 +367,12 @@ public:
     }
 };
 
+// If the __package.rb file itself is a test file, then the whole package is a test-only package.
+// For exapmle, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
+bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
+    return pkg.loc.file().data(gs).isPackagedTest();
+}
+
 [[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
     bool valid = true;
     while (constLit != nullptr) {
@@ -548,9 +545,9 @@ class PackageNamespaces final {
     static constexpr uint16_t SKIP_BOUND_VAL = 0;
 
 public:
-    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg, bool isTestFile)
+    PackageNamespaces(core::Context ctx, const PackageInfoImpl &filePkg)
         : packages(ctx.state.packageDB().packages()), filePkg(filePkg), begin(0), end(packages.size()),
-          isTestFile(isTestFile), filePkgIdx(findPackageIndex(ctx, filePkg)) {
+          isTestFile(ctx.file.data(ctx).isPackagedTest()), filePkgIdx(findPackageIndex(ctx, filePkg)) {
         ENFORCE(packages.size() < numeric_limits<uint16_t>::max());
     }
 
@@ -598,13 +595,18 @@ public:
         bool boundsEmpty = bounds.empty();
 
         if (isTestFile && boundsEmpty && !foundTestNS.exists()) {
-            if (isPrimaryTestNamespace(name)) {
+            if (isTestNamespace(name)) {
                 foundTestNS = name;
                 foundTestNSLoc = loc;
                 return;
-            } else if (!isTestNamespace(ctx, name)) {
-                // Inside a test file, but not inside a test namespace. Set bounds such that
-                // begin == end, stopping any subsequent search.
+            } else if (!isTestOnlyPackage(ctx, filePkg)) {
+                // In test-only packages, code can freely be inside the package's namespace, or the
+                // package's test namespace (i.e., either Critic or Test::Critic).
+                // Convention would say that the former is for test helpers and the latter is for
+                // runnable tests, but there is nothing enforcing this convention in Sorbet.
+                //
+                // If this *not* a test-only package, set bounds such that begin == end, stopping
+                // any subsequent search.
                 bounds.emplace_back(begin, end);
                 nameParts.emplace_back(name);
                 namePartsLocs.emplace_back(loc);
@@ -702,7 +704,16 @@ public:
 // prefix.
 class EnforcePackagePrefix final {
     const PackageInfoImpl &pkg;
-    const bool isTestFile;
+
+    // Whether code in this file must use the `Test::` namespace.
+    //
+    // Obviously tests *can* use the `Test::` namespace, but tests in test-only packages don't have to.
+    //
+    // (This is a wart of the original implementation, not an intentional design choice. It would
+    // probably be good in the future to require that runnable tests live in the `Test::` namespace
+    // for the package.)
+    const bool mustUseTestNamespace;
+
     PackageNamespaces namespaces;
     // Counter to avoid duplicate errors:
     // - Only emit errors when depth is 0
@@ -714,8 +725,9 @@ class EnforcePackagePrefix final {
     vector<std::pair<core::NameRef, core::LocOffsets>> tmpNameParts;
 
 public:
-    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg, bool isTestFile)
-        : pkg(pkg), isTestFile(isTestFile), namespaces(ctx, pkg, isTestFile) {
+    EnforcePackagePrefix(core::Context ctx, const PackageInfoImpl &pkg)
+        : pkg(pkg), mustUseTestNamespace(ctx.file.data(ctx).isPackagedTest() && !isTestOnlyPackage(ctx, pkg)),
+          namespaces(ctx, pkg) {
         ENFORCE(pkg.exists());
     }
 
@@ -878,9 +890,8 @@ private:
             }
         }
 
-        if (prevDepth == 0 && isTestFile && namespaces.depth() > 0) {
-            useTestNamespace = isPrimaryTestNamespace(tmpNameParts.back().first) ||
-                               !isSecondaryTestNamespace(ctx, pkg.name.fullName.parts[0]);
+        if (prevDepth == 0 && mustUseTestNamespace && namespaces.depth() > 0) {
+            useTestNamespace = true;
         }
 
         tmpNameParts.clear();
@@ -1408,7 +1419,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
     auto &pkgImpl = PackageInfoImpl::from(pkg);
 
-    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl, file.isPackagedTest());
+    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
     ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 

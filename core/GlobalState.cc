@@ -2373,18 +2373,13 @@ const packages::PackageDB &GlobalState::packageDB() const {
     return packageDB_;
 }
 
-void GlobalState::setPackagerOptions(const std::vector<std::string> &secondaryTestPackageNamespaces,
-                                     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                                      std::string errorHint) {
     ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
-
-    for (const string &ns : secondaryTestPackageNamespaces) {
-        packageDB_.secondaryTestPackageNamespaceRefs_.emplace_back(enterNameConstant(ns));
-    }
 
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;

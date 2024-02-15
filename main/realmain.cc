@@ -658,10 +658,10 @@ int realmain(int argc, char *argv[]) {
             {
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-                gs->setPackagerOptions(
-                    opts.secondaryTestPackageNamespaces, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                    opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-                    opts.allowRelaxedPackagerChecksFor, opts.stripePackagesHint);
+                gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                                       opts.extraPackageFilesDirectorySlashPrefixes,
+                                       opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
+                                       opts.stripePackagesHint);
             }
 
             packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));

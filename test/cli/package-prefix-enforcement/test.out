@@ -91,7 +91,21 @@ nested/nested.test.rb:16: Tests in the `Root::Nested` package must define tests 
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:13: File belongs to package `Critic::SomePkg` but defines a constant that does not match this namespace https://srb.help/3713
+critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+     3 |module Critic::SomePkg::Real
+               ^^^^^^^^^^^^^^^^^^^^^
+    critic_prefix/__package.rb:3: Enclosing package declared here
+     3 |class Critic::SomePkg < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+     7 |Critic::SomePkg::RealConst = 2
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    critic_prefix/__package.rb:3: Enclosing package declared here
+     3 |class Critic::SomePkg < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
     13 |SomeOtherNamespace::SomePkg::SomeConst = 4
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
@@ -107,4 +121,4 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
     __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 11
+Errors: 13
