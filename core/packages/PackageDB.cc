@@ -145,6 +145,74 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
+// It's unfortunate that we have to implement this the way we do.
+//
+// It would have been nicer if we could get away with packages non-packages sharing the same subtree
+// in the symbol table. We can't because:
+//
+// 1.  test code lives inside the `Test::` namespace, and (2) LSP support for
+// 2.  LSP support for definition/references in __package.rb files depends heavily on locations for
+//     package symbols and package namespace symbols being distinct from normal symbols.
+const MangledName PackageDB::getPackageNameFromBreadcrumbs(const GlobalState &gs,
+                                                           const vector<NameRef> &breadcrumbs) const {
+    auto cur = Symbols::PackageSpecRegistry();
+    SymbolRef bestPackageSpec;
+    for (auto breadcrumb = breadcrumbs.rbegin(); breadcrumb != breadcrumbs.rend(); ++breadcrumb) {
+        auto curSym = cur.data(gs)->findMember(gs, *breadcrumb);
+        if (!curSym.exists()) {
+            // We've reached the leaves of the package hierarchy despite there still
+            // being breadcrumbs left, so we've found the most specific package.
+            break;
+        }
+
+        ENFORCE(curSym.isClassOrModule(), "Non-ClassOrModule in package hierarchy");
+
+        cur = curSym.asClassOrModuleRef();
+        auto newPackageSpec = cur.data(gs)->findMember(gs, Names::Constants::PackageSpec_Storage());
+        if (newPackageSpec.exists()) {
+            bestPackageSpec = newPackageSpec;
+        }
+    }
+
+    if (bestPackageSpec.exists()) {
+        return getPackageNameForFile(bestPackageSpec.loc(gs).file());
+    } else {
+        return MangledName();
+    }
+}
+
+const MangledName PackageDB::getPackageNameForSymbolImpl(const GlobalState &gs, ClassOrModuleRef klass,
+                                                         vector<NameRef> &breadcrumbs) const {
+    if (klass == Symbols::root() || klass == Symbols::PackageSpecRegistry()) {
+        return getPackageNameFromBreadcrumbs(gs, breadcrumbs);
+    }
+
+    auto data = klass.data(gs);
+    auto owner = data->owner;
+    if (owner == Symbols::root() && data->name == TEST_NAMESPACE) {
+        return getPackageNameFromBreadcrumbs(gs, breadcrumbs);
+    }
+
+    auto attachedClass = data->attachedClass(gs);
+    if (attachedClass.exists()) {
+        // Don't add name to breadcrumbs, because we will never find a <PackageSpec> under a singleton class.
+        return getPackageNameForSymbolImpl(gs, attachedClass, breadcrumbs);
+    }
+
+    // Function is tail recursive, so mutating the vector instead of making a copy is fine.
+    breadcrumbs.emplace_back(data->name);
+    return getPackageNameForSymbolImpl(gs, owner, breadcrumbs);
+}
+
+const MangledName PackageDB::getPackageNameForSymbol(const GlobalState &gs, SymbolRef sym) const {
+    if (!sym.isClassOrModule()) {
+        return getPackageNameForSymbol(gs, sym.owner(gs));
+    }
+
+    vector<NameRef> breadcrumbs;
+    return getPackageNameForSymbolImpl(gs, sym.asClassOrModuleRef(), breadcrumbs);
+}
+
 void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     if (this->packageForFile_.size() <= file.id()) {
         this->packageForFile_.resize(file.id() + 1, MangledName());

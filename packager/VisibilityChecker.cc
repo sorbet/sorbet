@@ -35,6 +35,7 @@ class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
+        // TODO(jez) Replace with getPackageNameForSymbol
         auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
         return this->package.mangledName() == pkg;
     }
@@ -156,6 +157,7 @@ class PropagateVisibility final {
 
             if (packageSym.exists()) {
                 auto file = packageSym.data(ctx)->loc().file();
+                // TODO(jez) Delete this, because package ownership doesn't care about locs anymore
                 if (db.getPackageNameForFile(file) != this->package.mangledName()) {
                     packageSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
@@ -182,6 +184,7 @@ class PropagateVisibility final {
 
             if (testSym.exists()) {
                 auto file = testSym.data(ctx)->loc().file();
+                // TODO(jez) Delete this, because package ownership doesn't care about locs anymore
                 if (db.getPackageNameForFile(file) != this->package.mangledName()) {
                     testSym.data(ctx)->addLoc(ctx, ctx.locAt(loc));
                 }
@@ -212,6 +215,7 @@ class PropagateVisibility final {
         }
 
         auto definingFile = sym.loc(ctx).file();
+        // TODO(jez) Replace with getPackageNameForSymbol
         auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
@@ -399,7 +403,7 @@ public:
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
-        auto otherPackage = db.getPackageNameForFile(otherFile);
+        auto otherPackage = db.getPackageNameForSymbol(ctx, lit.symbol);
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
