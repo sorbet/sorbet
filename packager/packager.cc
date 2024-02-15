@@ -454,7 +454,7 @@ void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     }
 }
 
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef prefix) {
+ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(lastConstLit != nullptr);
     while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
@@ -988,7 +988,7 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+                send.addPosArg(prependName(move(importArg)));
 
                 info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
@@ -999,7 +999,7 @@ struct PackageSpecBodyWalk {
             auto importArg = move(send.getPosArg(0));
             send.removePosArg(0);
             ENFORCE(send.numPosArgs() == 0);
-            send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+            send.addPosArg(prependName(move(importArg)));
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
@@ -1021,7 +1021,7 @@ struct PackageSpecBodyWalk {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
-                send.addPosArg(prependName(move(importArg), core::Names::Constants::PackageSpecRegistry()));
+                send.addPosArg(prependName(move(importArg)));
 
                 info.visibleTo_.emplace_back(getPackageName(ctx, target));
             }
@@ -1215,8 +1215,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         //
         // Other than being able to say "we don't mutate the trees in packager" there's not much
         // value in going that far (even namer mutates the trees; the packager fills a similar role).
-        packageSpecClass->name =
-            prependName(move(packageSpecClass->name), core::Names::Constants::PackageSpecRegistry());
+        packageSpecClass->name = prependName(move(packageSpecClass->name));
 
         info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
                                             ctx.locAt(packageSpecClass->declLoc));
