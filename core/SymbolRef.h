@@ -163,9 +163,10 @@ public:
 
     bool isOnlyDefinedInFile(const GlobalState &gs, core::FileRef file) const;
 
-    // Given a symbol like <PackageSpecRegistry>::Project::Foo, returns true.
+    // Given a symbol like <PackageSpecRegistry>::Project::Foo::<PackageSpec>, returns true.
     // Given any other symbol, returns false.
     // Also returns false if called on core::Symbols::noClassOrModule().
+    // TODO(jez) Can we remove this method once we have packages in the symbol table?
     bool isPackageSpecSymbol(const GlobalState &gs) const;
 
     // Certain classes that need to be generic in the standard library already have a definition for
