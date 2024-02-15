@@ -355,7 +355,7 @@ some things that are only possible to represent with `T::Class`.
   `T::Class[MyInterface]` work.
 
   By contrast, it's simply a syntax error to write `T.class_of(T.any(A, B))`
-  (because this doesn't resolve to a single attached class), and
+  (because this doesn't resolve to a single singleton class), and
   `T.class_of(MyInterface)` means something different from what people might
   otherwise expect it to mean.
 
