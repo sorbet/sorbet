@@ -352,7 +352,7 @@ some things that are only possible to represent with <code>T::Class</code>.</p>
 type, which means that things like <code>T::Class[T.any(A, B)]</code> and
 <code>T::Class[MyInterface]</code> work.</p>
 <p>By contrast, it’s simply a syntax error to write <code>T.class_of(T.any(A, B))</code>
-(because this doesn’t resolve to a single attached class), and
+(because this doesn’t resolve to a single singleton class), and
 <code>T.class_of(MyInterface)</code> means something different from what people might
 otherwise expect it to mean.</p></li>
 <li><p><code>T.class_of</code> knows what methods are on the singleton class of a class. By
