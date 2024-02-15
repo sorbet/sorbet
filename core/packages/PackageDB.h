@@ -28,7 +28,20 @@ public:
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.
+    // TODO(jez) Audit all callers of this to see whether we can start using getPackageNameForSymbol already
     const MangledName getPackageNameForFile(FileRef file) const;
+
+    // Use the structure of the symbol table to determine which package owns a given symbol, instead
+    // of doing it based on location information.
+    //
+    // The file of the canonical loc() of a symbol used to be how we would figure out which package
+    // owns a Symbol. This is brittle and depends heavily on things like file order and whether
+    // a class symbol `!isDeclared`, among other things. Using the ownership structure of the
+    // symbol table is a more reliable way to determine ownership.
+    //
+    // TODO(jez) Update this comment when the PackageInfo -> symbol table migration is finished.
+    // TODO(jez) This should probably return something like a PackageRef in the future.
+    const MangledName getPackageNameForSymbol(const GlobalState &gs, SymbolRef sym) const;
 
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
@@ -85,6 +98,11 @@ private:
 
     bool frozen = true;
     std::thread::id writerThread;
+
+    const MangledName getPackageNameForSymbolImpl(const GlobalState &gs, ClassOrModuleRef klass,
+                                                  std::vector<NameRef> &breadcrumbs) const;
+    const MangledName getPackageNameFromBreadcrumbs(const GlobalState &gs,
+                                                    const std::vector<NameRef> &breadcrumbs) const;
 
     friend class UnfreezePackages;
 };
