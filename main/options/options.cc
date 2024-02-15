@@ -409,11 +409,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "package-munging convention, i.e. 'project/foo'."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")(
-        "secondary-test-package-namespaces",
-        "Secondary top-level namespaces which contain test code (in addition to Test, which is primary). "
-        "This option must be used in conjunction with --stripe-packages",
-        cxxopts::value<vector<string>>(), "string");
     options.add_options("dev")("allow-relaxed-packager-checks-for",
                                "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                "and `export` directives."
