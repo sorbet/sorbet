@@ -80,10 +80,11 @@ class PropagateVisibility final {
     // Lookup the package name on the given root symbol, and mark the final symbol as exported.
     void exportRoot(core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // For a package named `A::B`, the ClassDef that we see in this pass is for a symbol named
-        // `<PackageSpecRegistry>::A::B`. In order to make the name `A::B` visible to packages that have imported
-        // `A::B`, we explicitly lookup and export them here. This is a design decision inherited from the previous
-        // packages implementation, and we could remove it after migrating Stripe's codebase to not depend on package
-        // names being exported by default.
+        // `<PackageSpecRegistry>::A::B::<PackageSpec>`. In order to make the name `A::B` visible to
+        // packages that have imported `A::B`, we explicitly lookup and export them here. This is a
+        // design decision inherited from the previous packages implementation, and we could remove
+        // it after migrating Stripe's codebase to not depend on package names being exported by
+        // default.
         for (auto name : this->package.fullName()) {
             auto next = sym.data(gs)->findMember(gs, name);
             if (!next.exists() || !next.isClassOrModule()) {
@@ -109,9 +110,10 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
-    // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
-    // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
+    // While processing the ClassDef for the package, which will be named something like
+    // `<PackageSpecRegistry>::A::B::<PackageSpec>`, we also check that the symbols `A::B` and `Test::A::B` have
+    // locations whose package matches the one we're processing. If they don't match, we add locs to ensure that those
+    // symbols are associated with this package.
     //
     // The reason for this step is that it's currently allowed to refer to the name of the package outside of the
     // context of the package spec, even if it doesn't explicitly export its top-level name. So in the case above, there
@@ -120,6 +122,9 @@ class PropagateVisibility final {
     // that declaration will be marked as owning `A::B`, thus breaking the invariant that the file can be used to
     // determine the package that owns a symbol. So, to avoid this case we ensure that the symbols that correspond to
     // the package name are always owned by the package that defines them.
+    //
+    // TODO(jez) Determine which package a symbol belongs to using the symbol table ownership (not definition locs)
+    // and remove this code.
     void setPackageLocs(core::MutableContext ctx, core::LocOffsets loc, core::ClassOrModuleRef sym) {
         std::vector<core::NameRef> names;
 

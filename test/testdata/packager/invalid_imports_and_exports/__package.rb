@@ -5,13 +5,13 @@
 class A < PackageSpec
   import 123
        # ^^^ error: Argument to `import` must be a constant
-       # ^^^ error: Expected `T.class_of(PackageSpec)`
+       # ^^^ error: Expected `Module`
   import "hello"
        # ^^^^^^^ error: Argument to `import` must be a constant
-       # ^^^^^^^ error: Expected `T.class_of(PackageSpec)`
+       # ^^^^^^^ error: Expected `Module`
   import method
        # ^^^^^^ error: Argument to `import` must be a constant
-       # ^^^^^^ error: Expected `T.class_of(PackageSpec)`
+       # ^^^^^^ error: Expected `Module`
        #       ^ error: Not enough arguments
   import REFERENCE
        # ^^^^^^^^^ error: Unable to resolve constant `REFERENCE`

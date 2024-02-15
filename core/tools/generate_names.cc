@@ -457,6 +457,7 @@ NameDef names[] = {
     {"tests"},
     {"exportAll", "export_all!"},
     {"PackageSpec", "PackageSpec", true},
+    {"PackageSpec_Storage", "<PackageSpec>", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
     // Compiler

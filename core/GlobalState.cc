@@ -607,12 +607,12 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::PackageSpecSingleton());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::import())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_test_import());
 

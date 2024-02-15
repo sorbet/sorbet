@@ -478,18 +478,28 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     return scope;
 }
 
-bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit *cnst) {
-    while (cnst != nullptr) {
-        if (auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
-            return scope->symbol == core::Symbols::PackageSpecRegistry();
-        } else if (auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
-            return startsWithPackageSpecRegistry(scope);
-        } else {
-            return false;
-        }
-    }
+// Converts `Opus::Foo` -> `<PackageSpecRegistry>::Opus::Foo::<PackageSpec>`
+//
+// The leading `<PackageSpecRegistry>` ensures that Package symbols and the ClassOrModule symbols
+// which contain them are separate symbols from symbols defined in Ruby source code. This is
+// important to avoid polluting regular ClassOrModule symbols with spurious locs for the sake of
+// things like jump to definition and find all references.
+//
+// The trailing `<PackageSpec>` preps namer to be able to define Package symbols, this way ensures
+// that it's still the case that only ClassOrModule symbols have members (i.e., that all Symbols are
+// eventually owned by a ClassOrModule), which is a commonly-relied on invariant throughout Sorbet.
+//
+// It also means that a `class Opus::Foo < PackageSpec; end` definition always defines two symbols:
+// one which is a ClassOrModule, and one which is a Package. This means that constant literals in
+// `import` lines can continue to resolve to `ClassOrModule` symbols, which means that less code
+// has become aware of Package symbols.
+ast::ExpressionPtr rewritePackageSpecDefinition(ast::ExpressionPtr scope) {
+    return ast::MK::UnresolvedConstant(scope.loc().copyEndWithZeroLength(), prependName(move(scope)),
+                                       core::Names::Constants::PackageSpec_Storage());
+}
 
-    return false;
+bool isPackageSpecConst(const ast::UnresolvedConstantLit *cnst) {
+    return cnst->cnst == core::Names::Constants::PackageSpec_Storage();
 }
 
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
@@ -1116,7 +1126,7 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        if (startsWithPackageSpecRegistry(nameTree)) {
+        if (isPackageSpecConst(nameTree)) {
             this->foundFirstPackageSpec = true;
         } else if (this->foundFirstPackageSpec) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
@@ -1281,7 +1291,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         }
 
         // ---- Mutates the tree ----
-        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo < PackageSpec`
+        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo::<PackageSpec> < PackageSpec`
         // This removes the PackageSpec's themselves from the top-level namespace
         //
         // We can't do this rewrite in rewriter, because this rewrite should only happen if
@@ -1290,7 +1300,7 @@ unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::Pars
         //
         // Other than being able to say "we don't mutate the trees in packager" there's not much
         // value in going that far (even namer mutates the trees; the packager fills a similar role).
-        packageSpecClass->name = prependName(move(packageSpecClass->name));
+        packageSpecClass->name = rewritePackageSpecDefinition(move(packageSpecClass->name));
 
         // Pre-resolve the super class. This makes it easier to detect that this is a package
         // spec-related class def in later passes without having to recursively walk up the constant
