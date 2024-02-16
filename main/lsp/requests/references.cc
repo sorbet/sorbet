@@ -25,12 +25,8 @@ vector<core::SymbolRef> ReferencesTask::getSymsToCheckWithinPackage(const core::
 
     auto sym = symInPackage;
     while (sym.exists() && sym != core::Symbols::PackageSpecRegistry() && sym != core::Symbols::root()) {
-        auto name = sym.name(gs);
+        fullName.emplace_back(sym.name(gs));
         sym = sym.owner(gs);
-        if (name == core::Names::Constants::PackageSpec_Storage()) {
-            continue;
-        }
-        fullName.emplace_back(name);
     }
     reverse(fullName.begin(), fullName.end());
 

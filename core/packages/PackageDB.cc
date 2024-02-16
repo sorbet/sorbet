@@ -168,9 +168,9 @@ const MangledName PackageDB::getPackageNameFromBreadcrumbs(const GlobalState &gs
         ENFORCE(curSym.isClassOrModule(), "Non-ClassOrModule in package hierarchy");
 
         cur = curSym.asClassOrModuleRef();
-        auto newPackageSpec = cur.data(gs)->findMember(gs, Names::Constants::PackageSpec_Storage());
-        if (newPackageSpec.exists()) {
-            bestPackageSpec = newPackageSpec;
+        // TODO(jez) When these symbols switch to being Package symbols, this will have to change
+        if (cur.data(gs)->superClass() == Symbols::PackageSpec()) {
+            bestPackageSpec = cur;
         }
     }
 
