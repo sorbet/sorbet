@@ -28,7 +28,6 @@ public:
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.
-    // TODO(jez) Audit all callers of this to see whether we can start using getPackageNameForSymbol already
     const MangledName getPackageNameForFile(FileRef file) const;
 
     // Use the structure of the symbol table to determine which package owns a given symbol, instead
