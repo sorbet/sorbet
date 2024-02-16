@@ -72,6 +72,10 @@ fi
 {install_append_srcs}
 
 libyaml_loc="$(realpath {libyaml})"
+libffi_loc="$(realpath {libffi})"
+
+echo $libffi_loc
+echo $build_dir
 
 pushd "$build_dir" > /dev/null
 
@@ -109,6 +113,7 @@ export LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}"
 run_cmd ./configure \
         {configure_flags} \
         --with-libyaml-source-dir=$libyaml_loc \
+        --with-libffi-source-dir=$libffi_loc \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -163,7 +168,7 @@ cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
 
 popd > /dev/null
 
-rm -rf "$build_dir"
+# rm -rf "$build_dir"
 
 """
 
@@ -277,7 +282,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.libffi + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -291,6 +296,7 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
             libyaml = ctx.files.libyaml[0].dirname,
+            libffi = ctx.files.libffi[0].dirname,
             rustc = ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc.path,
             configure_flags = " ".join(ctx.attr.configure_flags),
             sysroot_flag = ctx.attr.sysroot_flag,
@@ -331,6 +337,10 @@ _build_ruby = rule(
         "libyaml": attr.label(
             default = Label("@libyaml//:libyaml"),
             doc = "A filegroup containing the libyaml source, `configure` should be at the top level",
+        ),
+        "libffi": attr.label(
+            default = Label("@libffi//:libffi"),
+            doc = "A filegroup containing the libffi source, `configure` should be at the top level",
         ),
         "extra_srcs": attr.label_list(
             doc = "A list of *.c and *.h files to treat as extra source files to libruby",
