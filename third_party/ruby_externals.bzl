@@ -11,11 +11,11 @@ def register_ruby_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libyaml.BUILD",
     )
 
-    libffi_version = "3.4.4"
+    libffi_version = "3.4.5"
     http_archive(
         name = "libffi",
         urls = _github_public_urls("libffi/libffi/releases/download/v{}/libffi-{}.tar.gz".format(libffi_version, libffi_version)),
-        sha256 = "d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676",
+        sha256 = "96fff4e589e3b239d888d9aa44b3ff30693c2ba1617f953925a70ddebcc102b2",
         strip_prefix = "libffi-{}".format(libffi_version),
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libffi.BUILD",
     )
