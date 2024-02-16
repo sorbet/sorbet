@@ -35,21 +35,13 @@ class PropagateVisibility final {
     const core::packages::PackageInfo &package;
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
-        // TODO(jez) Replace with getPackageNameForSymbol
-        // I think this would also let us get rid of the isBehaviorDefining hacks in this file?
-        auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
+        auto pkg = gs.packageDB().getPackageNameForSymbol(gs, sym);
         return this->package.mangledName() == pkg;
     }
 
     void recursiveExportSymbol(core::GlobalState &gs, bool firstSymbol, core::ClassOrModuleRef klass) {
-        // We only mark symbols from this package. However, there's a
-        // tough case where non-behavior-defining "namespace-like"
-        // constants might get attributed to other packages (since we
-        // don't have a canonical location, so we use the first place
-        // we see them... which might be in a subpackage) and
-        // therefore this might stop too soon. That's why we only stop
-        // recursing if the thing is actually behavior-defining.
-        if (!this->definedByThisPackage(gs, klass) && klass.data(gs)->flags.isBehaviorDefining) {
+        // We only mark symbols from this package, no subpackages.
+        if (!this->definedByThisPackage(gs, klass)) {
             return;
         }
 
