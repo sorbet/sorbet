@@ -36,6 +36,7 @@ class PropagateVisibility final {
 
     bool definedByThisPackage(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         // TODO(jez) Replace with getPackageNameForSymbol
+        // I think this would also let us get rid of the isBehaviorDefining hacks in this file?
         auto pkg = gs.packageDB().getPackageNameForFile(sym.data(gs)->loc().file());
         return this->package.mangledName() == pkg;
     }
@@ -214,9 +215,7 @@ class PropagateVisibility final {
             }
         }
 
-        auto definingFile = sym.loc(ctx).file();
-        // TODO(jez) Replace with getPackageNameForSymbol
-        auto symPackage = ctx.state.packageDB().getPackageNameForFile(definingFile);
+        auto symPackage = ctx.state.packageDB().getPackageNameForSymbol(ctx, sym);
         if (symPackage != this->package.mangledName()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
