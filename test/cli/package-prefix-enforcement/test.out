@@ -74,6 +74,17 @@ nested/nested.rb:57: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+nested/nested.rb:38: `Root::NOT_IN_PACKAGE` resolves but is not exported from `Root` https://srb.help/3717
+    38 |  NOT_IN_PACKAGE = T.let(1, Integer)
+          ^^^^^^^^^^^^^^
+    nested/nested.rb:38: Defined here
+    38 |  NOT_IN_PACKAGE = T.let(1, Integer)
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:3: Insert `export Root::NOT_IN_PACKAGE`
+     3 |class Root < PackageSpec
+                                ^
+
 nested/nested.test.rb:9: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
      9 |  NOT_IN_MODULE = nil
           ^^^^^^^^^^^^^
@@ -90,6 +101,17 @@ nested/nested.test.rb:16: Tests in the `Root::Nested` package must define tests 
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.test.rb:9: `Test::Root::NOT_IN_MODULE` resolves but is not exported from `Root` https://srb.help/3717
+     9 |  NOT_IN_MODULE = nil
+          ^^^^^^^^^^^^^
+    nested/nested.test.rb:9: Defined here
+     9 |  NOT_IN_MODULE = nil
+          ^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:3: Insert `export Test::Root::NOT_IN_MODULE`
+     3 |class Root < PackageSpec
+                                ^
 
 critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      3 |module Critic::SomePkg::Real
@@ -121,4 +143,4 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
     __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 13
+Errors: 15
