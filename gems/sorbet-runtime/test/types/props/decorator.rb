@@ -302,7 +302,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       e = assert_raises(NoMethodError) do
         m.immutable = 'world'
       end
-      assert_match(/undefined method `immutable='/, e.message)
+      assert_match(/undefined method [`']immutable='/, e.message)
     end
 
     it 'const creates an immutable prop' do
@@ -346,7 +346,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     e = assert_raises do
       MatrixStruct.new.c = nil
     end
-    assert_match(/undefined method `c='/, e.message)
+    assert_match(/undefined method [`']c='/, e.message)
     e = assert_raises do
       MatrixStruct.new.d = nil
     end

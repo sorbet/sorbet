@@ -34,7 +34,7 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
     e = assert_raises do
       klass.new.foo
     end
-    assert_match(/undefined method `sig' for/, e.message)
+    assert_match(/undefined method [`']sig' for/, e.message)
   end
 
   # Enable $VERBOSE and redirect stderr to a string for the duration of the

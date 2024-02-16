@@ -261,7 +261,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
-      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
       assert_includes(e.message, "foo")
       assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
     end
@@ -273,7 +273,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         m.serialize
       end
 
-      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
       assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
     end
   end
@@ -739,7 +739,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         struct.serialize
       end
 
-      assert_includes(e.message, "undefined method `serialize'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'serialize'")
     end
 
     it 'raises deserialize errors when props with a serializable subtype store the wrong datatype' do
@@ -763,7 +763,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         struct.serialize
       end
 
-      assert_includes(e.message, "undefined method `map'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'map'")
     end
 
     it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
@@ -784,7 +784,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:array, storytime[:prop])
       assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error], "undefined method `map'")
+      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'map'")
     end
 
     it 'round trips as hash key' do
@@ -799,7 +799,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         struct.serialize
       end
 
-      assert_includes(e.message, "undefined method `transform_keys'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_keys'")
     end
 
     it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
@@ -820,7 +820,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_key, storytime[:prop])
       assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error], "undefined method `transform_keys'")
+      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_keys'")
     end
 
     it 'round trips as hash value' do
@@ -835,7 +835,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         struct.serialize
       end
 
-      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
@@ -856,7 +856,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_value, storytime[:prop])
       assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error], "undefined method `transform_values'")
+      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'round trips as hash key and value' do
@@ -871,7 +871,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         struct.serialize
       end
 
-      assert_includes(e.message, "undefined method `each_with_object'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'each_with_object'")
     end
 
     it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
@@ -892,7 +892,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_both, storytime[:prop])
       assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error], "undefined method `each_with_object'")
+      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'each_with_object'")
     end
   end
 
