@@ -99,6 +99,22 @@ def register_ruby_dependencies():
     )
 
     http_archive(
+        name = "sorbet_ruby_3_1_experimental",
+        urls = _ruby_urls("3.1/ruby-3.1.4.tar.gz"),
+        sha256 = "a3d55879a0dfab1d7141fdf10d22a07dbf8e5cdc4415da1bde06127d5cc3c7b6",
+        strip_prefix = "ruby-3.1.4",
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by-3_1.patch",  # https://github.com/ruby/ruby/pull/6791
+            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-more-t-none-context.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-write-barrier-cme.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:gc-weakmap-finalizer-write-barrier.patch",
+        ],
+    )
+
+    http_archive(
         name = "sorbet_ruby_3_2",
         urls = _ruby_urls("3.2/ruby-3.2.2.tar.gz"),
         sha256 = "96c57558871a6748de5bc9f274e93f4b5aad06cd8f37befa0e8d94e7b8a423bc",
