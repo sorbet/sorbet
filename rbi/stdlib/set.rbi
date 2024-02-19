@@ -642,6 +642,19 @@ class Set < Object
   sig {returns(T.nilable(T.self_type))}
   def flatten!(); end
 
+  # Creates a new set containing the elements of the given
+  # enumerable object.
+  #
+  # If a block is given, the elements of enum are preprocessed by
+  # the given block.
+  #
+  # ```ruby
+  # Set.new([1, 2])                    #=> #<Set: {1, 2}>
+  # Set.new([1, 2, 1])                 #=> #<Set: {1, 2}>
+  # Set.new([1, 'c', :s])              #=> #<Set: {1, "c", :s}>
+  # Set.new(1..5)                      #=> #<Set: {1, 2, 3, 4, 5}>
+  # Set.new([1, 2, 3]) { |x| x * x }   #=> #<Set: {1, 4, 9}>
+  # ```
   sig do
     type_parameters(:U).params(
       enum: T.nilable(T::Enumerable[T.type_parameter(:U)]),
