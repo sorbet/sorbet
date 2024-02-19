@@ -643,12 +643,13 @@ class Set < Object
   def flatten!(); end
 
   sig do
-    params(
-        enum: T.nilable(T::Enumerable[BasicObject]),
+    type_parameters(:U).params(
+      enum: T.nilable(T::Enumerable[T.type_parameter(:U)]),
+      blk: T.nilable(T.proc.params(arg0: T.type_parameter(:U)).returns(Elem))
     )
     .void
   end
-  def initialize(enum=nil); end
+  def initialize(enum=nil, &blk); end
 
   # Returns true if the set and the given enumerable have at least
   # one
