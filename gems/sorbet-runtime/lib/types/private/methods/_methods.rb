@@ -168,7 +168,7 @@ module T::Private::Methods
 
         definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
         is_redefined = target == ancestor
-        caller_loc = caller_locations.find {|l| !l.to_s.start_with?(SORBET_RUNTIME_LIB_PATH)}
+        caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH)}
         extra_info = "\n"
         if caller_loc
           extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
