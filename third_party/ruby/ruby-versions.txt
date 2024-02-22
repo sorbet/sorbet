@@ -2,3 +2,4 @@ sorbet_ruby_2_7
 sorbet_ruby_3_1
 sorbet_ruby_3_2
 sorbet_ruby_3_3_preview
+sorbet_ruby_3_3
