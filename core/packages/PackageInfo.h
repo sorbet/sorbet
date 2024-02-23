@@ -63,6 +63,12 @@ public:
     virtual std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                                  const core::SymbolRef name) const = 0;
 
+    // returns the loc of the `test_import` statement, if it needs to be converted to `import`
+    virtual std::optional<core::Loc> shouldConvertTestImport(const core::GlobalState &gs,
+                                                             const PackageInfo &pkg) const = 0;
+
+    virtual std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const = 0;
+
     bool operator==(const PackageInfo &rhs) const;
 
     virtual ~PackageInfo() = 0;
