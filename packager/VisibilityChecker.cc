@@ -1,6 +1,7 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -355,6 +356,11 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
+    // package => [packages to import, isTestImport]
+    UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, bool>>> toImport;
+    // package => [`test_import`ed package, Loc of test_import]
+    UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, core::Loc>>>
+        convertTestImport;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -456,6 +462,16 @@ public:
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
 
+                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+                auto convertTestImportLoc = this->package.shouldConvertTestImport(ctx, pkg);
+
+                if (!convertTestImportLoc.has_value()) {
+                    toImport[this->package.mangledName()].emplace(pkg.mangledName(), isTestImport);
+                } else if (!isTestImport) {
+                    convertTestImport[this->package.mangledName()].emplace(pkg.mangledName(),
+                                                                           convertTestImportLoc.value());
+                }
+
                 if (!ctx.file.data(ctx).isPackaged()) {
                     e.addErrorNote(
                         "A `{}` file is allowed to define constants outside of the package's namespace,\n    "
@@ -472,6 +488,7 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+                toImport[this->package.mangledName()].emplace(pkg.mangledName(), false);
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
@@ -489,31 +506,84 @@ public:
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
+        // [(package, packageToImport, isTestImport)]
+        auto toImportQ = std::make_shared<BlockingBoundedQueue<
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>>>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ]() {
             size_t idx;
+            int processedByThread = 0;
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> res;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
+                processedByThread++;
                 if (!f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
                         VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
+                        for (auto &[package, packagesToImport] : pass.toImport) {
+                            for (auto &[packageToImport, isTestImport] : packagesToImport) {
+                                res.emplace_back(package, packageToImport, isTestImport);
+                            }
+                        }
                     }
                 }
             }
 
-            barrier.DecrementCount();
+            if (processedByThread > 0) {
+                toImportQ->push(std::move(res), processedByThread);
+            }
         });
 
-        barrier.Wait();
+        // package => {(packageToImport, isTestImport)}
+        UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, bool>>>
+            combinedImports;
+        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> threadResult;
+        for (auto result = toImportQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = toImportQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (auto &[package, packageToImport, isTestImport] : threadResult) {
+                combinedImports[package].emplace(packageToImport, isTestImport);
+            }
+        }
 
+        for (auto &[pkg, toImport] : combinedImports) {
+            auto &package = gs.packageDB().getPackageInfo(pkg);
+            auto newImportLoc = package.newImportLoc(gs, package);
+            fmt::memory_buffer autocorrect;
+            auto fullPackageName = [&gs](const sorbet::core::packages::PackageInfo &pkg) {
+                return absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs));
+            };
+
+            if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
+                e.setHeader("Package `{}` is missing imports", fullPackageName(package));
+                for (auto &[pkgToImport, isTestImport] : toImport) {
+                    auto &packageToImport = gs.packageDB().getPackageInfo(pkgToImport);
+                    e.addErrorSection(core::ErrorSection(
+                        fmt::format("`{}` resolves but its package is not imported", fullPackageName(packageToImport)),
+                        {core::ErrorLine::from(packageToImport.declLoc(), "Defined here")}));
+
+                    if (newImportLoc.has_value()) {
+                        fmt::format_to(std::back_inserter(autocorrect), "\n  {} {}",
+                                       isTestImport ? "test_import" : "import", fullPackageName(packageToImport));
+                    }
+                }
+                if (newImportLoc.has_value()) {
+                    e.addAutocorrect(
+                        {"Fix package issues",
+                         {core::AutocorrectSuggestion::Edit{newImportLoc.value(), fmt::to_string(autocorrect)}}});
+                }
+            }
+        }
         return files;
     }
 };
