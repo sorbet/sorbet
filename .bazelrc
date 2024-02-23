@@ -107,6 +107,9 @@ build:untyped-blame --copt=-DTRACK_UNTYPED_BLAME_MODE
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
+# Separate config for aarch64, so x86_64 can be differently optimized
+build:release-linux-aarch64 --linkopt=-Wl,-z,relro,-z,now
+build:release-linux-aarch64 --config=lto-linux --config=release-common
 
 # This is to turn on vector instructions where available.
 # We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.

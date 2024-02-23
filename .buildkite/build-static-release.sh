@@ -10,8 +10,11 @@ processor_name="$(uname -m)"
 
 platform="${kernel_name}-${processor_name}"
 case "$platform" in
-  linux-x86_64|linux-aarch64)
+  linux-x86_64)
     CONFIG_OPTS="--config=release-linux"
+    ;;
+  linux-aarch64)
+    CONFIG_OPTS="--config=release-${platform}"
     ;;
   darwin-x86_64|darwin-arm64)
     CONFIG_OPTS="--config=release-mac"
