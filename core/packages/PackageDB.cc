@@ -52,6 +52,16 @@ public:
         return {};
     }
 
+    std::optional<core::Loc> shouldConvertTestImport(const core::GlobalState &gs, const PackageInfo &pkg) const {
+        notImplemented();
+        return nullopt;
+    }
+
+    virtual std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const {
+        notImplemented();
+        return nullopt;
+    }
+
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
         notImplemented();
         return false;
