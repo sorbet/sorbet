@@ -5,5 +5,5 @@
 
   class Package < PackageSpec
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Package` is missing imports
-    # ^^^^^ apply-code-action: [1] Fix package issues
+      # ^^^^^ apply-code-action: [1] Fix package issues
 end
