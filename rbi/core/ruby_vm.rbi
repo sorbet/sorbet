@@ -816,7 +816,7 @@ module RubyVM::YJIT
   # * `false`: Disable stats.
   # * `true`: Enable stats. Print stats at exit.
   # * `:quiet`: Enable stats. Do not print stats at exit.
-  sig { params(stats: T::Boolean).returns(T::Boolean) }
+  sig { params(stats: T.any(T::Boolean, Symbol)).returns(T::Boolean) }
   def self.enable(stats: false); end
 
   # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) dumps exit locations to the given filename.
