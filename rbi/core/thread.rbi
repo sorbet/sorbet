@@ -1447,7 +1447,7 @@ class Thread::Mutex < Object
 
   # Obtains a lock, runs the block, and releases the lock when the block
   # completes. See the example under `Mutex`.
-  sig {params(blk: T.proc.void).returns(T.untyped)}
+  sig {type_parameters(:T).params(blk: T.proc.returns(T.type_parameter(:T))).returns(T.type_parameter(:T))}
   def synchronize(&blk); end
 
   # Attempts to obtain the lock and returns immediately. Returns `true` if the
