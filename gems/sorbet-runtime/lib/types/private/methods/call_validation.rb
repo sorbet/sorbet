@@ -318,7 +318,7 @@ module T::Private::Methods::CallValidation
     elsif mod.private_method_defined?(name)
       :private
     else
-      raise NameError.new("undefined method `#{name}` for `#{mod}`")
+      mod.method(name) # Raises
     end
   end
 end

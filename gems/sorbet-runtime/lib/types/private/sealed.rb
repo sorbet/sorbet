@@ -5,8 +5,8 @@ module T::Private::Sealed
   module NoInherit
     def inherited(child)
       super
-      caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `inherited'$/)}
-      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'inherited')
+      caller_loc = T::Private::CallerUtils.find_caller {|loc| loc.base_label != 'inherited'}
+      T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'inherited')
       @sorbet_sealed_module_all_subclasses << child
     end
 
@@ -23,14 +23,14 @@ module T::Private::Sealed
     def included(child)
       super
       caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `included'$/)}
-      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'included')
+      T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'included')
       @sorbet_sealed_module_all_subclasses << child
     end
 
     def extended(child)
       super
       caller_loc = T::Private::CallerUtils.find_caller {|loc| !loc.to_s.match(/in `extended'$/)}
-      T::Private::Sealed.validate_inheritance(caller_loc&.to_s, self, child, 'extended')
+      T::Private::Sealed.validate_inheritance(caller_loc, self, child, 'extended')
       @sorbet_sealed_module_all_subclasses << child
     end
 
@@ -68,8 +68,8 @@ module T::Private::Sealed
     mod.instance_variable_defined?(:@sorbet_sealed_module_decl_file)
   end
 
-  def self.validate_inheritance(this_line, parent, child, verb)
-    this_file = this_line&.split(':')&.first
+  def self.validate_inheritance(caller_loc, parent, child, verb)
+    this_file = caller_loc&.path
     decl_file = parent.instance_variable_get(:@sorbet_sealed_module_decl_file) if sealed_module?(parent)
 
     if !this_file

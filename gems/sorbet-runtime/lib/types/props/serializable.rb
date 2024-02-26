@@ -261,16 +261,11 @@ module T::Props::Serializable::DecoratorMethods
   end
 
   def message_with_generated_source_context(error, generated_method, generate_source_method)
-    line_label = error.backtrace.find {|l| l.end_with?("in `#{generated_method}'")}
-    return unless line_label
+    generated_method = generated_method.to_s
+    line_loc = error.backtrace_locations.find {|l| l.base_label == generated_method}
+    return unless line_loc
 
-    line_num = if line_label.start_with?("(eval)")
-      # (eval):13:in `__t_props_generated_serialize'
-      line_label.split(':')[1]&.to_i
-    else
-      # (eval at /Users/jez/stripe/sorbet/gems/sorbet-runtime/lib/types/props/has_lazily_specialized_methods.rb:65):13:in `__t_props_generated_serialize'
-      line_label.split(':')[2]&.to_i
-    end
+    line_num = line_loc.lineno
     return unless line_num
 
     source_lines = self.send(generate_source_method).split("\n")
