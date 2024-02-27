@@ -3,17 +3,13 @@
 load("@com_stripe_ruby_typer//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
-    append_srcs = [
-        "@com_stripe_ruby_typer//compiler/ruby-static-exports:vm_append_files",
-        "@com_stripe_ruby_typer//compiler/IREmitter/Payload/patches:vm_append_files",
-    ],
+    append_srcs = [],
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
         "--localstatedir=/var",
         "--disable-maintainer-mode",
         "--disable-dependency-tracking",
-        "--disable-jit-support",
         "--disable-install-doc",
     ] + select({
         # Enforce that we don't need Ruby to build in release builds.
@@ -21,6 +17,10 @@ ruby(
         # speed up the build.)
         "@com_stripe_ruby_typer//tools/config:release": ["--with-baseruby=no"],
         "//conditions:default": [],
+    }) + select({
+        # Do not enable the JIT unless opted in.
+        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["--enable-yjit=stats"],
+        "//conditions:default": ["--disable-jit-support"],
     }),
     copts = [
         "-g",
@@ -36,11 +36,13 @@ ruby(
     cppopts = [
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
-    ],
-    extra_srcs = [
-        "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
-        "@com_stripe_ruby_typer//compiler/IREmitter/Payload:vm_payload_srcs",
-    ],
+        "-fPIC",
+    ] + select({
+        # Don't include JIT statistics unless we're building JIT support
+        "@com_stripe_ruby_typer//tools/config:jit_enabled": ["-DYJIT_STATS=1"],
+        "//conditions:default": [],
+    }),
+    extra_srcs = [],
     gems = [
         "@bundler_stripe//file",
     ],
