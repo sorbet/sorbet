@@ -278,4 +278,8 @@ it sees a sequence of `.` followed by `\n`. This is a small change to the Ruby
 grammar with a small cost to implement, for a large improvement in developer
 ergonomics when working in an IDE, with a straightforward workaround.
 
+Note that this applies to **all** keywords, not just `end`. For a complete list
+of Ruby keywords, see
+[the Ruby docs](https://docs.ruby-lang.org/en/master/keywords_rdoc.html).
+
 For more, see [#1993](https://github.com/sorbet/sorbet/pull/1993).
