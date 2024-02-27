@@ -63,11 +63,9 @@ There was a Ruby syntax error. Sorbet was unable to parse the source code. If
 you encounter this error but your code is accepted by Ruby itself, this is a bug
 in our parser; please [report an issue] to us so we can address it.
 
-The only intentional break with Ruby compatibility is that method names that are
-keywords have some limitations with multi-line code, as explained in [#1993],
-and should not be reported.
-
-[#1993]: https://github.com/sorbet/sorbet/pull/1993
+The only intentional break with the Ruby grammar is that method names that are
+keywords have some limitations with multi-line code, as explained in
+[Unsupported Ruby Features](unsupported.md#multi-line-calls-to-to-keyword-named-methods-with-trailing-).
 
 ## 2002
 

@@ -220,3 +220,66 @@ require more work than we currently believe the payoff is.
 
 Because this is not a fundamental nor ideological limitation, it's possible this
 feature may gain support in the future.
+
+## Multi-line calls to to keyword-named methods with trailing `.`
+
+```ruby
+# 1. single-line method call
+x.end() # ok
+
+# 2. multi-line method call, leading `.`
+x
+  .end() # ok
+
+# 3. multi-line method call, trailing `.`
+x.
+  end() # not ok
+```
+
+Ruby allows methods to be defined with names that are nominally reserved for
+keywords—like the method called `end()` above, even though there is a keyword
+called `end`.
+
+For methods which share a name with a Ruby keyword, Sorbet does not allow a
+newline to appear between the `.` token and the method name.
+
+### Alternative
+
+Use a leading `.` for chained multi-line method calls, instead of a trailing
+`.`.
+
+Note: newer versions of `irb` and `pry` support the leading `.` syntax about as
+well as the trailing `.` syntax. In old versions of `irb` and `pry`, the REPLs
+did a poor job of detecting multi-line pastes, and would eagerly evaluate each
+line instead of waiting for the full paste and evaluating the entire snippet.
+Newer versions of `irb` and `pry` detect the terminal emulator's
+[bracketed paste](https://github.com/ruby/irb/commit/45aeb52575) functionality
+and pause evaluation until the paste finishes.
+
+### Why?
+
+One of the most common syntax errors in a Ruby program looks like this:
+
+```ruby
+def example(x)
+  x.
+end
+```
+
+At a glance, it looks like the syntax error is that the user has forgotten or is
+in the process of typing the method name after the `x.`. But to the Ruby parser,
+the method name **was** provided—it's a method named `end`. Instead, the syntax
+error the Ruby parser sees is that the user forgot to terminate their method
+definition with an `end` keyword after the last line.
+
+In order to make error messages and autocompletion suggestions better, Sorbet
+reverts to treating the characters `end` as a keyword, not a method name, after
+it sees a sequence of `.` followed by `\n`. This is a small change to the Ruby
+grammar with a small cost to implement, for a large improvement in developer
+ergonomics when working in an IDE, with a straightforward workaround.
+
+Note that this applies to **all** keywords, not just `end`. For a complete list
+of Ruby keywords, see
+[the Ruby docs](https://docs.ruby-lang.org/en/master/keywords_rdoc.html).
+
+For more, see [#1993](https://github.com/sorbet/sorbet/pull/1993).
