@@ -55,15 +55,15 @@ ruby(
         ],
         "//conditions:default": [],
     }),
-    rubygems = "@rubygems_update_stripe_ruby2//file",
+    rubygems = "@rubygems_update_stripe//file",
     deps = select({
         "@platforms//os:osx": [
-            "@system_ssl_darwin//:crypto",
             "@system_ssl_darwin//:ssl",
+            "@system_ssl_darwin//:crypto",
         ],
         "@platforms//os:linux": [
-            "@system_ssl_linux//:crypto",
             "@system_ssl_linux//:ssl",
+            "@system_ssl_linux//:crypto",
         ],
     }),
 )
