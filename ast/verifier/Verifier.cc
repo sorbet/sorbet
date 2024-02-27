@@ -33,6 +33,14 @@ public:
     void preTransformBlock(core::Context ctx, ExpressionPtr &original) {
         original._sanityCheck();
     }
+
+    void postTransformUnresolvedIdent(core::Context ctx, ExpressionPtr &tree) {
+        ENFORCE(false, "TODO");
+    }
+
+    void postTransformUnresolvedConstantLit(core::Context ctx, ExpressionPtr &tree) {
+        ENFORCE(false, "TODO");
+    }
 };
 
 ExpressionPtr Verifier::run(core::Context ctx, ExpressionPtr node) {

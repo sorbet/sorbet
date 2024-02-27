@@ -207,16 +207,16 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
+            tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
+            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
+                return emptyParsedFile(file);
+            }
             tree = runRewriter(lgs, file, move(tree));
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
             }
             if (print.RewriterTreeRaw.enabled) {
                 print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
-            }
-            tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
-            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
-                return emptyParsedFile(file);
             }
         }
         if (print.IndexTree.enabled) {
