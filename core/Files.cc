@@ -93,6 +93,10 @@ bool isTestPath(string_view path) {
     return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
 
+bool isSpecPath(string_view path) {
+    absl::StrContains(path, "/spec/");
+}
+
 bool isPackageRBIPath(string_view path) {
     return absl::EndsWith(path, ".package.rbi");
 }
@@ -112,7 +116,7 @@ bool File::isPackagePath(string_view path) {
 
 File::Flags::Flags(string_view path)
     : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
-      isPackage(isPackagePath(path)), isOpenInClient(false) {}
+      isPackage(isPackagePath(path)), isOpenInClient(false), isSpec(isSpecPath(path)) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
@@ -270,6 +274,10 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
     } else {
         return string(result);
     }
+}
+
+bool File::isSpec() const {
+    return flags.isSpec;
 }
 
 bool File::isPackagedTest() const {

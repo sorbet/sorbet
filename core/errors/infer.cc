@@ -10,7 +10,7 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
     }
 
     const auto &fileData = file.data(gs);
-    if (gs.trackUntyped == TrackUntyped::EverywhereButTests && fileData.isPackagedTest()) {
+    if (gs.trackUntyped == TrackUntyped::EverywhereButTests && fileData.isPackagedTest() || fileData.isSpec()) {
         return UntypedValue;
     }
 
