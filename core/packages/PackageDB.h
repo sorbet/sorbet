@@ -46,6 +46,7 @@ public:
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
     const PackageInfo &getPackageForFile(const core::GlobalState &gs, core::FileRef file) const;
+    const PackageInfo &getPackageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) const;
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
 
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
