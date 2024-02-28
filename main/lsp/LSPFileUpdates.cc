@@ -50,10 +50,9 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     return copy;
 }
 
-LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                                         const vector<shared_ptr<core::File>> &updatedFiles,
-                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
+LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTypecheck(
+    const core::GlobalState &gs, const LSPConfiguration &config, const vector<shared_ptr<core::File>> &updatedFiles,
+    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles, bool isNoopUpdateForRetypecheck) {
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
@@ -181,13 +180,15 @@ const UnorderedMap<core::FileRef, shared_ptr<core::File>> EMPTY_CONST_MAP;
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
 LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                                         const vector<shared_ptr<core::File>> &updatedFiles) {
-    return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP);
+                                         const vector<shared_ptr<core::File>> &updatedFiles,
+                                         bool isNoopUpdateForRetypecheck) {
+    return fastPathFilesToTypecheck(gs, config, updatedFiles, EMPTY_CONST_MAP, isNoopUpdateForRetypecheck);
 }
 
 LSPFileUpdates::FastPathFilesToTypecheckResult
-LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config) const {
-    return fastPathFilesToTypecheck(gs, config, this->updatedFiles);
+LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                         bool isNoopUpdateForRetypecheck) const {
+    return fastPathFilesToTypecheck(gs, config, this->updatedFiles, isNoopUpdateForRetypecheck);
 }
 
 } // namespace sorbet::realmain::lsp
