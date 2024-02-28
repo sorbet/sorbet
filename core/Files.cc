@@ -90,7 +90,7 @@ PackagedLevel File::filePackagedSigil(string_view source) {
 }
 
 bool isTestPath(string_view path) {
-    return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/") || absl::StrContains(path, "/spec/");
+    return absl::EndsWith(path, ".test.rb") || absl::StrContains(path, "/test/");
 }
 
 bool isPackageRBIPath(string_view path) {
