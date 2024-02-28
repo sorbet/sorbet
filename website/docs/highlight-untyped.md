@@ -62,7 +62,7 @@ There are multiple ways to enable untyped code highlights.
 
   - Everywhere but tests
 
-    Sorbet treats any file in a folder named `test` or ending with the
+    Sorbet treats any file in a folder named `test` or  `spec` or ending with the
     `.test.rb` suffix as a test file. This is not yet configurable.
 
   The new setting will be logged in the "Sorbet" output window.
