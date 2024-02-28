@@ -35,11 +35,8 @@ constexpr string_view HASH_SEPARATOR = "#"sv;
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
     if (!owner.exists() || owner == Symbols::root() || owner == core::Symbols::PackageSpecRegistry()) {
         return name.show(gs);
-    } else if (name == core::Names::Constants::PackageSpec_Storage()) {
-        return owner.show(gs);
-    } else {
-        return absl::StrCat(owner.show(gs), separator, name.show(gs));
     }
+    return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
 } // namespace
 
