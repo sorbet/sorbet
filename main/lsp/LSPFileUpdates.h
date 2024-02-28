@@ -66,7 +66,8 @@ public:
     // As written, it's possible to mutate the files, but that's not intentional.
     static FastPathFilesToTypecheckResult
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
-                             const std::vector<std::shared_ptr<core::File>> &updatedFiles);
+                             const std::vector<std::shared_ptr<core::File>> &updatedFiles,
+                             bool isNoopUpdateForRetypecheck);
 
     // Overload because sometimes we have to look up the old file's hash in GlobalState (when
     // running on the typechecker thread), and sometimes we have to look it up in evictedFiles (when
@@ -74,10 +75,11 @@ public:
     static FastPathFilesToTypecheckResult
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles,
-                             const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles);
+                             const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles,
+                             bool isNoopUpdateForRetypecheck);
 
-    FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs,
-                                                            const LSPConfiguration &config) const;
+    FastPathFilesToTypecheckResult fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
+                                                            bool isNoopUpdateForRetypecheck) const;
 };
 } // namespace sorbet::realmain::lsp
 
