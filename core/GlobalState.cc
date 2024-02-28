@@ -1954,6 +1954,10 @@ unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
 
+unsigned int GlobalState::packagesUsed() const {
+    return packages.size();
+}
+
 unsigned int GlobalState::methodsUsed() const {
     return methods.size();
 }
@@ -2030,6 +2034,8 @@ void GlobalState::sanityCheck() const {
         NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
     }
 
+    // TODO(jez) Sanity check packages here too
+    // Blocked on https://github.com/sorbet/sorbet/pull/7808
     int i = -1;
     for (auto &sym : classAndModules) {
         i++;

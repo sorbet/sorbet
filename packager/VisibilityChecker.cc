@@ -285,7 +285,8 @@ public:
             switch (lit->symbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
-                    ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
+                case core::SymbolRef::Kind::Package:
+                    ENFORCE(false, "ClassOrModule, Package, and FieldOrStaticField marked not exportable");
                     break;
 
                 case core::SymbolRef::Kind::Method:

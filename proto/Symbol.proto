@@ -13,6 +13,7 @@ message Symbol {
 //        ARGUMENT = 5;
         TYPE_MEMBER = 6;
         TYPE_ARGUMENT = 7;
+        PACKAGE = 8;
     }
 
     enum Variance {

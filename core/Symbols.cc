@@ -59,6 +59,14 @@ bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool PackageRef::operator==(const PackageRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool PackageRef::operator!=(const PackageRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 bool MethodRef::operator==(const MethodRef &rhs) const {
     return rhs._id == this->_id;
 }
@@ -193,6 +201,11 @@ ClassOrModuleRef ClassOrModule::ref(const GlobalState &gs) const {
     return ClassOrModuleRef(gs, distance);
 }
 
+PackageRef Package::ref(const GlobalState &gs) const {
+    uint32_t distance = this - gs.packages.data();
+    return PackageRef(gs, distance);
+}
+
 FieldRef Field::ref(const GlobalState &gs) const {
     uint32_t distance = this - gs.fields.data();
     return FieldRef(gs, distance);
@@ -257,6 +270,26 @@ ConstClassOrModuleData ClassOrModuleRef::data(const GlobalState &gs) const {
 ConstClassOrModuleData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ConstClassOrModuleData(gs.classAndModules[_id], gs);
+}
+
+PackageData PackageRef::dataAllowingNone(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.packagesUsed());
+    return PackageData(gs.packages[_id], gs);
+}
+
+PackageData PackageRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstPackageData PackageRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstPackageData PackageRef::dataAllowingNone(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.packagesUsed());
+    return ConstPackageData(gs.packages[_id], gs);
 }
 
 MethodData MethodRef::data(GlobalState &gs) const {
@@ -343,6 +376,9 @@ bool SymbolRef::isSynthetic() const {
             return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
         case Kind::TypeMember:
             return typeMemberIndex() < Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS;
+        case Kind::Package:
+            // There are no Package symbols shipped with the payload.
+            return false;
     }
 }
 
@@ -364,6 +400,8 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, uint32_t id)
 
 SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
 
+SymbolRef::SymbolRef(PackageRef pkg) : SymbolRef(nullptr, SymbolRef::Kind::Package, pkg.id()) {}
+
 SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
 
 SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, field.id()) {}
@@ -373,6 +411,8 @@ SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::K
 SymbolRef::SymbolRef(TypeArgumentRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
 
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, uint32_t id) : _id(id) {}
+
+PackageRef::PackageRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
 MethodRef::MethodRef(const GlobalState &from, uint32_t id) : _id(id) {}
 
@@ -394,6 +434,8 @@ string SymbolRef::show(const GlobalState &gs, ShowOptions options) const {
             return asTypeArgumentRef().show(gs, options);
         case Kind::TypeMember:
             return asTypeMemberRef().show(gs, options);
+        case Kind::Package:
+            return asPackageRef().show(gs, options);
     }
 }
 
@@ -412,6 +454,14 @@ string ClassOrModuleRef::show(const GlobalState &gs, ShowOptions options) const 
     }
 
     return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string PackageRef::show(const GlobalState &gs, ShowOptions options) const {
+    // If we ever need to show a Package symbol in an error message, we don't want to show the
+    // <PackageSpec> string in the name, so it's the same as showing the ClassOrModule symbol which
+    // owns this package (we handle hiding the `<PackageSpecRegistry>` name in the
+    // ClassOrModule::show implementation, for the same reason).
+    return dataAllowingNone(gs)->owner.show(gs);
 }
 
 string MethodRef::show(const GlobalState &gs, ShowOptions options) const {
@@ -1135,12 +1185,19 @@ string SymbolRef::showFullName(const GlobalState &gs) const {
             return asTypeArgumentRef().showFullName(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().showFullName(gs);
+        case Kind::Package:
+            return asPackageRef().showFullName(gs);
     }
 }
 
 string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
     return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string PackageRef::showFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name(), COLON_SEPARATOR);
 }
 
 string MethodRef::showFullName(const GlobalState &gs) const {
@@ -1175,12 +1232,19 @@ string SymbolRef::toStringFullName(const GlobalState &gs) const {
             return asTypeArgumentRef().toStringFullName(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().toStringFullName(gs);
+        case Kind::Package:
+            return asPackageRef().toStringFullName(gs);
     }
 }
 
 string ClassOrModuleRef::toStringFullName(const GlobalState &gs) const {
     auto sym = dataAllowingNone(gs);
     return toStringFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string PackageRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name(), COLON_SEPARATOR);
 }
 
 string MethodRef::toStringFullName(const GlobalState &gs) const {
@@ -1258,6 +1322,8 @@ string_view SymbolRef::showKind(const GlobalState &gs) const {
             return asTypeArgumentRef().showKind(gs);
         case Kind::TypeMember:
             return asTypeMemberRef().showKind(gs);
+        case Kind::Package:
+            return asPackageRef().showKind(gs);
     }
 }
 
@@ -1270,6 +1336,10 @@ string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
     } else {
         return "module"sv;
     }
+}
+
+string_view PackageRef::showKind(const GlobalState &gs) const {
+    return "package"sv;
 }
 
 string_view FieldRef::showKind(const GlobalState &gs) const {
@@ -1359,6 +1429,24 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
         ENFORCE(!str.empty());
         fmt::format_to(std::back_inserter(buf), "{}", move(str));
     }
+
+    return to_string(buf);
+}
+
+string PackageRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    fmt::format_to(std::back_inserter(buf), "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
+
+    auto sym = data(gs);
+    ENFORCE(sym->loc().exists());
+    auto loc = sym->loc();
+    printLocs(gs, buf, absl::MakeSpan(&loc, 1), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(std::back_inserter(buf), "\n");
 
     return to_string(buf);
 }
@@ -1525,6 +1613,8 @@ string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
             return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::Package:
+            return asPackageRef().toStringWithOptions(gs, tabs, showFull, showRaw);
     }
 }
 
@@ -1540,6 +1630,8 @@ NameRef SymbolRef::name(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->name;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->name;
+        case SymbolRef::Kind::Package:
+            return asPackageRef().data(gs)->name();
     }
 }
 
@@ -1555,6 +1647,8 @@ SymbolRef SymbolRef::owner(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->owner;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->owner;
+        case SymbolRef::Kind::Package:
+            return asPackageRef().data(gs)->owner;
     }
 }
 
@@ -1570,6 +1664,8 @@ Loc SymbolRef::loc(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->loc();
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->loc();
+        case SymbolRef::Kind::Package:
+            return asPackageRef().data(gs)->loc();
     }
 }
 
@@ -1585,6 +1681,8 @@ bool SymbolRef::isPrintable(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->isPrintable(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->isPrintable(gs);
+        case SymbolRef::Kind::Package:
+            return true;
     }
 }
 
@@ -1600,6 +1698,9 @@ absl::Span<const Loc> SymbolRef::locs(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->locs();
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->locs();
+        case SymbolRef::Kind::Package: {
+            return asPackageRef().data(gs)->locs();
+        }
     }
 }
 
@@ -1615,6 +1716,10 @@ void SymbolRef::removeLocsForFile(GlobalState &gs, core::FileRef file) const {
             return asTypeArgumentRef().data(gs)->removeLocsForFile(file);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->removeLocsForFile(file);
+        case SymbolRef::Kind::Package:
+            // This method is only used in support of fast path edits. It's likely that Package
+            // symbols will have different fast path support than most other symbol kinds.
+            ENFORCE(false, "removeLocsForFile is not yet implemented for Package symbols");
     }
 }
 
@@ -1630,6 +1735,8 @@ const TypePtr &SymbolRef::resultType(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->resultType;
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->resultType;
+        case SymbolRef::Kind::Package:
+            Exception::raise("Package symbol does not have a resultType!");
     }
 }
 
@@ -1650,6 +1757,9 @@ void SymbolRef::setResultType(GlobalState &gs, const TypePtr &typePtr) const {
         case SymbolRef::Kind::TypeMember:
             asTypeMemberRef().data(gs)->resultType = typePtr;
             return;
+        case SymbolRef::Kind::Package:
+            ENFORCE(false, "Cannot set the resultType of a Package symbol!");
+            return;
     }
 }
 
@@ -1665,6 +1775,8 @@ SymbolRef SymbolRef::dealias(const GlobalState &gs) const {
             return asTypeArgumentRef().data(gs)->dealias(gs);
         case SymbolRef::Kind::TypeMember:
             return asTypeMemberRef().data(gs)->dealias(gs);
+        case SymbolRef::Kind::Package:
+            Exception::raise("Package symbol is never an alias!");
     }
 }
 
@@ -2189,6 +2301,14 @@ ClassOrModule ClassOrModule::deepCopy(const GlobalState &to, bool keepGsId) cons
     return result;
 }
 
+Package Package::deepCopy(const GlobalState &to) const {
+    Package result;
+    result.owner = this->owner;
+    result.declLoc = this->declLoc;
+    result.classDefLoc = this->classDefLoc;
+    return result;
+}
+
 Method Method::deepCopy(const GlobalState &to) const {
     Method result;
     result.owner = this->owner;
@@ -2256,6 +2376,15 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
     }
 }
 
+void Package::sanityCheck(const GlobalState &gs) const {
+    if (!debug_mode) {
+        return;
+    }
+    ENFORCE(this->declLoc.exists(), "All packages should have a declLoc");
+    ENFORCE(this->classDefLoc.exists(), "All packages should have a classDefLoc");
+    // TODO(jez) Is it worth doing the re-`enterPackageSymbol` trick to ensure that the IDs are stable?
+}
+
 void Method::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {
         return;
@@ -2311,6 +2440,7 @@ void TypeParameter::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2;
         switch (current.kind()) {
             case SymbolRef::Kind::ClassOrModule:
+            case SymbolRef::Kind::Package:
             case SymbolRef::Kind::Method:
             case SymbolRef::Kind::FieldOrStaticField:
                 ENFORCE(false, "Should not happen");
@@ -2357,6 +2487,9 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.
             result = asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
+            break;
+        case SymbolRef::Kind::Package:
+            result = asPackageRef().data(gs)->owner;
             break;
     }
 
@@ -2588,6 +2721,10 @@ absl::Span<const Loc> ClassOrModule::locs() const {
     return locs_;
 }
 
+absl::Span<const Loc> Package::locs() const {
+    return absl::MakeSpan(&this->declLoc, 1);
+}
+
 absl::Span<const Loc> Field::locs() const {
     return locs_;
 }
@@ -2747,6 +2884,25 @@ const ClassOrModule *ClassOrModuleData::operator->() const {
 };
 
 const ClassOrModule *ConstClassOrModuleData::operator->() const {
+    runDebugOnlyCheck();
+    return &symbol;
+};
+
+PackageData::PackageData(Package &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+
+ConstPackageData::ConstPackageData(const Package &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+
+Package *PackageData::operator->() {
+    runDebugOnlyCheck();
+    return &symbol;
+};
+
+const Package *PackageData::operator->() const {
+    runDebugOnlyCheck();
+    return &symbol;
+};
+
+const Package *ConstPackageData::operator->() const {
     runDebugOnlyCheck();
     return &symbol;
 };
