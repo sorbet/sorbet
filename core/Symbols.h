@@ -95,7 +95,7 @@ public:
     CheckSize(Flags, 2, 1);
 
     Loc loc() const;
-    const SymbolRef::LOC_store &locs() const;
+    absl::Span<const Loc> locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
     uint32_t hash(const GlobalState &gs) const;
@@ -243,7 +243,7 @@ public:
     CheckSize(Flags, 1, 1);
 
     Loc loc() const;
-    const SymbolRef::LOC_store &locs() const;
+    absl::Span<const Loc> locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
@@ -320,7 +320,7 @@ public:
     CheckSize(Flags, 1, 1);
 
     Loc loc() const;
-    const SymbolRef::LOC_store &locs() const;
+    absl::Span<const Loc> locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
@@ -398,7 +398,7 @@ public:
     CheckSize(Flags, 2, 1);
 
     Loc loc() const;
-    const SymbolRef::LOC_store &locs() const;
+    absl::Span<const Loc> locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
@@ -555,7 +555,7 @@ public:
     void recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass);
 
     // Returns the locations that are allowed to subclass the sealed class.
-    const SymbolRef::LOC_store &sealedLocs(const GlobalState &gs) const;
+    absl::Span<const Loc> sealedLocs(const GlobalState &gs) const;
 
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
