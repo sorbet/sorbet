@@ -183,7 +183,7 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
     }
 
     auto inCurrentFile = [&](const auto &loc) { return loc.file() == fileToEdit; };
-    auto &classLocs = inWhat->locs();
+    auto classLocs = inWhat->locs();
     auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
 
     if (classLoc == classLocs.end()) {

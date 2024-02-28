@@ -587,7 +587,7 @@ MethodRef ClassOrModule::findParentMethodTransitive(const GlobalState &gs, NameR
     return Symbols::noMethod();
 }
 
-bool singleFileDefinition(const GlobalState &gs, const core::SymbolRef::LOC_store &locs, core::FileRef file) {
+bool singleFileDefinition(const GlobalState &gs, absl::Span<const Loc> locs, core::FileRef file) {
     bool result = false;
 
     for (auto &loc : locs) {
@@ -1607,7 +1607,7 @@ bool SymbolRef::isPrintable(const GlobalState &gs) const {
     }
 }
 
-const InlinedVector<Loc, 2> &SymbolRef::locs(const GlobalState &gs) const {
+absl::Span<const Loc> SymbolRef::locs(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef().data(gs)->locs();
@@ -1890,10 +1890,10 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     }
 }
 
-const InlinedVector<Loc, 2> &ClassOrModule::sealedLocs(const GlobalState &gs) const {
+absl::Span<const Loc> ClassOrModule::sealedLocs(const GlobalState &gs) const {
     ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
-    auto &result = sealedSubclasses.data(gs)->locs();
+    auto result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
     return result;
 }
@@ -2599,19 +2599,19 @@ Loc TypeParameter::loc() const {
     return Loc::none();
 }
 
-const InlinedVector<Loc, 2> &Method::locs() const {
+absl::Span<const Loc> Method::locs() const {
     return locs_;
 }
 
-const InlinedVector<Loc, 2> &ClassOrModule::locs() const {
+absl::Span<const Loc> ClassOrModule::locs() const {
     return locs_;
 }
 
-const InlinedVector<Loc, 2> &Field::locs() const {
+absl::Span<const Loc> Field::locs() const {
     return locs_;
 }
 
-const InlinedVector<Loc, 2> &TypeParameter::locs() const {
+absl::Span<const Loc> TypeParameter::locs() const {
     return locs_;
 }
 
