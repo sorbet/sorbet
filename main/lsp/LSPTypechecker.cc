@@ -216,7 +216,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    auto result = updates.fastPathFilesToTypecheck(*gs, *config);
+    auto result = updates.fastPathFilesToTypecheck(*gs, *config, isNoopUpdateForRetypecheck);
     config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
