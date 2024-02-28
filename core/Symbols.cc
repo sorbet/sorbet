@@ -1088,7 +1088,7 @@ bool isHiddenFromPrinting(const GlobalState &gs, SymbolRef symbol) {
     return false;
 }
 
-void printLocs(const GlobalState &gs, fmt::memory_buffer &buf, const InlinedVector<Loc, 2> &locs, bool showRaw) {
+void printLocs(const GlobalState &gs, fmt::memory_buffer &buf, absl::Span<const Loc> locs, bool showRaw) {
     if (!locs.empty()) {
         fmt::format_to(std::back_inserter(buf), " @ ");
         if (locs.size() > 1) {
