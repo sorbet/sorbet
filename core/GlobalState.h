@@ -42,11 +42,13 @@ class SerializerImpl;
 class GlobalState final {
     friend NameRef;
     friend ClassOrModule;
+    friend Package;
     friend Method;
     friend Field;
     friend TypeParameter;
     friend SymbolRef;
     friend ClassOrModuleRef;
+    friend PackageRef;
     friend MethodRef;
     friend TypeMemberRef;
     friend TypeArgumentRef;
@@ -187,6 +189,7 @@ public:
     unsigned int uniqueNamesUsed() const;
 
     unsigned int classAndModulesUsed() const;
+    unsigned int packagesUsed() const;
     unsigned int methodsUsed() const;
     unsigned int fieldsUsed() const;
     unsigned int typeArgumentsUsed() const;
@@ -337,6 +340,7 @@ private:
     std::vector<UniqueName> uniqueNames;
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<ClassOrModule> classAndModules;
+    std::vector<Package> packages;
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;

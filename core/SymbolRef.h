@@ -45,6 +45,28 @@ public:
 };
 CheckSize(ConstClassOrModuleData, 8, 8);
 
+class Package;
+class PackageData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    Package &symbol;
+
+public:
+    PackageData(Package &ref, GlobalState &gs);
+
+    Package *operator->();
+    const Package *operator->() const;
+};
+CheckSize(PackageData, 8, 8);
+
+class ConstPackageData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const Package &symbol;
+
+public:
+    ConstPackageData(const Package &ref, const GlobalState &gs);
+
+    const Package *operator->() const;
+};
+CheckSize(ConstPackageData, 8, 8);
+
 class Method;
 class MethodData : private DebugOnlyCheck<SymbolDataDebugCheck> {
     Method &method;
@@ -196,6 +218,58 @@ public:
     bool isLegacyStdlibGeneric() const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
+
+class PackageRef final {
+    uint32_t _id;
+
+    friend class SymbolRef;
+    friend class GlobalState;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
+
+public:
+    PackageRef() : _id(0){};
+    PackageRef(const GlobalState &from, uint32_t id);
+
+    uint32_t id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static PackageRef fromRaw(uint32_t id) {
+        PackageRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    PackageData data(GlobalState &gs) const;
+    PackageData dataAllowingNone(GlobalState &gs) const;
+    ConstPackageData data(const GlobalState &gs) const;
+    ConstPackageData dataAllowingNone(const GlobalState &gs) const;
+
+    bool operator==(const PackageRef &rhs) const;
+    bool operator!=(const PackageRef &rhs) const;
+
+    std::string toString(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
+    }
+
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+};
+CheckSize(PackageRef, 4, 4);
 
 class MethodRef final {
     uint32_t _id;
@@ -407,6 +481,7 @@ public:
         FieldOrStaticField = 2,
         TypeArgument = 3,
         TypeMember = 4,
+        Package = 5,
     };
 
     // Kind takes up this many bits in _id.
@@ -425,6 +500,10 @@ public:
 
     inline bool isClassOrModule() const {
         return kind() == Kind::ClassOrModule;
+    }
+
+    inline bool isPackage() const {
+        return kind() == Kind::Package;
     }
 
     inline bool isMethod() const {
@@ -453,6 +532,11 @@ public:
         return unsafeTableIndex();
     }
 
+    uint32_t packageIndex() const {
+        ENFORCE_NO_TIMER(kind() == Kind::Package);
+        return unsafeTableIndex();
+    }
+
     uint32_t methodIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::Method);
         return unsafeTableIndex();
@@ -478,6 +562,7 @@ public:
     // This constructor is not marked explicit so that we can implicitly convert ClassOrModuleRef to SymbolRefs as
     // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
+    SymbolRef(PackageRef kls);
     SymbolRef(MethodRef kls);
     SymbolRef(FieldRef kls);
     SymbolRef(TypeMemberRef kls);
@@ -507,6 +592,12 @@ public:
     ClassOrModuleRef asClassOrModuleRef() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return ClassOrModuleRef::fromRaw(unsafeTableIndex());
+    }
+
+    // If Kind is Packge, returns a PackageRef.
+    PackageRef asPackageRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::Package);
+        return PackageRef::fromRaw(unsafeTableIndex());
     }
 
     // If Kind is Method, returns a MethodRef.

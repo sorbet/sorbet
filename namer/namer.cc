@@ -765,6 +765,9 @@ private:
                 // Consider adding a test and removing this assertion if it fires
                 ENFORCE(false, "Should not call prettySymbolKind on type arguument in namer");
                 return "type argument";
+            case core::SymbolRef::Kind::Package:
+                // TODO(jez) Is it ever possible to have a constant redefinition error for a Package symbol?
+                return "package";
         }
     }
 
@@ -1534,6 +1537,7 @@ private:
                         break;
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeArgument:
+                    case core::SymbolRef::Kind::Package:
                         ENFORCE(false);
                         break;
                 }

@@ -1942,6 +1942,10 @@ unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
 
+unsigned int GlobalState::packagesUsed() const {
+    return packages.size();
+}
+
 unsigned int GlobalState::methodsUsed() const {
     return methods.size();
 }
