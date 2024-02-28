@@ -542,7 +542,7 @@ public:
     core::Loc loc(const GlobalState &gs) const;
     bool isPrintable(const GlobalState &gs) const;
     using LOC_store = InlinedVector<Loc, 2>;
-    const LOC_store &locs(const GlobalState &gs) const;
+    absl::Span<const Loc> locs(const GlobalState &gs) const;
     void removeLocsForFile(GlobalState &gs, core::FileRef file) const;
     const TypePtr &resultType(const GlobalState &gs) const;
     void setResultType(GlobalState &gs, const TypePtr &typePtr) const;
