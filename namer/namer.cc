@@ -89,7 +89,7 @@ class SymbolFinder {
     // This tracks those as they appear.
     vector<optional<core::FoundModifier>> methodVisiStack = {nullopt};
 
-    void findClassModifiers(core::Context ctx, core::FoundDefinitionRef klass, ast::ExpressionPtr &line) {
+    void findClassModifiers(core::Context ctx, core::FoundDefinitionRef klass, const ast::ExpressionPtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
         if (send == nullptr) {
             return;
@@ -169,7 +169,7 @@ public:
         return rv;
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::FoundClass found;
@@ -200,6 +200,7 @@ public:
         methodVisiStack.emplace_back(nullopt);
     }
 
+    // `tree` is not `const` because this populates the `ancestors` field of the ClassDef
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -232,7 +233,7 @@ public:
         }
     }
 
-    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::ExpressionPtr &node) {
+    void addAncestor(core::Context ctx, ast::ClassDef &klass, const ast::ExpressionPtr &node) {
         auto send = ast::cast_tree<ast::Send>(node);
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
@@ -287,7 +288,7 @@ public:
         }
     }
 
-    bool isValidAncestor(ast::ExpressionPtr &exp) {
+    bool isValidAncestor(const ast::ExpressionPtr &exp) {
         if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
@@ -297,15 +298,15 @@ public:
         return false;
     }
 
-    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
+    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
         methodVisiStack.emplace_back(nullopt);
     }
 
-    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &block) {
+    void postTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
         methodVisiStack.pop_back();
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         core::FoundMethod foundMethod;
         foundMethod.owner = getOwner();
@@ -324,7 +325,7 @@ public:
         methodVisiStack.emplace_back(nullopt);
     }
 
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         methodVisiStack.pop_back();
         ownerStack.pop_back();
     }
@@ -349,7 +350,7 @@ public:
         }
     }
 
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         auto ownerIsMethod = getOwnerRaw().kind() == core::FoundDefinitionRef::Kind::Method;
 
@@ -425,7 +426,7 @@ public:
         }
     }
 
-    void postTransformRuntimeMethodDefinition(core::Context, ast::ExpressionPtr &tree) {
+    void postTransformRuntimeMethodDefinition(core::Context, const ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::RuntimeMethodDefinition>(tree);
 
         // visibility toggle doesn't look at `self.*` methods, only instance methods
@@ -622,7 +623,7 @@ public:
     }
 
     // Returns `true` if `asgn` is a field declaration.
-    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+    bool handleFieldDeclaration(core::Context ctx, const ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
             return false;
@@ -660,7 +661,7 @@ public:
         return true;
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+    void postTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         if (handleFieldDeclaration(ctx, asgn)) {
