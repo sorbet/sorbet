@@ -666,12 +666,6 @@ module Kernel
   end
   def singleton_methods(all=T.unsafe(nil)); end
 
-  sig {returns(T.self_type)}
-  def taint(); end
-
-  sig {returns(T::Boolean)}
-  def tainted?(); end
-
   # Yields self to the block, and then returns self. The primary purpose of this
   # method is to "tap into" a method chain, in order to perform operations on
   # intermediate results within the chain.
@@ -721,9 +715,6 @@ module Kernel
     .void
   end
   def undef(*arg); end
-
-  sig {returns(T.self_type)}
-  def untaint(); end
 
   sig {returns(T.self_type)}
   def untrust(); end
