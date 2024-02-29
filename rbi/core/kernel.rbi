@@ -705,9 +705,6 @@ module Kernel
   sig {returns(String)}
   def to_s(); end
 
-  sig {returns(T.self_type)}
-  def trust(); end
-
   sig do
     params(
         arg: BasicObject,
@@ -715,12 +712,6 @@ module Kernel
     .void
   end
   def undef(*arg); end
-
-  sig {returns(T.self_type)}
-  def untrust(); end
-
-  sig {returns(T::Boolean)}
-  def untrusted?(); end
 
   # Returns `arg` as an
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
