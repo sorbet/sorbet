@@ -1229,6 +1229,32 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     return ret;
 }
 
+PackageRef GlobalState::enterPackageSymbol(Loc loc, ClassOrModuleRef owner) {
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[core::Names::Constants::PackageSpec_Storage()];
+    if (store.exists()) {
+        ENFORCE_NO_TIMER(store.isPackage(), "existing symbol is not a package");
+        counterInc("symbols.hit");
+        auto result = store.asPackageRef();
+        result.data(*this)->loc_ = loc;
+        return result;
+    }
+
+    ENFORCE_NO_TIMER(!symbolTableFrozen);
+    auto ret = PackageRef(*this, packages.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on packages invalidates `store`
+    packages.emplace_back();
+    PackageData data = ret.data(*this);
+    data->owner = owner;
+    data->loc_ = loc;
+    DEBUG_ONLY(categoryCounterInc("symbols", "package"));
+    wasModified_ = true;
+
+    return ret;
+}
+
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     TypeParameter::Flags flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());

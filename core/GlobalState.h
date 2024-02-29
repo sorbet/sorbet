@@ -103,6 +103,7 @@ public:
     ~GlobalState() = default;
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    PackageRef enterPackageSymbol(Loc loc, ClassOrModuleRef owner);
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
