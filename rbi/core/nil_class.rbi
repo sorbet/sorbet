@@ -24,6 +24,14 @@ class NilClass < Object
   end
   def ===(arg0); end
 
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(NilClass)
+  end
+  def =~(other); end
+
   # Exclusive Or---If *obj* is `nil` or `false`, returns `false`; otherwise,
   # returns `true`.
   sig do
