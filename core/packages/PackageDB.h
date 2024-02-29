@@ -55,7 +55,6 @@ public:
     PackageDB &operator=(const PackageDB &) = delete;
     PackageDB &operator=(PackageDB &&) = default;
 
-    const std::vector<core::NameRef> &secondaryTestPackageNamespaceRefs() const;
     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
@@ -64,7 +63,6 @@ public:
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
 private:
-    std::vector<NameRef> secondaryTestPackageNamespaceRefs_;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;

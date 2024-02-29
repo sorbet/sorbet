@@ -213,10 +213,6 @@ const vector<MangledName> &PackageDB::packages() const {
     return mangledNames;
 }
 
-const std::vector<core::NameRef> &PackageDB::secondaryTestPackageNamespaceRefs() const {
-    return secondaryTestPackageNamespaceRefs_;
-}
-
 const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const {
     return skipRBIExportEnforcementDirs_;
 }
@@ -244,7 +240,6 @@ PackageDB PackageDB::deepCopy() const {
     for (auto const &[nr, pkgInfo] : this->packages_) {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
-    result.secondaryTestPackageNamespaceRefs_ = this->secondaryTestPackageNamespaceRefs_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
