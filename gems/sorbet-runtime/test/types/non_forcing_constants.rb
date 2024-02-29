@@ -95,21 +95,5 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
       end
       assert_match(/is not a class or module/, exn.message)
     end
-
-    describe 'packaged form' do
-      it "when exists and is_a? of something not in the package" do
-        # 0 is an Integer, but we're trying to find out if it's a
-        # `PkgRegistry::SomePackage::Integer` here, so this should be
-        # false
-        res = T::NonForcingConstants.non_forcing_is_a?(0, 'Integer', package: "SomePackage")
-        assert_equal(false, res)
-      end
-
-      it "when exists and is_a? of something that IS in the 'package' (i.e. in the right namespace)" do
-        # This relies on the constants we've set up elsewhere
-        res = T::NonForcingConstants.non_forcing_is_a?(SomePackage::Thing.new, 'Thing', package: "SomePackage")
-        assert_equal(true, res)
-      end
-    end
   end
 end

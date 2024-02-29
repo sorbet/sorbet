@@ -2768,36 +2768,6 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        core::TypePtr packageType = nullptr;
-        optional<core::LocOffsets> packageLoc;
-        if (send.hasKwArgs()) {
-            // this means we got the third package arg
-            auto *key = ast::cast_tree<ast::Literal>(send.getKwKey(0));
-            if (!key || !key->isSymbol() || key->asSymbol() != ctx.state.lookupNameUTF8("package")) {
-                return;
-            }
-
-            auto *packageNode = ast::cast_tree<ast::Literal>(send.getKwValue(0));
-            packageLoc = std::optional<core::LocOffsets>{send.getKwValue(0).loc()};
-            if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.getKwValue(0).loc(), core::errors::Resolver::LazyResolve)) {
-                    e.setHeader("`{}` only accepts string literals", method);
-                }
-                return;
-            }
-
-            if (!core::isa_type<core::NamedLiteralType>(packageNode->value) ||
-                core::cast_type_nonnull<core::NamedLiteralType>(packageNode->value).literalKind !=
-                    core::NamedLiteralType::LiteralTypeKind::String) {
-                // Infer will report a type error
-                return;
-            }
-            packageType = packageNode->value;
-        }
-        // if we got no keyword args, then package should be null, and
-        // if we got keyword args, then package should be non-null
-        ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
-
         auto name = literal.asName();
         auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
@@ -2811,42 +2781,6 @@ class ResolveTypeMembersAndFieldsWalk {
         // below, we'll check to find out whether the first part is `""` or not, which means we're testing whether
         // the string did or did not begin with `::`.
         vector<string> parts = absl::StrSplit(shortName, "::");
-        if (packageType) {
-            // there's a little bit of a complexity here: we want
-            // `non_forcing_is_a?("C::D", package: "A::B")` to be
-            // looking for, more or less, `A::B::C::D`. We want this
-            // _regardless_ of whether we're in packaged mode or not,
-            // in fact: in non-packaged mode, we should treat this as
-            // looking for `::A::B::C::D`, and in packaged mode, we're
-            // looking for `A::B::C::D` nested inside the desugared
-            // `PkgRegistry::Pkg_A_B` namespace.
-            if (parts.front() == "") {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
-                                "package name is also provided",
-                                method);
-                }
-                return;
-            }
-            auto package = core::cast_type_nonnull<core::NamedLiteralType>(packageType);
-            auto name = package.asName().shortName(ctx);
-            vector<string> pkgParts = absl::StrSplit(name, "::");
-            // add the initial empty string to mimic the leading `::`
-            if (ctx.state.packageDB().empty()) {
-                pkgParts.insert(pkgParts.begin(), "");
-            }
-            // and now add the rest of `parts` to it
-            pkgParts.insert(pkgParts.end(), parts.begin(), parts.end());
-            // and then treat this new vector as the parts to walk over
-            parts = move(pkgParts);
-            // the path down below tries to find out if `packageType`
-            // is null to find out whether it should look up a package
-            // or not, so if we're not in package mode set
-            // `packageType` to null
-            if (ctx.state.packageDB().empty()) {
-                packageType = nullptr;
-            }
-        }
 
         core::SymbolRef current;
         for (auto part : parts) {
@@ -2854,17 +2788,15 @@ class ResolveTypeMembersAndFieldsWalk {
                 current = core::Symbols::root();
 
                 // First iteration
-                if (!packageType) {
-                    if (part != "") {
-                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("The string given to `{}` must be an absolute constant reference that "
-                                        "starts with `{}`",
-                                        method, "::");
-                        }
-                        return;
+                if (part != "") {
+                    if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                        e.setHeader("The string given to `{}` must be an absolute constant reference that "
+                                    "starts with `{}`",
+                                    method, "::");
                     }
-                    continue;
+                    return;
                 }
+                continue;
             }
 
             auto member = ctx.state.lookupNameConstant(part);

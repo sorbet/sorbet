@@ -15,7 +15,8 @@ module Project::Foo::FooNonForcing
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def self.bad_not_keyword_arg(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", "Project::Bar") # error: Too many positional arguments
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", "Project::Bar")
+      #                                                       ^^^^^^^^^^^^^^ error: Too many arguments
       true
     else
       false
@@ -24,7 +25,9 @@ module Project::Foo::FooNonForcing
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def self.bad_wrong_keyword_arg(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", pakige: "Project::Bar") # error: Unrecognized keyword argument
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", pakige: "Project::Bar")
+      #                                              ^^^^^^^ error: Unable to resolve constant
+      #                                                       ^^^^^^^^^^^^^^^^^^^^^^ error: Too many arguments
       true
     else
       false
@@ -32,35 +35,10 @@ module Project::Foo::FooNonForcing
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def self.bad_package_not_a_string(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", package: 5) # error: Expected `T.nilable(String)` but found `Integer(5)`
-      true
-    else
-      false
-    end
-  end
-
-  sig {params(arg: T.untyped).returns(T::Boolean)}
-  def self.bad_check_for_global_bar(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", package: "Project::Bar") # error: should not be an absolute constant reference
-      true
-    else
-      false
-    end
-  end
-
-  sig {params(arg: T.untyped).returns(T::Boolean)}
-  def self.bad_non_existent_package(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Quux") # error: Unable to resolve constant `::Project::Quux`
-      true
-    else
-      false
-    end
-  end
-
-  sig {params(arg: T.untyped).returns(T::Boolean)}
-  def self.check_for_non_existing_bar(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Quux", package: "Project::Bar") # error: Unable to resolve constant `::Project::Bar::Quux`
+  def self.bad_package(arg)
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", package: 5)
+      #                                              ^^^^^^^ error: Unable to resolve constant
+      #                                                       ^^^^^^^^^^ error: Too many arguments
       true
     else
       false
@@ -69,7 +47,7 @@ module Project::Foo::FooNonForcing
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
   def self.good_check_is_bar(arg)
-    if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Bar")
+    if T::NonForcingConstants.non_forcing_is_a?(arg, "::Project::Bar::Bar")
       true
     else
       false
