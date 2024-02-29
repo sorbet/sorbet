@@ -56,15 +56,6 @@ if T::NonForcingConstants.non_forcing_is_a?(i_or_s, '::String')
 end
 
 oni = T.unsafe(Outer::Nested::Inner.new)
-# in non-package mode, the following are all identical and should all resolve
-T::NonForcingConstants.non_forcing_is_a?(oni, "::Outer::Nested::Inner")
-T::NonForcingConstants.non_forcing_is_a?(oni, "Inner", package: "Outer::Nested")
-T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Inner", package: "Outer")
 
 # these, that reference non-existing constants, should all yield the same error
 T::NonForcingConstants.non_forcing_is_a?(oni, "::Outer::Nested::Other") # error: Unable to resolve constant `::Outer::Nested::Other`
-T::NonForcingConstants.non_forcing_is_a?(oni, "Other", package: "Outer::Nested") # error: Unable to resolve constant `::Outer::Nested::Other`
-T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Other", package: "Outer") # error: Unable to resolve constant `::Outer::Nested::Other`
-
-pkg = "Outer"
-T::NonForcingConstants.non_forcing_is_a?(oni, "Nested::Other", package: pkg) # error: only accepts string literals
