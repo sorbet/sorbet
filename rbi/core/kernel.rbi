@@ -367,14 +367,6 @@ module Kernel
   end
   def ===(other); end
 
-  sig do
-    params(
-        other: BasicObject,
-    )
-    .returns(NilClass)
-  end
-  def =~(other); end
-
   # Produces a shallow copy of *obj*---the instance variables of *obj* are
   # copied, but not the objects they reference.
   # [`clone`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-clone)
