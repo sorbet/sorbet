@@ -205,10 +205,6 @@ const PackageInfo &PackageDB::getPackageInfo(MangledName mangledName) const {
     return *it->second;
 }
 
-bool PackageDB::empty() const {
-    return packages_.empty();
-}
-
 const vector<MangledName> &PackageDB::packages() const {
     return mangledNames;
 }

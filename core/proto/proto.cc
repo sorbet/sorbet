@@ -394,7 +394,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
                                                       const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
     const auto &packageDB = gs.packageDB();
-    auto stripePackages = !packageDB.empty();
+    auto stripePackages = !packageDB.enabled();
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
         if (file.data(gs).isPayload()) {

@@ -39,7 +39,6 @@ public:
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
     const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
 
-    bool empty() const;
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
@@ -62,12 +61,17 @@ public:
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
+    bool enabled() const {
+        return this->enabled_;
+    }
+
 private:
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    bool enabled_ = false;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having
