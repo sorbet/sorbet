@@ -2378,7 +2378,6 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                                      std::string errorHint) {
-    ENFORCE(packageDB_.secondaryTestPackageNamespaceRefs_.size() == 0);
     ENFORCE(!packageDB_.frozen);
 
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
