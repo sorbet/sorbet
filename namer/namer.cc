@@ -77,7 +77,6 @@ bool isMangleRenameUniqueName(core::GlobalState &gs, core::NameRef name) {
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
- * Does not report any errors, which lets us cache its output.
  * Produces a vector of symbols to insert, and a vector of modifiers to those symbols.
  */
 class SymbolFinder {
