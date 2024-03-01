@@ -54,6 +54,11 @@ public:
     PackageDB &operator=(const PackageDB &) = delete;
     PackageDB &operator=(PackageDB &&) = default;
 
+    // Whether the --stripe-packages mode is active.
+    bool enabled() const {
+        return this->enabled_;
+    }
+
     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
@@ -61,17 +66,13 @@ public:
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
-    bool enabled() const {
-        return this->enabled_;
-    }
-
 private:
+    bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
-    bool enabled_ = false;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having
