@@ -236,6 +236,7 @@ PackageDB PackageDB::deepCopy() const {
     for (auto const &[nr, pkgInfo] : this->packages_) {
         result.packages_[nr] = pkgInfo->deepCopy();
     }
+    result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
