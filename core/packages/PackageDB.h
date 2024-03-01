@@ -39,7 +39,6 @@ public:
     // Lookup `PackageInfo` from the string representation of the un-mangled package name.
     const PackageInfo &getPackageInfo(const core::GlobalState &gs, std::string_view str) const;
 
-    bool empty() const;
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
     // namespaces.
@@ -55,6 +54,11 @@ public:
     PackageDB &operator=(const PackageDB &) = delete;
     PackageDB &operator=(PackageDB &&) = default;
 
+    // Whether the --stripe-packages mode is active.
+    bool enabled() const {
+        return this->enabled_;
+    }
+
     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
@@ -63,6 +67,7 @@ public:
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
 private:
+    bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;

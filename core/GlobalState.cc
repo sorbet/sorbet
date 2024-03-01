@@ -2380,6 +2380,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
                                      std::string errorHint) {
     ENFORCE(!packageDB_.frozen);
 
+    packageDB_.enabled_ = true;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
