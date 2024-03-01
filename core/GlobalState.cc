@@ -607,12 +607,12 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::PackageSpecSingleton());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::import())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_test_import());
 
@@ -1224,6 +1224,32 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     data->owner = owner;
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
+    wasModified_ = true;
+
+    return ret;
+}
+
+PackageRef GlobalState::enterPackageSymbol(Loc loc, ClassOrModuleRef owner) {
+    ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
+    histogramInc("symbol_enter_by_name", ownerScope->members().size());
+
+    auto &store = ownerScope->members()[core::Names::Constants::PackageSpec_Storage()];
+    if (store.exists()) {
+        ENFORCE_NO_TIMER(store.isPackage(), "existing symbol is not a package");
+        counterInc("symbols.hit");
+        auto result = store.asPackageRef();
+        result.data(*this)->loc_ = loc;
+        return result;
+    }
+
+    ENFORCE_NO_TIMER(!symbolTableFrozen);
+    auto ret = PackageRef(*this, packages.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on packages invalidates `store`
+    packages.emplace_back();
+    PackageData data = ret.data(*this);
+    data->owner = owner;
+    data->loc_ = loc;
+    DEBUG_ONLY(categoryCounterInc("symbols", "package"));
     wasModified_ = true;
 
     return ret;
@@ -1940,6 +1966,10 @@ void GlobalState::deleteTypeMemberSymbol(TypeMemberRef what) {
 
 unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
+}
+
+unsigned int GlobalState::packagesUsed() const {
+    return packages.size();
 }
 
 unsigned int GlobalState::methodsUsed() const {

@@ -846,6 +846,10 @@ private:
                         }
                         break;
                     }
+                    case core::SymbolRef::Kind::Package: {
+                        // Ignore; emitting packages is not supported in rbi_gen mode (yet? ever?)
+                        break;
+                    }
                 }
             }
 
@@ -979,6 +983,10 @@ private:
                                     maybeEmit(field);
                                 }
                             }
+                            break;
+                        }
+                        case core::SymbolRef::Kind::Package: {
+                            // Ignore; emitting packages is not supported in rbi_gen mode (yet? ever?)
                             break;
                         }
                     }
@@ -1155,6 +1163,8 @@ private:
                 case core::SymbolRef::Kind::TypeMember:
                     break;
                 case core::SymbolRef::Kind::TypeArgument:
+                    break;
+                case core::SymbolRef::Kind::Package:
                     break;
             }
         }

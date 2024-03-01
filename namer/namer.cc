@@ -198,6 +198,16 @@ public:
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
         methodVisiStack.emplace_back(nullopt);
+
+        if (ctx.file.data(ctx).isPackage()) {
+            auto directlyUnderTopLevel = ctx.owner == core::Symbols::root() && klass.symbol != core::Symbols::root();
+            if (directlyUnderTopLevel && !foundDefs->package.has_value()) {
+                foundDefs->package = core::FoundPackage{
+                    /* owner */ ownerStack.back(),
+                    /* loc */ tree.loc(),
+                };
+            }
+        }
     }
 
     // `tree` is not `const` because this populates the `ancestors` field of the ClassDef
@@ -205,8 +215,14 @@ public:
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         core::FoundDefinitionRef klassName = ownerStack.back();
+        auto &foundClass = klassName.klass(*foundDefs);
         ownerStack.pop_back();
         methodVisiStack.pop_back();
+
+        // auto klassStr = klass.symbol == core::Symbols::root() ? klass.symbol.show(ctx)
+        //                                                       : string(ctx.locAt(klass.declLoc).source(ctx).value());
+        // fmt::print("ctx.owner={}, {}, ref={}, ref.owner={}\n", ctx.owner.show(ctx), klassStr,
+        //            klassName.toString(ctx, *foundDefs), foundClass.owner.toString(ctx, *foundDefs));
 
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
@@ -225,7 +241,6 @@ public:
             }
         }
 
-        auto &foundClass = klassName.klass(*foundDefs);
         if (foundClass.name != core::Names::Constants::Root() && !ctx.file.data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
@@ -765,6 +780,9 @@ private:
                 // Consider adding a test and removing this assertion if it fires
                 ENFORCE(false, "Should not call prettySymbolKind on type arguument in namer");
                 return "type argument";
+            case core::SymbolRef::Kind::Package:
+                // TODO(jez) Is it ever possible to have a constant redefinition error for a Package symbol?
+                return "package";
         }
     }
 
@@ -1255,6 +1273,11 @@ private:
         return symbol;
     }
 
+    void insertPackage(core::MutableContext ctx, const State &state, const core::FoundPackage &package) {
+        auto owner = getOwnerSymbol(state, package.owner);
+        ctx.state.enterPackageSymbol(ctx.locAt(package.loc), owner);
+    }
+
     void modifyClass(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Class);
         const auto fun = mod.name;
@@ -1534,6 +1557,7 @@ private:
                         break;
                     case core::SymbolRef::Kind::ClassOrModule:
                     case core::SymbolRef::Kind::TypeArgument:
+                    case core::SymbolRef::Kind::Package:
                         ENFORCE(false);
                         break;
                 }
@@ -1659,6 +1683,10 @@ public:
         for (const auto &klass : foundDefs.klasses()) {
             state.definedClasses.emplace_back(insertClass(ctx.withOwner(getOwnerSymbol(state, klass.owner)), state,
                                                           klass, willDeleteOldDefs, classBehaviorLocs));
+        }
+
+        if (foundDefs.package.has_value()) {
+            insertPackage(ctx, state, foundDefs.package.value());
         }
 
         return state;

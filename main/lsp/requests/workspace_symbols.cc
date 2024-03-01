@@ -56,6 +56,8 @@ private:
                 return typeArgumentMatches[ref.typeArgumentIndex()];
             case core::SymbolRef::Kind::TypeMember:
                 return typeMemberMatches[ref.typeMemberIndex()];
+            case core::SymbolRef::Kind::Package:
+                Exception::raise("Workspace symbol search does not support finding package symbols");
         }
     }
 
