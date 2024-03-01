@@ -1,6 +1,6 @@
 # -- test/testdata/packager/export_imported/a/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C B>)
 
     <self>.export(::<root>::<C B>::<C BClass>)
@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (::PackageSpec)
     <self>.export(::<root>::<C B>::<C BClass>)
   end
 end
