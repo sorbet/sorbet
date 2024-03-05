@@ -308,6 +308,83 @@ foo.rb:3: Expected `String` but found `Symbol(:"symbol")` for argument `arg0`
 ...
 ```
 
+## `--cache-dir`: Caching parse results
+
+Sorbet can cache the result of parsing files. If only a few files change between
+consecutive runs of Sorbet, Sorbet can skip substantial amounts of work creating
+abstract syntax trees from files, which speeds up `srb tc` at the command line
+and the "Indexing..." operation in editors.
+
+To enable `--cache-dir`, simply pass `--cache-dir=...` when invoking `srb tc`
+(or add this option to the project's [config file](#config-file)). Replace `...`
+with a path to where Sorbet should write cached data to disk. This `...` can
+either be:
+
+- a path to a directory that doesn't exist (will be created by Sorbet)
+- a path to an empty directory
+- a path to a cache directory populated by a previous run of Sorbet
+
+For example:
+
+```bash
+# Creates or reuses a cache dir at `.sorbet-cache/` in the current dir
+srb tc --cache-dir=.sorbet-cache
+
+# Creates or reuses a cache dir at `/tmp/sorbet-cache/`, within the system's
+# `/tmp` folder.
+srb tc --cache-dir=/tmp/sorbet-cache
+```
+
+Under the hood, Sorbet creates two files in this folder (`data.mdb` and
+`lock.mdb`).
+
+We strongly recommend setting `--cache-dir`, especially in medium- to
+large-sized codebases. The parsing and AST rewriting phases of Sorbet are some
+of the least optimized parts of Sorbet, because historically this caching
+strategy has been so effective.
+
+### What is cached? What is evicted?
+
+The cache is a simple key/value store. The majority of the cache maps keys that
+look like `path/to/file.rb##<CHECKSUM>` to a compact binary representation of
+Sorbet's internal abstract syntax tree data structure. This means that if
+`srb tc` runs twice on a project, but the contents of `path/to/file.rb` change
+between the first and second run, there will be two keys in the cache which
+begin with `path/to/file.rb`, one for each version of the file. This also means
+that when checking out an old branch which has already had Sorbet run on it, all
+tracked and unmodified files will still be in the cache.
+
+This compact binary representation has no stability guarantees, meaning it is
+not forward nor backward compatible with new versions of Sorbet. Instead, Sorbet
+completely flushes the cache whenever the Sorbet version string
+(`srb tc --version`) changes.
+
+(This version string is only populated correctly for release builds of
+Sorbet—when using a custom source build of Sorbet which doesn't build Sorbet in
+release mode, avoid using `--cache-dir`.)
+
+Apart from evictions when the Sorbet version changes (e.g. upgrading Sorbet in
+the Gemfile, or checking out an old commit with an older Sorbet version), Sorbet
+never evicts data from this cache. It can grow without bound. If disk space is
+limited, consider
+[Collecting metrics from Sorbet](metrics.md#collecting-metrics-from-sorbet),
+paying attention to these metrics:
+
+- `cache.used_bytes`
+- `cache.used_percent`
+
+(Note that these metrics are only reported when the cache is modified, not when
+it's read.)
+
+To simplify Sorbet's implementation against the underlying key/value store
+library, the max cache size is fixed when Sorbet starts up. The default max
+cache size is 4 GiB. The size on disk will only take up as much data as needs to
+be cached (i., not a fixed 4 GiB). For projects which need more than this, you
+can use the `--max-cache-size-bytes` to set a larger cache size. If you find
+yourself needing to pass this option, please reach out to the Sorbet development
+team, as your codebase is likely huge (possibly the largest known Sorbet
+codebase) and we'd like to talk to you.
+
 ## Is there a way to get errors in JSON format?
 
 There is not, intentionally. If you're trying to consume Sorbet's output from a
