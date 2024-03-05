@@ -56,6 +56,7 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
     FastPathFilesToTypecheckResult result;
     Timer timeit(config.logger, "compute_fast_path_file_set");
     vector<core::SymbolHash> changedRetypecheckableSymbolHashes;
+    UnorderedSet<core::packages::MangledName> changedPackages;
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -68,6 +69,10 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
             // Only relevant in --stripe-packages mode. Package declarations do not have method
             // hashes. Instead we rely on recomputing packages if any __package.rb source
             // changes.
+
+            if (isNoopUpdateForRetypecheck) {
+                changedPackages.insert(gs.packageDB().getPackageNameForFile(fref));
+            }
             continue;
         }
         if (!fref.exists()) {
@@ -106,7 +111,7 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
                       [](const auto &symhash) { return symhash.nameHash; });
     core::WithoutUniqueNameHash::sortAndDedupe(result.changedSymbolNameHashes);
 
-    if (result.changedSymbolNameHashes.empty()) {
+    if (result.changedSymbolNameHashes.empty() && !(!changedPackages.empty() && isNoopUpdateForRetypecheck)) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if
         // the set of changed symbols is empty (e.g., running a completion request inside a
         // method body)
@@ -116,6 +121,9 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
     int i = -1;
     for (auto &oldFile : gs.getFiles()) {
         i++;
+
+        bool insertedIntoExtraFiles = false;
+
         if (oldFile == nullptr) {
             continue;
         }
@@ -135,6 +143,13 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
             continue;
         }
 
+        if (isNoopUpdateForRetypecheck) {
+            if (changedPackages.contains(gs.packageDB().getPackageNameForFile(ref))) {
+                result.extraFiles.emplace_back(ref);
+                insertedIntoExtraFiles = true;
+            }
+        }
+
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::WithoutUniqueNameHash> intersection;
@@ -144,7 +159,10 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
             continue;
         }
 
-        result.extraFiles.emplace_back(ref);
+        if (!insertedIntoExtraFiles) {
+            result.extraFiles.emplace_back(ref);
+            insertedIntoExtraFiles = true;
+        }
 
         if (result.changedFiles.size() + result.extraFiles.size() > (2 * config.opts.lspMaxFilesOnFastPath)) {
             // Short circuit, as a performance optimization.
