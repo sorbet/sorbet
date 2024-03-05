@@ -1062,21 +1062,13 @@ private:
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
                        job.klass.data(ctx)->superClass() == resolvedClass) {
                 job.klass.data(ctx)->setSuperClass(resolvedClass);
-            } else if (!ctx.file.data(ctx).isPayload() && absl::c_any_of(job.klass.data(ctx)->locs(), [&](auto &loc) {
-                           return loc.file().data(ctx).isPayload();
-                       })) {
-                job.klass.data(ctx)->setSuperClass(resolvedClass);
-                job.klass.data(ctx)->unsetClassOrModuleLinearizationComputed();
             } else {
                 auto fileIsPayload = ctx.file.data(ctx).isPayload();
                 auto klassDefinedInPayload = absl::c_any_of(
                     job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
                 auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
 
-                if (!fileIsPayload && klassDefinedInPayload && allowsPayloadParentOverride) {
-                    job.klass.data(ctx)->setSuperClass(resolvedClass);
-                    job.klass.data(ctx)->unsetClassOrModuleLinearizationComputed();
-                } else {
+                if (!allowsPayloadParentOverride) {
                     if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                         e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                     job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
