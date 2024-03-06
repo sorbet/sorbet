@@ -136,8 +136,8 @@ vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Se
             stats.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::private_(),
                                               loc.copyWithZeroLength(), lit->deepCopy()));
             ast::MethodDef::ARGS_store args;
-            args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-            args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+            args.emplace_back(ast::MK::RestArg(loc, ast::MK::ResolvedLocal(loc, core::Names::arg0())));
+            args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::ResolvedLocal(loc, core::Names::blkArg())));
             auto methodDef = ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));

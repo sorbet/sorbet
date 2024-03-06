@@ -400,7 +400,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             // If this is actually a T::InexactStruct or Chalk::ODM::Base::Document sub-sub-class,
             // this implementation is correct but does extra work.
 
-            auto arg2 = ast::MK::Local(loc, core::Names::arg2());
+            auto arg2 = ast::MK::ResolvedLocal(loc, core::Names::arg2());
 
             auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
                                           ast::MK::Symbol(nameLoc, ivarName));
@@ -437,20 +437,20 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
-                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
+                                                   ast::MK::ResolvedLocal(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 } else {
                     // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                     auto ivarSet = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
                                                   ast::MK::Symbol(nameLoc, ivarName),
-                                                  ast::MK::Local(nameLoc, core::Names::arg0()));
+                                                  ast::MK::ResolvedLocal(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 }
             } else if (propContext.needsRealPropBodies) {
                 // need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarSet =
                     ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
-                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
+                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::ResolvedLocal(nameLoc, core::Names::arg0()));
                 auto tConfig = ast::MK::Constant(loc, core::Symbols::T_Configuration());
                 auto propFreezeHandler =
                     ast::MK::Send0(loc, std::move(tConfig), core::Names::propFreezeHandler(), locZero);
@@ -576,7 +576,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
     for (const auto &prop : props) {
         auto ivarName = prop.name.addAt(ctx);
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
-                                           ast::MK::Local(prop.nameLoc, prop.name)));
+                                           ast::MK::ResolvedLocal(prop.nameLoc, prop.name)));
     }
     // Normally we wouldn't need to call super here: the compiler will use the types
     // in the sig to typecheck everything, just like sorbet-runtime, and we've

@@ -334,14 +334,14 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
             ast::ExpressionPtr body;
             if (declareIvars) {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
-                                       ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(sig)));
+                                       ast::MK::Let(loc, ast::MK::ResolvedLocal(loc, name), dupReturnsType(sig)));
             } else {
-                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
+                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::ResolvedLocal(loc, name));
             }
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
             stats.emplace_back(
-                ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body), flags));
+                ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::ResolvedLocal(argLoc, name), move(body), flags));
         }
     }
 

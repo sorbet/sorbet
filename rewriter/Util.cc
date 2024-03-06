@@ -259,7 +259,7 @@ ast::ExpressionPtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core:
 ast::ExpressionPtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
                                   ast::ExpressionPtr rhs, ast::MethodDef::Flags flags) {
     flags.isAttrBestEffortUIOnly = true;
-    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs), flags);
+    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::ResolvedLocal(argLoc, core::Names::arg0()), move(rhs), flags);
 }
 
 ast::ExpressionPtr ASTUtil::mkNilable(core::LocOffsets loc, ast::ExpressionPtr type) {

@@ -102,6 +102,11 @@ public:
         return make_expression<ConstantLit>(loc, symbol, nullptr);
     }
 
+    // TODO: rename
+    static ExpressionPtr ResolvedLocal(core::LocOffsets loc, core::NameRef name) {
+        return make_expression<ast::Local>(loc, core::LocalVariable(name, 0));
+    }
+
     static ExpressionPtr Local(core::LocOffsets loc, core::NameRef name) {
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }

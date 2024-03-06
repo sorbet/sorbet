@@ -133,7 +133,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
         sigArgs.emplace_back(ast::MK::Symbol(symLoc, name));
         sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
-        auto argName = ast::MK::Local(symLoc, name);
+        auto argName = ast::MK::ResolvedLocal(symLoc, name);
         if (keywordInit) {
             argName = ast::make_expression<ast::KeywordArg>(symLoc, move(argName));
         }
@@ -144,7 +144,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         body.emplace_back(ast::MK::Sig1(symLoc.copyWithZeroLength(), ast::MK::Symbol(symLoc, name),
                                         ast::MK::Untyped(symLoc.copyWithZeroLength()),
                                         ast::MK::Untyped(symLoc.copyWithZeroLength())));
-        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
+        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::ResolvedLocal(symLoc, name),
                                                     ast::MK::RaiseTypedUnimplemented(loc)));
     }
 
