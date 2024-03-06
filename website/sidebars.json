@@ -54,6 +54,7 @@
     ],
     "Editor Features": [
       "lsp",
+      "server-status",
       "sig-suggestion",
       "highlight-untyped",
       "sorbet-uris"

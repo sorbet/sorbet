@@ -216,11 +216,10 @@ Sorbet recognizes the following options in the `initializationOptions` of the
 export interface SorbetInitializationOptions {
   highlightUntyped?: boolean | string;
   enableTypedFalseCompletionNudges?: boolean;
+  supportsOperationNotifications?: boolean;
   supportsSorbetURIs?: boolean;
 }
 ```
-
-<!-- TODO(jez) supportsOperationNotifications -->
 
 - `highlightUntyped`
 
@@ -232,9 +231,86 @@ export interface SorbetInitializationOptions {
   Whether to show a notice explaining when Sorbet refuses to provide completion
   results because a file is `# typed: false`. Default: `true`
 
+- `supportsOperationNotifications`
+
+  See [Showing the Language Server Status](server-status.md#api)
+
 - `supportsSorbetURIs`
 
   See [Working with Synthetic or Missing Files](sorbet-uris.md)
+
+### `sorbet/showOperation` notification
+
+The Sorbet VS Code extension gives an indication of whether Sorbet is currently
+“Idle,” meaning it has finished all requested work and is waiting, or whether
+there is a current long-running operation which may affect things like whether
+all the errors have been reported and whether Sorbet is able to respond to
+certain editor commands.
+
+This feature is powered by the custom `sorbet/showOperation` LSP
+server-to-client notification:
+
+_Notification_:
+
+- method: `sorbet/showOperation`
+- params: `SorbetShowOperationParams` defined as follows
+
+```typescript
+interface SorbetShowOperationParams {
+  /**
+   * A stable identifier for this operation. At time of writing, this includes:
+   *
+   * - "Indexing"
+   * - "SlowPathBlocking"
+   * - "SlowPathNonBlocking"
+   * - "FastPath"
+   * - "References"
+   * - "SymbolSearch"
+   * - "Rename"
+   * - "MoveMethod"
+   *
+   * Use this field if it's important to programmatically detect a certain state
+   * in the language client, as these identifiers are stable and unlikely to change.
+   */
+  operationName: string;
+
+  /**
+   * An unstable, human-readable description of a given operation. We reserve
+   * the right to change these descriptions in future versions of Sorbet, so to
+   * programmatically detect them, use `operationName`.
+   *
+   * Use these descriptions to show the user what operation is currently ongoing.
+   * This field contains the operation descriptions documented above, like
+   * "Typechecking..." instead of the technical "SlowPathBlocking" identifier.
+   */
+  description: string;
+
+  /**
+   * Operations can overlap. For example, a "References" operation can overlap
+   * with a "SlowPathNonBlocking" operation. This field indicates whether an
+   * operation is starting or ending, so the language client can track
+   * overlapping operations.
+   *
+   * Typically language clients will display only the most recently received
+   * operation notification as the current active operation. For example, if a
+   * SlowPathNonBlocking operation is ongoing and a new References operation
+   * begins, the client will show "Finding all references..." until that
+   * operation ends, at which point the client will once again display
+   * "Typechecking in background..." (until the SlowPathNonBlocking operation
+   * also ends).
+   *
+   * When there is no active operation, language clients typically display
+   * something indicating that the process is idle, like "Idle" or ✅ or
+   * something else.
+   *
+   * There will only be one active operation for a given `operationName` at any
+   * given time.
+   */
+  status: SorbetOperationStatus;
+}
+
+export type SorbetOperationStatus = 'start' | 'end';
+```
 
 ### `sorbet/showSymbol` request
 
