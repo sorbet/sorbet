@@ -231,6 +231,8 @@ export interface SorbetInitializationOptions {
   Whether to show a notice explaining when Sorbet refuses to provide completion
   results because a file is `# typed: false`. Default: `true`
 
+  See [`# typed: false` nudges](lsp-typed-level.md#-typed-false-nudges)
+
 - `supportsOperationNotifications`
 
   See [Showing the Language Server Status](server-status.md#api)
@@ -238,6 +240,18 @@ export interface SorbetInitializationOptions {
 - `supportsSorbetURIs`
 
   See [Working with Synthetic or Missing Files](sorbet-uris.md)
+
+### `workspace/didChangeConfiguration` notification
+
+Sorbet recognizes the same options in the `settings` field of the
+[`DidChangeConfigurationParams`] as it recognizes in the `initializationOptions`
+of the [`initialize` request](#initialize-request) above.
+
+See the definition of [`SorbetInitializationOptions`](#initialize-request)
+above.
+
+[`DidChangeConfigurationParams`]:
+  https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#didChangeConfigurationParams
 
 ### `sorbet/showOperation` notification
 
