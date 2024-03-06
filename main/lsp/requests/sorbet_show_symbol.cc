@@ -17,9 +17,9 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     const core::GlobalState &gs = typechecker.state();
     // To match the behavior of Go To Definition, we don't error in an untyped file, but instead
     // be okay with returning an empty result for certain queries.
-    auto errorIfFileIsUntyped = false;
+    auto emptyResultIfFileIsUntyped = false;
     auto result = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->position,
-                                  LSPMethod::SorbetShowSymbol, errorIfFileIsUntyped);
+                                  LSPMethod::SorbetShowSymbol, emptyResultIfFileIsUntyped);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
