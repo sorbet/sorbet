@@ -1,0 +1,50 @@
+autocorrect-override.rb:21: Method `Child#foo` overrides an overridable method `Parent#foo` but is not declared with `override.` https://srb.help/5051
+    21 |  def foo; end
+          ^^^^^^^
+    autocorrect-override.rb:6: defined here
+     6 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Done
+    autocorrect-override.rb:20: Inserted `override.`
+    20 |  sig {void}
+               ^
+
+autocorrect-override.rb:24: Method `Child#bar` implements an abstract method `IChild#bar` but is not declared with `override.` https://srb.help/5051
+    24 |  def bar; end
+          ^^^^^^^
+    autocorrect-override.rb:15: defined here
+    15 |  def bar; end
+          ^^^^^^^
+  Autocorrect: Done
+    autocorrect-override.rb:23: Inserted `override.`
+    23 |  sig {void}
+               ^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class Parent
+  extend T::Sig
+  sig {overridable.void}
+  def foo; end
+end
+
+module IChild
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def bar; end
+end
+
+class Child < Parent
+  include IChild
+  sig {override.void}
+  def foo; end
+
+  sig {override.void}
+  def bar; end
+end

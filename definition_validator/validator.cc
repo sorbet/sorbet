@@ -439,7 +439,32 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 }
 
-void validateOverriding(const core::Context ctx, core::MethodRef method) {
+optional<core::AutocorrectSuggestion>
+constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
+    auto methodLoc = method.data(ctx)->loc();
+    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
+    if (!parsedSig.has_value()) {
+        return nullopt;
+    }
+
+    ast::Block *block = parsedSig->origSend->block();
+    if (!block) {
+        return nullopt;
+    }
+
+    auto *blockBody = ast::cast_tree<ast::Send>(block->body);
+    ENFORCE(blockBody != nullptr);
+    auto insertLoc = ctx.locAt(blockBody->loc.copyWithZeroLength());
+
+    vector<core::AutocorrectSuggestion::Edit> edits;
+    edits.emplace_back(core::AutocorrectSuggestion::Edit{insertLoc, "override."});
+    return core::AutocorrectSuggestion{
+        fmt::format("Add `{}` to `{}` sig", "override", method.data(ctx)->name.show(ctx)),
+        std::move(edits),
+    };
+}
+
+void validateOverriding(const core::Context ctx, const ast::ExpressionPtr &tree, core::MethodRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     auto klassData = klass.data(ctx);
@@ -500,10 +525,17 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
             (overriddenMethod.data(ctx)->flags.isOverridable || overriddenMethod.data(ctx)->flags.isOverride) &&
             !anyIsInterface && overriddenMethod.data(ctx)->hasSig() && !method.data(ctx)->flags.isRewriterSynthesized &&
             !isRBI) {
-            if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::UndeclaredOverride)) {
+            auto methodLoc = method.data(ctx)->loc();
+
+            if (auto e = ctx.state.beginError(methodLoc, core::errors::Resolver::UndeclaredOverride)) {
                 e.setHeader("Method `{}` overrides an overridable method `{}` but is not declared with `{}`",
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
+
+                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
+                if (potentialAutocorrect.has_value()) {
+                    e.addAutocorrect(std::move(*potentialAutocorrect));
+                }
             }
         }
         if (!method.data(ctx)->flags.isOverride && !method.data(ctx)->flags.isAbstract && method.data(ctx)->hasSig() &&
@@ -513,6 +545,11 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
                 e.setHeader("Method `{}` implements an abstract method `{}` but is not declared with `{}`",
                             method.show(ctx), overriddenMethod.show(ctx), "override.");
                 e.addErrorLine(overriddenMethod.data(ctx)->loc(), "defined here");
+
+                auto potentialAutocorrect = constructOverrideAutocorrect(ctx, tree, method);
+                if (potentialAutocorrect.has_value()) {
+                    e.addAutocorrect(std::move(*potentialAutocorrect));
+                }
             }
         }
         if ((overriddenMethod.data(ctx)->flags.isAbstract || overriddenMethod.data(ctx)->flags.isOverridable ||
@@ -858,7 +895,11 @@ void validateRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef s
 }
 
 class ValidateWalk {
+public:
+    ValidateWalk(const ast::ExpressionPtr &tree) : tree(tree) {}
+
 private:
+    const ast::ExpressionPtr &tree;
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
 
     const vector<core::MethodRef> &getAbstractMethods(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
@@ -1116,7 +1157,7 @@ public:
         // See the comment in `VarianceValidator::validateMethod` for an explanation of why we don't
         // need to check types on instance variables.
 
-        validateOverriding(ctx, methodDef.symbol);
+        validateOverriding(ctx, this->tree, methodDef.symbol);
     }
 
     void postTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1157,7 +1198,7 @@ public:
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
 
-    ValidateWalk validate;
+    ValidateWalk validate(tree.tree);
     ast::TreeWalk::apply(ctx, validate, tree.tree);
     return tree;
 }
