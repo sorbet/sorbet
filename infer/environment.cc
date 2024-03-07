@@ -1050,8 +1050,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         auto parentRecvLoc = ctx.locAt(parentRecv.loc);
 
                         if (recvLoc.source(ctx) != parentRecvLoc.source(ctx) ||
-                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type,
-                                                         core::noOpErrorDetailsCollector)) {
+                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type)) {
                             // Safeguard against most unrelated missing method errors
                             // Out of ~~laziness~~ simplicitity, this does not account for things
                             // like `==` or `===` where the relevant type to check is arg0, not recv

@@ -1583,9 +1583,9 @@ bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, 
            isSubTypeUnderConstraint(gs, constr, t2, t1, mode, errorDetailsCollector);
 }
 
-template <class T>
-bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
-    return isAsSpecificAs(gs, t1, t2, errorDetailsCollector) && isAsSpecificAs(gs, t2, t1, errorDetailsCollector);
+bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    return isAsSpecificAs(gs, t1, t2, core::noOpErrorDetailsCollector) &&
+           isAsSpecificAs(gs, t2, t1, core::noOpErrorDetailsCollector);
 }
 
 template <class T>
@@ -1623,11 +1623,6 @@ template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint 
 template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
                                     core::ErrorDetailsCollector &errorDetailsCollector);
 template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::NoOpErrorDetailsCollector &errorDetailsCollector);
-
-template bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
                                     core::NoOpErrorDetailsCollector &errorDetailsCollector);
 
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
