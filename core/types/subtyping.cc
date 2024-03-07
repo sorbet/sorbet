@@ -1244,7 +1244,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 }
                 if (!doesMemberMatch) {
                     result = false;
-                    if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                         // TODO(neil): once we pass in whether this a covariant or contravariant call,
                         // we should reword it in the "expected ... but got ..." form
                         // TODO(neil): if the type member is for a Proc we should have special wording,
@@ -1286,7 +1286,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             auto subCollector = errorDetailsCollector.newCollector();
                             if (!Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode, subCollector)) {
                                 result = false;
-                                if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                                if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                                     // TODO(neil): once we pass in whether this a covariant or contravariant call,
                                     // we should reword it in the "expected ... but got ..." form
                                     auto message = ErrorColors::format("`{}` is not a subtype of `{}` for item `{}`",
@@ -1299,7 +1299,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             }
                         }
                     } else {
-                        if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                        if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                             if (a2 != nullptr) {
                                 // array too small
                                 // TODO(neil): This error isn't useful until we know if this call is covariant or
@@ -1312,7 +1312,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
                     auto *h2 = cast_type<ShapeType>(t2);
                     result = h2 != nullptr && h2->keys.size() <= h1.keys.size();
-                    if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                         if (h2 == nullptr) {
                             return;
                         }
@@ -1337,7 +1337,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         auto subCollector = errorDetailsCollector.newCollector();
                         if (!optind.has_value()) {
                             result = false;
-                            if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                            if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                                 // Missing key
                                 // TODO(neil): This error isn't useful until we know if this call is covariant or
                                 // contravariant. If it's contravariant, we'll report the error "backwards".
@@ -1347,7 +1347,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
                                                                     h2->values[i], mode, subCollector)) {
                             result = false;
-                            if constexpr (std::is_same<T, ErrorDetailsCollector>::value) {
+                            if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                                 // TODO(neil): once we pass in whether this a covariant or contravariant call,
                                 // we should reword it in the "expected ... but got ..." form
                                 auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
@@ -1429,7 +1429,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
 bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible,
-                                    core::noOpErrorDetailsCollector);
+                                    ErrorSection::Collector::NO_OP);
 }
 
 template <class T>
@@ -1596,33 +1596,34 @@ bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint 
 
 template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode,
                                              const TypePtr &t1, const TypePtr &t2,
-                                             core::ErrorDetailsCollector &errorDetailsCollector);
+                                             core::ErrorSection::Collector &errorDetailsCollector);
 template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode,
                                              const TypePtr &t1, const TypePtr &t2,
-                                             core::NoOpErrorDetailsCollector &errorDetailsCollector);
+                                             core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                               const TypePtr &t2, UntypedMode mode,
-                                              core::NoOpErrorDetailsCollector &errorDetailsCollector);
+                                              core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                               const TypePtr &t2, UntypedMode mode,
-                                              core::ErrorDetailsCollector &errorDetailsCollector);
+                                              core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                               core::ErrorDetailsCollector &errorDetailsCollector);
+                               core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                               core::NoOpErrorDetailsCollector &errorDetailsCollector);
+                               core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                          const TypePtr &t2, core::ErrorDetailsCollector &errorDetailsCollector);
+                                          const TypePtr &t2, core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                          const TypePtr &t2, core::NoOpErrorDetailsCollector &errorDetailsCollector);
+                                          const TypePtr &t2,
+                                          core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,
-                                                   core::ErrorDetailsCollector &errorDetailsCollector);
+                                                   core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,
-                                                   core::NoOpErrorDetailsCollector &errorDetailsCollector);
+                                                   core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 } // namespace sorbet::core

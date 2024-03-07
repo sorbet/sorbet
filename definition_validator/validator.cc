@@ -56,7 +56,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method
 // going to be true in other situations.
 bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const core::TypePtr &sub,
                   core::MethodRef subMethod, const core::TypePtr &super, core::MethodRef superMethod,
-                  core::Polarity polarity, core::ErrorDetailsCollector &errorDetailsCollector) {
+                  core::Polarity polarity, core::ErrorSection::Collector &errorDetailsCollector) {
     if (sub == nullptr || super == nullptr) {
         // nullptr is just "unannotated" which is T.untyped
         return true;
@@ -143,7 +143,7 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
         auto &superArgType = superArgs[idx].get().type;
         auto &methodArgType = methodArgs[idx].get().type;
 
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, constr, methodArgType, method, superArgType, superMethod, core::Polarity::Negative,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -284,7 +284,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (hasCorrespondingRequired || hasCorrespondingOptional) {
-                core::ErrorDetailsCollector errorDetailsCollector;
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, req.get().type, superMethod,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
@@ -316,7 +316,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
 
             // if there is a corresponding parameter, make sure it has the right type
             if (corresponding != right.kw.optional.end()) {
-                core::ErrorDetailsCollector errorDetailsCollector;
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (!checkSubtype(ctx, *constr, corresponding->get().type, method, opt.get().type, superMethod,
                                   core::Polarity::Negative, errorDetailsCollector)) {
                     if (auto e =
@@ -356,7 +356,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
     }
 
     if (auto leftRest = left.kw.rest) {
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (!right.kw.rest) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("{} method `{}` must accept **`{}`", implementationOf(ctx, superMethod),
@@ -404,7 +404,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         const auto &methodBlkArg = method.data(ctx)->arguments.back();
         const auto &superMethodBlkArg = superMethod.data(ctx)->arguments.back();
 
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodBlkArg.type, method, superMethodBlkArg.type, superMethod,
                           core::Polarity::Negative, errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
@@ -437,7 +437,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         // the sake of showing an error message in the terms that the user wrote ("where did this
         // T.anything come from? I wrote .void").
 
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {

@@ -130,11 +130,11 @@ string ErrorSection::toString(const GlobalState &gs) const {
     return buf.str();
 }
 
-void ErrorDetailsCollector::addErrorDetails(ErrorDetailsCollector e) {
+void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector e) {
     children.push_back(e);
 }
 
-void toErrorSectionHelper(ErrorDetailsCollector &e, vector<ErrorLine> &result, int indentLevel = 0) {
+void toErrorSectionHelper(ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel = 0) {
     ENFORCE(e.message.length() > 0);
     std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
     result.push_back(ErrorLine(core::Loc::none(), message, ErrorLine::LocDisplay::Hidden));
@@ -143,7 +143,7 @@ void toErrorSectionHelper(ErrorDetailsCollector &e, vector<ErrorLine> &result, i
     }
 }
 
-std::optional<ErrorSection> ErrorDetailsCollector::toErrorSection() {
+std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() {
     if (children.size() == 0) {
         return nullopt;
     }
@@ -196,7 +196,7 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
     }
 }
 
-void ErrorBuilder::addErrorSections(ErrorDetailsCollector errorDetailsCollector) {
+void ErrorBuilder::addErrorSections(ErrorSection::Collector errorDetailsCollector) {
     auto errorSection = errorDetailsCollector.toErrorSection();
     if (errorSection) {
         addErrorSection(errorSection.value());

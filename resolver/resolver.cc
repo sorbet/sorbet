@@ -2467,7 +2467,7 @@ class ResolveTypeMembersAndFieldsWalk {
         // If the parent bounds exists, validate the new bounds against those of the parent.
         if (parentType != nullptr) {
             auto parentData = parentMember.data(ctx);
-            core::ErrorDetailsCollector errorDetailsCollector;
+            core::ErrorSection::Collector errorDetailsCollector;
             if (!core::Types::isSubType(ctx, parentType->lowerBound, memberType->lowerBound, errorDetailsCollector)) {
                 auto errLoc = lowerBoundTypeLoc.exists() ? lowerBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
@@ -2487,7 +2487,8 @@ class ResolveTypeMembersAndFieldsWalk {
                     }
                 }
             }
-            core::ErrorDetailsCollector errorDetailsCollector2;
+            // TODO:
+            core::ErrorSection::Collector errorDetailsCollector2;
             if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound, errorDetailsCollector2)) {
                 auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
                 if (auto e = ctx.state.beginError(errLoc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
@@ -2511,7 +2512,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
         // Ensure that the new lower bound is a subtype of the upper bound.
         // This will be a no-op in the case that the type member is fixed.
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (!core::Types::isSubType(ctx, memberType->lowerBound, memberType->upperBound, errorDetailsCollector)) {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
                 e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",

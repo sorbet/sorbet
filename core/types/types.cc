@@ -1081,7 +1081,7 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             bool validBounds = true;
 
             // Validate type parameter bounds.
-            ErrorDetailsCollector errorDetailsCollector;
+            ErrorSection::Collector errorDetailsCollector;
             if (!Types::isSubType(gs, argType, memType->upperBound, errorDetailsCollector)) {
                 validBounds = false;
                 if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
@@ -1094,7 +1094,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                 }
             }
 
-            ErrorDetailsCollector errorDetailsCollector2;
+            // TODO:
+            ErrorSection::Collector errorDetailsCollector2;
             if (!Types::isSubType(gs, memType->lowerBound, argType, errorDetailsCollector2)) {
                 validBounds = false;
 
