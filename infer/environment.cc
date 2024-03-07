@@ -1645,8 +1645,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                   argLoc.source(ctx).value());
                                 }
                             }
-                        } else if (!ty.type.isUntyped() &&
-                                   core::Types::isSubType(ctx, ty.type, castType, core::noOpErrorDetailsCollector)) {
+                        } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                                 e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                             ty.type.show(ctx), castType.show(ctx));
