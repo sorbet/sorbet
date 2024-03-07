@@ -97,8 +97,7 @@ public:
                                      const TypePtr &t2, T &errorDetailsCollector);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
-    template <class T>
-    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     template <class T>

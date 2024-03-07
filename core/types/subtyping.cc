@@ -854,13 +854,13 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (auto *o2 = cast_type<OrType>(t2)) { // 3, 6
-        bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2, core::noOpErrorDetailsCollector);
+        bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
             return t1;
         }
 
-        bool collapseInRight = Types::isAsSpecificAs(gs, t2, t1, core::noOpErrorDetailsCollector);
+        bool collapseInRight = Types::isAsSpecificAs(gs, t2, t1);
         if (collapseInRight) {
             categoryCounterInc("glb", "ZZor");
             return t2;
@@ -868,12 +868,12 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
         if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1)) {
             auto lft = Types::all(gs, t1, o2->left);
-            if (Types::isAsSpecificAs(gs, lft, o2->right, core::noOpErrorDetailsCollector) && !lft.isBottom()) {
+            if (Types::isAsSpecificAs(gs, lft, o2->right) && !lft.isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::all(gs, t1, o2->right);
-            if (Types::isAsSpecificAs(gs, rght, o2->left, core::noOpErrorDetailsCollector) && !rght.isBottom()) {
+            if (Types::isAsSpecificAs(gs, rght, o2->left) && !rght.isBottom()) {
                 categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
@@ -1427,10 +1427,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 }
 
-template <class T>
-bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
+bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible,
-                                    errorDetailsCollector);
+                                    core::noOpErrorDetailsCollector);
 }
 
 template <class T>
@@ -1584,8 +1583,7 @@ bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, 
 }
 
 bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    return isAsSpecificAs(gs, t1, t2, core::noOpErrorDetailsCollector) &&
-           isAsSpecificAs(gs, t2, t1, core::noOpErrorDetailsCollector);
+    return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
 template <class T>
@@ -1619,11 +1617,6 @@ template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint 
                                           const TypePtr &t2, core::ErrorDetailsCollector &errorDetailsCollector);
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                           const TypePtr &t2, core::NoOpErrorDetailsCollector &errorDetailsCollector);
-
-template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::NoOpErrorDetailsCollector &errorDetailsCollector);
 
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,
