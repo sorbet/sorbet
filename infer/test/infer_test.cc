@@ -130,18 +130,18 @@ TEST_CASE("Infer") {
         REQUIRE(core::Types::isSubType(gs, barType, foo2Nbar));
         REQUIRE(core::Types::isSubType(gs, foo2Type, foo2Nbar));
 
-        REQUIRE(core::Types::equiv(gs, barNfoo2, foo2Nbar, core::noOpErrorDetailsCollector));
-        REQUIRE(core::Types::equiv(gs, barNfoo1, foo1Nbar, core::noOpErrorDetailsCollector));
-        REQUIRE(core::Types::equiv(gs, foo1Nfoo2, foo2Nfoo1, core::noOpErrorDetailsCollector));
+        REQUIRE(core::Types::equiv(gs, barNfoo2, foo2Nbar));
+        REQUIRE(core::Types::equiv(gs, barNfoo1, foo1Nbar));
+        REQUIRE(core::Types::equiv(gs, foo1Nfoo2, foo2Nfoo1));
 
         auto intType = core::make_type<core::ClassType>(core::Symbols::Integer());
         auto intNfoo1 = core::Types::any(gs, foo1Type, intType);
         auto intNbar = core::Types::any(gs, barType, intType);
         auto intNfoo1Nbar = core::Types::any(gs, intNfoo1, barType);
-        REQUIRE(core::Types::equiv(gs, intNfoo1Nbar, intNbar, core::noOpErrorDetailsCollector));
+        REQUIRE(core::Types::equiv(gs, intNfoo1Nbar, intNbar));
         auto intNfoo1Nfoo2 = core::Types::any(gs, intNfoo1, foo2Type);
         auto intNfoo1Nfoo2Nbar = core::Types::any(gs, intNfoo1Nfoo2, barType);
-        REQUIRE(core::Types::equiv(gs, intNfoo1Nfoo2Nbar, intNbar, core::noOpErrorDetailsCollector));
+        REQUIRE(core::Types::equiv(gs, intNfoo1Nfoo2Nbar, intNbar));
     }
 
     SUBCASE("ClassesGlbs") {
@@ -179,9 +179,9 @@ TEST_CASE("Infer") {
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, barType));
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, foo2Type));
 
-        REQUIRE(core::Types::equiv(gs, barOrfoo2, foo2Orbar, core::noOpErrorDetailsCollector));
-        REQUIRE(core::Types::equiv(gs, barOrfoo1, foo1Orbar, core::noOpErrorDetailsCollector));
-        REQUIRE(core::Types::equiv(gs, foo1Orfoo2, foo2Orfoo1, core::noOpErrorDetailsCollector));
+        REQUIRE(core::Types::equiv(gs, barOrfoo2, foo2Orbar));
+        REQUIRE(core::Types::equiv(gs, barOrfoo1, foo1Orbar));
+        REQUIRE(core::Types::equiv(gs, foo1Orfoo2, foo2Orfoo1));
     }
 }
 

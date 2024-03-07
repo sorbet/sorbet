@@ -2294,8 +2294,7 @@ class ResolveTypeMembersAndFieldsWalk {
             // This was previously entered by namer and we are now resolving the type.
             priorField.data(ctx)->resultType = castType;
             return;
-        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType,
-                                      core::noOpErrorDetailsCollector)) {
+        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short
             // circuit.
             return;
@@ -4013,7 +4012,7 @@ private:
             if (arg0.name != arg1.name) {
                 return false;
             }
-            return core::Types::equiv(ctx, arg0.type, arg1.type, core::noOpErrorDetailsCollector);
+            return core::Types::equiv(ctx, arg0.type, arg1.type);
         };
 
         // TODO(froydnj) better error messages for users trying to provide overloads with kwargs?

@@ -316,7 +316,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (idxTypeMember.data(gs)->flags.isCovariant) {
                 newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
             } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                if (!Types::equiv(gs, a1->targs[i], a2->targs[j], core::noOpErrorDetailsCollector)) {
+                if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
                 // We don't need to check the idxTypeMember upper/lower bounds like the corresponding case in glb
@@ -465,7 +465,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const MetaType &m1) {
                     if (auto *m2 = cast_type<MetaType>(t2)) {
-                        if (Types::equiv(gs, m1.wrapped, m2->wrapped, core::noOpErrorDetailsCollector)) {
+                        if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
                             result = t1;
                             return;
                         }
@@ -828,7 +828,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 [&](const MetaType &m1) {
                     auto *m2 = cast_type<MetaType>(t2);
                     ENFORCE(m2 != nullptr);
-                    if (Types::equiv(gs, m1.wrapped, m2->wrapped, core::noOpErrorDetailsCollector)) {
+                    if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
                         result = t1;
                     } else {
                         result = Types::bottom();
@@ -978,7 +978,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 if (a2TypeMember.data(gs)->flags.isCovariant) {
                     newTargs.emplace_back(Types::all(gs, a1->targs[j], a2->targs[i]));
                 } else if (a2TypeMember.data(gs)->flags.isInvariant) {
-                    if (!Types::equiv(gs, a1->targs[j], a2->targs[i], core::noOpErrorDetailsCollector)) {
+                    if (!Types::equiv(gs, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
                     const auto &lambdaParam = cast_type<LambdaParam>(idx.data(gs)->resultType);
