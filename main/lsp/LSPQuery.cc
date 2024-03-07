@@ -53,7 +53,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
 }
 
 LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
-                               const Position &pos, LSPMethod forMethod, bool errorIfFileIsUntyped) {
+                               const Position &pos, LSPMethod forMethod, bool emptyResultIfFileIsUntyped) {
     Timer timeit(config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
@@ -72,7 +72,7 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDel
         return LSPQueryResult{{}, move(error)};
     }
 
-    if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
+    if (emptyResultIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
         config.logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
         return LSPQueryResult{{}, nullptr};
