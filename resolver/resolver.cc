@@ -2269,16 +2269,14 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Declaring a instance variable in either `initialize` or a `before do` block.
             } else if (ctx.owner.isMethod() &&
                        ctx.owner.asMethodRef().data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType,
-                                               core::noOpErrorDetailsCollector)) {
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType,
-                                               core::noOpErrorDetailsCollector)) {
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Inside a method; declaring a normal instance variable
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
@@ -3734,8 +3732,7 @@ private:
                 arg.type = std::move(spec->type);
                 // Passing in a noOp collector even though this call is used for error reporting,
                 // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
-                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass(),
-                                                        core::noOpErrorDetailsCollector)) {
+                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
                     if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
                                     "Proc", "T.proc");

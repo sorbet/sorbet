@@ -1483,7 +1483,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
-                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType, core::noOpErrorDetailsCollector)) {
+                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;

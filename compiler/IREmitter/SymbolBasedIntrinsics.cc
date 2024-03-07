@@ -64,8 +64,7 @@ public:
             ENFORCE(primaryMethod.data(gs)->hasSig());
 
             // test all overloads to see if we can find a sig that produces this type
-            if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType,
-                                       core::noOpErrorDetailsCollector)) {
+            if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
                 return;
             }
 
@@ -77,8 +76,7 @@ public:
                 auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
                 auto overload = primaryMethod.data(gs)->owner.data(gs)->findMethod(gs, overloadName);
                 ENFORCE(overload.exists());
-                if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType,
-                                           core::noOpErrorDetailsCollector)) {
+                if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
                     return;
                 }
 
