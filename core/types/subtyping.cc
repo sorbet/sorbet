@@ -1399,7 +1399,11 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         return;
                     }
 
-                    result = Types::equiv(gs, m1.wrapped, m2->wrapped, errorDetailsCollector);
+                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
+                    // backwards compatibility, but maybe we should do this under the `constr`
+                    // that's in scope.
+                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
+                                                         m2->wrapped, errorDetailsCollector);
                 });
             return result;
             // both are proxy
@@ -1567,9 +1571,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2, errorDetailsCollector); // 1
 }
 
-template <class T>
-bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
-    return isSubType(gs, t1, t2, errorDetailsCollector) && isSubType(gs, t2, t1, errorDetailsCollector);
+bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    return isSubType(gs, t1, t2) && isSubType(gs, t2, t1);
 }
 
 template <class T>
@@ -1611,11 +1614,6 @@ template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const T
                                core::ErrorDetailsCollector &errorDetailsCollector);
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
                                core::NoOpErrorDetailsCollector &errorDetailsCollector);
-
-template bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                           ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                           NoOpErrorDetailsCollector &errorDetailsCollector);
 
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                           const TypePtr &t2, core::ErrorDetailsCollector &errorDetailsCollector);

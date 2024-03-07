@@ -91,8 +91,7 @@ public:
     static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         return isSubType(gs, t1, t2, core::noOpErrorDetailsCollector);
     };
-    template <class T>
-    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     template <class T>
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, T &errorDetailsCollector);
