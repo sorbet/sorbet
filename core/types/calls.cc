@@ -451,7 +451,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     }
                 } else {
                     if (!Types::isSubTypeUnderConstraint(gs, *constr, arg, argType, UntypedMode::AlwaysCompatible,
-                                                         core::noOpErrorDetailsCollector)) {
+                                                         ErrorSection::Collector::NO_OP)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
@@ -1158,7 +1158,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
                                                             UntypedMode::AlwaysCompatible,
-                                                            core::noOpErrorDetailsCollector)) {
+                                                            ErrorSection::Collector::NO_OP)) {
                     // ^ Passing in a noOp collector even though this call is used for error reporting,
                     // because it's unlikely we'll add more details to a subtype check for Symbol
                     // TODO(jez) Highlight untyped code for this error
@@ -2648,7 +2648,7 @@ private:
                         // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
                         Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, bspecType,
-                                                        UntypedMode::AlwaysCompatible, core::noOpErrorDetailsCollector);
+                                                        UntypedMode::AlwaysCompatible, ErrorSection::Collector::NO_OP);
                     }
                 }
                 it = it->secondary.get();

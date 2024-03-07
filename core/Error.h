@@ -84,6 +84,31 @@ struct ErrorSection {
     ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
     ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
     std::string toString(const GlobalState &gs) const;
+
+    class NoOpCollector {
+    public:
+        void addErrorDetails(NoOpCollector e) {}
+        NoOpCollector newCollector() {
+            return *this;
+        }
+    };
+
+    class Collector {
+    public:
+        std::string message;
+        std::vector<Collector> children;
+
+        Collector() = default;
+        Collector(std::string msg) : message(msg) {}
+
+        void addErrorDetails(Collector e);
+        Collector newCollector() {
+            return Collector();
+        }
+        std::optional<ErrorSection> toErrorSection();
+
+        constexpr static NoOpCollector NO_OP = NoOpCollector();
+    };
 };
 
 class Error {
@@ -105,31 +130,6 @@ public:
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
 };
-
-class ErrorDetailsCollector {
-public:
-    std::string message;
-    std::vector<ErrorDetailsCollector> children;
-
-    ErrorDetailsCollector() : message("") {}
-    ErrorDetailsCollector(std::string msg) : message(msg) {}
-
-    void addErrorDetails(ErrorDetailsCollector e);
-    ErrorDetailsCollector newCollector() {
-        return ErrorDetailsCollector();
-    }
-    std::optional<ErrorSection> toErrorSection();
-};
-
-class NoOpErrorDetailsCollector {
-public:
-    void addErrorDetails(NoOpErrorDetailsCollector e) {}
-    NoOpErrorDetailsCollector newCollector() {
-        return NoOpErrorDetailsCollector();
-    }
-};
-
-static NoOpErrorDetailsCollector noOpErrorDetailsCollector;
 
 class ErrorBuilder {
     // An ErrorBuilder can be in three states:

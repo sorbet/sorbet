@@ -1429,7 +1429,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
 bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible,
-                                    core::noOpErrorDetailsCollector);
+                                    ErrorSection::Collector::NO_OP);
 }
 
 template <class T>
