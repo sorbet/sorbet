@@ -87,6 +87,10 @@ public:
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     template <class T>
     static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+        return isSubType(gs, t1, t2, core::noOpErrorDetailsCollector);
+    };
     template <class T>
     static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
     template <class T>
