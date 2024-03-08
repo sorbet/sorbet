@@ -1331,7 +1331,8 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         populateMangledName(gs, visibleTo.first);
 
         if (visibleTo.first.mangledName == info->name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, visibleTo.first.loc), core::errors::Packager::NoSelfImport)) {
+            if (auto e =
+                    gs.beginError(core::Loc(package.file, visibleTo.first.loc), core::errors::Packager::NoSelfImport)) {
                 e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
             }
         }
@@ -1419,8 +1420,9 @@ void validatePackage(core::Context ctx) {
                 continue;
             }
 
-            bool allowed = absl::c_any_of(otherPkg.visibleTo(),
-                                          [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+            bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) {
+                return visibilityApplies(other, absPkg.fullName());
+            });
 
             if (!allowed) {
                 if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
