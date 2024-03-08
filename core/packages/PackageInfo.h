@@ -26,7 +26,8 @@ struct VisibleTo {
     std::vector<core::NameRef> packageName;
     bool isWildcard;
 
-    VisibleTo(std::vector<core::NameRef> packageName, bool isWildcard) : packageName(packageName), isWildcard(isWildcard) {};
+    VisibleTo(std::vector<core::NameRef> packageName, bool isWildcard)
+        : packageName(packageName), isWildcard(isWildcard){};
 };
 
 class PackageInfo {
