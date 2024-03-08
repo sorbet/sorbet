@@ -76,8 +76,8 @@ public:
     std::vector<std::vector<core::NameRef>> testImports() const {
         return vector<vector<core::NameRef>>();
     }
-    std::vector<std::vector<core::NameRef>> visibleTo() const {
-        return vector<vector<core::NameRef>>();
+    std::vector<VisibleTo> visibleTo() const {
+        return vector<VisibleTo>();
     }
 
     std::optional<ImportType> importsPackage(MangledName mangledName) const {
