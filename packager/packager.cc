@@ -31,6 +31,26 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
+bool visibilityApplies(const core::packages::VisibleTo vt, const vector<core::NameRef> &name) {
+    if (vt.isWildcard) {
+        // a wildcard will match if it's a proper prefix of the package name
+        if (vt.packageName.size() <= name.size()) {
+            for (int i = 0; i < vt.packageName.size(); i++) {
+                if (vt.packageName[i] != name[i]) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            // which means if the visible_to name is longer than the package name, we don't even need to check
+            return false;
+        }
+    } else {
+        // otherwise it needs to be the same
+        return vt.packageName == name;
+    }
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -188,7 +208,7 @@ public:
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
-    vector<PackageName> visibleTo_ = {};
+    vector<pair<PackageName, bool>> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -339,10 +359,10 @@ public:
         }
         return rv;
     }
-    vector<vector<core::NameRef>> visibleTo() const {
-        vector<vector<core::NameRef>> rv;
+    vector<core::packages::VisibleTo> visibleTo() const {
+        vector<core::packages::VisibleTo> rv;
         for (auto &v : visibleTo_) {
-            rv.emplace_back(v.fullName.parts);
+            rv.emplace_back(v.first.fullName.parts, v.second);
         }
         return rv;
     }
@@ -1028,13 +1048,36 @@ struct PackageSpecBodyWalk {
                     return;
                 }
                 info.visibleToTests_ = true;
+            } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
+                // Constant::* is valid Ruby, and parses as a send of the method * to Constant
+                // so let's take advantage of this to implement wildcards
+                if (target->fun != core::Names::star()) {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                    send.fun.show(ctx), "\"tests\"");
+                    }
+                    return;
+                }
+                if (auto recv = verifyConstant(ctx, send.fun, target->recv)) {
+                    auto importArg = move(target->recv);
+                    send.removePosArg(0);
+                    ENFORCE(send.numPosArgs() == 0);
+                    send.addPosArg(prependName(move(importArg)));
+                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), true);
+                } else {
+                    if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                        e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
+                                    send.fun.show(ctx), "\"tests\"");
+                    }
+                    return;
+                }
             } else if (auto *target = verifyConstant(ctx, send.fun, send.getPosArg(0))) {
                 auto importArg = move(send.getPosArg(0));
                 send.removePosArg(0);
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.visibleTo_.emplace_back(getPackageName(ctx, target));
+                info.visibleTo_.emplace_back(getPackageName(ctx, target), false);
             }
         }
     }
@@ -1278,10 +1321,10 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     }
 
     for (auto &visibleTo : info->visibleTo_) {
-        populateMangledName(gs, visibleTo);
+        populateMangledName(gs, visibleTo.first);
 
-        if (visibleTo.mangledName == info->name.mangledName) {
-            if (auto e = gs.beginError(core::Loc(package.file, visibleTo.loc), core::errors::Packager::NoSelfImport)) {
+        if (visibleTo.first.mangledName == info->name.mangledName) {
+            if (auto e = gs.beginError(core::Loc(package.file, visibleTo.first.loc), core::errors::Packager::NoSelfImport)) {
                 e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
             }
         }
@@ -1370,7 +1413,7 @@ void validatePackage(core::Context ctx) {
             }
 
             bool allowed = absl::c_any_of(otherPkg.visibleTo(),
-                                          [&absPkg](const auto &other) { return other == absPkg.fullName(); });
+                                          [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
 
             if (!allowed) {
                 if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {

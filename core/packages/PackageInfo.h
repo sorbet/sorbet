@@ -22,6 +22,13 @@ enum class ImportType {
     Test,
 };
 
+struct VisibleTo {
+    std::vector<core::NameRef> packageName;
+    bool isWildcard;
+
+    VisibleTo(std::vector<core::NameRef> packageName, bool isWildcard) : packageName(packageName), isWildcard(isWildcard) {};
+};
+
 class PackageInfo {
 public:
     virtual MangledName mangledName() const = 0;
@@ -30,7 +37,7 @@ public:
     virtual std::vector<std::vector<core::NameRef>> exports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> imports() const = 0;
     virtual std::vector<std::vector<core::NameRef>> testImports() const = 0;
-    virtual std::vector<std::vector<core::NameRef>> visibleTo() const = 0;
+    virtual std::vector<VisibleTo> visibleTo() const = 0;
     virtual std::unique_ptr<PackageInfo> deepCopy() const = 0;
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;

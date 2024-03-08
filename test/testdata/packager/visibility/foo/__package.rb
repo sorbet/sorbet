@@ -11,4 +11,6 @@ class Foo < PackageSpec
   visible_to 'tests'
   visible_to 'a different string'
            # ^^^^^^^^^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
+
+  visible_to Nested::*
 end
