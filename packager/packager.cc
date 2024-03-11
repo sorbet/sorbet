@@ -32,7 +32,7 @@ bool isTestNamespace(const core::NameRef ns) {
 }
 
 bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core::NameRef> name) {
-    if (vt.isWildcard) {
+    if (vt.visibleToType == core::packages::VisibleToType::Wildcard) {
         // a wildcard will match if it's a proper prefix of the package name
         return vt.packageName == name.subspan(0, vt.packageName.size());
     } else {
@@ -198,7 +198,13 @@ public:
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
-    vector<pair<PackageName, bool>> visibleTo_ = {};
+    //
+    // The `VisibleToType` here represents whether to treat this line as a "wildcard". `Wildcard` means the
+    // `visible_to` line allows this package to be imported not just by the referenced package name
+    // but also any package name underneath it. `Normal` means the package can be imported
+    // by the referenced package name but not any child packages (unless they have a separate
+    // `visible_to` line of their own.)
+    vector<pair<PackageName, core::packages::VisibleToType>> visibleTo_ = {};
 
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
@@ -1053,7 +1059,7 @@ struct PackageSpecBodyWalk {
                     send.removePosArg(0);
                     ENFORCE(send.numPosArgs() == 0);
                     send.addPosArg(prependName(move(importArg)));
-                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), true);
+                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1067,7 +1073,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.visibleTo_.emplace_back(getPackageName(ctx, target), false);
+                info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
     }
