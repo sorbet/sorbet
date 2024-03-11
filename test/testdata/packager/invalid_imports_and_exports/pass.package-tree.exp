@@ -1,6 +1,6 @@
 # -- test/testdata/packager/invalid_imports_and_exports/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (::PackageSpec)
+  class ::<PackageSpecRegistry>::<C A><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(123)
 
     <self>.import("hello")
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (::PackageSpec)
+  class ::<PackageSpecRegistry>::<C B><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(::<PackageSpecRegistry>::<C A>)
 
     <self>.export(::<root>::<C B>::<C BClass>)
