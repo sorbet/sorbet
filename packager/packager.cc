@@ -31,20 +31,10 @@ bool isTestNamespace(const core::NameRef ns) {
     return ns == core::packages::PackageDB::TEST_NAMESPACE;
 }
 
-bool visibilityApplies(const core::packages::VisibleTo vt, const vector<core::NameRef> &name) {
+bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core::NameRef> name) {
     if (vt.isWildcard) {
         // a wildcard will match if it's a proper prefix of the package name
-        if (vt.packageName.size() <= name.size()) {
-            for (int i = 0; i < vt.packageName.size(); i++) {
-                if (vt.packageName[i] != name[i]) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            // which means if the visible_to name is longer than the package name, we don't even need to check
-            return false;
-        }
+        return vt.packageName == name.subspan(0, vt.packageName.size());
     } else {
         // otherwise it needs to be the same
         return vt.packageName == name;
