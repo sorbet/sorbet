@@ -276,7 +276,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 
     expectedType = Types::replaceSelfType(gs, expectedType, selfType);
 
-    core::ErrorDetailsCollector errorDetailsCollector;
+    core::ErrorSection::Collector errorDetailsCollector;
     if (Types::isSubTypeUnderConstraint(gs, constr, argTpe.type, expectedType, UntypedMode::AlwaysCompatible,
                                         errorDetailsCollector)) {
         if (expectedType.isUntyped()) {
@@ -1179,7 +1179,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             kwParamType = Types::untyped(method);
                         }
                         // TODO(jez) Highlight untyped code for this error
-                        core::ErrorDetailsCollector errorDetailsCollector;
+                        core::ErrorSection::Collector errorDetailsCollector;
                         if (Types::isSubTypeUnderConstraint(gs, *constr, kwSplatValueType, kwParamType,
                                                             UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
                             continue;
@@ -2599,7 +2599,7 @@ private:
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
-        core::ErrorDetailsCollector errorDetailsCollector;
+        core::ErrorSection::Collector errorDetailsCollector;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible, errorDetailsCollector)) {
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
@@ -3436,7 +3436,7 @@ public:
             auto actualType = *args.args[1];
             // This check (with the dropLiteral's) mimics what we do for pinning errors in environment.cc
             // TODO(jez) How should this interact with highlight untyped?
-            core::ErrorDetailsCollector errorDetailsCollector;
+            core::ErrorSection::Collector errorDetailsCollector;
             if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType),
                                   errorDetailsCollector)) {
                 auto argLoc = args.argLoc(1);

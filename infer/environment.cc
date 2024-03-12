@@ -1446,7 +1446,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (methodReturnType == core::Types::void_()) {
                     methodReturnType = core::Types::top();
                 }
-                core::ErrorDetailsCollector errorDetailsCollector;
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible,
                                                            errorDetailsCollector)) {
@@ -1486,7 +1486,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
-                core::ErrorDetailsCollector errorDetailsCollector;
+                core::ErrorSection::Collector errorDetailsCollector;
                 if (i.link->result->main.constr) {
                     isSubtype = core::Types::isSubTypeUnderConstraint(
                         ctx, *i.link->result->main.constr, typeAndOrigin.type, expectedType,
@@ -1600,7 +1600,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 // TODO(jez) Should we allow `T.let` / `T.cast` opt out of the untyped code error?
                 if (c.cast != core::Names::cast()) {
-                    core::ErrorDetailsCollector errorDetailsCollector;
+                    core::ErrorSection::Collector errorDetailsCollector;
                     if (c.cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
@@ -1692,7 +1692,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
             // TODO(jez) What should we do about untyped code and pinning?
-            core::ErrorDetailsCollector errorDetailsCollector;
+            core::ErrorSection::Collector errorDetailsCollector;
             bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
                                                    core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 

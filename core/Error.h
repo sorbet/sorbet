@@ -187,7 +187,7 @@ public:
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         _setHeader(move(formatted));
     }
-    void addErrorSections(ErrorDetailsCollector errorDetailsCollector);
+    void addErrorSections(ErrorSection::Collector errorDetailsCollector);
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
