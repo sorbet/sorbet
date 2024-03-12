@@ -508,14 +508,20 @@ public:
         // [(package, packageToImport, isTestImport)]
         auto toImportQ = std::make_shared<BlockingBoundedQueue<
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>>>>(files.size());
+        // [(package, packageToImport, Loc)]
+        auto replaceTestImportQ = std::make_shared<BlockingBoundedQueue<
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>>>(
+            files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ, replaceTestImportQ]() {
             size_t idx;
             int processedByThread = 0;
-            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> res;
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importCapacitor;
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
+                replaceTestImportCapacitor;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
                 processedByThread++;
@@ -527,7 +533,13 @@ public:
                         ast::TreeWalk::apply(ctx, pass, f.tree);
                         for (auto &[package, packagesToImport] : pass.toImport) {
                             for (auto &[packageToImport, isTestImport] : packagesToImport) {
-                                res.emplace_back(package, packageToImport, isTestImport);
+                                importCapacitor.emplace_back(package, packageToImport, isTestImport);
+                            }
+                        }
+
+                        for (auto &[package, packagesToReplace] : pass.convertTestImport) {
+                            for (auto pair : packagesToReplace) {
+                                replaceTestImportCapacitor.emplace_back(package, pair.first, pair.second);
                             }
                         }
                     }
@@ -535,7 +547,8 @@ public:
             }
 
             if (processedByThread > 0) {
-                toImportQ->push(std::move(res), processedByThread);
+                toImportQ->push(std::move(importCapacitor), processedByThread);
+                replaceTestImportQ->push(std::move(replaceTestImportCapacitor), processedByThread);
             }
         });
 
