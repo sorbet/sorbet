@@ -725,6 +725,11 @@ int realmain(int argc, char *argv[]) {
                     indexed = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
                 }
 
+                // Cache these before any pipeline::package rewrites, so that the cache is still
+                // usable regardless of whether `--stripe-packages` was passed.
+                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
+                                                     indexed);
+
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
@@ -736,6 +741,11 @@ int realmain(int argc, char *argv[]) {
                     ? hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFilesSpan, *workers, kvstore)
                     : pipeline::index(*gs, inputFilesSpan, opts, *workers, kvstore);
 
+            // Cache these before any pipeline::package rewrites, so that the cache is still usable
+            // regardless of whether `--stripe-packages` was passed.
+            cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
+                                                 nonPackageIndexed);
+
             // Second run: all the other files (the packageDB shouldn't change)
             pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
@@ -745,7 +755,6 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN
