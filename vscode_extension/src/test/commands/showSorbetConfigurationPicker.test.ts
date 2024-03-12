@@ -26,6 +26,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       name: "test-config-id-active",
       description: "",
       cwd: "",
+      env: {},
       command: [],
     });
     const otherLspConfig = new SorbetLspConfig({
@@ -33,6 +34,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       name: "test-config-id",
       description: "",
       cwd: "",
+      env: {},
       command: [],
     });
 

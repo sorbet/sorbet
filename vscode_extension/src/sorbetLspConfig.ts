@@ -1,4 +1,4 @@
-import { deepEqual } from "./utils";
+import { deepEqual, deepEqualEnv } from "./utils";
 
 /**
  * Sorbet LSP configuration (data-only).
@@ -20,6 +20,10 @@ export interface SorbetLspConfigData {
    * Working directory for {@link command}.
    */
   readonly cwd: string;
+  /**
+   * Environment variables to set when executing {@link command}.
+   */
+  readonly env: NodeJS.ProcessEnv;
   /**
    * Command and arguments to execute, e.g. `["srb", "typecheck", "--lsp"]`.
    */
@@ -47,6 +51,10 @@ export class SorbetLspConfig implements SorbetLspConfigData {
    */
   public readonly cwd: string;
   /**
+   * Environment variables to set when executing {@link command}.
+   */
+  public readonly env: NodeJS.ProcessEnv;
+  /**
    * Command and arguments to execute, e.g. `["bundle", "exec", "srb", "typecheck", "--lsp"]`.
    */
   public readonly command: ReadonlyArray<string>;
@@ -61,6 +69,15 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     name: string,
     description: string,
     cwd: string,
+    env: NodeJS.ProcessEnv,
+  );
+
+  constructor(
+    id: string,
+    name: string,
+    description: string,
+    cwd: string,
+    env: NodeJS.ProcessEnv,
     command: ReadonlyArray<string>,
   );
 
@@ -69,6 +86,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     name: string = "",
     description: string = "",
     cwd: string = "",
+    env: NodeJS.ProcessEnv = {},
     command: ReadonlyArray<string> = [],
   ) {
     if (typeof idOrData === "string") {
@@ -76,12 +94,14 @@ export class SorbetLspConfig implements SorbetLspConfigData {
       this.name = name;
       this.description = description;
       this.cwd = cwd;
+      this.env = { ...process.env, ...env };
       this.command = command;
     } else {
       this.id = idOrData.id;
       this.name = idOrData.name;
       this.description = idOrData.description;
       this.cwd = idOrData.cwd;
+      this.env = { ...process.env, ...idOrData.env };
       this.command = [...idOrData.command];
     }
   }
@@ -103,6 +123,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
         this.name !== other.name ||
         this.description !== other.description ||
         this.cwd !== other.cwd ||
+        !deepEqualEnv(this.env, other.env) ||
         !deepEqual(this.command, other.command))
     ) {
       return false;

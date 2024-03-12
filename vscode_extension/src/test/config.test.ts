@@ -98,6 +98,7 @@ const fooLspConfig = new SorbetLspConfig({
   name: "FooFoo",
   description: "The foo config",
   cwd: "${workspaceFolder}", // eslint-disable-line no-template-curly-in-string
+  env: {},
   command: ["foo", "on", "you"],
 });
 
@@ -106,6 +107,7 @@ const barLspConfig = new SorbetLspConfig({
   name: "BarBar",
   description: "The bar config",
   cwd: "${workspaceFolder}/bar", // eslint-disable-line no-template-curly-in-string
+  env: {},
   command: ["I", "heart", "bar", "bee", "que"],
 });
 
@@ -116,6 +118,7 @@ suite("SorbetLspConfig", () => {
       name: "two",
       description: "three",
       cwd: "four",
+      env: {},
       command: ["five", "six"],
     };
     const lspConfig = new SorbetLspConfig(ctorArg);
@@ -157,6 +160,7 @@ suite("SorbetLspConfig", () => {
       name: "two",
       description: "three",
       cwd: "four",
+      env: {},
       command: ["five", "six"],
     };
     const config1 = new SorbetLspConfig(json);
@@ -167,6 +171,7 @@ suite("SorbetLspConfig", () => {
       new SorbetLspConfig({ ...json, description: "different description" }),
       new SorbetLspConfig({ ...json, cwd: "different cwd" }),
       new SorbetLspConfig({ ...json, command: ["different", "command"] }),
+      new SorbetLspConfig({ ...json, env: { different: "value" } }),
       undefined,
     ];
 
