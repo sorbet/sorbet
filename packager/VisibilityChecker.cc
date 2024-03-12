@@ -463,14 +463,8 @@ public:
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
 
                 bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
-                auto convertTestImportLoc = this->package.shouldConvertTestImport(ctx, pkg);
 
-                if (!convertTestImportLoc.has_value()) {
-                    toImport[this->package.mangledName()].emplace(pkg.mangledName(), isTestImport);
-                } else if (!isTestImport) {
-                    convertTestImport[this->package.mangledName()].emplace(pkg.mangledName(),
-                                                                           convertTestImportLoc.value());
-                }
+                toImport[this->package.mangledName()].emplace(pkg.mangledName(), isTestImport);
 
                 if (!ctx.file.data(ctx).isPackaged()) {
                     e.addErrorNote(
@@ -488,7 +482,11 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                toImport[this->package.mangledName()].emplace(pkg.mangledName(), false);
+                auto convertTestImportLoc = this->package.shouldConvertTestImport(ctx, pkg);
+                if (convertTestImportLoc.has_value()) {
+                    convertTestImport[this->package.mangledName()].emplace(pkg.mangledName(),
+                                                                           convertTestImportLoc.value());
+                }
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
         }
