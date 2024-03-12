@@ -13,4 +13,15 @@ class Foo < PackageSpec
            # ^^^^^^^^^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
 
   visible_to Nested::*
+
+  visible_to Nested::*(0)
+           # ^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
+           # ^^^^^^ error: Unable to resolve constant `Nested`
+  visible_to Nested::*(x: 0)
+           # ^^^^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
+           # ^^^^^^ error: Unable to resolve constant `Nested`
+  visible_to Nested::* {}
+           # ^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
+           # ^^^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+           # ^^^^^^ error: Unable to resolve constant `Nested`
 end
