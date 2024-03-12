@@ -353,6 +353,14 @@ public:
 };
 
 class VisibilityCheckerPass final {
+    struct PackageFixes {
+        // {(packageToImport, isTestImport)}
+        UnorderedSet<std::pair<core::packages::MangledName, bool>> toImport;
+
+        // {(packageToImport, Loc)}
+        UnorderedSet<std::pair<core::packages::MangledName, core::Loc>> convertTestImports;
+    };
+
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
@@ -552,32 +560,49 @@ public:
             }
         });
 
-        // package => {(packageToImport, isTestImport)}
-        UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, bool>>>
-            combinedImports;
-        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> threadResult;
-        for (auto result = toImportQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+        UnorderedMap<core::packages::MangledName, PackageFixes> combinedFixes;
+        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importThreadResult;
+        for (auto result = toImportQ->wait_pop_timed(importThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
-             result = toImportQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+             result = toImportQ->wait_pop_timed(importThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (!result.gotItem()) {
                 continue;
             }
-            for (auto &[package, packageToImport, isTestImport] : threadResult) {
-                combinedImports[package].emplace(packageToImport, isTestImport);
+            for (auto &[package, packageToImport, isTestImport] : importThreadResult) {
+                combinedFixes[package].toImport.emplace(packageToImport, isTestImport);
             }
         }
 
-        for (auto &[pkg, toImport] : combinedImports) {
+        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
+            replaceTestImportThreadResult;
+        for (auto result = replaceTestImportQ->wait_pop_timed(replaceTestImportThreadResult,
+                                                              WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done(); result = replaceTestImportQ->wait_pop_timed(replaceTestImportThreadResult,
+                                                                         WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (auto &[package, packageToImport, loc] : replaceTestImportThreadResult) {
+                combinedFixes[package].convertTestImports.emplace(packageToImport, loc);
+            }
+        }
+
+        if (combinedFixes.empty()) {
+            return files;
+        }
+
+        for (auto &[pkg, fixes] : combinedFixes) {
             auto &package = gs.packageDB().getPackageInfo(pkg);
             auto newImportLoc = package.newImportLoc(gs, package);
             fmt::memory_buffer autocorrect;
+            std::vector<core::AutocorrectSuggestion::Edit> edits;
             auto fullPackageName = [&gs](const sorbet::core::packages::PackageInfo &pkg) {
                 return absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs));
             };
 
             if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
                 e.setHeader("Package `{}` is missing imports", fullPackageName(package));
-                for (auto &[pkgToImport, isTestImport] : toImport) {
+                for (auto &[pkgToImport, isTestImport] : fixes.toImport) {
                     auto &packageToImport = gs.packageDB().getPackageInfo(pkgToImport);
                     e.addErrorSection(core::ErrorSection(
                         fmt::format("`{}` resolves but its package is not imported", fullPackageName(packageToImport)),
@@ -588,11 +613,23 @@ public:
                                        isTestImport ? "test_import" : "import", fullPackageName(packageToImport));
                     }
                 }
+
                 if (newImportLoc.has_value()) {
-                    e.addAutocorrect(
-                        {"Fix package issues",
-                         {core::AutocorrectSuggestion::Edit{newImportLoc.value(), fmt::to_string(autocorrect)}}});
+                    edits.push_back({newImportLoc.value(), fmt::to_string(autocorrect)});
                 }
+
+                for (auto &[importToReplace, importLoc] : fixes.convertTestImports) {
+                    auto &packageToImport = gs.packageDB().getPackageInfo(importToReplace);
+                    e.addErrorSection(core::ErrorSection(fmt::format("Used `{}` instead of `{}` for {}", "test_import",
+                                                                     "import", fullPackageName(packageToImport)),
+                                                         {}));
+
+                    auto [lineStart, _] = importLoc.findStartOfLine(gs);
+                    core::Loc replaceLoc(importLoc.file(), lineStart.beginPos(), importLoc.endPos());
+                    edits.push_back({replaceLoc, fmt::format("import {}", fullPackageName(packageToImport))});
+                }
+
+                e.addAutocorrect({"Fix package issues", edits});
             }
         }
         return files;
