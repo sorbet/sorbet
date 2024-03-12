@@ -131,7 +131,7 @@ def register_ruby_dependencies():
         patch_tool = "patch -p1",
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:optimized-new-insn.patch",
-        ]
+        ],
     )
 
 def _rubygems_urls(gem):
