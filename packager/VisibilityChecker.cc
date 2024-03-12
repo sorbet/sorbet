@@ -602,7 +602,19 @@ public:
 
             if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
                 e.setHeader("Package `{}` is missing imports", fullPackageName(package));
-                for (auto &[pkgToImport, isTestImport] : fixes.toImport) {
+                std::vector<std::pair<core::packages::MangledName, bool>> toImport;
+                for (auto p: fixes.toImport) {
+                    toImport.push_back(p);
+                }
+                fast_sort(toImport, [](const std::pair<core::packages::MangledName, bool> &lhs, const std::pair<core::packages::MangledName, bool> &rhs) {
+                    if (lhs.first.mangledName.rawId() == rhs.first.mangledName.rawId()) {
+                        return lhs.second < rhs.second;
+                    } else {
+                        return lhs.first.mangledName.rawId() < rhs.first.mangledName.rawId();
+                    }
+                });
+
+                for (auto &[pkgToImport, isTestImport] : toImport) {
                     auto &packageToImport = gs.packageDB().getPackageInfo(pkgToImport);
                     e.addErrorSection(core::ErrorSection(
                         fmt::format("`{}` resolves but its package is not imported", fullPackageName(packageToImport)),
