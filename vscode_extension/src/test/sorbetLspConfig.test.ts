@@ -9,6 +9,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     "test_name",
     "test_description",
     "test_cwd",
+    {},
     ["test_command", "test_arg_1"],
   );
   const config2 = new SorbetLspConfig(
@@ -16,6 +17,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     "test_name",
     "test_description",
     "test_cwd",
+    {},
     ["test_command", "test_arg_1"],
   );
   const differentConfigs = [
@@ -24,6 +26,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       "test_name",
       "test_description",
       "test_cwd",
+      {},
       ["test_command", "test_arg_1"],
     ),
     new SorbetLspConfig(
@@ -31,6 +34,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       "different_test_name",
       "test_description",
       "test_cwd",
+      {},
       ["test_command", "test_arg_1"],
     ),
     new SorbetLspConfig(
@@ -38,6 +42,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       "test_name",
       "different_test_description",
       "test_cwd",
+      {},
       ["test_command", "test_arg_1"],
     ),
     new SorbetLspConfig(
@@ -45,6 +50,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       "test_name",
       "test_description",
       "different_test_cwd",
+      {},
       ["test_command", "test_arg_1"],
     ),
     new SorbetLspConfig(
@@ -52,7 +58,18 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       "test_name",
       "test_description",
       "test_cwd",
+      {},
       ["different_test_command", "test_arg_1"],
+    ),
+    new SorbetLspConfig(
+      "test_id",
+      "test_name",
+      "test_description",
+      "test_cwd",
+      {
+        different_env_key: "different_env_value",
+      },
+      ["test_command", "test_arg_1"],
     ),
     undefined,
     null,
