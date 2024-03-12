@@ -257,6 +257,15 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     return NONE_PKG;
 }
 
+const PackageInfo &PackageDB::getPackageForSymbol(const core::GlobalState &gs, core::SymbolRef sym) const {
+    auto name = this->getPackageNameForSymbol(gs, sym);
+    if (!name.exists()) {
+        return NONE_PKG;
+    }
+
+    return this->getPackageInfo(name);
+}
+
 const PackageInfo &PackageDB::getPackageInfo(const core::GlobalState &gs, std::string_view nameStr) const {
     auto cnst = core::packages::MangledName::mangledNameFromHuman(gs, nameStr);
     if (!cnst.exists()) {
