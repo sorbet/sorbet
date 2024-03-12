@@ -108,7 +108,7 @@ TEST_CASE("Simple add export") {
     auto &package = test.targetPackage(gs);
     ENFORCE(package.exists());
     auto addExport = package.addExport(gs, test.getConstantRef(gs, {"Opus", "MyPackage", "NewExport"}));
-    ENFORCE(addExport, "Expected to get an autocorrect from `addImport`");
+    ENFORCE(addExport, "Expected to get an autocorrect from `addExport`");
     auto replaced = addExport->applySingleEditForTesting(pkg_source);
     CHECK_EQ(expected, replaced);
 }

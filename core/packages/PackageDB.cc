@@ -41,12 +41,6 @@ public:
         return Loc::none();
     }
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                         bool isTestImport) const {
-        notImplemented();
-        return nullopt;
-    }
-
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef name) const {
         return {};
