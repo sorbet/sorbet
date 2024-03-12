@@ -741,6 +741,15 @@ cases, a common solution is to factor the shared functionality to a new package,
 and import that new package wherever it's needed. In some situations, there may
 be simpler ways to restructure the code that don't involve making a new package.
 
+## 3719
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package references constants from another package without the corresponding `import` or `test_import` statements.
+
+To fix this error, add the `import` or `test_import` statements related to the packages in the `__package.rb` file where the error is reported.
+
 ## 3720
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
