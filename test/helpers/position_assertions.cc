@@ -1788,10 +1788,20 @@ std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::uniqu
     // First, sort the edits by increasing starting location and verify that none overlap.
     fast_sort(changes->edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
     for (uint32_t i = 1; i < changes->edits.size(); i++) {
+        auto &first = changes->edits[i - 1];
+        auto &second = changes->edits[i];
+
+        // VSCode allows two overlapping edits if:
+        // 1) One edit is contained inside another
+        // 2) One of edits is empty string
+        if ((first->range->contains(*second->range) || second->range->contains(*first->range)) && (first->newText == "" || second->newText == "")) {
+            continue;
+        }
+
         INFO(fmt::format("Received quick fix edit\n{}\nthat overlaps edit\n{}\nThe test runner does not support "
                          "overlapping autocomplete edits, and it's likely that this is a bug.",
-                         changes->edits[i - 1]->toJSON(), changes->edits[i]->toJSON()));
-        REQUIRE_LT(changes->edits[i - 1]->range->end->cmp(*changes->edits[i]->range->start), 0);
+                         first->toJSON(), second->toJSON()));
+        REQUIRE_LT(first->range->end->cmp(*second->range->start), 0);
     }
 
     // Now, apply the edits in the reverse order so that the indices don't change.
