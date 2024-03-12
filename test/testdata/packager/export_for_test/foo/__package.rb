@@ -1,6 +1,6 @@
 # typed: strict
 
-class Opus::Foo < PackageSpec
+class Opus::Foo < PackageSpec # error: Package `Opus::Foo` is missing imports
   import Opus::Foo::Bar
   import Opus::Util
   test_import Opus::TestImported
