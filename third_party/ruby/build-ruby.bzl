@@ -145,7 +145,7 @@ run_cmd ./configure \
 #
 # We've handled regenerating the files that we need as part of our patching process,
 # so try to convince make these are not the files it's looking for.
-touch opt_sc.inc optinsn.inc optunifs.inc insns.inc insns_info.inc vmtc.inc vm.inc mjit_compile.inc id.c id.h miniprelude.c
+touch opt_sc.inc optinsn.inc optunifs.inc insns.inc insns_info.inc vmtc.inc vm.inc mjit_compile.inc id.c id.h miniprelude.c lib/ruby_vm/rjit/instruction.rb
 # We also need to touch these files, since they depend on id.h.  But we are only
 # defining new global identifiers to use in C code; we're not touching tokens used
 # by the parser in any way.
