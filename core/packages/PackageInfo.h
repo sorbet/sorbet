@@ -22,12 +22,17 @@ enum class ImportType {
     Test,
 };
 
+enum class VisibleToType {
+    Normal,
+    Wildcard,
+};
+
 struct VisibleTo {
     std::vector<core::NameRef> packageName;
-    bool isWildcard;
+    VisibleToType visibleToType;
 
-    VisibleTo(std::vector<core::NameRef> packageName, bool isWildcard)
-        : packageName(packageName), isWildcard(isWildcard){};
+    VisibleTo(std::vector<core::NameRef> packageName, VisibleToType visibleToType)
+        : packageName(packageName), visibleToType(visibleToType){};
 };
 
 class PackageInfo {
