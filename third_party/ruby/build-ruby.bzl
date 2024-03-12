@@ -116,6 +116,26 @@ run_cmd ./configure \
         --disable-install-doc \
         --prefix=/
 
+
+# FABLE CRIMES ONLY
+# SCRIPT TO REGENERATE VM PATCHES
+# set -euo pipefail
+# FILES=(opt_sc.inc optinsn.inc optunifs.inc insns.inc insns_info.inc vmtc.inc vm.inc mjit_compile.inc id.h id.c miniprelude.c lib/ruby_vm/rjit/instruction.rb)
+# 
+# rm -f patch
+# git diff --no-prefix v3_3_0 >> patch
+# 
+# for file in ${FILES[@]}; do
+#   if test -f $file; then
+#     if test -f ruby-3.3.0/$file; then
+#       diff -u ruby-3.3.0/$file $file >> patch || true
+#     fi
+#   fi
+# done
+# 
+# sed -I.bak "s/ruby-3.3.0\\///g" patch
+
+
 # Make is dumb; these files are listed as a group output, which means that if make
 # thinks any one of them changed, they all have to change.  And since some of our
 # custom patches are touching things like insns.def, it looks like these files need
