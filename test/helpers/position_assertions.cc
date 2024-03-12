@@ -1794,7 +1794,8 @@ std::unique_ptr<TextDocumentEdit> ApplyCodeActionAssertion::sortEdits(std::uniqu
         // VSCode allows two overlapping edits if:
         // 1) One edit is contained inside another
         // 2) One of edits is empty string
-        if ((first->range->contains(*second->range) || second->range->contains(*first->range)) && (first->newText == "" || second->newText == "")) {
+        if ((first->range->contains(*second->range) || second->range->contains(*first->range)) &&
+            (first->newText == "" || second->newText == "")) {
             continue;
         }
 
