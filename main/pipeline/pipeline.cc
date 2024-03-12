@@ -1230,7 +1230,7 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
 #endif
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, const vector<ast::ParsedFile> &parsedFiles,
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
