@@ -502,14 +502,37 @@ ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
     return scope;
 }
 
+bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
+                             const ast::ExpressionPtr &expr) {
+    if (ast::isa_tree<ast::EmptyTree>(expr)) {
+        return true;
+    }
+
+    auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (target == nullptr) {
+        if (auto e = ctx.beginError(root.loc(), core::errors::Packager::InvalidConfiguration)) {
+            e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
+        }
+        return false;
+    }
+
+    return recursiveVerifyConstant(ctx, fun, root, target->scope);
+}
+
 const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
             e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
         }
+        return nullptr;
     }
-    return target;
+
+    if (recursiveVerifyConstant(ctx, fun, expr, target->scope)) {
+        return target;
+    }
+
+    return nullptr;
 }
 
 // Binary search to find a packages index in the global packages list
@@ -1055,7 +1078,8 @@ struct PackageSpecBodyWalk {
                     }
                     return;
                 }
-                if (auto recv = verifyConstant(ctx, send.fun, target->recv)) {
+
+                if (auto *recv = verifyConstant(ctx, send.fun, target->recv)) {
                     auto importArg = move(target->recv);
                     send.removePosArg(0);
                     ENFORCE(send.numPosArgs() == 0);
