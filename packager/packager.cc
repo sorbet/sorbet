@@ -1047,7 +1047,8 @@ struct PackageSpecBodyWalk {
             } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
                 // Constant::* is valid Ruby, and parses as a send of the method * to Constant
                 // so let's take advantage of this to implement wildcards
-                if (target->fun != core::Names::star() || target->numPosArgs() > 0 || target->numKwArgs() > 0 || target->hasBlock()) {
+                if (target->fun != core::Names::star() || target->numPosArgs() > 0 || target->numKwArgs() > 0 ||
+                    target->hasBlock()) {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
                                     send.fun.show(ctx), "\"tests\"");
