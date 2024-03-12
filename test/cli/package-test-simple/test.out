@@ -1,10 +1,6 @@
 main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file https://srb.help/3720
      8 |  Project::TestOnly::SomeHelper.new
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    main_lib/__package.rb:7: Replace with `import Project::TestOnly`
-     7 |  test_import Project::TestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     test_only/__package.rb:5: Defined here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -13,7 +9,19 @@ main_lib/__package.rb:8: Invalid expression in package: Arguments to functions m
      8 |  export_for_test Project::MainLib::Lib
                           ^^^^^^^^^^^^^^^^^^^^^
 
+main_lib/__package.rb:5: Package `Project::MainLib` is missing imports https://srb.help/3719
+     5 |class Project::MainLib < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Used `test_import` instead of `import` for Project::TestOnly
+  Autocorrect: Use `-a` to autocorrect
+    main_lib/__package.rb:7: Delete
+     7 |  test_import Project::TestOnly
+                                       ^
+    main_lib/__package.rb:7: Replace with `import Project::TestOnly`
+     7 |  test_import Project::TestOnly
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 main_lib/__package.rb:8: Method `export_for_test` does not exist on `T.class_of(Project::MainLib)` https://srb.help/7003
      8 |  export_for_test Project::MainLib::Lib
           ^^^^^^^^^^^^^^^
-Errors: 3
+Errors: 4
