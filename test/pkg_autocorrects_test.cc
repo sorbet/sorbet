@@ -90,7 +90,6 @@ struct TestPackageFile {
     }
 };
 
-
 TEST_CASE("Simple add export") {
     core::GlobalState gs(errorQueue);
     gs.initEmpty();
