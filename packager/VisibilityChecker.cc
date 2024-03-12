@@ -603,10 +603,11 @@ public:
             if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
                 e.setHeader("Package `{}` is missing imports", fullPackageName(package));
                 std::vector<std::pair<core::packages::MangledName, bool>> toImport;
-                for (auto p: fixes.toImport) {
+                for (auto p : fixes.toImport) {
                     toImport.push_back(p);
                 }
-                fast_sort(toImport, [](const std::pair<core::packages::MangledName, bool> &lhs, const std::pair<core::packages::MangledName, bool> &rhs) {
+                fast_sort(toImport, [](const std::pair<core::packages::MangledName, bool> &lhs,
+                                       const std::pair<core::packages::MangledName, bool> &rhs) {
                     if (lhs.first.mangledName.rawId() == rhs.first.mangledName.rawId()) {
                         return lhs.second < rhs.second;
                     } else {
