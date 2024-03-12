@@ -234,7 +234,6 @@ index b72167f75d..33a62b09dc 100644
  static VALUE
  vm_opt_neq(const rb_iseq_t *iseq, CALL_DATA cd, CALL_DATA cd_eq, VALUE recv, VALUE obj)
  {
-
 --- optunifs.inc	2023-12-24 21:59:40
 +++ optunifs.inc	2024-03-12 13:58:50
 @@ -38,6 +38,6 @@
@@ -1343,8 +1342,8 @@ index b72167f75d..33a62b09dc 100644
        case BIN(trace_objtostring):
        case BIN(trace_opt_str_freeze):
        case BIN(trace_opt_nil_p):
---- vmtc.inc
-+++ vmtc.inc
+--- vmtc.inc	2023-12-24 21:59:40
++++ vmtc.inc	2024-03-12 13:58:51
 @@ -90,6 +90,7 @@
      LABEL_PTR(definesmethod),
      LABEL_PTR(send),
@@ -2265,4 +2264,31 @@ index b72167f75d..33a62b09dc 100644
  /* insn trace_objtostring(...)(...)(...) */
  INSN_ENTRY(trace_objtostring)
  {
-
+--- id.h	2023-12-24 21:59:40
++++ id.h	2024-03-12 13:58:50
+@@ -136,6 +136,7 @@
+     tMin,
+     tHash,
+     tFreeze,
++    tNew,
+     tInspect,
+     tIntern,
+     tObject_id,
+@@ -240,6 +241,7 @@
+     DEFINE_LOCALID_FROM_TOKEN(Min),
+     DEFINE_LOCALID_FROM_TOKEN(Hash),
+     DEFINE_LOCALID_FROM_TOKEN(Freeze),
++    DEFINE_LOCALID_FROM_TOKEN(New),
+     DEFINE_LOCALID_FROM_TOKEN(Inspect),
+     DEFINE_LOCALID_FROM_TOKEN(Intern),
+     DEFINE_LOCALID_FROM_TOKEN(Object_id),
+--- id.c	2023-12-24 21:59:40
++++ id.c	2024-03-12 13:58:50
+@@ -69,6 +69,7 @@
+     REGISTER_SYMID(idHash, "hash");
+     REGISTER_SYMID(idFreeze, "freeze");
+     REGISTER_SYMID(idNilP, "nil?");
++    REGISTER_SYMID(idNew, "new");
+     REGISTER_SYMID(idInspect, "inspect");
+     REGISTER_SYMID(idIntern, "intern");
+     REGISTER_SYMID(idObject_id, "object_id");
