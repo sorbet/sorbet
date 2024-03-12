@@ -281,59 +281,6 @@ public:
         return insertionLoc;
     }
 
-    optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &pkg,
-                                                    bool isTestImport) const {
-        auto &info = PackageInfoImpl::from(pkg);
-        for (auto &import : importedPackageNames) {
-            if (import.name != info.name) {
-                continue;
-            }
-            if (!isTestImport && import.type == ImportType::Test) {
-                return convertTestImport(gs, info, core::Loc(fullLoc().file(), import.name.loc));
-            }
-            // we already import this, and if so, don't return an autocorrect
-            return nullopt;
-        }
-
-        core::Loc insertionLoc = loc.adjust(gs, core::INVALID_POS_LOC, core::INVALID_POS_LOC);
-        // first let's try adding it to the end of the imports.
-        if (!importedPackageNames.empty()) {
-            auto lastOffset = importedPackageNames.back().name.loc;
-            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
-        } else {
-            // if we don't have any imports, then we can try adding it
-            // either before the first export, or if we have no
-            // exports, then right before the final `end`
-            uint32_t exportLoc;
-            if (!exports_.empty()) {
-                exportLoc = exports_.front().fqn.loc.beginPos() - "export "sv.size() - 1;
-            } else {
-                exportLoc = loc.endPos() - "end"sv.size() - 1;
-            }
-            // we want to find the end of the last non-empty line, so
-            // let's do something gross: walk backward until we find non-whitespace
-            const auto &file_source = loc.file().data(gs).source();
-            while (isspace(file_source[exportLoc])) {
-                exportLoc--;
-                // this shouldn't happen in a well-formatted
-                // `__package.rb` file, but just to be safe
-                if (exportLoc == 0) {
-                    return nullopt;
-                }
-            }
-            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
-        }
-        ENFORCE(insertionLoc.exists());
-
-        // now find the appropriate place for it, specifically by
-        // finding the import that directly precedes it, if any
-        core::AutocorrectSuggestion suggestion(
-            fmt::format("Import `{}` in package `{}`", info.name.toString(gs), name.toString(gs)),
-            {{insertionLoc,
-              fmt::format("\n  {} {}", isTestImport ? "test_import" : "import", info.name.toString(gs))}});
-        return {suggestion};
-    }
-
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());
