@@ -345,6 +345,7 @@ class ObjectSpace::WeakKeyMap < Object
   def []=(_,_); end
   
   # Removes all map entries; returns self.
+  sig {returns(T.self_type)}
   def clear; end
   
   # Deletes the entry for the given key and returns its associated value
@@ -356,8 +357,10 @@ class ObjectSpace::WeakKeyMap < Object
   def getkey(_); end
   
   # Returns a new String containing informations about the map
+  sig {returns(String)}
   def inspect; end
   
   # Returns true if key is a key in self, otherwise false.
-  def key?(_); end
+  sig {params(key: T.any).returns(T::Boolean)}
+  def key?(key); end
 end
