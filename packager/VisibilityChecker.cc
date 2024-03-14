@@ -627,8 +627,9 @@ public:
                     }
                 }
 
-                if (newImportLoc.has_value()) {
-                    edits.push_back({newImportLoc.value(), fmt::to_string(autocorrect)});
+                if (newImportLoc.has_value() && autocorrect.size() != 0) {
+                    auto autocorrectText = fmt::to_string(autocorrect);
+                    edits.push_back({newImportLoc.value(), autocorrectText});
                 }
 
                 for (auto &[importToReplace, importLoc] : fixes.convertTestImports) {
