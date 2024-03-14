@@ -14,9 +14,6 @@ main_lib/__package.rb:5: Package `Project::MainLib` is missing imports https://s
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Used `test_import` instead of `import` for Project::TestOnly
   Autocorrect: Use `-a` to autocorrect
-    main_lib/__package.rb:7: Delete
-     7 |  test_import Project::TestOnly
-                                       ^
     main_lib/__package.rb:7: Replace with `import Project::TestOnly`
      7 |  test_import Project::TestOnly
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
