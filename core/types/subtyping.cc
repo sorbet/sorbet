@@ -1599,11 +1599,11 @@ template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstrai
                                              core::ErrorSection::Collector &errorDetailsCollector);
 template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode,
                                              const TypePtr &t1, const TypePtr &t2,
-                                             core::NoOpErrorSection::Collector &errorDetailsCollector);
+                                             core::ErrorSection::NoOpCollector &errorDetailsCollector);
 
 template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                               const TypePtr &t2, UntypedMode mode,
-                                              core::NoOpErrorSection::Collector &errorDetailsCollector);
+                                              core::ErrorSection::NoOpCollector &errorDetailsCollector);
 template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                               const TypePtr &t2, UntypedMode mode,
                                               core::ErrorSection::Collector &errorDetailsCollector);
@@ -1611,18 +1611,18 @@ template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstra
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
                                core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                               core::NoOpErrorSection::Collector &errorDetailsCollector);
+                               core::ErrorSection::NoOpCollector &errorDetailsCollector);
 
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                           const TypePtr &t2, core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                          const TypePtr &t2, core::NoOpErrorSection::Collector &errorDetailsCollector);
+                                          const TypePtr &t2, core::ErrorSection::NoOpCollector &errorDetailsCollector);
 
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,
                                                    core::ErrorSection::Collector &errorDetailsCollector);
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,
-                                                   core::NoOpErrorSection::Collector &errorDetailsCollector);
+                                                   core::ErrorSection::NoOpCollector &errorDetailsCollector);
 
 } // namespace sorbet::core
