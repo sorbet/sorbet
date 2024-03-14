@@ -88,7 +88,7 @@ struct ErrorSection {
     class NoOpCollector {
     public:
         void addErrorDetails(NoOpCollector e) {}
-        NoOpCollector newCollector() {
+        NoOpCollector newCollector() const {
             return *this;
         }
     };
@@ -102,7 +102,7 @@ struct ErrorSection {
         Collector(std::string msg) : message(msg) {}
 
         void addErrorDetails(Collector e);
-        Collector newCollector() {
+        Collector newCollector() const {
             return Collector();
         }
         std::optional<ErrorSection> toErrorSection();
