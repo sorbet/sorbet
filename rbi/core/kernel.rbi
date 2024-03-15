@@ -974,7 +974,7 @@ module Kernel
   # ```
   sig do
     params(
-        arg: T.any(Numeric, String),
+        arg: T.any(Numeric, String, NilClass),
         base: Integer,
         exception: T::Boolean
     )
