@@ -746,9 +746,11 @@ be simpler ways to restructure the code that don't involve making a new package.
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
 > at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-A package references constants from another package without the corresponding `import` or `test_import` statements.
+A package references constants from another package without the corresponding
+`import` or `test_import` statements.
 
-To fix this error, add the `import` or `test_import` statements related to the packages in the `__package.rb` file where the error is reported.
+To fix this error, add the `import` or `test_import` statements related to the
+packages in the `__package.rb` file where the error is reported.
 
 ## 3720
 
