@@ -281,6 +281,35 @@ public:
         return insertionLoc;
     }
 
+
+    std::optional<core::Loc> newExportLoc(const core::GlobalState &gs) const {
+        auto insertionLoc = core::Loc::none(loc.file());
+        // first let's try adding it to the end of the imports.
+        if (!exports_.empty()) {
+            auto lastOffset = exports_.back().fqn.loc.offsets();
+            insertionLoc = core::Loc{loc.file(), lastOffset.copyEndWithZeroLength()};
+        } else {
+            // if we don't have any imports, then we can try adding it
+            // either before the first export, or if we have no
+            // exports, then right before the final `end`
+            uint32_t exportLoc = loc.endPos() - "end"sv.size() - 1;
+            // we want to find the end of the last non-empty line, so
+            // let's do something gross: walk backward until we find non-whitespace
+            const auto &file_source = loc.file().data(gs).source();
+            while (isspace(file_source[exportLoc])) {
+                exportLoc--;
+                // this shouldn't happen in a well-formatted
+                // `__package.rb` file, but just to be safe
+                if (exportLoc == 0) {
+                    return nullopt;
+                }
+            }
+            insertionLoc = {loc.file(), exportLoc + 1, exportLoc + 1};
+        }
+        ENFORCE(insertionLoc.exists());
+        return insertionLoc;
+    }
+
     optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                     const core::SymbolRef newExport) const {
         auto insertionLoc = core::Loc::none(loc.file());

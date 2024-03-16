@@ -359,6 +359,9 @@ class VisibilityCheckerPass final {
 
         // {(packageToImport, Loc)}
         UnorderedSet<std::pair<core::packages::MangledName, core::Loc>> convertTestImports;
+
+        // {packageToExport}
+        UnorderedSet<core::SymbolRef> toExport;
     };
 
 public:
@@ -369,6 +372,8 @@ public:
     // package => [`test_import`ed package, Loc of test_import]
     UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, core::Loc>>>
         convertTestImport;
+    // package => [SymbolRef of package to import]
+    UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> toExport;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -451,9 +456,7 @@ public:
                 if (enumClass.exists()) {
                     symToExport = enumClass;
                 }
-                if (auto exp = pkg.addExport(ctx, symToExport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
+                toExport[pkg.mangledName()].emplace(symToExport);
                 if (!db.errorHint().empty()) {
                     e.addErrorNote("{}", db.errorHint());
                 }
@@ -520,16 +523,19 @@ public:
         auto replaceTestImportQ = std::make_shared<BlockingBoundedQueue<
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>>>(
             files.size());
+        auto toExportQ = std::make_shared<
+            BlockingBoundedQueue<std::vector<std::pair<core::packages::MangledName, core::SymbolRef>>>>(files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ, replaceTestImportQ]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ, replaceTestImportQ, toExportQ]() {
             size_t idx;
             int processedByThread = 0;
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importCapacitor;
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
                 replaceTestImportCapacitor;
+            std::vector<std::pair<core::packages::MangledName, core::SymbolRef>> exportCapacitor;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
                 processedByThread++;
@@ -550,6 +556,12 @@ public:
                                 replaceTestImportCapacitor.emplace_back(package, pair.first, pair.second);
                             }
                         }
+
+                        for (auto &[package, packagesToExport] : pass.toExport) {
+                            for (auto sym : packagesToExport) {
+                                exportCapacitor.emplace_back(package, sym);
+                            }
+                        }
                     }
                 }
             }
@@ -557,6 +569,7 @@ public:
             if (processedByThread > 0) {
                 toImportQ->push(std::move(importCapacitor), processedByThread);
                 replaceTestImportQ->push(std::move(replaceTestImportCapacitor), processedByThread);
+                toExportQ->push(std::move(exportCapacitor), processedByThread);
             }
         });
 
@@ -587,6 +600,18 @@ public:
             }
         }
 
+        std::vector<std::pair<core::packages::MangledName, core::SymbolRef>> exportThreadResult;
+        for (auto result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (auto &[package, sym] : exportThreadResult) {
+                combinedFixes[package].toExport.emplace(sym);
+            }
+        }
+
         if (combinedFixes.empty()) {
             return files;
         }
@@ -594,7 +619,9 @@ public:
         for (auto &[pkg, fixes] : combinedFixes) {
             auto &package = gs.packageDB().getPackageInfo(pkg);
             auto newImportLoc = package.newImportLoc(gs, package);
+            auto newExportLoc = package.newExportLoc(gs);
             fmt::memory_buffer autocorrect;
+            fmt::memory_buffer exportAutocorrect;
             std::vector<core::AutocorrectSuggestion::Edit> edits;
             auto fullPackageName = [&gs](const sorbet::core::packages::PackageInfo &pkg) {
                 return absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs));
@@ -641,6 +668,19 @@ public:
                     auto [lineStart, _] = importLoc.findStartOfLine(gs);
                     core::Loc replaceLoc(importLoc.file(), lineStart.beginPos(), importLoc.endPos());
                     edits.push_back({replaceLoc, fmt::format("import {}", fullPackageName(packageToImport))});
+                }
+
+                for (auto packageSym : fixes.toExport) {
+// e.setHeader("`{}` resolves but is not exported from `{}`", lit.symbol.show(ctx), pkg.show(ctx));
+                    e.addErrorSection(core::ErrorSection(
+                        fmt::format("`{}` resolves but is not exported", packageSym.show(gs)),
+                        {}));
+                    fmt::format_to(std::back_inserter(exportAutocorrect), "\n  export {}", packageSym.show(gs));
+
+                }
+                if (newExportLoc.has_value() && exportAutocorrect.size() != 0) {
+                    auto autocorrectText = fmt::to_string(autocorrect);
+                    edits.push_back({newExportLoc.value(), autocorrectText});
                 }
 
                 e.addAutocorrect({"Fix package issues", edits});
