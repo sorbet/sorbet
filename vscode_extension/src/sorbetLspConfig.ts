@@ -19,7 +19,7 @@ export interface SorbetLspConfigData {
   /**
    * Working directory for {@link command}.
    */
-  readonly cwd: string;
+  readonly cwd: string | undefined;
   /**
    * Command and arguments to execute, e.g. `["srb", "typecheck", "--lsp"]`.
    */
@@ -45,7 +45,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
   /**
    * Working directory for {@link command}.
    */
-  public readonly cwd: string;
+  public readonly cwd: string | undefined;
   /**
    * Command and arguments to execute, e.g. `["bundle", "exec", "srb", "typecheck", "--lsp"]`.
    */
@@ -55,12 +55,27 @@ export class SorbetLspConfig implements SorbetLspConfigData {
 
   constructor(id: string, name: string);
   constructor(id: string, name: string, description: string);
-  constructor(id: string, name: string, description: string, cwd: string);
   constructor(
     id: string,
     name: string,
     description: string,
-    cwd: string,
+    cwd: string | undefined,
+  );
+
+  constructor(
+    id: string,
+    name: string,
+    description: string,
+    cwd: string | undefined,
+    env: NodeJS.ProcessEnv,
+  );
+
+  constructor(
+    id: string,
+    name: string,
+    description: string,
+    cwd: string | undefined,
+    env: NodeJS.ProcessEnv,
     command: ReadonlyArray<string>,
   );
 
@@ -68,7 +83,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
     idOrData: string | SorbetLspConfigData,
     name: string = "",
     description: string = "",
-    cwd: string = "",
+    cwd: string | undefined = undefined,
     command: ReadonlyArray<string> = [],
   ) {
     if (typeof idOrData === "string") {

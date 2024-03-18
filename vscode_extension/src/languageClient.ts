@@ -287,8 +287,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   private startSorbetProcess(): Promise<ChildProcess> {
     this.status = ServerStatus.INITIALIZING;
     this.context.log.info("Running Sorbet LSP.");
-    const [command, ...args] =
-      this.context.configuration.activeLspConfig?.command ?? [];
+    const activeConfig = this.context.configuration.activeLspConfig;
+    const [command, ...args] = activeConfig?.command ?? [];
     if (!command) {
       const msg = `Missing command-line data to start Sorbet. ConfigId:${this.context.configuration.activeLspConfig?.id}`;
       this.context.log.error(msg);
@@ -297,7 +297,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     this.context.log.debug(` > ${command} ${args.join(" ")}`);
     this.sorbetProcess = spawn(command, args, {
-      cwd: workspace.rootPath,
+      cwd: activeConfig?.cwd ?? workspace.rootPath,
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯
