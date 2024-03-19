@@ -65,7 +65,7 @@ thing under the cursor:
 - Go to Definition (`textDocument/definition`)
 - Go to Type Definition (`textDocument/typeDefinition`)
 - Go to Implementation (`textDocument/typeDefinition`)
-- Autocompletion (`textDocument/complete`)
+- [Autocompletion](autocompletion.md) (`textDocument/complete`)
 - Rename Symbol (`textDocument/rename`)
 - Signature Help (`textDocument/signatureHelp`)
 - Document Highlight (`textDocument/documentHighlight`)

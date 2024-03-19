@@ -56,6 +56,7 @@
       "lsp",
       "server-status",
       "lsp-typed-level",
+      "autocompletion",
       "sig-suggestion",
       "highlight-untyped",
       "sorbet-uris"

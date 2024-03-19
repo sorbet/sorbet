@@ -357,65 +357,6 @@ will not function in some of these special files.
 
 ### Completion
 
-#### I don't see any completion results.
-
-- Are you in a `typed: false` file? No completion results are expected.
-- Is the place where you're trying to see results unreachable? For example,
-  after a return statement, or in an else condition that can't happen? Sorbet
-  can't provide completion results here.
-- Can you see completion results for other things? Sorbet only supports
-  completing local variables, methods, keywords, suggested sigs, classes,
-  modules, and constants right now. Notably, it doesn't support completing the
-  names of instance variables.
-
-#### I don't see any completion results right after I type A:: or x.
-
-You'll have to type at least one character after the dot (like x.f) or after the
-colon (like A::B) before completion results show up.
-
-We tried to get this working before the initial ship, but it ended up being a
-more complicated change than we expected. We have a couple ideas how to support
-this, so expect this to be supported in the future.
-
-#### The completion results look wrong.
-
-Completion results can come from many different extensions, not just Sorbet. You
-can try to figure out what extension returned the results by looking at the icon
-that VS Code shows in the completion list:
-
-![](/img/lsp/vscode-completion-list.png)
-
-Results from Sorbet will only ever have 1 of 6 icons (currently): `method`,
-`variable`, `field`, `class`, `interface`, `module`, `enum`, `keyword`, and
-`snippet`.
-
-**Notably**, the abc icon (`word`) means the results came either from VS Code’s
-`editor.wordBasedSuggestions` setting or some other generic autocomplete
-extension.
-
-Also, `snippet` results can come from other extensions. Snippet results that
-come from Sorbet will always say `(sorbet)` somewhere in the snippet
-description. Sorbet does not have control over any snippet results that don't
-say `(sorbet)` in them; if they look wrong, the only suggestion is to turn them
-off.
-
-#### Can I have Sorbet only suggest method names, not the entire snippet, with types?
-
-Sorbet inserts a suggested snippet into the document when accepting a completion
-result.
-
-- Snippet results will have highlighted sections inside them.
-- These represent "holes" (tabstops) that you'll need to fill in—the aim is that
-  every tabstop is for a required argument (i.e., optional / default arguments
-  won't be present).
-- As the default text for each of these holes, Sorbet uses the type of the
-  corresponding argument.
-- Press `TAB` to cycle through the holes (tabstops), or press `ESC` to deselect
-  all the tabstops.
-
-It is not possible to opt-out of these completion snippets. If you find that
-this is annoying, please let us know.
-
 ## Reporting metrics
 
 > Sorbet does not require metrics gathering for full functionality. If you are
