@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Feature support by strictness level · Sorbet</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Some of Sorbet&#x27;s LSP features will not work in [`# typed: false` files] (also,"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Feature support by strictness level · Sorbet"/><meta property="og:type" content="website"/><meta property="og:url" content="https://sorbet.org/"/><meta property="og:description" content="Some of Sorbet&#x27;s LSP features will not work in [`# typed: false` files] (also,"/><meta name="twitter:card" content="summary"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://sorbet.org/blog/atom.xml" title="Sorbet Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://sorbet.org/blog/feed.xml" title="Sorbet Blog RSS Feed"/><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-5H7PQ9Z8KF"></script><script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments); }
+              gtag('js', new Date());
+              gtag('config', 'G-5H7PQ9Z8KF');
+            </script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/sorbet-logo-white-sparkles.svg" alt="Sorbet"/><h2 class="headerTitleWithLogo">Sorbet</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/adopting" target="_self">Get started</a></li><li class="siteNavGroupActive"><a href="/docs/overview" target="_self">Docs</a></li><li class=""><a href="https://sorbet.run" target="_self">Try</a></li><li class=""><a href="/en/community" target="_self">Community</a></li><li class=""><a href="https://github.com/sorbet/sorbet" target="_self">GitHub</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Editor Features</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/adopting">Adopting Sorbet</a></li><li class="navListItem"><a class="navItem" href="/docs/metrics">Tracking Adoption</a></li><li class="navListItem"><a class="navItem" href="/docs/quickref">Quick Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/vscode">Visual Studio Code</a></li><li class="navListItem"><a class="navItem" href="/docs/from-typescript">TypeScript ↔ Sorbet</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Static &amp; Runtime</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/gradual">Gradual Type Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/static">Enabling Static Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/runtime">Enabling Runtime Checks</a></li><li class="navListItem"><a class="navItem" href="/docs/rbi">RBI Files</a></li><li class="navListItem"><a class="navItem" href="/docs/cli">Command Line Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/tconfiguration">Runtime Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Troubleshooting</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/troubleshooting">Troubleshooting</a></li><li class="navListItem"><a class="navItem" href="/docs/why-type-annotations">Why type annotations?</a></li><li class="navListItem"><a class="navItem" href="/docs/faq">FAQ</a></li><li class="navListItem"><a class="navItem" href="/docs/error-reference">Error Reference</a></li><li class="navListItem"><a class="navItem" href="/docs/unsupported">Unsupported Ruby Features</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Type System</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/sigs">sig</a></li><li class="navListItem"><a class="navItem" href="/docs/type-annotations">Type Annotations (non-sig)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-assertions">T.let, T.cast, T.must, T.bind</a></li><li class="navListItem"><a class="navItem" href="/docs/class-types">Class Types (Integer, String)</a></li><li class="navListItem"><a class="navItem" href="/docs/stdlib-generics">Arrays &amp; Hashes</a></li><li class="navListItem"><a class="navItem" href="/docs/nilable-types">Nilable Types (T.nilable)</a></li><li class="navListItem"><a class="navItem" href="/docs/union-types">Union Types (T.any)</a></li><li class="navListItem"><a class="navItem" href="/docs/flow-sensitive">Flow-Sensitivity (is_a?, nil?)</a></li><li class="navListItem"><a class="navItem" href="/docs/type-aliases">T.type_alias</a></li><li class="navListItem"><a class="navItem" href="/docs/exhaustiveness">Exhaustiveness (T.absurd)</a></li><li class="navListItem"><a class="navItem" href="/docs/tstruct">T::Struct</a></li><li class="navListItem"><a class="navItem" href="/docs/tenum">T::Enum</a></li><li class="navListItem"><a class="navItem" href="/docs/untyped">T.untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/procs">Blocks, Procs, &amp; Lambdas</a></li><li class="navListItem"><a class="navItem" href="/docs/abstract">Abstract Classes &amp; Interfaces</a></li><li class="navListItem"><a class="navItem" href="/docs/final">Final Methods &amp; Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/override-checking">Override Checking</a></li><li class="navListItem"><a class="navItem" href="/docs/sealed">Sealed Classes</a></li><li class="navListItem"><a class="navItem" href="/docs/class-of">T.class_of</a></li><li class="navListItem"><a class="navItem" href="/docs/self-type">T.self_type</a></li><li class="navListItem"><a class="navItem" href="/docs/noreturn">T.noreturn</a></li><li class="navListItem"><a class="navItem" href="/docs/anything">T.anything</a></li><li class="navListItem"><a class="navItem" href="/docs/attached-class">T.attached_class</a></li><li class="navListItem"><a class="navItem" href="/docs/intersection-types">Intersection Types (T.all)</a></li><li class="navListItem"><a class="navItem" href="/docs/generics">Generics</a></li><li class="navListItem"><a class="navItem" href="/docs/non-forcing-constants">T::NonForcingConstants</a></li><li class="navListItem"><a class="navItem" href="/docs/strong">Banning untyped</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Editor Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/lsp">Language Server (LSP)</a></li><li class="navListItem"><a class="navItem" href="/docs/server-status">Server Status</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/lsp-typed-level">LSP &amp; Typed Level</a></li><li class="navListItem"><a class="navItem" href="/docs/sig-suggestion">Suggesting sigs</a></li><li class="navListItem"><a class="navItem" href="/docs/highlight-untyped">Highlighting untyped</a></li><li class="navListItem"><a class="navItem" href="/docs/sorbet-uris">sorbet: URIs</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Experimental Features</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/tuples">Tuples</a></li><li class="navListItem"><a class="navItem" href="/docs/shapes">Shapes</a></li><li class="navListItem"><a class="navItem" href="/docs/overloads">Overloads</a></li><li class="navListItem"><a class="navItem" href="/docs/requires-ancestor">Requiring Ancestors</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/sorbet/sorbet/edit/master/website/docs/lsp-typed-level.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Feature support by strictness level</h1></header><article><div><span><p>Some of Sorbet’s LSP features will not work in <a href="/docs/static"><code># typed: false</code> files</a> (also,
+no LSP features will work in <code># typed: ignore</code> files).</p>
+<h2><a class="anchor" aria-hidden="true" id="type-inference--typed-false-vs--typed-true"></a><a href="#type-inference--typed-false-vs--typed-true" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type inference: <code># typed: false</code> vs <code># typed: true</code></h2>
+<p>All LSP features which rely on type inference will not work in <code># typed: false</code>
+files.</p>
+<p>Recall from <a href="/docs/static">Enabling Static Checks</a> the primary function of a
+<code># typed:</code> sigil is to control which errors are reported and which are silenced.
+Sorbet still processes <code># typed: false</code> files, but it silences some (not all)
+errors detected in those files.</p>
+<p>The biggest class of errors silenced at <code># typed: false</code> are those relating to
+<strong>type inference</strong>: the process of inferring types for local variables and
+checking that arguments provided at a method call site match the method’s
+declared parameter types.</p>
+<p>Since all type inference-related errors are silenced at <code># typed: false</code>, Sorbet
+<strong>does not run type inference</strong> over <code># typed: false</code> files at all. It’s not
+that Sorbet makes an attempt to infer types for local variables and then
+refrains from reporting those errors: it does not run inference on these files
+at all.</p>
+<h2><a class="anchor" aria-hidden="true" id="support-by-lsp-feature"></a><a href="#support-by-lsp-feature" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Support by LSP feature</h2>
+<p>The following table summarizes what to expect to work by Ruby language feature.
+The &quot;Works in <code># typed: false</code>&quot; column describes whether to expect LSP features
+like Hover to work. For example, the table makes it clear that hovering over a
+constant literal in a <code># typed: false</code> file will show information about that
+constant, but that hovering over a local variable will not.</p>
+<table>
+<thead>
+<tr><th>Ruby feature</th><th>Works in <code># typed: false</code></th></tr>
+</thead>
+<tbody>
+<tr><td><code>class</code>/<code>module</code> definition</td><td>✅</td></tr>
+<tr><td>left side of constant assignment</td><td>✅</td></tr>
+<tr><td>constant reference</td><td>✅</td></tr>
+<tr><td>method definition</td><td>✅</td></tr>
+<tr><td>left side of instance/class variable definition</td><td>✅</td></tr>
+<tr><td>instance/class variable usage</td><td>✅<strong>†</strong></td></tr>
+<tr><td>method call</td><td>❌</td></tr>
+<tr><td>local variable assignment</td><td>❌</td></tr>
+<tr><td>local variable usage</td><td>❌</td></tr>
+</tbody>
+</table>
+<p><strong>†</strong>: Only if the instance or class variable at the cursor is defined. Sorbet
+only requires these variables to be defined in <code># typed: strict</code> files or above,
+so it’s possible that there will be no results because Sorbet has silenced an
+error complaining that it could not find the definition matching an instance or
+class variable usage.</p>
+<p>The table above applies to the following LSP features, which operate on the
+thing under the cursor:</p>
+<!-- TODO(jez) Should we have links to these LSP features eventually? -->
+<ul>
+<li>Hover (<code>textDocument/hover</code>)</li>
+<li>Go to Definition (<code>textDocument/definition</code>)</li>
+<li>Go to Type Definition (<code>textDocument/typeDefinition</code>)</li>
+<li>Go to Implementation (<code>textDocument/typeDefinition</code>)</li>
+<li>Autocompletion (<code>textDocument/complete</code>)</li>
+<li>Rename Symbol (<code>textDocument/rename</code>)</li>
+<li>Signature Help (<code>textDocument/signatureHelp</code>)</li>
+<li>Document Highlight (<code>textDocument/documentHighlight</code>)</li>
+</ul>
+<p>It also applies to these features which operate on both the thing under the
+cursor <strong>and</strong> references to things throughout the codebase:</p>
+<ul>
+<li>Find All References (<code>textDocument/references</code>)</li>
+<li>Rename Symbol (<code>textDocument/rename</code>)</li>
+</ul>
+<p>For this second set of requests, the table indicates whether the results will
+include usages in <code># typed: false</code> files (in addition to whatever was under the
+cursor to initiate the request). For example, Find All References on a constant
+literal will find all usages of the constant, even references in
+<code># typed: false</code> files. But Find All References on a method definition will only
+find calls to that method in <code># typed: true</code> or higher files.</p>
+<h2><a class="anchor" aria-hidden="true" id="why-choose-to-disable-certain-editor-features"></a><a href="#why-choose-to-disable-certain-editor-features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why choose to disable certain editor features?</h2>
+<p>An alternative to disabling things like Hover and Go to Definition in
+<code># typed: false</code> files would be to turn those features on, but make it clear
+that the results are “best effort,” because silenced type errors have gotten in
+the way of accurately knowing what’s under the cursor.</p>
+<p>Choosing to disable these LSP features is intentional, for two main reasons:</p>
+<ul>
+<li><p>We do not want to train people to expect incorrect results from Sorbet. It can
+be hard to know when to expect an accurate result vs when to expect a “best
+effort” result.</p>
+<p>Consistently inaccurate results with Sorbet erodes trust in Sorbet, especially
+for new Sorbet users where much of the codebase is not yet <code># typed: true</code>.</p></li>
+<li><p>We want to encourage people to upgrade their files from <code># typed: false</code> to
+<code># typed: true</code>. Disabling LSP features in <code># typed: false</code> files provides a
+reminder and a nudge that upgrading from <code># typed: false</code> to <code># typed: true</code>
+is a good idea.</p>
+<p>Upgrading the file to <code># typed: true</code> allows both catching type errors
+introduced by future edits and turning on editor features, which aligns short-
+and long-term incentives.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="-typed-false-nudges"></a><a href="#-typed-false-nudges" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code># typed: false</code> nudges</h2>
+<p>To make it clear when LSP features have been disabled, Sorbet usually shows some
+sort of nudge.</p>
+<p><img src="/img/lsp/hover-typed-false.png" alt="Screenshot of typed: false nudge for hover">
+<em>The message shown when hovering over a local variable in a <code># typed: false</code>
+file.</em></p>
+<p><img src="/img/lsp/typed-false-nudge.png" alt="Screenshot of typed: false nudge for autocompletion">
+<em>An empty completion item when typing the name of a local variable in a
+<code># typed: false</code> file.</em></p>
+<h3><a class="anchor" aria-hidden="true" id="disable-autocompletion-nudges-in--typed-false-files"></a><a href="#disable-autocompletion-nudges-in--typed-false-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Disable autocompletion nudges in <code># typed: false</code> files</h3>
+<p>These nudges (for autocompletion specifically) can be disabled.</p>
+<p>In VS Code, either:</p>
+<ul>
+<li><p>Use the <code>Sorbet: Toggle the auto-complete nudge in `typed: false` files</code>
+command from the command pallet.</p></li>
+<li><p>Set the <code>sorbet.typedFalseCompletionNudges</code> setting to <code>false</code> in the VS Code
+preferences. This changes the <em>default</em> setting–changing the value with the
+above “Toggle” command will override the value in the preferences.</p></li>
+</ul>
+<p>In other LSP clients, either:</p>
+<ul>
+<li><p>Set the <code>enableTypedFalseCompletionNudges</code> property to <code>false</code> in the
+<code>initialize</code> request.</p>
+<p>See <a href="/docs/lsp#initialize-request"><code>initialize</code> request</a></p></li>
+<li><p>Send a <code>workspace/didChangeConfiguration</code> notification to the server which
+includes the <code>enableTypedFalseCompletionNudges</code> property.</p>
+<p>See
+<a href="/docs/lsp#workspacedidchangeconfiguration-notification"><code>workspace/didChangeConfiguration</code> request</a></p></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/server-status"><span class="arrow-prev">← </span><span>Server Status</span></a><a class="docs-next button" href="/docs/sig-suggestion"><span>Suggesting sigs</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#type-inference--typed-false-vs--typed-true">Type inference: <code># typed: false</code> vs <code># typed: true</code></a></li><li><a href="#support-by-lsp-feature">Support by LSP feature</a></li><li><a href="#why-choose-to-disable-certain-editor-features">Why choose to disable certain editor features?</a></li><li><a href="#-typed-false-nudges"><code># typed: false</code> nudges</a><ul class="toc-headings"><li><a href="#disable-autocompletion-nudges-in--typed-false-files">Disable autocompletion nudges in <code># typed: false</code> files</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer"><svg width="99" height="28" viewBox="0 0 99 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.98432 20H6.27432C8.44932 20 9.81432 18.905 9.81432 17.03C9.81432 15.665 9.00432 14.72 7.78932 14.39C8.61432 14.105 9.45432 13.415 9.45432 12.035C9.45432 10.235 8.23932 9.23 5.95932 9.23H1.98432V20ZM3.37932 13.85V10.445H5.83932C7.27932 10.445 8.07432 11 8.07432 12.155C8.07432 13.295 7.27932 13.85 5.83932 13.85H3.37932ZM3.37932 15.08H6.21432C7.65432 15.08 8.43432 15.83 8.43432 16.925C8.43432 18.035 7.65432 18.785 6.21432 18.785H3.37932V15.08ZM18.0294 12.155H16.6794V16.88C16.6794 18.185 15.6894 18.92 14.7144 18.92C13.5594 18.92 13.0794 18.17 13.0794 17.06V12.155H11.7294V17.345C11.7294 19.01 12.6744 20.165 14.3544 20.165C15.4644 20.165 16.2294 19.58 16.6794 18.92V20H18.0294V12.155ZM20.5112 10.79H21.9812V9.23H20.5112V10.79ZM21.9212 12.155H20.5712V20H21.9212V12.155ZM25.8247 9.23H24.4747V20H25.8247V9.23ZM28.5882 18.125C28.5882 19.625 29.3532 20.075 30.6882 20.075C31.1382 20.075 31.5282 20.03 31.8732 19.955V18.8C31.5582 18.875 31.3332 18.89 31.0182 18.89C30.3282 18.89 29.9232 18.74 29.9232 17.915V13.31H31.7082V12.155H29.9232V9.86H28.5882V12.155H27.3732V13.31H28.5882V18.125ZM41.0199 20.165C43.1949 20.165 44.4399 18.305 44.4399 16.085C44.4399 13.85 43.1949 12.005 41.0199 12.005C39.9249 12.005 39.0549 12.53 38.5899 13.295V9.23H37.2399V20H38.5899V18.86C39.0549 19.64 39.9249 20.165 41.0199 20.165ZM38.5599 15.815C38.5599 13.985 39.6699 13.19 40.7799 13.19C42.2499 13.19 43.0749 14.39 43.0749 16.085C43.0749 17.765 42.2499 18.98 40.7799 18.98C39.6699 18.98 38.5599 18.17 38.5599 16.37V15.815ZM49.1804 20.855L52.5554 12.155H51.1454L48.9704 18.155L46.7654 12.155H45.3404L48.2504 19.715L47.8754 20.645C47.5604 21.425 47.2454 21.635 46.6604 21.635C46.4354 21.635 46.2704 21.62 46.0154 21.56V22.73C46.2554 22.775 46.4204 22.79 46.7504 22.79C48.1154 22.79 48.7304 22.04 49.1804 20.855Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M98.7993 15.7838C98.7993 12.8786 97.3871 10.5862 94.688 10.5862C91.9774 10.5862 90.3374 12.8786 90.3374 15.7611C90.3374 19.177 92.2735 20.9019 95.0524 20.9019C96.4077 20.9019 97.4327 20.5955 98.2071 20.1643V17.8946C97.4327 18.2804 96.5443 18.5188 95.4168 18.5188C94.3121 18.5188 93.3327 18.1329 93.2074 16.7938H98.7766C98.7766 16.6463 98.7993 16.0561 98.7993 15.7838ZM93.1732 14.7057C93.1732 13.4233 93.9591 12.8899 94.6766 12.8899C95.3713 12.8899 96.1116 13.4233 96.1116 14.7057H93.1732Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M85.9413 10.5862C84.8251 10.5862 84.1076 11.1082 83.709 11.4714L83.561 10.7678H81.0554V24.0001L83.9026 23.3986L83.914 20.187C84.324 20.482 84.9276 20.9019 85.9299 20.9019C87.9685 20.9019 89.8249 19.2678 89.8249 15.6703C89.8135 12.3792 87.9343 10.5862 85.9413 10.5862ZM85.2579 18.4053C84.586 18.4053 84.1874 18.167 83.914 17.8719L83.9026 13.6616C84.1988 13.3325 84.6088 13.1055 85.2579 13.1055C86.2943 13.1055 87.0118 14.2631 87.0118 15.7497C87.0118 17.2704 86.3057 18.4053 85.2579 18.4053Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1377 9.91656L79.9963 9.30374V7L77.1377 7.60147V9.91656Z" fill="white"></path><path d="M79.9963 10.7791H77.1377V20.709H79.9963V10.7791Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M74.074 11.6187L73.8918 10.7789H71.4318V20.7088H74.279V13.9792C74.9509 13.1054 76.0898 13.2642 76.4429 13.3891V10.7789C76.0784 10.6427 74.7459 10.3931 74.074 11.6187Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M68.3796 8.31641L65.6007 8.90653L65.5894 17.9966C65.5894 19.6762 66.8535 20.9132 68.5391 20.9132C69.473 20.9132 70.1563 20.743 70.5321 20.5387V18.235C70.1677 18.3825 68.3682 18.9045 68.3682 17.225V13.1962H70.5321V10.779H68.3682L68.3796 8.31641Z" fill="white"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M60.6807 13.6616C60.6807 13.219 61.0452 13.0488 61.6488 13.0488C62.5143 13.0488 63.6076 13.3098 64.4732 13.7751V11.1082C63.5279 10.7337 62.594 10.5862 61.6488 10.5862C59.3368 10.5862 57.7993 11.7891 57.7993 13.7978C57.7993 16.93 62.1271 16.4306 62.1271 17.7811C62.1271 18.3031 61.6715 18.4734 61.0338 18.4734C60.0885 18.4734 58.8813 18.0875 57.9246 17.5655V20.2664C58.9838 20.7204 60.0543 20.9133 61.0338 20.9133C63.4026 20.9133 65.0313 19.7444 65.0313 17.713C65.0199 14.3312 60.6807 14.9326 60.6807 13.6616Z" fill="white"></path></svg><a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div><div id="csat-extension-config" data-notify="#sorbet-team"></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'ZYWC6Z01G8',
+                apiKey: 'b05a65e9f8d9f50dc4ec3241db8836c4',
+                indexName: 'stripe_sorbet',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {}
+              });
+            </script></body></html>
