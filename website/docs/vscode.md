@@ -354,48 +354,13 @@ the [issue tracker](https://github.com/sorbet/sorbet/issues).
 
 #### Go to Definition/Go to Type Definition/Find all References is not working / Find all References is missing some expected results.
 
-First, make sure that Sorbet is running. You should see "Sorbet: Idle" in VS
-Code's status bar.
+Make sure that Sorbet is running. You should see "Sorbet: Idle" in VS Code's
+status bar. Otherwise, see
+[Feature support by strictness level](lsp-typed-level.md).
 
-It's possible that the feature is working as intended. Go to Definition and Find
-all References are not available in all circumstances. A ‘Yes’ entry in the
-following table indicates two distinct things:
-
-- A _language construct_ where these features work. For example, you can right
-  click a class reference and go to its definition or find its references in
-  typed and untyped files.
-- An item that will be included in the results of these features. For example,
-  the result of Find all References on a method includes method calls in typed
-  files, but not method calls in untyped files.
-
-|                                               | `# typed: true` or above | `# typed: false`  |
-| --------------------------------------------- | ------------------------ | ----------------- |
-| Class/module/constant definition or reference | Yes                      | Yes               |
-| ivar (@foo)                                   | Yes, if defined\*        | Yes, if defined\* |
-| cvar (@@foo)                                  | Yes, if defined\*        | Yes, if defined\* |
-| Method definition                             | Yes                      | Results only\*\*  |
-| Method call                                   | Yes                      | No                |
-| Local variable                                | Yes                      | No                |
-
-\* Indicates that the variable
-[_must_ be defined with `T.let`](/docs/type-annotations#declaring-class-and-instance-variables).
-Otherwise, Sorbet doesn’t see that variable as having ever been defined.
-
-\*\* You cannot use either feature from this language construct, but this item
-will be included in Go to Definition/Find all References results from typed
-files.
-
-We have these restrictions in place to avoid weird/nonsensical behavior caused
-by untyped files, which may have partial and potentially incorrect type
-information. We heartily encourage you to type files to gain access to these
-features.
-
-Note that some items marked "Yes" in the table may not work with these features
-if Sorbet does not have the necessary type information. In particular, method
-calls on an object `foo` where `foo` is untyped will not be included in Find all
-References and will not work with Go to Definition because Sorbet is unable to
-resolve which method is being called at that location. Using `# typed: strict`
-should suss out most of these untyped locations on a per-file basis.
+If the information in that document doesn't apply (e.g., the current file is
+`# typed: true` or higher), check whether the expression is `T.untyped`. See
+[Troubleshooting](troubleshooting.md) for more information.
 
 #### Find all References is slow.
 
