@@ -69,10 +69,13 @@ pass the `supportsSorbetURIs` property:
 }
 ```
 
-Different language clients will have different ways to specify
-`initializationOptions` when starting a language server. Consult the
+Different language clients will have [different ways to specify
+`initializationOptions`] when starting a language server. Consult the
 documentation of your editor or language client for how to pass this option on
 startup in the `initialize` request.
+
+[different ways to specify `initializationOptions`]:
+  lsp.md#instructions-for-specific-language-clients
 
 Setting `supportsSorbetURIs` to `true` informs Sorbet that it can use `sorbet:`
 URIs. Whenever a Go to Definition request would attempt to jump into a synthetic
