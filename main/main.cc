@@ -12,6 +12,6 @@ int main(int argc, char *argv[]) {
 
         // Forcibly exit with a segfault signal for uncaught exceptions, which makes it easier to
         // use `catchsegv.sh` to report these errors.
-        kill(0, SIGSEGV);
+        kill(getpid(), SIGSEGV);
     }
 };
