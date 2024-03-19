@@ -2490,7 +2490,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     }
                 }
             }
-            // TODO:
             core::ErrorDetailsCollector errorDetailsCollector2;
             if (!core::Types::isSubType(ctx, memberType->upperBound, parentType->upperBound, errorDetailsCollector2)) {
                 auto errLoc = upperBoundTypeLoc.exists() ? upperBoundTypeLoc : ctx.locAt(rhs->loc);
