@@ -236,6 +236,15 @@
                 "format": "uri-reference",
                 "default": "${workspaceFolder}"
               },
+              "env": {
+                "description": "Environment variables to set when launching sorbet",
+                "type": "object",
+                "minItems": 1,
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
               "command": {
                 "description": "Full command line to invoke sorbet",
                 "type": "array",
@@ -250,6 +259,9 @@
               "name": "My Custom Sorbet Configuration",
               "description": "A longer description of this Sorbet Configuration for use in hover text",
               "cwd": "${workspaceFolder}",
+              "env": {
+                "MY_ENV_VAR": "my-value"
+              },
               "command": [
                 "bundle",
                 "exec",
