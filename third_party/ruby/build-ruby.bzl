@@ -83,9 +83,6 @@ fi
 libyaml_loc="$(realpath {libyaml})"
 libffi_loc="$(realpath {libffi})"
 
-echo $libffi_loc
-echo $build_dir
-
 pushd "$build_dir" > /dev/null
 
 run_cmd() {{
