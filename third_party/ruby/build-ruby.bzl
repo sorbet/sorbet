@@ -38,7 +38,7 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 _BUILD_RUBY = """#!/bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 
 base="$PWD"
 out_dir="$base/{toolchain}"
@@ -64,8 +64,17 @@ export PATH="$(dirname "{cc}"):$(dirname $(realpath {rustc})):$PATH"
 cp -aL "{src_dir}"/* "$build_dir"
 # Manually copy over .bundle as bundled gems are no longer installed
 # https://github.com/ruby/ruby/pull/6234
+
+
+if [ "$(uname)" == "Darwin" ]; then
+    # according to the man page -r is highly discouraged on macOS
+    CPFLAGS=-RaL
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    CPFLAGS=-raL
+fi
+
 if [[ -d "{src_dir}/.bundle" ]]; then
-  cp -raL "{src_dir}/.bundle" "$build_dir"
+  cp $CPFLAGS "{src_dir}/.bundle" "$build_dir"
 fi
 
 {install_extra_srcs}
