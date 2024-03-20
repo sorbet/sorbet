@@ -355,8 +355,6 @@ them, we've configured the Sorbet extension to display them in this read-only
 view. Note that certain extension features, like hover and Go to Definition,
 will not function in some of these special files.
 
-### Completion
-
 ## Reporting metrics
 
 > Sorbet does not require metrics gathering for full functionality. If you are
