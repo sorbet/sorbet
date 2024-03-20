@@ -313,9 +313,9 @@ that variable as having ever been defined.
 Otherwise, try to reproduce the issue on https://sorbet.run/ and file a bug on
 the [issue tracker](https://github.com/sorbet/sorbet/issues).
 
-### Go to Definition/Go to Type Definition/Find all References
+### Find all References
 
-#### Go to Definition/Go to Type Definition/Find all References is not working / Find all References is missing some expected results.
+#### Find all References is not working / Find all References is missing some expected results.
 
 Make sure that Sorbet is running. You should see "Sorbet: Idle" in VS Code's
 status bar. Otherwise, see
@@ -337,14 +337,7 @@ one file.
 Find all References also waits for "Typechecking in background..." to complete
 so that it does not contend with typechecking for CPU time.
 
-#### Go to Definition/Go to Type Definition brought me to what I believe is the wrong location.
-
-Ensure that you see "Sorbet: Idle" and not "Sorbet: Disabled" at the bottom of
-VS Code. If Sorbet is enabled and it is returning a weird/unexpected definition
-site, please try to reproduce the issue on https://sorbet.run/ and file a bug on
-the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
-#### Go to Definition/Go to Type Definition/Find all References brought me to a file that I cannot edit.
+#### Find all References brought me to a file that I cannot edit.
 
 These features may return results in type definitions for core Ruby libraries,
 which are baked directly into the Sorbet executable and are not present on the
