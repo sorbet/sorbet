@@ -87,17 +87,19 @@ public:
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     template <class T>
     static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
-    template <class T>
-    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
+    static bool isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+        return isSubType(gs, t1, t2, core::noOpErrorDetailsCollector);
+    };
+    static bool equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     template <class T>
     static bool equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, T &errorDetailsCollector);
 
     /** check that t1 <: t2, but do not consider `T.untyped` as super type or a subtype of all other types */
-    template <class T>
-    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
-    template <class T>
-    static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector);
+    static bool isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static bool equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+
     template <class T>
     static bool equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                               const TypePtr &t2, T &errorDetailsCollector);

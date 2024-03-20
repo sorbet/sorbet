@@ -445,7 +445,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
                 auto argType = Types::resultTypeAsSeenFrom(gs, argTypeRaw, candidate.data(gs)->owner, inClass, targs);
                 if (constr == nullptr) {
-                    if (!Types::isSubType(gs, arg, argType, core::noOpErrorDetailsCollector)) {
+                    if (!Types::isSubType(gs, arg, argType)) {
                         it = leftCandidates.erase(it);
                         continue;
                     }
@@ -490,8 +490,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 }
             } else {
                 if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() ||
-                     !Types::isSubType(gs, Types::nilClass(), lastArg.type, core::noOpErrorDetailsCollector))) {
+                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -1534,8 +1533,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
         auto blockType = data->arguments.back().type;
         // TODO(jez) Highlight untyped code for this error
-        if (blockType &&
-            !core::Types::isSubType(gs, core::Types::nilClass(), blockType, core::noOpErrorDetailsCollector)) {
+        if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "defined here");
@@ -2521,7 +2519,7 @@ private:
             return blockType.type;
         }
 
-        if (Types::isSubType(gs, Types::nilClass(), blockType.type, core::noOpErrorDetailsCollector)) {
+        if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
             nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
             typeIsNilable = true;
 
@@ -2607,7 +2605,7 @@ private:
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
             if (isa_type<ClassType>(passedInBlockType) &&
                 cast_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
-                Types::isSubType(gs, nonNilableBlockType, passedInBlockType, core::noOpErrorDetailsCollector)) {
+                Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
                 // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
@@ -3063,8 +3061,7 @@ public:
                 }
             }
 
-            if (unknownMethodOnNilClassErrors == 1 &&
-                !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type, core::noOpErrorDetailsCollector)) {
+            if (unknownMethodOnNilClassErrors == 1 && !core::Types::isSubType(gs, selfTy.type, selfTyAndAnd.type)) {
                 DispatchArgs newInnerArgs{
                     fun,
                     sendLocs,
@@ -4061,8 +4058,8 @@ public:
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
         // TODO(jez) How should this interact with highlight untyped?
-        auto isOnlySymbol = Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()),
-                                             core::noOpErrorDetailsCollector);
+        auto isOnlySymbol =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::Symbol()));
         if (isOnlySymbol && Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
@@ -4085,8 +4082,8 @@ public:
         }
 
         // TODO(jez) How should this interact with highlight untyped?
-        auto isOnlyString = Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()),
-                                             core::noOpErrorDetailsCollector);
+        auto isOnlyString =
+            Types::isSubType(gs, args.fullType.type, Types::any(gs, Types::nilClass(), Types::String()));
 
         // NOTE:
         // If you update this, please update error-reference to mention which types this check applies to
@@ -4096,8 +4093,7 @@ public:
             // assumption that `Symbol` is final and thus no subclass can implement `to_str` (we
             // could also implement the actual final logic for arbitrary classes, but have opted not
             // to because it would likely be a cause for surprise).
-            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol()),
-                             core::noOpErrorDetailsCollector) &&
+            Types::isSubType(gs, args.args[0]->type, Types::any(gs, Types::nilClass(), Types::Symbol())) &&
             Types::all(gs, args.fullType.type, args.args[0]->type).isBottom()) {
             if (auto e = gs.beginError(args.errLoc(), errors::Infer::NonOverlappingEqual)) {
                 e.setHeader("Comparison between `{}` and `{}` is always false", args.fullType.type.show(gs),
@@ -4156,8 +4152,7 @@ public:
         // because implicit conversions are hard in the presence of subtyping. Instead, we restrict
         // the check to only subclasses of `Exception`, not arbitrary classes.
         auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
-        if (!classArg->type.isUntyped() &&
-            !Types::isSubType(gs, classArg->type, classOfException, core::noOpErrorDetailsCollector)) {
+        if (!classArg->type.isUntyped() && !Types::isSubType(gs, classArg->type, classOfException)) {
             return;
         }
 
@@ -4281,7 +4276,7 @@ public:
         }
         auto lhs = rc.data(gs)->externalType();
         ENFORCE(!lhs.isUntyped(), "lhs of Module.=== must be typed");
-        if (Types::isSubType(gs, rhs, lhs, core::noOpErrorDetailsCollector)) {
+        if (Types::isSubType(gs, rhs, lhs)) {
             res.returnType = Types::trueClass();
             return;
         }
@@ -4352,7 +4347,7 @@ public:
             return;
         }
 
-        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs, core::noOpErrorDetailsCollector)) {
+        if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs)) {
             res.returnType = Types::trueClass();
             return;
         }

@@ -203,8 +203,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             } else if (cdata->flags.isSealed && (cdata->flags.isAbstract || cdata->isModule())) {
                 auto subclasses = cdata->sealedSubclassesToUnion(gs);
-                ENFORCE(!Types::equiv(gs, subclasses, from, core::noOpErrorDetailsCollector),
-                        "sealedSubclassesToUnion about to cause infinite loop");
+                ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinite loop");
                 result = dropSubtypesOf(gs, subclasses, klasses);
             } else {
                 result = from;
@@ -222,8 +221,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             } else if (adata->flags.isSealed && (adata->flags.isAbstract || adata->isModule())) {
                 auto subclasses = adata->sealedSubclassesToUnion(gs);
-                ENFORCE(!Types::equiv(gs, subclasses, from, core::noOpErrorDetailsCollector),
-                        "sealedSubclassesToUnion about to cause infinite loop");
+                ENFORCE(!Types::equiv(gs, subclasses, from), "sealedSubclassesToUnion about to cause infinite loop");
                 result = dropSubtypesOf(gs, subclasses, klasses);
                 result = Types::all(gs, from, result);
             } else {
@@ -237,7 +235,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             }
         });
-    SLOW_ENFORCE(Types::isSubType(gs, result, from, core::noOpErrorDetailsCollector),
+    SLOW_ENFORCE(Types::isSubType(gs, result, from),
                  "dropSubtypesOf({}, [{}]) returned {}, which is not a subtype of the input", from.toString(gs),
                  fmt::map_join(klasses, ", ", [&](auto klass) { return klass.showFullName(gs); }), result.toString(gs));
     return result;
@@ -273,9 +271,8 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
     if (what.isUntyped()) {
         return true;
     }
-    return Types::isSubType(gs, Types::falseClass(), what, core::noOpErrorDetailsCollector) ||
-           Types::isSubType(gs, Types::nilClass(), what,
-                            core::noOpErrorDetailsCollector); // check if inhabited by falsy values
+    return Types::isSubType(gs, Types::falseClass(), what) ||
+           Types::isSubType(gs, Types::nilClass(), what); // check if inhabited by falsy values
 }
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {

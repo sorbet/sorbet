@@ -45,12 +45,10 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(gs, t1, t2);
-    SLOW_ENFORCE(Types::isSubType(gs, t1, ret, core::noOpErrorDetailsCollector),
-                 "\n{}\nis not a super type of\n{}\nwas lubbing with {}", ret.toString(gs), t1.toString(gs),
-                 t2.toString(gs));
-    SLOW_ENFORCE(Types::isSubType(gs, t2, ret, core::noOpErrorDetailsCollector),
-                 "\n{}\nis not a super type of\n{}\nwas lubbing with {}", ret.toString(gs), t2.toString(gs),
-                 t1.toString(gs));
+    SLOW_ENFORCE(Types::isSubType(gs, t1, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
+                 ret.toString(gs), t1.toString(gs), t2.toString(gs));
+    SLOW_ENFORCE(Types::isSubType(gs, t2, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
+                 ret.toString(gs), t2.toString(gs), t1.toString(gs));
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
@@ -167,10 +165,10 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
         categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
-    if (Types::isSubType(gs, n1, n2, core::noOpErrorDetailsCollector)) {
+    if (Types::isSubType(gs, n1, n2)) {
         categoryCounterInc("glbDistributeAnd.outcome", "ZZn1");
         return n1;
-    } else if (Types::isSubType(gs, n2, n1, core::noOpErrorDetailsCollector)) {
+    } else if (Types::isSubType(gs, n2, n1)) {
         categoryCounterInc("glbDistributeAnd.outcome", "ZZZn2");
         return n2;
     }
@@ -184,8 +182,8 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
     if (auto *a1 = cast_type<AndType>(t1)) {
         auto a1a = dropLubComponents(gs, a1->left, t2);
         auto a1b = dropLubComponents(gs, a1->right, t2);
-        auto subl = Types::isSubType(gs, a1a, t2, core::noOpErrorDetailsCollector);
-        auto subr = Types::isSubType(gs, a1b, t2, core::noOpErrorDetailsCollector);
+        auto subl = Types::isSubType(gs, a1a, t2);
+        auto subr = Types::isSubType(gs, a1b, t2);
         if (subl || subr) {
             return Types::bottom();
         }
@@ -193,8 +191,8 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
             return Types::all(gs, a1a, a1b);
         }
     } else if (auto *o1 = cast_type<OrType>(t1)) {
-        auto subl = Types::isSubType(gs, o1->left, t2, core::noOpErrorDetailsCollector);
-        auto subr = Types::isSubType(gs, o1->right, t2, core::noOpErrorDetailsCollector);
+        auto subl = Types::isSubType(gs, o1->left, t2);
+        auto subr = Types::isSubType(gs, o1->right, t2);
         if (subl && subr) {
             return Types::bottom();
         } else if (subl) {
@@ -279,10 +277,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     if (auto *a1 = cast_type<AppliedType>(t1)) {
         auto *a2 = cast_type<AppliedType>(t2);
         if (a2 == nullptr) {
-            if (isSubType(gs, t2, t1, core::noOpErrorDetailsCollector)) {
+            if (isSubType(gs, t2, t1)) {
                 return t1;
             }
-            if (isSubType(gs, t1, t2, core::noOpErrorDetailsCollector)) {
+            if (isSubType(gs, t1, t2)) {
                 return t2;
             }
             return OrType::make_shared(t1, t2);
@@ -318,7 +316,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (idxTypeMember.data(gs)->flags.isCovariant) {
                 newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
             } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                if (!Types::equiv(gs, a1->targs[i], a2->targs[j], core::noOpErrorDetailsCollector)) {
+                if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
                 // We don't need to check the idxTypeMember upper/lower bounds like the corresponding case in glb
@@ -467,7 +465,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const MetaType &m1) {
                     if (auto *m2 = cast_type<MetaType>(t2)) {
-                        if (Types::equiv(gs, m1.wrapped, m2->wrapped, core::noOpErrorDetailsCollector)) {
+                        if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
                             result = t1;
                             return;
                         }
@@ -480,7 +478,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
             // only 1st is proxy
             TypePtr und = t1.underlying(gs);
-            if (isSubType(gs, und, t2, core::noOpErrorDetailsCollector)) {
+            if (isSubType(gs, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
                 return OrType::make_shared(t1, t2);
@@ -493,7 +491,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
         // only 1st is proxy
         TypePtr und = t2.underlying(gs);
-        if (isSubType(gs, und, t1, core::noOpErrorDetailsCollector)) {
+        if (isSubType(gs, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
             return OrType::make_shared(t1, t2);
@@ -641,13 +639,11 @@ TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     auto ret = glb(gs, t1, t2);
     ret.sanityCheck(gs);
 
-    SLOW_ENFORCE(Types::isSubType(gs, ret, t1, core::noOpErrorDetailsCollector),
-                 "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}", ret.toString(gs), t1.toString(gs),
-                 t2.toString(gs));
+    SLOW_ENFORCE(Types::isSubType(gs, ret, t1), "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}", ret.toString(gs),
+                 t1.toString(gs), t2.toString(gs));
 
-    SLOW_ENFORCE(Types::isSubType(gs, ret, t2, core::noOpErrorDetailsCollector),
-                 "\n{}\n is not a subtype of\n{}\nwas glbbing with\n{}", ret.toString(gs), t2.toString(gs),
-                 t1.toString(gs));
+    SLOW_ENFORCE(Types::isSubType(gs, ret, t2), "\n{}\n is not a subtype of\n{}\nwas glbbing with\n{}",
+                 ret.toString(gs), t2.toString(gs), t1.toString(gs));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
     //                !Types::isSubTypeUnderConstraint(gs, t1, t2) || ret == t1 || ret->isUntyped(),
@@ -832,7 +828,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 [&](const MetaType &m1) {
                     auto *m2 = cast_type<MetaType>(t2);
                     ENFORCE(m2 != nullptr);
-                    if (Types::equiv(gs, m1.wrapped, m2->wrapped, core::noOpErrorDetailsCollector)) {
+                    if (Types::equiv(gs, m1.wrapped, m2->wrapped)) {
                         result = t1;
                     } else {
                         result = Types::bottom();
@@ -842,7 +838,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return result;
         } else {
             // only 1st is proxy
-            if (Types::isSubType(gs, t1, t2, core::noOpErrorDetailsCollector)) {
+            if (Types::isSubType(gs, t1, t2)) {
                 return t1;
             } else {
                 return Types::bottom();
@@ -850,7 +846,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     } else if (is_proxy_type(t2)) {
         // only 1st is proxy
-        if (Types::isSubType(gs, t2, t1, core::noOpErrorDetailsCollector)) {
+        if (Types::isSubType(gs, t2, t1)) {
             return t2;
         } else {
             return Types::bottom();
@@ -858,13 +854,13 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (auto *o2 = cast_type<OrType>(t2)) { // 3, 6
-        bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2, core::noOpErrorDetailsCollector);
+        bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
             return t1;
         }
 
-        bool collapseInRight = Types::isAsSpecificAs(gs, t2, t1, core::noOpErrorDetailsCollector);
+        bool collapseInRight = Types::isAsSpecificAs(gs, t2, t1);
         if (collapseInRight) {
             categoryCounterInc("glb", "ZZor");
             return t2;
@@ -872,12 +868,12 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
         if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1)) {
             auto lft = Types::all(gs, t1, o2->left);
-            if (Types::isAsSpecificAs(gs, lft, o2->right, core::noOpErrorDetailsCollector) && !lft.isBottom()) {
+            if (Types::isAsSpecificAs(gs, lft, o2->right) && !lft.isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::all(gs, t1, o2->right);
-            if (Types::isAsSpecificAs(gs, rght, o2->left, core::noOpErrorDetailsCollector) && !rght.isBottom()) {
+            if (Types::isAsSpecificAs(gs, rght, o2->left) && !rght.isBottom()) {
                 categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
@@ -982,13 +978,12 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 if (a2TypeMember.data(gs)->flags.isCovariant) {
                     newTargs.emplace_back(Types::all(gs, a1->targs[j], a2->targs[i]));
                 } else if (a2TypeMember.data(gs)->flags.isInvariant) {
-                    if (!Types::equiv(gs, a1->targs[j], a2->targs[i], core::noOpErrorDetailsCollector)) {
+                    if (!Types::equiv(gs, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
                     const auto &lambdaParam = cast_type<LambdaParam>(idx.data(gs)->resultType);
-                    if (a1->targs[j].isUntyped() &&
-                        Types::isSubType(gs, lambdaParam->lowerBound, a2->targs[i], core::noOpErrorDetailsCollector) &&
-                        Types::isSubType(gs, a2->targs[i], lambdaParam->upperBound, core::noOpErrorDetailsCollector)) {
+                    if (a1->targs[j].isUntyped() && Types::isSubType(gs, lambdaParam->lowerBound, a2->targs[i]) &&
+                        Types::isSubType(gs, a2->targs[i], lambdaParam->upperBound)) {
                         newTargs.emplace_back(a2->targs[i]);
                     } else {
                         newTargs.emplace_back(a1->targs[j]);
@@ -1404,7 +1399,11 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         return;
                     }
 
-                    result = Types::equiv(gs, m1.wrapped, m2->wrapped, errorDetailsCollector);
+                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
+                    // backwards compatibility, but maybe we should do this under the `constr`
+                    // that's in scope.
+                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
+                                                         m2->wrapped, errorDetailsCollector);
                 });
             return result;
             // both are proxy
@@ -1428,10 +1427,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 }
 
-template <class T>
-bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
+bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible,
-                                    errorDetailsCollector);
+                                    core::noOpErrorDetailsCollector);
 }
 
 template <class T>
@@ -1572,9 +1570,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2, errorDetailsCollector); // 1
 }
 
-template <class T>
-bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
-    return isSubType(gs, t1, t2, errorDetailsCollector) && isSubType(gs, t2, t1, errorDetailsCollector);
+bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    return isSubType(gs, t1, t2) && isSubType(gs, t2, t1);
 }
 
 template <class T>
@@ -1585,9 +1582,8 @@ bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, 
            isSubTypeUnderConstraint(gs, constr, t2, t1, mode, errorDetailsCollector);
 }
 
-template <class T>
-bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
-    return isAsSpecificAs(gs, t1, t2, errorDetailsCollector) && isAsSpecificAs(gs, t2, t1, errorDetailsCollector);
+bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
 template <class T>
@@ -1617,25 +1613,10 @@ template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const T
 template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
                                core::NoOpErrorDetailsCollector &errorDetailsCollector);
 
-template bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                           ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                           NoOpErrorDetailsCollector &errorDetailsCollector);
-
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                           const TypePtr &t2, core::ErrorDetailsCollector &errorDetailsCollector);
 template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                           const TypePtr &t2, core::NoOpErrorDetailsCollector &errorDetailsCollector);
-
-template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::NoOpErrorDetailsCollector &errorDetailsCollector);
-
-template bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::ErrorDetailsCollector &errorDetailsCollector);
-template bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
-                                    core::NoOpErrorDetailsCollector &errorDetailsCollector);
 
 template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                    const TypePtr &t2,

@@ -553,7 +553,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType, core::noOpErrorDetailsCollector)) {
+        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
@@ -570,7 +570,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType, core::noOpErrorDetailsCollector)) {
+        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
@@ -1050,8 +1050,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         auto parentRecvLoc = ctx.locAt(parentRecv.loc);
 
                         if (recvLoc.source(ctx) != parentRecvLoc.source(ctx) ||
-                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type,
-                                                         core::noOpErrorDetailsCollector)) {
+                            !core::Types::equivNoUntyped(ctx, recvType.type, parentRecv.recv.type)) {
                             // Safeguard against most unrelated missing method errors
                             // Out of ~~laziness~~ simplicitity, this does not account for things
                             // like `==` or `===` where the relevant type to check is arg0, not recv
@@ -1483,7 +1482,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
-                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType, core::noOpErrorDetailsCollector)) {
+                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
@@ -1646,8 +1645,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                   argLoc.source(ctx).value());
                                 }
                             }
-                        } else if (!ty.type.isUntyped() &&
-                                   core::Types::isSubType(ctx, ty.type, castType, core::noOpErrorDetailsCollector)) {
+                        } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                                 e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                             ty.type.show(ctx), castType.show(ctx));

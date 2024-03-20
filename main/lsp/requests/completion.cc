@@ -359,8 +359,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
     ENFORCE(blkArg.flags.isBlock);
 
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
-    if (hasBlockType &&
-        !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type, core::noOpErrorDetailsCollector)) {
+    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
         string blkArgs;
         if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type)) {
             if (appliedType->targs.size() >= 2) {
