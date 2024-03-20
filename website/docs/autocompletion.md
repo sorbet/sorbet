@@ -6,7 +6,7 @@ sidebar_label: Autocompletion
 
 Sorbet supports autocompletion via LSP.
 
-<video autoplay loop muted playsinline width="934" style="max-width: 100%;">
+<video autoplay loop muted playsinline style="max-width: calc(min(934px, 100%));">
   <source src="/img/lsp/autocompletion.mp4" type="video/mp4">
 </video>
 
@@ -125,7 +125,7 @@ For more information, see
 
 Sorbet can suggest a YARD doc snippet for methods.
 
-<video autoplay loop muted playsinline width="813" style="max-width: 100%;">
+<video autoplay loop muted playsinline style="max-width: calc(min(813px, 100%));">
   <source src="/img/lsp/yard-snippet.mp4" type="video/mp4">
 </video>
 
