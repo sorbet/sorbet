@@ -62,11 +62,12 @@ thing under the cursor:
 <!-- TODO(jez) Should we have links to these LSP features eventually? -->
 
 - Hover (`textDocument/hover`)
-- Go to Definition (`textDocument/definition`)
-- Go to Type Definition (`textDocument/typeDefinition`)
-- Go to Implementation (`textDocument/typeDefinition`)
+- [Go to Definition](go-to-def.md) (`textDocument/definition`)
+- [Go to Type Definition](go-to-def.md#definition-vs-type-definition)
+  (`textDocument/typeDefinition`)
+- [Go to Implementation](go-to-def.md#go-to-implementations--find-all-implementations)
+  (`textDocument/implementation`)
 - [Autocompletion](autocompletion.md) (`textDocument/complete`)
-- Rename Symbol (`textDocument/rename`)
 - Signature Help (`textDocument/signatureHelp`)
 - Document Highlight (`textDocument/documentHighlight`)
 
