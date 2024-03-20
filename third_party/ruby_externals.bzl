@@ -11,6 +11,15 @@ def register_ruby_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libyaml.BUILD",
     )
 
+    libffi_version = "3.4.5"
+    http_archive(
+        name = "libffi",
+        urls = _github_public_urls("libffi/libffi/releases/download/v{}/libffi-{}.tar.gz".format(libffi_version, libffi_version)),
+        sha256 = "96fff4e589e3b239d888d9aa44b3ff30693c2ba1617f953925a70ddebcc102b2",
+        strip_prefix = "libffi-{}".format(libffi_version),
+        build_file = "@com_stripe_ruby_typer//third_party/ruby:libffi.BUILD",
+    )
+
     http_archive(
         name = "rules_rust",
         sha256 = "25209daff2ba21e818801c7b2dab0274c43808982d6aea9f796d899db6319146",
@@ -128,6 +137,9 @@ def register_ruby_dependencies():
         sha256 = "96518814d9832bece92a85415a819d4893b307db5921ae1f0f751a9a89a56b7d",
         strip_prefix = "ruby-3.3.0",
         build_file = ruby_3_3_build,
+        patches = [
+            "@com_stripe_ruby_typer//third_party/ruby:ldflags.patch",
+        ],
     )
 
 def _rubygems_urls(gem):
