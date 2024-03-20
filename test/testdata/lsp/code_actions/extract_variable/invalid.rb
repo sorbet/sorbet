@@ -119,3 +119,8 @@ end
 
 def endless_method = 1 + 123
 #                        ^^^ apply-code-action: [A] Extract Variable
+
+def multi_stat_selection
+  1 + 1; 2 + 2
+# ^^^^^^^^^^^^ apply-code-action: [A] Extract Variable
+end
