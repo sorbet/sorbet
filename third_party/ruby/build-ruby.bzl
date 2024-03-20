@@ -38,7 +38,7 @@ source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
 
 _BUILD_RUBY = """#!/bin/bash
 
-set -exuo pipefail
+set -euo pipefail
 
 base="$PWD"
 out_dir="$base/{toolchain}"
@@ -174,7 +174,7 @@ cp "$out_dir/bin/bundle" "$out_dir/bin/bundler"
 
 popd > /dev/null
 
-# rm -rf "$build_dir"
+rm -rf "$build_dir"
 
 """
 
