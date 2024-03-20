@@ -1209,21 +1209,21 @@ module Opus::Types::Test
 
       it 'fails validation with a value not from the enum' do
         msg = check_error_message_for_obj(@type, :baz)
-        assert_equal("Expected type T.deprecated_enum([:foo, :bar]), got :baz", msg)
+        assert_equal("Expected type T.deprecated_enum([:bar, :foo]), got :baz", msg)
       end
 
       it 'does not coerce types' do
         msg = check_error_message_for_obj(@type, 'foo')
-        assert_equal('Expected type T.deprecated_enum([:foo, :bar]), got "foo"', msg)
+        assert_equal('Expected type T.deprecated_enum([:bar, :foo]), got "foo"', msg)
 
         type = T.deprecated_enum(%w[foo bar])
         msg = check_error_message_for_obj(type, :foo)
-        assert_equal('Expected type T.deprecated_enum(["foo", "bar"]), got :foo', msg)
+        assert_equal('Expected type T.deprecated_enum(["bar", "foo"]), got :foo', msg)
       end
 
       it 'fails validation with a nil value' do
         msg = check_error_message_for_obj(@type, nil)
-        assert_equal("Expected type T.deprecated_enum([:foo, :bar]), got nil", msg)
+        assert_equal("Expected type T.deprecated_enum([:bar, :foo]), got nil", msg)
       end
     end
 
