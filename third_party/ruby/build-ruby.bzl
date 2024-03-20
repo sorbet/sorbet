@@ -116,6 +116,22 @@ run_cmd ./configure \
         --disable-install-doc \
         --prefix=/
 
+# Make is dumb; these files are listed as a group output, which means that if make
+# thinks any one of them changed, they all have to change.  And since some of our
+# custom patches are touching things like insns.def, it looks like these files need
+# to be rebuilt.  Unfortunately, rebuilding these files requires an existing Ruby
+# installation, and we've made a conscious decision to not require that on the host
+# system (or downloading one as part of the Bazel build).
+#
+# We've handled regenerating the files that we need as part of our patching process,
+# so try to convince make these are not the files it's looking for.
+mkdir -p lib/ruby_vm/rjit/
+touch opt_sc.inc optinsn.inc optunifs.inc insns.inc insns_info.inc vmtc.inc vm.inc mjit_compile.inc id.c id.h miniprelude.c lib/ruby_vm/rjit/instruction.rb
+# We also need to touch these files, since they depend on id.h.  But we are only
+# defining new global identifiers to use in C code; we're not touching tokens used
+# by the parser in any way.
+touch ext/ripper/ripper.y ext/ripper/ripper.c parse.c parse.h parse.y
+
 run_cmd make V=1 -j8
 run_cmd make V=1 install
 
