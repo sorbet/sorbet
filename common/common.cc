@@ -492,12 +492,8 @@ public:
                 // Aparently this is the only way to convert a std::exception_ptr to std::exception
                 std::rethrow_exception(eptr);
             } catch (const std::exception &e) {
-                int status;
-                // nullptr to request that __cxa_demangle allocate the string on our behalf,
-                // instead of populating a pre-allocated buffer.
-                auto demangled = abi::__cxa_demangle(typeid(e).name(), nullptr, nullptr, &status);
-                sorbet::fatalLogger->error("Sorbet raised uncaught exception type={} what={}", demangled, e.what());
-                std::free(demangled);
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type={} what={}",
+                                           demangle(typeid(e).name()), e.what());
             } catch (const std::string &s) {
                 sorbet::fatalLogger->error("Sorbet raised uncaught exception type=std::string what={}", s);
             } catch (const char *s) {
