@@ -2,6 +2,7 @@
 #define SORBET_CORE_PACKAGES_PACKAGEDB_H
 
 #include "common/common.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/Files.h"
 #include "core/Names.h"
 #include "core/packages/PackageInfo.h"
@@ -66,6 +67,11 @@ public:
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
 
+    const std::vector<core::SymbolRef> extraExportsFor(packages::MangledName package) const;
+    void registerExtraAutocorrectFor(const packages::MangledName package, const core::SymbolRef toExport,
+                                     core::FileRef fref);
+    void removeExtraAutocorrectFor(const core::FileRef fref);
+
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
@@ -73,6 +79,13 @@ private:
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+
+    // package where we *report* errors => [(File where error has happened, Symbol for a package to export)]
+    UnorderedMap<packages::MangledName, UnorderedSet<std::pair<core::FileRef, core::SymbolRef>>> requiresExport_;
+
+    // maps files where error *occur* to the package files where the error is repoted
+    // it's used to invalidate `requiresExport_`
+    UnorderedMap<core::FileRef, std::vector<packages::MangledName>> errorSources_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having

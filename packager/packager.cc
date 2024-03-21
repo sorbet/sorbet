@@ -281,7 +281,6 @@ public:
         return insertionLoc;
     }
 
-
     std::optional<core::Loc> newExportLoc(const core::GlobalState &gs) const {
         auto insertionLoc = core::Loc::none(loc.file());
         // first let's try adding it to the end of the imports.
