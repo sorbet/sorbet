@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "absl/strings/escaping.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
@@ -492,12 +493,14 @@ public:
                 // Aparently this is the only way to convert a std::exception_ptr to std::exception
                 std::rethrow_exception(eptr);
             } catch (const std::exception &e) {
-                sorbet::fatalLogger->error("Sorbet raised uncaught exception type={} what={}",
-                                           demangle(typeid(e).name()), e.what());
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"{}\" what=\"{}\"",
+                                           demangle(typeid(e).name()), absl::CEscape(e.what()));
             } catch (const std::string &s) {
-                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=std::string what={}", s);
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=std::string what=\"{}\"",
+                                           absl::CEscape(s));
             } catch (const char *s) {
-                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"char *\" what={}", s);
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"char *\" what=\"{}\"",
+                                           absl::CEscape(s));
             } catch (...) {
                 sorbet::fatalLogger->error("Sorbet raised uncaught exception type=<unknown> what=\"\"");
             }
