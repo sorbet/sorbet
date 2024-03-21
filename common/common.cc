@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "absl/strings/escaping.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
@@ -486,7 +487,39 @@ vector<int> sorbet::findLineBreaks(string_view s) {
 class SetTerminateHandler {
 public:
     static void on_terminate() {
+        auto eptr = current_exception();
+        if (eptr) {
+            try {
+                // Aparently this is the only way to convert a std::exception_ptr to std::exception
+                std::rethrow_exception(eptr);
+            } catch (const std::exception &e) {
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"{}\" what=\"{}\"",
+                                           demangle(typeid(e).name()), absl::CEscape(e.what()));
+            } catch (const std::string &s) {
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=std::string what=\"{}\"",
+                                           absl::CEscape(s));
+            } catch (const char *s) {
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"char *\" what=\"{}\"",
+                                           absl::CEscape(s));
+            } catch (...) {
+                sorbet::fatalLogger->error("Sorbet raised uncaught exception type=<unknown> what=\"\"");
+            }
+        } else {
+            sorbet::fatalLogger->error("Sorbet raised uncaught exception type=<unknown> what=\"\"");
+        }
+
+        // Might print the backtrace twice if it's a SorbetException, because
+        // Exception::raise already prints the backtrace when the exception is raised. But
+        // SorbetException are caught at various places inside Sorbet, and so might not
+        // always terminate the process.
         sorbet::Exception::printBacktrace();
+
+        // "A std::terminate_handler shall terminate execution of the program without returning to
+        // the caller, otherwise the behavior is undefined."
+        //
+        // In libc++, the behavior is to print "terminate_handler unexpectedly returned" and then
+        // call abort()
+        abort();
     }
 
     SetTerminateHandler() {

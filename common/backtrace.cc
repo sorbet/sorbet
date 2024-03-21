@@ -46,7 +46,7 @@ void sorbet::Exception::printBacktrace() noexcept {
 
     string res = addr2line(programName, stackTraces, traceSize);
     filter_unnecessary(res);
-    fatalLogger->error("Backtrace from terminate:\n{}", res.c_str());
+    fatalLogger->error("Backtrace:\n{}", res.c_str());
 
     if (messages != nullptr) {
         free(messages);

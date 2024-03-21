@@ -1,2 +1,2 @@
 Exception::raise(): statsd initialization failed: host=f4K#l1N&.com port=8200 prefix=foo.bar.counters
-caught N6sorbet15SorbetExceptionE: statsd initialization failed: host=f4K#l1N&.com port=8200 prefix=foo.bar.counters
+Sorbet raised uncaught exception type="sorbet::SorbetException" what="statsd initialization failed: host=f4K#l1N&.com port=8200 prefix=foo.bar.counters"
