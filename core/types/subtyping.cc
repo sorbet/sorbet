@@ -1300,8 +1300,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                 if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
                                     // TODO(neil): once we pass in whether this a covariant or contravariant call,
                                     // we should reword it in the "expected ... but got ..." form
-                                    auto message = ErrorColors::format("`{}` is not a subtype of `{}` for item `{}`",
-                                                                       a1.elems[i].show(gs), el2.show(gs), i);
+                                    auto message =
+                                        ErrorColors::format("`{}` is not a subtype of `{}` for tuple index `{}`",
+                                                            a1.elems[i].show(gs), el2.show(gs), i);
                                     subCollector.message = message;
                                     errorDetailsCollector.addErrorDetails(subCollector);
                                 } else {

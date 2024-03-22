@@ -5,7 +5,7 @@ test.rb:65: The `lower` type bound `[Lower]` must be a supertype of the parent's
     47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `Middle` is not a subtype of `Lower` for item `0`
+    `Middle` is not a subtype of `Lower` for tuple index `0`
   Autocorrect: Use `-a` to autocorrect
     test.rb:65: Replace with `[Middle]`
     65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
@@ -18,7 +18,7 @@ test.rb:65: The `upper` type bound `[Upper]` must be a subtype of the parent's `
     47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `Upper` is not a subtype of `Middle` for item `0`
+    `Upper` is not a subtype of `Middle` for tuple index `0`
   Autocorrect: Use `-a` to autocorrect
     test.rb:65: Replace with `[Middle]`
     65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
@@ -31,7 +31,7 @@ test.rb:93: The `fixed` type bound `[Middle]` must be equivalent to the parent's
     87 |  X = type_member {{ fixed: [Upper] }}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `Upper` is not a subtype of `Middle` for item `0`
+    `Upper` is not a subtype of `Middle` for tuple index `0`
   Autocorrect: Use `-a` to autocorrect
     test.rb:93: Replace with `[Upper]`
     93 |  X = type_member {{ fixed: [Middle] }}
@@ -41,7 +41,7 @@ test.rb:99: The `lower` type bound `[Upper]` is not a subtype of the `upper` typ
     99 |  X = type_member {{upper: [Lower], lower: [Upper] }}
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `Upper` is not a subtype of `Lower` for item `0`
+    `Upper` is not a subtype of `Lower` for tuple index `0`
 
 test.rb:68: Parameter `x` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
     68 |  def foo(x, y:, z: [''], &blk)
@@ -52,7 +52,7 @@ test.rb:68: Parameter `x` of type `[String]` not compatible with type of overrid
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Possible explanation:
-    `Integer` is not a subtype of `String` for item `0`
+    `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:68: Keyword parameter `y` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
     68 |  def foo(x, y:, z: [''], &blk)
@@ -63,7 +63,7 @@ test.rb:68: Keyword parameter `y` of type `[String]` not compatible with type of
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Possible explanation:
-    `Integer` is not a subtype of `String` for item `0`
+    `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:68: Keyword parameter `z` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
     68 |  def foo(x, y:, z: [''], &blk)
@@ -74,7 +74,7 @@ test.rb:68: Keyword parameter `z` of type `[String]` not compatible with type of
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Possible explanation:
-    `Integer` is not a subtype of `String` for item `0`
+    `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:68: Block parameter `blk` of type `T.proc.returns([String])` not compatible with type of overridable method `A#foo` https://srb.help/5035
     68 |  def foo(x, y:, z: [''], &blk)
@@ -86,7 +86,7 @@ test.rb:68: Block parameter `blk` of type `T.proc.returns([String])` not compati
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Possible explanation:
     `[Integer]` is not a subtype of `[String]` for covariant type member `Proc0::Return`
-      `Integer` is not a subtype of `String` for item `0`
+      `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:68: Return type `[String]` does not match return type of overridable method `A#foo` https://srb.help/5035
     68 |  def foo(x, y:, z: [''], &blk)
@@ -97,7 +97,7 @@ test.rb:68: Return type `[String]` does not match return type of overridable met
   Note:
     A method's return type must be a subtype of the return type on the super method.
   Possible explanation:
-    `String` is not a subtype of `Integer` for item `0`
+    `String` is not a subtype of `Integer` for tuple index `0`
 
 test.rb:73: Parameter **`rest` of type `[String]` not compatible with type of overridable method `A#bar` https://srb.help/5035
     73 |  def bar(**rest)
@@ -108,7 +108,7 @@ test.rb:73: Parameter **`rest` of type `[String]` not compatible with type of ov
   Note:
     A parameter's type must be a supertype of the same parameter's type on the super method.
   Possible explanation:
-    `Integer` is not a subtype of `String` for item `0`
+    `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:7: Expected `[Integer]` but found `[String("")]` for method result type https://srb.help/7005
      7 |  ['']
@@ -122,7 +122,7 @@ test.rb:7: Expected `[Integer]` but found `[String("")]` for method result type 
      7 |  ['']
           ^^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer` for item `0`
+    `String("")` is not a subtype of `Integer` for tuple index `0`
 
 test.rb:10: Expected `[Integer]` but found `[String("")]` for argument `x` https://srb.help/7002
     10 |foo([''])
@@ -136,7 +136,7 @@ test.rb:10: Expected `[Integer]` but found `[String("")]` for argument `x` https
     10 |foo([''])
             ^^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer` for item `0`
+    `String("")` is not a subtype of `Integer` for tuple index `0`
 
 test.rb:17: Expected `[Integer]` for keyword parameter `x` but found `[String]` from keyword splat https://srb.help/7002
     17 |bar(**h)
@@ -156,7 +156,7 @@ test.rb:17: Expected `[Integer]` for keyword parameter `x` but found `[String]` 
     A `Hash` passed as a keyword splat must match the type of all keyword parameters
     because Sorbet cannot see what specific keys exist in the `Hash`.
   Possible explanation:
-    `String` is not a subtype of `Integer` for item `0`
+    `String` is not a subtype of `Integer` for tuple index `0`
   Autocorrect: Use `-a` to autocorrect
     test.rb:17: Replace with `T.unsafe(h)`
     17 |bar(**h)
@@ -171,9 +171,9 @@ test.rb:24: Expected `T.proc.params(arg0: [Integer]).returns([Integer])` but fou
                     ^^^
   Possible explanation:
     `[String]` is not a subtype of `[Integer]` for covariant type member `Proc1::Return`
-      `String` is not a subtype of `Integer` for item `0`
+      `String` is not a subtype of `Integer` for tuple index `0`
     `[String]` is not a supertype of `[Integer]` for contravariant type member `Proc1::Arg0`
-      `Integer` is not a subtype of `String` for item `0`
+      `Integer` is not a subtype of `String` for tuple index `0`
 
 test.rb:27: Expected `[Integer]` but found `[String("")]` for block result type https://srb.help/7005
     27 |  ['']
@@ -187,7 +187,7 @@ test.rb:27: Expected `[Integer]` but found `[String("")]` for block result type 
     27 |  ['']
           ^^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer` for item `0`
+    `String("")` is not a subtype of `Integer` for tuple index `0`
 
 test.rb:60: `[String]` is not a subtype of upper bound of type member `::A::X` https://srb.help/5060
     60 |A[[String]]
@@ -196,7 +196,7 @@ test.rb:60: `[String]` is not a subtype of upper bound of type member `::A::X` h
     47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `String` is not a subtype of `Middle` for item `0`
+    `String` is not a subtype of `Middle` for tuple index `0`
 
 test.rb:60: `[String]` is not a supertype of lower bound of type member `::A::X` https://srb.help/5060
     60 |A[[String]]
@@ -205,7 +205,7 @@ test.rb:60: `[String]` is not a supertype of lower bound of type member `::A::X`
     47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Possible explanation:
-    `Middle` is not a subtype of `String` for item `0`
+    `Middle` is not a subtype of `String` for tuple index `0`
 
 test.rb:80: Changing the type of a variable in a loop is not permitted https://srb.help/7001
     80 |  a = ['']
@@ -218,7 +218,7 @@ test.rb:80: Changing the type of a variable in a loop is not permitted https://s
     77 |a = [1]
             ^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer(1)` for item `0`
+    `String("")` is not a subtype of `Integer(1)` for tuple index `0`
 
 test.rb:106: Expected `[Integer(1)]` but found `[String("")]` for key `Symbol(:foo)` https://srb.help/7002
      106 |xs[:foo] = ['']
@@ -233,7 +233,7 @@ test.rb:106: Expected `[Integer(1)]` but found `[String("")]` for key `Symbol(:f
      106 |xs[:foo] = ['']
                      ^^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer(1)` for item `0`
+    `String("")` is not a subtype of `Integer(1)` for tuple index `0`
 
 test.rb:108: Argument does not have asserted type `[Integer]` https://srb.help/7007
      108 |T.let([''], [Integer])
@@ -243,7 +243,7 @@ test.rb:108: Argument does not have asserted type `[Integer]` https://srb.help/7
      108 |T.let([''], [Integer])
                 ^^^^
   Possible explanation:
-    `String("")` is not a subtype of `Integer` for item `0`
+    `String("")` is not a subtype of `Integer` for tuple index `0`
 
 test.rb:51: Expected `[String]` but found `[Integer(1)]` for field https://srb.help/7013
     51 |    @a = [1]
@@ -257,5 +257,5 @@ test.rb:51: Expected `[String]` but found `[Integer(1)]` for field https://srb.h
     51 |    @a = [1]
                  ^^^
   Possible explanation:
-    `Integer(1)` is not a subtype of `String` for item `0`
+    `Integer(1)` is not a subtype of `String` for tuple index `0`
 Errors: 21
