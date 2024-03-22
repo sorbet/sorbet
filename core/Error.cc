@@ -134,7 +134,7 @@ void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector e) {
     children.push_back(e);
 }
 
-void toErrorSectionHelper(ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel = 0) {
+void toErrorSectionHelper(ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel) {
     ENFORCE(e.message.length() > 0);
     std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
     result.push_back(ErrorLine(core::Loc::none(), move(message), ErrorLine::LocDisplay::Hidden));
