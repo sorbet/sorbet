@@ -1218,16 +1218,10 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 auto &a = a1->targs[i];
                 auto &b = a2->targs[j];
                 bool doesMemberMatch = true;
-                string variance;
-                string joiningText;
                 auto subCollector = errorDetailsCollector.newCollector();
                 if (idxTypeMember.data(gs)->flags.isCovariant) {
-                    variance = "covariant";
-                    joiningText = "a subtype of";
                     doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a, b, mode, subCollector);
                 } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                    variance = "invariant";
-                    joiningText = "equivalent to";
                     if (mode == UntypedMode::AlwaysCompatible) {
                         doesMemberMatch = Types::equivUnderConstraint(gs, constr, a, b, subCollector);
                     } else {
@@ -1238,8 +1232,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a, b, subCollector);
                     }
                 } else if (idxTypeMember.data(gs)->flags.isContravariant) {
-                    variance = "contravariant";
-                    joiningText = "a supertype of";
                     doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, b, a, mode, subCollector);
                 }
                 if (!doesMemberMatch) {
@@ -1249,6 +1241,25 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         // we should reword it in the "expected ... but got ..." form
                         // TODO(neil): if the type member is for a Proc we should have special wording,
                         // ie. Proc return value instead of Proc1::Return and Proc arg 1 instead of Proc1::Arg1
+                        string variance;
+                        string joiningText;
+                        switch (idxTypeMember.data(gs)->variance()) {
+                            case Variance::CoVariant: {
+                                variance = "covariant";
+                                joiningText = "a subtype of";
+                                break;
+                            }
+                            case Variance::Invariant: {
+                                variance = "invariant";
+                                joiningText = "equivalent to";
+                                break;
+                            }
+                            case Variance::ContraVariant: {
+                                variance = "contravariant";
+                                joiningText = "a supertype of";
+                                break;
+                            }
+                        }
                         auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a.show(gs),
                                                            joiningText, b.show(gs), variance, idxTypeMember.show(gs));
                         subCollector.message = message;
