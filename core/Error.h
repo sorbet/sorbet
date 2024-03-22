@@ -105,7 +105,7 @@ struct ErrorSection {
         Collector newCollector() const {
             return Collector();
         }
-        std::optional<ErrorSection> toErrorSection();
+        std::optional<ErrorSection> toErrorSection() const;
 
         constexpr static NoOpCollector NO_OP = NoOpCollector();
     };
