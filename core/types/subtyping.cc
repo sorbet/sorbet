@@ -1215,24 +1215,24 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                 ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
 
-                auto &a = a1->targs[i];
-                auto &b = a2->targs[j];
+                auto &a1i = a1->targs[i];
+                auto &a2j = a2->targs[j];
                 bool doesMemberMatch = true;
                 auto subCollector = errorDetailsCollector.newCollector();
                 if (idxTypeMember.data(gs)->flags.isCovariant) {
-                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a, b, mode, subCollector);
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a1i, a2j, mode, subCollector);
                 } else if (idxTypeMember.data(gs)->flags.isInvariant) {
                     if (mode == UntypedMode::AlwaysCompatible) {
-                        doesMemberMatch = Types::equivUnderConstraint(gs, constr, a, b, subCollector);
+                        doesMemberMatch = Types::equivUnderConstraint(gs, constr, a1i, a2j, subCollector);
                     } else {
                         // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
                         // except when `constr` is EmptyFrozenConstraint, so there's no observable
                         // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
                         // May as well do it for symmetry though.
-                        doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a, b, subCollector);
+                        doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a1i, a2j, subCollector);
                     }
                 } else if (idxTypeMember.data(gs)->flags.isContravariant) {
-                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, b, a, mode, subCollector);
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a2j, a1i, mode, subCollector);
                 }
                 if (!doesMemberMatch) {
                     result = false;
@@ -1260,8 +1260,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                 break;
                             }
                         }
-                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a.show(gs),
-                                                           joiningText, b.show(gs), variance, idxTypeMember.show(gs));
+                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
                         subCollector.message = message;
                         errorDetailsCollector.addErrorDetails(subCollector);
                     } else {
