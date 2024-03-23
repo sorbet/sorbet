@@ -167,7 +167,6 @@ unique_ptr<LSPMessage> MultiThreadedLSPWrapper::read(int timeoutMs) {
 
 void LSPWrapper::enableAllExperimentalFeatures() {
     opts->lspDocumentHighlightEnabled = true;
-    opts->lspDocumentSymbolEnabled = true;
     opts->lspSignatureHelpEnabled = true;
     opts->lspDocumentFormatRubyfmtEnabled = true;
 }

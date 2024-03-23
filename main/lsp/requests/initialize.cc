@@ -25,7 +25,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->textDocumentSync = TextDocumentSyncKind::Full;
     serverCap->definitionProvider = true;
     serverCap->typeDefinitionProvider = true;
-    serverCap->documentSymbolProvider = opts.lspDocumentSymbolEnabled;
+    serverCap->documentSymbolProvider = true;
     serverCap->workspaceSymbolProvider = true;
     serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
     serverCap->hoverProvider = true;
