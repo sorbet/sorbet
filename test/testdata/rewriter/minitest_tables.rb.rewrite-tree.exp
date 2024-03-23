@@ -49,9 +49,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'works with instance methods'><<todo method>>(&<blk>)
       [<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()].each() do |value|
         begin
-          <self>.puts(value.foo())
-          <self>.outside_method()
-          <emptyTree>::<C T>.reveal_type(value)
+          "works with instance methods"
+          begin
+            <self>.puts(value.foo())
+            <self>.outside_method()
+            <emptyTree>::<C T>.reveal_type(value)
+          end
         end
       end
     end
@@ -63,8 +66,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a constant list'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST>.each() do |value|
         begin
-          <self>.puts(value.foo())
-          <emptyTree>::<C T>.reveal_type(value)
+          "succeeds with a constant list"
+          begin
+            <self>.puts(value.foo())
+            <emptyTree>::<C T>.reveal_type(value)
+          end
         end
       end
     end
@@ -76,8 +82,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a typed constant list'><<todo method>>(&<blk>)
       <emptyTree>::<C ANOTHER_CONST_LIST>.each() do |value|
         begin
-          <self>.puts(value.foo())
-          <emptyTree>::<C T>.reveal_type(value)
+          "succeeds with a typed constant list"
+          begin
+            <self>.puts(value.foo())
+            <emptyTree>::<C T>.reveal_type(value)
+          end
         end
       end
     end
@@ -89,8 +98,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeed with a local variable but cannot type it'><<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |value|
         begin
-          <self>.puts(value.foo())
-          <emptyTree>::<C T>.reveal_type(value)
+          "succeed with a local variable but cannot type it"
+          begin
+            <self>.puts(value.foo())
+            <emptyTree>::<C T>.reveal_type(value)
+          end
         end
       end
     end
@@ -101,7 +113,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it 'fails with non-it statements'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST>.each() do |value|
-        <self>.puts(x)
+        begin
+          "fails with non-it statements"
+          <self>.puts(x)
+        end
       end
     end
 
@@ -111,7 +126,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       ["foo", 5, {:x => false}].each() do |v|
-        <emptyTree>::<C T>.reveal_type(v)
+        begin
+          "handles lists with several types"
+          <emptyTree>::<C T>.reveal_type(v)
+        end
       end
     end
 
@@ -122,8 +140,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'blocks get padded with NilClass arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |k, v|
         begin
-          <emptyTree>::<C T>.reveal_type(k)
-          <emptyTree>::<C T>.reveal_type(v)
+          "blocks get padded with NilClass arguments"
+          begin
+            <emptyTree>::<C T>.reveal_type(k)
+            <emptyTree>::<C T>.reveal_type(v)
+          end
         end
       end
     end
@@ -135,8 +156,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'multiple it blocks are ok with multiple arguments'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |k, v|
         begin
-          <emptyTree>::<C T>.reveal_type(k)
-          <emptyTree>::<C T>.reveal_type(v)
+          "multiple it blocks are ok with multiple arguments"
+          begin
+            <emptyTree>::<C T>.reveal_type(k)
+            <emptyTree>::<C T>.reveal_type(v)
+          end
         end
       end
     end
@@ -155,6 +179,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             v = <assignTemp>$6.[](1)
             <assignTemp>$5
           end
+          "destructured blocks get padded with NilClass arguments"
           begin
             <emptyTree>::<C T>.reveal_type(k)
             <emptyTree>::<C T>.reveal_type(v)
@@ -177,6 +202,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             v = <assignTemp>$6.[](1)
             <assignTemp>$5
           end
+          "multiple it blocks are ok with multiple destructured arguments"
           begin
             <emptyTree>::<C T>.reveal_type(k)
             <emptyTree>::<C T>.reveal_type(v)
@@ -206,6 +232,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             y = <assignTemp>$12.[](1)
             <assignTemp>$11
           end
+          "handles mixed destructuring and positional arguments"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -238,6 +265,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             y = <assignTemp>$12.[](1)
             <assignTemp>$11
           end
+          "multiple it blocks are ok with mixed argument styles"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -254,8 +282,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a constant list of tuples'><<todo method>>(&<blk>)
       <emptyTree>::<C CONST_LIST_TUPLE>.each() do |i, s|
         begin
-          <emptyTree>::<C T>.reveal_type(i)
-          <emptyTree>::<C T>.reveal_type(s)
+          "succeeds with a constant list of tuples"
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+          end
         end
       end
     end
@@ -274,6 +305,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$15.[](1)
             <assignTemp>$14
           end
+          "succeeds with a constant list of tuples and destructuring"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -289,8 +321,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeeds with a typed constant tuple list'><<todo method>>(&<blk>)
       <emptyTree>::<C ANOTHER_CONST_LIST_TUPLE>.each() do |i, s|
         begin
-          <emptyTree>::<C T>.reveal_type(i)
-          <emptyTree>::<C T>.reveal_type(s)
+          "succeeds with a typed constant tuple list"
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+          end
         end
       end
     end
@@ -309,6 +344,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$18.[](1)
             <assignTemp>$17
           end
+          "succeeds with a typed constant tuple list with destructuring"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -324,8 +360,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'succeed with local variables but cannot type them'><<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |i, s|
         begin
-          <emptyTree>::<C T>.reveal_type(i)
-          <emptyTree>::<C T>.reveal_type(s)
+          "succeed with local variables but cannot type them"
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+          end
         end
       end
     end
@@ -344,6 +383,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             s = <assignTemp>$21.[](1)
             <assignTemp>$20
           end
+          "succeed with destructured local variables but cannot type them"
           begin
             <emptyTree>::<C T>.reveal_type(i)
             <emptyTree>::<C T>.reveal_type(s)
@@ -359,8 +399,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'rejects manual destructuring of the list argument'><<todo method>>(&<blk>)
       [[1, "a"], [2, "b"]].each() do |value|
         begin
-          <emptyTree>::<C T>.reveal_type(i)
-          <emptyTree>::<C T>.reveal_type(s)
+          "rejects manual destructuring of the list argument"
+          begin
+            <emptyTree>::<C T>.reveal_type(i)
+            <emptyTree>::<C T>.reveal_type(s)
+          end
         end
       end
     end
@@ -379,6 +422,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             ns = <assignTemp>$26.[](1)
             <assignTemp>$25
           end
+          ::<Magic>.<string-interpolate>("color ", color, " which is not purple is not number 1 ", ns)
           begin
             <emptyTree>::<C T>.reveal_type(color)
             <emptyTree>::<C T>.reveal_type(ns)
@@ -394,8 +438,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'handles lists with several types'><<todo method>>(&<blk>)
       {:foo => 1, :bar => 2, :baz => 3}.each() do |k, v|
         begin
-          <emptyTree>::<C T>.reveal_type(k)
-          <emptyTree>::<C T>.reveal_type(v)
+          "handles lists with several types"
+          begin
+            <emptyTree>::<C T>.reveal_type(k)
+            <emptyTree>::<C T>.reveal_type(v)
+          end
         end
       end
     end
@@ -406,7 +453,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it 'fails to typecheck with non-hash arguments to `test_each-hash`'><<todo method>>(&<blk>)
       [1, 2, 3].each() do |k, v|
-        <self>.puts(k, v)
+        begin
+          "fails to typecheck with non-hash arguments to `test_each-hash`"
+          <self>.puts(k, v)
+        end
       end
     end
 

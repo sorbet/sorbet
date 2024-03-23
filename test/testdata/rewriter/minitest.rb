@@ -78,6 +78,26 @@ class MyTest
         end
       end
     end
+
+    describe "typechecks the `it` arg" do
+      cases = [1, 2, 3]
+      test_each(cases) do |x| # error: Method `test_each` does not exist
+        it "contains a #{nonexistant} variable" do # error: Method `nonexistant` does not exist
+        end
+      end
+    end
+
+    test_each( # error: Method `test_each` does not exist
+      [
+        [1, "x"],
+        [2, "y"],
+        [3, "z"],
+        [4, "w"],
+      ]
+    ) do |(i, s)|
+      it "does a thing with #{i.anybits?(1)}" do
+      end
+    end
 end
 
 def junk
