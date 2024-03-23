@@ -22,6 +22,7 @@ module T::Private::RuntimeLevels
 
   @has_read_default_checked_level = false
   @default_checked_level = :always
+  @recursively_check_in_tests = false
 
   def self.check_tests?
     # Assume that this code path means that some `sig.checked(:tests)`
@@ -30,6 +31,10 @@ module T::Private::RuntimeLevels
     @wrapped_tests_with_validation = true
 
     @check_tests
+  end
+
+  def self.recursively_check_in_tests?
+    @recursively_check_in_tests
   end
 
   def self.enable_checking_in_tests
@@ -78,4 +83,12 @@ module T::Private::RuntimeLevels
     end
   end
   set_default_checked_level_from_environment
+
+  private_class_method def self.set_enable_recursive_checking_in_tests_from_environment
+    recursively_check_in_tests = ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS']
+    if recursively_check_in_tests
+      @recursively_check_in_tests = true
+    end
+  end
+  set_enable_recursive_checking_in_tests_from_environment
 end
