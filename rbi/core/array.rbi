@@ -2976,4 +2976,7 @@ class Array < Object
   # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-inspect)
   sig {returns(String)}
   def to_s(); end
+
+  sig { returns(FalseClass) }
+  def !(); end
 end
