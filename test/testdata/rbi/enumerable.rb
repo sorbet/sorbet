@@ -76,11 +76,27 @@ def example(xs)
   end
   T.reveal_type(res) # error: `String`
 
+  res = xs.reduce do |acc, x|
+    T.reveal_type(acc) # error: `Integer`
+    T.reveal_type(x) # error: `Integer`
+    new_acc = acc + x
+    T.reveal_type(new_acc) # error: `Integer`
+  end
+  T.reveal_type(res) # error: `T.nilable(Integer)`
+
   res = xs.inject('') do |acc, x|
-    T.reveal_type(acc) # error: `T.untyped`
+    T.reveal_type(acc) # error: `String`
     T.reveal_type(x) # error: `Integer`
     new_acc = acc + x.to_s
-    T.reveal_type(new_acc) # error: `T.untyped`
+    T.reveal_type(new_acc) # error: `String`
   end
-  T.reveal_type(res) # error: `T.untyped`
+  T.reveal_type(res) # error: `String`
+
+  res = xs.inject do |acc, x|
+    T.reveal_type(acc) # error: `Integer`
+    T.reveal_type(x) # error: `Integer`
+    new_acc = acc + x
+    T.reveal_type(new_acc) # error: `Integer`
+  end
+  T.reveal_type(res) # error: `T.nilable(Integer)`
 end
