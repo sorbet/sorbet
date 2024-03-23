@@ -43,10 +43,59 @@ void emitProc(ofstream &out, int arity) {
     out << "end" << '\n' << '\n';
 }
 
+void emitLambdaOverload(ofstream &out, int arity) {
+    out << "  sig do\n";
+    out << "    type_parameters(:Return)\n"
+           "      .params(\n"
+           "        blk: T.proc";
+    if (arity != 0) {
+        out << ".params(\n";
+        for (int i = 0; i < arity; ++i) {
+            out << "          arg" << i << ": T.untyped";
+            if (i + 1 != arity) {
+                out << ",";
+            }
+            out << "\n";
+        }
+        out << "        )\n          ";
+    }
+    out << ".returns(T.type_parameter(:Return))\n";
+    out << "      )\n"
+           "      .returns(\n"
+           "        T.proc";
+    if (arity != 0) {
+        out << ".params(\n";
+        for (int i = 0; i < arity; ++i) {
+            out << "          arg" << i << ": T.untyped";
+            if (i + 1 != arity) {
+                out << ",";
+            }
+            out << "\n";
+        }
+        out << "        )\n          ";
+    }
+    out << ".returns(T.type_parameter(:Return))\n"
+           "      )\n"
+           "  end\n";
+}
+
 int main(int argc, char **argv) {
     ofstream rb(argv[1], ios::trunc);
     rb << "# typed: true" << '\n';
     for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
         emitProc(rb, arity);
     }
+
+    rb << "module Kernel\n"
+          "  # Equivalent to\n"
+          "  # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new),\n"
+          "  # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)\n"
+          "  # objects check the number of parameters passed when called.\n";
+
+    for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
+        emitLambdaOverload(rb, arity);
+    }
+
+    rb << "  def lambda(&blk); end\n"
+          "end\n\n";
 }
