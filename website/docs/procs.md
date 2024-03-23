@@ -261,3 +261,38 @@ end
 In general, you're better off avoiding `Proc.new` if you can. There's a
 [rubocop rule](https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc)
 you can use to enforce this.
+
+## `T.lambda` shorthand
+
+If you are explicitly creating anonymous functions with `proc` or `lambda`, you
+may find that the variables in the body are untyped, even when you as a
+programmer can tell what static type you intend them to have. For example, in
+the following snippet, the lambda takes an array of strings and returns a
+string, but within the body of the lambda, the parameter of `strs` is untyped:
+
+```ruby
+my_lambda = T.let(
+  lambda do |strs|
+    T.reveal_type(strs) # Revealed type: T.untyped
+    strs.map(&:upcase).join("\n")
+  end,
+  T.proc.params(arg0: T::Array[String]).returns(String)
+)
+puts my_lamba.call(["foo", "bar"])
+```
+
+In order to give static types here, Sorbet offers a piece of syntactic sugar
+called `T.lambda`, where Ruby keyword syntax is used to assign static types to
+variables. At runtime, a `T.proc` created with `T.lambda` will take positional
+parameters and not keywords.
+
+```ruby
+my_lambda = T.let(
+  T.lambda do |strs: T::Array[String]|
+    T.reveal_type(strs) # Revealed type: T::Array[Strings]
+    strs.map(&:upcase).join("\n")
+  end,
+  T.proc.params(arg0: T::Array[String]).returns(String)
+)
+puts my_lamba.call(["foo", "bar"])
+```
