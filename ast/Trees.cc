@@ -162,9 +162,10 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
 
 MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
                      ARGS_store args, ExpressionPtr rhs, Flags flags)
-    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
+    : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args_(std::move(args)), name(name),
+      flags(flags) {
     categoryCounterInc("trees", "methoddef");
-    histogramInc("trees.methodDef.args", this->args.size());
+    histogramInc("trees.methodDef.args", this->args_.size());
     _sanityCheck();
 }
 
@@ -538,7 +539,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     fmt::format_to(std::back_inserter(buf), "(");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
-        for (auto &a : this->args) {
+        for (auto &a : this->args_) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
@@ -583,7 +584,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(std::back_inserter(buf), "args = [");
     bool first = true;
     if (this->symbol == core::Symbols::todoMethod()) {
-        for (auto &a : this->args) {
+        for (auto &a : this->args_) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }
@@ -591,7 +592,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) const {
             fmt::format_to(std::back_inserter(buf), "{}", a.showRaw(gs, tabs + 2));
         }
     } else {
-        for (auto &a : this->args) {
+        for (auto &a : this->args_) {
             if (!first) {
                 fmt::format_to(std::back_inserter(buf), ", ");
             }

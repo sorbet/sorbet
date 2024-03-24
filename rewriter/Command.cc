@@ -74,8 +74,8 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
 
     ast::MethodDef::ARGS_store newArgs;
-    newArgs.reserve(call->args.size());
-    for (auto &arg : call->args) {
+    newArgs.reserve(call->args().size());
+    for (auto &arg : call->args()) {
         newArgs.emplace_back(arg.deepCopy());
     }
 

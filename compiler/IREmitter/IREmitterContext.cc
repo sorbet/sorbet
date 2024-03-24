@@ -380,7 +380,7 @@ CapturedVariables findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cf
 
     int argId = -1;
     auto &methodArguments = cfg.symbol.data(cs)->arguments;
-    for (auto &arg : mdef.args) {
+    for (auto &arg : mdef.args()) {
         argId += 1;
         ast::Local const *local = nullptr;
         if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
@@ -1019,7 +1019,7 @@ IREmitterContext IREmitterContext::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     {
         // fill in data about args for main function
-        for (auto &treeArg : md.args) {
+        for (auto &treeArg : md.args()) {
             auto *a = ast::MK::arg2Local(treeArg);
             rubyBlockArgs[0].emplace_back(cfg.enterLocal(a->localVariable));
         }
