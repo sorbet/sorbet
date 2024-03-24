@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$9
   end
 
-  4
+  ::<Magic>.<regex-backref>(4)
 
   def optfoo<<todo method>>(x = 1, *y, &<blk>)
     <emptyTree>
