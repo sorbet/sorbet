@@ -119,3 +119,17 @@ end
 
 def endless_method = 1 + 123
 #                        ^^^ apply-code-action: [A] Extract Variable
+
+# The actual issue we saw causing crashes was the following, the selection is the entire method body:
+# def foo
+#   1 + 1
+#   2 + 2
+# end
+# However, our tests don't support mutli-line assertions, so this test case is approximating that
+# by joining the lines with a ; (the parse result will be the same for both cases).
+# TODO(neil): add a multiline test case here once we have multiline assertions.
+
+def multi_stat_selection
+  1 + 1; 2 + 2
+# ^^^^^^^^^^^^ apply-code-action: [A] Extract Variable
+end
