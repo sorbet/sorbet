@@ -1329,7 +1329,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             return;
                         }
                     }
-                    // have enough keys (or this call is used for error reporting).
+                    // have enough keys (or we want to keep going for rich error reporting).
                     int i = -1;
                     for (auto &el2 : h2->keys) {
                         ++i;

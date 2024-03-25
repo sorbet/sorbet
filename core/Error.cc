@@ -137,7 +137,7 @@ void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector e) {
 void toErrorSectionHelper(ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel = 0) {
     ENFORCE(e.message.length() > 0);
     std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
-    result.push_back(ErrorLine(core::Loc::none(), message, ErrorLine::LocDisplay::Hidden));
+    result.push_back(ErrorLine(core::Loc::none(), move(message), ErrorLine::LocDisplay::Hidden));
     for (auto c : e.children) {
         toErrorSectionHelper(c, result, indentLevel + 1);
     }
@@ -197,8 +197,7 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
 }
 
 void ErrorBuilder::addErrorSections(ErrorSection::Collector errorDetailsCollector) {
-    auto errorSection = errorDetailsCollector.toErrorSection();
-    if (errorSection) {
+    if (auto errorSection = errorDetailsCollector.toErrorSection()) {
         addErrorSection(errorSection.value());
     }
 }
