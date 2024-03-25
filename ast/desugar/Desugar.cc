@@ -1534,17 +1534,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                std::move(ancestors), std::move(body));
                 result = std::move(res);
             },
-            [&](parser::Class *claz) {
+            [&](parser::Class *klass) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                                      dctx.enclosingMethodName, dctx.inAnyBlock, false);
-                ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(claz->body));
+                ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
-                if (claz->superclass == nullptr) {
+                if (klass->superclass == nullptr) {
                     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
                 } else {
-                    ancestors.emplace_back(node2TreeImpl(dctx, std::move(claz->superclass)));
+                    ancestors.emplace_back(node2TreeImpl(dctx, std::move(klass->superclass)));
                 }
-                ExpressionPtr res = MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
+                ExpressionPtr res = MK::Class(klass->loc, klass->declLoc, node2TreeImpl(dctx, std::move(klass->name)),
                                               std::move(ancestors), std::move(body));
                 result = std::move(res);
             },
