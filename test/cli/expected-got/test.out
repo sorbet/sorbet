@@ -44,7 +44,7 @@ test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but
     test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
                     ^^^
-  Possible explanation:
+  Detailed explanation:
     `String` is not a subtype of `Integer` for covariant type member `Proc0::Return`
 
 test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` because the type `Integer` wasn't handled https://srb.help/7026
@@ -151,7 +151,7 @@ test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found
     test/cli/expected-got/expected-got.rb:72:
     72 |xs = [1, 2, T.let(3, T.nilable(Integer))]
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `T.nilable(Integer)` is not a subtype of `Integer` for covariant type member `Array::Elem`
 
 test/cli/expected-got/expected-got.rb:74: Argument does not have asserted type `T::Array[Integer]` https://srb.help/7007
@@ -161,6 +161,6 @@ test/cli/expected-got/expected-got.rb:74: Argument does not have asserted type `
     test/cli/expected-got/expected-got.rb:72:
     72 |xs = [1, 2, T.let(3, T.nilable(Integer))]
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `T.nilable(Integer)` is not a subtype of `Integer` for covariant type member `Array::Elem`
 Errors: 16

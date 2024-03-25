@@ -151,7 +151,7 @@ std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
     for (auto c : children) {
         toErrorSectionHelper(c, lines, 0);
     }
-    return ErrorSection("Possible explanation:", lines);
+    return ErrorSection("Detailed explanation:", lines);
 }
 
 string Error::toString(const GlobalState &gs) const {

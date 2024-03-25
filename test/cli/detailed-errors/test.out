@@ -57,7 +57,7 @@ shapes.rb:18: Expected `{a: Integer, b: String}` but found `{a: Integer(1), b: I
     shapes.rb:18:
     18 |takes_shape({a: 1, b: 1})
                     ^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
 
 shapes.rb:19: Expected `{a: Integer, b: String}` but found `{a: String(""), b: Integer(1)}` for argument `x` https://srb.help/7002
@@ -71,7 +71,7 @@ shapes.rb:19: Expected `{a: Integer, b: String}` but found `{a: String(""), b: I
     shapes.rb:19:
     19 |takes_shape({a: '', b: 1})
                     ^^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
     `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
 
@@ -86,7 +86,7 @@ shapes.rb:22: Expected `{a: Integer, b: String}` but found `{a: String(""), c: I
     shapes.rb:22:
     22 |takes_shape({a: '', c: 1})
                     ^^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
@@ -124,7 +124,7 @@ tuples.rb:14: Expected `[Integer, String]` but found `[Integer(1), Integer(1)]` 
     tuples.rb:14:
     14 |takes_tuple([1, 1])
                     ^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `Integer(1)` is not a subtype of `String` for tuple index `1`
 
 tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` for argument `x` https://srb.help/7002
@@ -138,7 +138,7 @@ tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` 
     tuples.rb:15:
     15 |takes_tuple(['', 1])
                     ^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `String("")` is not a subtype of `Integer` for tuple index `0`
     `Integer(1)` is not a subtype of `String` for tuple index `1`
 
@@ -161,7 +161,7 @@ type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Midd
     type_members.rb:21:
     21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Possible explanation:
+  Detailed explanation:
     `String` is not equivalent to `Middle` for invariant type member `A::X`
     `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
     `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
