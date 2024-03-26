@@ -4442,6 +4442,10 @@ class OpenSSL::HMAC
   sig {returns(::T.untyped)}
   def hexdigest(); end
 
+  # Returns the authentication code as a Base64-encoded string.
+  sig {returns(::T.untyped)}
+  def base64digest(); end
+
   sig do
     params(
       arg0: ::T.untyped,
@@ -4554,6 +4558,28 @@ class OpenSSL::HMAC
     .returns(::T.untyped)
   end
   def self.hexdigest(arg0, arg1, arg2); end
+
+  # Returns the authentication code as a Base64-encoded string. The *digest*
+  # parameter specifies the digest algorithm to use. This may be a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representing the
+  # algorithm name or an instance of
+  # [`OpenSSL::Digest`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Digest.html).
+  #
+  # === Example
+  #  key = 'key'
+  #  data = 'The quick brown fox jumps over the lazy dog'
+  #
+  #  hmac = OpenSSL::HMAC.base64digest('SHA1', key, data)
+  #  #=> "3nybhbi3iqa8ino29wqQcBydtNk="
+  sig do
+    params(
+      arg0: ::T.untyped,
+      arg1: ::T.untyped,
+      arg2: ::T.untyped,
+    )
+    .returns(::T.untyped)
+  end
+  def self.base64digest(arg0, arg1, arg2); end
 end
 
 # Document-class:
