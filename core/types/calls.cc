@@ -663,6 +663,33 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 
+    // Check if mayBeOverloaded is abstract, if so, find the next non-abstract method
+    // it will be used for typechecking the super call against the right signature.
+    //
+    // Consider this example:
+    //
+    // ```rb
+    // class A
+    //   def foo(x); end
+    // end
+    //
+    // class B < A
+    //   sig { abstract.params(x: Integer, y: Integer).void }
+    //   def foo(x, y); end
+    // end
+    //
+    // class C < B
+    //   sig { override.params(x: Integer, y: Integer).void }
+    //   def foo(x, y)
+    //     # Calling `super` in this method actually calls `A#foo` and not `B#foo`
+    //     super()      # so this call should error as we expect only one argument `x`
+    //     super(42)    # while this should be okay
+    //   end
+    // end
+    while (mayBeOverloaded.exists() && mayBeOverloaded.data(gs)->flags.isAbstract) {
+        mayBeOverloaded = mayBeOverloaded.data(gs)->owner.data(gs)->findParentMethodTransitive(gs, targetName);
+    }
+
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
         // Before raising any error, we look if the method exists in all required ancestors by this symbol
         auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
