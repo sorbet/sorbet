@@ -179,7 +179,7 @@ public:
     void clear(const core::GlobalState &gs) {
         got.clear();
         errorQueue->flushAllErrors(gs);
-        errorCollector->drainErrors();
+        auto _newErrors = errorCollector->drainErrors();
     }
 };
 
@@ -731,7 +731,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);
-    errorCollector->drainErrors();
+    { auto _ = errorCollector->drainErrors(); }
 
     // now we test the incremental resolver
 
@@ -833,7 +833,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     // and drain all the remaining errors
     errorQueue->flushAllErrors(*gs);
-    errorCollector->drainErrors();
+    { auto _ = errorCollector->drainErrors(); }
 
     {
         INFO("the incremental resolver should not add new symbols");

@@ -16,7 +16,7 @@ void ErrorCollector::flushErrors(spdlog::logger &logger, const core::GlobalState
     }
 }
 
-vector<unique_ptr<core::Error>> ErrorCollector::drainErrors() {
+[[nodiscard]] vector<unique_ptr<core::Error>> ErrorCollector::drainErrors() {
     return move(collectedErrors);
 }
 
