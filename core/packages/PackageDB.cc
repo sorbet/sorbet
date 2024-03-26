@@ -51,6 +51,11 @@ public:
         return nullopt;
     }
 
+    virtual std::optional<core::Loc> newExportLoc(const core::GlobalState &gs) const {
+        notImplemented();
+        return nullopt;
+    }
+
     virtual std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const {
         notImplemented();
         return nullopt;
@@ -232,6 +237,35 @@ const std::string_view PackageDB::errorHint() const {
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
     return absl::c_find(allowRelaxedPackagerChecksFor_, mangledName) != allowRelaxedPackagerChecksFor_.end();
 }
+
+const std::vector<core::SymbolRef> PackageDB::extraExportsFor(packages::MangledName package) const {
+    auto extraExports = requiresExport_.find(package);
+    if (extraExports == requiresExport_.end()) {
+        return {};
+    }
+    std::vector<core::SymbolRef> result;
+    for (auto &[fref, sym] : extraExports->second) {
+        result.push_back(sym);
+    }
+    return result;
+};
+
+void PackageDB::registerExtraAutocorrectFor(const packages::MangledName package, const core::SymbolRef toExport,
+                                            core::FileRef fref) {
+    requiresExport_[package].emplace(fref, toExport);
+};
+
+void PackageDB::removeExtraAutocorrectFor(const core::FileRef fref) {
+    auto packagesWithErrors = errorSources_[fref];
+    for (auto package : packagesWithErrors) {
+        for (auto it = requiresExport_[package].begin(); it != requiresExport_[package].end(); ++it) {
+            auto &[file, sym] = *it;
+            if (file == fref) {
+                requiresExport_[package].erase(it);
+            }
+        }
+    }
+};
 
 PackageDB PackageDB::deepCopy() const {
     ENFORCE(frozen);

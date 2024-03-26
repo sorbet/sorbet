@@ -66,6 +66,7 @@ public:
                                                              const PackageInfo &pkg) const = 0;
 
     virtual std::optional<core::Loc> newImportLoc(const core::GlobalState &gs, const PackageInfo &pkg) const = 0;
+    virtual std::optional<core::Loc> newExportLoc(const core::GlobalState &gs) const = 0;
 
     bool operator==(const PackageInfo &rhs) const;
 

@@ -13,6 +13,7 @@
 #include "core/packages/PackageDB.h"
 #include "core/packages/PackageInfo.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
+#include "packages/MangledName.h"
 #include <memory>
 
 namespace sorbet::core {

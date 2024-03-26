@@ -82,6 +82,7 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
 }
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
                      int line) {
+    fmt::print("\n*** getSourceLine");
     if (absl::StartsWith(filename, core::File::URL_PREFIX)) {
         return "";
     }
