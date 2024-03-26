@@ -373,7 +373,7 @@ public:
     UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, core::Loc>>>
         convertTestImport;
     // package => [SymbolRef of package to import, FileRef of a file where the error has happened]
-    UnorderedMap<core::packages::MangledName, UnorderedSet<core::SymbolRef>> toExport;
+    UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::SymbolRef, core::FileRef>>> toExport;
 
     VisibilityCheckerPass(core::MutableContext ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -456,22 +456,13 @@ public:
                 if (enumClass.exists()) {
                     symToExport = enumClass;
                 }
-                toExport[pkg.mangledName()].emplace(symToExport);
-                {
-                    auto packages = ctx.state.unfreezePackages();
-                    packages.db.registerExtraAutocorrectFor(pkg.mangledName(), symToExport, ctx.file);
-                }
+                toExport[pkg.mangledName()].emplace(symToExport, ctx.file);
                 if (!db.errorHint().empty()) {
                     e.addErrorNote("{}", db.errorHint());
                 }
             }
 
             return;
-        }
-        {
-            // no missing export error in a file, we need to remove cached autocorrect
-            auto packages = ctx.state.unfreezePackages();
-            packages.db.removeExtraAutocorrectFor(ctx.file);
         }
 
         auto importType = this->package.importsPackage(otherPackage);
@@ -533,7 +524,8 @@ public:
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>>>(
             files.size());
         auto toExportQ = std::make_shared<
-            BlockingBoundedQueue<std::vector<std::pair<core::packages::MangledName, core::SymbolRef>>>>(files.size());
+            BlockingBoundedQueue<std::vector<std::tuple<core::packages::MangledName, core::SymbolRef, core::FileRef>>>>(
+            files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
@@ -544,7 +536,7 @@ public:
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importCapacitor;
             std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
                 replaceTestImportCapacitor;
-            std::vector<std::pair<core::packages::MangledName, core::SymbolRef>> exportCapacitor;
+            std::vector<std::tuple<core::packages::MangledName, core::SymbolRef, core::FileRef>> exportCapacitor;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
                 processedByThread++;
@@ -567,8 +559,8 @@ public:
                         }
 
                         for (auto &[package, packagesToExport] : pass.toExport) {
-                            for (auto sym : packagesToExport) {
-                                exportCapacitor.emplace_back(package, sym);
+                            for (auto &[sym, fref] : packagesToExport) {
+                                exportCapacitor.emplace_back(package, sym, fref);
                             }
                         }
                     }
@@ -609,15 +601,34 @@ public:
             }
         }
 
-        std::vector<std::pair<core::packages::MangledName, core::SymbolRef>> exportThreadResult;
-        for (auto result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (!result.gotItem()) {
-                continue;
+        {
+            std::vector<core::FileRef> filesToCheck;
+            std::vector<core::FileRef> filesWithErrors;
+            std::vector<core::FileRef> filesWithoutErrors;
+            for (const auto &f : files) {
+                filesToCheck.push_back(f.file);
             }
-            for (auto &[package, sym] : exportThreadResult) {
-                combinedFixes[package].toExport.emplace(sym);
+            auto packages = gs.unfreezePackages();
+            std::vector<std::tuple<core::packages::MangledName, core::SymbolRef, core::FileRef>> exportThreadResult;
+            for (auto result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+                 !result.done();
+                 result = toExportQ->wait_pop_timed(exportThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+                if (!result.gotItem()) {
+                    continue;
+                }
+                for (auto &[package, sym, fref] : exportThreadResult) {
+                    combinedFixes[package].toExport.emplace(sym);
+                    // register an export error in a autocorrect cache
+                    packages.db.registerExtraAutocorrectFor(package, sym, fref);
+                    filesWithErrors.push_back(fref);
+                }
+            }
+
+            absl::c_set_difference(filesToCheck, filesWithErrors, std::back_inserter(filesWithoutErrors),
+                                   [](core::FileRef lhs, core::FileRef rhs) { return lhs.id() < rhs.id(); });
+            // no missing export error in a file, we need to remove cached autocorrect
+            for (auto f : filesWithoutErrors) {
+                packages.db.removeExtraAutocorrectFor(f);
             }
         }
 
