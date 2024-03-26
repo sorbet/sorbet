@@ -600,7 +600,7 @@ public:
                 return absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs));
             };
 
-            if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
+            if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageVisibilityIssues)) {
                 e.setHeader("Package `{}` is missing imports", fullPackageName(package));
                 std::vector<std::pair<core::packages::MangledName, bool>> toImport;
                 for (auto p : fixes.toImport) {

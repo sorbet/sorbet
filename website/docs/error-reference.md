@@ -741,17 +741,6 @@ cases, a common solution is to factor the shared functionality to a new package,
 and import that new package wherever it's needed. In some situations, there may
 be simpler ways to restructure the code that don't involve making a new package.
 
-## 3719
-
-> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
-> at Stripe, please see [go/modularity](http://go/modularity) for more.
-
-A package references constants from another package without the corresponding
-`import` or `test_import` statements.
-
-To fix this error, add the `import` or `test_import` statements related to the
-packages in the `__package.rb` file where the error is reported.
-
 ## 3720
 
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
@@ -872,6 +861,19 @@ on an implementation detail that was deliberately made private. However, if
 you're sure that it should be okay to import this package, then you can add an
 additional `visible_to` directive in order to allow the import you're trying to
 add.
+
+## 3724
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error indicates a package visibility problem due to missing `import` or
+`test_import` statement in a corresponding package file. It usually accompanies
+specific errors about unresolved constants that couldn't be imported or exported
+correctly.
+
+To fix this error, add the necessary `import` or `test_import` statements for
+the packages in the corresponding package file where the error was reported.
 
 ## 4001
 
