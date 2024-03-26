@@ -79,7 +79,17 @@ public:
      *
      * The parameter `mode` controls whether or not `T.untyped` is
      * considered to be a super type or subtype of all other types */
-    // TODO explain the collector
+
+    /**
+     * The `errorDetailsCollector` parameter is used to pass additional details out of isSubType
+     * about why subtyping failed, which can then be shown to the user. See ErrorSection::Collector
+     * in core/Error.h for the API.
+     *
+     * If this call is going to be used to determine if an error should be shown, you should pass in
+     * an instance of ErrorSection::Collector. Otherwise, you should pass in
+     * ErrorSection::Collector::NO_OP, as passing an ErrorSection::Collector will slow down subtype
+     * checking to collect the additional information.
+     */
     template <class T>
     static bool isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                          const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
