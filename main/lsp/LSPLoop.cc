@@ -105,12 +105,6 @@ public:
     }
 };
 
-void tagNewRequest(spdlog::logger &logger, LSPMessage &msg) {
-    msg.latencyTimer = make_unique<Timer>(logger, "task_latency",
-                                          initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
-                                                                15000, 20000, 25000, 30000, 35000, 40000});
-}
-
 class LSPWatchmanProcess final : public watchman::WatchmanProcess {
     MessageQueueState &messageQueue;
     absl::Mutex &messageQueueMutex;
@@ -306,7 +300,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     absl::MutexLock lck(&messageQueueMutex); // guards guardedState.
                     auto &msg = readResult.message;
                     if (msg) {
-                        tagNewRequest(*logger, *msg);
+                        msg->tagNewRequest(*logger);
                         messageQueue.counters = mergeCounters(move(messageQueue.counters));
                         messageQueue.pendingRequests.push_back(move(msg));
                         // Reset span now that we've found a request.
