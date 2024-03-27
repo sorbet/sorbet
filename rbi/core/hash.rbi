@@ -1148,6 +1148,7 @@ class Hash < Object
         arg0: K,
     )
     .returns(T::Hash[K, V])
+  end
   def slice(*arg0); end
 
   # Returns a new hash consisting of entries for which the block returns true.
