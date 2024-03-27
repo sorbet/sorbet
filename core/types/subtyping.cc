@@ -1073,6 +1073,8 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
 template <class T>
 bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode, const TypePtr &t1,
                                     const TypePtr &t2, T &errorDetailsCollector) {
+    constexpr auto shouldAddErrorDetails = std::is_same<T, ErrorSection::Collector>::value;
+
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
 
@@ -1236,7 +1238,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 }
                 if (!doesMemberMatch) {
                     result = false;
-                    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+                    if constexpr (shouldAddErrorDetails) {
                         string variance;
                         string joiningText;
                         switch (idxTypeMember.data(gs)->variance()) {
@@ -1293,7 +1295,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             auto subCollector = errorDetailsCollector.newCollector();
                             if (!Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode, subCollector)) {
                                 result = false;
-                                if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+                                if constexpr (shouldAddErrorDetails) {
                                     auto message =
                                         ErrorColors::format("`{}` is not a subtype of `{}` for tuple index `{}`",
                                                             a1.elems[i].show(gs), el2.show(gs), i);
@@ -1311,7 +1313,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
                     auto *h2 = cast_type<ShapeType>(t2);
                     result = h2 != nullptr && h2->keys.size() <= h1.keys.size();
-                    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+                    if constexpr (shouldAddErrorDetails) {
                         if (h2 == nullptr) {
                             return;
                         }
@@ -1331,13 +1333,13 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         auto subCollector = errorDetailsCollector.newCollector();
                         if (!optind.has_value()) {
                             result = false;
-                            if constexpr (!std::is_same<T, ErrorSection::Collector>::value) {
+                            if constexpr (!shouldAddErrorDetails) {
                                 return;
                             }
                         } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
                                                                     h2->values[i], mode, subCollector)) {
                             result = false;
-                            if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+                            if constexpr (shouldAddErrorDetails) {
                                 auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
                                                                    h1.values[i].show(gs),
                                                                    h2->values[optind.value()].show(gs), el2.show(gs));
