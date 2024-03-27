@@ -996,13 +996,23 @@ private:
                                    const UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor,
                                    bool firstRun, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
-        if (!ancestorSym.exists() && !firstRun) {
+        if (!ancestorSym.exists()) {
             if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
             }
             return false;
+        }
+
+        if (!firstRun) {
+            if (lastRun) {
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Ancestor must resolve on the first run");
+                }
+            } else {
+                return false;
+            }
         }
 
         core::ClassOrModuleRef resolvedClass;
