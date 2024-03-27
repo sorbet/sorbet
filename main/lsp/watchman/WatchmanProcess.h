@@ -2,14 +2,18 @@
 #define RUBY_TYPER_LSP_WATCHMAN_WATCHMANPROCESS_H
 
 #include "absl/synchronization/mutex.h"
+#include "absl/synchronization/notification.h"
 #include "common/common.h"
 #include "core/core.h"
+#include "main/lsp/MessageQueueState.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::lsp {
 class WatchmanQueryResponse;
 class WatchmanStateEnter;
 class WatchmanStateLeave;
+class LSPConfiguration;
+class NotificationMessage;
 } // namespace sorbet::realmain::lsp
 
 namespace sorbet::realmain::lsp::watchman {
@@ -26,6 +30,11 @@ private:
     absl::Mutex mutex;
     // If true, the process has been stopped.
     bool stopped = false;
+
+    MessageQueueState &messageQueue;
+    absl::Mutex &messageQueueMutex;
+    absl::Notification &initializedNotification;
+    const std::shared_ptr<const LSPConfiguration> config;
 
     /**
      * Starts up a Watchman subprocess and begins processing file changes. Runs in a dedicated thread.
@@ -51,7 +60,9 @@ public:
      * workspace folder. Passes file updates to `processUpdate` function.
      */
     WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath, std::string_view workSpace,
-                    std::vector<std::string> extensions);
+                    std::vector<std::string> extensions, MessageQueueState &messageQueue,
+                    absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
+                    std::shared_ptr<const LSPConfiguration> config);
 
     virtual ~WatchmanProcess();
 
