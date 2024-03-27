@@ -317,8 +317,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, expectedType, argTpe.type);
-        e.addErrorSections(errorDetailsCollector);
+        core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, expectedType, argTpe.type);
         TypeErrorDiagnostics::maybeAutocorrect(gs, e, argLoc, constr, expectedType, argTpe.type);
         return e.build();
     }
@@ -1191,11 +1190,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                                             method.show(gs));
                             e.addErrorSection(TypeAndOrigins::explainExpected(gs, kwParamType, kwParam->loc, for_));
                             e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                            core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, kwParamType,
+                                                                            kwSplatValueType);
                             e.addErrorNote(
                                 "A `{}` passed as a keyword splat must match the type of all keyword parameters\n"
                                 "    because Sorbet cannot see what specific keys exist in the `{}`.",
                                 "Hash", "Hash");
-                            e.addErrorSections(errorDetailsCollector);
                             maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
                             result.main.errors.emplace_back(e.build());
                         }
@@ -2629,7 +2629,8 @@ private:
                 if (!dispatched.secondary) {
                     Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, blockPreType,
+                                                                passedInBlockType);
             }
         }
 
@@ -3447,7 +3448,8 @@ public:
                         ErrorSection("Shape originates from here:",
                                      args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
-                    e.addErrorSections(errorDetailsCollector);
+                    core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, expectedType,
+                                                                    actualType.type);
 
                     if (args.fullType.origins.size() == 1 && isa_type<NamedLiteralType>(arg)) {
                         auto argLit = cast_type_nonnull<NamedLiteralType>(arg);

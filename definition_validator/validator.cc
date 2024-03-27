@@ -6,6 +6,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "core/source_generator/source_generator.h"
@@ -105,7 +106,7 @@ bool checkSubtype(const core::Context ctx, core::TypeConstraint &constr, const c
     }
 }
 
-string supermethodKind(const core::Context ctx, core::MethodRef method) {
+string superMethodKind(const core::Context ctx, core::MethodRef method) {
     auto methodData = method.data(ctx);
     ENFORCE(methodData->flags.isAbstract || methodData->flags.isOverridable || methodData->hasSig());
     if (methodData->flags.isAbstract) {
@@ -148,14 +149,15 @@ void matchPositional(const core::Context ctx, core::TypeConstraint &constr,
                           errorDetailsCollector)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodArgs[idx].get().show(ctx), methodArgType.show(ctx), supermethodKind(ctx, superMethod),
+                            methodArgs[idx].get().show(ctx), methodArgType.show(ctx), superMethodKind(ctx, superMethod),
                             superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
                                superArgs[idx].get().show(ctx), superArgType.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superArgType,
+                                                                methodArgType);
             }
         }
         idx++;
@@ -291,13 +293,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
-                                    supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                                    superMethodKind(ctx, superMethod), superMethod.show(ctx));
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The corresponding parameter `{}` was declared here with type `{}`",
                                        req.get().show(ctx), req.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        e.addErrorSections(errorDetailsCollector);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, req.get().type,
+                                                                        corresponding->get().type);
                     }
                 }
             } else {
@@ -323,13 +326,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                                     corresponding->get().show(ctx), corresponding->get().type.show(ctx),
-                                    supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                                    superMethodKind(ctx, superMethod), superMethod.show(ctx));
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The super method parameter `{}` was declared here with type `{}`",
                                        opt.get().show(ctx), opt.get().type.show(ctx));
                         e.addErrorNote(
                             "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                        e.addErrorSections(errorDetailsCollector);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, opt.get().type,
+                                                                        corresponding->get().type);
                     }
                 }
             } else if (absl::c_any_of(right.kw.required,
@@ -368,13 +372,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
                             right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
-                            supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                            superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter **`{}` was declared here with type `{}`",
                                left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, left.kw.rest->get().type,
+                                                                right.kw.rest->get().type);
             }
         }
     }
@@ -410,13 +415,14 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Block parameter `{}` of type `{}` not compatible with type of {} method `{}`",
                             methodBlkArg.argumentName(ctx), methodBlkArg.type.show(ctx),
-                            supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                            superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
                                superMethodBlkArg.show(ctx), superMethodBlkArg.type.show(ctx));
                 e.addErrorNote(
                     "A parameter's type must be a supertype of the same parameter's type on the super method.");
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superMethodBlkArg.type,
+                                                                methodBlkArg.type);
             }
         }
     }
@@ -443,11 +449,12 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 auto methodReturnShow = methodReturn == core::Types::void_() ? "void" : methodReturn.show(ctx);
                 e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturnShow,
-                            supermethodKind(ctx, superMethod), superMethod.show(ctx));
+                            superMethodKind(ctx, superMethod), superMethod.show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
                                superReturn.show(ctx));
                 e.addErrorNote("A method's return type must be a subtype of the return type on the super method.");
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, superReturn,
+                                                                methodReturn);
             }
         }
     }

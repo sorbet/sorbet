@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
 #include <utility>
@@ -1090,7 +1091,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
                                    memType->upperBound.show(gs));
-                    e.addErrorSections(errorDetailsCollector);
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, memType->upperBound,
+                                                              argType);
                 }
             }
 
@@ -1105,7 +1107,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
                                    memType->lowerBound.show(gs));
-                    e.addErrorSections(errorDetailsCollector2);
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector2, memType->lowerBound,
+                                                              argType);
                 }
             }
 

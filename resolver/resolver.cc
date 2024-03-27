@@ -7,6 +7,7 @@
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
 #include "core/lsp/TypecheckEpochManager.h"
@@ -2479,7 +2480,8 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
-                    e.addErrorSections(errorDetailsCollector);
+                    core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector,
+                                                                    parentType->lowerBound, memberType->lowerBound);
                     if (lowerBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->lowerBound;
@@ -2500,7 +2502,8 @@ class ResolveTypeMembersAndFieldsWalk {
                                 rhs->fun.show(ctx), data->name.show(ctx));
                     e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` defined in parent here",
                                    parentMember.show(ctx));
-                    e.addErrorSections(errorDetailsCollector2);
+                    core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector2,
+                                                                    parentType->upperBound, memberType->upperBound);
                     if (upperBoundTypeLoc.exists()) {
                         auto replacementType = ctx.state.suggestUnsafe.has_value() ? core::Types::untypedUntracked()
                                                                                    : parentType->upperBound;
@@ -2517,7 +2520,8 @@ class ResolveTypeMembersAndFieldsWalk {
             if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::InvalidTypeMemberBounds)) {
                 e.setHeader("The `{}` type bound `{}` is not a subtype of the `{}` type bound `{}` for `{}`", "lower",
                             memberType->lowerBound.show(ctx), "upper", memberType->upperBound.show(ctx), lhs.show(ctx));
-                e.addErrorSections(errorDetailsCollector);
+                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, memberType->upperBound,
+                                                                memberType->lowerBound);
             }
         }
 

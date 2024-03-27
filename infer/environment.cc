@@ -1458,8 +1458,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, methodReturnType, typeAndOrigin.type);
-                        e.addErrorSections(errorDetailsCollector);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, methodReturnType,
+                                                                        typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
@@ -1505,8 +1505,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
 
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, expectedType, typeAndOrigin.type);
-                        e.addErrorSections(errorDetailsCollector);
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, expectedType,
+                                                                        typeAndOrigin.type);
                     }
                 } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
@@ -1613,8 +1613,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 e.setHeader("Assumed expression had type `{}` but found `{}`", castType.show(ctx),
                                             ty.type.show(ctx));
                                 e.addErrorSection(ty.explainGot(ctx, ownerLoc));
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, castType,
+                                                                                ty.type);
                                 e.addErrorNote("Please add an explicit type annotation to correct this assumption");
-                                e.addErrorSections(errorDetailsCollector);
                                 if (bind.loc.exists() && c.valueLoc.exists()) {
                                     e.replaceWith("Add explicit annotation", ctx.locAt(bind.loc), "T.let({}, {})",
                                                   ctx.locAt(c.valueLoc).source(ctx).value(), ty.type.show(ctx));
@@ -1708,8 +1709,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 // message, but we don't have a convenient way to compute this at the moment.
                                 e.addErrorSection(cur.explainExpected(ctx, "field defined here", ownerLoc));
                                 e.addErrorSection(tp.explainGot(ctx, ownerLoc));
-                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, cur.type, tp.type);
-                                e.addErrorSections(errorDetailsCollector);
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, cur.type,
+                                                                                tp.type);
                                 auto replaceLoc = ctx.locAt(bind.loc);
                                 // We are not processing a method call, so there is no constraint.
                                 auto &constr = core::TypeConstraint::EmptyFrozenConstraint;
@@ -1725,7 +1726,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
                                             "let", tp.type.show(ctx), cur.type.show(ctx));
-                                e.addErrorSections(errorDetailsCollector);
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, tp.type,
+                                                                                cur.type);
                             }
                             tp = cur;
                         }
@@ -1769,7 +1771,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
                                 }
-                                e.addErrorSections(errorDetailsCollector);
+                                core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, tp.type,
+                                                                                cur.type);
 
                                 if (!cur.origins.empty() && !tp.origins.empty() &&
                                     absl::c_any_of(cur.origins,

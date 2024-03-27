@@ -152,11 +152,11 @@ test.rb:17: Expected `[Integer]` for keyword parameter `x` but found `[String]` 
     test.rb:17:
     17 |bar(**h)
             ^^^
+  Detailed explanation:
+    `String` is not a subtype of `Integer` for tuple index `0`
   Note:
     A `Hash` passed as a keyword splat must match the type of all keyword parameters
     because Sorbet cannot see what specific keys exist in the `Hash`.
-  Detailed explanation:
-    `String` is not a subtype of `Integer` for tuple index `0`
   Autocorrect: Use `-a` to autocorrect
     test.rb:17: Replace with `T.unsafe(h)`
     17 |bar(**h)
