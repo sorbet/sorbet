@@ -1296,9 +1296,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                             if (!Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode, subCollector)) {
                                 result = false;
                                 if constexpr (shouldAddErrorDetails) {
-                                    auto message =
-                                        ErrorColors::format("`{}` is not a subtype of `{}` for tuple index `{}`",
-                                                            a1.elems[i].show(gs), el2.show(gs), i);
+                                    auto message = ErrorColors::format(
+                                        "`{}` is not a subtype of `{}` for index `{}` of `{}`-tuple",
+                                        a1.elems[i].show(gs), el2.show(gs), i, a2->elems.size());
                                     subCollector.message = message;
                                     errorDetailsCollector.addErrorDetails(std::move(subCollector));
                                 } else {

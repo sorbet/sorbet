@@ -125,7 +125,7 @@ tuples.rb:14: Expected `[Integer, String]` but found `[Integer(1), Integer(1)]` 
     14 |takes_tuple([1, 1])
                     ^^^^^^
   Detailed explanation:
-    `Integer(1)` is not a subtype of `String` for tuple index `1`
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
 
 tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` for argument `x` https://srb.help/7002
     15 |takes_tuple(['', 1])
@@ -139,8 +139,8 @@ tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` 
     15 |takes_tuple(['', 1])
                     ^^^^^^^
   Detailed explanation:
-    `String("")` is not a subtype of `Integer` for tuple index `0`
-    `Integer(1)` is not a subtype of `String` for tuple index `1`
+    `String("")` is not a subtype of `Integer` for index `0` of `2`-tuple
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
 
 tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument `x` https://srb.help/7002
     18 |takes_tuple([''])
