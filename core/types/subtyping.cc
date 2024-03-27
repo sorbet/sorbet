@@ -1261,7 +1261,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
                                                            joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
                         subCollector.message = message;
-                        errorDetailsCollector.addErrorDetails(subCollector);
+                        errorDetailsCollector.addErrorDetails(std::move(subCollector));
                     } else {
                         break;
                     }
@@ -1300,7 +1300,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                         ErrorColors::format("`{}` is not a subtype of `{}` for tuple index `{}`",
                                                             a1.elems[i].show(gs), el2.show(gs), i);
                                     subCollector.message = message;
-                                    errorDetailsCollector.addErrorDetails(subCollector);
+                                    errorDetailsCollector.addErrorDetails(std::move(subCollector));
                                 } else {
                                     break;
                                 }
@@ -1344,7 +1344,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                                                                    h1.values[i].show(gs),
                                                                    h2->values[optind.value()].show(gs), el2.show(gs));
                                 subCollector.message = message;
-                                errorDetailsCollector.addErrorDetails(subCollector);
+                                errorDetailsCollector.addErrorDetails(std::move(subCollector));
                             } else {
                                 return;
                             }

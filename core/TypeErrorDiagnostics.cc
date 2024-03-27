@@ -38,7 +38,7 @@ namespace {
 void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e,
                                                const ErrorSection::Collector &collector, const TypePtr &expected,
                                                const TypePtr &got) {
-    e.addErrorSections(collector);
+    e.addErrorSections(std::move(collector));
     auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
     auto gotClassType = isa_type<ClassType>(got);
     if (expectedSelfTypeParam && gotClassType) {

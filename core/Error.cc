@@ -130,15 +130,15 @@ string ErrorSection::toString(const GlobalState &gs) const {
     return buf.str();
 }
 
-void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector e) {
-    children.push_back(e);
+void ErrorSection::Collector::addErrorDetails(ErrorSection::Collector &&e) {
+    children.push_back(std::move(e));
 }
 
-void toErrorSectionHelper(ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel) {
+void toErrorSectionHelper(const ErrorSection::Collector &e, vector<ErrorLine> &result, int indentLevel) {
     ENFORCE(e.message.length() > 0);
     std::string message = fmt::format("{}{}", string(indentLevel * 2, ' '), e.message);
     result.push_back(ErrorLine(core::Loc::none(), move(message), ErrorLine::LocDisplay::Hidden));
-    for (auto c : e.children) {
+    for (auto &c : e.children) {
         toErrorSectionHelper(c, result, indentLevel + 1);
     }
 }
@@ -148,7 +148,7 @@ std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
         return nullopt;
     }
     vector<ErrorLine> lines;
-    for (auto c : children) {
+    for (auto &c : children) {
         toErrorSectionHelper(c, lines, 0);
     }
     return ErrorSection("Detailed explanation:", lines);
@@ -196,7 +196,7 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
     }
 }
 
-void ErrorBuilder::addErrorSections(ErrorSection::Collector errorDetailsCollector) {
+void ErrorBuilder::addErrorSections(const ErrorSection::Collector &&errorDetailsCollector) {
     if (auto errorSection = errorDetailsCollector.toErrorSection()) {
         addErrorSection(errorSection.value());
     }

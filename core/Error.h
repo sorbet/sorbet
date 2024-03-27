@@ -99,9 +99,11 @@ struct ErrorSection {
         std::vector<Collector> children;
 
         Collector() = default;
-        Collector(std::string msg) : message(msg) {}
+        Collector(const Collector &) = delete;
+        Collector &operator=(const Collector &) = delete;
+        Collector(Collector &&other) = default;
 
-        void addErrorDetails(Collector e);
+        void addErrorDetails(Collector &&e);
         Collector newCollector() const {
             return Collector();
         }
@@ -187,7 +189,7 @@ public:
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         _setHeader(move(formatted));
     }
-    void addErrorSections(ErrorSection::Collector errorDetailsCollector);
+    void addErrorSections(const ErrorSection::Collector &&errorDetailsCollector);
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>
