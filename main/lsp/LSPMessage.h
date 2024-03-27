@@ -67,6 +67,11 @@ public:
     std::unique_ptr<Timer> latencyTimer;
 
     /**
+     * Initializes the `latencyTimer` of this message with a new Timer
+     */
+    void tagNewRequest(spdlog::logger &logger);
+
+    /**
      * Returns an ID if the message has one. Otherwise, returns nullopt.
      */
     std::optional<MessageId> id() const;

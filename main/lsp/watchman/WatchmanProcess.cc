@@ -2,6 +2,9 @@
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
+#include "main/lsp/LSPConfiguration.h"
+#include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
 #include "subprocess.hpp"
@@ -10,11 +13,16 @@ using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
 
-WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
-                                 vector<string> extensions)
+WatchmanProcess::WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath,
+                                 std::string_view workSpace, std::vector<std::string> extensions,
+                                 MessageQueueState &messageQueue, absl::Mutex &messageQueueMutex,
+                                 absl::Notification &initializedNotification,
+                                 std::shared_ptr<const LSPConfiguration> config)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
-      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
+      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),
+      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification),
+      config(std::move(config)) {}
 
 WatchmanProcess::~WatchmanProcess() {
     exitWithCode(0, "");
@@ -151,6 +159,49 @@ void WatchmanProcess::exitWithCode(int code, const std::optional<std::string> &m
     if (!stopped) {
         stopped = true;
         processExit(code, msg);
+    }
+}
+
+void WatchmanProcess::enqueueNotification(std::unique_ptr<NotificationMessage> notification) {
+    auto msg = make_unique<LSPMessage>(move(notification));
+    // Don't start enqueueing requests until LSP is initialized.
+    initializedNotification.WaitForNotification();
+    {
+        absl::MutexLock lck(&messageQueueMutex);
+        msg->tagNewRequest(*logger);
+        messageQueue.counters = mergeCounters(move(messageQueue.counters));
+        messageQueue.pendingRequests.push_back(move(msg));
+    }
+}
+
+void WatchmanProcess::processQueryResponse(std::unique_ptr<WatchmanQueryResponse> response) {
+    auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
+    enqueueNotification(move(notifMsg));
+}
+
+void WatchmanProcess::processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
+    auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateEnter, move(stateEnter));
+    enqueueNotification(move(notification));
+}
+
+void WatchmanProcess::processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
+    auto notification = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateLeave, move(stateLeave));
+    enqueueNotification(move(notification));
+}
+
+void WatchmanProcess::processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
+    {
+        absl::MutexLock lck(&messageQueueMutex);
+        if (!messageQueue.terminate) {
+            messageQueue.terminate = true;
+            messageQueue.errorCode = watchmanExitCode;
+            if (watchmanExitCode != 0 && msg.has_value()) {
+                auto params = make_unique<ShowMessageParams>(MessageType::Error, msg.value());
+                config->output->write(make_unique<LSPMessage>(
+                    make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+            }
+        }
+        logger->debug("Watchman terminating");
     }
 }
 

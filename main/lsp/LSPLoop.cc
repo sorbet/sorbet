@@ -105,79 +105,6 @@ public:
     }
 };
 
-CounterState mergeCounters(CounterState counters) {
-    if (!counters.hasNullCounters()) {
-        counterConsume(move(counters));
-    }
-    return getAndClearThreadCounters();
-}
-
-void tagNewRequest(spdlog::logger &logger, LSPMessage &msg) {
-    msg.latencyTimer = make_unique<Timer>(logger, "task_latency",
-                                          initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000,
-                                                                15000, 20000, 25000, 30000, 35000, 40000});
-}
-
-class LSPWatchmanProcess final : public watchman::WatchmanProcess {
-    MessageQueueState &messageQueue;
-    absl::Mutex &messageQueueMutex;
-    absl::Notification &initializedNotification;
-    const std::shared_ptr<const LSPConfiguration> config;
-
-    void enqueueNotification(std::unique_ptr<NotificationMessage> notification) {
-        auto msg = make_unique<LSPMessage>(move(notification));
-        // Don't start enqueueing requests until LSP is initialized.
-        initializedNotification.WaitForNotification();
-        {
-            absl::MutexLock lck(&messageQueueMutex);
-            tagNewRequest(*logger, *msg);
-            messageQueue.counters = mergeCounters(move(messageQueue.counters));
-            messageQueue.pendingRequests.push_back(move(msg));
-        }
-    }
-
-public:
-    LSPWatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath,
-                       std::string_view workSpace, std::vector<std::string> extensions, MessageQueueState &messageQueue,
-                       absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
-                       std::shared_ptr<const LSPConfiguration> config)
-        : WatchmanProcess(std::move(logger), watchmanPath, workSpace, std::move(extensions)),
-          messageQueue(messageQueue), messageQueueMutex(messageQueueMutex),
-          initializedNotification(initializedNotification), config(std::move(config)) {}
-
-    virtual void processQueryResponse(std::unique_ptr<WatchmanQueryResponse> response) {
-        auto notifMsg = make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanFileChange, move(response));
-        enqueueNotification(move(notifMsg));
-    }
-
-    virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter> stateEnter) {
-        auto notification =
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateEnter, move(stateEnter));
-        enqueueNotification(move(notification));
-    }
-
-    virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave> stateLeave) {
-        auto notification =
-            make_unique<NotificationMessage>("2.0", LSPMethod::SorbetWatchmanStateLeave, move(stateLeave));
-        enqueueNotification(move(notification));
-    }
-
-    virtual void processExit(int watchmanExitCode, const std::optional<std::string> &msg) {
-        {
-            absl::MutexLock lck(&messageQueueMutex);
-            if (!messageQueue.terminate) {
-                messageQueue.terminate = true;
-                messageQueue.errorCode = watchmanExitCode;
-                if (watchmanExitCode != 0 && msg.has_value()) {
-                    auto params = make_unique<ShowMessageParams>(MessageType::Error, msg.value());
-                    config->output->write(make_unique<LSPMessage>(
-                        make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
-                }
-            }
-            logger->debug("Watchman terminating");
-        }
-    }
-};
 } // namespace
 
 void LSPLoop::processRequest(const string &json) {
@@ -292,9 +219,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             throw EarlyReturnWithCode(1);
         }
 
-        watchmanProcess = make_unique<LSPWatchmanProcess>(logger, opts.watchmanPath, opts.rawInputDirNames.at(0),
-                                                          vector<string>({"rb", "rbi"}), messageQueue,
-                                                          messageQueueMutex, initializedNotification, this->config);
+        watchmanProcess = make_unique<watchman::WatchmanProcess>(
+            logger, opts.watchmanPath, opts.rawInputDirNames.at(0), vector<string>({"rb", "rbi"}), messageQueue,
+            messageQueueMutex, initializedNotification, this->config);
     }
 
     auto readerThread =
@@ -313,7 +240,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     absl::MutexLock lck(&messageQueueMutex); // guards guardedState.
                     auto &msg = readResult.message;
                     if (msg) {
-                        tagNewRequest(*logger, *msg);
+                        msg->tagNewRequest(*logger);
                         messageQueue.counters = mergeCounters(move(messageQueue.counters));
                         messageQueue.pendingRequests.push_back(move(msg));
                         // Reset span now that we've found a request.

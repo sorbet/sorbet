@@ -39,6 +39,7 @@ cc_library(
         "LSPOutput.h",
         "LSPPreprocessor.h",
         "LSPQuery.h",
+        "MessageQueueState.h",
         "MoveMethod.h",
         "json_types.h",
         "wrapper.h",
