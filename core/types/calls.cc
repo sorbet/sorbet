@@ -300,7 +300,6 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                     ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
                 e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, argTpe, originForUninitialized);
-                e.addErrorSections(errorDetailsCollector);
                 return e.build();
             }
         }
