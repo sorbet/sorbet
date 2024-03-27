@@ -45,14 +45,15 @@ private:
 
     bool isStopped();
 
-protected:
-    virtual void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>) = 0;
+    void enqueueNotification(std::unique_ptr<NotificationMessage> notification);
 
-    virtual void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter>) = 0;
+    void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>);
 
-    virtual void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave>) = 0;
+    void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter>);
 
-    virtual void processExit(int core, const std::optional<std::string> &) = 0;
+    void processStateLeave(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateLeave>);
+
+    void processExit(int core, const std::optional<std::string> &);
 
 public:
     /**
@@ -64,7 +65,7 @@ public:
                     absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
                     std::shared_ptr<const LSPConfiguration> config);
 
-    virtual ~WatchmanProcess();
+    ~WatchmanProcess();
 
     WatchmanProcess(const WatchmanProcess &&) = delete;
     WatchmanProcess(WatchmanProcess &) = delete;
