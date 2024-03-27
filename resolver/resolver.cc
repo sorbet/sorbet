@@ -1861,6 +1861,28 @@ public:
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             counterInc("resolve.constants.retries");
             {
+                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
+                // This is an optimization. The order should not matter semantically
+                // This is done as a "pre-step" because the first iteration of this effectively ran in TreeWalk.
+                // every item in todoClassAliases implicitly depends on an item in item in todo
+                // there would be no point in running the todoClassAliases step before todo
+
+                long retries = 0;
+                auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    auto origSize = job.items.size();
+                    auto g = [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); };
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    return job.items.empty();
+                };
+                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
+                todoClassAliases.erase(it, todoClassAliases.end());
+                categoryCounterAdd("resolve.constants.aliases", "retry", retries);
+                progress = progress || retries > 0;
+            }
+            {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
@@ -1890,28 +1912,6 @@ public:
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
                 bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
                 progress = progress || resolvedSomeConstants;
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
-                // This is an optimization. The order should not matter semantically
-                // This is done as a "pre-step" because the first iteration of this effectively ran in TreeWalk.
-                // every item in todoClassAliases implicitly depends on an item in item in todo
-                // there would be no point in running the todoClassAliases step before todo
-
-                long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    auto origSize = job.items.size();
-                    auto g = [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
-                    retries += origSize - job.items.size();
-                    return job.items.empty();
-                };
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
-                todoClassAliases.erase(it, todoClassAliases.end());
-                categoryCounterAdd("resolve.constants.aliases", "retry", retries);
-                progress = progress || retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
