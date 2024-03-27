@@ -36,13 +36,6 @@ public:
     }
 };
 
-CounterState mergeCounters(CounterState counters) {
-    if (!counters.hasNullCounters()) {
-        counterConsume(move(counters));
-    }
-    return getAndClearThreadCounters();
-}
-
 } // namespace
 
 bool TaskQueue::isTerminated() const {
