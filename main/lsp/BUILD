@@ -36,6 +36,7 @@ cc_library(
         "LSPInput.h",
         "LSPLoop.h",
         "LSPMessage.h",
+        "MessageQueueState.h",
         "LSPOutput.h",
         "LSPPreprocessor.h",
         "LSPQuery.h",
