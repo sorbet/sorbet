@@ -8,7 +8,7 @@ set -o errexit
 echo "--- Dowloading artifacts"
 rm -rf release
 rm -rf _out_
-buildkite-agent artifact download "_out_/**/*" .
+buildkite-agent artifact download "_out_/**/*.gem" .
 
 # Based on the output of build-static-release.sh
 # _out_/gems/ should have the Linux & Mac sorbet-static gem
