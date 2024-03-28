@@ -334,6 +334,18 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (ifunset != nullptr) {
             ret.ifunset = std::move(ifunset);
         }
+
+        if (send->fun == core::Names::merchantTokenProp()) {
+            auto [_nameKey, nameValue] = ASTUtil::extractHashValue(ctx, *rules, core::Names::name());
+            if (nameValue != nullptr) {
+                if (auto lit = ast::cast_tree<ast::Literal>(nameValue)) {
+                    if (lit->isSymbol()) {
+                        ret.name = lit->asSymbol();
+                        ret.nameLoc = nameValue.loc();
+                    }
+                }
+            }
+        }
     }
 
     if (ret.default_ == nullptr && isTNilable(ret.type)) {
