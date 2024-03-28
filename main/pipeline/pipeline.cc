@@ -243,7 +243,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
-                   const options::Options &opts) {
+                   const options::Options &opts, WorkerPool &workers) {
     try {
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
@@ -916,7 +916,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     // We don't compute file hashes when running for incrementalResolve.
                     auto foundHashesForFiles = nullopt;
                     auto reresolved =
-                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
+                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts, workers);
                     ENFORCE(reresolved.size() == 1);
                     f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
                 }

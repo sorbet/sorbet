@@ -311,10 +311,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved =
-        shouldRunIncrementalNamer
-            ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles), config->opts)
-            : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
+    auto resolved = shouldRunIncrementalNamer
+                        ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles),
+                                                       config->opts, workers)
+                        : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
@@ -706,7 +706,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
     auto foundHashesForFiles = nullopt;
 
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts);
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
