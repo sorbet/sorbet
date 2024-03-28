@@ -73,6 +73,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // We don't run this fuzzer with any packager options, so we can skip pipeline::package()
     auto foundHashes = nullptr;
     indexed = move(realmain::pipeline::resolve(gs, move(indexed), *opts, *workers, foundHashes).result());
-    realmain::pipeline::typecheck(*gs, move(indexed), *opts, *workers);
+    realmain::pipeline::typecheck(*gs, move(indexed), {}, *opts, *workers);
     return 0;
 }

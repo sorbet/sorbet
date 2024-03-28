@@ -4,8 +4,16 @@ a/foo.rb:5: `Main::B` resolves but its package is not imported https://srb.help/
     __package.rb:3: Exported from package here
      3 |class Main < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
+
+a/__package.rb:3: Package `Main::A` is missing imports https://srb.help/3719
+     3 |class Main::A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Main` resolves but its package is not imported
+    __package.rb:3: Defined here
+     3 |class Main < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     a/__package.rb:3: Insert `import Main`
      3 |class Main::A < PackageSpec
                                    ^
-Errors: 1
+Errors: 2

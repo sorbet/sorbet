@@ -862,6 +862,19 @@ you're sure that it should be okay to import this package, then you can add an
 additional `visible_to` directive in order to allow the import you're trying to
 add.
 
+## 3724
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error indicates a package visibility problem due to missing `import` or
+`test_import` statement in a corresponding package file. It usually accompanies
+specific errors about unresolved constants that couldn't be imported or exported
+correctly.
+
+To fix this error, add the necessary `import` or `test_import` statements for
+the packages in the corresponding package file where the error was reported.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
