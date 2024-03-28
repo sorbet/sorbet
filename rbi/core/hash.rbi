@@ -1143,7 +1143,13 @@ class Hash < Object
   # h.slice(:a)           #=> {:a=>100}
   # h.slice(:b, :c, :d)   #=> {:b=>200, :c=>300}
   # ```
-  def slice(*_); end
+  sig do
+    params(
+        arg0: K,
+    )
+    .returns(T::Hash[K, V])
+  end
+  def slice(*arg0); end
 
   # Returns a new hash consisting of entries for which the block returns true.
   #
