@@ -137,8 +137,11 @@ def register_ruby_dependencies():
         sha256 = "96518814d9832bece92a85415a819d4893b307db5921ae1f0f751a9a89a56b7d",
         strip_prefix = "ruby-3.3.0",
         build_file = ruby_3_3_build,
+        patch_tool = "patch",
+        patch_args = ["-p1"],
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:ldflags.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:fix_grapheme_clusters_3_3_only.patch",
         ],
     )
 
