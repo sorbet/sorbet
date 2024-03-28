@@ -122,8 +122,6 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
     for (auto &oldFile : gs.getFiles()) {
         i++;
 
-        bool insertedIntoExtraFiles = false;
-
         if (oldFile == nullptr) {
             continue;
         }
@@ -143,26 +141,16 @@ LSPFileUpdates::FastPathFilesToTypecheckResult LSPFileUpdates::fastPathFilesToTy
             continue;
         }
 
-        if (isNoopUpdateForRetypecheck) {
-            if (changedPackages.contains(gs.packageDB().getPackageNameForFile(ref))) {
-                result.extraFiles.emplace_back(ref);
-                insertedIntoExtraFiles = true;
-            }
-        }
-
         ENFORCE(oldFile->getFileHash() != nullptr);
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::WithoutUniqueNameHash> intersection;
         absl::c_set_intersection(result.changedSymbolNameHashes, oldHash.usages.nameHashes,
                                  std::back_inserter(intersection));
-        if (intersection.empty()) {
+        if (intersection.empty() && !(changedPackages.contains(gs.packageDB().getPackageNameForFile(ref)) && isNoopUpdateForRetypecheck) ) {
             continue;
         }
 
-        if (!insertedIntoExtraFiles) {
-            result.extraFiles.emplace_back(ref);
-            insertedIntoExtraFiles = true;
-        }
+        result.extraFiles.emplace_back(ref);
 
         if (result.changedFiles.size() + result.extraFiles.size() > (2 * config.opts.lspMaxFilesOnFastPath)) {
             // Short circuit, as a performance optimization.
