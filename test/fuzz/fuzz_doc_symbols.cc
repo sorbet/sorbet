@@ -21,7 +21,6 @@ std::shared_ptr<sorbet::realmain::options::Options> mkOpts(std::string_view cont
     auto opts = std::make_shared<sorbet::realmain::options::Options>();
     opts->fs = std::make_shared<sorbet::test::MockFileSystem>(rootPath);
     opts->fs->writeFile(filePath, contents);
-    opts->lspDocumentSymbolEnabled = true;
     opts->rawInputDirNames.emplace_back(rootPath);
     opts->inputFileNames.emplace_back(filePath);
     return opts;

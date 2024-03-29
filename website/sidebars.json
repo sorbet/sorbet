@@ -59,6 +59,7 @@
       "go-to-def",
       "autocompletion",
       "code-actions",
+      "outline",
       "sig-suggestion",
       "highlight-untyped",
       "sorbet-uris"
