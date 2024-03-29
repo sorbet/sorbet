@@ -142,6 +142,7 @@ def register_ruby_dependencies():
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:ldflags.patch",
             "@com_stripe_ruby_typer//third_party/ruby:fix_grapheme_clusters_3_3_only.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:no_hash_allocate_static_kwargs_3_3_only.patch",
         ],
     )
 
