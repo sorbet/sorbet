@@ -275,6 +275,9 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
+            for (auto &file : what) {
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
                 return what;
@@ -292,6 +295,9 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
+            for (auto &file : what) {
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
                 return what;
@@ -870,6 +876,9 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         }
         what = move(result.result());
 
+        for (auto &file : what) {
+            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+        }
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
                 opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
@@ -899,6 +908,9 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
+            for (auto &file : what) {
+                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {
@@ -1045,9 +1057,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
-    // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
-    // drop errors in LSP mode.
-    ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
 
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1169,9 +1178,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         for (auto &extension : gs.semanticExtensions) {
             extension->finishTypecheck(gs);
         }
-
-        // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
-        gs.errorQueue->filesFlushedCount = 0;
 
         return;
     }

@@ -315,6 +315,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         shouldRunIncrementalNamer
             ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles), config->opts)
             : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
+
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
@@ -389,6 +390,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return !epochManager.wasTypecheckingCanceled();
 }
 
+// TODO(iz) add extra flushes
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
                                  shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,

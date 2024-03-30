@@ -8,6 +8,21 @@ namespace sorbet::core {
 
 using namespace std;
 
+ErrorQueueMessage ErrorQueueMessage::clone() {
+    ErrorQueueMessage newMsg;
+
+    newMsg.kind = this->kind;
+    newMsg.whatFile = this->whatFile;
+    newMsg.text = this->text;
+    if (this->error) {
+        newMsg.error = make_unique<Error>(*this->error);
+    }
+    if (this->queryResponse) {
+        newMsg.queryResponse = make_unique<lsp::QueryResponse>(*this->queryResponse);
+    }
+    return newMsg;
+}
+
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
@@ -32,7 +47,6 @@ bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) const {
 void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 
-    filesFlushedCount.fetch_add(1);
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
 
     core::ErrorQueueMessage msg;
@@ -42,6 +56,27 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
 
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
+
+void ErrorQueue::flushButRetainErrorsForFile(const GlobalState &gs, FileRef file) {
+    checkOwned();
+
+    Timer timeit(tracer, "ErrorQueue::flushButRetainErrorsForFile");
+
+
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        if (!result.gotItem()) {
+            continue;
+        }
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+    }
+
+    std::vector<std::unique_ptr<ErrorQueueMessage>> toFlush;
+    for (auto &errMsg : collected[file]) {
+        toFlush.emplace_back(make_unique<ErrorQueueMessage>(errMsg.get()->clone()));
+    }
+    errorFlusher->flushErrors(logger, gs, file, move(toFlush));
+};
 
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
     core::ErrorQueueMessage msg;
