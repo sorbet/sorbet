@@ -26,7 +26,6 @@ public:
     spdlog::logger &tracer;
     std::atomic<bool> hadCritical{false};
     std::atomic<int> nonSilencedErrorCount{0};
-    std::atomic<int> filesFlushedCount{0};
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer,
                std::shared_ptr<ErrorFlusher> errorFlusher = std::make_shared<ErrorFlusherStdout>());
@@ -39,6 +38,9 @@ public:
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);
     bool wouldFlushErrorsForFile(FileRef file) const;
+
+    /** reports errors, but doesn't remove them from internal storage, so they can be re-reported later*/
+    void flushButRetainErrorsForFile(const GlobalState &gs, FileRef file);
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;

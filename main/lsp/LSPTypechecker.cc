@@ -393,6 +393,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return epochManager.wasTypecheckingCanceled();
 }
 
+// TODO(iz) add extra flushes
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
                                  shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
