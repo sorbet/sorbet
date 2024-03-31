@@ -20,11 +20,11 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
 
         // Check if it matches against a specific argument. If it does, send that instead;
         // it's more specific.
-        const int numArgs = methodDef.args.size();
+        const int numArgs = methodDef.args().size();
 
         ENFORCE(numArgs == argTypes.size());
         for (int i = 0; i < numArgs; i++) {
-            auto &arg = methodDef.args[i];
+            auto &arg = methodDef.args()[i];
             auto &argType = argTypes[i];
             auto *localExp = ast::MK::arg2Local(arg);
             // localExp should never be null, but guard against the possibility.

@@ -69,7 +69,7 @@ public:
     void preTransformMethodDef(core::MutableContext ctx, ExpressionPtr &tree) {
         auto &original = cast_tree_nonnull<MethodDef>(tree);
         original.name = subst.substituteSymbolName(original.name);
-        for (auto &arg : original.args) {
+        for (auto &arg : original.args()) {
             substArg(ctx, arg);
         }
     }

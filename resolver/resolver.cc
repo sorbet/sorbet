@@ -3430,7 +3430,7 @@ private:
     static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
                                          int pos, bool isOverloaded) {
         if (!isOverloaded) {
-            return ast::MK::arg2Local(mdef.args[pos]);
+            return ast::MK::arg2Local(mdef.args()[pos]);
         }
 
         // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
@@ -3440,7 +3440,7 @@ private:
                                              [&](const auto &arg) { return arg.name == internalNameToLookFor; });
         ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments.end());
         auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments.begin();
-        return ast::MK::arg2Local(mdef.args[realPos]);
+        return ast::MK::arg2Local(mdef.args()[realPos]);
     }
 
     static bool usesArgumentForwardingSyntax(core::Context ctx, core::MethodData methodInfo, const ast::MethodDef &mdef,
@@ -3533,7 +3533,7 @@ private:
                                                             core::LocOffsets exprLoc, ParsedSig &sig, bool isOverloaded,
                                                             const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args.size());
+        ENFORCE(isOverloaded || method.data(ctx)->arguments.size() == mdef.args().size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -3881,7 +3881,7 @@ private:
                             auto sig = parseSig(ctx, sigOwner, *lastSig, mdef);
                             vector<bool> argsToKeep;
                             if (isOverloaded) {
-                                for (auto &argTree : mdef.args) {
+                                for (auto &argTree : mdef.args()) {
                                     const auto local = ast::MK::arg2Local(argTree);
                                     auto treeArgName = local->localVariable._name;
                                     ENFORCE(local != nullptr);
@@ -4050,7 +4050,7 @@ public:
 
             auto argIdx = -1;
             auto numPosArgs = 0;
-            for (auto &arg : mdef.args) {
+            for (auto &arg : mdef.args()) {
                 ++argIdx;
 
                 const ast::Local *local = nullptr;

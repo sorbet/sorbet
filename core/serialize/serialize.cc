@@ -1321,9 +1321,9 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             p.putU1(flags);
             p.putU4(c.name.rawId());
             p.putU4(c.symbol.id());
-            p.putU4(c.args.size());
+            p.putU4(c.args().size());
             pickle(p, c.rhs);
-            for (auto &a : c.args) {
+            for (auto &a : c.args()) {
                 pickle(p, a);
             }
             break;

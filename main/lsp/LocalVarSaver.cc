@@ -59,7 +59,7 @@ void LocalVarSaver::postTransformMethodDef(core::Context ctx, const ast::MethodD
     this->enclosingMethodDefLoc.pop_back();
 
     // Check args.
-    for (auto &arg : methodDef.args) {
+    for (auto &arg : methodDef.args()) {
         // nullptrs should never happen, but guard against it anyway.
         if (auto *localExp = ast::MK::arg2Local(arg)) {
             bool lspQueryMatch = ctx.state.lspQuery.matchesVar(methodDef.symbol, localExp->localVariable);
