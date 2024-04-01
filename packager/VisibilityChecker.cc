@@ -223,7 +223,7 @@ class PropagateVisibility final {
         // - Nothing prevents `MyEnum.deserialize('x')` to simply hide visibility violations.
         // - It was hard for end users to know whether an enum had only exported some values intentionally.
         //   In practice people just exported the new values without thinking.
-        // 
+        //
         // See also how when we get a visibility violation for an enum value not being exported we export the entire
         // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
