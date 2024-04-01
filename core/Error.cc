@@ -151,7 +151,7 @@ std::optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
     for (auto &c : children) {
         toErrorSectionHelper(c, lines, 0);
     }
-    return ErrorSection("Detailed explanation:", lines);
+    return ErrorSection("Detailed explanation:", move(lines));
 }
 
 string Error::toString(const GlobalState &gs) const {
@@ -198,7 +198,7 @@ void ErrorBuilder::addErrorSection(optional<ErrorSection> &&section) {
 
 void ErrorBuilder::addErrorSections(const ErrorSection::Collector &&errorDetailsCollector) {
     if (auto errorSection = errorDetailsCollector.toErrorSection()) {
-        addErrorSection(errorSection.value());
+        addErrorSection(move(errorSection.value()));
     }
 }
 
