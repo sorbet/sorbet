@@ -65,7 +65,7 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
     buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
 fi
 
-if grep -r '^  \w*\.md' website &> lint_docusaurus_md; then
+if grep -n -r '^  \w*\.md' website &> lint_docusaurus_md; then
   globalErr=1
   echo "^^^ +++"
   buildkite-agent annotate --context "Docusaurus Link Reference Definitions" --style error --append <<EOF
