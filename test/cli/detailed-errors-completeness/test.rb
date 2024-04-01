@@ -106,3 +106,8 @@ xs = {
 xs[:foo] = ['']
 
 T.let([''], [Integer])
+
+b = T.let([0], [Integer])
+1.times do
+  b = [""]
+end

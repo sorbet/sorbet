@@ -39,6 +39,8 @@ void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuild
                                                const ErrorSection::Collector &collector, const TypePtr &expected,
                                                const TypePtr &got) {
     e.addErrorSections(std::move(collector));
+    // TODO: the rest of this function should eventually be moved to isSubTypeUnderConstraint,
+    // as calls to collector.addErrorDetails
     auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
     auto gotClassType = isa_type<ClassType>(got);
     if (expectedSelfTypeParam && gotClassType) {

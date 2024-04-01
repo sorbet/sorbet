@@ -245,6 +245,12 @@ test.rb:108: Argument does not have asserted type `[Integer]` https://srb.help/7
   Detailed explanation:
     `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
 
+test.rb:112: Incompatible assignment to variable declared via `let`: `[String("")]` is not a subtype of `[Integer]` https://srb.help/7001
+     112 |  b = [""]
+                ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
 test.rb:51: Expected `[String]` but found `[Integer(1)]` for field https://srb.help/7013
     51 |    @a = [1]
                  ^^^
@@ -258,4 +264,4 @@ test.rb:51: Expected `[String]` but found `[Integer(1)]` for field https://srb.h
                  ^^^
   Detailed explanation:
     `Integer(1)` is not a subtype of `String` for index `0` of `1`-tuple
-Errors: 21
+Errors: 22

@@ -1096,7 +1096,6 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                 }
             }
 
-            // TODO:
             ErrorSection::Collector errorDetailsCollector2;
             if (!Types::isSubType(gs, memType->lowerBound, argType, errorDetailsCollector2)) {
                 validBounds = false;
