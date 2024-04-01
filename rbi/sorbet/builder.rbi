@@ -18,8 +18,8 @@ class T::Private::Methods::DeclBuilder
   sig {returns(T::Private::Methods::DeclBuilder)}
   def overridable; end
 
-  sig {params(claz: T.untyped).returns(T::Private::Methods::DeclBuilder)}
-  def bind(claz); end
+  sig {params(klass: T.untyped).returns(T::Private::Methods::DeclBuilder)}
+  def bind(klass); end
 
   sig {params(unused_positional_params: T.untyped, params: T.untyped).returns(T::Private::Methods::DeclBuilder)}
   def params(*unused_positional_params, **params); end

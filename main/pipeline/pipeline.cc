@@ -243,7 +243,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 vector<ast::ParsedFile>
 incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                    optional<UnorderedMap<core::FileRef, core::FoundDefHashes>> &&foundHashesForFiles,
-                   const options::Options &opts) {
+                   const options::Options &opts, WorkerPool &workers) {
     try {
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
@@ -256,6 +256,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // split `pipeline::package` into something like "populate the package DB" and "verify
             // the package prefixes" with the later living in `pipeline::resolve` once again (thus
             // restoring the symmetry).
+            // TODO(jez) Parallelize this
             what = packager::Packager::runIncremental(gs, move(what));
         }
 #endif
@@ -264,12 +265,10 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
 
-            auto result = runIncrementalNamer
-                              ? sorbet::namer::Namer::runIncremental(
-                                    gs, move(what), std::move(foundHashesForFiles.value()), *emptyWorkers)
-                              : sorbet::namer::Namer::run(gs, move(what), *emptyWorkers, nullptr);
+            auto result = runIncrementalNamer ? sorbet::namer::Namer::runIncremental(
+                                                    gs, move(what), std::move(foundHashesForFiles.value()), workers)
+                                              : sorbet::namer::Namer::run(gs, move(what), workers, nullptr);
 
             // Cancellation cannot occur during incremental namer.
             ENFORCE(result.hasResult());
@@ -287,7 +286,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer);
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what), runIncrementalNamer, workers);
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());
@@ -300,8 +299,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.stripePackages) {
-            auto emptyWorkers = WorkerPool::create(0, gs.tracer());
-            what = packager::VisibilityChecker::run(gs, *emptyWorkers, std::move(what));
+            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
         }
 #endif
 
@@ -916,7 +914,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                     // We don't compute file hashes when running for incrementalResolve.
                     auto foundHashesForFiles = nullopt;
                     auto reresolved =
-                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts);
+                        pipeline::incrementalResolve(*gs, move(toBeReResolved), foundHashesForFiles, opts, workers);
                     ENFORCE(reresolved.size() == 1);
                     f = checkNoDefinitionsInsideProhibitedLines(*gs, move(reresolved[0]), 0, prohibitedLines);
                 }

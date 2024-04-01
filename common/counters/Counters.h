@@ -78,6 +78,7 @@ private:
 
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
+CounterState mergeCounters(CounterState counters);
 
 void prodCounterInc(ConstExprStr counter);
 void prodCounterAdd(ConstExprStr counter, unsigned long value);

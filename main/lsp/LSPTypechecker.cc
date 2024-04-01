@@ -311,10 +311,10 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
-    auto resolved =
-        shouldRunIncrementalNamer
-            ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles), config->opts)
-            : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts);
+    auto resolved = shouldRunIncrementalNamer
+                        ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles),
+                                                       config->opts, workers)
+                        : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
@@ -639,7 +639,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());
     gs->lspQuery = q;
-    auto resolved = getResolved(filesForQuery);
+    auto resolved = getResolved(filesForQuery, workers);
     tryApplyDefLocSaver(*gs, resolved);
     tryApplyLocalVarSaver(*gs, resolved);
 
@@ -690,7 +690,7 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     return indexed[id];
 }
 
-vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
+vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
 
@@ -706,7 +706,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
     // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
     auto foundHashesForFiles = nullopt;
 
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts);
+    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
 }
 
 const core::GlobalState &LSPTypechecker::state() const {
@@ -780,7 +780,7 @@ const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) co
 }
 
 std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vector<core::FileRef> &frefs) const {
-    return typechecker.getResolved(frefs);
+    return typechecker.getResolved(frefs, workers);
 }
 
 ast::ExpressionPtr LSPTypecheckerDelegate::getDesugared(core::FileRef fref) const {

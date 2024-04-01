@@ -106,7 +106,7 @@ rm -rf _out_
 mkdir -p _out_/gems
 
 mv gems/sorbet-static/sorbet-static-*.gem _out_/gems/
-if [[ "$kernel_name" == "linux" ]]; then
+if [[ "$platform" == "linux-x86_64" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 

@@ -64,14 +64,24 @@ export PATH="$(dirname "{cc}"):$(dirname $(realpath {rustc})):$PATH"
 cp -aL "{src_dir}"/* "$build_dir"
 # Manually copy over .bundle as bundled gems are no longer installed
 # https://github.com/ruby/ruby/pull/6234
+
+
+if [ "$(uname)" == "Darwin" ]; then
+    # according to the man page -r is highly discouraged on macOS
+    CPFLAGS=-RaL
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    CPFLAGS=-raL
+fi
+
 if [[ -d "{src_dir}/.bundle" ]]; then
-  cp -raL "{src_dir}/.bundle" "$build_dir"
+  cp $CPFLAGS "{src_dir}/.bundle" "$build_dir"
 fi
 
 {install_extra_srcs}
 {install_append_srcs}
 
 libyaml_loc="$(realpath {libyaml})"
+libffi_loc="$(realpath {libffi})"
 
 pushd "$build_dir" > /dev/null
 
@@ -109,6 +119,7 @@ export LDFLAGS="{sysroot_flag} ${{lib_path[*]:-}} {linkopts}"
 run_cmd ./configure \
         {configure_flags} \
         --with-libyaml-source-dir=$libyaml_loc \
+        --with-libffi-source-dir=$libffi_loc \
         --enable-load-relative \
         --with-destdir="$out_dir" \
         --with-rubyhdrdir='${{includedir}}' \
@@ -277,7 +288,7 @@ def _build_ruby_impl(ctx):
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.libyaml + ctx.files.libffi + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -291,6 +302,7 @@ def _build_ruby_impl(ctx):
             libs = " ".join(libs),
             rubygems = ctx.files.rubygems[0].path,
             libyaml = ctx.files.libyaml[0].dirname,
+            libffi = ctx.files.libffi[0].dirname,
             rustc = ctx.toolchains["@rules_rust//rust:toolchain_type"].rustc.path,
             configure_flags = " ".join(ctx.attr.configure_flags),
             sysroot_flag = ctx.attr.sysroot_flag,
@@ -331,6 +343,10 @@ _build_ruby = rule(
         "libyaml": attr.label(
             default = Label("@libyaml//:libyaml"),
             doc = "A filegroup containing the libyaml source, `configure` should be at the top level",
+        ),
+        "libffi": attr.label(
+            default = Label("@libffi//:libffi"),
+            doc = "A filegroup containing the libffi source, `configure` should be at the top level",
         ),
         "extra_srcs": attr.label_list(
             doc = "A list of *.c and *.h files to treat as extra source files to libruby",

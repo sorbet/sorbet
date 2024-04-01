@@ -1,5 +1,5 @@
-Content-Length: 639
+Content-Length: 638
 
-{"jsonrpc":"2.0","id":0,"requestMethod":"initialize","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"triggerCharacters":[".",":","@","#"]},"definitionProvider":true,"typeDefinitionProvider":true,"implementationProvider":true,"referencesProvider":true,"documentHighlightProvider":false,"documentSymbolProvider":false,"workspaceSymbolProvider":true,"codeActionProvider":{"codeActionKinds":["quickfix","source.fixAll.sorbet","refactor.extract","refactor.rewrite"],"resolveProvider":true},"documentFormattingProvider":false,"renameProvider":{"prepareProvider":true},"sorbetShowSymbolProvider":true}}}Content-Length: 65
+{"jsonrpc":"2.0","id":0,"requestMethod":"initialize","result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"completionProvider":{"triggerCharacters":[".",":","@","#"]},"definitionProvider":true,"typeDefinitionProvider":true,"implementationProvider":true,"referencesProvider":true,"documentHighlightProvider":false,"documentSymbolProvider":true,"workspaceSymbolProvider":true,"codeActionProvider":{"codeActionKinds":["quickfix","source.fixAll.sorbet","refactor.extract","refactor.rewrite"],"resolveProvider":true},"documentFormattingProvider":false,"renameProvider":{"prepareProvider":true},"sorbetShowSymbolProvider":true}}}Content-Length: 65
 
 {"jsonrpc":"2.0","id":1,"requestMethod":"shutdown","result":null}

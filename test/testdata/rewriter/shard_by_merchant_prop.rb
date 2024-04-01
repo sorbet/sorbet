@@ -39,8 +39,20 @@ class MerchantTokenPropModel
   merchant_token_prop
 end
 
+class MerchantTokenPropModelCustomName
+  include T::Props
+  extend ShardByMerchantBase
+
+  merchant_token_prop name: :linked_merchant
+end
+
 T.reveal_type(MerchantPropModel.new.merchant) # error: Revealed type: `String`
 MerchantPropModel.new.merchant = "hi" # error: Setter method `merchant=` does not exist
 
 T.reveal_type(MerchantTokenPropModel.new.merchant) # error: Revealed type: `Opus::Autogen::Tokens::AccountModelMerchant::Token`
 MerchantTokenPropModel.new.merchant = nil # error: Setter method `merchant=` does not exist
+
+MerchantTokenPropModelCustomName.new.merchant
+#                                    ^^^^^^^^ error: does not exist
+
+T.reveal_type(MerchantTokenPropModelCustomName.new.linked_merchant) # error: `Opus::Autogen::Tokens::AccountModelMerchant::Token`

@@ -151,6 +151,13 @@ void counterConsume(CounterState cs) {
     }
 }
 
+CounterState mergeCounters(CounterState counters) {
+    if (!counters.hasNullCounters()) {
+        counterConsume(move(counters));
+    }
+    return getAndClearThreadCounters();
+}
+
 void counterAdd(ConstExprStr counter, unsigned long value) {
     if constexpr (enable_counters) {
         counterState.counterAdd(counter.str, value);

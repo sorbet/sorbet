@@ -142,43 +142,6 @@ your preferred LSP client using the [`sorbet/showSymbol` LSP request].)
 [`sorbet/showsymbol` lsp request]:
   https://github.com/sorbet/sorbet/blob/ec02be89e3d1895ea51bc72464538073d27b812c/vscode_extension/src/LanguageClient.ts#L154-L179
 
-Highlight `T.untyped` code.
-
-This feature reports diagnostics to the editor for occurrences of `T.untyped`
-code. Note that it is not yet perfect and may miss occurrences of such values.
-
-It can be enabled by adding the following to your VS Code `settings.json` and
-either reopening VS Code or restarting Sorbet:
-
-```json
-"sorbet.highlightUntyped": "everywhere"
-```
-
-> **Note**: In versions of the Sorbet VS Code extension before v0.3.29, this
-> option was a simple `true`/`false` setting. If you had specified it as a
-> boolean in your config, you will want to convert `true` to `"everywhere"` or
-> `false` to `"nowhere"`, though the legacy boolean option remains supported.
-> The default (`false` / `"nowhere"`) remains the same.
-
-You can also using the `Sorbet: Toggle Highlight untyped values` command from
-the command palette (note this causes a full restart of Sorbet).
-
-To enable this feature in other language clients, configure your language client
-to send this when sending the LSP initialize request to the Sorbet language
-server:
-
-```json
-"initializationOptions": {
-  "highlightUntyped": "everywhere"
-}
-```
-
-> **Note**: In versions of the Sorbet language server before `v0.5.11175`, this
-> option was a simple `true`/`false` setting. The legacy boolean option remains
-> supported.
-
-<img src="/img/lsp/highlight_untyped.png" />
-
 ## Switching between configurations
 
 The Sorbet extension supports switching between multiple configurations to make
@@ -350,9 +313,9 @@ that variable as having ever been defined.
 Otherwise, try to reproduce the issue on https://sorbet.run/ and file a bug on
 the [issue tracker](https://github.com/sorbet/sorbet/issues).
 
-### Go to Definition/Go to Type Definition/Find all References
+### Find all References
 
-#### Go to Definition/Go to Type Definition/Find all References is not working / Find all References is missing some expected results.
+#### Find all References is not working / Find all References is missing some expected results.
 
 Make sure that Sorbet is running. You should see "Sorbet: Idle" in VS Code's
 status bar. Otherwise, see
@@ -374,14 +337,7 @@ one file.
 Find all References also waits for "Typechecking in background..." to complete
 so that it does not contend with typechecking for CPU time.
 
-#### Go to Definition/Go to Type Definition brought me to what I believe is the wrong location.
-
-Ensure that you see "Sorbet: Idle" and not "Sorbet: Disabled" at the bottom of
-VS Code. If Sorbet is enabled and it is returning a weird/unexpected definition
-site, please try to reproduce the issue on https://sorbet.run/ and file a bug on
-the [issue tracker](https://github.com/sorbet/sorbet/issues).
-
-#### Go to Definition/Go to Type Definition/Find all References brought me to a file that I cannot edit.
+#### Find all References brought me to a file that I cannot edit.
 
 These features may return results in type definitions for core Ruby libraries,
 which are baked directly into the Sorbet executable and are not present on the
@@ -391,67 +347,6 @@ In order to display these files in your editor and to support navigating through
 them, we've configured the Sorbet extension to display them in this read-only
 view. Note that certain extension features, like hover and Go to Definition,
 will not function in some of these special files.
-
-### Completion
-
-#### I don't see any completion results.
-
-- Are you in a `typed: false` file? No completion results are expected.
-- Is the place where you're trying to see results unreachable? For example,
-  after a return statement, or in an else condition that can't happen? Sorbet
-  can't provide completion results here.
-- Can you see completion results for other things? Sorbet only supports
-  completing local variables, methods, keywords, suggested sigs, classes,
-  modules, and constants right now. Notably, it doesn't support completing the
-  names of instance variables.
-
-#### I don't see any completion results right after I type A:: or x.
-
-You'll have to type at least one character after the dot (like x.f) or after the
-colon (like A::B) before completion results show up.
-
-We tried to get this working before the initial ship, but it ended up being a
-more complicated change than we expected. We have a couple ideas how to support
-this, so expect this to be supported in the future.
-
-#### The completion results look wrong.
-
-Completion results can come from many different extensions, not just Sorbet. You
-can try to figure out what extension returned the results by looking at the icon
-that VS Code shows in the completion list:
-
-![](/img/lsp/vscode-completion-list.png)
-
-Results from Sorbet will only ever have 1 of 6 icons (currently): `method`,
-`variable`, `field`, `class`, `interface`, `module`, `enum`, `keyword`, and
-`snippet`.
-
-**Notably**, the abc icon (`word`) means the results came either from VS Code’s
-`editor.wordBasedSuggestions` setting or some other generic autocomplete
-extension.
-
-Also, `snippet` results can come from other extensions. Snippet results that
-come from Sorbet will always say `(sorbet)` somewhere in the snippet
-description. Sorbet does not have control over any snippet results that don't
-say `(sorbet)` in them; if they look wrong, the only suggestion is to turn them
-off.
-
-#### Can I have Sorbet only suggest method names, not the entire snippet, with types?
-
-Sorbet inserts a suggested snippet into the document when accepting a completion
-result.
-
-- Snippet results will have highlighted sections inside them.
-- These represent "holes" (tabstops) that you'll need to fill in—the aim is that
-  every tabstop is for a required argument (i.e., optional / default arguments
-  won't be present).
-- As the default text for each of these holes, Sorbet uses the type of the
-  corresponding argument.
-- Press `TAB` to cycle through the holes (tabstops), or press `ESC` to deselect
-  all the tabstops.
-
-It is not possible to opt-out of these completion snippets. If you find that
-this is annoying, please let us know.
 
 ## Reporting metrics
 

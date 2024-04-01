@@ -129,6 +129,12 @@ LSPMessage::LSPMessage(std::string_view json) : LSPMessage::LSPMessage(fromJSON(
 
 LSPMessage::~LSPMessage() = default;
 
+void LSPMessage::tagNewRequest(spdlog::logger &logger) {
+    this->latencyTimer = make_unique<Timer>(logger, "task_latency",
+                                            initializer_list<int>{50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000,
+                                                                  10000, 15000, 20000, 25000, 30000, 35000, 40000});
+}
+
 optional<MessageId> LSPMessage::id() const {
     if (isRequest()) {
         return asRequest().id;
