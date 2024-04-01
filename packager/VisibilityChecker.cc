@@ -216,6 +216,16 @@ class PropagateVisibility final {
         }
 
         // If sym is an enum value, it can't be exported directly. Instead, its wrapping enum class must be exported.
+        //
+        // This was originally an implementation limitation, but is now an intentional choice. The considerations:
+        //
+        // - Each additional export was previously expensive in the rewriter-based package visibility checker.
+        // - Nothing prevents `MyEnum.deserialize('x')` to simply hide visibility violations.
+        // - It was hard for end users to know whether an enum had only exported some values intentionally.
+        //   In practice people just exported the new values without thinking.
+        // 
+        // See also how when we get a visibility violation for an enum value not being exported we export the entire
+        // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
