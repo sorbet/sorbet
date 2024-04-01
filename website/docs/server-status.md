@@ -266,13 +266,11 @@ option during the [`initialize` request].
 }
 ```
 
-Different language clients will have [different ways to specify
-`initializationOptions`] when starting a language server. Consult the
-documentation of your editor or language client for how to pass this option on
-startup in the `initialize` request.
-
-[different ways to specify `initializationOptions`]:
-  lsp.md#instructions-for-specific-language-clients
+Different language clients will have
+[different ways to specify `initializationOptions`](lsp.md#instructions-for-specific-language-clients)
+when starting a language server. Consult the documentation of your editor or
+language client for how to pass this option on startup in the `initialize`
+request.
 
 As a reference, it may be helpful to consult the implementation in the Sorbet VS
 Code extension:
