@@ -1622,6 +1622,7 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
     }
 }
 
+// TODO(jez) Parallelize this
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files) {
     // Note: This will only run if packages have not been changed (byte-for-byte equality).
     // TODO(nroman-stripe) This could be further incrementalized to avoid processing all packages by

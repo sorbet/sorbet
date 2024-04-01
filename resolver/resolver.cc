@@ -4245,9 +4245,8 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 }
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                     bool ranIncrementalNamer) {
-    auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
+                                                     bool ranIncrementalNamer, WorkerPool &workers) {
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     verifyLinearizationComputed(gs);
     // (verifyLinearizationComputed vs finalizeAncestors is currently the only difference between
@@ -4260,8 +4259,8 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     if (ranIncrementalNamer) {
         Resolver::finalizeSymbols(gs);
     }
-    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
-    auto result = resolveSigs(gs, std::move(rtmafResult.trees), *workers);
+    auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
+    auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
     // This check is FAR too slow to run on large codebases, especially with sanitizers on.
