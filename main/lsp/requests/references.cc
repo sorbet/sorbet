@@ -191,6 +191,13 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             } else {
                 notifyAboutUntypedFile = true;
             }
+        } else if (auto litResp = resp->isLiteral()) {
+            auto type = litResp->retType.type;
+            if (core::isa_type<core::NamedLiteralType>(type)) {
+                auto namedLiteral = core::cast_type_nonnull<core::NamedLiteralType>(type);
+                auto responses = LSPQuery::byNamedLiteral(config, typechecker, namedLiteral.asName()).responses;
+                response->result = extractLocations(typechecker.state(), responses);
+            }
         }
     } else if (fref.exists() && !fileIsTyped) {
         // The first check ensures that the file actually exists (and therefore

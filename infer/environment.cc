@@ -1518,6 +1518,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = i.value;
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
+                if (core::isa_type<core::NamedLiteralType>(i.value)) {
+                    auto namedLiteral = core::cast_type_nonnull<core::NamedLiteralType>(i.value);
+                    lspQueryMatch |= lspQuery.matchesNamedLiteral(namedLiteral.asName());
+                }
+
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(ctx,
                                                                 core::lsp::LiteralResponse(ctx.locAt(bind.loc), tp));

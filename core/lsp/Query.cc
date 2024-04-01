@@ -4,32 +4,37 @@
 using namespace std;
 namespace sorbet::core::lsp {
 
-Query::Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable)
-    : kind(kind), loc(loc), symbol(symbol), variable(variable) {}
+Query::Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable, core::NameRef literal)
+    : kind(kind), loc(loc), symbol(symbol), variable(variable), literal(literal) {}
 
 Query Query::noQuery() {
-    return Query(Query::Kind::NONE, core::Loc::none(), core::Symbols::noSymbol(), core::LocalVariable());
+    return Query(Query::Kind::NONE, core::Loc::none(), core::Symbols::noSymbol(), core::LocalVariable(), NameRef::noName());
 }
 
 Query Query::createLocQuery(core::Loc loc) {
     ENFORCE(loc.exists());
-    return Query(Query::Kind::LOC, loc, core::Symbols::noSymbol(), core::LocalVariable());
+    return Query(Query::Kind::LOC, loc, core::Symbols::noSymbol(), core::LocalVariable(), NameRef::noName());
 }
 
 Query Query::createSymbolQuery(core::SymbolRef symbol) {
     ENFORCE(symbol.exists());
-    return Query(Query::Kind::SYMBOL, core::Loc::none(), symbol, core::LocalVariable());
+    return Query(Query::Kind::SYMBOL, core::Loc::none(), symbol, core::LocalVariable(), NameRef::noName());
 }
 
 Query Query::createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable) {
     ENFORCE(owner.exists());
     ENFORCE(variable.exists());
-    return Query(Query::Kind::VAR, enclosingLoc, owner, variable);
+    return Query(Query::Kind::VAR, enclosingLoc, owner, variable, core::NameRef::noName());
+}
+
+Query Query::createNamedLiteralQuery(core::NameRef literal) {
+    ENFORCE(literal.exists());
+    return Query(Query::Kind::NAMED_LITERAL, core::Loc::none(), core::Symbols::noSymbol(), core::LocalVariable::noVariable(), literal);
 }
 
 Query Query::createSuggestSigQuery(core::MethodRef method) {
     ENFORCE(method.exists());
-    return Query(Query::Kind::SUGGEST_SIG, core::Loc::none(), method, core::LocalVariable());
+    return Query(Query::Kind::SUGGEST_SIG, core::Loc::none(), method, core::LocalVariable(), NameRef::noName());
 }
 
 bool Query::matchesSymbol(const core::SymbolRef &symbol) const {
@@ -45,6 +50,10 @@ bool Query::matchesLoc(const core::Loc &loc) const {
 
 bool Query::matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const {
     return kind == Query::Kind::VAR && var.exists() && this->symbol == owner && this->variable == var;
+}
+
+bool Query::matchesNamedLiteral(NameRef literal) const {
+    return kind == Query::Kind::NAMED_LITERAL && literal.exists() && this->literal == literal;
 }
 
 bool Query::matchesSuggestSig(const core::SymbolRef &method) const {

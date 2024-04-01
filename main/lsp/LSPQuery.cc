@@ -96,6 +96,29 @@ LSPQueryResult LSPQuery::LSPQuery::bySymbolInFiles(const LSPConfiguration &confi
     return typechecker.query(core::lsp::Query::createSymbolQuery(symbol), frefs);
 }
 
+LSPQueryResult LSPQuery::byNamedLiteral(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                        core::NameRef literal) {
+    Timer timeit(config.logger, "setupLSPQueryBySymbol");
+    ENFORCE(literal.exists());
+    vector<core::FileRef> frefs;
+    const core::GlobalState &gs = typechecker.state();
+    // Locate all files. Is an overapproximation, but a good first filter.
+    // TODO: this is slow, find way to just run slow path instead
+    int i = -1;
+    for (auto &file : typechecker.state().getFiles()) {
+        i++;
+        if (file == nullptr) {
+            continue;
+        }
+
+        auto ref = core::FileRef(i);
+        const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
+        if (fileIsValid) {
+            frefs.emplace_back(ref);
+        }
+    }
+    return typechecker.query(core::lsp::Query::createNamedLiteralQuery(literal), frefs);
+}
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                   core::SymbolRef symbol, core::packages::MangledName pkgName) {
     Timer timeit(config.logger, "setupLSPQueryBySymbol");

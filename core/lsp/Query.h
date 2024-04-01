@@ -22,6 +22,8 @@ public:
         VAR,
         // Looking for the definition of a certain method for the purpose of suggesting a sig.
         SUGGEST_SIG,
+        // Looking for a specific literal
+        NAMED_LITERAL,
     };
 
     Kind kind;
@@ -33,22 +35,26 @@ public:
     // If Kind == SUGGEST_SIG, this is the method to suggest a sig for.
     // If Kind == VAR, this is the owner of the variable.
     core::SymbolRef symbol;
+    // If Kind == NAMED_LITERAL, this is the literal the query is looking for.
     core::LocalVariable variable;
+    core::NameRef literal;
 
     static Query noQuery();
     static Query createLocQuery(core::Loc loc);
     static Query createSymbolQuery(core::SymbolRef symbol);
     static Query createVarQuery(core::SymbolRef owner, core::Loc enclosingLoc, core::LocalVariable variable);
+    static Query createNamedLiteralQuery(core::NameRef literal);
     static Query createSuggestSigQuery(core::MethodRef method);
 
     bool matchesSymbol(const core::SymbolRef &symbol) const;
     bool matchesLoc(const core::Loc &loc) const;
     bool matchesVar(const core::SymbolRef &owner, const core::LocalVariable &var) const;
+    bool matchesNamedLiteral(NameRef literal) const;
     bool matchesSuggestSig(const core::SymbolRef &method) const;
     bool isEmpty() const;
 
 private:
-    Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable);
+    Query(Kind kind, core::Loc loc, core::SymbolRef symbol, core::LocalVariable variable, core::NameRef literal);
 };
 } // namespace sorbet::core::lsp
 

@@ -690,6 +690,7 @@ const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
     return indexed[id];
 }
 
+// TODO: parallize by passing in worker pool to incremental resolve
 vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;

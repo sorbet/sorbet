@@ -16,6 +16,8 @@ public:
                                 bool emptyResultIfFileIsUntyped = true);
     static LSPQueryResult bySymbolInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                           core::SymbolRef symbol, std::vector<core::FileRef> frefs);
+    static LSPQueryResult byNamedLiteral(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
+                                         core::NameRef literal);
     static LSPQueryResult bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                    core::SymbolRef symbol,
                                    core::packages::MangledName pkgName = core::packages::MangledName());
