@@ -100,7 +100,7 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
         }
     } else if (auto constant = queryResponse->isConstant()) {
         // User called "Go to Implementation" from the abstract class reference
-        auto classSymbol = constant->symbol.asClassOrModuleRef();
+        auto classSymbol = constant->symbolBeforeDealias.dealias(gs).asClassOrModuleRef();
 
         if (!classSymbol.data(gs)->flags.isAbstract) {
             response->error = makeInvalidRequestError(classSymbol, gs);
