@@ -64,12 +64,12 @@ unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, string_view ru
 }
 
 string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
-    // Request that the constant already be dealiased, rather than dealias here to avoid defensively dealiasing.
-    // We should understand where dealias calls go.
-    ENFORCE(constant == constant.dealias(gs));
-
     if (constant == core::Symbols::StubModule()) {
         return "This constant is not defined";
+    }
+
+    if (constant.isClassAlias(gs)) {
+        return fmt::format("{} = {}", constant.name(gs).show(gs), constant.dealias(gs).show(gs));
     }
 
     core::TypePtr result;
