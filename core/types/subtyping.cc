@@ -1204,7 +1204,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (!result) {
             return result;
         }
-        if (result) {
         InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
         // code below inverts permutation of type params
         int j = 0;
@@ -1272,7 +1271,6 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             j++;
         }
         // alight type params.
-        }
         return result;
     }
     if (isa_type<AppliedType>(t2)) {
