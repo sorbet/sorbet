@@ -1,3 +1,35 @@
+type_members.rb:35: Argument does not have asserted type `Box2[Integer]` https://srb.help/7007
+    35 |  T.let(box1, Box2[Integer])
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `Box1[Integer]` originating from:
+    type_members.rb:34:
+    34 |def takes_box1(box1)
+                       ^^^^
+  Detailed explanation:
+    `Box1` does not derive from `Box2`
+
+type_members.rb:36: Argument does not have asserted type `Integer` https://srb.help/7007
+    36 |  T.let(box1, Integer)
+          ^^^^^^^^^^^^^^^^^^^^
+  Got `Box1[Integer]` originating from:
+    type_members.rb:34:
+    34 |def takes_box1(box1)
+                       ^^^^
+  Detailed explanation:
+    `Box1` does not derive from `Integer`
+
+type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A[String, Lower, Upper]` originating from:
+    type_members.rb:21:
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `String` is not equivalent to `Middle` for invariant type member `A::X`
+    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
+    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
+
 shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
     10 |takes_shape({})
                     ^^
@@ -153,16 +185,4 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-
-type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
-    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `A[String, Lower, Upper]` originating from:
-    type_members.rb:21:
-    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Detailed explanation:
-    `String` is not equivalent to `Middle` for invariant type member `A::X`
-    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
-    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
-Errors: 13
+Errors: 15
