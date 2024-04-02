@@ -9,6 +9,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeErrorDiagnostics.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
 #include <utility>
@@ -272,8 +273,7 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
         return true;
     }
     return Types::isSubType(gs, Types::falseClass(), what) ||
-           Types::isSubType(gs, Types::nilClass(),
-                            what); // check if inhabited by falsy values
+           Types::isSubType(gs, Types::nilClass(), what); // check if inhabited by falsy values
 }
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
@@ -1082,7 +1082,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
             bool validBounds = true;
 
             // Validate type parameter bounds.
-            if (!Types::isSubType(gs, argType, memType->upperBound)) {
+            ErrorSection::Collector errorDetailsCollector;
+            if (!Types::isSubType(gs, argType, memType->upperBound, errorDetailsCollector)) {
                 validBounds = false;
                 if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
                     auto argStr = argType.show(gs);
@@ -1090,10 +1091,13 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "upper",
                                    memType->upperBound.show(gs));
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, memType->upperBound,
+                                                              argType);
                 }
             }
 
-            if (!Types::isSubType(gs, memType->lowerBound, argType)) {
+            ErrorSection::Collector errorDetailsCollector2;
+            if (!Types::isSubType(gs, memType->lowerBound, argType, errorDetailsCollector2)) {
                 validBounds = false;
 
                 if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
@@ -1102,6 +1106,8 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
                                 mem.showFullName(gs));
                     e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", mem.showFullName(gs), "lower",
                                    memType->lowerBound.show(gs));
+                    TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector2, memType->lowerBound,
+                                                              argType);
                 }
             }
 

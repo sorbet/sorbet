@@ -84,6 +84,33 @@ struct ErrorSection {
     ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
     ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
     std::string toString(const GlobalState &gs) const;
+
+    class NoOpCollector {
+    public:
+        void addErrorDetails(NoOpCollector e) {}
+        NoOpCollector newCollector() const {
+            return *this;
+        }
+    };
+
+    class Collector {
+    public:
+        std::string message;
+        std::vector<Collector> children;
+
+        Collector() = default;
+        Collector(const Collector &) = delete;
+        Collector &operator=(const Collector &) = delete;
+        Collector(Collector &&other) = default;
+
+        void addErrorDetails(Collector &&e);
+        Collector newCollector() const {
+            return Collector();
+        }
+        std::optional<ErrorSection> toErrorSection() const;
+
+        constexpr static NoOpCollector NO_OP = NoOpCollector();
+    };
 };
 
 class Error {
@@ -162,6 +189,7 @@ public:
         std::string formatted = ErrorColors::format(msg, std::forward<Args>(args)...);
         _setHeader(move(formatted));
     }
+    void addErrorSections(const ErrorSection::Collector &&errorDetailsCollector);
 
     void addAutocorrect(AutocorrectSuggestion &&autocorrect);
     template <typename... Args>

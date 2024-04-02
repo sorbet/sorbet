@@ -1070,8 +1070,11 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
+template <class T>
 bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode, const TypePtr &t1,
-                                    const TypePtr &t2) {
+                                    const TypePtr &t2, T &errorDetailsCollector) {
+    constexpr auto shouldAddErrorDetails = std::is_same<T, ErrorSection::Collector>::value;
+
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
 
@@ -1147,14 +1150,16 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!isSelfTypeT1) {
                 auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
                 if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.resultType(gs))) {
-                    return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode);
+                    return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
+                                                           errorDetailsCollector);
                 } else {
                     return false;
                 }
             } else if (!isSelfTypeT2) {
                 auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
                 if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.resultType(gs))) {
-                    return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode);
+                    return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
+                                                           errorDetailsCollector);
                 } else {
                     return false;
                 }
@@ -1168,7 +1173,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 auto *lambda1 = cast_type<LambdaParam>(self1.definition.resultType(gs));
                 auto *lambda2 = cast_type<LambdaParam>(self2.definition.resultType(gs));
                 return lambda1 && lambda2 &&
-                       Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode);
+                       Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode,
+                                                       errorDetailsCollector);
             }
         }
     }
@@ -1211,25 +1217,54 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
                 ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
 
+                auto &a1i = a1->targs[i];
+                auto &a2j = a2->targs[j];
+                bool doesMemberMatch = true;
+                auto subCollector = errorDetailsCollector.newCollector();
                 if (idxTypeMember.data(gs)->flags.isCovariant) {
-                    result = Types::isSubTypeUnderConstraint(gs, constr, a1->targs[i], a2->targs[j], mode);
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a1i, a2j, mode, subCollector);
                 } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                    auto &a = a1->targs[i];
-                    auto &b = a2->targs[j];
                     if (mode == UntypedMode::AlwaysCompatible) {
-                        result = Types::equivUnderConstraint(gs, constr, a, b);
+                        doesMemberMatch = Types::equivUnderConstraint(gs, constr, a1i, a2j, subCollector);
                     } else {
                         // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
                         // except when `constr` is EmptyFrozenConstraint, so there's no observable
                         // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
                         // May as well do it for symmetry though.
-                        result = Types::equivNoUntypedUnderConstraint(gs, constr, a, b);
+                        doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a1i, a2j, subCollector);
                     }
                 } else if (idxTypeMember.data(gs)->flags.isContravariant) {
-                    result = Types::isSubTypeUnderConstraint(gs, constr, a2->targs[j], a1->targs[i], mode);
+                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a2j, a1i, mode, subCollector);
                 }
-                if (!result) {
-                    break;
+                if (!doesMemberMatch) {
+                    result = false;
+                    if constexpr (shouldAddErrorDetails) {
+                        string variance;
+                        string joiningText;
+                        switch (idxTypeMember.data(gs)->variance()) {
+                            case Variance::CoVariant: {
+                                variance = "covariant";
+                                joiningText = "a subtype of";
+                                break;
+                            }
+                            case Variance::Invariant: {
+                                variance = "invariant";
+                                joiningText = "equivalent to";
+                                break;
+                            }
+                            case Variance::ContraVariant: {
+                                variance = "contravariant";
+                                joiningText = "a supertype of";
+                                break;
+                            }
+                        }
+                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(std::move(subCollector));
+                    } else {
+                        break;
+                    }
                 }
                 j++;
             }
@@ -1239,7 +1274,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
     if (isa_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
-            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
         }
         return false;
     }
@@ -1257,32 +1292,62 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         int i = -1;
                         for (auto &el2 : a2->elems) {
                             ++i;
-                            result = Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode);
-                            if (!result) {
-                                break;
+                            auto subCollector = errorDetailsCollector.newCollector();
+                            if (!Types::isSubTypeUnderConstraint(gs, constr, a1.elems[i], el2, mode, subCollector)) {
+                                result = false;
+                                if constexpr (shouldAddErrorDetails) {
+                                    auto message = ErrorColors::format(
+                                        "`{}` is not a subtype of `{}` for index `{}` of `{}`-tuple",
+                                        a1.elems[i].show(gs), el2.show(gs), i, a2->elems.size());
+                                    subCollector.message = message;
+                                    errorDetailsCollector.addErrorDetails(std::move(subCollector));
+                                } else {
+                                    break;
+                                }
                             }
                         }
+                    } else {
+                        return;
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
                     auto *h2 = cast_type<ShapeType>(t2);
                     result = h2 != nullptr && h2->keys.size() <= h1.keys.size();
-                    if (!result) {
-                        return;
+                    if constexpr (shouldAddErrorDetails) {
+                        if (h2 == nullptr) {
+                            return;
+                        }
+                        // If we're using this subtyping call to report an error, we should loop through all the items
+                        // even if there aren't enough keys, so we can report all the missing keys to the user, and
+                        // report an error for the incorrect keys.
+                    } else {
+                        if (!result) {
+                            return;
+                        }
                     }
-                    // have enough keys.
+                    // have enough keys (or we want to keep going for rich error reporting).
                     int i = -1;
                     for (auto &el2 : h2->keys) {
                         ++i;
                         auto optind = h1.indexForKey(el2);
+                        auto subCollector = errorDetailsCollector.newCollector();
                         if (!optind.has_value()) {
                             result = false;
-                            return;
-                        }
-                        if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()], h2->values[i],
-                                                             mode)) {
+                            if constexpr (!shouldAddErrorDetails) {
+                                return;
+                            }
+                        } else if (!Types::isSubTypeUnderConstraint(gs, constr, h1.values[optind.value()],
+                                                                    h2->values[i], mode, subCollector)) {
                             result = false;
-                            return;
+                            if constexpr (shouldAddErrorDetails) {
+                                auto message = ErrorColors::format("`{}` is not a subtype of `{}` for key `{}`",
+                                                                   h1.values[i].show(gs),
+                                                                   h2->values[optind.value()].show(gs), el2.show(gs));
+                                subCollector.message = message;
+                                errorDetailsCollector.addErrorDetails(std::move(subCollector));
+                            } else {
+                                return;
+                            }
                         }
                     }
                 },
@@ -1324,14 +1389,18 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         return;
                     }
 
-                    result = Types::equiv(gs, m1.wrapped, m2->wrapped);
+                    // TODO(jez) Should this actually run under EmptyFrozenConstraint? Leaving for
+                    // backwards compatibility, but maybe we should do this under the `constr`
+                    // that's in scope.
+                    result = Types::equivUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, m1.wrapped,
+                                                         m2->wrapped, errorDetailsCollector);
                 });
             return result;
             // both are proxy
         } else {
             // only 1st is proxy
             TypePtr und = t1.underlying(gs);
-            return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2);
+            return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
         }
     } else if (is_proxy_type(t2)) {
         // non-proxies are never subtypes of proxies.
@@ -1349,15 +1418,19 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 }
 
 bool Types::isAsSpecificAs(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible);
+    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysIncompatible,
+                                    ErrorSection::Collector::NO_OP);
 }
 
-bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
+template <class T>
+bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, T &errorDetailsCollector) {
+    return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible,
+                                    errorDetailsCollector);
 }
 
+template <class T>
 bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                     const TypePtr &t2, UntypedMode mode) {
+                                     const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector) {
     if (t1 == t2) {
         return true;
     }
@@ -1376,13 +1449,13 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
     if (auto *o1 = cast_type<OrType>(t1)) { // 7, 8, 9
-        return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode) &&
-               Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode);
+        return Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, errorDetailsCollector) &&
+               Types::isSubTypeUnderConstraint(gs, constr, o1->right, t2, mode, errorDetailsCollector);
     }
 
     if (auto *a2 = cast_type<AndType>(t2)) { // 2, 5
-        return Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode) &&
-               Types::isSubTypeUnderConstraint(gs, constr, t1, a2->right, mode);
+        return Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode, errorDetailsCollector) &&
+               Types::isSubTypeUnderConstraint(gs, constr, t1, a2->right, mode, errorDetailsCollector);
     }
 
     auto *a1 = cast_type<AndType>(t1);
@@ -1402,8 +1475,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
             // this could be using glb, but we _know_ that we already tried to collapse it (prior
             // construction of types did). Thus we use AndType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, *r), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->left, *r), t2, mode,
+                                                   errorDetailsCollector) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, AndType::make_shared(a1o->right, *r), t2, mode,
+                                                   errorDetailsCollector);
         }
     }
     if (o2 != nullptr) {
@@ -1420,8 +1495,10 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
             // this could be using lub, but we _know_ that we already tried to collapse it (prior
             // construction of types did). Thus we use OrType::make_shared instead
-            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode) &&
-                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode,
+                                                   errorDetailsCollector) &&
+                   Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode,
+                                                   errorDetailsCollector);
         }
     }
 
@@ -1448,12 +1525,12 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         //
         // Concretely, it's still possible to come up with cases where this heuristic isn't good enough.
         // For more, see the comment in `no_short_circuit_type_constraint.rb`
-        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode);
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, t1, o2->left, mode, errorDetailsCollector);
         auto stillNeedToCheckRight = t1.isUntyped() && o2->left.isFullyDefined() && !o2->right.isFullyDefined();
         if (leftIsSubType && !stillNeedToCheckRight) {
             // Short circuit to save time
             return true;
-        } else if (Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode)) {
+        } else if (Types::isSubTypeUnderConstraint(gs, constr, t1, o2->right, mode, errorDetailsCollector)) {
             return true;
         } else if (a1 == nullptr) {
             // If neither t1 <: o2->left nor t1 <: o2->right, it might mean that we tried to split
@@ -1470,36 +1547,73 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             return constr.rememberIsSubtype(gs, t1, t2);
         }
         // See explanation in "// 3"
-        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode);
+        auto leftIsSubType = Types::isSubTypeUnderConstraint(gs, constr, a1->left, t2, mode, errorDetailsCollector);
         auto stillNeedToCheckRight = t2.isUntyped() && a1->left.isFullyDefined() && !a1->right.isFullyDefined();
         if (leftIsSubType && !stillNeedToCheckRight) {
             // Short circuit to save time
             return true;
         } else {
-            return Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, a1->right, t2, mode, errorDetailsCollector);
         }
     }
 
-    return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2); // 1
+    return isSubTypeUnderConstraintSingle(gs, constr, mode, t1, t2, errorDetailsCollector); // 1
 }
 
 bool Types::equiv(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isSubType(gs, t1, t2) && isSubType(gs, t2, t1);
 }
 
-bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
+template <class T>
+bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
+                                 T &errorDetailsCollector) {
     auto mode = UntypedMode::AlwaysCompatible;
-    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode) && isSubTypeUnderConstraint(gs, constr, t2, t1, mode);
+    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode, errorDetailsCollector) &&
+           isSubTypeUnderConstraint(gs, constr, t2, t1, mode, errorDetailsCollector);
 }
 
 bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
+template <class T>
 bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
-                                          const TypePtr &t2) {
+                                          const TypePtr &t2, T &errorDetailsCollector) {
     auto mode = UntypedMode::AlwaysIncompatible;
-    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode) && isSubTypeUnderConstraint(gs, constr, t2, t1, mode);
+    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode, errorDetailsCollector) &&
+           isSubTypeUnderConstraint(gs, constr, t2, t1, mode, errorDetailsCollector);
 }
+
+template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode,
+                                             const TypePtr &t1, const TypePtr &t2,
+                                             core::ErrorSection::Collector &errorDetailsCollector);
+template bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &constr, UntypedMode mode,
+                                             const TypePtr &t1, const TypePtr &t2,
+                                             core::ErrorSection::NoOpCollector const &errorDetailsCollector);
+
+template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                              const TypePtr &t2, UntypedMode mode,
+                                              core::ErrorSection::Collector &errorDetailsCollector);
+template bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                              const TypePtr &t2, UntypedMode mode,
+                                              core::ErrorSection::NoOpCollector const &errorDetailsCollector);
+
+template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                               core::ErrorSection::Collector &errorDetailsCollector);
+template bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                               core::ErrorSection::NoOpCollector const &errorDetailsCollector);
+
+template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                          const TypePtr &t2, core::ErrorSection::Collector &errorDetailsCollector);
+template bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                          const TypePtr &t2,
+                                          core::ErrorSection::NoOpCollector const &errorDetailsCollector);
+
+template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                                   const TypePtr &t2,
+                                                   core::ErrorSection::Collector &errorDetailsCollector);
+template bool Types::equivNoUntypedUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                                   const TypePtr &t2,
+                                                   core::ErrorSection::NoOpCollector const &errorDetailsCollector);
 
 } // namespace sorbet::core

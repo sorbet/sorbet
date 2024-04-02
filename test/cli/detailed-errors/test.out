@@ -1,0 +1,168 @@
+shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
+    10 |takes_shape({})
+                    ^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:10:
+    10 |takes_shape({})
+                    ^^
+
+shapes.rb:11: Expected `{a: Integer, b: String}` but found `{a: Integer(1)}` for argument `x` https://srb.help/7002
+    11 |takes_shape({a: 1})
+                    ^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:11:
+    11 |takes_shape({a: 1})
+                    ^^^^^^
+
+shapes.rb:14: Expected `{a: Integer, b: String}` but found `{a: Integer(1), c: Integer(1)}` for argument `x` https://srb.help/7002
+    14 |takes_shape({a: 1, c: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1), c: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:14:
+    14 |takes_shape({a: 1, c: 1})
+                    ^^^^^^^^^^^^
+
+shapes.rb:15: Expected `{a: Integer, b: String}` but found `{c: Integer(1), d: Integer(1)}` for argument `x` https://srb.help/7002
+    15 |takes_shape({c: 1, d: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{c: Integer(1), d: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:15:
+    15 |takes_shape({c: 1, d: 1})
+                    ^^^^^^^^^^^^
+
+shapes.rb:18: Expected `{a: Integer, b: String}` but found `{a: Integer(1), b: Integer(1)}` for argument `x` https://srb.help/7002
+    18 |takes_shape({a: 1, b: 1})
+                    ^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: Integer(1), b: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:18:
+    18 |takes_shape({a: 1, b: 1})
+                    ^^^^^^^^^^^^
+  Detailed explanation:
+    `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
+
+shapes.rb:19: Expected `{a: Integer, b: String}` but found `{a: String(""), b: Integer(1)}` for argument `x` https://srb.help/7002
+    19 |takes_shape({a: '', b: 1})
+                    ^^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: String(""), b: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:19:
+    19 |takes_shape({a: '', b: 1})
+                    ^^^^^^^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
+    `Integer(1)` is not a subtype of `String` for key `Symbol(:b)`
+
+shapes.rb:22: Expected `{a: Integer, b: String}` but found `{a: String(""), c: Integer(1)}` for argument `x` https://srb.help/7002
+    22 |takes_shape({a: '', c: 1})
+                    ^^^^^^^^^^^^^
+  Expected `{a: Integer, b: String}` for argument `x` of method `Object#takes_shape`:
+    shapes.rb:5:
+     5 |sig { params(x: {a: Integer, b: String}).void }
+                     ^
+  Got `{a: String(""), c: Integer(1)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    shapes.rb:22:
+    22 |takes_shape({a: '', c: 1})
+                    ^^^^^^^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
+
+tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
+    10 |takes_tuple([])
+                    ^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[] (0-tuple)` originating from:
+    tuples.rb:10:
+    10 |takes_tuple([])
+                    ^^
+
+tuples.rb:11: Expected `[Integer, String]` but found `[Integer(1)]` for argument `x` https://srb.help/7002
+    11 |takes_tuple([1])
+                    ^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[Integer(1)] (1-tuple)` originating from:
+    tuples.rb:11:
+    11 |takes_tuple([1])
+                    ^^^
+
+tuples.rb:14: Expected `[Integer, String]` but found `[Integer(1), Integer(1)]` for argument `x` https://srb.help/7002
+    14 |takes_tuple([1, 1])
+                    ^^^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[Integer(1), Integer(1)] (2-tuple)` originating from:
+    tuples.rb:14:
+    14 |takes_tuple([1, 1])
+                    ^^^^^^
+  Detailed explanation:
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
+
+tuples.rb:15: Expected `[Integer, String]` but found `[String(""), Integer(1)]` for argument `x` https://srb.help/7002
+    15 |takes_tuple(['', 1])
+                    ^^^^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[String(""), Integer(1)] (2-tuple)` originating from:
+    tuples.rb:15:
+    15 |takes_tuple(['', 1])
+                    ^^^^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `2`-tuple
+    `Integer(1)` is not a subtype of `String` for index `1` of `2`-tuple
+
+tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument `x` https://srb.help/7002
+    18 |takes_tuple([''])
+                    ^^^^
+  Expected `[Integer, String]` for argument `x` of method `Object#takes_tuple`:
+    tuples.rb:5:
+     5 |sig { params(x: [Integer, String]).void }
+                     ^
+  Got `[String("")] (1-tuple)` originating from:
+    tuples.rb:18:
+    18 |takes_tuple([''])
+                    ^^^^
+
+type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `A[String, Lower, Upper]` originating from:
+    type_members.rb:21:
+    21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `String` is not equivalent to `Middle` for invariant type member `A::X`
+    `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
+    `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
+Errors: 13

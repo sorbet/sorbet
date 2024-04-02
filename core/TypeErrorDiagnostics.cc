@@ -35,8 +35,12 @@ namespace {
 }
 } // namespace
 
-void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e, const TypePtr &expected,
+void TypeErrorDiagnostics::explainTypeMismatch(const GlobalState &gs, ErrorBuilder &e,
+                                               const ErrorSection::Collector &collector, const TypePtr &expected,
                                                const TypePtr &got) {
+    e.addErrorSections(std::move(collector));
+    // TODO: the rest of this function should eventually be moved to isSubTypeUnderConstraint,
+    // as calls to collector.addErrorDetails
     auto expectedSelfTypeParam = isa_type<SelfTypeParam>(expected);
     auto gotClassType = isa_type<ClassType>(got);
     if (expectedSelfTypeParam && gotClassType) {
@@ -81,12 +85,13 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
 
         auto withoutNil = Types::dropNil(gs, actualType);
         if (!withoutNil.isBottom() &&
-            Types::isSubTypeUnderConstraint(gs, *constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
+            Types::isSubTypeUnderConstraint(gs, *constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible,
+                                            ErrorSection::Collector::NO_OP)) {
             e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
         } else if (isa_type<MetaType>(actualType) && !isa_type<MetaType>(expectedType) &&
-                   core::Types::isSubTypeUnderConstraint(gs, *constr,
-                                                         core::Symbols::T_Types_Base().data(gs)->externalType(),
-                                                         expectedType, UntypedMode::AlwaysCompatible)) {
+                   core::Types::isSubTypeUnderConstraint(
+                       gs, *constr, core::Symbols::T_Types_Base().data(gs)->externalType(), expectedType,
+                       UntypedMode::AlwaysCompatible, ErrorSection::Collector::NO_OP)) {
             e.replaceWith("Wrap in `T::Utils.coerce`", loc, "T::Utils.coerce({})", loc.source(gs).value());
         }
     }

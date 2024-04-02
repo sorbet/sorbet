@@ -1,0 +1,267 @@
+test.rb:65: The `lower` type bound `[Lower]` must be a supertype of the parent's `lower` type bound `[Middle]` for type_member `X` https://srb.help/5053
+    65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
+                                                   ^^^^^^^
+    test.rb:47: `A::X` defined in parent here
+    47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `Middle` is not a subtype of `Lower` for index `0` of `1`-tuple
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:65: Replace with `[Middle]`
+    65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
+                                                   ^^^^^^^
+
+test.rb:65: The `upper` type bound `[Upper]` must be a subtype of the parent's `upper` type bound `[Middle]` for type_member `X` https://srb.help/5053
+    65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
+                                   ^^^^^^^
+    test.rb:47: `A::X` defined in parent here
+    47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `Upper` is not a subtype of `Middle` for index `0` of `1`-tuple
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:65: Replace with `[Middle]`
+    65 |  X = type_member {{upper: [Upper], lower: [Lower] }}
+                                   ^^^^^^^
+
+test.rb:93: The `fixed` type bound `[Middle]` must be equivalent to the parent's `fixed` type bound `[Upper]` for type_member `X` https://srb.help/5053
+    93 |  X = type_member {{ fixed: [Middle] }}
+                                    ^^^^^^^^
+    test.rb:87: `C::X` defined in parent here
+    87 |  X = type_member {{ fixed: [Upper] }}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `Upper` is not a subtype of `Middle` for index `0` of `1`-tuple
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:93: Replace with `[Upper]`
+    93 |  X = type_member {{ fixed: [Middle] }}
+                                    ^^^^^^^^
+
+test.rb:99: The `lower` type bound `[Upper]` is not a subtype of the `upper` type bound `[Lower]` for `E::X` https://srb.help/5052
+    99 |  X = type_member {{upper: [Lower], lower: [Upper] }}
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `Upper` is not a subtype of `Lower` for index `0` of `1`-tuple
+
+test.rb:68: Parameter `x` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    68 |  def foo(x, y:, z: [''], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:50: The super method parameter `x` was declared here with type `[Integer]`
+    50 |  def foo(x, y:, z: [1], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    A parameter's type must be a supertype of the same parameter's type on the super method.
+  Detailed explanation:
+    `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:68: Keyword parameter `y` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    68 |  def foo(x, y:, z: [''], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:50: The corresponding parameter `y` was declared here with type `[Integer]`
+    50 |  def foo(x, y:, z: [1], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    A parameter's type must be a supertype of the same parameter's type on the super method.
+  Detailed explanation:
+    `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:68: Keyword parameter `z` of type `[String]` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    68 |  def foo(x, y:, z: [''], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:50: The super method parameter `z` was declared here with type `[Integer]`
+    50 |  def foo(x, y:, z: [1], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    A parameter's type must be a supertype of the same parameter's type on the super method.
+  Detailed explanation:
+    `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:68: Block parameter `blk` of type `T.proc.returns([String])` not compatible with type of overridable method `A#foo` https://srb.help/5035
+    68 |  def foo(x, y:, z: [''], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:50: The super method parameter `blk` was declared here with type `T.proc.returns([Integer])`
+    50 |  def foo(x, y:, z: [1], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    A parameter's type must be a supertype of the same parameter's type on the super method.
+  Detailed explanation:
+    `[Integer]` is not a subtype of `[String]` for covariant type member `Proc0::Return`
+      `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:68: Return type `[String]` does not match return type of overridable method `A#foo` https://srb.help/5035
+    68 |  def foo(x, y:, z: [''], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:50: Super method defined here with return type `[Integer]`
+    50 |  def foo(x, y:, z: [1], &blk)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    A method's return type must be a subtype of the return type on the super method.
+  Detailed explanation:
+    `String` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:73: Parameter **`rest` of type `[String]` not compatible with type of overridable method `A#bar` https://srb.help/5035
+    73 |  def bar(**rest)
+          ^^^^^^^^^^^^^^^
+    test.rb:56: The super method parameter **`rest` was declared here with type `[Integer]`
+    56 |  def bar(**rest)
+          ^^^^^^^^^^^^^^^
+  Note:
+    A parameter's type must be a supertype of the same parameter's type on the super method.
+  Detailed explanation:
+    `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:7: Expected `[Integer]` but found `[String("")]` for method result type https://srb.help/7005
+     7 |  ['']
+          ^^^^
+  Expected `[Integer]` for result type of method `foo`:
+    test.rb:6:
+     6 |def foo(x)
+        ^^^^^^^^^^
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:7:
+     7 |  ['']
+          ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:10: Expected `[Integer]` but found `[String("")]` for argument `x` https://srb.help/7002
+    10 |foo([''])
+            ^^^^
+  Expected `[Integer]` for argument `x` of method `Object#foo`:
+    test.rb:5:
+     5 |sig { params(x: [Integer]).returns([Integer]) }
+                     ^
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:10:
+    10 |foo([''])
+            ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:17: Expected `[Integer]` for keyword parameter `x` but found `[String]` from keyword splat https://srb.help/7002
+    17 |bar(**h)
+            ^^^
+  Expected `[Integer]` for argument `x` of method `Object#bar`:
+    test.rb:12:
+    12 |sig { params(x: [Integer]).void }
+                     ^
+  Got `T::Hash[Symbol, [String]]` originating from:
+    test.rb:16:
+    16 |h = T.let({}, T::Hash[Symbol, [String]])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    test.rb:17:
+    17 |bar(**h)
+            ^^^
+  Detailed explanation:
+    `String` is not a subtype of `Integer` for index `0` of `1`-tuple
+  Note:
+    A `Hash` passed as a keyword splat must match the type of all keyword parameters
+    because Sorbet cannot see what specific keys exist in the `Hash`.
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:17: Replace with `T.unsafe(h)`
+    17 |bar(**h)
+              ^
+
+test.rb:24: Expected `T.proc.params(arg0: [Integer]).returns([Integer])` but found `T.proc.params(arg0: [String]).returns([String])` for block argument https://srb.help/7002
+    24 |baz(&p)
+        ^^^^^^^
+  Expected `T.proc.params(arg0: [Integer]).returns([Integer])` for block argument `blk` of method `Object#baz`:
+    test.rb:19:
+    19 |sig {params(blk: T.proc.params(x: [Integer]).returns([Integer])).void}
+                    ^^^
+  Detailed explanation:
+    `[String]` is not a subtype of `[Integer]` for covariant type member `Proc1::Return`
+      `String` is not a subtype of `Integer` for index `0` of `1`-tuple
+    `[String]` is not a supertype of `[Integer]` for contravariant type member `Proc1::Arg0`
+      `Integer` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:27: Expected `[Integer]` but found `[String("")]` for block result type https://srb.help/7005
+    27 |  ['']
+          ^^^^
+  Expected `[Integer]` for block result type:
+    test.rb:19:
+    19 |sig {params(blk: T.proc.params(x: [Integer]).returns([Integer])).void}
+                    ^^^
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:27:
+    27 |  ['']
+          ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:60: `[String]` is not a subtype of upper bound of type member `::A::X` https://srb.help/5060
+    60 |A[[String]]
+          ^^^^^^^^
+    test.rb:47: `::A::X` is `upper` bounded by `[Middle]` here
+    47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `String` is not a subtype of `Middle` for index `0` of `1`-tuple
+
+test.rb:60: `[String]` is not a supertype of lower bound of type member `::A::X` https://srb.help/5060
+    60 |A[[String]]
+          ^^^^^^^^
+    test.rb:47: `::A::X` is `lower` bounded by `[Middle]` here
+    47 |  X = type_member {{upper: [Middle], lower: [Middle] }}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `Middle` is not a subtype of `String` for index `0` of `1`-tuple
+
+test.rb:80: Changing the type of a variable in a loop is not permitted https://srb.help/7001
+    80 |  a = ['']
+              ^^^^
+  Existing variable has type: `[Integer(1)]`
+  Attempting to change type to: `[String("")]`
+
+  Autocorrect: Use `-a` to autocorrect
+    test.rb:77: Replace with `T.let([1], [T.any(Integer, String)])`
+    77 |a = [1]
+            ^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer(1)` for index `0` of `1`-tuple
+
+test.rb:106: Expected `[Integer(1)]` but found `[String("")]` for key `Symbol(:foo)` https://srb.help/7002
+     106 |xs[:foo] = ['']
+                     ^^^^
+  Shape originates from here:
+    test.rb:102:
+     102 |xs = {
+     103 |  foo: [1],
+     104 |}
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:106:
+     106 |xs[:foo] = ['']
+                     ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer(1)` for index `0` of `1`-tuple
+
+test.rb:108: Argument does not have asserted type `[Integer]` https://srb.help/7007
+     108 |T.let([''], [Integer])
+          ^^^^^^^^^^^^^^^^^^^^^^
+  Got `[String("")] (1-tuple)` originating from:
+    test.rb:108:
+     108 |T.let([''], [Integer])
+                ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:112: Incompatible assignment to variable declared via `let`: `[String("")]` is not a subtype of `[Integer]` https://srb.help/7001
+     112 |  b = [""]
+                ^^^^
+  Detailed explanation:
+    `String("")` is not a subtype of `Integer` for index `0` of `1`-tuple
+
+test.rb:51: Expected `[String]` but found `[Integer(1)]` for field https://srb.help/7013
+    51 |    @a = [1]
+                 ^^^
+  Expected `[String] (1-tuple)` for field defined here:
+    test.rb:44:
+    44 |    @a = T.let([''], [String])
+            ^^
+  Got `[Integer(1)] (1-tuple)` originating from:
+    test.rb:51:
+    51 |    @a = [1]
+                 ^^^
+  Detailed explanation:
+    `Integer(1)` is not a subtype of `String` for index `0` of `1`-tuple
+Errors: 22
