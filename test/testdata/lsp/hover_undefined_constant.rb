@@ -3,6 +3,6 @@
 class MyClass
   def foo(x)
     x + THE_CONSTANT # error: Unable to resolve constant
-      # ^ hover: This constant is not defined
+      # ^ hover: (unable to resolve constant)
   end
 end

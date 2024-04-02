@@ -83,7 +83,12 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
     } else if (auto c = resp->isConstant()) {
-        for (auto loc : c->symbol.locs(gs)) {
+        for (auto loc : c->symbolBeforeDealias.locs(gs)) {
+            if (loc.exists()) {
+                documentationLocations.emplace_back(loc);
+            }
+        }
+        for (auto loc : c->symbolBeforeDealias.dealias(gs).locs(gs)) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
             }
@@ -121,7 +126,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type,
                                                                  nullptr, options);
     } else if (auto constResp = resp->isConstant()) {
-        typeString = prettyTypeForConstant(gs, constResp->symbol);
+        typeString = prettyTypeForConstant(gs, constResp->symbolBeforeDealias);
     } else {
         core::TypePtr retType = resp->getRetType();
         // Some untyped arguments have null types.

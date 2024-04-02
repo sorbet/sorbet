@@ -67,18 +67,10 @@ CheckSize(LiteralResponse, 48, 8);
 class ConstantResponse final {
 public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
-    ConstantResponse(core::SymbolRef symbol, core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes,
-                     core::NameRef name, core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
-        : symbol(symbol), symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
+    ConstantResponse(core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes, core::NameRef name,
+                     core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
+        : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
           enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
-    const core::SymbolRef symbol;
-    // You probably don't want this. Almost all of Sorbet's type system operates on dealiased
-    // symbols transparently (e.g., for a constant like `X = Integer`, Sorbet reports that `''` is
-    // not an `Integer`, not that `''` is not an `X`).
-    //
-    // But for some interactive features, it's important to respond using names the user typed.
-    // If you're thinking about using this, probably just use `symbol` instead, and if you still
-    // think you need this, double check with a Sorbet contributor.
     const core::SymbolRef symbolBeforeDealias;
     const core::Loc termLoc;
     const Scopes scopes;
@@ -86,7 +78,7 @@ public:
     const core::MethodRef enclosingMethod;
     const core::TypeAndOrigins retType;
 };
-CheckSize(ConstantResponse, 88, 8);
+CheckSize(ConstantResponse, 80, 8);
 
 class FieldResponse final {
 public:

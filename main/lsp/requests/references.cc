@@ -120,7 +120,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //  Returns all global usages of Foo::A
 
                 auto packageName = gs.packageDB().getPackageNameForFile(fref);
-                auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbol, packageName);
+                auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
 
                 if (!symsToCheck.empty()) {
                     std::vector<std::unique_ptr<Location>> locations;
@@ -137,13 +137,13 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 } else {
                     // Fall back to normal case when we are not querying for an external symbol, e.g. class Foo <
                     // PackageSpec declarations, or export statements.
-                    response->result =
-                        extractLocations(typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbol));
+                    response->result = extractLocations(
+                        typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
                 }
             } else {
                 // Normal handling for non-package files
-                response->result =
-                    extractLocations(typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbol));
+                response->result = extractLocations(typechecker.state(),
+                                                    getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
             }
         } else if (auto fieldResp = resp->isField()) {
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.
