@@ -605,6 +605,21 @@ const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     return hash;
 }
 
+// Heuristic to try to find leading commas. Not actually required for correctness
+// (will still parse even if we delete something but don't find the comma) which is
+// why we're fine with this just hard-coding two common cases (easiest to implement).
+Loc expandToLeadingComma(const GlobalState &gs, Loc loc) {
+    if (loc.adjustLen(gs, -1, 1).source(gs) == ",") {
+        return loc.adjust(gs, -1, 0);
+    } else if (loc.adjustLen(gs, -2, 2).source(gs) == ", ") {
+        return loc.adjust(gs, -2, 0);
+    } else if (loc.adjustLen(gs, -1, 1).source(gs) == " ") {
+        return loc.adjust(gs, -1, 0);
+    } else {
+        return loc;
+    }
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -984,6 +999,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     // Extract the kwargs hash if there are keyword args present in the send
     TypePtr kwargs;
+    UnorderedMap<NameRef, Loc> kwargLocs;
     Loc kwargsLoc;
     if (numKwargs > 0 || hasKwsplat) {
         // for cases where the method accepts keyword arguments, none were given, but more positional arguments were
@@ -1001,10 +1017,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         // process inlined keyword arguments
         {
-            auto kwit = args.args.begin() + args.numPosArgs;
-            auto kwend = args.args.begin() + args.numPosArgs + numKwargs;
-
+            auto kwbegin = args.args.begin() + args.numPosArgs;
+            auto kwit = kwbegin;
+            auto kwend = kwbegin + numKwargs;
             while (kwit != kwend) {
+                auto kwArgIdx = distance(kwbegin, kwit);
+                auto kwArgLoc =
+                    args.argLoc(args.numPosArgs + kwArgIdx).join(args.argLoc(args.numPosArgs + kwArgIdx + 1));
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
                 if (!isa_type<NamedLiteralType>(key->type) ||
@@ -1021,6 +1040,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto &val = *kwit++;
                 keys.emplace_back(key->type);
                 values.emplace_back(val->type);
+                kwargLocs[cast_type_nonnull<NamedLiteralType>(key->type).asName()] = kwArgLoc;
             }
         }
 
@@ -1338,9 +1358,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
                 NameRef arg = key.asName();
 
-                if (auto e = gs.beginError(args.callLoc(), errors::Infer::MethodArgumentCountMismatch)) {
+                auto kwargErrLoc = kwargsLoc;
+                auto it = kwargLocs.find(key.asName());
+                // TODO(jez) This papers over some stuff around kwsplats which might get in our way
+                // of getting a loc for known keyword args. In those cases, we simply give up right now.
+                if (it != kwargLocs.end()) {
+                    kwargErrLoc = it->second;
+                }
+                if (auto e = gs.beginError(kwargErrLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
                                 method.show(gs));
+                    if (kwargErrLoc != kwargsLoc && kwargErrLoc.exists()) {
+                        auto deleteLoc = expandToLeadingComma(gs, kwargErrLoc);
+                        e.replaceWith("Delete unrecognized keyword argument", deleteLoc, "");
+                    }
                     result.main.errors.emplace_back(e.build());
                 }
             }
@@ -1383,17 +1414,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         auto extraArgsLoc = args.argLoc(maxPossiblePositional).join(lastPositionalArg);
         if (auto e = gs.beginError(extraArgsLoc, errors::Infer::MethodArgumentCountMismatch)) {
-            auto deleteLoc = extraArgsLoc;
-            // Heuristic to try to find leading commas. Not actually required for correctness
-            // (will still parse even if we delete something but don't find the comma) which is
-            // why we're fine with this just hard-coding two common cases (easiest to implement).
-            if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == ",") {
-                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
-            } else if (extraArgsLoc.adjustLen(gs, -2, 2).source(gs) == ", ") {
-                deleteLoc = extraArgsLoc.adjust(gs, -2, 0);
-            } else if (extraArgsLoc.adjustLen(gs, -1, 1).source(gs) == " ") {
-                deleteLoc = extraArgsLoc.adjust(gs, -1, 0);
-            }
+            auto deleteLoc = expandToLeadingComma(gs, extraArgsLoc);
 
             if (method == Symbols::BasicObject_initialize()) {
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
