@@ -1038,6 +1038,14 @@ bool classSymbolIsAsGoodAs(const GlobalState &gs, ClassOrModuleRef c1, ClassOrMo
     return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
 }
 
+void doesNotDeriveFrom(const GlobalState &gs, ErrorSection::Collector &errorDetailsCollector, ClassOrModuleRef left,
+                       ClassOrModuleRef right) {
+    auto subCollector = errorDetailsCollector.newCollector();
+    auto message = ErrorColors::format("`{}` does not derive from `{}`", left.show(gs), right.show(gs));
+    subCollector.message = message;
+    errorDetailsCollector.addErrorDetails(move(subCollector));
+}
+
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame.isUntyped());
     if (is_proxy_type(ty)) {
@@ -1195,13 +1203,22 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (a2 == nullptr) {
             if (isa_type<ClassType>(t2)) {
                 auto c2 = cast_type_nonnull<ClassType>(t2);
-                return classSymbolIsAsGoodAs(gs, a1->klass, c2.symbol);
+                result = classSymbolIsAsGoodAs(gs, a1->klass, c2.symbol);
+                if constexpr (shouldAddErrorDetails) {
+                    if (!result) {
+                        doesNotDeriveFrom(gs, errorDetailsCollector, a1->klass, c2.symbol);
+                    }
+                }
+                return result;
             }
             return false;
         } else {
             result = classSymbolIsAsGoodAs(gs, a1->klass, a2->klass);
         }
         if (!result) {
+            if constexpr (shouldAddErrorDetails) {
+                doesNotDeriveFrom(gs, errorDetailsCollector, a1->klass, a2->klass);
+            }
             return result;
         }
         InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
