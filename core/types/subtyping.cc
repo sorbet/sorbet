@@ -1201,6 +1201,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         } else {
             result = classSymbolIsAsGoodAs(gs, a1->klass, a2->klass);
         }
+        if (!result) {
+            return result;
+        }
         if (result) {
             InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
             // code below inverts permutation of type params
