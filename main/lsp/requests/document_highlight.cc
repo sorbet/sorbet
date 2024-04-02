@@ -65,8 +65,8 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
-            response->result =
-                getHighlights(typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbol));
+            response->result = getHighlights(
+                typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbolBeforeDealias));
         } else if (auto fieldResp = resp->isField()) {
             // This could be a `prop` or `attr_*`, which have multiple associated symbols.
             response->result = getHighlights(
