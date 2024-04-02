@@ -1586,8 +1586,23 @@ template <class T>
 bool Types::equivUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2,
                                  T &errorDetailsCollector) {
     auto mode = UntypedMode::AlwaysCompatible;
-    return isSubTypeUnderConstraint(gs, constr, t1, t2, mode, errorDetailsCollector) &&
-           isSubTypeUnderConstraint(gs, constr, t2, t1, mode, errorDetailsCollector);
+    auto leftSubRight = isSubTypeUnderConstraint(gs, constr, t1, t2, mode, errorDetailsCollector);
+    if (!leftSubRight) {
+        return leftSubRight;
+    }
+
+    auto subCollector = errorDetailsCollector.newCollector();
+    auto rightSubLeft = isSubTypeUnderConstraint(gs, constr, t2, t1, mode, subCollector);
+    if constexpr (std::is_same<T, ErrorSection::Collector>::value) {
+        if (!rightSubLeft) {
+            auto message = ErrorColors::format(
+                "`{}` is a subtype of `{}` but not the reverse, so they are not equivalent", t1.show(gs), t2.show(gs));
+            subCollector.message = message;
+            errorDetailsCollector.addErrorDetails(move(subCollector));
+        }
+    }
+
+    return rightSubLeft;
 }
 
 bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
