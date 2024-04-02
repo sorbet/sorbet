@@ -48,7 +48,7 @@ class TestArgs
 
     kwarg(1, b: 2)
     kwarg(1, b: 2, c: 3)
-  # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `c`
+    #              ^^^^ error: Unrecognized keyword argument `c`
     kwarg(1, {})
     #     ^^^^^ error: Missing required keyword argument `b`
     kwarg(1, b: "hi")
