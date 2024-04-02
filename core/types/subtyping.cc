@@ -1205,73 +1205,73 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             return result;
         }
         if (result) {
-            InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
-            // code below inverts permutation of type params
-            int j = 0;
-            for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {
-                TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
-                int i = 0;
-                while (indexes[j] != a1->klass.data(gs)->typeMembers()[i]) {
-                    i++;
-                    if (i >= a1->klass.data(gs)->typeMembers().size()) {
-                        return result;
-                    }
+        InlinedVector<TypeMemberRef, 4> indexes = Types::alignBaseTypeArgs(gs, a1->klass, a1->targs, a2->klass);
+        // code below inverts permutation of type params
+        int j = 0;
+        for (SymbolRef idx : a2->klass.data(gs)->typeMembers()) {
+            TypeMemberRef idxTypeMember = idx.asTypeMemberRef();
+            int i = 0;
+            while (indexes[j] != a1->klass.data(gs)->typeMembers()[i]) {
+                i++;
+                if (i >= a1->klass.data(gs)->typeMembers().size()) {
+                    return result;
                 }
-
-                ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
-
-                auto &a1i = a1->targs[i];
-                auto &a2j = a2->targs[j];
-                bool doesMemberMatch = true;
-                auto subCollector = errorDetailsCollector.newCollector();
-                if (idxTypeMember.data(gs)->flags.isCovariant) {
-                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a1i, a2j, mode, subCollector);
-                } else if (idxTypeMember.data(gs)->flags.isInvariant) {
-                    if (mode == UntypedMode::AlwaysCompatible) {
-                        doesMemberMatch = Types::equivUnderConstraint(gs, constr, a1i, a2j, subCollector);
-                    } else {
-                        // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
-                        // except when `constr` is EmptyFrozenConstraint, so there's no observable
-                        // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
-                        // May as well do it for symmetry though.
-                        doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a1i, a2j, subCollector);
-                    }
-                } else if (idxTypeMember.data(gs)->flags.isContravariant) {
-                    doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a2j, a1i, mode, subCollector);
-                }
-                if (!doesMemberMatch) {
-                    result = false;
-                    if constexpr (shouldAddErrorDetails) {
-                        string variance;
-                        string joiningText;
-                        switch (idxTypeMember.data(gs)->variance()) {
-                            case Variance::CoVariant: {
-                                variance = "covariant";
-                                joiningText = "a subtype of";
-                                break;
-                            }
-                            case Variance::Invariant: {
-                                variance = "invariant";
-                                joiningText = "equivalent to";
-                                break;
-                            }
-                            case Variance::ContraVariant: {
-                                variance = "contravariant";
-                                joiningText = "a supertype of";
-                                break;
-                            }
-                        }
-                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
-                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
-                        subCollector.message = message;
-                        errorDetailsCollector.addErrorDetails(std::move(subCollector));
-                    } else {
-                        break;
-                    }
-                }
-                j++;
             }
-            // alight type params.
+
+            ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
+
+            auto &a1i = a1->targs[i];
+            auto &a2j = a2->targs[j];
+            bool doesMemberMatch = true;
+            auto subCollector = errorDetailsCollector.newCollector();
+            if (idxTypeMember.data(gs)->flags.isCovariant) {
+                doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a1i, a2j, mode, subCollector);
+            } else if (idxTypeMember.data(gs)->flags.isInvariant) {
+                if (mode == UntypedMode::AlwaysCompatible) {
+                    doesMemberMatch = Types::equivUnderConstraint(gs, constr, a1i, a2j, subCollector);
+                } else {
+                    // At the time of writing, we never set mode == UntypedMode::AlwaysIncompatible
+                    // except when `constr` is EmptyFrozenConstraint, so there's no observable
+                    // difference whether we use equivNoUntyped or equivNoUntypedUnderConstraint here.
+                    // May as well do it for symmetry though.
+                    doesMemberMatch = Types::equivNoUntypedUnderConstraint(gs, constr, a1i, a2j, subCollector);
+                }
+            } else if (idxTypeMember.data(gs)->flags.isContravariant) {
+                doesMemberMatch = Types::isSubTypeUnderConstraint(gs, constr, a2j, a1i, mode, subCollector);
+            }
+            if (!doesMemberMatch) {
+                result = false;
+                if constexpr (shouldAddErrorDetails) {
+                    string variance;
+                    string joiningText;
+                    switch (idxTypeMember.data(gs)->variance()) {
+                        case Variance::CoVariant: {
+                            variance = "covariant";
+                            joiningText = "a subtype of";
+                            break;
+                        }
+                        case Variance::Invariant: {
+                            variance = "invariant";
+                            joiningText = "equivalent to";
+                            break;
+                        }
+                        case Variance::ContraVariant: {
+                            variance = "contravariant";
+                            joiningText = "a supertype of";
+                            break;
+                        }
+                    }
+                    auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                       joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                    subCollector.message = message;
+                    errorDetailsCollector.addErrorDetails(std::move(subCollector));
+                } else {
+                    break;
+                }
+            }
+            j++;
+        }
+        // alight type params.
         }
         return result;
     }
