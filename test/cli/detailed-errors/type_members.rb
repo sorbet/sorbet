@@ -35,3 +35,16 @@ def takes_box1(box1)
   T.let(box1, Box2[Integer])
   T.let(box1, Integer)
 end
+
+class Box
+  extend T::Generic
+  Elem = type_member
+end
+
+sig { params(box: Box[T.any(Integer, String)]).void }
+def takes_box_int_str(box); end
+
+sig { params(box: Box[Integer]).void }
+def takes_box_integer(box)
+  takes_box_int_str(box)
+end

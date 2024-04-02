@@ -18,6 +18,21 @@ type_members.rb:36: Argument does not have asserted type `Integer` https://srb.h
   Detailed explanation:
     `Box1` does not derive from `Integer`
 
+type_members.rb:49: Expected `Box[T.any(Integer, String)]` but found `Box[Integer]` for argument `box` https://srb.help/7002
+    49 |  takes_box_int_str(box)
+                            ^^^
+  Expected `Box[T.any(Integer, String)]` for argument `box` of method `Object#takes_box_int_str`:
+    type_members.rb:44:
+    44 |sig { params(box: Box[T.any(Integer, String)]).void }
+                     ^^^
+  Got `Box[Integer]` originating from:
+    type_members.rb:48:
+    48 |def takes_box_integer(box)
+                              ^^^
+  Detailed explanation:
+    `Integer` is not equivalent to `T.any(Integer, String)` for invariant type member `Box::Elem`
+      `Integer` is a subtype of `T.any(Integer, String)` but not the reverse, so they are not equivalent
+
 type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Middle]` https://srb.help/7007
     21 |T.let(A[String, Lower, Upper].new, A[Middle, Middle, Middle])
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -185,4 +200,4 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 15
+Errors: 16
