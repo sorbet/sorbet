@@ -37,6 +37,8 @@ test/cli/invariant_type_parameter/test.rb:75: Expected `Box[T.type_parameter(:U)
     test/cli/invariant_type_parameter/test.rb:71:
     71 |ibox_m = T.let(Box[M].new, IBox[M])
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Detailed explanation:
+    `IBox` does not derive from `Box`
 
 test/cli/invariant_type_parameter/test.rb:76: Revealed type: `Box[T.noreturn]` https://srb.help/7014
     76 |  T.reveal_type(box)
