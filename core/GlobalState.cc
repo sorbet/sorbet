@@ -836,10 +836,10 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .buildWithResultUntyped();
 
-    // Synthesize <Magic>.<defined-instance-var>(arg0: T.untyped) => T.untyped
+    // Synthesize <Magic>.<defined-instance-var>(arg0: T.untyped) => T.nilable(String)
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::definedInstanceVar())
                  .untypedArg(Names::arg0())
-                 .buildWithResultUntyped();
+                 .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
 
     // Synthesize <DeclBuilderForProcs>.params(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
