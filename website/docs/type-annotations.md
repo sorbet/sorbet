@@ -128,6 +128,22 @@ smart enough to understand that either:
 2.  `@user` has not yet been initialized, but the initial value, computed using
     `ENV.fetch('USER')`, has type `String` (and is thus non-nil).
 
+Note that using `||=` like this only works when `nil` is the same as
+"uninitialized." If it's possible for the instance variable to be initialized
+and also possibly `nil` (meaning that there's no need to attempt to
+re-initialize it on subsequent calls), use the `defined?` keyword built into
+Ruby:
+
+```ruby
+module B
+  sig {returns(T.nilable(String))}
+  def current_git_dir
+    return @git_dir if defined?(@git_dir)
+    @git_dir = T.let(ENV['GIT_DIR'], T.nilable(String))
+  end
+end
+```
+
 ## Limitations on instance variable inference
 
 A current shortcoming of Sorbet is that in many cases it cannot reuse static
