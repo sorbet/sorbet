@@ -1453,6 +1453,17 @@ class C < A; end
 class C < B; end
 ```
 
+> **Note**: In cases where you intend to change the superclass of a class
+> originally defined in Sorbet's payload RBIs (e.g. you generate RBI for a newer
+> version of a gem in Sorbet's payload), you may suppress this error using the
+> `--suppress-payload-superclass-redefinition-for` command line flag.
+>
+> For example, to suppress the error in the example above, you would run:
+>
+> `srb tc --suppress-payload-superclass-redefinition-for=C`
+>
+> To suppress multiple errors, you may pass the flag multiple times.
+
 ## 5013
 
 A class or instance variable declaration used `T.cast` when it should use
