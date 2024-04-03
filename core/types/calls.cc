@@ -1368,7 +1368,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (auto e = gs.beginError(kwargErrLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
                                 method.show(gs));
-                    if (kwargErrLoc != kwargsLoc && kwargErrLoc.exists()) {
+                    if (kwargErrLoc.exists() && kwargErrLoc != kwargsLoc) {
                         auto deleteLoc = expandToLeadingComma(gs, kwargErrLoc);
                         e.replaceWith("Delete unrecognized keyword argument", deleteLoc, "");
                     }
