@@ -2167,6 +2167,7 @@ public:
     }
 };
 
+// TODO(jez) This is duplicated from packager.cc
 void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
@@ -2214,6 +2215,7 @@ bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr)
     return valid;
 }
 
+// TODO(jez) This is duplicated from packager.cc
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     ENFORCE(lastConstLit != nullptr);

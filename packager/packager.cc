@@ -1089,6 +1089,7 @@ struct PackageSpecBodyWalk {
                 e.addErrorLine(info.loc, "Previous package declaration found here");
             }
         } else {
+            // TODO(jez) Can we delete this?
             mustContainPackageDef(ctx, tree.loc());
         }
     }
@@ -1197,7 +1198,6 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, original);
     }
 };
-
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
     PackageSpecBodyWalk bodyWalk(info);
