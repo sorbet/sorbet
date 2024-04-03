@@ -64,13 +64,13 @@ class MixinStruct
     self.new(1, 2)
     #        ^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
     self.new(giberish: 1)
-  # ^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+    #        ^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   end
 
   MyKeywordInitStruct.new(1, 2)
   #                       ^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
   MyKeywordInitStruct.new(giberish: 1)
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+  #                       ^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   MyStruct.new.x
   MyStruct.new.foo
 end
@@ -130,7 +130,7 @@ end
 
 class ImmutableTest
   Immutable.new(a: 1, b: "foo")
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `a` passed for method `Immutable#initialize`
+  #             ^^^^ error: Unrecognized keyword argument `a` passed for method `Immutable#initialize`
 
   obj = Immutable.new(b: "foo")
   obj.b = "bar"

@@ -10,6 +10,7 @@ end
 
 A.new.bar
 #        ^ error: Missing required keyword argument `y` for method `A#bar`
-A.new.bar(x: 0) # error: Unrecognized keyword argument `x` passed for method `A#bar`
+A.new.bar(x: 0)
+#         ^^^^ error: Unrecognized keyword argument `x` passed for method `A#bar`
 #         ^^^^ error: Missing required keyword argument `y` for method `A#bar`
 A.new.bar(y: 0)

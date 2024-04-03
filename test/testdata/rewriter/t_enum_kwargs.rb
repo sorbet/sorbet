@@ -14,7 +14,7 @@ class Test < T::Enum
     D = new(10, "bar", c: 20, d: 30)
 
     E = new(10, "bar", c: 20, d: 30, f: "error")
-    #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument
+    #                                ^^^^^^^^^^ error: Unrecognized keyword argument
     F = new(1, "bar", 3, 4, c: 20)
     #                 ^^^^ error: Too many positional arguments
   end
