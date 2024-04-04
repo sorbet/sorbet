@@ -26,15 +26,30 @@ namespace sorbet::namer {
 
 namespace {
 
+struct SymbolFinderJob {
+    ast::ParsedFile parsedFile;
+    size_t idx;
+
+    SymbolFinderJob();
+    SymbolFinderJob(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
+    SymbolFinderJob(const SymbolFinderJob &job) = delete;
+    SymbolFinderJob &operator=(const SymbolFinderJob &job) = delete;
+    SymbolFinderJob(SymbolFinderJob &&job) = default;
+    SymbolFinderJob &operator=(SymbolFinderJob &&job) = default;
+};
+
 struct SymbolFinderResult {
     ast::ParsedFile tree;
     unique_ptr<core::FoundDefinitions> names;
-};
 
-void swap(SymbolFinderResult &a, SymbolFinderResult &b) {
-    a.tree.swap(b.tree);
-    a.names.swap(b.names);
-}
+    SymbolFinderResult();
+    SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
+        : tree(move(tree)), names(move(names)) {}
+    SymbolFinderResult(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult &operator=(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult(SymbolFinderResult &&result) = default;
+    SymbolFinderResult &operator=(SymbolFinderResult &&result) = default;
+};
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -2168,47 +2183,41 @@ public:
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<SymbolFinderJob>>(trees.size());
     vector<SymbolFinderResult> allFoundDefinitions;
     allFoundDefinitions.reserve(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(SymbolFinderJob(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        vector<SymbolFinderResult> output;
-        ast::ParsedFile job;
+        SymbolFinderJob job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, finder, job.tree);
-                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
-                output.emplace_back(move(jobOutput));
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, finder, job.parsedFile.tree);
+                auto threadResult = SymbolFinderResult(move(job.parsedFile), finder.getAndClearFoundDefinitions());
+                resultq->push({job.idx, move(threadResult)}, 1);
             }
         }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
-        }
     });
-    trees.clear();
 
     {
-        vector<SymbolFinderResult> threadResult;
+        pair<size_t, SymbolFinderResult> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
+                allFoundDefinitions[threadResult.first] = move(threadResult.second);
             }
         }
     }
-    fast_sort(allFoundDefinitions,
-              [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
     return allFoundDefinitions;
 }
