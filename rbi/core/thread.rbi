@@ -1549,8 +1549,8 @@ class Thread::Queue < Object
 
   # Alias for:
   # [`pop`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-pop)
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def deq(*args); end
+  sig {params(non_block: T::Boolean, timeout: T.nilable(Integer)).returns(T.untyped)}
+  def deq(non_block=false, timeout: nil); end
 
   # Returns `true` if the queue is empty.
   sig {returns(T::Boolean)}
@@ -1572,7 +1572,7 @@ class Thread::Queue < Object
   def marshal_dump; end
 
   # Returns the number of threads waiting on the queue.
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def num_waiting; end
 
   # Retrieves data from the queue.
@@ -1584,8 +1584,8 @@ class Thread::Queue < Object
   # Also aliased as:
   # [`deq`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-deq),
   # [`shift`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-shift)
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def pop(*args); end
+  sig {params(non_block: T::Boolean, timeout: T.nilable(Integer)).returns(T.untyped)}
+  def pop(non_block=false, timeout: nil); end
 
   # Pushes the given `object` to the queue.
   #
@@ -1597,8 +1597,8 @@ class Thread::Queue < Object
 
   # Alias for:
   # [`pop`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-pop)
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def shift(*args); end
+  sig {params(non_block: T::Boolean, timeout: T.nilable(Integer)).returns(T.untyped)}
+  def shift(non_block=false, timeout: nil); end
 
   # Alias for:
   # [`length`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-length)
