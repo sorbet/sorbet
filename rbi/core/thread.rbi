@@ -1572,7 +1572,7 @@ class Thread::Queue < Object
   def marshal_dump; end
 
   # Returns the number of threads waiting on the queue.
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def num_waiting; end
 
   # Retrieves data from the queue.
