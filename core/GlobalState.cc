@@ -1294,6 +1294,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
+    ENFORCE(!symbolTableFrozen);
     for (auto typeArg : ownerScope->typeArguments()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
@@ -1303,7 +1304,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
         }
     }
 
-    ENFORCE(!symbolTableFrozen);
     auto result = TypeArgumentRef(*this, this->typeArguments.size());
     this->typeArguments.emplace_back();
 
@@ -1422,6 +1422,8 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
+    ENFORCE(!symbolTableFrozen);
+
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE(store.isStaticField(*this), "existing symbol is not a static field");
@@ -1432,8 +1434,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
         fieldRef.data(*this)->addLoc(*this, loc);
         return fieldRef;
     }
-
-    ENFORCE(!symbolTableFrozen);
 
     auto ret = FieldRef(*this, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
