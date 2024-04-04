@@ -2356,7 +2356,7 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
         optional<core::FoundDefHashes> oldFoundHashes;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, oldFoundHashes);
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return output;
