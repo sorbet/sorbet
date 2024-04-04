@@ -2185,8 +2185,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
     Timer timeit(gs.tracer(), "naming.findSymbols");
     auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<SymbolFinderJob>>(trees.size());
-    vector<SymbolFinderResult> allFoundDefinitions;
-    allFoundDefinitions.reserve(trees.size());
+    vector<SymbolFinderResult> allFoundDefinitions(trees.size());
     size_t idx = 0;
     for (auto &tree : trees) {
         fileq->push(SymbolFinderJob(move(tree), idx++), 1);
