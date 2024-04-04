@@ -30,7 +30,7 @@ struct SymbolFinderJob {
     ast::ParsedFile parsedFile;
     size_t idx;
 
-    SymbolFinderJob();
+    SymbolFinderJob() = default;
     SymbolFinderJob(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
     SymbolFinderJob(const SymbolFinderJob &job) = delete;
     SymbolFinderJob &operator=(const SymbolFinderJob &job) = delete;
@@ -42,7 +42,7 @@ struct SymbolFinderResult {
     ast::ParsedFile tree;
     unique_ptr<core::FoundDefinitions> names;
 
-    SymbolFinderResult();
+    SymbolFinderResult() = default;
     SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
         : tree(move(tree)), names(move(names)) {}
     SymbolFinderResult(const SymbolFinderResult &result) = delete;
