@@ -14,6 +14,7 @@ namespace sorbet::core {
 class FoundDefinitions;
 
 struct FoundClass;
+struct FoundPackage;
 struct FoundStaticField;
 struct FoundTypeMember;
 struct FoundMethod;
@@ -30,6 +31,7 @@ public:
         TypeMember = 5,
         Symbol = 6, // stores ClassOrModuleRef IDs
         Field = 7,
+        // TODO(jez) Do we need Package here?
     };
     CheckSize(Kind, 1, 1);
 
@@ -119,6 +121,15 @@ struct FoundClass final {
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
 CheckSize(FoundClass, 28, 4);
+
+struct FoundPackage final {
+    FoundDefinitionRef owner;
+    core::LocOffsets loc;
+    core::LocOffsets declLoc;
+
+    std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
+};
+CheckSize(FoundPackage, 20, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
@@ -238,6 +249,12 @@ class FoundDefinitions final {
     std::vector<FoundField> _fields;
 
 public:
+    // Contains the package spec defined in the file, if any.
+    //
+    // Because there is only ever at most one package spec defined in a file, we don't track it with refs,
+    // and then there's no value in attempting to make this field private to encourage correct access via Ref helpers.
+    std::optional<FoundPackage> package;
+
     FoundDefinitions() = default;
     FoundDefinitions(FoundDefinitions &&names) = default;
     FoundDefinitions(const FoundDefinitions &names) = delete;
