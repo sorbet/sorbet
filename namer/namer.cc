@@ -1647,7 +1647,7 @@ public:
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> oldFoundHashes)
+    SymbolDefiner(const core::FoundDefinitions &foundDefs, optional<core::FoundDefHashes> &&oldFoundHashes)
         : foundDefs(foundDefs), oldFoundHashes(move(oldFoundHashes)) {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
@@ -1854,7 +1854,8 @@ public:
         tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
-    ast::MethodDef::ARGS_store fillInArgs(vector<core::ParsedArg> parsedArgs, ast::MethodDef::ARGS_store oldArgs) {
+    ast::MethodDef::ARGS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
+                                          ast::MethodDef::ARGS_store oldArgs) {
         ast::MethodDef::ARGS_store args;
         int i = -1;
         for (auto &arg : parsedArgs) {
