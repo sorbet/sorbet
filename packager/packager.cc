@@ -1,11 +1,9 @@
 #include "packager/packager.h"
-#include "absl/strings/str_join.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
 #include "common/concurrency/Parallel.h"
 #include "common/sort/sort.h"
-#include "common/strings/formatting.h"
 #include "core/Unfreeze.h"
 #include "core/errors/packager.h"
 #include "core/packages/Condensation.h"
@@ -64,18 +62,6 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.file.data(gs).isPackagedTest();
-}
-
-vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState &gs, core::ClassOrModuleRef owner) {
-    auto klass = owner;
-    vector<core::NameRef> fqn;
-    while (klass != core::Symbols::PackageSpecRegistry()) {
-        auto data = klass.data(gs);
-        fqn.emplace_back(data->name);
-        klass = data->owner;
-    }
-    absl::c_reverse(fqn);
-    return fqn;
 }
 
 // TODO(jez) Might be nice to eagerly resolve these UnresolvedConstantLit to ConstantLit so resolver doesn't have to.
@@ -885,39 +871,6 @@ private:
     }
 };
 
-unique_ptr<PackageInfo> definePackage(core::GlobalState &gs, ast::ParsedFile &package) {
-    ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(gs).isPackage(gs));
-    // Assumption: Root of AST is <root> class. (This won't be true
-    // for `typed: ignore` files, so we should make sure to catch that
-    // elsewhere.)
-    ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
-    ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
-
-    core::Context ctx(gs, core::Symbols::root(), package.file);
-
-    auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
-
-    for (auto &rootStmt : rootClass.rhs) {
-        auto packageSpecClass = ast::packager::asPackageSpecClass(rootStmt);
-        if (packageSpecClass == nullptr) {
-            // rewriter already reported an error
-            continue;
-        }
-
-        // Eagerly resolve the superclass, so that we can rely on the
-        packageSpecClass->symbol.data(gs)->setSuperClass(core::Symbols::PackageSpec());
-
-        auto nameTree = ast::cast_tree<ast::ConstantLit>(packageSpecClass->name);
-        ENFORCE(nameTree != nullptr, "Invariant from rewriter");
-
-        return make_unique<PackageInfo>(MangledName(packageSpecClass->symbol), ctx.file, packageSpecClass->loc,
-                                        packageSpecClass->declLoc);
-    }
-
-    return nullptr;
-}
-
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
@@ -933,59 +886,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
         }
-    }
-}
-
-void populatePackagePathPrefixes(core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
-    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
-    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
-        gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
-    auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
-
-    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
-                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
-                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
-    info.packagePathPrefixes.reserve(numPrefixes);
-    auto packageFilePath = package.file.data(gs).path();
-    info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
-    auto fullName = fullyQualifiedNameFromMangledName(gs, info.mangledName_.owner);
-    const auto shortName = absl::StrJoin(fullName, "_", NameFormatter(gs));
-    const auto slashDirName = absl::StrJoin(fullName, "/", NameFormatter(gs)) + "/";
-    const string_view dirNameFromShortName = shortName;
-
-    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-        // Project_FooBar -- munge with underscore
-        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
-    }
-
-    for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
-        // project/Foo_bar -- convert camel-case to snake-case and munge with slash
-        string additionalDirPath;
-        additionalDirPath.reserve(prefix.size() + 2 * dirNameFromShortName.length() + 1);
-        additionalDirPath += prefix;
-        for (int i = 0; i < dirNameFromShortName.length(); i++) {
-            if (dirNameFromShortName[i] == '_') {
-                additionalDirPath.push_back('/');
-            } else if (i == 0 || dirNameFromShortName[i - 1] == '_') {
-                // Capitalizing first letter in each directory name to avoid conflicts with ignored directories,
-                // which tend to be all lower case
-                additionalDirPath.push_back(std::toupper(dirNameFromShortName[i]));
-            } else {
-                if (isupper(dirNameFromShortName[i])) {
-                    additionalDirPath.push_back('_'); // snake-case munging
-                }
-
-                additionalDirPath.push_back(std::tolower(dirNameFromShortName[i]));
-            }
-        }
-        additionalDirPath.push_back('/');
-
-        info.packagePathPrefixes.emplace_back(std::move(additionalDirPath));
-    }
-
-    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
-        // Project/FooBar -- each constant name is a file or directory name
-        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
     }
 }
 
@@ -1210,38 +1110,7 @@ void Packager::findPackages(core::GlobalState &gs, absl::Span<ast::ParsedFile> f
 
     Timer timeit(gs.tracer(), "packager.findPackages");
 
-    // Find packages and determine their imports/exports.
-    {
-        core::UnfreezeNameTable unfreeze(gs);
-        UnfreezePackages packages = gs.unfreezePackages();
-        for (auto &file : files) {
-            if (!file.file.data(gs).isPackage(gs)) {
-                continue;
-            }
-
-            auto pkg = definePackage(gs, file);
-            if (pkg == nullptr) {
-                // There was an error creating a PackageInfo for this file, and getPackageInfo has already
-                // surfaced that error to the user. Nothing to do here.
-                continue;
-            }
-
-            auto &prevPkg = gs.packageDB().getPackageInfo(pkg->mangledName());
-            if (prevPkg.exists() && prevPkg.declLoc() != pkg->declLoc()) {
-                if (auto e = gs.beginError(pkg->declLoc(), core::errors::Packager::RedefinitionOfPackage)) {
-                    auto pkgName = pkg->mangledName_.owner.show(gs);
-                    e.setHeader("Redefinition of package `{}`", pkgName);
-                    e.addErrorLine(prevPkg.declLoc(), "Package `{}` originally defined here", pkgName);
-                }
-            } else {
-                populatePackagePathPrefixes(gs, file, *pkg);
-                packages.db.enterPackage(move(pkg));
-            }
-        }
-
-        // Must be called after any calls to enterPackage (i.e., only here)
-        gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
-    }
+    gs.packageDB().resolvePackagesWithRelaxedChecks(gs);
 
     setPackageNameOnFiles(gs, files);
 

@@ -29,6 +29,7 @@ constexpr ErrorClass ConstantKindRedefinition{4022, StrictLevel::False};
 constexpr ErrorClass DuplicateKeywordArg{4024, StrictLevel::False};
 constexpr ErrorClass PackagePrivateOutsidePackage{4025, StrictLevel::False};
 constexpr ErrorClass PackageScopeMustBeClass{4026, StrictLevel::False};
+constexpr ErrorClass RedefinitionOfPackage{4027, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

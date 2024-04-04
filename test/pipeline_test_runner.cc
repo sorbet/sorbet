@@ -364,6 +364,7 @@ void package(core::GlobalState &gs, unique_ptr<WorkerPool> &workers, absl::Span<
 void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    auto packagesAccess = gs.unfreezePackages();
     auto foundHashes = nullptr;
     auto canceled = namer::Namer::run(gs, trees, workers, foundHashes);
     ENFORCE(!canceled);
