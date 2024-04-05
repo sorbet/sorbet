@@ -37,3 +37,19 @@ def example(x)
   T.reveal_type(x.class) # error: `T.class_of(A)[T.all(A, M)]`
   T.reveal_type(x.class.new) # error: `T.all(A, M)`
 end
+
+sig do
+  type_parameters(:U)
+    .params(x: T.type_parameter(:U))
+    .returns(T.type_parameter(:U))
+end
+def example2(x)
+  case x
+  when A
+    T.reveal_type(x) # error: `T.all(A, T.type_parameter(:U) (of Object#example2))`
+    T.reveal_type(x.class) # error: `T.class_of(A)[T.all(A, T.type_parameter(:U) (of Object#example2))]`
+    T.reveal_type(x.class.new) # error: T.all(A, T.type_parameter(:U) (of Object#example2))
+  else
+    x
+  end
+end
