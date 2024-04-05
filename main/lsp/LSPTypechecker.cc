@@ -386,6 +386,10 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
+    if (epochManager.wasTypecheckingCanceled()) {
+        return true;
+    }
+    fast_sort(out, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return epochManager.wasTypecheckingCanceled();
 }
 
