@@ -26,16 +26,16 @@ namespace sorbet::namer {
 
 namespace {
 
-struct SymbolFinderJob {
+struct ParsedFileWithIdx {
     ast::ParsedFile parsedFile;
     size_t idx;
 
-    SymbolFinderJob() = default;
-    SymbolFinderJob(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
-    SymbolFinderJob(const SymbolFinderJob &job) = delete;
-    SymbolFinderJob &operator=(const SymbolFinderJob &job) = delete;
-    SymbolFinderJob(SymbolFinderJob &&job) = default;
-    SymbolFinderJob &operator=(SymbolFinderJob &&job) = default;
+    ParsedFileWithIdx() = default;
+    ParsedFileWithIdx(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
+    ParsedFileWithIdx(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx &operator=(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx(ParsedFileWithIdx &&job) = default;
+    ParsedFileWithIdx &operator=(ParsedFileWithIdx &&job) = default;
 };
 
 struct SymbolFinderResult {
@@ -2184,17 +2184,17 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
     auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<SymbolFinderJob>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
     vector<SymbolFinderResult> allFoundDefinitions(trees.size());
     size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(SymbolFinderJob(move(tree), idx++), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        SymbolFinderJob job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne",
