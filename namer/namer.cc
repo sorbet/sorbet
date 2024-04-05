@@ -2377,43 +2377,39 @@ struct SymbolizeTreesResult {
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<SymbolizeTreesResult>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
         SymbolizeTreesResult output;
-        ast::ParsedFile job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, inserter, job.tree);
-                output.trees.emplace_back(move(job));
+                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, inserter, job.parsedFile.tree);
+                resultq->push(move(job), 1);
             }
         }
-        if (!output.trees.empty()) {
-            resultq->push(move(output), output.trees.size());
-        }
     });
-    trees.clear();
 
     {
-        SymbolizeTreesResult threadResult;
+        ParsedFileWithIdx threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                             make_move_iterator(threadResult.trees.end()));
+                trees[threadResult.idx] = move(threadResult.parsedFile);
             }
         }
     }
-    fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return trees;
 }
 
