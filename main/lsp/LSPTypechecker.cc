@@ -386,7 +386,7 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
             }
         }
     }
-    return !epochManager.wasTypecheckingCanceled();
+    return epochManager.wasTypecheckingCanceled();
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
@@ -437,7 +437,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         // We use `gs` rather than the moved `finalGS` from this point forward.
 
         // Copy the indexes of unchanged files.
-        if (!copyIndexed(workers, updatedFiles, indexedCopies)) {
+        if (copyIndexed(workers, updatedFiles, indexedCopies)) {
             // Canceled.
             return;
         }
