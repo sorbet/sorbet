@@ -621,6 +621,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         ret = indexSuppliedFiles(gs, files, opts, workers, kvstore);
     }
 
+    // TODO(jez) Do we want this fast_sort here? Is it redundant?
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
     return ret;
 }
