@@ -2358,14 +2358,13 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         optional<core::FoundDefHashes> oldFoundHashes;
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions.names, move(oldFoundHashes));
+        SymbolDefiner symbolDefiner(*fileFoundDefinitions, move(oldFoundHashes));
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
-    return output;
+    return;
 }
 
-vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                       WorkerPool &workers) {
+void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
@@ -2399,22 +2398,17 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             }
         }
     }
-    return trees;
 }
 
 } // namespace
 
-ast::ParsedFilesOrCancelled
-Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                   UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
-                   core::FoundDefHashes *foundHashesOut) {
-    auto foundDefs = findSymbols(gs, move(trees), workers);
+// Returns whether typechecking was cancelled
+[[nodiscard]] bool Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                                      core::FoundDefHashes *foundHashesOut) {
+    auto foundDefs = findSymbols(gs, trees, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
-        trees.reserve(foundDefs.size());
-        for (auto &def : foundDefs) {
-            trees.emplace_back(move(def.tree));
-        }
-        return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
+        return true;
     }
     if (foundHashesOut != nullptr) {
         ENFORCE(foundDefs.size() == 1,
@@ -2424,24 +2418,25 @@ Namer::runInternal(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerP
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
-    trees = symbolizeTrees(gs, move(result.result()), workers);
-    return trees;
+
+    symbolizeTrees(gs, trees, workers);
+    return false;
 }
 
-ast::ParsedFilesOrCancelled Namer::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers,
-                                       core::FoundDefHashes *foundHashesOut) {
+[[nodiscard]] bool Namer::run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                              core::FoundDefHashes *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     auto oldFoundHashesForFiles = UnorderedMap<core::FileRef, core::FoundDefHashes>{};
-    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
-ast::ParsedFilesOrCancelled
-Namer::runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,
-                      UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles, WorkerPool &workers) {
+[[nodiscard]] bool Namer::runIncremental(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees,
+                                         UnorderedMap<core::FileRef, core::FoundDefHashes> &&oldFoundHashesForFiles,
+                                         WorkerPool &workers) {
     // foundHashesOut is only used when namer is run via hashing.cc to compute a FileHash for each file
     // The incremental namer mode should never be used for hashing.
     auto foundHashesOut = nullptr;
-    return runInternal(gs, move(trees), workers, std::move(oldFoundHashesForFiles), foundHashesOut);
+    return runInternal(gs, trees, workers, std::move(oldFoundHashesForFiles), foundHashesOut);
 }
 
 }; // namespace sorbet::namer

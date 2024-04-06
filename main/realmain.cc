@@ -777,7 +777,9 @@ int realmain(int argc, char *argv[]) {
 
             // Only need to compute FoundMethodHashes when running to compute a FileHash
             auto foundMethodHashes = nullptr;
-            indexed = move(pipeline::name(*gs, move(indexed), opts, *workers, foundMethodHashes).result());
+            auto canceled =
+                pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundMethodHashes);
+            ENFORCE(!canceled);
 
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
