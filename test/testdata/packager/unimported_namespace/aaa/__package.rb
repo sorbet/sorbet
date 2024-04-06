@@ -2,6 +2,6 @@
 # typed: strict
 # enable-packager: true
 
-class AAA < PackageSpec
+class AAA < PackageSpec # error: Package `AAA` is missing imports
   export AAA::AClass
 end
