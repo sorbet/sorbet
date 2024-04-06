@@ -216,7 +216,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     Timer timeit(config->logger, "fast_path");
     // Replace error queue with one that is owned by this thread.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
-    auto result = updates.fastPathFilesToTypecheck(*gs, *config);
+    auto result = updates.fastPathFilesToTypecheck(*gs, *config, isNoopUpdateForRetypecheck);
     config->logger->debug("Added {} files that were not part of the edit to the update set", result.extraFiles.size());
     UnorderedMap<core::FileRef, core::FoundDefHashes> oldFoundHashesForFiles;
     auto toTypecheck = move(result.extraFiles);
@@ -318,7 +318,16 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
+
+    std::vector<core::FileRef> extraFilesToFlush;
+    if (isNoopUpdateForRetypecheck) {
+        for (auto &file : updates.updatedFileIndexes) {
+            extraFilesToFlush.emplace_back(file.file);
+        }
+    }
+
+    pipeline::typecheck(*gs, move(sorted), extraFilesToFlush, config->opts, workers, cancelable, std::nullopt,
+                        presorted);
     gs->lspTypecheckCount++;
 
     return toTypecheck;
@@ -525,7 +534,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
-        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+        std::vector<core::FileRef> extraFilesToFlush;
+        pipeline::typecheck(*gs, move(sorted), extraFilesToFlush, config->opts, workers, cancelable, preemptManager,
+                            presorted);
     });
 
     // Note: `gs` now holds the value of `finalGS`.
@@ -644,7 +655,8 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     tryApplyLocalVarSaver(*gs, resolved);
 
     const auto cancelable = true;
-    pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
+    std::vector<core::FileRef> extraFilesToFlush;
+    pipeline::typecheck(*gs, move(resolved), extraFilesToFlush, config->opts, workers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};

@@ -1,6 +1,7 @@
 #include "packager/VisibilityChecker.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -362,9 +363,22 @@ public:
 };
 
 class VisibilityCheckerPass final {
+    struct PackageFixes {
+        // {(packageToImport, isTestImport)}
+        UnorderedSet<std::pair<core::packages::MangledName, bool>> toImport;
+
+        // {(packageToImport, Loc)}
+        UnorderedSet<std::pair<core::packages::MangledName, core::Loc>> convertTestImports;
+    };
+
 public:
     const core::packages::PackageInfo &package;
     const bool insideTestFile;
+    // package => [packages to import, isTestImport]
+    UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, bool>>> toImport;
+    // package => [`test_import`ed package, Loc of test_import]
+    UnorderedMap<core::packages::MangledName, UnorderedSet<std::pair<core::packages::MangledName, core::Loc>>>
+        convertTestImport;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
@@ -464,11 +478,11 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::MissingImport)) {
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
                 e.setHeader("`{}` resolves but its package is not imported", lit.symbol.show(ctx));
-                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                if (auto exp = this->package.addImport(ctx, pkg, isTestImport)) {
-                    e.addAutocorrect(std::move(exp.value()));
-                }
+
+                bool isTestImport = otherFile.data(ctx).isPackagedTest() || ctx.file.data(ctx).isPackagedTest();
+
+                toImport[this->package.mangledName()].emplace(pkg.mangledName(), isTestImport);
 
                 if (!ctx.file.data(ctx).isPackaged()) {
                     e.addErrorNote(
@@ -486,8 +500,10 @@ public:
             if (auto e = ctx.beginError(lit.loc, core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", lit.symbol.show(ctx));
                 auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-                if (auto exp = this->package.addImport(ctx, pkg, false)) {
-                    e.addAutocorrect(std::move(exp.value()));
+                auto convertTestImportLoc = this->package.shouldConvertTestImport(ctx, pkg);
+                if (convertTestImportLoc.has_value()) {
+                    convertTestImport[this->package.mangledName()].emplace(pkg.mangledName(),
+                                                                           convertTestImportLoc.value());
                 }
                 e.addErrorLine(pkg.declLoc(), "Defined here");
             }
@@ -506,31 +522,139 @@ public:
                                             std::vector<ast::ParsedFile> files) {
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
         auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-        absl::BlockingCounter barrier(std::max(workers.size(), 1));
 
+        // [(package, packageToImport, isTestImport)]
+        auto toImportQ = std::make_shared<BlockingBoundedQueue<
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>>>>(files.size());
+        // [(package, packageToImport, Loc)]
+        auto replaceTestImportQ = std::make_shared<BlockingBoundedQueue<
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>>>(
+            files.size());
         for (size_t i = 0; i < files.size(); ++i) {
             taskq->push(i, 1);
         }
 
-        workers.multiplexJob("VisibilityChecker", [&gs, &files, &barrier, taskq]() {
+        workers.multiplexJob("VisibilityChecker", [&gs, &files, taskq, toImportQ, replaceTestImportQ]() {
             size_t idx;
+            int processedByThread = 0;
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importCapacitor;
+            std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
+                replaceTestImportCapacitor;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 ast::ParsedFile &f = files[idx];
+                processedByThread++;
                 if (!f.file.data(gs).isPackage()) {
                     auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                     if (pkgName.exists()) {
                         core::Context ctx{gs, core::Symbols::root(), f.file};
                         VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
                         ast::TreeWalk::apply(ctx, pass, f.tree);
+                        for (auto &[package, packagesToImport] : pass.toImport) {
+                            for (auto &[packageToImport, isTestImport] : packagesToImport) {
+                                importCapacitor.emplace_back(package, packageToImport, isTestImport);
+                            }
+                        }
+
+                        for (auto &[package, packagesToReplace] : pass.convertTestImport) {
+                            for (auto pair : packagesToReplace) {
+                                replaceTestImportCapacitor.emplace_back(package, pair.first, pair.second);
+                            }
+                        }
                     }
                 }
             }
 
-            barrier.DecrementCount();
+            if (processedByThread > 0) {
+                toImportQ->push(std::move(importCapacitor), processedByThread);
+                replaceTestImportQ->push(std::move(replaceTestImportCapacitor), processedByThread);
+            }
         });
 
-        barrier.Wait();
+        UnorderedMap<core::packages::MangledName, PackageFixes> combinedFixes;
+        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, bool>> importThreadResult;
+        for (auto result = toImportQ->wait_pop_timed(importThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = toImportQ->wait_pop_timed(importThreadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (auto &[package, packageToImport, isTestImport] : importThreadResult) {
+                combinedFixes[package].toImport.emplace(packageToImport, isTestImport);
+            }
+        }
 
+        std::vector<std::tuple<core::packages::MangledName, core::packages::MangledName, core::Loc>>
+            replaceTestImportThreadResult;
+        for (auto result = replaceTestImportQ->wait_pop_timed(replaceTestImportThreadResult,
+                                                              WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done(); result = replaceTestImportQ->wait_pop_timed(replaceTestImportThreadResult,
+                                                                         WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            for (auto &[package, packageToImport, loc] : replaceTestImportThreadResult) {
+                combinedFixes[package].convertTestImports.emplace(packageToImport, loc);
+            }
+        }
+
+        if (combinedFixes.empty()) {
+            return files;
+        }
+
+        for (auto &[pkg, fixes] : combinedFixes) {
+            auto &package = gs.packageDB().getPackageInfo(pkg);
+            auto newImportLoc = package.newImportLoc(gs, package);
+            fmt::memory_buffer autocorrect;
+            std::vector<core::AutocorrectSuggestion::Edit> edits;
+            auto fullPackageName = [&gs](const sorbet::core::packages::PackageInfo &pkg) {
+                return absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs));
+            };
+
+            if (auto e = gs.beginError(package.declLoc(), core::errors::Packager::PackageIssues)) {
+                e.setHeader("Package `{}` is missing imports", fullPackageName(package));
+                std::vector<std::pair<core::packages::MangledName, bool>> toImport;
+                for (auto p : fixes.toImport) {
+                    toImport.push_back(p);
+                }
+                fast_sort(toImport, [](const std::pair<core::packages::MangledName, bool> &lhs,
+                                       const std::pair<core::packages::MangledName, bool> &rhs) {
+                    if (lhs.first.mangledName.rawId() == rhs.first.mangledName.rawId()) {
+                        return lhs.second < rhs.second;
+                    } else {
+                        return lhs.first.mangledName.rawId() < rhs.first.mangledName.rawId();
+                    }
+                });
+
+                for (auto &[pkgToImport, isTestImport] : toImport) {
+                    auto &packageToImport = gs.packageDB().getPackageInfo(pkgToImport);
+                    e.addErrorSection(core::ErrorSection(
+                        fmt::format("`{}` resolves but its package is not imported", fullPackageName(packageToImport)),
+                        {core::ErrorLine::from(packageToImport.declLoc(), "Defined here")}));
+
+                    if (newImportLoc.has_value()) {
+                        fmt::format_to(std::back_inserter(autocorrect), "\n  {} {}",
+                                       isTestImport ? "test_import" : "import", fullPackageName(packageToImport));
+                    }
+                }
+
+                if (newImportLoc.has_value()) {
+                    edits.push_back({newImportLoc.value(), fmt::to_string(autocorrect)});
+                }
+
+                for (auto &[importToReplace, importLoc] : fixes.convertTestImports) {
+                    auto &packageToImport = gs.packageDB().getPackageInfo(importToReplace);
+                    e.addErrorSection(core::ErrorSection(fmt::format("Used `{}` instead of `{}` for {}", "test_import",
+                                                                     "import", fullPackageName(packageToImport)),
+                                                         {}));
+
+                    auto [lineStart, _] = importLoc.findStartOfLine(gs);
+                    core::Loc replaceLoc(importLoc.file(), lineStart.beginPos(), importLoc.endPos());
+                    edits.push_back({replaceLoc, fmt::format("import {}", fullPackageName(packageToImport))});
+                }
+
+                e.addAutocorrect({"Fix package issues", edits});
+            }
+        }
         return files;
     }
 };

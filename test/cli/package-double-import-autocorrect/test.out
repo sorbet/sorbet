@@ -1,0 +1,42 @@
+different-files/c2.rb:6: `A::Foo` resolves but its package is not imported https://srb.help/3718
+     6 |  sig{returns(A::Foo)}
+                      ^^^^^^
+    a/__package.rb:3: Exported from package here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+different-files/c1.rb:6: `A::Foo` resolves but its package is not imported https://srb.help/3718
+     6 |  sig{returns(A::Foo)}
+                      ^^^^^^
+    a/__package.rb:3: Exported from package here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+different-files/__package.rb:3: Package `C` is missing imports https://srb.help/3719
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  `A` resolves but its package is not imported
+    a/__package.rb:3: Defined here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    different-files/__package.rb:3: Inserted `import A`
+     3 |class C < PackageSpec
+                             ^
+Errors: 3
+
+====================
+
+# typed: strict
+
+class B < PackageSpec
+  import A
+end
+
+====================
+
+# typed: strict
+
+class C < PackageSpec
+  import A
+end

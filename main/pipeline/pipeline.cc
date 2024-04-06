@@ -1039,8 +1039,8 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable,
+void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, std::vector<core::FileRef> extraFilesToFlush,
+               const options::Options &opts, WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
@@ -1146,6 +1146,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
                     return;
+                }
+            }
+
+            // TODO(iz): Remove when package.rb files will take the fast path
+            if (!extraFilesToFlush.empty()) {
+                for (auto &file : extraFilesToFlush) {
+                    gs.errorQueue->flushErrorsForFile(gs, file);
                 }
             }
 
