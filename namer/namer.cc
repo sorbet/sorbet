@@ -2370,10 +2370,6 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
-struct SymbolizeTreesResult {
-    vector<ast::ParsedFile> trees;
-};
-
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
@@ -2387,7 +2383,6 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
-        SymbolizeTreesResult output;
         ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
