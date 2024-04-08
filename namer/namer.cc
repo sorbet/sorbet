@@ -26,15 +26,30 @@ namespace sorbet::namer {
 
 namespace {
 
+struct ParsedFileWithIdx {
+    ast::ParsedFile parsedFile;
+    size_t idx;
+
+    ParsedFileWithIdx() = default;
+    ParsedFileWithIdx(ast::ParsedFile &&parsedFile, size_t idx) : parsedFile(move(parsedFile)), idx(idx) {}
+    ParsedFileWithIdx(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx &operator=(const ParsedFileWithIdx &job) = delete;
+    ParsedFileWithIdx(ParsedFileWithIdx &&job) = default;
+    ParsedFileWithIdx &operator=(ParsedFileWithIdx &&job) = default;
+};
+
 struct SymbolFinderResult {
     ast::ParsedFile tree;
     unique_ptr<core::FoundDefinitions> names;
-};
 
-void swap(SymbolFinderResult &a, SymbolFinderResult &b) {
-    a.tree.swap(b.tree);
-    a.names.swap(b.names);
-}
+    SymbolFinderResult() = default;
+    SymbolFinderResult(ast::ParsedFile &&tree, unique_ptr<core::FoundDefinitions> names)
+        : tree(move(tree)), names(move(names)) {}
+    SymbolFinderResult(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult &operator=(const SymbolFinderResult &result) = delete;
+    SymbolFinderResult(SymbolFinderResult &&result) = default;
+    SymbolFinderResult &operator=(SymbolFinderResult &&result) = default;
+};
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -2168,47 +2183,40 @@ public:
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    vector<SymbolFinderResult> allFoundDefinitions;
-    allFoundDefinitions.reserve(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<pair<size_t, SymbolFinderResult>>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    vector<SymbolFinderResult> allFoundDefinitions(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        vector<SymbolFinderResult> output;
-        ast::ParsedFile job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, finder, job.tree);
-                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
-                output.emplace_back(move(jobOutput));
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, finder, job.parsedFile.tree);
+                auto threadResult = SymbolFinderResult(move(job.parsedFile), finder.getAndClearFoundDefinitions());
+                resultq->push({job.idx, move(threadResult)}, 1);
             }
         }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
-        }
     });
-    trees.clear();
 
     {
-        vector<SymbolFinderResult> threadResult;
+        pair<size_t, SymbolFinderResult> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
+                allFoundDefinitions[threadResult.first] = move(threadResult.second);
             }
         }
     }
-    fast_sort(allFoundDefinitions,
-              [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
     return allFoundDefinitions;
 }
@@ -2362,50 +2370,41 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
-struct SymbolizeTreesResult {
-    vector<ast::ParsedFile> trees;
-};
-
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<SymbolizeTreesResult>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    auto resultq = make_shared<BlockingBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<ParsedFileWithIdx>>(trees.size());
+    size_t idx = 0;
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        fileq->push(ParsedFileWithIdx(move(tree), idx++), 1);
     }
 
     workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
         TreeSymbolizer inserter;
-        SymbolizeTreesResult output;
-        ast::ParsedFile job;
+        ParsedFileWithIdx job;
         for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
             if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(job.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                ast::TreeWalk::apply(ctx, inserter, job.tree);
-                output.trees.emplace_back(move(job));
+                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
+                             {{"file", string(job.parsedFile.file.data(gs).path())}});
+                core::Context ctx(gs, core::Symbols::root(), job.parsedFile.file);
+                ast::TreeWalk::apply(ctx, inserter, job.parsedFile.tree);
+                resultq->push(move(job), 1);
             }
         }
-        if (!output.trees.empty()) {
-            resultq->push(move(output), output.trees.size());
-        }
     });
-    trees.clear();
 
     {
-        SymbolizeTreesResult threadResult;
+        ParsedFileWithIdx threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                             make_move_iterator(threadResult.trees.end()));
+                trees[threadResult.idx] = move(threadResult.parsedFile);
             }
         }
     }
-    fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file < rhs.file; });
     return trees;
 }
 
