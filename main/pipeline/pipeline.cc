@@ -784,10 +784,10 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     if (!canceled) {
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
+                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(gs, 0));
             }
             if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(gs));
             }
         }
     }
