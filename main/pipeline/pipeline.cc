@@ -887,6 +887,12 @@ ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, ve
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
     }
 
+    return resolve(gs, move(what), opts, workers, foundHashes);
+}
+
+ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers,
+                                    core::FoundDefHashes *foundHashes) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
