@@ -795,7 +795,7 @@ int realmain(int argc, char *argv[]) {
         } else {
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());
+            indexed = move(pipeline::nameAndResolve(gs, move(indexed), opts, *workers, foundHashes).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

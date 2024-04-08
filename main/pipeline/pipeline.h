@@ -32,9 +32,9 @@ void setPackagerOptions(core::GlobalState &gs, const options::Options &opts);
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 
-ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes);
+ast::ParsedFilesOrCancelled nameAndResolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes);
 
 // If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
 //

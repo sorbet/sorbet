@@ -249,13 +249,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             // For simplicity, we still call Packager::runIncremental here, even though
-            // pipeline::resolve no longer calls Packager::run.
+            // pipeline::nameAndResolve no longer calls Packager::run.
             //
             // TODO(jez) We may want to revisit this. At the moment, the only thing that
             // runIncremental does is validate that files have the right package prefix. We could
             // split `pipeline::package` into something like "populate the package DB" and "verify
-            // the package prefixes" with the later living in `pipeline::resolve` once again (thus
-            // restoring the symmetry).
+            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
+            // (thus restoring the symmetry).
             // TODO(jez) Parallelize this
             what = packager::Packager::runIncremental(gs, move(what));
         }
@@ -879,9 +879,9 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
-ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes) {
+ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes) {
     auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
     if (canceled) {
         return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
