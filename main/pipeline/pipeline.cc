@@ -779,7 +779,20 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    return namer::Namer::run(gs, what, workers, foundHashes);
+    auto canceled = namer::Namer::run(gs, what, workers, foundHashes);
+
+    if (!canceled) {
+        for (auto &named : what) {
+            if (opts.print.NameTree.enabled) {
+                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
+            }
+            if (opts.print.NameTreeRaw.enabled) {
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
+            }
+        }
+    }
+
+    return canceled;
 }
 
 class GatherUnresolvedConstantsWalk {
@@ -865,15 +878,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
         auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
         if (canceled) {
             return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
-        }
-
-        for (auto &named : what) {
-            if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
-            }
-            if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
-            }
         }
 
         if (opts.stopAfterPhase != options::Phase::NAMER) {
