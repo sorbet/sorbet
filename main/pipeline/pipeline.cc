@@ -266,13 +266,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = runIncrementalNamer ? sorbet::namer::Namer::runIncremental(
-                                                    gs, move(what), std::move(foundHashesForFiles.value()), workers)
-                                              : sorbet::namer::Namer::run(gs, move(what), workers, nullptr);
+            auto canceled = runIncrementalNamer
+                                ? sorbet::namer::Namer::runIncremental(gs, absl::Span<ast::ParsedFile>(what),
+                                                                       std::move(foundHashesForFiles.value()), workers)
+                                : sorbet::namer::Namer::run(gs, absl::Span<ast::ParsedFile>(what), workers, nullptr);
 
             // Cancellation cannot occur during incremental namer.
-            ENFORCE(result.hasResult());
-            what = move(result.result());
+            ENFORCE(!canceled);
 
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
@@ -774,15 +774,14 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 #endif
 }
 
-ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers, core::FoundDefHashes *foundHashes) {
+[[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
+                        WorkerPool &workers, core::FoundDefHashes *foundHashes) {
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    auto result = namer::Namer::run(gs, move(what), workers, foundHashes);
-
-    return result;
+    return namer::Namer::run(gs, what, workers, foundHashes);
 }
+
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
@@ -863,11 +862,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
     try {
-        auto result = name(*gs, move(what), opts, workers, foundHashes);
-        if (!result.hasResult()) {
-            return result;
+        auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+        if (canceled) {
+            return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
         }
-        what = move(result.result());
 
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {

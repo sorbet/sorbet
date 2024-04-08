@@ -446,7 +446,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 core::UnfreezeNameTable nameTableAccess(*rbiGenGs);     // creates singletons and class names
                 core::UnfreezeSymbolTable symbolTableAccess(*rbiGenGs); // enters symbols
                 auto foundHashes = nullptr;
-                trees = move(namer::Namer::run(*rbiGenGs, move(trees), *workers, foundHashes).result());
+                auto canceled = namer::Namer::run(*rbiGenGs, absl::Span<ast::ParsedFile>(trees), *workers, foundHashes);
+                ENFORCE(!canceled);
             }
 
             // Resolver
@@ -479,7 +480,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
         core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
         auto foundHashes = nullptr;
-        trees = move(namer::Namer::run(*gs, move(trees), *workers, foundHashes).result());
+        auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(trees), *workers, foundHashes);
+        ENFORCE(!canceled);
     }
 
     for (auto &tree : trees) {
@@ -809,7 +811,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
             ENFORCE(!ranIncrementalNamer);
-            vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers, &foundHashes).result());
+            auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(vTmp), *workers, &foundHashes);
+            ENFORCE(!canceled);
             tree = testSerialize(*gs, move(vTmp[0]));
 
             handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
