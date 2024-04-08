@@ -779,7 +779,15 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    auto canceled = namer::Namer::run(gs, what, workers, foundHashes);
+    bool canceled = false;
+    try {
+        canceled = namer::Namer::run(gs, what, workers, foundHashes);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception naming (backtrace is above)");
+        }
+    }
 
     if (!canceled) {
         for (auto &named : what) {
@@ -874,12 +882,12 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers,
                                     core::FoundDefHashes *foundHashes) {
-    try {
-        auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
-        if (canceled) {
-            return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
-        }
+    auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    if (canceled) {
+        return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
+    }
 
+    try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
