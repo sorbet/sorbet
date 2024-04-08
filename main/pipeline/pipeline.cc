@@ -720,15 +720,15 @@ size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileR
     return numPackageFiles;
 }
 
-void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::ParsedFile> &&nonPackageIndexed) {
-    if (indexed.empty()) {
+void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::ParsedFile> &&nonPackageFiles) {
+    if (packageFiles.empty()) {
         // Performance optimization--if it's already empty, no need to move one-by-one
-        indexed = move(nonPackageIndexed);
+        packageFiles = move(nonPackageFiles);
     } else {
         // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
         // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
-        indexed.reserve(indexed.size() + nonPackageIndexed.size());
-        absl::c_move(nonPackageIndexed, back_inserter(indexed));
+        packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
+        absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
 }
 

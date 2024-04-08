@@ -25,7 +25,8 @@ std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileR
                                    WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
-void unpartitionPackageFiles(std::vector<ast::ParsedFile> &indexed, std::vector<ast::ParsedFile> &&nonPackageIndexed);
+void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
+                             std::vector<ast::ParsedFile> &&nonPackageFiles);
 
 void setPackagerOptions(core::GlobalState &gs, const options::Options &opts);
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
