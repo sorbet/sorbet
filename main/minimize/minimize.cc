@@ -421,10 +421,12 @@ void Minimize::indexAndResolveForMinimize(unique_ptr<core::GlobalState> &sourceG
 
     pipeline::setPackagerOptions(*rbiGS, opts);
     pipeline::package(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers);
-
     // Only need to compute FoundDefHashes when running to compute a FileHash
     auto foundHashes = nullptr;
-    rbiIndexed = move(pipeline::nameAndResolve(rbiGS, move(rbiIndexed), opts, workers, foundHashes).result());
+    auto canceled = pipeline::name(*rbiGS, absl::Span<ast::ParsedFile>(rbiIndexed), opts, workers, foundHashes);
+    ENFORCE(!canceled, "Can only cancel in LSP mode");
+
+    rbiIndexed = move(pipeline::resolve(rbiGS, move(rbiIndexed), opts, workers).result());
     if (rbiGS->hadCriticalError()) {
         rbiGS->errorQueue->flushAllErrors(*rbiGS);
     }
