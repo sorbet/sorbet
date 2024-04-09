@@ -1294,16 +1294,22 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
-    ENFORCE(!symbolTableFrozen);
     for (auto typeArg : ownerScope->typeArguments()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             counterInc("symbols.hit");
-            typeArg.data(*this)->addLoc(*this, loc);
+            if (!symbolTableFrozen) {
+                typeArg.data(*this)->addLoc(*this, loc);
+            } else {
+                // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
+                // checking. Don't mutate the symbol table in those cases. This loc should already be there.
+                ENFORCE(absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
+            }
             return typeArg;
         }
     }
 
+    ENFORCE(!symbolTableFrozen);
     auto result = TypeArgumentRef(*this, this->typeArguments.size());
     this->typeArguments.emplace_back();
 
@@ -1422,8 +1428,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
-    ENFORCE(!symbolTableFrozen);
-
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE(store.isStaticField(*this), "existing symbol is not a static field");
@@ -1431,9 +1435,17 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
 
         // Ensures that locs get properly updated on the fast path
         auto fieldRef = store.asFieldRef();
-        fieldRef.data(*this)->addLoc(*this, loc);
+        if (!symbolTableFrozen) {
+            fieldRef.data(*this)->addLoc(*this, loc);
+        } else {
+            // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
+            // checking. Don't mutate the symbol table in those cases. This loc should already be there.
+            ENFORCE(absl::c_count(fieldRef.data(*this)->locs(), loc) == 1);
+        }
         return fieldRef;
     }
+
+    ENFORCE(!symbolTableFrozen);
 
     auto ret = FieldRef(*this, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
