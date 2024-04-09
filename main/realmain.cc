@@ -531,6 +531,14 @@ int realmain(int argc, char *argv[]) {
     }
     gs->suggestUnsafe = opts.suggestUnsafe;
 
+    if (gs->runningUnderAutogen) {
+        gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+        gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
+        gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
+    }
+
     logger->trace("done building initial global state");
 
     if (opts.print.PayloadSources.enabled) {
@@ -767,12 +775,6 @@ int realmain(int argc, char *argv[]) {
                 indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheConfig.cacheFile, move(indexed),
                                                           *workers);
             }
-
-            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
-            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
-            gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
 
             // Only need to compute FoundMethodHashes when running to compute a FileHash
             auto foundMethodHashes = nullptr;
