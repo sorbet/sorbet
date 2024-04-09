@@ -51,8 +51,7 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                         WorkerPool &workers, core::FoundDefHashes *foundHashes);
 
 ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes);
+                                    const options::Options &opts, WorkerPool &workers);
 
 std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
                                                    std::vector<ast::ParsedFile> what, WorkerPool &workers);
