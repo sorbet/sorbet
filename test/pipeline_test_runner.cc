@@ -303,6 +303,14 @@ void package(unique_ptr<core::GlobalState> &gs, unique_ptr<WorkerPool> &workers,
     }
 }
 
+void name(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
+    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    auto foundHashes = nullptr;
+    auto canceled = namer::Namer::run(gs, trees, workers, foundHashes);
+    ENFORCE(!canceled);
+}
+
 TEST_CASE("PerPhaseTest") { // NOLINT
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -394,10 +402,12 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // First run: only the __package.rb files. This populates the packageDB
         package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
+        name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
     }
 
     auto nonPackageTrees = index(gs, filesSpan, handler, test);
     package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
+    name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     if (enablePackager) {
@@ -474,14 +484,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 }
             }
         }
-    }
-
-    {
-        core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
-        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
-        auto foundHashes = nullptr;
-        auto canceled = namer::Namer::run(*gs, absl::Span<ast::ParsedFile>(trees), *workers, foundHashes);
-        ENFORCE(!canceled);
     }
 
     for (auto &tree : trees) {
