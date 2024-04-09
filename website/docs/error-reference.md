@@ -871,6 +871,9 @@ that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
 
+To fix, ensure that the `include` or `extend` line is given at least one
+argument.
+
 ## 4002
 
 Sorbet requires seeing the complete inheritance hierarchy in a codebase. To do
@@ -942,6 +945,8 @@ Sorbet parses the syntax of `include` and `extend` declarations, even in
 that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
+
+To fix, ensure that the `include` or `extend` line is not given a block.
 
 ## 4006
 
