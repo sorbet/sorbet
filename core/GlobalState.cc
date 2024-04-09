@@ -1303,7 +1303,7 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
             } else {
                 // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
                 // checking. Don't mutate the symbol table in those cases. This loc should already be there.
-                ENFORCE(absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
+                ENFORCE(!loc.exists() || absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
             }
             return typeArg;
         }
@@ -1440,7 +1440,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
         } else {
             // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
             // checking. Don't mutate the symbol table in those cases. This loc should already be there.
-            ENFORCE(absl::c_count(fieldRef.data(*this)->locs(), loc) == 1);
+            ENFORCE(!loc.exists() || absl::c_count(fieldRef.data(*this)->locs(), loc) == 1);
         }
         return fieldRef;
     }
