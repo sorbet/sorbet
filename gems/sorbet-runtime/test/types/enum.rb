@@ -369,7 +369,6 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'string value conversion assertions' do
-    ENUM_CONVERSION_MSG = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./.freeze
     before do
       T::Configuration.expects(:soft_assert_handler).never
     end
@@ -378,16 +377,16 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       ex = assert_raises(NoMethodError) do
         CardSuit::HEART.to_str
       end
-      assert_match(ENUM_CONVERSION_MSG, ex.message)
+      assert_match(/undefined method `to_str' for #<T::Enum::Test::EnumTest::CardSuit::HEART>/, ex.message)
     end
 
     it 'raises an assertion if to_str is called (implicitly) and also returns the serialized value' do
-      ex = assert_raises(NoMethodError) do
+      ex = assert_raises(TypeError) do
         # rubocop:disable Style/StringConcatenation
         "foo " + CardSuit::HEART
         # rubocop:enable Style/StringConcatenation
       end
-      assert_match(ENUM_CONVERSION_MSG, ex.message)
+      assert_match(/no implicit conversion of T::Enum::Test::EnumTest::CardSuit into String/, ex.message)
     end
   end
 
