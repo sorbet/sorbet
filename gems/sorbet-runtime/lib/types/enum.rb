@@ -200,7 +200,7 @@ class T::Enum
         msg,
         storytime: {
           class: self.class.name,
-          caller_location: caller_locations(1..1)&.[](0)&.then { "#{_1.path}:#{_1.lineno}" },
+          caller_location: caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
         },
       )
       serialize.to_s
@@ -253,7 +253,7 @@ class T::Enum
         other: other,
         other_class: other.class.name,
         method: method,
-        caller_location: caller_locations(2..2)&.[](0)&.then { "#{_1.path}:#{_1.lineno}" },
+        caller_location: caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
       }
     )
   end
