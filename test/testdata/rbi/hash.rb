@@ -103,4 +103,5 @@ T.assert_type!({}.shift, T.nilable(T::Array[T.untyped]))
 
 [:a, :b].each do |key|
   T.assert_type!({a: 1}.slice(key), T::Hash[Symbol, Integer])
+  T.assert_type!({a: 1}.slice(nil), T::Hash[Symbol, Integer])
 end
