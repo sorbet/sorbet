@@ -818,7 +818,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+    {
+        core::UnfreezeNameTable nameTableAccess(*gs);
+        core::UnfreezeSymbolTable symbolTableAccess(*gs);
+        trees = move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers).result());
+    }
 
     if (enablePackager) {
         trees = packager::VisibilityChecker::run(*gs, *workers, move(trees));
