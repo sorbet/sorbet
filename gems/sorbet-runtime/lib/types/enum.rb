@@ -192,13 +192,16 @@ class T::Enum
   # responds to the `to_str` method. It does not actually call `to_str` however.
   #
   # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
-  sig {returns(String)}
+  T::Sig::WithoutRuntime.sig {returns(String)}
   def to_str
     msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
     if T::Configuration.legacy_t_enum_migration_mode?
       T::Configuration.soft_assert_handler(
         msg,
-        storytime: {class: self.class.name},
+        storytime: {
+          class: self.class.name,
+          caller_location: caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+        },
       )
       serialize.to_s
     else
@@ -206,7 +209,8 @@ class T::Enum
     end
   end
 
-  sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
+  # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+  T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
   def ==(other)
     case other
     when String
@@ -221,7 +225,8 @@ class T::Enum
     end
   end
 
-  sig {params(other: BasicObject).returns(T::Boolean).checked(:never)}
+  # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+  T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
   def ===(other)
     case other
     when String
@@ -236,7 +241,9 @@ class T::Enum
     end
   end
 
-  sig {params(method: Symbol, other: T.untyped).void}
+  # WithoutRuntime so that caller_locations can assume a constant stack depth
+  # (Otherwise, the first call would be the method with the wrapping, which would have a different stack depth.)
+  T::Sig::WithoutRuntime.sig {params(method: Symbol, other: T.untyped).void}
   private def comparison_assertion_failed(method, other)
     T::Configuration.soft_assert_handler(
       'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
@@ -246,6 +253,7 @@ class T::Enum
         other: other,
         other_class: other.class.name,
         method: method,
+        caller_location: caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
       }
     )
   end
