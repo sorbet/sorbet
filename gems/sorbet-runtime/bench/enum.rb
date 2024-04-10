@@ -38,6 +38,8 @@ module SorbetBenchmarks
 
     def self.all_comparisons
       time_block("T::Enum == T::Enum", iterations_of_block: 100_000, iterations_in_block: 9) do
+        # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
+        # rubocop:disable Lint/Void
         MyEnum::X == MyEnum::X
         MyEnum::X == MyEnum::X
         MyEnum::X == MyEnum::X
@@ -49,9 +51,12 @@ module SorbetBenchmarks
         MyEnum::Z == MyEnum::Z
         MyEnum::Z == MyEnum::Z
         MyEnum::Z == MyEnum::Z
+        # rubocop:enable Lint/Void
+        # rubocop:enable Lint/BinaryOperatorWithIdenticalOperands
       end
 
       time_block("T::Enum == String", iterations_of_block: 100_000, iterations_in_block: 9) do
+        # rubocop:disable Lint/Void
         MyEnum::X == 'x'
         MyEnum::X == 'x'
         MyEnum::X == 'x'
@@ -63,6 +68,7 @@ module SorbetBenchmarks
         MyEnum::Z == 'z'
         MyEnum::Z == 'z'
         MyEnum::Z == 'z'
+        # rubocop:enable Lint/Void
       end
     end
 
@@ -72,7 +78,7 @@ module SorbetBenchmarks
       all_comparisons
 
       T::Configuration.enable_legacy_t_enum_migration_mode
-      T::Configuration.soft_assert_handler = -> (str, extra) do
+      T::Configuration.soft_assert_handler = lambda do |str, extra|
         # Empty
         # (Not trying to benchmark the performance of the soft_assert_handler)
       end
