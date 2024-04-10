@@ -186,6 +186,17 @@ class T::Enum
   end
 
   module LegacyMigrationMode
+    include Kernel
+    extend T::Helpers
+    abstract!
+
+    if T.unsafe(false)
+      # Declare to the type system that the `serialize` method for sure exists
+      # on whatever we mix this into.
+      T::Sig::WithoutRuntime.sig {abstract.returns(T.untyped)}
+      def serialize; end
+    end
+
     # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
     # values are compared directly against string values.
     #
@@ -201,12 +212,12 @@ class T::Enum
           msg,
           storytime: {
             class: self.class.name,
-            caller_location: caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+            caller_location: Kernel.caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
           },
         )
         serialize.to_s
       else
-        raise NoMethodError.new(msg)
+        Kernel.raise NoMethodError.new(msg)
       end
     end
 
@@ -254,7 +265,7 @@ class T::Enum
           other: other,
           other_class: other.class.name,
           method: method,
-          caller_location: caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+          caller_location: Kernel.caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
         }
       )
     end
