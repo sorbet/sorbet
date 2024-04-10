@@ -185,6 +185,7 @@ class T::Enum
     end
   end
 
+  module LegacyMigrationMode
   # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
   # values are compared directly against string values.
   #
@@ -256,6 +257,7 @@ class T::Enum
         caller_location: caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
       }
     )
+  end
   end
 
   ### Private implementation ###
