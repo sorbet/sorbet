@@ -31,3 +31,11 @@ def test_io_read_return(io)
   T.assert_type!(io.read(1), T.nilable(String))
   T.assert_type!(io.read, String)
 end
+
+sig {void}
+def test_io_pipe
+  result = IO.pipe do
+    1
+  end
+  T.assert_type!(result, Integer)
+end
