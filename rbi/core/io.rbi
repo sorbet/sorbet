@@ -1821,9 +1821,17 @@ class IO < Object
     params(
       ext_enc: T.nilable(T.any(String, Encoding)),
       int_enc: T.nilable(T.any(String, Encoding)),
-      opt: T.nilable(T::Hash[Symbol, String]),
-      blk: T.nilable(T.proc.params(read_io: IO, write_io: IO).void)
+      opt: T.nilable(T::Hash[Symbol, String])
     ).returns([IO, IO])
+  end
+  sig do
+    type_parameters(:T)
+    .params(
+      ext_enc: T.nilable(T.any(String, Encoding)),
+      int_enc: T.nilable(T.any(String, Encoding)),
+      opt: T.nilable(T::Hash[Symbol, String]),
+      blk: T.nilable(T.proc.params(read_io: IO, write_io: IO).returns(T.type_parameter(:T)))
+    ).returns(T.type_parameter(:T))
   end
   def self.pipe(ext_enc = nil, int_enc = nil, opt = nil, &blk); end
 
