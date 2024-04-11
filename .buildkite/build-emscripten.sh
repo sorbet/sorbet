@@ -12,7 +12,7 @@ source .buildkite/tools/setup-bazel.sh
 PATH=$PATH:$(pwd)
 export PATH
 
-./bazel build //emscripten:sorbet-wasm.tar --config=webasm-linux --strip=always
+./bazel build //emscripten:sorbet-wasm.tar --config=webasm-linux --strip=always --cpu=webasm
 
 rm -rf _out_
 mkdir -p _out_/webasm
