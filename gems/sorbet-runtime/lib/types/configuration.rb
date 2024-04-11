@@ -536,6 +536,7 @@ module T::Configuration
 
   @legacy_t_enum_migration_mode = false
   def self.enable_legacy_t_enum_migration_mode
+    T::Enum.include(T::Enum::LegacyMigrationMode)
     @legacy_t_enum_migration_mode = true
   end
   def self.disable_legacy_t_enum_migration_mode

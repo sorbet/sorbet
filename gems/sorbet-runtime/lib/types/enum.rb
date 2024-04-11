@@ -185,77 +185,90 @@ class T::Enum
     end
   end
 
-  # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
-  # values are compared directly against string values.
-  #
-  # Ruby's string has a weird quirk where `'my_string' == obj` calls obj.==('my_string') if obj
-  # responds to the `to_str` method. It does not actually call `to_str` however.
-  #
-  # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
-  T::Sig::WithoutRuntime.sig {returns(String)}
-  def to_str
-    msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
-    if T::Configuration.legacy_t_enum_migration_mode?
+  module LegacyMigrationMode
+    include Kernel
+    extend T::Helpers
+    abstract!
+
+    if T.unsafe(false)
+      # Declare to the type system that the `serialize` method for sure exists
+      # on whatever we mix this into.
+      T::Sig::WithoutRuntime.sig {abstract.returns(T.untyped)}
+      def serialize; end
+    end
+
+    # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
+    # values are compared directly against string values.
+    #
+    # Ruby's string has a weird quirk where `'my_string' == obj` calls obj.==('my_string') if obj
+    # responds to the `to_str` method. It does not actually call `to_str` however.
+    #
+    # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
+    T::Sig::WithoutRuntime.sig {returns(String)}
+    def to_str
+      msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+      if T::Configuration.legacy_t_enum_migration_mode?
+        T::Configuration.soft_assert_handler(
+          msg,
+          storytime: {
+            class: self.class.name,
+            caller_location: Kernel.caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+          },
+        )
+        serialize.to_s
+      else
+        Kernel.raise NoMethodError.new(msg)
+      end
+    end
+
+    # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+    T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
+    def ==(other)
+      case other
+      when String
+        if T::Configuration.legacy_t_enum_migration_mode?
+          comparison_assertion_failed(:==, other)
+          self.serialize == other
+        else
+          false
+        end
+      else
+        super(other)
+      end
+    end
+
+    # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
+    T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
+    def ===(other)
+      case other
+      when String
+        if T::Configuration.legacy_t_enum_migration_mode?
+          comparison_assertion_failed(:===, other)
+          self.serialize == other
+        else
+          false
+        end
+      else
+        super(other)
+      end
+    end
+
+    # WithoutRuntime so that caller_locations can assume a constant stack depth
+    # (Otherwise, the first call would be the method with the wrapping, which would have a different stack depth.)
+    T::Sig::WithoutRuntime.sig {params(method: Symbol, other: T.untyped).void}
+    private def comparison_assertion_failed(method, other)
       T::Configuration.soft_assert_handler(
-        msg,
+        'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
         storytime: {
           class: self.class.name,
-          caller_location: caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
-        },
+          self: self.inspect,
+          other: other,
+          other_class: other.class.name,
+          method: method,
+          caller_location: Kernel.caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+        }
       )
-      serialize.to_s
-    else
-      raise NoMethodError.new(msg)
     end
-  end
-
-  # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
-  T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
-  def ==(other)
-    case other
-    when String
-      if T::Configuration.legacy_t_enum_migration_mode?
-        comparison_assertion_failed(:==, other)
-        self.serialize == other
-      else
-        false
-      end
-    else
-      super(other)
-    end
-  end
-
-  # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
-  T::Sig::WithoutRuntime.sig {params(other: BasicObject).returns(T::Boolean)}
-  def ===(other)
-    case other
-    when String
-      if T::Configuration.legacy_t_enum_migration_mode?
-        comparison_assertion_failed(:===, other)
-        self.serialize == other
-      else
-        false
-      end
-    else
-      super(other)
-    end
-  end
-
-  # WithoutRuntime so that caller_locations can assume a constant stack depth
-  # (Otherwise, the first call would be the method with the wrapping, which would have a different stack depth.)
-  T::Sig::WithoutRuntime.sig {params(method: Symbol, other: T.untyped).void}
-  private def comparison_assertion_failed(method, other)
-    T::Configuration.soft_assert_handler(
-      'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration',
-      storytime: {
-        class: self.class.name,
-        self: self.inspect,
-        other: other,
-        other_class: other.class.name,
-        method: method,
-        caller_location: caller_locations(2..2)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
-      }
-    )
   end
 
   ### Private implementation ###
