@@ -379,10 +379,10 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       # once before, even if it's been undone with
       # T::Configuration.disable_legacy_t_enum_migration_mode, unfortunately.
       # Hopefully no one depended on the old behavior.
-      if T::Enum < T::Enum::LegacyMigrationMode
-        exn_message = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./
+      exn_message = if T::Enum < T::Enum::LegacyMigrationMode
+        /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./
       else
-        exn_message = /undefined method `to_str'/
+        /undefined method `to_str'/
       end
 
       ex = assert_raises(NoMethodError) do
