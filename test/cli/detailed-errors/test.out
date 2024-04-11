@@ -136,6 +136,48 @@ shapes.rb:22: Expected `{a: Integer, b: String}` but found `{a: String(""), c: I
   Detailed explanation:
     `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
 
+intersection.rb:26: Expected `T.all(M1, M2)` but found `C` for argument `x` https://srb.help/7002
+    26 |takes_intersection(C.new)
+                           ^^^^^
+  Expected `T.all(M1, M2)` for argument `x` of method `Object#takes_intersection`:
+    intersection.rb:22:
+    22 |sig { params(x: T.all(M1, M2)).void }
+                     ^
+  Got `C` originating from:
+    intersection.rb:26:
+    26 |takes_intersection(C.new)
+                           ^^^^^
+  Detailed explanation:
+    `C` is not a subtype of `M1` (the left side of `T.all(M1, M2)`)
+
+intersection.rb:27: Expected `T.all(M1, M2)` but found `C1` for argument `x` https://srb.help/7002
+    27 |takes_intersection(C1.new)
+                           ^^^^^^
+  Expected `T.all(M1, M2)` for argument `x` of method `Object#takes_intersection`:
+    intersection.rb:22:
+    22 |sig { params(x: T.all(M1, M2)).void }
+                     ^
+  Got `C1` originating from:
+    intersection.rb:27:
+    27 |takes_intersection(C1.new)
+                           ^^^^^^
+  Detailed explanation:
+    `C1` is not a subtype of `M2` (the right side of `T.all(M1, M2)`)
+
+intersection.rb:28: Expected `T.all(M1, M2)` but found `C2` for argument `x` https://srb.help/7002
+    28 |takes_intersection(C2.new)
+                           ^^^^^^
+  Expected `T.all(M1, M2)` for argument `x` of method `Object#takes_intersection`:
+    intersection.rb:22:
+    22 |sig { params(x: T.all(M1, M2)).void }
+                     ^
+  Got `C2` originating from:
+    intersection.rb:28:
+    28 |takes_intersection(C2.new)
+                           ^^^^^^
+  Detailed explanation:
+    `C2` is not a subtype of `M1` (the left side of `T.all(M1, M2)`)
+
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])
                     ^^
@@ -200,4 +242,4 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 16
+Errors: 19
