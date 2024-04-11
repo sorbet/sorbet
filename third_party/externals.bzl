@@ -189,9 +189,8 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "io_bazel_rules_go",
-        urls = _github_public_urls("bazelbuild/rules_go/archive/dd4fb4f8128b83f189f7bdda663e65b915a6d3c4.zip"),
-        sha256 = "ea702009018b6a5d6665808a4d1f54e2f40a2938e3946e98de00d38b34fd8a27",
-        strip_prefix = "rules_go-dd4fb4f8128b83f189f7bdda663e65b915a6d3c4",
+        sha256 = "d6ab6b57e48c09523e93050f13698f708428cfd5e619252e369d377af6597707",
+        urls = _github_public_urls("bazelbuild/rules_go/releases/download/v0.43.0/rules_go-v0.43.0.zip"),
     )
 
     http_archive(
@@ -320,9 +319,15 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "bazel_skylib",
-        sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
-        strip_prefix = "bazel-skylib-1.0.0",
-        urls = _github_public_urls("bazelbuild/bazel-skylib/archive/1.0.0.tar.gz"),
+        sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
+        urls = _github_public_urls("bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz"),
+    )
+
+    http_archive(
+        name = "aspect_bazel_lib",
+        sha256 = "357dad9d212327c35d9244190ef010aad315e73ffa1bed1a29e20c372f9ca346",
+        strip_prefix = "bazel-lib-2.7.0",
+        urls = _github_public_urls("aspect-build/bazel-lib/releases/download/v2.7.0/bazel-lib-v2.7.0.tar.gz"),
     )
 
     http_archive(
