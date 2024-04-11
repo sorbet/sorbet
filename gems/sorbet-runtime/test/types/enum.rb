@@ -374,19 +374,43 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
 
     it 'raises an assertion if to_str is called and also returns the serialized value' do
+      # The exception messages change depending on whether
+      # T::Configuration.enable_legacy_t_enum_migration_mode has been called
+      # once before, even if it's been undone with
+      # T::Configuration.disable_legacy_t_enum_migration_mode, unfortunately.
+      # Hopefully no one depended on the old behavior.
+      if T::Enum < T::Enum::LegacyMigrationMode
+        exn_message = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./
+      else
+        exn_message = /undefined method `to_str'/
+      end
+
       ex = assert_raises(NoMethodError) do
         CardSuit::HEART.to_str
       end
-      assert_match(/undefined method `to_str' for #<T::Enum::Test::EnumTest::CardSuit::HEART>/, ex.message)
+      assert_match(exn_message, ex.message)
     end
 
     it 'raises an assertion if to_str is called (implicitly) and also returns the serialized value' do
-      ex = assert_raises(TypeError) do
+      # The exception messages change depending on whether
+      # T::Configuration.enable_legacy_t_enum_migration_mode has been called
+      # once before, even if it's been undone with
+      # T::Configuration.disable_legacy_t_enum_migration_mode, unfortunately.
+      # Hopefully no one depended on the old behavior.
+      if T::Enum < T::Enum::LegacyMigrationMode
+        exn_class = NoMethodError
+        exn_message = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./
+      else
+        exn_class = TypeError
+        exn_message = /no implicit conversion of .* into String/
+      end
+
+      ex = assert_raises(exn_class) do
         # rubocop:disable Style/StringConcatenation
         "foo " + CardSuit::HEART
         # rubocop:enable Style/StringConcatenation
       end
-      assert_match(/no implicit conversion of T::Enum::Test::EnumTest::CardSuit into String/, ex.message)
+      assert_match(exn_message, ex.message)
     end
   end
 
