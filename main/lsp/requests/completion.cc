@@ -298,11 +298,11 @@ vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const ve
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef method,
+string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef maybeAlias,
                      const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs) {
     fmt::memory_buffer result;
-    auto shortName = method.data(gs)->name.shortName(gs);
-    auto isSetter = method.data(gs)->name.isSetter(gs);
+    auto shortName = maybeAlias.data(gs)->name.shortName(gs);
+    auto isSetter = maybeAlias.data(gs)->name.isSetter(gs);
     if (isSetter) {
         fmt::format_to(std::back_inserter(result), "{}", string_view(shortName.data(), shortName.size() - 1));
     } else {
@@ -324,6 +324,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         return to_string(result);
     }
 
+    auto method = maybeAlias.data(gs)->dealiasMethod(gs);
     vector<string> typeAndArgNames;
     for (auto &argSym : method.data(gs)->arguments) {
         fmt::memory_buffer argBuf;
@@ -1043,7 +1044,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, dispatchResult, what, receiverType, constraint, totalArgs);
+        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, constraint, totalArgs);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
