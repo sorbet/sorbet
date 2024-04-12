@@ -472,7 +472,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
         // Only need to compute FoundDefHashes when running to compute a FileHash
         auto foundHashes = nullptr;
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, foundHashes);
+        auto canceled =
+            pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
+        if (canceled) {
+            ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
+            return;
+        }
+
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }

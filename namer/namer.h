@@ -19,7 +19,7 @@ public:
     // Note: foundHashes is an optional out parameter.
     //
     // Setting it to a non-nullptr requests that Namer compute a fingerprint of the FoundDefinitions
-    // it found while running. (Thus, it's usually nullptr except when pipeline::resolve is called
+    // it found while running. (Thus, it's usually nullptr except when pipeline::nameAndResolve is called
     // for the purpose of computing a FileHash.)
     [[nodiscard]] static bool run(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                                   core::FoundDefHashes *foundHashesOut);

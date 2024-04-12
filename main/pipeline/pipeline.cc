@@ -249,13 +249,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
         if (opts.stripePackages) {
             Timer timeit(gs.tracer(), "incremental_packager");
             // For simplicity, we still call Packager::runIncremental here, even though
-            // pipeline::resolve no longer calls Packager::run.
+            // pipeline::nameAndResolve no longer calls Packager::run.
             //
             // TODO(jez) We may want to revisit this. At the moment, the only thing that
             // runIncremental does is validate that files have the right package prefix. We could
             // split `pipeline::package` into something like "populate the package DB" and "verify
-            // the package prefixes" with the later living in `pipeline::resolve` once again (thus
-            // restoring the symmetry).
+            // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
+            // (thus restoring the symmetry).
             // TODO(jez) Parallelize this
             what = packager::Packager::runIncremental(gs, move(what));
         }
@@ -720,15 +720,15 @@ size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileR
     return numPackageFiles;
 }
 
-void unpartitionPackageFiles(vector<ast::ParsedFile> &indexed, vector<ast::ParsedFile> &&nonPackageIndexed) {
-    if (indexed.empty()) {
+void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::ParsedFile> &&nonPackageFiles) {
+    if (packageFiles.empty()) {
         // Performance optimization--if it's already empty, no need to move one-by-one
-        indexed = move(nonPackageIndexed);
+        packageFiles = move(nonPackageFiles);
     } else {
         // In this case, all the __package.rb files will have been sorted before non-__package.rb files,
         // and within each subsequence, the parsed files will be sorted (pipeline::index sorts its result)
-        indexed.reserve(indexed.size() + nonPackageIndexed.size());
-        absl::c_move(nonPackageIndexed, back_inserter(indexed));
+        packageFiles.reserve(packageFiles.size() + nonPackageFiles.size());
+        absl::c_move(nonPackageFiles, back_inserter(packageFiles));
     }
 }
 
@@ -779,7 +779,28 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
     Timer timeit(gs.tracer(), "name");
     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-    return namer::Namer::run(gs, what, workers, foundHashes);
+    bool canceled = false;
+    try {
+        canceled = namer::Namer::run(gs, what, workers, foundHashes);
+    } catch (SorbetException &) {
+        Exception::failInFuzzer();
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception naming (backtrace is above)");
+        }
+    }
+
+    if (!canceled) {
+        for (auto &named : what) {
+            if (opts.print.NameTree.enabled) {
+                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(gs, 0));
+            }
+            if (opts.print.NameTreeRaw.enabled) {
+                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(gs));
+            }
+        }
+    }
+
+    return canceled;
 }
 
 class GatherUnresolvedConstantsWalk {
@@ -858,24 +879,20 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
+ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes) {
+    auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+    if (canceled) {
+        return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
+    }
+
+    return resolve(gs, move(what), opts, workers);
+}
+
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes) {
+                                    const options::Options &opts, WorkerPool &workers) {
     try {
-        auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
-        if (canceled) {
-            return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
-        }
-
-        for (auto &named : what) {
-            if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
-            }
-            if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
-            }
-        }
-
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {

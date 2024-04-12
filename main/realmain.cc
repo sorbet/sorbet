@@ -531,6 +531,14 @@ int realmain(int argc, char *argv[]) {
     }
     gs->suggestUnsafe = opts.suggestUnsafe;
 
+    if (gs->runningUnderAutogen) {
+        gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+        gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
+        gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
+        gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
+    }
+
     logger->trace("done building initial global state");
 
     if (opts.print.PayloadSources.enabled) {
@@ -733,6 +741,10 @@ int realmain(int argc, char *argv[]) {
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
+                // Only need to compute hashes when running to compute a FileHash
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+                ENFORCE(!canceled, "There's no cancellation in batch mode");
             }
 
             auto nonPackageIndexed =
@@ -749,7 +761,14 @@ int realmain(int argc, char *argv[]) {
             // Second run: all the other files (the packageDB shouldn't change)
             pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
+            // Only need to compute hashes when running to compute a FileHash
+            auto foundHashes = nullptr;
+            auto canceled =
+                pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
+            ENFORCE(!canceled, "There's no cancellation in batch mode");
+
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
+            // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
 
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
@@ -761,24 +780,15 @@ int realmain(int argc, char *argv[]) {
             logger->warn("Autogen is disabled in sorbet-orig for faster builds");
             return 1;
 #else
-
+            // TODO(jez) Make sure that it's still okay to run this phase after namer, otherwise
+            // you'll have to adjust the non-autogen pipeline code. At first read, it seems like it
+            // unwraps ConstantLit to UnresolvedConstantLit and proceeds as normal, so I think it
+            // should be fine.
             if (!opts.autogenConstantCacheConfig.cacheFile.empty()) {
                 // we should regenerate the constant cache here
                 indexed = pipeline::autogenWriteCacheFile(*gs, opts.autogenConstantCacheConfig.cacheFile, move(indexed),
                                                           *workers);
             }
-
-            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
-            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
-            gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
-            gs->suppressErrorClass(core::errors::Resolver::RecursiveTypeAlias.code);
-
-            // Only need to compute FoundMethodHashes when running to compute a FileHash
-            auto foundMethodHashes = nullptr;
-            auto canceled =
-                pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundMethodHashes);
-            ENFORCE(!canceled);
 
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);
@@ -793,9 +803,7 @@ int realmain(int argc, char *argv[]) {
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
         } else {
-            // Only need to compute hashes when running to compute a FileHash
-            auto foundHashes = nullptr;
-            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers, foundHashes).result());
+            indexed = move(pipeline::resolve(gs, move(indexed), opts, *workers).result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
