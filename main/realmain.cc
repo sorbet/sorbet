@@ -740,11 +740,11 @@ int realmain(int argc, char *argv[]) {
 
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
-                pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
                 // Only need to compute hashes when running to compute a FileHash
                 auto foundHashes = nullptr;
                 auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
                 ENFORCE(!canceled, "There's no cancellation in batch mode");
+                pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
             }
 
             auto nonPackageIndexed =
@@ -759,13 +759,12 @@ int realmain(int argc, char *argv[]) {
                                                  nonPackageIndexed);
 
             // Second run: all the other files (the packageDB shouldn't change)
-            pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
-
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto canceled =
                 pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
+            pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
 
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
             // TODO(jez) At this point, it's not correct to call it `indexed` anymore: we've run namer too
