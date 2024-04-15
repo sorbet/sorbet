@@ -148,7 +148,7 @@ intersection.rb:26: Expected `T.all(M1, M2)` but found `C` for argument `x` http
     26 |takes_intersection(C.new)
                            ^^^^^
   Detailed explanation:
-    `C` is not a subtype of `M1` (the left side of `T.all(M1, M2)`)
+    `C` is not a subtype of `M1` (the left side of the `T.all`)
 
 intersection.rb:27: Expected `T.all(M1, M2)` but found `C1` for argument `x` https://srb.help/7002
     27 |takes_intersection(C1.new)
@@ -162,7 +162,7 @@ intersection.rb:27: Expected `T.all(M1, M2)` but found `C1` for argument `x` htt
     27 |takes_intersection(C1.new)
                            ^^^^^^
   Detailed explanation:
-    `C1` is not a subtype of `M2` (the right side of `T.all(M1, M2)`)
+    `C1` is not a subtype of `M2` (the right side of the `T.all`)
 
 intersection.rb:28: Expected `T.all(M1, M2)` but found `C2` for argument `x` https://srb.help/7002
     28 |takes_intersection(C2.new)
@@ -176,7 +176,7 @@ intersection.rb:28: Expected `T.all(M1, M2)` but found `C2` for argument `x` htt
     28 |takes_intersection(C2.new)
                            ^^^^^^
   Detailed explanation:
-    `C2` is not a subtype of `M1` (the left side of `T.all(M1, M2)`)
+    `C2` is not a subtype of `M1` (the left side of the `T.all`)
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])

@@ -1478,8 +1478,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode, subCollectorLeft);
         if (!isSubTypeOfLeft) {
             if constexpr (shouldAddErrorDetails) {
-                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the left side of `{}`)", t1.show(gs),
-                                                   a2->left.show(gs), t2.show(gs));
+                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the left side of the `{}`)",
+                                                   t1.show(gs), a2->left.show(gs), "T.all");
                 subCollectorLeft.message = message;
                 errorDetailsCollector.addErrorDetails(move(subCollectorLeft));
             }
@@ -1488,15 +1488,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
         auto subCollectorRight = errorDetailsCollector.newCollector();
         auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, t1, a2->right, mode, subCollectorRight);
-        if (!isSubTypeOfRight) {
-            if constexpr (shouldAddErrorDetails) {
-                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the right side of `{}`)",
-                                                   t1.show(gs), a2->right.show(gs), t2.show(gs));
+        if constexpr (shouldAddErrorDetails) {
+            if (!isSubTypeOfRight) {
+                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the right side of the `{}`)",
+                                                   t1.show(gs), a2->right.show(gs), "T.all");
                 subCollectorRight.message = message;
                 errorDetailsCollector.addErrorDetails(move(subCollectorRight));
             }
         }
-        return isSubTypeOfLeft && isSubTypeOfRight;
+        return isSubTypeOfRight;
     }
 
     auto *a1 = cast_type<AndType>(t1);
