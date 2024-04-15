@@ -952,13 +952,18 @@ private:
 };
 
 struct PackageSpecBodyWalk {
-    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
+    PackageSpecBodyWalk() {}
 
-    PackageInfoImpl &info;
+    unique_ptr<PackageInfoImpl> info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (this->info == nullptr) {
+            // We've either reported an error elsewhere, or we've yet to reach the PackageSpec body
+            return;
+        }
+
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
@@ -1005,7 +1010,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
+                info->importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -1018,7 +1023,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
-            info.exportAll_ = true;
+            info->exportAll_ = true;
         }
 
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
@@ -1031,7 +1036,7 @@ struct PackageSpecBodyWalk {
                     }
                     return;
                 }
-                info.visibleToTests_ = true;
+                info->visibleToTests_ = true;
             } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
                 // Constant::* is valid Ruby, and parses as a send of the method * to Constant
                 // so let's take advantage of this to implement wildcards
@@ -1049,7 +1054,7 @@ struct PackageSpecBodyWalk {
                     send.removePosArg(0);
                     ENFORCE(send.numPosArgs() == 0);
                     send.addPosArg(prependName(move(importArg)));
-                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
+                    info->visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1063,7 +1068,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
+                info->visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
     }
@@ -1086,7 +1091,7 @@ struct PackageSpecBodyWalk {
         } else if (this->foundFirstPackageSpec) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
-                e.addErrorLine(info.loc, "Previous package declaration found here");
+                e.addErrorLine(info->loc, "Previous package declaration found here");
             }
         } else {
             // TODO(jez) Can we delete this?
@@ -1095,19 +1100,19 @@ struct PackageSpecBodyWalk {
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::Context ctx) {
+    unique_ptr<PackageInfoImpl> finalize(core::Context ctx) {
         if (exported.empty()) {
-            return;
+            return move(this->info);
         }
 
-        if (info.exportAll()) {
+        if (info->exportAll()) {
             // we're only here because exports exist, which means if
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.name.toString(ctx), "export_all!");
+                                info->name.toString(ctx), "export_all!");
                 }
             }
         }
@@ -1142,8 +1147,10 @@ struct PackageSpecBodyWalk {
             exported.erase(exported.begin() + *indIt);
         }
 
-        ENFORCE(info.exports_.empty());
-        std::swap(exported, info.exports_);
+        ENFORCE(info->exports_.empty());
+        std::swap(exported, info->exports_);
+
+        return move(this->info);
     }
 
     bool isSpecMethod(const sorbet::ast::Send &send) const {
@@ -1199,21 +1206,17 @@ struct PackageSpecBodyWalk {
     }
 };
 
-void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
-    PackageSpecBodyWalk bodyWalk(info);
+unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package) {
+    PackageSpecBodyWalk bodyWalk;
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
-    bodyWalk.finalize(ctx);
+    return bodyWalk.finalize(ctx);
 }
 
 unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
-    auto info = definePackage(gs, package);
-    if (info == nullptr) {
-        return info;
-    }
     populateMangledName(gs, info->name);
 
-    rewritePackageSpec(gs, package, *info);
+    auto info = rewritePackageSpec(gs, package);
     for (auto &importedPackageName : info->importedPackageNames) {
         populateMangledName(gs, importedPackageName.name);
 
@@ -1519,7 +1522,9 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
         if (file.file.data(gs).isPackage()) {
             // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
             // report some syntactic packager errors.
-            auto info = definePackage(gs, file);
+            // TODO(jez) Now that definePackage is in namer, make this operate on the Package symbol, not the
+            // PackageInfo auto info = definePackage(gs, file);
+            unique_ptr<PackageInfoImpl> info = nullptr;
             if (info != nullptr) {
                 rewritePackageSpec(gs, file, *info);
             }
