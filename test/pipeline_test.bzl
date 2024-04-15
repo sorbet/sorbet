@@ -114,6 +114,7 @@ _TEST_RUNNERS = {
 
 def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = []):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
+    package_tests = {}  # ^ ditto
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
     # All immediate subdirs of `/packager/` are individual tests.
@@ -140,6 +141,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                         "disabled": "disabled" in test_name,
                     }
                     tests[test_name] = data
+                    package_tests[test_name] = data
                 continue
 
         # This is not a folder test (common case)
@@ -206,6 +208,12 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
         name = suite_name,
         tests = enabled_tests,
     )
+
+    if len(package_tests) > 0:
+        native.test_suite(
+            name = "{}_packager".format(suite_name),
+            tests = package_tests,
+        )
 
     if len(disabled_tests) > 0:
         native.test_suite(
