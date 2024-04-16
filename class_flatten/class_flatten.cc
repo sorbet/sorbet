@@ -75,7 +75,9 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;
-        ast::ExpressionPtr replacement;
+        auto replacement = ast::MK::EmptyTree();
+
+        if (!ast::isa_tree<ast::EmptyTree>(inits)) {
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -85,7 +87,6 @@ public:
             sym = ctx.state.lookupStaticInitForFile(ctx.file);
 
             // Skip emitting a place-holder for the root object.
-            replacement = ast::MK::EmptyTree();
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
 
@@ -94,8 +95,6 @@ public:
             // noise otherwise.
             if (ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
                 replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
-            } else {
-                replacement = ast::MK::EmptyTree();
             }
         }
         ENFORCE(!sym.data(ctx)->arguments.empty(), "<static-init> method should already have a block arg symbol: {}",
@@ -118,6 +117,7 @@ public:
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 
         classDef->rhs.emplace_back(std::move(init));
+        }
 
         classes[classStack.back()] = std::move(tree);
         classStack.pop_back();
