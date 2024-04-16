@@ -138,12 +138,38 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     }
 }
 
+// This decides if we need to keep a node around incase the current LSP query needs type information for it
+bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
+    // used in Desugar <-> resolver to signal classes that did not have explicit superclass
+    if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
+        return false;
+    }
+    auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
+    if (rcl && rcl->symbol == core::Symbols::todo()) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace
 
 void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     matchesQuery(ctx, &lit, lspQuery, lit.symbol);
+}
+
+void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+    matchesQuery(ctx, lit, lspQuery, lit->symbol);
+
+    if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
+        shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
+        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+    }
 }
 
 } // namespace sorbet::realmain::lsp
