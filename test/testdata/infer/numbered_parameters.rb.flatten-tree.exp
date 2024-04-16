@@ -1,56 +1,52 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def foo(blk)
-      blk.call(42, "foo")
-    end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo(blk)
+    blk.call(42, "foo")
+  end
 
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:blk, ::T.proc().params(:a, ::Integer, :b, ::String).void()).void()
-        end
-        <self>.extend(::T::Sig)
-        <runtime method definition of foo>
-        <self>.foo() do |_1$2|
-          ::T.reveal_type(_1$2)
-        end
-        <self>.foo() do |_1$3, _2$3|
-          ::T.reveal_type(_2$3)
-        end
-        <self>.foo() do |_1$4, _2$4, _3$4|
-          ::T.reveal_type(_3$4)
-        end
-        <self>.foo() do |_1$5, _2$5|
-          ::T.reveal_type(_2$5.*(_1$5))
-        end
-        <self>.foo() do |_1$6, _2$6, _3$6|
-          begin
-            ::T.reveal_type(_1$6)
-            ::T.reveal_type(_2$6)
-            ::T.reveal_type(_3$6)
-            ::T.reveal_type(_2$6.*(_1$6))
-          end
-        end
-        ::Kernel.lambda() do |_1$7|
-          ::T.reveal_type(_1$7)
-        end
-        ::Kernel.lambda() do |_1$8, _2$8, _3$8, _4$8, _5$8, _6$8, _7$8, _8$8, _9$8|
-          ::T.reveal_type(_9$8)
-        end
-        [1, 2, 3].map() do |_1$9|
-          ::T.reveal_type(_1$9)
-        end
-        ["albatross", "dog", "horse"].max(2) do |_1$10, _2$10|
-          begin
-            ::T.reveal_type(_1$10)
-            ::T.reveal_type(_2$10)
-            _1$10.length().<=>(_2$10.length())
-          end
-        end
-        <emptyTree>
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    begin
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params(:blk, ::T.proc().params(:a, ::Integer, :b, ::String).void()).void()
       end
+      <self>.extend(::T::Sig)
+      <runtime method definition of foo>
+      <self>.foo() do |_1$2|
+        ::T.reveal_type(_1$2)
+      end
+      <self>.foo() do |_1$3, _2$3|
+        ::T.reveal_type(_2$3)
+      end
+      <self>.foo() do |_1$4, _2$4, _3$4|
+        ::T.reveal_type(_3$4)
+      end
+      <self>.foo() do |_1$5, _2$5|
+        ::T.reveal_type(_2$5.*(_1$5))
+      end
+      <self>.foo() do |_1$6, _2$6, _3$6|
+        begin
+          ::T.reveal_type(_1$6)
+          ::T.reveal_type(_2$6)
+          ::T.reveal_type(_3$6)
+          ::T.reveal_type(_2$6.*(_1$6))
+        end
+      end
+      ::Kernel.lambda() do |_1$7|
+        ::T.reveal_type(_1$7)
+      end
+      ::Kernel.lambda() do |_1$8, _2$8, _3$8, _4$8, _5$8, _6$8, _7$8, _8$8, _9$8|
+        ::T.reveal_type(_9$8)
+      end
+      [1, 2, 3].map() do |_1$9|
+        ::T.reveal_type(_1$9)
+      end
+      ["albatross", "dog", "horse"].max(2) do |_1$10, _2$10|
+        begin
+          ::T.reveal_type(_1$10)
+          ::T.reveal_type(_2$10)
+          _1$10.length().<=>(_2$10.length())
+        end
+      end
+      <emptyTree>
     end
   end
-  <emptyTree>
 end

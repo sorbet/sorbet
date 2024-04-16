@@ -1,15 +1,11 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def foo(<blk>)
-      <emptyTree>
-    rescue Unresolved: <emptyTree>::<C NotAClass> => e
-      <emptyTree>
-    end
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <runtime method definition of foo>
-    end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo(<blk>)
+    <emptyTree>
+  rescue Unresolved: <emptyTree>::<C NotAClass> => e
+    <emptyTree>
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    <runtime method definition of foo>
+  end
 end

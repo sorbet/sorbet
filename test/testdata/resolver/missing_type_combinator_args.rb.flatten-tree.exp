@@ -1,20 +1,16 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        <cast:cast>(nil, T.untyped, ::T.nilable())
-        <cast:cast>(nil, T.untyped, ::T.nilable(::Integer, ::Integer))
-        <cast:cast>(nil, T.untyped, ::T.any())
-        <cast:cast>(nil, T.untyped, ::T.all())
-        ::T.must()
-        ::T.let(1)
-        <cast:let>(1, Integer, 2)
-        ::T.reveal_type()
-        ::T.reveal_type(1, 2)
-        <emptyTree>
-      end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    begin
+      <cast:cast>(nil, T.untyped, ::T.nilable())
+      <cast:cast>(nil, T.untyped, ::T.nilable(::Integer, ::Integer))
+      <cast:cast>(nil, T.untyped, ::T.any())
+      <cast:cast>(nil, T.untyped, ::T.all())
+      ::T.must()
+      ::T.let(1)
+      <cast:let>(1, Integer, 2)
+      ::T.reveal_type()
+      ::T.reveal_type(1, 2)
+      <emptyTree>
     end
   end
-  <emptyTree>
 end
