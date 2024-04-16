@@ -1,10 +1,6 @@
 begin
   class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
   end
   class ::A<<C A>> < (::<todo sym>)
     def self.make(<blk>)

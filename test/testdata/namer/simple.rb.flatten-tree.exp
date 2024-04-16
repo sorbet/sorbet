@@ -13,10 +13,6 @@ begin
     <emptyTree>
 
     <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
   end
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
     def normal_method(<blk>)
@@ -40,46 +36,21 @@ begin
     end
   end
   class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   module ::NormalClass::InnerModule<<C InnerModule>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   module ::ANamespace<<C ANamespace>> < ()
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   module ::Mixin<<C Mixin>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   module ::OtherMixin<<C OtherMixin>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::Child<<C Child>> < (::Parent, ::Mixin)
     def self.<static-init>(<blk>)

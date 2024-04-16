@@ -37,16 +37,9 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::B<<C B>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:B>> < ()
     def b(<blk>)
@@ -59,17 +52,9 @@ begin
   end
   class ::D<<C D>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:D>> < ()
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:<Class:D>>> < ()
     def d(<blk>)
@@ -102,10 +87,6 @@ begin
   end
   class ::F<<C F>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:F>> < ()
     def initialize(<blk>)
@@ -158,17 +139,9 @@ begin
   end
   class ::H<<C H>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:H>> < ()
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::<Class:H>::H2<<C H2>> < (::<todo sym>)
     def self.h(<blk>)

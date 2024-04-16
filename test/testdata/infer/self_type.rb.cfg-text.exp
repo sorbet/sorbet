@@ -173,20 +173,6 @@ bb5[rubyRegionId=1, firstDead=5](<self>: T.class_of(Parent), <block-pre-call-tem
 
 }
 
-method ::<Class:Normal>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(Normal) = cast(<self>: NilClass, T.class_of(Normal));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::Generic#bad {
 
 bb0[rubyRegionId=0, firstDead=7]():
@@ -255,20 +241,6 @@ bb5[rubyRegionId=1, firstDead=7](<self>: T.class_of(Generic), <block-pre-call-te
 
 }
 
-method ::<Class:B>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::Array#returns_self {
 
 bb0[rubyRegionId=0, firstDead=3]():
@@ -326,20 +298,6 @@ bb5[rubyRegionId=1, firstDead=5](<self>: T.class_of(Array), <block-pre-call-temp
     <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.untyped)
     <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
-
-}
-
-method ::<Class:A>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 

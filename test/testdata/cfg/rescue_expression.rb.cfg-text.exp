@@ -81,17 +81,3 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 }
 
-method ::<Class:MyException>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(MyException) = cast(<self>: NilClass, T.class_of(MyException));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-

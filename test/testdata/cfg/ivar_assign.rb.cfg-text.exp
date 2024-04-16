@@ -1,17 +1,3 @@
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::TestIVar#initialize {
 
 bb0[rubyRegionId=0, firstDead=9]():

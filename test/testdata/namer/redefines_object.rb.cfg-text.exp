@@ -1,31 +1,3 @@
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Object>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(Object) = cast(<self>: NilClass, T.class_of(Object));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::Trigger#trigger {
 
 bb0[rubyRegionId=0, firstDead=4]():
@@ -48,34 +20,6 @@ bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(Trigger) = cast(<self>: NilClass, T.class_of(Trigger));
     <returnMethodTemp>$2: Symbol(:trigger) = :trigger
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:trigger)
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Foo>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(Foo) = cast(<self>: NilClass, T.class_of(Foo));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:Bar>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(Bar) = cast(<self>: NilClass, T.class_of(Bar));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges

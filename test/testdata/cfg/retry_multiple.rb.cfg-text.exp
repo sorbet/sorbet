@@ -141,31 +141,3 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 }
 
-method ::<Class:A>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::<Class:B>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(B) = cast(<self>: NilClass, T.class_of(B));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-

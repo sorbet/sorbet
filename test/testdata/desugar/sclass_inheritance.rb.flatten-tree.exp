@@ -25,16 +25,9 @@ begin
     end
   end
   module ::MM<<C MM>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class ::A<<C A>> < (::<todo sym>)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:A>> < (::MM)
     def newer(<blk>)
@@ -64,10 +57,6 @@ begin
   end
   class ::C<<C C>> < (::A)
     <emptyTree>
-
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   class <singleton class><<Class:C>> < ()
     def newerer(<blk>)

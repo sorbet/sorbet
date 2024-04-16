@@ -1,17 +1,3 @@
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::MyEnum#serialize {
 
 bb0[rubyRegionId=0, firstDead=4]():
@@ -120,48 +106,6 @@ bb9[rubyRegionId=2, firstDead=22](<self>: T.class_of(MyEnum), <block-pre-call-te
     <blockReturnTemp>$27: NilClass = nil
     <blockReturnTemp>$53: T.noreturn = blockreturn<enums> <blockReturnTemp>$27: NilClass
     <unconditional> -> bb6
-
-}
-
-method ::MyEnum::<Class:X>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(MyEnum::X) = cast(<self>: NilClass, T.class_of(MyEnum::X));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::MyEnum::<Class:Y>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(MyEnum::Y) = cast(<self>: NilClass, T.class_of(MyEnum::Y));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::MyEnum::<Class:Z>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(MyEnum::Z) = cast(<self>: NilClass, T.class_of(MyEnum::Z));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 
@@ -337,48 +281,6 @@ bb9[rubyRegionId=2, firstDead=22](<self>: T.class_of(EnumsDoEnum), <block-pre-ca
 
 }
 
-method ::EnumsDoEnum::<Class:X>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(EnumsDoEnum::X) = cast(<self>: NilClass, T.class_of(EnumsDoEnum::X));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::EnumsDoEnum::<Class:Y>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(EnumsDoEnum::Y) = cast(<self>: NilClass, T.class_of(EnumsDoEnum::Y));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::EnumsDoEnum::<Class:Z>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(EnumsDoEnum::Z) = cast(<self>: NilClass, T.class_of(EnumsDoEnum::Z));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::BadConsts#serialize {
 
 bb0[rubyRegionId=0, firstDead=4]():
@@ -498,48 +400,6 @@ bb9[rubyRegionId=2, firstDead=10](<self>: T.class_of(BadConsts), <block-pre-call
     <blockReturnTemp>$36: NilClass = nil
     <blockReturnTemp>$47: T.noreturn = blockreturn<enums> <blockReturnTemp>$36: NilClass
     <unconditional> -> bb6
-
-}
-
-method ::BadConsts::<Class:Before>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(BadConsts::Before) = cast(<self>: NilClass, T.class_of(BadConsts::Before));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::BadConsts::<Class:Inside>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(BadConsts::Inside) = cast(<self>: NilClass, T.class_of(BadConsts::Inside));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
-method ::BadConsts::<Class:After>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(BadConsts::After) = cast(<self>: NilClass, T.class_of(BadConsts::After));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
 
 }
 

@@ -260,17 +260,3 @@ bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Concrete), <block-pre-call-t
 
 }
 
-method ::<Class:Other>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=2]():
-    <self>: T.class_of(Other) = cast(<self>: NilClass, T.class_of(Other));
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-

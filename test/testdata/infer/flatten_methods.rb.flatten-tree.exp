@@ -3,10 +3,6 @@ begin
     <emptyTree>
 
     <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
-    end
   end
   class ::Parent<<C Parent>> < (::<todo sym>)
     def self.takes_integer_static(x, <blk>)

@@ -11,9 +11,6 @@ begin
     end
   end
   module ::Foo<<C Foo>> < ()
-    def self.<static-init>(<blk>)
-      <emptyTree>
-    end
   end
   <emptyTree>
 end
