@@ -56,21 +56,7 @@ ast::ExpressionPtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
 class ClassFlattenWalk {
 private:
 public:
-    ~ClassFlattenWalk() {
-        ENFORCE(classes.empty());
-        ENFORCE(classStack.empty());
-    }
-
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        classStack.emplace_back(classes.size());
-        classes.emplace_back();
-    }
-
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        ENFORCE(!classStack.empty());
-        ENFORCE(classes.size() > classStack.back());
-        ENFORCE(classes[classStack.back()] == nullptr);
-
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto inits = extractClassInit(ctx, classDef);
 
@@ -118,63 +104,12 @@ public:
 
             classDef->rhs.emplace_back(std::move(init));
         }
-
-        classes[classStack.back()] = std::move(tree);
-        classStack.pop_back();
-
-        tree = std::move(replacement);
     };
-
-    ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {
-        if (classes.empty()) {
-            ENFORCE(sortedClasses().empty());
-            return tree;
-        }
-        if (classes.size() == 1 && ast::isa_tree<ast::EmptyTree>(tree)) {
-            // It was only 1 class to begin with, put it back
-            return std::move(sortedClasses()[0]);
-        }
-
-        auto insSeq = ast::cast_tree<ast::InsSeq>(tree);
-        if (insSeq == nullptr) {
-            ast::InsSeq::STATS_store stats;
-            auto sorted = sortedClasses();
-            stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
-            return ast::MK::InsSeq(tree.loc(), std::move(stats), std::move(tree));
-        }
-
-        for (auto &clas : sortedClasses()) {
-            ENFORCE(!!clas);
-            insSeq->stats.emplace_back(std::move(clas));
-        }
-        return tree;
-    }
-
-private:
-    vector<ast::ExpressionPtr> sortedClasses() {
-        ENFORCE(classStack.empty());
-        auto ret = std::move(classes);
-        classes.clear();
-        return ret;
-    }
-
-    // We flatten nested classes into a flat list. We want to sort
-    // them by their starts, so that `class A; class B; end; end` --> `class A;
-    // end; class B; end`.
-    //
-    // In order to make TreeWalk work out, we can't remove them from the AST
-    // until the `postTransform*` hook. Appending them to a list at that point
-    // would result in an "bottom-up" ordering, so instead we store a stack of
-    // "where does the next definition belong" into `classStack`
-    // which we push onto in the `preTransform* hook, and pop from in the `postTransform` hook.
-    vector<ast::ExpressionPtr> classes;
-    vector<int> classStack;
 };
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     ClassFlattenWalk flatten;
     ast::TreeWalk::apply(ctx, flatten, tree.tree);
-    tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
 
     return tree;
 }

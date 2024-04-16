@@ -974,8 +974,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](const ast::EmptyTree &n) { ret = current; },
-
-            [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
+            [&](const ast::ClassDef &c) {
+                // Nested classes and their methods will get handled later in CFGCollectorAndTyper. We can skip them.
+                ret = current;
+            },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
             [&](const ast::ExpressionPtr &n) {
