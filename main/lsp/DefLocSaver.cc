@@ -162,8 +162,13 @@ void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr
 void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
     auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
-    matchesQuery(ctx, lit, lspQuery, lit->symbol);
+    if (!ast::isa_tree<ast::EmptyTree>(classDef.name)) {
+        // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
+        auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+        matchesQuery(ctx, lit, lspQuery, lit->symbol);
+    } else {
+        ENFORCE(classDef.symbol == core::Symbols::root());
+    }
 
     if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
