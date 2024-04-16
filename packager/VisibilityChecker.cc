@@ -369,27 +369,7 @@ public:
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, insideTestFile{ctx.file.data(ctx).isPackagedTest()} {}
 
-    // `keep-def` will reference constants in a way that looks like a packaging violation, but is actually fine. This
-    // boolean allows for an early exit when we know we're in the context of processing one of these sends. Currently
-    // the only sends that we process this way will not have any nested method calls, but if that changes this will need
-    // to become a stack.
-    bool ignoreConstant = false;
-
-    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        ENFORCE(!this->ignoreConstant, "keepForIde has nested sends");
-        this->ignoreConstant = send.fun == core::Names::keepForIde();
-    }
-
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        this->ignoreConstant = false;
-    }
-
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (this->ignoreConstant) {
-            return;
-        }
-
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         if (!lit.symbol.isClassOrModule() && !lit.symbol.isFieldOrStaticField()) {
             return;

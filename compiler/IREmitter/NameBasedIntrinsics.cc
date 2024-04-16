@@ -52,18 +52,6 @@ public:
     }
 } DoNothingIntrinsic;
 
-class ShouldNeverSeeIntrinsic : public NameBasedIntrinsicMethod {
-public:
-    ShouldNeverSeeIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
-    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        failCompilation(mcctx.cs, core::Loc(core::FileRef(), mcctx.send->receiverLoc),
-                        "Emitting intrinsic that should have been deleted!");
-    }
-    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::keepForIde()};
-    }
-} ShouldNeverSeeIntrinsic;
-
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DefineClassIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
@@ -925,10 +913,10 @@ static const vector<UntypedSpecialization> untypedSpecializations{
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,           &ExceptionRetry,
-        &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &ShouldNeverSeeIntrinsic, &DefinedClassVar,
-        &DefinedInstanceVar, &NewIntrinsic,         &InstanceVariableGet,   &InstanceVariableSet,     &ClassIntrinsic,
-        &BangIntrinsic,      &FreezeIntrinsic,      &IsAIntrinsic};
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,     &CallWithBlock,   &ExceptionRetry,
+        &BuildHash,          &CallWithSplat,        &CallWithSplatAndBlock, &DefinedClassVar, &DefinedInstanceVar,
+        &NewIntrinsic,       &InstanceVariableGet,  &InstanceVariableSet,   &ClassIntrinsic,  &BangIntrinsic,
+        &FreezeIntrinsic,    &IsAIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
