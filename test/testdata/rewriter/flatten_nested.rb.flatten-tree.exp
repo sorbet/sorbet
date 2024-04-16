@@ -1,28 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::A.new().outer_method()
-        ::A.new().inner_method()
-        b = ::B.new()
-        b.outer_method()
-        b.inner_method()
-        ::C.outer_method()
-        ::C.new().inner_method()
-        ::D.outer_method()
-        ::D.inner_method()
-        <emptyTree>
-      end
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
     def outer_method(<blk>)
       <runtime method definition of inner_method>
@@ -36,6 +12,7 @@ begin
       <runtime method definition of outer_method>
     end
   end
+
   class ::B<<C B>> < (::<todo sym>)
     def outer_method(<blk>)
       <runtime method definition of self.inner_method>
@@ -49,6 +26,7 @@ begin
       <runtime method definition of outer_method>
     end
   end
+
   class ::C<<C C>> < (::<todo sym>)
     def self.outer_method(<blk>)
       <runtime method definition of inner_method>
@@ -62,6 +40,7 @@ begin
       <runtime method definition of self.outer_method>
     end
   end
+
   class ::D<<C D>> < (::<todo sym>)
     def self.outer_method(<blk>)
       <runtime method definition of self.inner_method>
@@ -75,5 +54,19 @@ begin
       <runtime method definition of self.outer_method>
     end
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    begin
+      ::A.new().outer_method()
+      ::A.new().inner_method()
+      b = ::B.new()
+      b.outer_method()
+      b.inner_method()
+      ::C.outer_method()
+      ::C.new().inner_method()
+      ::D.outer_method()
+      ::D.inner_method()
+      <emptyTree>
+    end
+  end
 end

@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::Main.new().main()
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Main<<C Main>> < (::<todo sym>)
     def yielder(<blk>)
       begin
@@ -60,5 +53,8 @@ begin
       end
     end
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    ::Main.new().main()
+  end
 end

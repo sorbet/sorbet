@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::OpEq<<C OpEq>> < (::<todo sym>)
     def b(<blk>)
       <emptyTree>
@@ -85,5 +82,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

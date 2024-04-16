@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Test<<C Test>> < (::<todo sym>)
     def test_next_break(<blk>)
       <self>.each() do ||
@@ -24,5 +21,4 @@ begin
       <runtime method definition of test_next_break>
     end
   end
-  <emptyTree>
 end

@@ -1,11 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      $a = 1
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
     def meth(<blk>)
       [$a, $b, $c]
@@ -20,5 +13,8 @@ begin
       end
     end
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    $a = 1
+  end
 end

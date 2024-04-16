@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Destructure<<C Destructure>> < (::<todo sym>)
     def f((x,y), z, <blk>)
       begin
@@ -34,5 +31,4 @@ begin
       <runtime method definition of f>
     end
   end
-  <emptyTree>
 end

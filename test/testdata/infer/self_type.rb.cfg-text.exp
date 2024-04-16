@@ -12,107 +12,6 @@ bb1[rubyRegionId=0, firstDead=-1]():
 
 }
 
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(Normal) = alias <C Normal>
-    keep_for_ide$4: T.class_of(Normal) = <cfgAlias>$5
-    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
-    <cfgAlias>$9: T.class_of(Normal) = alias <C Normal>
-    <statTemp>$7: Normal = <cfgAlias>$9: T.class_of(Normal).new()
-    <castTemp>$6: Normal = <statTemp>$7: Normal.returns_self()
-    <statTemp>$3: Normal = cast(<castTemp>$6: Normal, Normal);
-    <cfgAlias>$13: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$15: T.class_of(String) = alias <C String>
-    keep_for_ide$11: Runtime object representing type: Generic[String] = <cfgAlias>$13: T.class_of(Generic).[](<cfgAlias>$15: T.class_of(String))
-    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
-    <cfgAlias>$20: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$22: T.class_of(String) = alias <C String>
-    <statTemp>$18: Runtime object representing type: Generic[String] = <cfgAlias>$20: T.class_of(Generic).[](<cfgAlias>$22: T.class_of(String))
-    <statTemp>$17: Generic[String] = <statTemp>$18: Runtime object representing type: Generic[String].new()
-    <castTemp>$16: Generic[String] = <statTemp>$17: Generic[String].returns_self()
-    <statTemp>$10: Generic[String] = cast(<castTemp>$16: Generic[String], Generic[String]);
-    <cfgAlias>$26: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$28: T.class_of(String) = alias <C String>
-    <statTemp>$24: Runtime object representing type: Generic[String] = <cfgAlias>$26: T.class_of(Generic).[](<cfgAlias>$28: T.class_of(String))
-    a: Generic[String] = <statTemp>$24: Runtime object representing type: Generic[String].new()
-    <cfgAlias>$33: T.class_of(B) = alias <C B>
-    <ifTemp>$30: T::Boolean = a: Generic[String].is_a?(<cfgAlias>$33: T.class_of(B))
-    <ifTemp>$30 -> (T::Boolean ? bb2 : bb4)
-
-# backedges
-# - bb7(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb2[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[String], B)):
-    <cfgAlias>$36: T.class_of(T) = alias <C T>
-    <cfgAlias>$39: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$41: T.class_of(String) = alias <C String>
-    <statTemp>$37: Runtime object representing type: Generic[String] = <cfgAlias>$39: T.class_of(Generic).[](<cfgAlias>$41: T.class_of(String))
-    <cfgAlias>$43: T.class_of(B) = alias <C B>
-    keep_for_ide$34: Runtime object representing type: T.all(Generic[String], B) = <cfgAlias>$36: T.class_of(T).all(<statTemp>$37: Runtime object representing type: Generic[String], <cfgAlias>$43: T.class_of(B))
-    keep_for_ide$34: T.untyped = <keep-alive> keep_for_ide$34
-    <castTemp>$44: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()
-    <statTemp>$29: T.all(Generic[String], B) = cast(<castTemp>$44: T.all(Generic[String], B), T.all(Generic[String], B));
-    <unconditional> -> bb4
-
-# backedges
-# - bb0(rubyRegionId=0)
-# - bb2(rubyRegionId=0)
-bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
-    <cfgAlias>$49: T.class_of(Integer) = alias <C Integer>
-    <cfgAlias>$51: T.class_of(Integer) = alias <C Integer>
-    <magic>$52: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$47: [T.class_of(Integer), T.class_of(Integer)] = <magic>$52: T.class_of(<Magic>).<build-array>(<cfgAlias>$49: T.class_of(Integer), <cfgAlias>$51: T.class_of(Integer))
-    keep_for_ide$47: T.untyped = <keep-alive> keep_for_ide$47
-    <arrayTemp>$55: Integer(1) = 1
-    <arrayTemp>$56: Integer(2) = 2
-    <magic>$57: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$54: [Integer(1), Integer(2)] = <magic>$57: T.class_of(<Magic>).<build-array>(<arrayTemp>$55: Integer(1), <arrayTemp>$56: Integer(2))
-    <castTemp>$53: [Integer(1), Integer(2)] = <statTemp>$54: [Integer(1), Integer(2)].returns_self()
-    <statTemp>$46: [Integer, Integer] = cast(<castTemp>$53: [Integer(1), Integer(2)], [Integer, Integer]);
-    <cfgAlias>$60: T.class_of(A) = alias <C A>
-    s: A = <cfgAlias>$60: T.class_of(A).new()
-    <unconditional> -> bb5
-
-# backedges
-# - bb4(rubyRegionId=0)
-# - bb8(rubyRegionId=0)
-# - bb9(rubyRegionId=0)
-bb5[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
-    # outerLoops: 1
-    <whileTemp>$63: T.untyped = <self>: T.class_of(<root>).rnd()
-    <whileTemp>$63 -> (T.untyped ? bb8 : bb7)
-
-# backedges
-# - bb5(rubyRegionId=0)
-bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
-    <statTemp>$71: NilClass = <self>: T.class_of(<root>).puts(s: A)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb5(rubyRegionId=0)
-bb8[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
-    # outerLoops: 1
-    <cfgAlias>$69: T.class_of(B) = alias <C B>
-    <ifTemp>$66: T::Boolean = s: A.is_a?(<cfgAlias>$69: T.class_of(B))
-    <ifTemp>$66 -> (T::Boolean ? bb9 : bb5)
-
-# backedges
-# - bb8(rubyRegionId=0)
-bb9[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: T.all(A, B)):
-    # outerLoops: 1
-    <statTemp>$70: T.all(A, B) = s
-    s: T.all(A, B) = <statTemp>$70: T.all(A, B).returns_self()
-    <unconditional> -> bb5
-
-}
-
 method ::Parent#returns_self {
 
 bb0[rubyRegionId=0, firstDead=3]():
@@ -358,6 +257,107 @@ bb5[rubyRegionId=1, firstDead=5](<self>: T.class_of(B), <block-pre-call-temp>$7:
     <blockReturnTemp>$9: T::Private::Methods::DeclBuilder = <self>: T::Private::Methods::DeclBuilder.returns(<statTemp>$11: Runtime object representing type: T.untyped)
     <blockReturnTemp>$14: T.noreturn = blockreturn<sig> <blockReturnTemp>$9: T::Private::Methods::DeclBuilder
     <unconditional> -> bb2
+
+}
+
+method ::<Class:<root>>#<static-init> {
+
+bb0[rubyRegionId=0, firstDead=-1]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(Normal) = alias <C Normal>
+    keep_for_ide$4: T.class_of(Normal) = <cfgAlias>$5
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <cfgAlias>$9: T.class_of(Normal) = alias <C Normal>
+    <statTemp>$7: Normal = <cfgAlias>$9: T.class_of(Normal).new()
+    <castTemp>$6: Normal = <statTemp>$7: Normal.returns_self()
+    <statTemp>$3: Normal = cast(<castTemp>$6: Normal, Normal);
+    <cfgAlias>$13: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$15: T.class_of(String) = alias <C String>
+    keep_for_ide$11: Runtime object representing type: Generic[String] = <cfgAlias>$13: T.class_of(Generic).[](<cfgAlias>$15: T.class_of(String))
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
+    <cfgAlias>$20: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$22: T.class_of(String) = alias <C String>
+    <statTemp>$18: Runtime object representing type: Generic[String] = <cfgAlias>$20: T.class_of(Generic).[](<cfgAlias>$22: T.class_of(String))
+    <statTemp>$17: Generic[String] = <statTemp>$18: Runtime object representing type: Generic[String].new()
+    <castTemp>$16: Generic[String] = <statTemp>$17: Generic[String].returns_self()
+    <statTemp>$10: Generic[String] = cast(<castTemp>$16: Generic[String], Generic[String]);
+    <cfgAlias>$26: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$28: T.class_of(String) = alias <C String>
+    <statTemp>$24: Runtime object representing type: Generic[String] = <cfgAlias>$26: T.class_of(Generic).[](<cfgAlias>$28: T.class_of(String))
+    a: Generic[String] = <statTemp>$24: Runtime object representing type: Generic[String].new()
+    <cfgAlias>$33: T.class_of(B) = alias <C B>
+    <ifTemp>$30: T::Boolean = a: Generic[String].is_a?(<cfgAlias>$33: T.class_of(B))
+    <ifTemp>$30 -> (T::Boolean ? bb2 : bb4)
+
+# backedges
+# - bb7(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyRegionId=0)
+bb2[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[String], B)):
+    <cfgAlias>$36: T.class_of(T) = alias <C T>
+    <cfgAlias>$39: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$41: T.class_of(String) = alias <C String>
+    <statTemp>$37: Runtime object representing type: Generic[String] = <cfgAlias>$39: T.class_of(Generic).[](<cfgAlias>$41: T.class_of(String))
+    <cfgAlias>$43: T.class_of(B) = alias <C B>
+    keep_for_ide$34: Runtime object representing type: T.all(Generic[String], B) = <cfgAlias>$36: T.class_of(T).all(<statTemp>$37: Runtime object representing type: Generic[String], <cfgAlias>$43: T.class_of(B))
+    keep_for_ide$34: T.untyped = <keep-alive> keep_for_ide$34
+    <castTemp>$44: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()
+    <statTemp>$29: T.all(Generic[String], B) = cast(<castTemp>$44: T.all(Generic[String], B), T.all(Generic[String], B));
+    <unconditional> -> bb4
+
+# backedges
+# - bb0(rubyRegionId=0)
+# - bb2(rubyRegionId=0)
+bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
+    <cfgAlias>$49: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$51: T.class_of(Integer) = alias <C Integer>
+    <magic>$52: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$47: [T.class_of(Integer), T.class_of(Integer)] = <magic>$52: T.class_of(<Magic>).<build-array>(<cfgAlias>$49: T.class_of(Integer), <cfgAlias>$51: T.class_of(Integer))
+    keep_for_ide$47: T.untyped = <keep-alive> keep_for_ide$47
+    <arrayTemp>$55: Integer(1) = 1
+    <arrayTemp>$56: Integer(2) = 2
+    <magic>$57: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$54: [Integer(1), Integer(2)] = <magic>$57: T.class_of(<Magic>).<build-array>(<arrayTemp>$55: Integer(1), <arrayTemp>$56: Integer(2))
+    <castTemp>$53: [Integer(1), Integer(2)] = <statTemp>$54: [Integer(1), Integer(2)].returns_self()
+    <statTemp>$46: [Integer, Integer] = cast(<castTemp>$53: [Integer(1), Integer(2)], [Integer, Integer]);
+    <cfgAlias>$60: T.class_of(A) = alias <C A>
+    s: A = <cfgAlias>$60: T.class_of(A).new()
+    <unconditional> -> bb5
+
+# backedges
+# - bb4(rubyRegionId=0)
+# - bb8(rubyRegionId=0)
+# - bb9(rubyRegionId=0)
+bb5[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
+    # outerLoops: 1
+    <whileTemp>$63: T.untyped = <self>: T.class_of(<root>).rnd()
+    <whileTemp>$63 -> (T.untyped ? bb8 : bb7)
+
+# backedges
+# - bb5(rubyRegionId=0)
+bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
+    <statTemp>$71: NilClass = <self>: T.class_of(<root>).puts(s: A)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb5(rubyRegionId=0)
+bb8[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
+    # outerLoops: 1
+    <cfgAlias>$69: T.class_of(B) = alias <C B>
+    <ifTemp>$66: T::Boolean = s: A.is_a?(<cfgAlias>$69: T.class_of(B))
+    <ifTemp>$66 -> (T::Boolean ? bb9 : bb5)
+
+# backedges
+# - bb8(rubyRegionId=0)
+bb9[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: T.all(A, B)):
+    # outerLoops: 1
+    <statTemp>$70: T.all(A, B) = s
+    s: T.all(A, B) = <statTemp>$70: T.all(A, B).returns_self()
+    <unconditional> -> bb5
 
 }
 

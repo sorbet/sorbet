@@ -1,19 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::NormalClass<<C NormalClass>> < (::<todo sym>)
     def normal_method(<blk>)
       <emptyTree>
@@ -23,9 +8,11 @@ begin
       <emptyTree>
     end
 
-    <emptyTree>
+    class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
+    end
 
-    <emptyTree>
+    module ::NormalClass::InnerModule<<C InnerModule>> < ()
+    end
 
     def self.<static-init>(<blk>)
       begin
@@ -35,23 +22,24 @@ begin
       end
     end
   end
-  class ::NormalClass::InnerClass<<C InnerClass>> < (::<todo sym>)
-  end
-  module ::NormalClass::InnerModule<<C InnerModule>> < ()
-  end
+
   module ::ANamespace<<C ANamespace>> < ()
-    <emptyTree>
+    class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
+    end
   end
-  class ::ANamespace::ObviousChild<<C ObviousChild>> < (::<todo sym>)
-  end
+
   class ::ANamespace::ClassInNamespace<<C ClassInNamespace>> < (::<todo sym>)
   end
+
   class ::Parent<<C Parent>> < (::<todo sym>)
   end
+
   module ::Mixin<<C Mixin>> < ()
   end
+
   module ::OtherMixin<<C OtherMixin>> < ()
   end
+
   class ::Child<<C Child>> < (::Parent, ::Mixin)
     def self.<static-init>(<blk>)
       begin
@@ -65,5 +53,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Test<<C Test>> < (::<todo sym>)
     def foo(x, <blk>)
       x
@@ -42,5 +39,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

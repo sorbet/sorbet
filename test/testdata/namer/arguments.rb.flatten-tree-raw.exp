@@ -1,17 +1,12 @@
-InsSeq{
-  stats = [
-    ClassDef{
-      kind = class
-      name = EmptyTree
-      symbol = <C <U <root>>>
-      ancestors = [ConstantLit{
-          symbol = (class ::<todo sym>)
-          orig = nullptr
-        }]
-      rhs = [
-        EmptyTree
-      ]
-    }
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
     ClassDef{
       kind = class
       name = ConstantLit{
@@ -170,6 +165,5 @@ InsSeq{
         }
       ]
     }
-  ],
-  expr = EmptyTree
+  ]
 }

@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::A<<C A>> < (::<todo sym>)
     def self.make(<blk>)
       begin
@@ -41,5 +38,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

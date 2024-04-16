@@ -1,9 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Parent<<C Parent>> < (::<todo sym>)
     def self.takes_integer_static(x, <blk>)
       <emptyTree>
@@ -28,6 +23,7 @@ begin
       end
     end
   end
+
   class ::Child<<C Child>> < (::Parent)
     def self.outer_static(<blk>)
       <self>.takes_integer_static(<runtime method definition of self.inner_static>)
@@ -53,5 +49,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

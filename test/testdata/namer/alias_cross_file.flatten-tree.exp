@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::TestSig<<C TestSig>> < (::<todo sym>)
     def test_resolve(<blk>)
       <emptyTree>
@@ -17,17 +14,12 @@ begin
       end
     end
   end
-  <emptyTree>
 end
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::T2 = ::T1
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::T1<<C T1>> < (::<todo sym>)
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    ::T2 = ::T1
+  end
 end

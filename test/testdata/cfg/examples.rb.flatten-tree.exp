@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::Examples<<C Examples>> < (::<todo sym>)
     def i_like_ifs(<blk>)
       if true
@@ -104,5 +101,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

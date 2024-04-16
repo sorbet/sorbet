@@ -1,52 +1,3 @@
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=-1]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$5: T.class_of(B) = alias <C B>
-    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(B).class_helper()
-    <selfRestore>$7: T.class_of(<root>) = <self>
-    <unconditional> -> bb2
-
-# backedges
-# - bb3(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-# - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
-    # outerLoops: 1
-    <block-call> -> (NilClass ? bb5 : bb3)
-
-# backedges
-# - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=5](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
-    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, class_helper>
-    <self>: T.class_of(<root>) = <selfRestore>$7
-    <cfgAlias>$21: T.class_of(T) = alias <C T>
-    <statTemp>$19: T.class_of(<root>) = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
-    # outerLoops: 1
-    <self>: T.class_of(<root>) = loadSelf(class_helper)
-    <cfgAlias>$11: T.class_of(B) = alias <C B>
-    keep_for_ide$10: T.class_of(B) = <cfgAlias>$11
-    keep_for_ide$10: T.untyped = <keep-alive> keep_for_ide$10
-    <castTemp>$12: T.class_of(<root>) = <self>
-    <self>: B = cast(<castTemp>$12: T.class_of(<root>), B);
-    <cfgAlias>$15: T.class_of(T) = alias <C T>
-    <statTemp>$13: B = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: B)
-    <blockReturnTemp>$8: T.untyped = <self>: B.instance_helper()
-    <blockReturnTemp>$18: T.noreturn = blockreturn<class_helper> <blockReturnTemp>$8: T.untyped
-    <unconditional> -> bb2
-
-}
-
 method ::<Class:Base>#before_save {
 
 bb0[rubyRegionId=0, firstDead=2]():
@@ -1107,6 +1058,55 @@ bb0[rubyRegionId=0, firstDead=3]():
 # - bb0(rubyRegionId=0)
 bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
+
+}
+
+method ::<Class:<root>>#<static-init> {
+
+bb0[rubyRegionId=0, firstDead=-1]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <cfgAlias>$5: T.class_of(B) = alias <C B>
+    <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(B).class_helper()
+    <selfRestore>$7: T.class_of(<root>) = <self>
+    <unconditional> -> bb2
+
+# backedges
+# - bb3(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyRegionId=0)
+# - bb5(rubyRegionId=1)
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
+    # outerLoops: 1
+    <block-call> -> (NilClass ? bb5 : bb3)
+
+# backedges
+# - bb2(rubyRegionId=1)
+bb3[rubyRegionId=0, firstDead=5](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
+    <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$6, class_helper>
+    <self>: T.class_of(<root>) = <selfRestore>$7
+    <cfgAlias>$21: T.class_of(T) = alias <C T>
+    <statTemp>$19: T.class_of(<root>) = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: T.class_of(<root>))
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
+
+# backedges
+# - bb2(rubyRegionId=1)
+bb5[rubyRegionId=1, firstDead=10](<self>: T.class_of(<root>), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(<root>)):
+    # outerLoops: 1
+    <self>: T.class_of(<root>) = loadSelf(class_helper)
+    <cfgAlias>$11: T.class_of(B) = alias <C B>
+    keep_for_ide$10: T.class_of(B) = <cfgAlias>$11
+    keep_for_ide$10: T.untyped = <keep-alive> keep_for_ide$10
+    <castTemp>$12: T.class_of(<root>) = <self>
+    <self>: B = cast(<castTemp>$12: T.class_of(<root>), B);
+    <cfgAlias>$15: T.class_of(T) = alias <C T>
+    <statTemp>$13: B = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: B)
+    <blockReturnTemp>$8: T.untyped = <self>: B.instance_helper()
+    <blockReturnTemp>$18: T.noreturn = blockreturn<class_helper> <blockReturnTemp>$8: T.untyped
+    <unconditional> -> bb2
 
 }
 

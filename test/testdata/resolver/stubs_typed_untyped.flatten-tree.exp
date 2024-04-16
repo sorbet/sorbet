@@ -1,18 +1,14 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        Unresolved: <emptyTree>::<C Bar>
-        Unresolved: ::Foo::<C Bar>
-        <emptyTree>
-      end
-    end
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Foo<<C Foo>> < ()
   end
-  <emptyTree>
+
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    begin
+      Unresolved: <emptyTree>::<C Bar>
+      Unresolved: ::Foo::<C Bar>
+      <emptyTree>
+    end
+  end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   def self.<static-init><<static-init>$CENSORED>(<blk>)

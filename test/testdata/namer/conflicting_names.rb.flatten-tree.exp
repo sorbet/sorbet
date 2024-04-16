@@ -1,19 +1,14 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::A<<C A>> < ()
     def Foo(<blk>)
       <emptyTree>
     end
 
-    <emptyTree>
+    class ::A::Foo<<C Foo>> < (::<todo sym>)
+    end
 
     def self.<static-init>(<blk>)
       <runtime method definition of Foo>
     end
   end
-  class ::A::Foo<<C Foo>> < (::<todo sym>)
-  end
-  <emptyTree>
 end

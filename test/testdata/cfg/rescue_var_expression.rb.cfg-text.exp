@@ -66,22 +66,6 @@ bb9[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(3)):
 
 }
 
-method ::<Class:<root>>#<static-init> {
-
-bb0[rubyRegionId=0, firstDead=4]():
-    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
-    <unconditional> -> bb1
-
-# backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
-    <unconditional> -> bb1
-
-}
-
 method ::MyClass#foo= {
 
 bb0[rubyRegionId=0, firstDead=2]():
@@ -102,6 +86,22 @@ bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(MyClass) = cast(<self>: NilClass, T.class_of(MyClass));
     <returnMethodTemp>$2: Symbol(:foo=) = :foo=
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo=)
+    <unconditional> -> bb1
+
+# backedges
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
+    <unconditional> -> bb1
+
+}
+
+method ::<Class:<root>>#<static-init> {
+
+bb0[rubyRegionId=0, firstDead=4]():
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
+    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges

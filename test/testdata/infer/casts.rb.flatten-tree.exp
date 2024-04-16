@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::TestCasts<<C TestCasts>> < (::<todo sym>)
     def untyped(<blk>)
       <emptyTree>
@@ -37,5 +34,4 @@ begin
       end
     end
   end
-  <emptyTree>
 end

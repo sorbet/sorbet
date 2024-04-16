@@ -1,7 +1,4 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-  end
+class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::C<<C C>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       ::C::L = <cast:let>(<self>.lambda() do |x$1|
@@ -15,5 +12,4 @@ begin
       }, ::T.proc().params(:x, ::Integer).returns(::Integer))
     end
   end
-  <emptyTree>
 end
