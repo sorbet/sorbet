@@ -78,45 +78,45 @@ public:
         auto replacement = ast::MK::EmptyTree();
 
         if (!ast::isa_tree<ast::EmptyTree>(inits)) {
-        if (classDef->symbol == core::Symbols::root()) {
-            // Every file may have its own top-level code, so uniqify the names.
-            //
-            // NOTE(nelhage): In general, we potentially need to do this for
-            // every class, since Ruby allows reopening classes. However, since
-            // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.lookupStaticInitForFile(ctx.file);
+            if (classDef->symbol == core::Symbols::root()) {
+                // Every file may have its own top-level code, so uniqify the names.
+                //
+                // NOTE(nelhage): In general, we potentially need to do this for
+                // every class, since Ruby allows reopening classes. However, since
+                // pay-server bans that behavior, this should be OK here.
+                sym = ctx.state.lookupStaticInitForFile(ctx.file);
 
-            // Skip emitting a place-holder for the root object.
-        } else {
-            sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
+                // Skip emitting a place-holder for the root object.
+            } else {
+                sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
 
-            // We only need a representation of the runtime definition of the class in the
-            // containing static-init if the file is compiled; such a definition is just
-            // noise otherwise.
-            if (ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
-                replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+                // We only need a representation of the runtime definition of the class in the
+                // containing static-init if the file is compiled; such a definition is just
+                // noise otherwise.
+                if (ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
+                    replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
+                }
             }
-        }
-        ENFORCE(!sym.data(ctx)->arguments.empty(), "<static-init> method should already have a block arg symbol: {}",
-                sym.show(ctx));
-        ENFORCE(sym.data(ctx)->arguments.back().flags.isBlock, "Last argument symbol is not a block arg: {}",
-                sym.show(ctx));
+            ENFORCE(!sym.data(ctx)->arguments.empty(),
+                    "<static-init> method should already have a block arg symbol: {}", sym.show(ctx));
+            ENFORCE(sym.data(ctx)->arguments.back().flags.isBlock, "Last argument symbol is not a block arg: {}",
+                    sym.show(ctx));
 
-        // Synthesize a block argument for this <static-init> block. This is rather fiddly,
-        // because we have to know exactly what invariants desugar and namer set up about
-        // methods and block arguments before us.
-        auto blkLoc = core::LocOffsets::none();
-        core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
-        ast::MethodDef::ARGS_store args;
-        args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
+            // Synthesize a block argument for this <static-init> block. This is rather fiddly,
+            // because we have to know exactly what invariants desugar and namer set up about
+            // methods and block arguments before us.
+            auto blkLoc = core::LocOffsets::none();
+            core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
+            ast::MethodDef::ARGS_store args;
+            args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init =
-            ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym, core::Names::staticInit(),
-                                                 std::move(args), std::move(inits), ast::MethodDef::Flags());
-        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
-        ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
+            auto init = ast::make_expression<ast::MethodDef>(classDef->declLoc, classDef->declLoc, sym,
+                                                             core::Names::staticInit(), std::move(args),
+                                                             std::move(inits), ast::MethodDef::Flags());
+            ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
+            ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 
-        classDef->rhs.emplace_back(std::move(init));
+            classDef->rhs.emplace_back(std::move(init));
         }
 
         classes[classStack.back()] = std::move(tree);
