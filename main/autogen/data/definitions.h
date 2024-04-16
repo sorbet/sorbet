@@ -113,7 +113,7 @@ struct Definition {
 };
 
 // A `Reference` corresponds to a simple use of a constant name in a file. After a `ParsedFile` has been created, every
-// constant use should have a `Reference` corresponding to it _unless_ it appears in a `keep_for_ide` call.
+// constant use should have a `Reference` corresponding to it
 struct Reference {
     // the reference to this reference. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
