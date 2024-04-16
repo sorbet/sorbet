@@ -113,8 +113,7 @@ _TEST_RUNNERS = {
 }
 
 def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = []):
-    tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String}
-    package_tests = {}  # ^ ditto
+    tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
     # All immediate subdirs of `/packager/` are individual tests.
@@ -139,9 +138,9 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                         "isMultiFile": False,
                         "isDirectory": True,
                         "disabled": "disabled" in test_name,
+                        "isPackage": True,
                     }
                     tests[test_name] = data
-                    package_tests[test_name] = data
                 continue
 
         # This is not a folder test (common case)
@@ -158,6 +157,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                 "isMultiFile": "__" in path,
                 "isDirectory": False,
                 "disabled": "disabled" in path,
+                "isPackage": False,
             }
             tests[test_name] = data
 
@@ -166,6 +166,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
         fail(msg = "Unknown pipeline test type: {}".format(test_name_prefix))
 
     enabled_tests = []
+    enabled_packager_tests = []
     disabled_tests = []
     for name in tests.keys():
         test_name = "test_{}/{}".format(test_name_prefix, name)
@@ -180,6 +181,8 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
             disabled_tests.append(test_name)
         else:
             enabled_tests.append(test_name)
+            if tests[name]["isPackage"]:
+                enabled_packager_tests.append(test_name)
 
         data = []
         data += extra_files
@@ -209,10 +212,10 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
         tests = enabled_tests,
     )
 
-    if len(package_tests) > 0:
+    if len(enabled_packager_tests) > 0:
         native.test_suite(
             name = "{}_packager".format(suite_name),
-            tests = package_tests,
+            tests = enabled_packager_tests,
         )
 
     if len(disabled_tests) > 0:
