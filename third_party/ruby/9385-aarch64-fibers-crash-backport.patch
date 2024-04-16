@@ -25,3 +25,34 @@ index 9286946fc1..18b4247991 100644
                  break
              ])
          ])
+--- a/configure	2024-04-16 14:03:03.035215032 +0000
++++ b/configure	2024-04-16 16:43:00.603560413 +0000
+@@ -10964,9 +9969,10 @@
+ 
+ fi
+ 
+-            if test "x$branch_protection" = xyes
+-then :
++            if test "x$branch_protection" = xyes; then :
+ 
++                # C compiler and assembler must be consistent for -mbranch-protection
++                # since they both check `__ARM_FEATURE_PAC_DEFAULT` definition.
+                 # RUBY_APPEND_OPTION(XCFLAGS)
+ 	case " ${XCFLAGS-} " in #(
+   *" $opt "*) :
+@@ -10976,6 +10005,15 @@
+   *) :
+      XCFLAGS="$XCFLAGS $opt" ;;
+ esac
++                # RUBY_APPEND_OPTION(ASFLAGS)
++	case " ${ASFLAGS-} " in #(
++  *" $opt "*) :
++     ;; #(
++  '  ') :
++     ASFLAGS="$opt" ;; #(
++  *) :
++     ASFLAGS="$ASFLAGS $opt" ;;
++esac
+                 break
+ 
+ fi
