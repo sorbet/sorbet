@@ -13,5 +13,8 @@ public:
 
     // Handles loc and symbol requests for constants.
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &lit);
+
+    // Handles loc and symbol requests for ClassDef names.
+    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &lit);
 };
 }; // namespace sorbet::realmain::lsp

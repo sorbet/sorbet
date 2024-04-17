@@ -67,16 +67,10 @@ bb9[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(3)):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=10]():
+bb0[rubyRegionId=0, firstDead=4]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(MyException) = alias <C MyException>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(MyException))
-    <cfgAlias>$12: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$14: T.class_of(Exception) = alias <C Exception>
-    <statTemp>$10: Sorbet::Private::Static::Void = <cfgAlias>$12: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$14: T.class_of(Exception))
-    <statTemp>$18: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$16: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$18: T.untyped)
+    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

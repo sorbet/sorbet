@@ -1,15 +1,11 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def a_method(<blk>)
-      <emptyTree>
-    end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def a_method(<blk>)
+    <emptyTree>
+  end
 
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <self>.foobar() do ||
-        <runtime method definition of a_method>
-      end
+  def self.<static-init><<static-init>$CENSORED>(<blk>)
+    <self>.foobar() do ||
+      <runtime method definition of a_method>
     end
   end
-  <emptyTree>
 end

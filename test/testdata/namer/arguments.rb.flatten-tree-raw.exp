@@ -1,6 +1,5 @@
 InsSeq{
   stats = [
-    EmptyTree
     ClassDef{
       kind = class
       name = EmptyTree
@@ -10,37 +9,15 @@ InsSeq{
           orig = nullptr
         }]
       rhs = [
+        EmptyTree
+
         MethodDef{
           flags = {self}
           name = <U <static-init>><<N <U <static-init>> $CENSORED>>
           args = [Local{
               localVariable = <U <blk>>
             }]
-          rhs = InsSeq{
-            stats = [
-              EmptyTree
-              Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::Sorbet::Private::Static)
-                  orig = nullptr
-                }
-                fun = <U keep_for_ide>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (class ::A)
-                    orig = UnresolvedConstantLit{
-                      cnst = <C <U A>>
-                      scope = EmptyTree
-                    }
-                  }
-                ]
-              }
-            ],
-            expr = EmptyTree
-          }
+          rhs = EmptyTree
         }
       ]
     }

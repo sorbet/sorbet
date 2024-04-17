@@ -1,20 +1,11 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer1)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::Outer1<<C Outer1>> < (::<todo sym>)
@@ -23,31 +14,16 @@ begin
     end
   end
   class ::Outer2<<C Outer2>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::C)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Other)
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::Outer2::C<<C C>> < (::<todo sym>)
@@ -56,20 +32,12 @@ begin
     end
   end
   class ::Outer2::Inner1<<C Inner1>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::A)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Outer2::Inner1::Inner2)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::Outer2::Inner1::A<<C A>> < (::<todo sym>)

@@ -1,12 +1,9 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::OpEq)
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class ::OpEq<<C OpEq>> < (::<todo sym>)
