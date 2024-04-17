@@ -60,10 +60,13 @@ public:
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto inits = extractClassInit(ctx, classDef);
 
+        if (ast::isa_tree<ast::EmptyTree>(inits)) {
+            return;
+        }
+
         core::MethodRef sym;
         auto replacement = ast::MK::EmptyTree();
 
-        if (!ast::isa_tree<ast::EmptyTree>(inits)) {
             if (classDef->symbol == core::Symbols::root()) {
                 // Every file may have its own top-level code, so uniqify the names.
                 //
@@ -103,7 +106,6 @@ public:
             ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 
             classDef->rhs.emplace_back(std::move(init));
-        }
     };
 };
 
