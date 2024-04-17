@@ -388,35 +388,6 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) 
     return pkg.loc.file().data(gs).isPackagedTest();
 }
 
-[[nodiscard]] bool validatePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constLit) {
-    bool valid = true;
-    while (constLit != nullptr) {
-        if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
-            // By forbidding package names to have an underscore, we can trivially convert between
-            // mangled names and unmangled names by replacing `_` with `::`.
-            //
-            // Even with packages into the symbol table this restriction is useful, because we have
-            // a lot of tooling that will create directory structures like Foo_Bar to store
-            // generated files associated with package Foo::Bar
-            if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
-                e.setHeader("Package names cannot contain an underscore");
-                auto replacement = absl::StrReplaceAll(constLit->cnst.shortName(ctx), {{"_", ""}});
-                auto nameLoc = constLit->loc;
-                // cnst is the last characters in the constant literal
-                nameLoc.beginLoc = nameLoc.endLoc - constLit->cnst.shortName(ctx).size();
-
-                e.addAutocorrect(core::AutocorrectSuggestion{
-                    fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
-                    {core::AutocorrectSuggestion::Edit{ctx.locAt(nameLoc), replacement}}});
-            }
-            valid = false;
-        }
-        constLit = ast::cast_tree<ast::UnresolvedConstantLit>(constLit->scope);
-    }
-
-    return valid;
-}
-
 FullyQualifiedName getFullyQualifiedName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit) {
     FullyQualifiedName fqn;
     fqn.loc = ctx.locAt(constantLit->loc);
@@ -448,11 +419,6 @@ void populateMangledName(core::GlobalState &gs, PackageName &pName) {
     pName.mangledName = core::packages::MangledName::mangledNameFromParts(gs, pName.fullName.parts);
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, const ast::ExpressionPtr &expr) {
-    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
-}
-
 void mustContainPackageDef(core::Context ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
@@ -477,28 +443,18 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     return scope;
 }
 
-// Converts `Opus::Foo` -> `<PackageSpecRegistry>::Opus::Foo::<PackageSpec>`
-//
-// The leading `<PackageSpecRegistry>` ensures that Package symbols and the ClassOrModule symbols
-// which contain them are separate symbols from symbols defined in Ruby source code. This is
-// important to avoid polluting regular ClassOrModule symbols with spurious locs for the sake of
-// things like jump to definition and find all references.
-//
-// The trailing `<PackageSpec>` preps namer to be able to define Package symbols, this way ensures
-// that it's still the case that only ClassOrModule symbols have members (i.e., that all Symbols are
-// eventually owned by a ClassOrModule), which is a commonly-relied on invariant throughout Sorbet.
-//
-// It also means that a `class Opus::Foo < PackageSpec; end` definition always defines two symbols:
-// one which is a ClassOrModule, and one which is a Package. This means that constant literals in
-// `import` lines can continue to resolve to `ClassOrModule` symbols, which means that less code
-// has become aware of Package symbols.
-ast::ExpressionPtr rewritePackageSpecDefinition(ast::ExpressionPtr scope) {
-    return ast::MK::UnresolvedConstant(scope.loc().copyEndWithZeroLength(), prependName(move(scope)),
-                                       core::Names::Constants::PackageSpec_Storage());
-}
+bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit *cnst) {
+    while (cnst != nullptr) {
+        if (auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
+            return scope->symbol == core::Symbols::PackageSpecRegistry();
+        } else if (auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope)) {
+            return startsWithPackageSpecRegistry(scope);
+        } else {
+            return false;
+        }
+    }
 
-bool isPackageSpecConst(const ast::UnresolvedConstantLit *cnst) {
-    return cnst->cnst == core::Names::Constants::PackageSpec_Storage();
+    return false;
 }
 
 ast::ExpressionPtr prependRoot(ast::ExpressionPtr scope) {
@@ -996,13 +952,18 @@ private:
 };
 
 struct PackageSpecBodyWalk {
-    PackageSpecBodyWalk(PackageInfoImpl &info) : info(info) {}
+    PackageSpecBodyWalk() {}
 
-    PackageInfoImpl &info;
+    unique_ptr<PackageInfoImpl> info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (this->info == nullptr) {
+            // We've either reported an error elsewhere, or we've yet to reach the PackageSpec body
+            return;
+        }
+
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
@@ -1049,7 +1010,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
+                info->importedPackageNames.emplace_back(getPackageName(ctx, target), method2ImportType(send));
             }
         }
 
@@ -1062,7 +1023,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::exportAll() && send.numPosArgs() == 0) {
-            info.exportAll_ = true;
+            info->exportAll_ = true;
         }
 
         if (send.fun == core::Names::visibleTo() && send.numPosArgs() == 1) {
@@ -1075,7 +1036,7 @@ struct PackageSpecBodyWalk {
                     }
                     return;
                 }
-                info.visibleToTests_ = true;
+                info->visibleToTests_ = true;
             } else if (auto target = ast::cast_tree<ast::Send>(send.getPosArg(0))) {
                 // Constant::* is valid Ruby, and parses as a send of the method * to Constant
                 // so let's take advantage of this to implement wildcards
@@ -1093,7 +1054,7 @@ struct PackageSpecBodyWalk {
                     send.removePosArg(0);
                     ENFORCE(send.numPosArgs() == 0);
                     send.addPosArg(prependName(move(importArg)));
-                    info.visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
+                    info->visibleTo_.emplace_back(getPackageName(ctx, recv), core::packages::VisibleToType::Wildcard);
                 } else {
                     if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
                         e.setHeader("Argument to `{}` must be a constant or the string literal `{}`",
@@ -1107,7 +1068,7 @@ struct PackageSpecBodyWalk {
                 ENFORCE(send.numPosArgs() == 0);
                 send.addPosArg(prependName(move(importArg)));
 
-                info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
+                info->visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
     }
@@ -1125,32 +1086,33 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        if (isPackageSpecConst(nameTree)) {
+        if (startsWithPackageSpecRegistry(nameTree)) {
             this->foundFirstPackageSpec = true;
         } else if (this->foundFirstPackageSpec) {
             if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::MultiplePackagesInOneFile)) {
                 e.setHeader("Package files can only declare one package");
-                e.addErrorLine(info.loc, "Previous package declaration found here");
+                e.addErrorLine(info->loc, "Previous package declaration found here");
             }
         } else {
+            // TODO(jez) Can we delete this?
             mustContainPackageDef(ctx, tree.loc());
         }
     }
 
     // Generate a list of FQNs exported by this package. No export may be a prefix of another.
-    void finalize(core::Context ctx) {
+    unique_ptr<PackageInfoImpl> finalize(core::Context ctx) {
         if (exported.empty()) {
-            return;
+            return move(this->info);
         }
 
-        if (info.exportAll()) {
+        if (info->exportAll()) {
             // we're only here because exports exist, which means if
             // `exportAll` is set then we've got conflicting
             // information about export; flag the exports as wrong
             for (auto it = exported.begin(); it != exported.end(); ++it) {
                 if (auto e = ctx.beginError(it->fqn.loc.offsets(), core::errors::Packager::ExportConflict)) {
                     e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                                info.name.toString(ctx), "export_all!");
+                                info->name.toString(ctx), "export_all!");
                 }
             }
         }
@@ -1185,8 +1147,10 @@ struct PackageSpecBodyWalk {
             exported.erase(exported.begin() + *indIt);
         }
 
-        ENFORCE(info.exports_.empty());
-        std::swap(exported, info.exports_);
+        ENFORCE(info->exports_.empty());
+        std::swap(exported, info->exports_);
+
+        return move(this->info);
     }
 
     bool isSpecMethod(const sorbet::ast::Send &send) const {
@@ -1242,101 +1206,17 @@ struct PackageSpecBodyWalk {
     }
 };
 
-unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
-    ENFORCE(package.file.exists());
-    ENFORCE(package.file.data(gs).isPackage());
-    // Assumption: Root of AST is <root> class. (This won't be true
-    // for `typed: ignore` files, so we should make sure to catch that
-    // elsewhere.)
-    ENFORCE(ast::isa_tree<ast::ClassDef>(package.tree));
-    ENFORCE(ast::cast_tree_nonnull<ast::ClassDef>(package.tree).symbol == core::Symbols::root());
-
-    core::Context ctx(gs, core::Symbols::root(), package.file);
-
-    auto &rootClass = ast::cast_tree_nonnull<ast::ClassDef>(package.tree);
-
-    unique_ptr<PackageInfoImpl> info;
-    bool reportedError = false;
-    for (auto &rootStmt : rootClass.rhs) {
-        if (info != nullptr) {
-            // No error here; let the error be reported in the tree walk later as a bad node type.
-            continue;
-        }
-
-        auto *packageSpecClass = ast::cast_tree<ast::ClassDef>(rootStmt);
-        if (packageSpecClass == nullptr) {
-            // No error here; let this be reported in the tree walk later as a bad node type,
-            // or at the end of this function if no PackageSpec is found.
-            continue;
-        }
-
-        if (packageSpecClass->ancestors.size() != 1 ||
-            !ast::isa_tree<ast::UnresolvedConstantLit>(packageSpecClass->name)) {
-            mustContainPackageDef(ctx, packageSpecClass->declLoc);
-            reportedError = true;
-            continue;
-        }
-
-        if (!isReferenceToPackageSpec(ctx, packageSpecClass->ancestors[0])) {
-            mustContainPackageDef(ctx, packageSpecClass->ancestors[0].loc());
-            reportedError = true;
-            continue;
-        }
-
-        auto *nameTree = ast::cast_tree<ast::UnresolvedConstantLit>(packageSpecClass->name);
-        if (!validatePackageName(ctx, nameTree)) {
-            reportedError = true;
-            continue;
-        }
-
-        // ---- Mutates the tree ----
-        // `class Foo < PackageSpec` -> `class <PackageSpecRegistry>::Foo::<PackageSpec> < PackageSpec`
-        // This removes the PackageSpec's themselves from the top-level namespace
-        //
-        // We can't do this rewrite in rewriter, because this rewrite should only happen if
-        // `opts.stripePackages` is set. That would mean we would have to add another cache flavor,
-        // which would double the size of Sorbet's disk cache.
-        //
-        // Other than being able to say "we don't mutate the trees in packager" there's not much
-        // value in going that far (even namer mutates the trees; the packager fills a similar role).
-        packageSpecClass->name = rewritePackageSpecDefinition(move(packageSpecClass->name));
-
-        // Pre-resolve the super class. This makes it easier to detect that this is a package
-        // spec-related class def in later passes without having to recursively walk up the constant
-        // lit's scope to find if it starts with <PackageSpecRegistry>.
-        auto superClassLoc = packageSpecClass->ancestors[0].loc();
-        packageSpecClass->ancestors[0] = ast::make_expression<ast::ConstantLit>(
-            superClassLoc, core::Symbols::PackageSpec(), move(packageSpecClass->ancestors[0]));
-
-        info = make_unique<PackageInfoImpl>(getPackageName(ctx, nameTree), ctx.locAt(packageSpecClass->loc),
-                                            ctx.locAt(packageSpecClass->declLoc));
-    }
-
-    // Only report an error if we didn't already
-    // (the one we reported will have been more descriptive than this one)
-    if (info == nullptr && !reportedError) {
-        auto errLoc = rootClass.rhs.empty() ? core::LocOffsets{0, 0} : rootClass.rhs[0].loc();
-        mustContainPackageDef(ctx, errLoc);
-    }
-
-    return info;
-}
-
-void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfoImpl &info) {
-    PackageSpecBodyWalk bodyWalk(info);
+unique_ptr<PackageInfoImpl> rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package) {
+    PackageSpecBodyWalk bodyWalk;
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
-    bodyWalk.finalize(ctx);
+    return bodyWalk.finalize(ctx);
 }
 
 unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, ast::ParsedFile &package) {
-    auto info = definePackage(gs, package);
-    if (info == nullptr) {
-        return info;
-    }
     populateMangledName(gs, info->name);
 
-    rewritePackageSpec(gs, package, *info);
+    auto info = rewritePackageSpec(gs, package);
     for (auto &importedPackageName : info->importedPackageNames) {
         populateMangledName(gs, importedPackageName.name);
 
@@ -1642,7 +1522,9 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
         if (file.file.data(gs).isPackage()) {
             // Only rewrites the `__package.rb` file to mention `<PackageSpecRegistry>` and
             // report some syntactic packager errors.
-            auto info = definePackage(gs, file);
+            // TODO(jez) Now that definePackage is in namer, make this operate on the Package symbol, not the
+            // PackageInfo auto info = definePackage(gs, file);
+            unique_ptr<PackageInfoImpl> info = nullptr;
             if (info != nullptr) {
                 rewritePackageSpec(gs, file, *info);
             }

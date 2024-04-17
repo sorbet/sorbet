@@ -105,6 +105,8 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
     } else if (sym.isTypeArgument()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
+    } else if (sym.isPackage()) {
+        symbolProto.set_kind(com::stripe::rubytyper::Symbol::PACKAGE);
     }
 
     if (sym.isClassOrModule() || sym.isMethod()) {

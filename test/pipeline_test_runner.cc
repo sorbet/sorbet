@@ -401,13 +401,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         trees = index(gs, inputPackageFiles, handler, test);
 
         // First run: only the __package.rb files. This populates the packageDB
-        package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
         name(*gs, absl::Span<ast::ParsedFile>(trees), *workers);
+        package(gs, workers, absl::Span<ast::ParsedFile>(trees), handler, assertions);
     }
 
     auto nonPackageTrees = index(gs, filesSpan, handler, test);
-    package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     name(*gs, absl::Span<ast::ParsedFile>(nonPackageTrees), *workers);
+    package(gs, workers, absl::Span<ast::ParsedFile>(nonPackageTrees), handler, assertions);
     realmain::pipeline::unpartitionPackageFiles(trees, move(nonPackageTrees));
 
     if (enablePackager) {

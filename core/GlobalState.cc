@@ -607,12 +607,12 @@ void GlobalState::initEmpty() {
     ENFORCE(klass == Symbols::PackageSpecSingleton());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::import())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_import());
 
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::testImport())
-                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::Module()))
+                 .typedArg(Names::arg0(), make_type<ClassType>(Symbols::PackageSpecSingleton()))
                  .build();
     ENFORCE(method == Symbols::PackageSpec_test_import());
 
@@ -1954,6 +1954,10 @@ unsigned int GlobalState::classAndModulesUsed() const {
     return classAndModules.size();
 }
 
+unsigned int GlobalState::packagesUsed() const {
+    return packages.size();
+}
+
 unsigned int GlobalState::methodsUsed() const {
     return methods.size();
 }
@@ -2030,6 +2034,8 @@ void GlobalState::sanityCheck() const {
         NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
     }
 
+    // TODO(jez) Sanity check packages here too
+    // Blocked on https://github.com/sorbet/sorbet/pull/7808
     int i = -1;
     for (auto &sym : classAndModules) {
         i++;

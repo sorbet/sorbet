@@ -104,10 +104,9 @@ class PropagateVisibility final {
         }
     }
 
-    // While processing the ClassDef for the package, which will be named something like
-    // `<PackageSpecRegistry>::A::B::<PackageSpec>`, we also check that the symbols `A::B` and `Test::A::B` have
-    // locations whose package matches the one we're processing. If they don't match, we add locs to ensure that those
-    // symbols are associated with this package.
+    // While processing the ClassDef for the package, which will be named something like `<PackageSpecRegistry>::A::B`,
+    // we also check that the symbols `A::B` and `Test::A::B` have locations whose package matches the one we're
+    // processing. If they don't match, we add locs to ensure that those symbols are associated with this package.
     //
     // The reason for this step is that it's currently allowed to refer to the name of the package outside of the
     // context of the package spec, even if it doesn't explicitly export its top-level name. So in the case above, there
@@ -286,7 +285,8 @@ public:
             switch (lit->symbol.kind()) {
                 case core::SymbolRef::Kind::ClassOrModule:
                 case core::SymbolRef::Kind::FieldOrStaticField:
-                    ENFORCE(false, "ClassOrModule and FieldOrStaticField marked not exportable");
+                case core::SymbolRef::Kind::Package:
+                    ENFORCE(false, "ClassOrModule, Package, and FieldOrStaticField marked not exportable");
                     break;
 
                 case core::SymbolRef::Kind::Method:

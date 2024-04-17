@@ -360,6 +360,49 @@ private:
 };
 CheckSize(TypeParameter, 56, 8);
 
+class Package final {
+public:
+    Package(const Package &) = delete;
+    Package() = default;
+    Package(Package &&) noexcept = default;
+
+    ClassOrModuleRef owner;
+
+    // For consistency with other symbol kinds, loc() returns declLoc
+    // The class def loc is exposed as `classDefLoc()`
+    Loc loc() const {
+        return declLoc;
+    }
+    absl::Span<const Loc> locs() const;
+
+    PackageRef ref(const GlobalState &gs) const;
+
+    // All Package symbols have the same name, so it's not worth storing it. For approximate API
+    // compatibility with other symobls, we provide this helper function so that we can avoid
+    // hard-coding the name in so many places.
+    inline NameRef name() const {
+        return core::Names::Constants::PackageSpec_Storage();
+    }
+
+    Package deepCopy(const GlobalState &to) const;
+    void sanityCheck(const GlobalState &gs) const;
+
+private:
+    friend class serialize::SerializerImpl;
+    friend class GlobalState;
+
+    // There should only be one loc for a package, which is the definition in the __package.rb file.
+    // For clarity, we call this Loc `declLoc`.
+    Loc declLoc;
+    // This is the `loc` field on the ClassDef. It's not called `loc` here for consistency with
+    // ClassOrModule symbols.
+    Loc classDefLoc;
+
+    // TODO(jez) As you add more fields to core::Package, consider whether that information should
+    // show up in the `toStringWithOptions` output, for snapshot tests. Also: `deepCopy`
+};
+CheckSize(Package, 16, 8);
+
 class ClassOrModule final {
 public:
     ClassOrModule(const ClassOrModule &) = delete;
