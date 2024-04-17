@@ -1380,8 +1380,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
         writer.String("package");
         if (sym.exists() && sym.loc(gs).exists()) {
-            const auto file = sym.loc(gs).file();
-            const auto &pkg = gs.packageDB().getPackageForFile(gs, file);
+            const auto &pkg = gs.packageDB().getPackageForSymbol(gs, sym);
             if (!pkg.exists()) {
                 writer.String("<none>");
             } else {
