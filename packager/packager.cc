@@ -225,9 +225,8 @@ public:
     }
 
     bool ownsSymbol(const core::GlobalState &gs, core::SymbolRef symbol) const {
-        auto file = symbol.loc(gs).file();
-        auto &pkg = gs.packageDB().getPackageForFile(gs, file);
-        return this->mangledName() == pkg.mangledName();
+        auto &pkg = gs.packageDB().getPackageNameForSymbol(gs, symbol);
+        return this->mangledName() == pkg;
     }
 
     PackageInfoImpl(PackageName name, core::Loc loc, core::Loc declLoc_) : name(name), loc(loc), declLoc_(declLoc_) {}

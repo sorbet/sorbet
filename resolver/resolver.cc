@@ -803,16 +803,10 @@ private:
                         // export statement. Currently (1/9/23) this happens to work because export statements are the
                         // only part of the packager DSL that do not prepend PackageSpec to the relevant constant.
 
-                        // Can't use pkg.ownsSymbol since it uses symbol definition locs, which have an edge case that
-                        // isn't handled until the VisibilityChecker pass.
-                        const auto pkgRootSymbol = ctx.state.packageDB()
-                                                       .getPackageForFile(ctx.state, ctx.file)
-                                                       .getRootSymbolForAutocorrectSearch(ctx.state, suggestScope);
-
-                        auto it = std::remove_if(suggested.begin(), suggested.end(),
-                                                 [&pkgRootSymbol, &gs](auto &suggestion) -> bool {
-                                                     return !suggestion.symbol.isUnderNamespace(gs, pkgRootSymbol);
-                                                 });
+                        const auto &curPkg = ctx.state.packageDB().getPackageForFile(ctx.state, ctx.file);
+                        auto it = std::remove_if(suggested.begin(), suggested.end(), [&](auto &suggestion) {
+                            return !curPkg.ownsSymbol(gs, suggestion.symbol);
+                        });
                         suggested.erase(it, suggested.end());
                     }
 
