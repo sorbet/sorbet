@@ -63,6 +63,9 @@ config_setting(
 
 config_setting(
     name = "linkshared",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
     values = {
         "define": "linkshared=true",
     },
