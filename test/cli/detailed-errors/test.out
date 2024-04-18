@@ -45,6 +45,81 @@ type_members.rb:21: Argument does not have asserted type `A[Middle, Middle, Midd
     `Lower` is not a supertype of `Middle` for contravariant type member `A::Y`
     `Upper` is not a subtype of `Middle` for covariant type member `A::Z`
 
+intersection.rb:46: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    46 |T.let(C.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C` originating from:
+    intersection.rb:46:
+    46 |T.let(C.new, T.all(M1, M2))
+              ^^^^^
+  Detailed explanation:
+    `C` is not a subtype of `M1` (the left side of the `T.all`)
+
+intersection.rb:47: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    47 |T.let(C1.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C1` originating from:
+    intersection.rb:47:
+    47 |T.let(C1.new, T.all(M1, M2))
+              ^^^^^^
+  Detailed explanation:
+    `C1` is not a subtype of `M2` (the right side of the `T.all`)
+
+intersection.rb:48: Argument does not have asserted type `T.all(M1, M2)` https://srb.help/7007
+    48 |T.let(C2.new, T.all(M1, M2))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C2` originating from:
+    intersection.rb:48:
+    48 |T.let(C2.new, T.all(M1, M2))
+              ^^^^^^
+  Detailed explanation:
+    `C2` is not a subtype of `M1` (the left side of the `T.all`)
+
+intersection.rb:49: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    49 |T.let(C1.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C1` originating from:
+    intersection.rb:49:
+    49 |T.let(C1.new, T.all(M1, M2, M3, M4))
+              ^^^^^^
+  Detailed explanation:
+    `C1` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C1` is not a subtype of `T.all(M1, M2)` (the left side of the `T.all`)
+        `C1` is not a subtype of `M2` (the right side of the `T.all`)
+
+intersection.rb:50: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    50 |T.let(C123.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C123` originating from:
+    intersection.rb:50:
+    50 |T.let(C123.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C123` is not a subtype of `M4` (the right side of the `T.all`)
+
+intersection.rb:51: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    51 |T.let(C124.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C124` originating from:
+    intersection.rb:51:
+    51 |T.let(C124.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C124` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C124` is not a subtype of `M3` (the right side of the `T.all`)
+
+intersection.rb:52: Argument does not have asserted type `T.all(M1, M2, M3, M4)` https://srb.help/7007
+    52 |T.let(C134.new, T.all(M1, M2, M3, M4))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `C134` originating from:
+    intersection.rb:52:
+    52 |T.let(C134.new, T.all(M1, M2, M3, M4))
+              ^^^^^^^^
+  Detailed explanation:
+    `C134` is not a subtype of `T.all(M1, M2, M3)` (the left side of the `T.all`)
+      `C134` is not a subtype of `T.all(M1, M2)` (the left side of the `T.all`)
+        `C134` is not a subtype of `M2` (the right side of the `T.all`)
+
 shapes.rb:10: Expected `{a: Integer, b: String}` but found `{}` for argument `x` https://srb.help/7002
     10 |takes_shape({})
                     ^^
@@ -200,4 +275,4 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 16
+Errors: 23
