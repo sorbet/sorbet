@@ -806,12 +806,26 @@ void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const opti
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
+
     void postTransformConstantLit(core::MutableContext ctx, const ast::ConstantLit &tree) {
         auto unresolvedPath = tree.fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
                 fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
+        }
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
+        if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty()) {
+            auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
+            auto unresolvedPath = lit->fullUnresolvedPath(ctx);
+            if (unresolvedPath.has_value()) {
+                unresolvedConstants.emplace_back(fmt::format(
+                    "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
+                    fmt::map_join(unresolvedPath->second,
+                                  "::", [&](const auto &el) -> string { return el.show(ctx); })));
+            }
         }
     }
 };
