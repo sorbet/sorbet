@@ -816,8 +816,7 @@ public:
         }
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
         if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty()) {
             auto *lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
             auto unresolvedPath = lit->fullUnresolvedPath(ctx);
@@ -838,7 +837,6 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     for (auto &resolved : what) {
         core::MutableContext ctx(gs, core::Symbols::root(), resolved.file);
         ast::ConstTreeWalk::apply(ctx, walk, resolved.tree);
-        ast::TreeWalk::apply(ctx, walk, resolved.tree);
     }
     auto &missing = walk.unresolvedConstants;
     fast_sort(missing);
