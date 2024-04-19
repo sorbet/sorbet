@@ -147,8 +147,17 @@ class LLVMSemanticExtension : public SemanticExtension {
             for (auto i = block->exprs.rbegin(), e = block->exprs.rend(); i != e; ++i) {
                 auto &binding = *i;
                 if (auto *send = cfg::cast_instruction<cfg::Send>(binding.value)) {
-                    if (!refsToDelete.contains(binding.bind.variable)) {
-                        continue;
+                    switch (send->fun.rawId()) {
+                        case core::Names::keepForIde().rawId():
+                            // TODO: figure out why we can't delete this.
+                            // case core::Names::keepForCfg().rawId():
+                            refsToDelete.emplace(binding.bind.variable);
+                            break;
+                        default:
+                            if (!refsToDelete.contains(binding.bind.variable)) {
+                                continue;
+                            }
+                            break;
                     }
 
                     // We're binding a ref that is unneeded, so anything that this

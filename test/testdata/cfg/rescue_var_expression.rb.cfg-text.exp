@@ -68,10 +68,13 @@ bb9[rubyRegionId=0, firstDead=1](<returnMethodTemp>$2: Integer(3)):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=4]():
+bb0[rubyRegionId=0, firstDead=7]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <statTemp>$6: T.untyped = <self>: T.class_of(<root>).foo()
-    <statTemp>$4: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$6: T.untyped)
+    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
+    <cfgAlias>$9: T.class_of(MyClass) = alias <C MyClass>
+    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(MyClass))
+    <statTemp>$13: T.untyped = <self>: T.class_of(<root>).foo()
+    <statTemp>$11: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$13: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

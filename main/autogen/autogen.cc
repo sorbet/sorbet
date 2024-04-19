@@ -265,8 +265,8 @@ public:
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (!ignoring.empty()) {
-            // this is an `include` or an `extend` which already got handled in `preTransformClassDef`
-            // (in which case don't handle it again)
+            // this is either a constant in a `keepForIde` node (in which case we don't care) or it was an `include` or
+            // an `extend` which already got handled in `preTransformClassDef` (in which case don't handle it again)
             return;
         }
         if (original.original == nullptr) {
@@ -386,11 +386,12 @@ public:
         auto *original = ast::cast_tree<ast::Send>(tree);
 
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
-        // Ignore include/extend sends iff they are directly at the class/module level.
-        // These cases are handled in `preTransformClassDef`.
-        // Do not ignore in block scope so that we a ref to the included module is still rendered.
-        if (!inBlock && original->recv.isSelfReference() &&
-            (original->fun == core::Names::include() || original->fun == core::Names::extend())) {
+        // Ignore keepForIde nodes. Also ignore include/extend sends iff they are directly at the
+        // class/module level. These cases are handled in `preTransformClassDef`. Do not ignore in
+        // block scope so that we a ref to the included module is still rendered.
+        if (original->fun == core::Names::keepForIde() ||
+            (!inBlock && original->recv.isSelfReference() &&
+             (original->fun == core::Names::include() || original->fun == core::Names::extend()))) {
             ignoring.emplace_back(original);
         }
         // This means it's a `require`; mark it as such
@@ -404,7 +405,7 @@ public:
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto *original = ast::cast_tree<ast::Send>(tree);
-        // if this send was something we were ignoring (i.e. an `include` or `require`) then pop this
+        // if this send was something we were ignoring (i.e. a `keepForIde` or an `include` or `require`) then pop this
         if (!ignoring.empty() && ignoring.back() == original) {
             ignoring.pop_back();
         }

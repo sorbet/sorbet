@@ -1,9 +1,12 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::TestAttr)
+        <emptyTree>
+      end
     end
   end
   class ::TestAttr<<C TestAttr>> < (::<todo sym>)

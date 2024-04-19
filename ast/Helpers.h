@@ -414,6 +414,11 @@ public:
                                        {core::Names::Constants::T(), core::Names::Constants::Boolean()});
     }
 
+    static ExpressionPtr KeepForIDE(core::LocOffsets loc, ExpressionPtr arg) {
+        return Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::keepForIde(), loc,
+                     std::move(arg));
+    }
+
     static ExpressionPtr ZSuper(core::LocOffsets loc, core::NameRef method) {
         Send::Flags flags;
         flags.isPrivateOk = true;

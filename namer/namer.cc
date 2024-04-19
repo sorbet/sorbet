@@ -1831,12 +1831,19 @@ public:
         }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
+    // This decides if we need to keep a node around incase the current LSP query needs type information for it
+    bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
+        // used in Desugar <-> resolver to signal classes that did not have explicit superclass
+        if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
+            return false;
+        }
+        auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
+        if (rcl && rcl->symbol == core::Symbols::todo()) {
+            return false;
+        }
+        return true;
+    }
+
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -1849,8 +1856,20 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
+
+        auto loc = klass.declLoc;
+        ast::InsSeq::STATS_store retSeqs;
+        retSeqs.emplace_back(std::move(tree));
+        if (ast::isa_tree<ast::ConstantLit>(klass.name)) {
+            retSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.name.deepCopy()));
+        }
+        if (klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
+            shouldLeaveAncestorForIDE(klass.ancestors.front())) {
+            retSeqs.emplace_back(ast::MK::KeepForIDE(loc.copyWithZeroLength(), klass.ancestors.front().deepCopy()));
+        }
+
+        tree = ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
-#endif
 
     ast::MethodDef::ARGS_store fillInArgs(const vector<core::ParsedArg> &parsedArgs,
                                           ast::MethodDef::ARGS_store oldArgs) {

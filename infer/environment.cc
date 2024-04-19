@@ -1877,7 +1877,11 @@ void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc 
 
 namespace {
 core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
-    return {core::Types::nilClass(), loc};
+    // I'd love to have this, but keepForIDE intentionally has Loc::none() and
+    // sometimes ends up here...
+    // ENFORCE(loc.exists());
+    core::TypeAndOrigins ret{core::Types::nilClass(), loc};
+    return ret;
 }
 } // namespace
 

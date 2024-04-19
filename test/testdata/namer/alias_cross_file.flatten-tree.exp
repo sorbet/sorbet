@@ -1,9 +1,12 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
+      begin
+        <emptyTree>
+        ::Sorbet::Private::Static.keep_for_ide(::TestSig)
+        <emptyTree>
+      end
     end
   end
   class ::TestSig<<C TestSig>> < (::<todo sym>)
@@ -24,11 +27,18 @@ begin
   <emptyTree>
 end
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      ::T2 = ::T1
+      begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::T1)
+          <emptyTree>
+        end
+        ::T2 = ::T1
+        <emptyTree>
+      end
     end
   end
   class ::T1<<C T1>> < (::<todo sym>)

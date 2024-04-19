@@ -1,9 +1,13 @@
 begin
+  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    <emptyTree>
-
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
+        begin
+          <emptyTree>
+          ::Sorbet::Private::Static.keep_for_ide(::Foo)
+          <emptyTree>
+        end
         Unresolved: <emptyTree>::<C Bar>
         Unresolved: ::Foo::<C Bar>
         <emptyTree>
@@ -17,12 +21,16 @@ begin
   end
   <emptyTree>
 end
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  def self.<static-init><<static-init>$CENSORED>(<blk>)
-    begin
-      Unresolved: <emptyTree>::<C Bar>
-      Unresolved: ::Foo::<C Bar>
-      <emptyTree>
+begin
+  <emptyTree>
+  class <emptyTree><<C <root>>> < (::<todo sym>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
+      begin
+        Unresolved: <emptyTree>::<C Bar>
+        Unresolved: ::Foo::<C Bar>
+        <emptyTree>
+      end
     end
   end
+  <emptyTree>
 end
