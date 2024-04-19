@@ -30,13 +30,8 @@ cd "$old_pwd"
 
 workspace_contents=$(< "$repo_root/WORKSPACE")
 
-bazel_version_regex='BAZEL_VERSION = "([^"]+)"'
-if [[ $workspace_contents =~ $bazel_version_regex ]]; then
-  export BAZEL_VERSION="${BASH_REMATCH[1]}"
-else
-  echo >&2 "$0: Failed to extract BAZEL_VERSION from WORKSPACE"
-  exit 1
-fi
+BAZEL_VERSION=$(< "$repo_root/.bazelversion")
+export BAZEL_VERSION
 
 bazel_bin_loc="${bazel_bin_loc:-$HOME/.bazel_binaries}"
 bazel_exec_path="$bazel_bin_loc/$BAZEL_VERSION/bin/bazel-real"
