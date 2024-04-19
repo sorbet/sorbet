@@ -1,4 +1,4 @@
-class A
+class A < E
   def foo
     B
     Duplicate
@@ -11,4 +11,3 @@ end
 
 A::C
 B
-
