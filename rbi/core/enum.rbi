@@ -6,9 +6,6 @@ class T::Enum
   # Assume that this is always included (even if it isn't) so that it never
   # shows up in RBI files generated from reflection.
   module LegacyMigrationMode
-    sig {returns(String)}
-    def to_str; end
-
     sig {params(other: T.anything).returns(T::Boolean)}
     def ==(other); end
 
@@ -81,6 +78,9 @@ class T::Enum
 
   sig {returns(String)}
   def to_s; end
+
+  sig {returns(String)}
+  def to_str; end
 
   sig {returns(String)}
   def inspect; end
