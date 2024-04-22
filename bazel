@@ -28,8 +28,6 @@ fi
 
 cd "$old_pwd"
 
-workspace_contents=$(< "$repo_root/WORKSPACE")
-
 BAZEL_VERSION=$(< "$repo_root/.bazelversion")
 export BAZEL_VERSION
 
@@ -63,6 +61,8 @@ case "$bazel_installer_platform" in
     exit 1
     ;;
 esac
+
+workspace_contents=$(< "$repo_root/WORKSPACE")
 
 bazel_installer_platform_var="$(echo "$bazel_installer_platform" | tr 'a-z-' 'A-Z_')"
 bazel_installer_sha_variable="BAZEL_INSTALLER_VERSION_${bazel_installer_platform_var}_SHA"
