@@ -460,10 +460,6 @@ NameDef names[] = {
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
-    // Compiler
-    {"runningCompiled_p", "running_compiled?"},
-    {"compilerVersion", "compiler_version"},
-
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
     {"Bottom", "T.noreturn", true},
@@ -567,7 +563,6 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
-    {"Compiler", "Compiler", true},
     {"Test", "Test", true},
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
@@ -580,9 +575,6 @@ NameDef names[] = {
     {"Int", "Int", true},
     {"Timestamp", "Timestamp", true},
     {"Bool", "Bool", true},
-
-    // used by the compiler
-    {"returnValue", "<returnValue>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
