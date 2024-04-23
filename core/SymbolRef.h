@@ -1069,14 +1069,6 @@ public:
         return ClassOrModuleRef::fromRaw(91);
     }
 
-    static ClassOrModuleRef T_Private_Compiler() {
-        return ClassOrModuleRef::fromRaw(92);
-    }
-
-    static ClassOrModuleRef T_Private_CompilerSingleton() {
-        return ClassOrModuleRef::fromRaw(93);
-    }
-
     static ClassOrModuleRef MagicBindToAttachedClass() {
         return ClassOrModuleRef::fromRaw(94);
     }

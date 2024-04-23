@@ -650,12 +650,6 @@ void GlobalState::initEmpty() {
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
-    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
-    ENFORCE(klass == Symbols::T_Private_Compiler());
-    klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
-    ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
-
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE(klass == Symbols::MagicBindToAttachedClass());
