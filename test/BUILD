@@ -236,10 +236,6 @@ pipeline_tests(
             "testdata/**/*.rb",
             "testdata/**/*.exp",
         ],
-        exclude = [
-            "testdata/compiler/**/*",
-            "testdata/ruby_benchmark/**/*",
-        ],
     ),
     "PosTests",
 )
@@ -260,10 +256,6 @@ pipeline_tests(
             "testdata/**/*.rb",
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
-        ],
-        exclude = [
-            "testdata/compiler/**/*",
-            "testdata/ruby_benchmark/**/*",
         ],
     ),
     "LSPTests",
