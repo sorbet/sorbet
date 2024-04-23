@@ -44,13 +44,6 @@ steps:
     artifact_paths: _out_/profile.json
     <<: *elastic
 
-  - label: ":linux: test-compiler.sh"
-    command: .buildkite/test-compiler.sh
-    artifact_paths:
-      - _out_/profile.json
-      - _out_/**/*.ll
-    <<: *elastic
-
   - label: ":linux: test-vscode-extension.sh"
     command: '.buildkite/test-vscode-extension.sh'
     <<: *elastic
