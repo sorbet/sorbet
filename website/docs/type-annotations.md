@@ -51,12 +51,49 @@ end
 
 ## Annotating constants
 
-Sorbet does not, by default, infer the types of constants, but they can be
-specified using `T.let`:
+Sorbet does _very_ minimal inference for types of constants. These are the cases
+where Sorbet infers constant types:
+
+- Constants initialized with simple literals (like `"foo"` or `123`) will have
+  their types inferred. Importantly, this does not include `Array` or `Hash`
+  literals.
+
+- Constants initialized with a call to `SomeClass.new` will have their type
+  inferred to `SomeClass`. Importantly, this assumption happens **regardless**
+  of whether the `new` method actually returns an instance of `SomeClass`, which
+  might not be the case if the `new` method has been overridden.
+
+  In these cases, Sorbet reports an error stating that it requires an explicit
+  type annotation to correct the faulty assumption.
+
+In all other cases, Sorbet does not infer the types of constants, and will
+assume a type of `T.untyped`. In [`# typed: strict`](static.md) files, Sorbet
+reports an error requiring that a type be specified, so that Sorbet does not
+assume `T.untyped`.
+
+To specify the type of a constant, use `T.let`:
 
 ```ruby
 NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String])
 ```
+
+In codebases that require calling `.freeze` on constants, the call to `.freeze`
+**must** go inside the `T.let`, or Sorbet will not see the call to `T.let`.
+
+```ruby
+# ✅ Good
+NAMES = T.let(["Nelson", "Dmitry", "Paul"].freeze, T::Array[String])
+#                                         ^^^^^^^ ✅
+
+# ❌ BAD
+NAMES = T.let(["Nelson", "Dmitry", "Paul"], T::Array[String]).freeze
+#                                                         ❌ ^^^^^^^
+```
+
+We recommend using the [`rubocop-sorbet`] gem, which modifies the behavior of
+RuboCop's `Style/MutableConstant` rule, making it aware of `T.let`.
+
+[`rubocop-sorbet`]: https://github.com/Shopify/rubocop-sorbet
 
 ## Declaring class and instance variables
 
