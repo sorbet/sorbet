@@ -8,8 +8,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = ["//common"] + select({
         "//tools/config:webasm": ["@com_github_blake2_blake2"],
-        "//tools/config:darwin_x86_64": ["@com_github_blake2_libb2"],
-        "//tools/config:linux_x86_64": ["@com_github_blake2_libb2"],
-        "//conditions:default": ["@com_github_blake2_blake2"],
+        "//tools/config:linux_arm64": ["@com_github_blake2_blake2"],
+        "//conditions:default": ["@com_github_blake2_libb2"],
     }),
 )

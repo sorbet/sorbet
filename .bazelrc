@@ -25,11 +25,6 @@ build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE
 # this flag here once flipped in Bazel again.
 build --incompatible_strict_action_env
 
-# Enforce that we don't rely on `@bazel_tools//platforms` and instead use the
-# `@platforms` repository for constraint resolution.  See
-# https://github.com/bazelbuild/bazel/issues/8622 for more information.
-build --incompatible_use_platforms_repo_for_constraints
-
 # C / C++ Options
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
