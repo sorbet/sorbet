@@ -93,10 +93,38 @@ x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
 <span class="hljs-keyword">end</span>
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="annotating-constants"></a><a href="#annotating-constants" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating constants</h2>
-<p>Sorbet does not, by default, infer the types of constants, but they can be
-specified using <code>T.let</code>:</p>
+<p>Sorbet does <em>very</em> minimal inference for types of constants. These are the cases
+where Sorbet infers constant types:</p>
+<ul>
+<li><p>Constants initialized with simple literals (like <code>&quot;foo&quot;</code> or <code>123</code>) will have
+their types inferred. Importantly, this does not include <code>Array</code> or <code>Hash</code>
+literals.</p></li>
+<li><p>Constants initialized with a call to <code>SomeClass.new</code> will have their type
+inferred to <code>SomeClass</code>. Importantly, this assumption happens <strong>regardless</strong>
+of whether the <code>new</code> method actually returns an instance of <code>SomeClass</code>, which
+might not be the case if the <code>new</code> method has been overridden.</p>
+<p>In these cases, Sorbet reports an error stating that it requires an explicit
+type annotation to correct the faulty assumption.</p></li>
+</ul>
+<p>In all other cases, Sorbet does not infer the types of constants, and will
+assume a type of <code>T.untyped</code>. In <a href="/docs/static"><code># typed: strict</code></a> files, Sorbet
+reports an error requiring that a type be specified, so that Sorbet does not
+assume <code>T.untyped</code>.</p>
+<p>To specify the type of a constant, use <code>T.let</code>:</p>
 <pre><code class="hljs css language-ruby">NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>], T::Array[String])
 </code></pre>
+<p>In codebases that require calling <code>.freeze</code> on constants, the call to <code>.freeze</code>
+<strong>must</strong> go inside the <code>T.let</code>, or Sorbet will not see the call to <code>T.let</code>.</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># ✅ Good</span>
+NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>].freeze, T::Array[String])
+<span class="hljs-comment">#                                         ^^^^^^^ ✅</span>
+
+<span class="hljs-comment"># ❌ BAD</span>
+NAMES = T.let([<span class="hljs-string">"Nelson"</span>, <span class="hljs-string">"Dmitry"</span>, <span class="hljs-string">"Paul"</span>], T::Array[String]).freeze
+<span class="hljs-comment">#                                                         ❌ ^^^^^^^</span>
+</code></pre>
+<p>We recommend using the <a href="https://github.com/Shopify/rubocop-sorbet"><code>rubocop-sorbet</code></a> gem, which modifies the behavior of
+RuboCop’s <code>Style/MutableConstant</code> rule, making it aware of <code>T.let</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="declaring-class-and-instance-variables"></a><a href="#declaring-class-and-instance-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Declaring class and instance variables</h2>
 <p>To declare the static type of an instance variable, we can use <code>T.let</code> in a
 class’s constructor:</p>
