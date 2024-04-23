@@ -31,10 +31,7 @@ err=0
 
 mkdir -p _out_
 
-# NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
 test_args+=(
-  "--test_tag_filters=-compiler"
-  "--build_tag_filters=-compiler"
   "--build_tests_only"
   "//..."
 )
