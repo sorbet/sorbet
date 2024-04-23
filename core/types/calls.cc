@@ -704,8 +704,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     //     super(42)    # while this should be okay
     //   end
     // end
-    while (mayBeOverloaded.exists() && mayBeOverloaded.data(gs)->flags.isAbstract && !symbol.data(gs)->flags.isAbstract) {
-        mayBeOverloaded = mayBeOverloaded.data(gs)->owner.data(gs)->findParentMethodTransitive(gs, targetName);
+    if (mayBeOverloaded.exists() && mayBeOverloaded.data(gs)->flags.isAbstract && !symbol.data(gs)->flags.isAbstract) {
+        auto possiblities = symbol.data(gs)->findParentMethodTransitiveAll(gs, targetName);
+        for (auto overload : possiblities) {
+            if (!overload.data(gs)->flags.isAbstract) {
+                mayBeOverloaded = overload;
+                break;
+            }
+        }
     }
 
     if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
