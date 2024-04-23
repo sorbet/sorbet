@@ -766,9 +766,6 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
             }
         }
     }
-    if (this->superClass().exists()) {
-        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
-    }
     return Symbols::noSymbol();
 }
 
