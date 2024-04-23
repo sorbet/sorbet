@@ -110,7 +110,6 @@ compilation_database(
         "//payload/text:generate_payload",
         "//payload/text:some",
         "//payload/text:text",
-        "//plugin_injector:plugin_injector",
         "//proto:proto",
         "//proto/pay-server:pay-server",
         "//rbi:generate_procs",
