@@ -805,7 +805,9 @@ int realmain(int argc, char *argv[]) {
                 // we don't need to typecheck when generating rbis
                 pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
+                // gs->errors.clear();
             }
+
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

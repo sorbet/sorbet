@@ -274,7 +274,37 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
+            gs.tracer().error("\n\n*** after {}namer:", runIncrementalNamer ? "incremental " : "");
             for (auto &file : what) {
+                // gs.clearCache
+
+                auto fref = file.file;
+                auto &prevErrors = gs.errors[fref];
+                auto code = 5000; // namer errors are 40xx
+                                  //
+
+                gs.tracer().error("\n\n*** clearing cache\n***before:");
+                for (auto &msg : prevErrors) {
+                    const auto &[s, e] = msg->error->loc.position(gs);
+                    gs.tracer().error("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}",
+                                      msg->error->what.code, msg->whatFile.data(gs).path(), msg->error->header, msg->kind,
+                                      s.line, s.column, e.line, e.column);
+                }
+                prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(),
+                                                [code](const unique_ptr<core::ErrorQueueMessage> &err) {
+                                                    return err->error->what.code < code;
+                                                }),
+                                 prevErrors.end());
+                gs.tracer().error("\n\n*** clearing cache\n***after:");
+                for (auto &msg : prevErrors) {
+                    const auto &[s, e] = msg->error->loc.position(gs);
+                    gs.tracer().error("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}",
+                                      msg->error->what.code, msg->whatFile.data(gs).path(), msg->error->header, msg->kind,
+                                      s.line, s.column, e.line, e.column);
+                }
+                // gs.reportErrorsForFile()
+                //   gs.pullErrorsFromTheQueue
+                //   gs.mixErrors
                 gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
             }
             // Required for autogen tests, which need to control which phase to stop after.
@@ -294,9 +324,10 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
-            for (auto &file : what) {
-                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
-            }
+            gs.tracer().error("\n\n*** after incremental resolver:");
+            // for (auto &file : what) {
+            // gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            // }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
                 return what;
@@ -873,9 +904,25 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
         }
 
+        // gs->tracer().error("\n\n*** after namer:");
         for (auto &file : what) {
+            // gs.clearCache
+
+            auto fref = file.file;
+            auto code = 5000; // namer errors are 40xx
+            gs->errors[fref].erase(std::remove_if(gs->errors[fref].begin(), gs->errors[fref].end(),
+                                                  [code](const unique_ptr<core::ErrorQueueMessage> &err) {
+                                                      return err->error->what.code < code;
+                                                  }),
+                                   gs->errors[fref].end());
+            // gs.reportErrorsForFile()
+            //   gs.pullErrorsFromTheQueue
+            //   gs.mixErrors
             gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
         }
+        // for (auto &file : what) {
+        // gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+        // }
         for (auto &named : what) {
             if (opts.print.NameTree.enabled) {
                 opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
@@ -905,9 +952,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
-            for (auto &file : what) {
-                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
-            }
+            gs->tracer().error("\n\n*** after resolver:");
+            // for (auto &file : what) {
+            // gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            // }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {
@@ -1054,7 +1102,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
-
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
     const uint32_t epoch = epochManager.getStatus().epoch;

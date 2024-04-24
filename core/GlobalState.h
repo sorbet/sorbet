@@ -4,6 +4,7 @@
 
 #include "common/StableStringStorage.h"
 #include "core/Error.h"
+#include "core/ErrorQueueMessage.h"
 #include "core/Files.h"
 #include "core/Loc.h"
 #include "core/Names.h"
@@ -319,6 +320,8 @@ public:
     bool requiresAncestorEnabled = false;
 
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
+
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>> errors;
 
 private:
     struct DeepCloneHistoryEntry {

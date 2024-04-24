@@ -1,4 +1,5 @@
 #include "main/lsp/QueryCollector.h"
+#include "core/GlobalState.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {
@@ -28,7 +29,18 @@ uint16_t getQueryResponseTypeSpecificity(const core::lsp::QueryResponse &q) {
 } // namespace
 void QueryCollector::flushErrors(spdlog::logger &logger, const core::GlobalState &gs, core::FileRef file,
                                  vector<unique_ptr<core::ErrorQueueMessage>> errors) {
+    gs.tracer().error("\n\n*** QueryCollector::flushErrors");
+    for (const auto &e : errors) {
+        if (e == nullptr) {
+            gs.tracer().error("\n\t*** nullptr");
+        } else {
+            gs.tracer().error("\n\t*** {}", e->text.value_or("empty text"));
+        }
+    }
     for (auto &error : errors) {
+        if (error == nullptr) {
+            continue;
+        }
         if (error->kind == core::ErrorQueueMessage::Kind::QueryResponse) {
             queryResponses.emplace_back(move(error->queryResponse));
         }

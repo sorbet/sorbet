@@ -6,6 +6,7 @@
 #include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
 #include "core/lsp/QueryResponse.h"
+#include "GlobalState.h"
 #include <atomic>
 
 namespace sorbet {
@@ -16,12 +17,12 @@ class ErrorQueue {
 private:
     void checkOwned();
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
-    std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
 public:
+    std::shared_ptr<ErrorFlusher> errorFlusher;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     spdlog::logger &logger;
     spdlog::logger &tracer;
     std::atomic<bool> hadCritical{false};
@@ -35,15 +36,16 @@ public:
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
 
-    void flushAllErrors(const GlobalState &gs);
+    void flushAllErrors(GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);
     bool wouldFlushErrorsForFile(FileRef file) const;
 
     /** reports errors, but doesn't remove them from internal storage, so they can be re-reported later*/
-    void flushButRetainErrorsForFile(const GlobalState &gs, FileRef file);
+    void flushButRetainErrorsForFile(GlobalState &gs, FileRef file);
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;
+    std::vector<std::unique_ptr<ErrorQueueMessage>> getErrorsForFile(const GlobalState &gs, core::FileRef file);
 };
 
 } // namespace core
