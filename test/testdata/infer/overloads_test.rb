@@ -202,8 +202,8 @@ class BlockOverloads
     end
     T.reveal_type(x) # error: `Integer`
     x = block_arity_overload do |y|
-      T.reveal_type(y) # error: `NilClass`
+      T.reveal_type(y) # error: `String`
     end
-    T.reveal_type(x) # error: `Integer`
+    T.reveal_type(x) # error: `String`
   end
 end

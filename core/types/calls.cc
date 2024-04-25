@@ -361,7 +361,8 @@ struct GuessOverloadCandidate {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs,
+                        const shared_ptr<const SendAndBlockLink> &block) {
     counterInc("calls.overloaded_invocations");
     MethodRef fallback = primary;
     vector<MethodRef> allCandidates;
@@ -481,10 +482,20 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             const auto &lastArg = args.back();
             auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
-            if (hasBlock) {
+            if (block != nullptr) {
                 if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
                     it = leftCandidates.erase(it);
                     continue;
+                }
+                if (auto blockParamType = cast_type<AppliedType>(lastArg.type)) {
+                    if (auto procArity = Types::getProcArity(*blockParamType)) {
+                        if (auto fixedArity = block->fixedArity()) {
+                            if (procArity != block->fixedArity()) {
+                                it = leftCandidates.erase(it);
+                                continue;
+                            }
+                        }
+                    }
                 }
             } else {
                 if (mentionsBlockArg && lastArg.type != nullptr &&
@@ -910,10 +921,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    auto method =
-        mayBeOverloaded.data(gs)->flags.isOverloaded
-            ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
-            : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->flags.isOverloaded
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block)
+                      : mayBeOverloaded;
 
     if (method.data(gs)->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
