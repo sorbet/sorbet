@@ -9,8 +9,6 @@ require_relative './block_call_rb_iterate__2'
 # the block doesn't use `break` to change control flow, while the second does
 # use break and should use `rb_iterate` in the generated code.
 
-# OPT-ENTRY: Init_block_call_rb_iterate__1
-
 a = test do
   puts "without a break"
 end
