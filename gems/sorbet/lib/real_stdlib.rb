@@ -7,6 +7,11 @@ module Sorbet::Private::RealStdlib
     @real_is_a.bind(o).call(klass)
   end
 
+  def self.real_respond_to?(o, method)
+    @real_respond_to ||= Object.instance_method(:respond_to?)
+    @real_respond_to.bind(o).call(method)
+  end
+
   def self.real_constants(mod)
     @real_constants ||= Module.instance_method(:constants)
     @real_constants.bind(mod).call(false)
