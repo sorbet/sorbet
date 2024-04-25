@@ -99,6 +99,7 @@ def single_package_rbi_test(name, rb_files):
     end_to_end_rbi_test(
         name = name,
         rb_files = rb_files,
+        tags = ["manual"],
         size = "medium",
     )
 
