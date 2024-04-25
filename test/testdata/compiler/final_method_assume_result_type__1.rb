@@ -2,7 +2,7 @@
 # typed: true
 # compiled: true
 
-# NOTE: explicitly not testing the interaction with interpreted code here
+# NOTE explicitly not testing the interaction with interpreted code here
 # because we only emit direct calls if the call would be compiled -> compiled.
 
 require_relative './final_method_assume_result_type__2'
