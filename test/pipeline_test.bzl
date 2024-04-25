@@ -12,6 +12,47 @@ def dropExtension(p):
     "TODO: handle multiple . in name"
     return p.partition(".")[0]
 
+_TEST_SCRIPT = """#!/usr/bin/env bash
+export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_12_0_0/bin/llvm-symbolizer
+set -x
+exec {runner} --single_test="{test}"
+"""
+
+def _exp_test_impl(ctx):
+    ctx.actions.write(
+        output = ctx.outputs.executable,
+        content = _TEST_SCRIPT.format(
+            runner = ctx.executable.runner.short_path,
+            test = ctx.file.test.path,
+        ),
+    )
+
+    runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data)
+    runfiles = runfiles.merge(ctx.attr._llvm_symbolizer[DefaultInfo].default_runfiles)
+
+    return [DefaultInfo(runfiles = runfiles)]
+
+exp_test = rule(
+    implementation = _exp_test_impl,
+    test = True,
+    attrs = {
+        "test": attr.label(
+            allow_single_file = True,
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+        ),
+        "runner": attr.label(
+            executable = True,
+            cfg = "target",
+            allow_files = True,
+        ),
+        "_llvm_symbolizer": attr.label(
+            default = "//test:llvm-symbolizer",
+        ),
+    },
+)
+
 _GEN_PACKAGE_RUNNER_SCRIPT = """
 set -x
 
