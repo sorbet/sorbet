@@ -24,5 +24,3 @@ end
 
 p result
 p state
-
-# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock

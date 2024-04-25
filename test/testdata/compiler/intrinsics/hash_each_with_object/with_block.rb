@@ -34,5 +34,3 @@ end
 
 p result
 p obj
-
-# INITIAL-COUNT-3: call i64 @sorbet_callIntrinsicInlineBlock

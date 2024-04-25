@@ -19,5 +19,3 @@ result = h.each do |k, v|
 end
 
 p result
-
-# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock

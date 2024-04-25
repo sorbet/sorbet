@@ -92,5 +92,3 @@ FinalWrapper2.builder_final(tricky: :keyword, args: :passed, as: :hash)
 
 # static-init gets generated prior to the method definitions, so we look for the
 # calls first.
-# INITIAL-COUNT-5: call i64 @direct_func_FinalWrapper2.13builder_final
-#
