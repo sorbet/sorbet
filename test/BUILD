@@ -375,12 +375,12 @@ cc_binary(
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
-    visibility = ["//tools:__pkg__"],
     tags = ["manual"],
+    visibility = ["//tools:__pkg__"],
     deps = [
-        "@rapidjson",
-        "@com_google_absl//absl/strings",
         "//common",
+        "@com_google_absl//absl/strings",
+        "@rapidjson",
     ],
 )
 
