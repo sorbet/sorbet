@@ -356,10 +356,8 @@ sh_binary(
     name = "single_package_runner",
     srcs = ["test_single_package_runner.sh"],
     data = [
-        "rbi_gen_package_runner.rb",
-        "//gems/sorbet-runtime",
+        "single_package_runner_cc",
         "//main:sorbet",
-        "@sorbet_ruby_2_7//:ruby",
     ],
     # This is to get the test to run on the compiler build job,
     # so we can avoid building ruby on the test-static-sanitized job.
@@ -367,6 +365,22 @@ sh_binary(
     deps = [
         ":logging",
         "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+cc_binary(
+    name = "single_package_runner_cc",
+    srcs = ["rbi_gen_package_runner.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    tags = ["manual"],
+    deps = [
+        "@rapidjson",
+        "@com_google_absl//absl/strings",
+        "//common",
     ],
 )
 
