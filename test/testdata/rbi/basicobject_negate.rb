@@ -51,3 +51,30 @@ if !A.new # if false
 else
   puts "else branch"
 end
+
+class MyArray < Array
+  extend T::Sig
+  sig { returns(Integer) }
+  def !()
+# ^^^^^^^ error: Method `MyArray#!` overrides an overridable method `Array#!` but is not declared with `override.`
+# ^^^^^^^ error: Return type `Integer` does not match return type of overridable method `Array#!`
+    1
+  end
+end
+
+class MyInteger < Integer
+  extend T::Sig
+  sig { override.returns(Integer) }
+  def !()
+# ^^^^^^^ error: Return type `Integer` does not match return type of overridable method `Integer#!`
+    1
+  end
+end
+
+class MyString < String
+  extend T::Sig
+  sig { override(allow_incompatible: true).returns(Integer) }
+  def !()
+    1
+  end
+end
