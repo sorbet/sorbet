@@ -39,5 +39,4 @@ rbi_gen_package_runner="$(rlocation com_stripe_ruby_typer/test/single_package_ru
 # Main #########################################################################
 
 set -x
-export ASAN_OPTIONS=detect_leaks=0
 exec "${rbi_gen_package_runner}" "${sorbet}" "$root" "${test_directory}"

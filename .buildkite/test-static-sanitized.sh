@@ -66,8 +66,6 @@ if [ "$err" -ne 0 ]; then
   echo '  --config=dbg' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
-  cp /usr/local/var/bazelcache/output-bases/test-static-sanitized/execroot/com_stripe_ruby_typer/bazel-out/k8-dbg/testlogs/test/end_to_end_rbi_test/test.log _out_
-
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
 
   exit "$err"
