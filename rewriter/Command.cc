@@ -41,7 +41,8 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     }
 
     int i = 0;
-    ast::MethodDef *call;
+    ast::MethodDef *call = nullptr;
+    ast::ExpressionPtr *callptr = nullptr;
 
     for (auto &stat : klass->rhs) {
         auto *mdef = ast::cast_tree<ast::MethodDef>(stat);
@@ -54,6 +55,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
         i = &stat - &klass->rhs.front();
         call = mdef;
+        callptr = &stat;
         break;
     }
     // If we didn't find a `call` method, or if it was the first statement (and
@@ -84,8 +86,23 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     ast::MethodDef::Flags flags;
     flags.isSelfMethod = true;
     flags.discardDef = true;
-    auto selfCall = ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs),
+    auto selfCall = ast::MK::SyntheticMethod(call->loc, call->declLoc, call->name, std::move(newArgs),
                                              ast::MK::RaiseTypedUnimplemented(call->declLoc), flags);
+
+    // We are now in the weird situation where we have an actual method that
+    // the user has written, but we have a synthetic method that lives at the
+    // same location.  If we try to jump-to-def from the actual method, there
+    // are no calls to it, which will frustrate the user.  Erase the location(s)
+    // on the non-synthetic method so that LSP only sees the synthetic method.
+    auto hiddenCall = ast::MK::Method(call->loc.copyWithZeroLength(),
+                                      call->declLoc.copyWithZeroLength(),
+                                      call->name,
+                                      std::move(call->args), std::move(call->rhs),
+                                      call->flags);
+
+    // We need to make sure we assign into `callptr` prior to inserting into
+    // `klass->rhs`, otherwise our pointer might not be live anymore.
+    *callptr = std::move(hiddenCall);
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));
