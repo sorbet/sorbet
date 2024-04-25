@@ -1303,6 +1303,6 @@ class Integer < Numeric
   # is raised.
   def self.sqrt(_); end
 
-  sig { returns(FalseClass) }
+  sig { overridable.returns(FalseClass) }
   def !(); end
 end

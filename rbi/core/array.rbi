@@ -2977,6 +2977,6 @@ class Array < Object
   sig {returns(String)}
   def to_s(); end
 
-  sig { returns(FalseClass) }
+  sig { overridable.returns(FalseClass) }
   def !(); end
 end

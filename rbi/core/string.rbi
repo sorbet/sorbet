@@ -2957,6 +2957,6 @@ class String < Object
   end
   def slice(arg0, arg1=T.unsafe(nil)); end
 
-  sig { returns(FalseClass) }
+  sig { overridable.returns(FalseClass) }
   def !(); end
 end
