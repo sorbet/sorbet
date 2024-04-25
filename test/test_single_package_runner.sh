@@ -26,9 +26,6 @@ else
 fi
 # --- end runfiles.bash initialization --- }}}
 
-# shellcheck source-path=SCRIPTDIR/..
-source "test/logging.sh"
-
 # Argument Parsing #############################################################
 
 test_directory=$1

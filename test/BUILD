@@ -272,11 +272,6 @@ test_suite(
     tests = ["whitequark_parser_corpus"],
 )
 
-sh_library(
-    name = "logging",
-    srcs = ["logging.sh"],
-)
-
 sh_binary(
     name = "single_package_runner",
     srcs = ["test_single_package_runner.sh"],
@@ -284,10 +279,7 @@ sh_binary(
         "single_package_runner_cc",
         "//main:sorbet",
     ],
-    # This is to get the test to run on the compiler build job,
-    # so we can avoid building ruby on the test-static-sanitized job.
     deps = [
-        ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
 )
