@@ -146,6 +146,11 @@ class BlockOverloads
   sig { returns(A) }
   def not_fully_defined_flipped(&blk); end # error: against an overloaded signature
 
+  sig { params(blk: T.proc.void).returns(Integer) }
+  sig { params(blk: T.proc.params(x: String).void).returns(String) }
+  def block_arity_overload(&blk)
+  end
+
   def test
     x = simple
     T.reveal_type(x) # error: `A`
@@ -192,5 +197,13 @@ class BlockOverloads
     T.reveal_type(x) # error: `A`
     x = not_fully_defined_flipped {B.new}
     T.reveal_type(x) # error: `B`
+
+    x = block_arity_overload do
+    end
+    T.reveal_type(x) # error: `Integer`
+    x = block_arity_overload do |y|
+      T.reveal_type(y) # error: `NilClass`
+    end
+    T.reveal_type(x) # error: `Integer`
   end
 end
