@@ -2,11 +2,6 @@
 
 set -euo pipefail
 
-if [ "${SIMULATE_FAIL:-}" != "" ]; then
-  echo "Simulating build failure. Exiting status 1"
-  exit 1
-fi
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     platform="linux";;
@@ -14,35 +9,30 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
-test_args=()
-
-if [[ "linux" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-linux")
-elif [[ "mac" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-mac")
-fi
-
-export JOB_NAME=test-static-sanitized
+export JOB_NAME=test-rbi-gen
 source .buildkite/tools/setup-bazel.sh
-
-echo -- will run with "${test_args[@]}"
 
 err=0
 
-mkdir -p _out_
+echo "+++ running tests"
 
-# NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
-test_args+=(
-  "--test_tag_filters=-compiler"
-  "--build_tag_filters=-compiler"
-  "--build_tests_only"
-  "//..."
+# `-c opt` is required, otherwise the tests are too slow
+# forcedebug is really the ~only thing in `--config=dbg` we care about.
+# must come after `-c opt` because `-c opt` will define NDEBUG on its own
+test_args=(
+  "//test:end_to_end_rbi_test"
+  "//test:single_package_runner"
+  "-c"
+  "opt"
+  "--config=forcedebug"
+  "--spawn_strategy=local"
 )
 
 ./bazel test \
   --experimental_generate_json_trace_profile \
   --profile=_out_/profile.json \
   --test_summary=terse \
+  --test_output=errors \
   "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
@@ -62,14 +52,10 @@ if [ "$err" -ne 0 ]; then
     sed -e 's/^/  /' >> "$failing_tests"
 
   # Put this last as an easy way to not have a `\` on the last line.
-  #
-  # Use --config=dbg instead of sanitized because it's more likely that they've
-  # already built this config locally, and most test failures reproduce outside
-  # of sanitized mode anyways.
-  echo '  --config=dbg' >> "$failing_tests"
+  echo '  -c opt --config=forcedebug' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
-  buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+  buildkite-agent annotate --context "test-rbi-gen.sh" --style error --append < "$failing_tests"
 
   exit "$err"
 fi

@@ -44,6 +44,12 @@ steps:
     artifact_paths: _out_/profile.json
     <<: *elastic
 
+  - label: ":linux: test-rbi-gen.sh"
+    command: .buildkite/test-rbi-gen.sh
+    artifact_paths:
+      - _out_/profile.json
+    <<: *elastic
+
   - label: ":linux: test-vscode-extension.sh"
     command: '.buildkite/test-vscode-extension.sh'
     <<: *elastic
