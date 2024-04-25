@@ -41,7 +41,9 @@ steps:
 
   - label: ":linux: test-static-sanitized.sh"
     command: .buildkite/test-static-sanitized.sh
-    artifact_paths: _out_/profile.json
+    artifact_paths:
+    - _out_/profile.json
+    - _out_/test.log
     <<: *elastic
 
   - label: ":linux: test-vscode-extension.sh"
