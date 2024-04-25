@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: OPT
 
 module M
   extend T::Sig

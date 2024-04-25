@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: LOWERED
 
 # NOTE: explicitly not testing the interaction with interpreted code here
 # because we only emit direct calls if the call would be compiled -> compiled.

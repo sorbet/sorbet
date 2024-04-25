@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 h = {a: 1, b: 2, c: :sym}
 

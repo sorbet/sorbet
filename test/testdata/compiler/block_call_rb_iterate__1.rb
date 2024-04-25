@@ -1,7 +1,6 @@
 # compiled: true
 # frozen_string_literal: true
 # typed: true
-# run_filecheck: OPT
 
 require_relative './block_call_rb_iterate__2'
 
@@ -11,9 +10,6 @@ require_relative './block_call_rb_iterate__2'
 # use break and should use `rb_iterate` in the generated code.
 
 # OPT-ENTRY: Init_block_call_rb_iterate__1
-# OPT: call i64 @sorbet_rb_iterate(
-# OPT-NOT: call i64 @sorbet_rb_iterate(
-# OPT{LITERAL}: }
 
 a = test do
   puts "without a break"

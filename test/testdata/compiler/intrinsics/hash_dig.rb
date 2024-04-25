@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 
 module M

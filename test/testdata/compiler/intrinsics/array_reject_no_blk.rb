@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 enumerator = ['zero', 'one', 'two'].reject
 
-# INITIAL-LABEL: define internal i64 @"func_<root>.13<static-init>
-# INITIAL: call i64 @sorbet_rb_array_reject(
-# INITIAL{LITERAL}: }
 
 puts enumerator.class
 

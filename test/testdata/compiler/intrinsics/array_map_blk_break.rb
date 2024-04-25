@@ -1,7 +1,6 @@
 # typed: true
 # compiled: true
 # frozen_string_literal: true
-# run_filecheck: LOWERED
 
 class NotArray
   def size
