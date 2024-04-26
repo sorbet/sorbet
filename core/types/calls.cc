@@ -134,7 +134,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     if (method.exists()) {
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
-            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
             if (res.returnType != nullptr) {
@@ -151,7 +151,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     if (method.exists()) {
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
-            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
             if (res.returnType != nullptr) {
@@ -1508,7 +1508,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         blockType = constr->isSolved() ? Types::instantiate(gs, blockType, *constr)
                                        : Types::approximate(gs, blockType, *constr);
         component.blockPreType = blockType;
-        component.blockSpec = bspec.deepCopy();
+        component.rebind = bspec.rebind;
+        component.rebindLoc = bspec.loc;
     }
 
     TypePtr &resultType = result.returnType;

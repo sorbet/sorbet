@@ -1822,7 +1822,7 @@ void Environment::cloneFrom(const Environment &rhs) {
 
 core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
                                                     cfg::LocalRef fallback) {
-    auto rebind = main.blockSpec.rebind;
+    auto rebind = main.rebind;
 
     if (rebind.exists()) {
         core::TypeAndOrigins result;
@@ -1840,7 +1840,7 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
             result.type = rebind.data(ctx)->selfType(ctx);
         }
 
-        result.origins.emplace_back(main.blockSpec.loc);
+        result.origins.emplace_back(main.rebindLoc);
         return result;
     } else {
         return getTypeAndOrigin(ctx, fallback);
