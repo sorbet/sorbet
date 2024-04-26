@@ -2,11 +2,11 @@
 
 f = T.let(
   -> (x) do
-    T.reveal_type(x)
+    T.reveal_type(x) # error: `Integer`
   end,
   T.proc.params(x: Integer).returns(Integer)
 )
-T.reveal_type(f)
+T.reveal_type(f) # error: `T.proc.params(arg0: Integer).returns(Integer)`
 
 f = T.let(
   -> (x) do
@@ -15,7 +15,7 @@ f = T.let(
   end,
   T.proc.params(x: Integer).returns(Integer)
 )
-T.reveal_type(f)
+T.reveal_type(f) # error: `T.proc.params(arg0: Integer).returns(Integer)`
 
 f = T.let(
   -> (x) do
@@ -24,4 +24,4 @@ f = T.let(
   Integer
 # ^^^^^^^ error: Lambda type annotation must be either `Proc` or a `T.proc` type (and possibly nilable)
 )
-T.reveal_type(f)
+T.reveal_type(f) # error: `Integer`
