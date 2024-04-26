@@ -4165,12 +4165,17 @@ public:
             return;
         }
 
-        auto *metaType = cast_type<MetaType>(args.args[0]->type);
-        if (metaType == nullptr) {
+        auto procType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        if (!Types::isSubType(gs, procType, Types::nilableProcClass())) {
+            if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::CastTypeMismatch)) {
+                e.setHeader("Lambda type annotation must be either `{}` or a `{}` type (and possibly nilable)", "Proc",
+                            "T.proc");
+                e.addErrorLine(args.callLoc(), "For lambda here");
+            }
             return;
         }
 
-        handleBlockType(gs, res.main, metaType->wrapped);
+        handleBlockType(gs, res.main, procType);
     }
 } Kernel_lambdaTLet;
 

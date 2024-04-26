@@ -17,12 +17,11 @@ f = T.let(
 )
 T.reveal_type(f)
 
-# Should we error if this is not a proc type?
-# (What would have happened if you put `blk: Integer` in a sig somewhere?)
 f = T.let(
   -> (x) do
-    T.reveal_type(x)
+    T.reveal_type(x) # error: `T.untyped`
   end,
   Integer
+# ^^^^^^^ error: Lambda type annotation must be either `Proc` or a `T.proc` type (and possibly nilable)
 )
 T.reveal_type(f)
