@@ -91,9 +91,10 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     // We are now in the weird situation where we have an actual method that
     // the user has written, but we have a synthetic method that lives at the
-    // same location.  If we try to jump-to-def from the actual method, there
-    // are no calls to it, which will frustrate the user.  Erase the location(s)
-    // on the non-synthetic method so that LSP only sees the synthetic method.
+    // same location.  If we try to find all references from the actual
+    // method, there are no calls to it, which will frustrate the user.  Erase
+    // the location(s) on the non-synthetic method so that LSP only sees the
+    // synthetic method.
     auto hiddenCall = ast::MK::Method(call->loc.copyWithZeroLength(),
                                       call->declLoc.copyWithZeroLength(),
                                       call->name,
