@@ -488,9 +488,21 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     continue;
                 }
                 if (auto blockParamType = cast_type<AppliedType>(lastArg.type)) {
-                    if (auto procArity = Types::getProcArity(*blockParamType)) {
-                        if (auto fixedArity = block->fixedArity()) {
-                            if (procArity != block->fixedArity()) {
+                    if (auto paramProcArity = Types::getProcArity(*blockParamType)) {
+                        if (auto blockFixedArity = block->fixedArity()) {
+                            if (blockFixedArity == 1) {
+                                if (paramProcArity != blockFixedArity) {
+                                    it = leftCandidates.erase(it);
+                                    continue;
+                                }
+                            } else if (paramProcArity == 1 && blockParamType->targs.size() == 2 &&
+                                       isa_type<TupleType>(blockParamType->targs[1])) {
+                                auto &paramProcArg0Type = cast_type_nonnull<TupleType>(blockParamType->targs[1]);
+                                if (paramProcArg0Type.elems.size() != blockFixedArity) {
+                                    it = leftCandidates.erase(it);
+                                    continue;
+                                }
+                            } else if (paramProcArity != blockFixedArity) {
                                 it = leftCandidates.erase(it);
                                 continue;
                             }
