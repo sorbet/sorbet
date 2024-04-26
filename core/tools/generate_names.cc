@@ -357,6 +357,7 @@ NameDef names[] = {
     {"destructureArg", "<destructure>"},
 
     {"lambda"},
+    {"lambdaTLet", "<lambda T.let>"},
     {"nil_p", "nil?"},
     {"blank_p", "blank?"},
     {"present_p", "present?"},

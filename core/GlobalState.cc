@@ -680,6 +680,9 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
     ENFORCE(method == Symbols::T_Generic_squareBrackets());
 
+    method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::type(), Types::top()).build();
+    ENFORCE(method == Symbols::Kernel_lambdaTLet());
+
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
     ENFORCE(typeArgument == Symbols::todoTypeArgument());
