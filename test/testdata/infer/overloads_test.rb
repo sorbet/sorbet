@@ -151,6 +151,11 @@ class BlockOverloads
   def block_arity_overload(&blk)
   end
 
+  sig { returns(Integer) }
+  sig { params(blk: T.proc.params(xy: [Integer, Integer]).void).returns(String) }
+  def block_tuple_overload(&blk)
+  end
+
   def test
     x = simple
     T.reveal_type(x) # error: `A`
@@ -203,6 +208,20 @@ class BlockOverloads
     T.reveal_type(x) # error: `Integer`
     x = block_arity_overload do |y|
       T.reveal_type(y) # error: `String`
+    end
+    T.reveal_type(x) # error: `String`
+
+    x = block_tuple_overload
+    T.reveal_type(x) # error: `Integer`
+
+    x = block_tuple_overload do |tuple|
+      T.reveal_type(tuple) # error: `[Integer, Integer]` (2-tuple)
+    end
+    T.reveal_type(x) # error: `String`
+
+    x = block_tuple_overload do |a, b|
+      T.reveal_type(a) # error: `Integer`
+      T.reveal_type(b) # error: `Integer`
     end
     T.reveal_type(x) # error: `String`
   end
