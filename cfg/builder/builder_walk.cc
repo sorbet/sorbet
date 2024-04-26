@@ -169,9 +169,10 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     return make_insn<Alias>(typeParam);
 }
 
-ast::Send *isKernelLambda(ast::ExpressionPtr &expr) {
+ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
     auto *send = ast::cast_tree<ast::Send>(expr);
-    if (send == nullptr || send->fun != core::Names::lambda() || send->hasNonBlockArgs()) {
+    if (send == nullptr || send->hasNonBlockArgs() ||
+        (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
         return nullptr;
     }
 
@@ -938,7 +939,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
-                if (auto *kernelLambda = isKernelLambda(c.arg)) {
+                if (auto *kernelLambda = isKernelProcOrLambda(c.arg)) {
                     kernelLambda->fun = core::Names::lambdaTLet();
                     kernelLambda->addPosArg(move(c.typeExpr));
                 } else {
