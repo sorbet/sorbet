@@ -43,8 +43,9 @@ if [ "$dryrun" = "" ]; then
   tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
   mv sorbet-wasm.wasm sorbet.run/docs
   mv sorbet-wasm.js sorbet.run/docs
+  mv ruby.wasm sorbet.run/docs
   pushd sorbet.run/docs
-  git add sorbet-wasm.wasm sorbet-wasm.js
+  git add sorbet-wasm.wasm sorbet-wasm.js ruby.wasm
   dirty=
   git diff-index --quiet HEAD -- || dirty=1
   if [ "$dirty" != "" ]; then
