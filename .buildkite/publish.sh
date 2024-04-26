@@ -43,7 +43,7 @@ if [ "$dryrun" = "" ]; then
   tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
   mv sorbet-wasm.wasm sorbet.run/docs
   mv sorbet-wasm.js sorbet.run/docs
-  mv ruby.wasm sorbet.run/docs
+  mv ./_out_/webasm_ruby/ruby.wasm sorbet.run/docs
   pushd sorbet.run/docs
   git add sorbet-wasm.wasm sorbet-wasm.js ruby.wasm
   dirty=
