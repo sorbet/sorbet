@@ -941,7 +941,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 if (auto *kernelLambda = isKernelLambda(c.arg)) {
                     kernelLambda->fun = core::Names::lambdaTLet();
                     kernelLambda->addPosArg(move(c.typeExpr));
-                    // TODO(jez) Do we need to gate this on the Cast type?
                 } else {
                     // This is kind of gross, but it is the only way to ensure that the bits in the
                     // type expression make it into the CFG for LSP to hit on their locations.

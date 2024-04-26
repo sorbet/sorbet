@@ -25,3 +25,12 @@ f = T.let(
 # ^^^^^^^ error: Lambda type annotation must be either `Proc` or a `T.proc` type (and possibly nilable)
 )
 T.reveal_type(f) # error: `Integer`
+
+f = T.cast(
+  -> (x) do
+    T.reveal_type(x) # error: `T.untyped`
+  end,
+  Integer
+# ^^^^^^^ error: Lambda type annotation must be either `Proc` or a `T.proc` type (and possibly nilable)
+)
+T.reveal_type(f) # error: `Integer`
