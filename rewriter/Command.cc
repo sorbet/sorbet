@@ -95,11 +95,8 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     // method, there are no calls to it, which will frustrate the user.  Erase
     // the location(s) on the non-synthetic method so that LSP only sees the
     // synthetic method.
-    auto hiddenCall = ast::MK::Method(call->loc.copyWithZeroLength(),
-                                      call->declLoc.copyWithZeroLength(),
-                                      call->name,
-                                      std::move(call->args), std::move(call->rhs),
-                                      call->flags);
+    auto hiddenCall = ast::MK::Method(call->loc.copyWithZeroLength(), call->declLoc.copyWithZeroLength(), call->name,
+                                      std::move(call->args), std::move(call->rhs), call->flags);
 
     // We need to make sure we assign into `callptr` prior to inserting into
     // `klass->rhs`, otherwise our pointer might not be live anymore.
