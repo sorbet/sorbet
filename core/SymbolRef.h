@@ -1105,6 +1105,10 @@ public:
         return MethodRef::fromRaw(19);
     }
 
+    static MethodRef Kernel_lambdaTLet() {
+        return MethodRef::fromRaw(20);
+    }
+
     static ClassOrModuleRef Magic_UntypedSource() {
         return ClassOrModuleRef::fromRaw(101);
     }

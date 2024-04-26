@@ -623,6 +623,17 @@ Loc expandToLeadingComma(const GlobalState &gs, Loc loc) {
     }
 }
 
+void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePtr blockType) {
+    if (!blockType) {
+        blockType = Types::untyped(component.method);
+    }
+
+    component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
+    blockType = component.constr->isSolved() ? Types::instantiate(gs, blockType, *component.constr)
+                                             : Types::approximate(gs, blockType, *component.constr);
+    component.blockPreType = blockType;
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -1500,14 +1511,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
-        if (!blockType) {
-            blockType = Types::untyped(method);
-        }
-
-        component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
-        blockType = constr->isSolved() ? Types::instantiate(gs, blockType, *constr)
-                                       : Types::approximate(gs, blockType, *constr);
-        component.blockPreType = blockType;
+        handleBlockType(gs, component, blockType);
         component.rebind = bspec.rebind;
         component.rebindLoc = bspec.loc;
     }
@@ -4150,6 +4154,26 @@ public:
     }
 } Kernel_proc;
 
+class Kernel_lambdaTLet : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.block == nullptr) {
+            return;
+        }
+
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto *metaType = cast_type<MetaType>(args.args[0]->type);
+        if (metaType == nullptr) {
+            return;
+        }
+
+        handleBlockType(gs, res.main, metaType->wrapped);
+    }
+} Kernel_lambdaTLet;
+
 class Kernel_raise : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
@@ -4492,6 +4516,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambdaTLet(), &Kernel_lambdaTLet},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::fail(), &Kernel_raise},
 
