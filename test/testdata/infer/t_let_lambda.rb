@@ -10,7 +10,7 @@ T.reveal_type(f) # error: `T.proc.params(arg0: Integer).returns(Integer)`
 
 f = T.let(
   -> (x) do
-    T.reveal_type(x)
+    T.reveal_type(x) # error: `Integer`
     x.to_s # error: Expected `Integer` but found `String` for block result type
   end,
   T.proc.params(x: Integer).returns(Integer)
