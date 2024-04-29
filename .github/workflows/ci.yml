@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [prism]
+  pull_request:
+    branches: [prism]
+env:
+  RUBY_ROOT: '/opt/hostedtoolcache/Ruby/3.3.0/x64'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Prism Parser Regression Tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.9.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      - name: Verify parse trees
+        run: ./tools/scripts/verify_prism_regression_tests.sh
+      - name: Run tests
+        run: ./bazel test //test:prism --config=dbg --test_output=errors
+      - name: Run location tests
+        run: ./bazel test //test:prism_location_tests --config=dbg --test_output=errors

@@ -1,0 +1,23 @@
+Begin {
+  stmts = [
+    While {
+      cond = True {
+      }
+      body = Next {
+        exprs = [
+        ]
+      }
+    }
+    While {
+      cond = True {
+      }
+      body = Next {
+        exprs = [
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+    }
+  ]
+}

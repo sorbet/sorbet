@@ -1,0 +1,8 @@
+If {
+  condition = True {
+  }
+  then_ = NULL
+  else_ = String {
+    val = <U body>
+  }
+}

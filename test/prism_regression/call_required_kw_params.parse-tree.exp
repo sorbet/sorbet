@@ -1,0 +1,96 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U a>
+              }
+              value = Integer {
+                val = "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U a>
+              }
+              value = Integer {
+                val = "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U bar>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U a>
+              }
+              value = Integer {
+                val = "2"
+              }
+            }
+            Pair {
+              key = Symbol {
+                val = <U b>
+              }
+              value = Integer {
+                val = "3"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U bar>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Pair {
+              key = Symbol {
+                val = <U a>
+              }
+              value = Integer {
+                val = "2"
+              }
+            }
+            Pair {
+              key = Symbol {
+                val = <U b>
+              }
+              value = Integer {
+                val = "3"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

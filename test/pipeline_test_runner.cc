@@ -59,6 +59,7 @@ namespace sorbet::test {
 using namespace std;
 
 string singleTest;
+realmain::options::Parser parser;
 
 constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
 constexpr string_view packageFileName = "__package.rb"sv;
@@ -84,15 +85,34 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",  "parse-tree-whitequark",
-                                          "desugar-tree",     "desugar-tree-raw", "rewrite-tree",
-                                          "rewrite-tree-raw", "index-tree",       "index-tree-raw",
-                                          "symbol-table",     "symbol-table-raw", "name-tree",
-                                          "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
-                                          "flatten-tree",     "flatten-tree-raw", "cfg",
-                                          "cfg-raw",          "cfg-text",         "autogen",
-                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimized-rbi",    "rbi-gen"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-json-with-locs",
+                                          "parse-tree-whitequark",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "cfg-text",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt",
+                                          "autocorrects",
+                                          "minimized-rbi",
+                                          "rbi-gen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -202,17 +222,22 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         }
 
         unique_ptr<parser::Node> nodes;
-        {
+        if (parser == realmain::options::Parser::SORBET) {
+            std::cout << "Parsing with sorbet" << std::endl;
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
             auto settings = parser::Parser::Settings{};
             nodes = parser::Parser::run(*gs, file, settings);
+        } else if (parser == realmain::options::Parser::PRISM) {
+            std::cout << "Parsing with prism" << std::endl;
+            nodes = realmain::pipeline::runPrismParser(*gs, file, false, {});
         }
 
         handler.drainErrors(*gs);
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
         handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
         handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved(*gs, "parse-tree-json-with-locs", [&]() { return nodes->toJSONWithLocs(*gs, file); });
 
         // Desugarer
         ast::ParsedFile desugared;
@@ -870,6 +895,9 @@ int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Sorbet typechecker");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<std::string>()->default_value(""), "testpath");
+    options.allow_unrecognised_options().add_options()("parser", "The parser to use while testing.",
+                                                       cxxopts::value<std::string>()->default_value("sorbet"),
+                                                       "{prism, sorbet}");
     auto res = options.parse(argc, argv);
 
     if (res.count("single_test") != 1) {
@@ -878,6 +906,14 @@ int main(int argc, char *argv[]) {
     }
 
     sorbet::test::singleTest = res["single_test"].as<std::string>();
+
+    std::string parserOpt = res["parser"].as<std::string>();
+    for (auto &known : sorbet::realmain::options::parser_options) {
+        if (known.option == parserOpt) {
+            sorbet::test::parser = known.flag;
+            break;
+        }
+    }
 
     doctest::Context context(argc, argv);
     return context.run();

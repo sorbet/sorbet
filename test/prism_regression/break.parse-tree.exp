@@ -1,0 +1,26 @@
+Begin {
+  stmts = [
+    While {
+      cond = True {
+      }
+      body = Break {
+        exprs = [
+          Send {
+            receiver = NULL
+            method = <U foo>
+            args = [
+            ]
+          }
+        ]
+      }
+    }
+    While {
+      cond = True {
+      }
+      body = Break {
+        exprs = [
+        ]
+      }
+    }
+  ]
+}

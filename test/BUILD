@@ -121,6 +121,21 @@ sh_test(
     ],
 )
 
+# Load the macro that creates a test for every file in the prism_regression folder
+load("//test:prism_location_test.bzl", "prism_test_suite")
+
+# Run the macro
+prism_test_suite(
+    name = "prism_location_tests",
+    srcs = glob(["prism_regression/**/*.rb"]),
+)
+
+# Create a test suite to run all the location tests
+test_suite(
+    name = "prism_location_tests",
+    tags = ["prism_location_test"],
+)
+
 cc_test(
     name = "hello-test",
     size = "small",
@@ -262,6 +277,16 @@ pipeline_tests(
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
+pipeline_tests(
+    "test_corpus_prism",
+    glob([
+        "prism_regression/**/*.rb",
+        "prism_regression/**/*.exp",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
 test_suite(
     name = "test",
     tests = ["test_corpus"],
@@ -270,6 +295,11 @@ test_suite(
 test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
+)
+
+test_suite(
+    name = "prism",
+    tests = ["test_corpus_prism"],
 )
 
 sh_binary(

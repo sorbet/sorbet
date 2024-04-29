@@ -1,0 +1,196 @@
+Begin {
+  stmts = [
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = NULL
+      body = Integer {
+        val = "123"
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U param>
+          }
+        ]
+      }
+      body = LVar {
+        name = <U param>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Optarg {
+            name = <U optional_param>
+            default_ = Integer {
+              val = "123"
+            }
+          }
+        ]
+      }
+      body = LVar {
+        name = <U optional_param>
+      }
+    }
+    Send {
+      receiver = Block {
+        send = Send {
+          receiver = Const {
+            scope = NULL
+            name = <C <U Kernel>>
+          }
+          method = <U lambda>
+          args = [
+          ]
+        }
+        args = NULL
+        body = Integer {
+          val = "456"
+        }
+      }
+      method = <U call>
+      args = [
+      ]
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = NULL
+      body = Integer {
+        val = "789"
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U param>
+          }
+        ]
+      }
+      body = LVar {
+        name = <U param>
+      }
+    }
+    Send {
+      receiver = NULL
+      method = <U method_with_lambda_arg>
+      args = [
+        Symbol {
+          val = <U arg1>
+        }
+        Block {
+          send = Send {
+            receiver = Const {
+              scope = NULL
+              name = <C <U Kernel>>
+            }
+            method = <U lambda>
+            args = [
+            ]
+          }
+          args = NULL
+          body = Integer {
+            val = "123"
+          }
+        }
+      ]
+    }
+    NumBlock {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
+      }
+      args = NumParams {
+        decls = [
+          LVar {
+            name = <U _1>
+          }
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+      body = Send {
+        receiver = LVar {
+          name = <U _1>
+        }
+        method = <U +>
+        args = [
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+    }
+    Class {
+      name = Const {
+        scope = NULL
+        name = <C <U C>>
+      }
+      superclass = NULL
+      body = DefMethod {
+        name = <U method_returning_lambda>
+        args = NULL
+        body = Block {
+          send = Send {
+            receiver = Const {
+              scope = NULL
+              name = <C <U Kernel>>
+            }
+            method = <U lambda>
+            args = [
+            ]
+          }
+          args = NULL
+          body = Integer {
+            val = "123"
+          }
+        }
+      }
+    }
+  ]
+}
