@@ -279,7 +279,7 @@ sh_binary(
         "single_package_runner_cc",
         "//main:sorbet",
     ],
-    tags = ["compiler"],
+    tags = ["manual"],
     deps = [
         "@bazel_tools//tools/bash/runfiles",
     ],
