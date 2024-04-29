@@ -99,6 +99,8 @@ def single_package_rbi_test(name, rb_files):
     end_to_end_rbi_test(
         name = name,
         rb_files = rb_files,
+        # This is to get the test to run on the rbi-gen build job, because I
+        # can't figure out how to disable the leak sanitizer when running this.
         tags = ["manual"],
         size = "medium",
     )
