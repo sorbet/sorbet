@@ -178,12 +178,13 @@ def register_sorbet_dependencies():
         urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
     )
 
-    # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
+    # TODO(jez) We will need some modifications to this, so it will still have to be a fork.
+    # Currently jez-more-tools branch.
     http_archive(
-        name = "com_grail_bazel_toolchain",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/c2715fcb7ec7fc574eac501007b29277f316099f.zip",
-        sha256 = "1fee34a3f4123b2ec60d2c81d4805e16e47c7f95b31259272274430a45d4f3da",
-        strip_prefix = "bazel-toolchain-c2715fcb7ec7fc574eac501007b29277f316099f",
+        name = "toolchains_llvm",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/8d9165fd3560f6ff50bc4794972f714f4ba2adaa.tar.gz",
+        sha256 = "238b5a777bbfac3d5ec35cbd45ae2b84ca4118aa8f902ab27894912352e94658",
+        strip_prefix = "bazel-toolchain-8d9165fd3560f6ff50bc4794972f714f4ba2adaa",
     )
 
     http_archive(

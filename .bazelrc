@@ -10,9 +10,16 @@ common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
 ##
-##  Custom toolchain.
+##  Custom toolchain (bazel-contrib/toolchains_llvm).
 ##
-build --crosstool_top=@llvm_toolchain_15_0_7//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+# Not needed after https://github.com/bazelbuild/bazel/issues/7260 is closed
+build --incompatible_enable_cc_toolchain_resolution
+# For macOS only, needed for Bazel versions before 7.
+# Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
+# This feature is intentionally not supported on macOS.
+build --features=-supports_dynamic_linker
+# Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
+build --features=-libtool
 
 ##
 ##  Common build options across all build configurations
@@ -34,6 +41,8 @@ build --copt=-fno-omit-frame-pointer
 build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
+
+build --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG
@@ -262,7 +271,6 @@ build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 ##
 ## Webasm config. Please use either of those depending on your platform
 ##
-build:webasm --incompatible_enable_cc_toolchain_resolution
 build:webasm --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
