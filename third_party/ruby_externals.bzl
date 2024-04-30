@@ -116,26 +116,10 @@ def register_ruby_dependencies():
     )
 
     http_archive(
-        name = "sorbet_ruby_3_2",
-        urls = _ruby_urls("3.2/ruby-3.2.2.tar.gz"),
-        sha256 = "96c57558871a6748de5bc9f274e93f4b5aad06cd8f37befa0e8d94e7b8a423bc",
-        strip_prefix = "ruby-3.2.2",
-        build_file = ruby_build,
-    )
-
-    http_archive(
-        name = "sorbet_ruby_3_3_preview",
-        urls = _ruby_urls("3.3/ruby-3.3.0-preview2.tar.gz"),
-        sha256 = "30ce8b0fe11b37b5ac088f5a5765744b935eac45bb89a9e381731533144f5991",
-        strip_prefix = "ruby-3.3.0-preview2",
-        build_file = ruby_3_3_build,
-    )
-
-    http_archive(
         name = "sorbet_ruby_3_3",
-        urls = _ruby_urls("3.3/ruby-3.3.0.tar.gz"),
-        sha256 = "96518814d9832bece92a85415a819d4893b307db5921ae1f0f751a9a89a56b7d",
-        strip_prefix = "ruby-3.3.0",
+        urls = _ruby_urls("3.3/ruby-3.3.1.tar.gz"),
+        sha256 = "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99",
+        strip_prefix = "ruby-3.3.1",
         build_file = ruby_3_3_build,
         patch_tool = "patch",
         patch_args = ["-p1"],
@@ -144,7 +128,6 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:fix_grapheme_clusters_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10151_no_hash_allocate_static_kwargs_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10306_no_hash_allocate_static_kwargs_3_3_only.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:9385-aarch64-fibers-crash-backport.patch",
         ],
     )
 
