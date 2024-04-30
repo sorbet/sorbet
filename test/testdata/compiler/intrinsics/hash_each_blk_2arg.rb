@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 # "Normal" block
 result = {a: 1, b: 2, c: :sym}.each do |k, v|
@@ -20,6 +19,3 @@ result = h.each do |k, v|
 end
 
 p result
-
-# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock
-# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock

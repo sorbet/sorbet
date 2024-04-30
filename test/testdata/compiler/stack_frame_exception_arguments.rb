@@ -12,7 +12,7 @@ class Main
 
   sig {params(x: String).void}
   def self.takes_string(x)
-    # NOTE: we need to use x, as we only type check arguments that get used
+    # NOTE, we need to use x, as we only type check arguments that get used
     T.unsafe(x)
   end
 end

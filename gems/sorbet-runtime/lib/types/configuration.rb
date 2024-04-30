@@ -113,7 +113,7 @@ module T::Configuration
   # statically, so that methods don't have to guard themselves from being
   # called incorrectly by untyped code.
   #
-  # @param [:never, :compiled, :tests, :always] default_checked_level
+  # @param [:never, :tests, :always] default_checked_level
   def self.default_checked_level=(default_checked_level)
     T::Private::RuntimeLevels.default_checked_level = default_checked_level
   end

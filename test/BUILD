@@ -1,7 +1,5 @@
 load("//tools:clang.bzl", "clang_tool")  # todo: this should be decoupled and use the library toolchain, not the compiler one
 
-clang_tool("llvm-diff")  # depended on by compiler_tests
-
 clang_tool("llvm-symbolizer")
 
 cc_binary(
@@ -238,10 +236,6 @@ pipeline_tests(
             "testdata/**/*.rb",
             "testdata/**/*.exp",
         ],
-        exclude = [
-            "testdata/compiler/**/*",
-            "testdata/ruby_benchmark/**/*",
-        ],
     ),
     "PosTests",
 )
@@ -263,10 +257,6 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
-        exclude = [
-            "testdata/compiler/**/*",
-            "testdata/ruby_benchmark/**/*",
-        ],
     ),
     "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
@@ -282,76 +272,6 @@ test_suite(
     tests = ["whitequark_parser_corpus"],
 )
 
-load(":compiler_tests.bzl", "compiler_tests")
-
-compiler_tests(
-    "compiler",
-    glob([
-        "testdata/compiler/**/*.rb",
-        "testdata/ruby_benchmark/**/*.rb",
-    ]),
-    tags = ["compiler"],
-)
-
-sh_library(
-    name = "logging",
-    srcs = ["logging.sh"],
-)
-
-sh_library(
-    name = "hermetic_tar",
-    srcs = ["hermetic_tar.sh"],
-)
-
-sh_binary(
-    name = "generate_out_file",
-    srcs = ["generate_out_file.sh"],
-    data = [
-        "patch_require.rb",
-        "//gems/sorbet-runtime",
-        "@sorbet_ruby_2_7_for_compiler//:ruby",
-    ],
-    deps = [
-        ":logging",
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
-sh_binary(
-    name = "build_extension",
-    srcs = ["build_extension.sh"],
-    data = ["//compiler:sorbet"],
-    tags = ["compiler"],
-    deps = [
-        ":hermetic_tar",
-        ":logging",
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
-sh_binary(
-    name = "test_corpus_runner",
-    srcs = ["test_corpus_runner.sh"],
-    tags = ["compiler"],
-    deps = [
-        ":logging",
-    ],
-)
-
-sh_binary(
-    name = "validate_exp",
-    srcs = ["validate_exp.sh"],
-    data = [
-        "diff-diff.rb",
-        "@sorbet_ruby_2_7_for_compiler//:ruby",
-    ],
-    tags = ["compiler"],
-    deps = [
-        ":logging",
-        "@bazel_tools//tools/bash/runfiles",
-    ],
-)
-
 sh_binary(
     name = "single_package_runner",
     srcs = ["test_single_package_runner.sh"],
@@ -359,11 +279,8 @@ sh_binary(
         "single_package_runner_cc",
         "//main:sorbet",
     ],
-    # This is to get the test to run on the compiler build job,
-    # so we can avoid building ruby on the test-static-sanitized job.
-    tags = ["compiler"],
+    tags = ["manual"],
     deps = [
-        ":logging",
         "@bazel_tools//tools/bash/runfiles",
     ],
 )
@@ -381,16 +298,5 @@ cc_binary(
         "//common",
         "@com_google_absl//absl/strings",
         "@rapidjson",
-    ],
-)
-
-sh_binary(
-    name = "filecheck",
-    testonly = 1,
-    srcs = ["filecheck.sh"],
-    data = ["@llvm//:FileCheck"],
-    tags = ["compiler"],
-    deps = [
-        ":logging",
     ],
 )

@@ -9,38 +9,17 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
-if [[ "linux" == "$platform" ]]; then
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-    apt-get update
-    apt-get install -yy libncurses5-dev libncursesw5-dev xxd
-elif [[ "mac" == "$platform" ]]; then
-    if ! [ -x "$(command -v wget)" ]; then
-        brew install wget
-    fi
-fi
-
-export JOB_NAME=test
+export JOB_NAME=test-rbi-gen
 source .buildkite/tools/setup-bazel.sh
 
 err=0
 
-# Build sorbet_ruby once with gcc, to ensure that we can build it without depending on the clang toolchain in the
-# sandbox
-echo "--- building ruby with gcc"
-./bazel build @sorbet_ruby_2_7_for_compiler//:ruby --crosstool_top=@bazel_tools//tools/cpp:toolchain
-
 echo "+++ running tests"
-
-mkdir -p _out_
 
 # `-c opt` is required, otherwise the tests are too slow
 # forcedebug is really the ~only thing in `--config=dbg` we care about.
 # must come after `-c opt` because `-c opt` will define NDEBUG on its own
 test_args=(
-  "//test:compiler"
-  "//test/cli/compiler"
-  # These are two tests that depend on sorbet_ruby, and it's annoying to have
-  # to build sorbet_ruby on the static sanitized job (delays test start time)
   "//test:end_to_end_rbi_test"
   "//test:single_package_runner"
   "-c"
@@ -76,16 +55,7 @@ if [ "$err" -ne 0 ]; then
   echo '  -c opt --config=forcedebug' >> "$failing_tests"
   echo '```' >> "$failing_tests"
 
-  # Lines look like "[ .. ] Actual LLVM output: test/testdata/compiler/intrinsics/t_must.sorbet.build/test/testdata/compiler/intrinsics/t_must.rb.opt.ll"
-  { ./bazel test --test_summary=terse --test_output=errors "${test_args[@]}" || true ; } | \
-    grep --only-matching 'Actual LLVM output: .*\.ll' | \
-    sed -e 's@.*Actual LLVM output: @bazel-out/k8-opt/bin/@' | \
-    xargs cp --target-directory=_out_
-
-  echo >> "$failing_tests"
-  echo 'If there are expectation file changes, you can find them in the Artifacts tab of the build' >> "$failing_tests"
-
-  buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+  buildkite-agent annotate --context "test-rbi-gen.sh" --style error --append < "$failing_tests"
 
   exit "$err"
 fi
