@@ -185,6 +185,30 @@ class T::Enum
     end
   end
 
+  # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
+  # values are compared directly against string values.
+  #
+  # Ruby's string has a weird quirk where `'my_string' == obj` calls obj.==('my_string') if obj
+  # responds to the `to_str` method. It does not actually call `to_str` however.
+  #
+  # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
+  T::Sig::WithoutRuntime.sig {returns(String)}
+  def to_str
+    msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
+    if T::Configuration.legacy_t_enum_migration_mode?
+      T::Configuration.soft_assert_handler(
+        msg,
+        storytime: {
+          class: self.class.name,
+          caller_location: Kernel.caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
+        },
+      )
+      serialize.to_s
+    else
+      Kernel.raise NoMethodError.new(msg)
+    end
+  end
+
   module LegacyMigrationMode
     include Kernel
     extend T::Helpers
@@ -195,30 +219,6 @@ class T::Enum
       # on whatever we mix this into.
       T::Sig::WithoutRuntime.sig {abstract.returns(T.untyped)}
       def serialize; end
-    end
-
-    # NB: Do not call this method. This exists to allow for a safe migration path in places where enum
-    # values are compared directly against string values.
-    #
-    # Ruby's string has a weird quirk where `'my_string' == obj` calls obj.==('my_string') if obj
-    # responds to the `to_str` method. It does not actually call `to_str` however.
-    #
-    # See https://ruby-doc.org/core-2.4.0/String.html#method-i-3D-3D
-    T::Sig::WithoutRuntime.sig {returns(String)}
-    def to_str
-      msg = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
-      if T::Configuration.legacy_t_enum_migration_mode?
-        T::Configuration.soft_assert_handler(
-          msg,
-          storytime: {
-            class: self.class.name,
-            caller_location: Kernel.caller_locations(1..1)&.[](0)&.then {"#{_1.path}:#{_1.lineno}"},
-          },
-        )
-        serialize.to_s
-      else
-        Kernel.raise NoMethodError.new(msg)
-      end
     end
 
     # WithoutRuntime so that comparison_assertion_failed can assume a constant stack depth
