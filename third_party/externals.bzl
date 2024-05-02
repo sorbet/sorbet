@@ -182,9 +182,9 @@ def register_sorbet_dependencies():
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/5c23c6f550bc2a1db0d5d0b9cf83669a1f91d46e.zip"),
-        sha256 = "53c76d48dfa63c00961293fb73843fe7d9bee647e39f98c7d6a04e256eb40514",
-        strip_prefix = "bazel-toolchain-5c23c6f550bc2a1db0d5d0b9cf83669a1f91d46e",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/ec7f3bcee2a71daf07a6c8876b701d7622044744.zip"),
+        sha256 = "09b4fd4a586d952afe83dca68d1e333a0f0512ea861c12e27596f6f948587a5f",
+        strip_prefix = "bazel-toolchain-ec7f3bcee2a71daf07a6c8876b701d7622044744",
     )
 
     http_archive(
