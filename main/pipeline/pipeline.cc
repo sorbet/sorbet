@@ -49,6 +49,27 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
+void clearCacheForFileAndCode(core::GlobalState &gs, core::FileRef fref,
+                              std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> filter) {
+    auto &prevErrors = gs.errors[fref];
+
+    gs.tracer().debug("\n\n*** clearing cache\n***before:");
+    for (auto &msg : prevErrors) {
+        const auto &[s, e] = msg->error->loc.position(gs);
+        gs.tracer().debug("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}", msg->error->what.code,
+                          msg->whatFile.data(gs).path(), msg->error->header, msg->kind, s.line, s.column, e.line,
+                          e.column);
+    }
+    prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(), filter), prevErrors.end());
+    gs.tracer().debug("\n\n*** clearing cache\n***after:");
+    for (auto &msg : prevErrors) {
+        const auto &[s, e] = msg->error->loc.position(gs);
+        gs.tracer().debug("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}", msg->error->what.code,
+                          msg->whatFile.data(gs).path(), msg->error->header, msg->kind, s.line, s.column, e.line,
+                          e.column);
+    }
+}
+
 class CFGCollectorAndTyper {
     const options::Options &opts;
 
@@ -274,37 +295,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
-            gs.tracer().error("\n\n*** after {}namer:", runIncrementalNamer ? "incremental " : "");
+            gs.tracer().debug("\n\n*** after {}namer:", runIncrementalNamer ? "incremental " : "");
             for (auto &file : what) {
-                // gs.clearCache
-
-                auto fref = file.file;
-                auto &prevErrors = gs.errors[fref];
                 auto code = 5000; // namer errors are 40xx
-                                  //
+                clearCacheForFileAndCode(gs, file.file, [code](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    return err->error->what.code < code;
+                });
 
-                gs.tracer().error("\n\n*** clearing cache\n***before:");
-                for (auto &msg : prevErrors) {
-                    const auto &[s, e] = msg->error->loc.position(gs);
-                    gs.tracer().error("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}",
-                                      msg->error->what.code, msg->whatFile.data(gs).path(), msg->error->header, msg->kind,
-                                      s.line, s.column, e.line, e.column);
-                }
-                prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(),
-                                                [code](const unique_ptr<core::ErrorQueueMessage> &err) {
-                                                    return err->error->what.code < code;
-                                                }),
-                                 prevErrors.end());
-                gs.tracer().error("\n\n*** clearing cache\n***after:");
-                for (auto &msg : prevErrors) {
-                    const auto &[s, e] = msg->error->loc.position(gs);
-                    gs.tracer().error("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}",
-                                      msg->error->what.code, msg->whatFile.data(gs).path(), msg->error->header, msg->kind,
-                                      s.line, s.column, e.line, e.column);
-                }
-                // gs.reportErrorsForFile()
-                //   gs.pullErrorsFromTheQueue
-                //   gs.mixErrors
                 gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
             }
             // Required for autogen tests, which need to control which phase to stop after.
@@ -324,10 +321,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
-            gs.tracer().error("\n\n*** after incremental resolver:");
-            // for (auto &file : what) {
-            // gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
-            // }
+            gs.tracer().debug("\n\n*** after incremental resolver:");
+            for (auto &file : what) {
+                clearCacheForFileAndCode(gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    return err->error->what.code > 4999 && err->error->what.code < 6000;
+                });
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
                 return what;
@@ -904,20 +904,13 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
         }
 
-        // gs->tracer().error("\n\n*** after namer:");
+        gs->tracer().debug("\n\n*** after full namer:");
         for (auto &file : what) {
             // gs.clearCache
 
-            auto fref = file.file;
-            auto code = 5000; // namer errors are 40xx
-            gs->errors[fref].erase(std::remove_if(gs->errors[fref].begin(), gs->errors[fref].end(),
-                                                  [code](const unique_ptr<core::ErrorQueueMessage> &err) {
-                                                      return err->error->what.code < code;
-                                                  }),
-                                   gs->errors[fref].end());
-            // gs.reportErrorsForFile()
-            //   gs.pullErrorsFromTheQueue
-            //   gs.mixErrors
+            clearCacheForFileAndCode(*gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                return err->error->what.code < 5000;
+            });
             gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
         }
         // for (auto &file : what) {
@@ -952,7 +945,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
-            gs->tracer().error("\n\n*** after resolver:");
+            gs->tracer().debug("\n\n*** after resolver:");
+
+            for (auto &file : what) {
+                clearCacheForFileAndCode(*gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    return err->error->what.code > 4999 && err->error->what.code < 6000;
+                });
+                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            }
             // for (auto &file : what) {
             // gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
             // }
@@ -1167,7 +1167,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                     typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
                                 } catch (SorbetException &) {
                                     Exception::failInFuzzer();
-                                    gs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                    gs.tracer().debug("Exception typing file: {} (backtrace is above)",
                                                       file.data(gs).path());
                                 }
                                 // Stream out errors
@@ -1448,3 +1448,4 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 }
 
 } // namespace sorbet::realmain::pipeline
+  // #611F69,#243806,#729C1A,#C474D

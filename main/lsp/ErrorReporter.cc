@@ -113,7 +113,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
     fileErrorStatus.lastReportedEpoch = epoch;
 
     auto it = epochTimers.find(epoch);
-    if (!it->second.hasFirstDiagnosticEndTimes && it != epochTimers.end()) {
+    if (it != epochTimers.end() && !it->second.hasFirstDiagnosticEndTimes) {
         it->second.hasFirstDiagnosticEndTimes = true;
         for (auto &timer : it->second.firstDiagnosticLatencyTimers) {
             timer.setEndTime();

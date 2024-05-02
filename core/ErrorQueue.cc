@@ -33,11 +33,18 @@ void ErrorQueue::flushAllErrors(GlobalState &gs) {
     auto collectedErrors = drainAll();
 
     for (auto &[file, errors] : gs.errors) {
-        move(errors.begin(), errors.end(), std::back_inserter(collected[file]));
+        move(errors.begin(), errors.end(), std::back_inserter(collectedErrors[file]));
+        errors.clear();
     }
     gs.errors.clear();
 
     for (auto &it : collectedErrors) {
+        gs.tracer().debug("\n\n*** ErrorQueue::flushAllErrors:");
+        for (const auto &e : it.second) {
+            gs.tracer().debug("\n\t*** code: {} text: {}",
+                              e->error != nullptr ? to_string(e->error->what.code) : "no error code",
+                              e->text.value_or("empty text"));
+        }
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
     }
 }
@@ -61,27 +68,19 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     auto prevErrorsIt = gs.errors.find(file);
     if (prevErrorsIt != gs.errors.end()) {
         auto &prevErrors = (*prevErrorsIt).second;
-        for (auto &e: prevErrors) {
+        for (auto &e : prevErrors) {
             auto cloned = make_unique<ErrorQueueMessage>(e->clone());
             collected[file].emplace_back(move(cloned));
         }
     }
 
-    errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
-}
-
-std::vector<std::unique_ptr<ErrorQueueMessage>> ErrorQueue::getErrorsForFile(const GlobalState &gs,
-                                                                             core::FileRef file) {
-    checkOwned();
-
-    Timer timeit(tracer, "ErrorQueue::getErrorsForFile");
-
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+    gs.tracer().debug("\n\n*** ErrorQueue::flushErrorsForFile:");
+    for (const auto &e : collected[file]) {
+        gs.tracer().debug("\n\t*** code: {} text: {}",
+                          e->error != nullptr ? to_string(e->error->what.code) : "no error code",
+                          e->text.value_or("empty text"));
     }
-
-    return move(collected[file]);
+    errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
 
 void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
@@ -94,11 +93,6 @@ void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
         if (!result.gotItem()) {
             continue;
         }
-        // gs->tracer->error
-        const auto &[s, e] = msg.error->loc.position(gs);
-        gs.tracer().error("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}", msg.error->what.code,
-                          msg.whatFile.data(gs).path(), msg.error->header, msg.kind, s.line, s.column, e.line,
-                          e.column);
 
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
@@ -116,13 +110,11 @@ void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
         errorsToFlush.emplace_back(move(cloned));
     }
 
-    gs.tracer().error("\n\n*** ErrorQueue::flushButRetainErrorsForFile:");
+    gs.tracer().debug("\n\n*** ErrorQueue::flushButRetainErrorsForFile:");
     for (const auto &e : errorsToFlush) {
-        if (e == nullptr) {
-            stopInDebugger();
-            continue;
-        }
-        gs.tracer().error("\n\t*** {}", e->text.value_or("empty text"));
+        gs.tracer().debug("\n\t*** code: {} text: {}",
+                          e->error != nullptr ? to_string(e->error->what.code) : "no error code",
+                          e->text.value_or("empty text"));
     }
     errorFlusher->flushErrors(logger, gs, file, move(errorsToFlush));
 };

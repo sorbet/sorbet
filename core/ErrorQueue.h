@@ -45,7 +45,6 @@ public:
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;
-    std::vector<std::unique_ptr<ErrorQueueMessage>> getErrorsForFile(const GlobalState &gs, core::FileRef file);
 };
 
 } // namespace core
