@@ -50,7 +50,7 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 
-go_register_toolchains()
+go_register_toolchains(version = "1.20.7")
 
 load("@rules_ragel//ragel:ragel.bzl", "ragel_register_toolchains")
 
@@ -87,12 +87,20 @@ rust_register_toolchains(
     ],
 )
 
-BAZEL_VERSION = "5.2.0"
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
-BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "7d9ef51beab5726c55725fb36675c6fed0518576d3ba51fb4067580ddf7627c4"
+bazel_skylib_workspace()
 
-BAZEL_INSTALLER_VERSION_LINUX_ARM64_SHA = "ae50cb7d64aebee986287134ff8ca0335651a0c1685348b3216f3fdfa20ff7e7"
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
 
-BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "645e7c335efc3207905e98f0c56a598b7cb0282d54d9470e80f38fb698064fb3"
+aspect_bazel_lib_dependencies()
 
-BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "bc018ee7980cdf1c3f0099ec1568847a1756a3c00f1f9440bca44c26ceb3d90f"
+BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "c0161a346b9c0d00e6eb3d3e8f9c4dece32f6292520248c5ab2e3527265601c1"
+
+# Bazel for linux-arm64 doesn't have an installer at the moment.
+# We have a workaround in `./bazel` to download the binary directly.
+BAZEL_INSTALLER_VERSION_LINUX_ARM64_SHA = "5afe973cadc036496cac66f1414ca9be36881423f576db363d83afc9084c0c2f"
+
+BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "455589bbaedf26e7bdb949288f777492ba1c53d67fd8329bfe066fb988df0e5c"
+
+BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "c2b5f82dcc1561d25bc05c734a7cc7a5ff58d4e69185f3d6d21b51ddb53b488b"

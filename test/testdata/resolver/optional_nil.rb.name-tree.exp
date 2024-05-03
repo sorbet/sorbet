@@ -1,52 +1,45 @@
-begin
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    begin
-      class ::Test<<C Test>> < (::<todo sym>)
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-        end
-
-        def foo(x, <blk>)
-          x
-        end
-
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-        end
-
-        def bar(y, <blk>)
-          y
-        end
-
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:z, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-        end
-
-        def qux(z, <blk>)
-          z
-        end
-
-        ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:w, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-        end
-
-        def baz(w, <blk>)
-          w
-        end
-
-        <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-        <runtime method definition of foo>
-
-        <runtime method definition of bar>
-
-        <runtime method definition of qux>
-
-        <runtime method definition of baz>
-      end
-      ::Sorbet::Private::Static.keep_for_ide(::Test)
-      <emptyTree>
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Test<<C Test>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:x, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
+
+    def foo(x, <blk>)
+      x
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:y, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def bar(y, <blk>)
+      y
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:z, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def qux(z, <blk>)
+      z
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:w, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def baz(w, <blk>)
+      w
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar>
+
+    <runtime method definition of qux>
+
+    <runtime method definition of baz>
   end
-  <emptyTree>
 end

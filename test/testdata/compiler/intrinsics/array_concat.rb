@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
 
 def test_array_concat
   p ([1, 2, 3].concat)
@@ -14,11 +13,3 @@ end
 
 test_array_concat
 
-# INITIAL-LABEL: define internal i64 @"func_Object#17test_array_concat"
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL: call i64 @sorbet_int_rb_ary_concat_multi(
-# INITIAL{LITERAL}: }

@@ -478,7 +478,7 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope) {
     return scope;
 }
 
-bool startsWithPackageSpecRegistry(ast::UnresolvedConstantLit *cnst) {
+bool startsWithPackageSpecRegistry(const ast::UnresolvedConstantLit *cnst) {
     while (cnst != nullptr) {
         if (auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope)) {
             return scope->symbol == core::Symbols::PackageSpecRegistry();
@@ -1103,7 +1103,7 @@ struct PackageSpecBodyWalk {
         }
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>

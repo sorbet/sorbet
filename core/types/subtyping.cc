@@ -1449,6 +1449,8 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
 template <class T>
 bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector) {
+    constexpr auto shouldAddErrorDetails = std::is_same<T, ErrorSection::Collector>::value;
+
     if (t1 == t2) {
         return true;
     }
@@ -1472,8 +1474,29 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     }
 
     if (auto *a2 = cast_type<AndType>(t2)) { // 2, 5
-        return Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode, errorDetailsCollector) &&
-               Types::isSubTypeUnderConstraint(gs, constr, t1, a2->right, mode, errorDetailsCollector);
+        auto subCollectorLeft = errorDetailsCollector.newCollector();
+        auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, t1, a2->left, mode, subCollectorLeft);
+        if (!isSubTypeOfLeft) {
+            if constexpr (shouldAddErrorDetails) {
+                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the left side of the `{}`)",
+                                                   t1.show(gs), a2->left.show(gs), "T.all");
+                subCollectorLeft.message = message;
+                errorDetailsCollector.addErrorDetails(move(subCollectorLeft));
+            }
+            return isSubTypeOfLeft;
+        }
+
+        auto subCollectorRight = errorDetailsCollector.newCollector();
+        auto isSubTypeOfRight = Types::isSubTypeUnderConstraint(gs, constr, t1, a2->right, mode, subCollectorRight);
+        if constexpr (shouldAddErrorDetails) {
+            if (!isSubTypeOfRight) {
+                auto message = ErrorColors::format("`{}` is not a subtype of `{}` (the right side of the `{}`)",
+                                                   t1.show(gs), a2->right.show(gs), "T.all");
+                subCollectorRight.message = message;
+                errorDetailsCollector.addErrorDetails(move(subCollectorRight));
+            }
+        }
+        return isSubTypeOfRight;
     }
 
     auto *a1 = cast_type<AndType>(t1);

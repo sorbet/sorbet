@@ -170,24 +170,12 @@ bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-te
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=18](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(<root>)):
+bb7[rubyRegionId=0, firstDead=6](<block-pre-call-temp>$25: Sorbet::Private::Static::Void, <selfRestore>$26: T.class_of(<root>)):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$25, sig>
     <self>: T.class_of(<root>) = <selfRestore>$26
     <cfgAlias>$42: T.class_of(T::Sig) = alias <C Sig>
     <cfgAlias>$44: T.class_of(T) = alias <C T>
     <statTemp>$39: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$42: T.class_of(T::Sig))
-    <cfgAlias>$49: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$51: T.class_of(Base)[Base, T.untyped] = alias <C Base>
-    <statTemp>$47: Sorbet::Private::Static::Void = <cfgAlias>$49: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$51: T.class_of(Base)[Base, T.untyped])
-    <cfgAlias>$56: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$58: T.class_of(Concrete) = alias <C Concrete>
-    <statTemp>$54: Sorbet::Private::Static::Void = <cfgAlias>$56: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$58: T.class_of(Concrete))
-    <cfgAlias>$61: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$63: T.class_of(Base)[Base, T.untyped] = alias <C Base>
-    <statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$63: T.class_of(Base)[Base, T.untyped])
-    <cfgAlias>$68: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$70: T.class_of(Other) = alias <C Other>
-    <statTemp>$66: Sorbet::Private::Static::Void = <cfgAlias>$68: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$70: T.class_of(Other))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

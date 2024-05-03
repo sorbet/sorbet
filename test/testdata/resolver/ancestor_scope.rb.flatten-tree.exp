@@ -1,19 +1,11 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Other)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test)
-          ::Sorbet::Private::Static.keep_for_ide(::Other)
-          <emptyTree>
-        end
         <cast:assert_type!>(::Test.new(), Test::Mixin, ::Test::Mixin)
         <cast:assert_type!>(::Test.new(), Test::Other, ::Test::Other)
         <cast:assert_type!>(::Test.new(), Other, ::Other)
@@ -27,18 +19,12 @@ begin
     end
   end
   class ::Test<<C Test>> < (::Other, ::Test::Mixin, ::Test::Other)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test::Mixin)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::Test::Other)
-          <emptyTree>
-        end
         <self>.include(::Test::Mixin)
         <self>.include(::Test::Other)
         <emptyTree>

@@ -650,12 +650,6 @@ void GlobalState::initEmpty() {
     klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), core::Names::Constants::Compiler());
-    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
-    ENFORCE(klass == Symbols::T_Private_Compiler());
-    klass = Symbols::T_Private_Compiler().data(*this)->singletonClass(*this);
-    ENFORCE(klass == Symbols::T_Private_CompilerSingleton());
-
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE(klass == Symbols::MagicBindToAttachedClass());
@@ -679,6 +673,9 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
     ENFORCE(method == Symbols::T_Generic_squareBrackets());
+
+    method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::type(), Types::top()).build();
+    ENFORCE(method == Symbols::Kernel_lambdaTLet());
 
     typeArgument =
         enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
@@ -1298,7 +1295,13 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
             counterInc("symbols.hit");
-            typeArg.data(*this)->addLoc(*this, loc);
+            if (!symbolTableFrozen) {
+                typeArg.data(*this)->addLoc(*this, loc);
+            } else {
+                // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
+                // checking. Don't mutate the symbol table in those cases. This loc should already be there.
+                ENFORCE(!loc.exists() || absl::c_count(typeArg.data(*this)->locs(), loc) == 1);
+            }
             return typeArg;
         }
     }
@@ -1429,7 +1432,13 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
 
         // Ensures that locs get properly updated on the fast path
         auto fieldRef = store.asFieldRef();
-        fieldRef.data(*this)->addLoc(*this, loc);
+        if (!symbolTableFrozen) {
+            fieldRef.data(*this)->addLoc(*this, loc);
+        } else {
+            // Sometimes this method is called when the symbol table is frozen for the purposes of sanity
+            // checking. Don't mutate the symbol table in those cases. This loc should already be there.
+            ENFORCE(!loc.exists() || absl::c_count(fieldRef.data(*this)->locs(), loc) == 1);
+        }
         return fieldRef;
     }
 

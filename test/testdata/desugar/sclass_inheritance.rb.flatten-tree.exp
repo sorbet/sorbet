@@ -1,5 +1,4 @@
 begin
-  <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
     def main(<blk>)
       begin
@@ -9,29 +8,16 @@ begin
       end
     end
 
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::MM)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::B)
-          <emptyTree>
-        end
-        begin
-          <emptyTree>
-          ::Sorbet::Private::Static.keep_for_ide(::C)
-          ::Sorbet::Private::Static.keep_for_ide(::A)
-          <emptyTree>
-        end
         <runtime method definition of main>
         <self>.main()
         <emptyTree>
@@ -44,12 +30,10 @@ begin
     end
   end
   class ::A<<C A>> < (::<todo sym>)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        ::Sorbet::Private::Static.keep_for_ide(::MM)
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:A>> < (::MM)
@@ -79,11 +63,10 @@ begin
     end
   end
   class ::C<<C C>> < (::A)
+    <emptyTree>
+
     def self.<static-init>(<blk>)
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
+      <emptyTree>
     end
   end
   class <singleton class><<Class:C>> < ()

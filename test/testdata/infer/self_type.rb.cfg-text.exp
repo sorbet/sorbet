@@ -16,48 +16,30 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[rubyRegionId=0, firstDead=-1]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(Parent) = alias <C Parent>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Parent))
-    <cfgAlias>$14: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$16: T.class_of(Normal) = alias <C Normal>
-    <statTemp>$12: Sorbet::Private::Static::Void = <cfgAlias>$14: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$16: T.class_of(Normal))
-    <cfgAlias>$19: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$21: T.class_of(Parent) = alias <C Parent>
-    <statTemp>$17: Sorbet::Private::Static::Void = <cfgAlias>$19: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$21: T.class_of(Parent))
-    <cfgAlias>$26: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$28: T.class_of(Generic) = alias <C Generic>
-    <statTemp>$24: Sorbet::Private::Static::Void = <cfgAlias>$26: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$28: T.class_of(Generic))
-    <cfgAlias>$31: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$33: T.class_of(Parent) = alias <C Parent>
-    <statTemp>$29: Sorbet::Private::Static::Void = <cfgAlias>$31: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$33: T.class_of(Parent))
-    <cfgAlias>$36: T.class_of(Normal) = alias <C Normal>
-    keep_for_ide$35: T.class_of(Normal) = <cfgAlias>$36
-    keep_for_ide$35: T.untyped = <keep-alive> keep_for_ide$35
-    <cfgAlias>$40: T.class_of(Normal) = alias <C Normal>
-    <statTemp>$38: Normal = <cfgAlias>$40: T.class_of(Normal).new()
-    <castTemp>$37: Normal = <statTemp>$38: Normal.returns_self()
-    <statTemp>$34: Normal = cast(<castTemp>$37: Normal, Normal);
-    <cfgAlias>$44: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$46: T.class_of(String) = alias <C String>
-    keep_for_ide$42: Runtime object representing type: Generic[String] = <cfgAlias>$44: T.class_of(Generic).[](<cfgAlias>$46: T.class_of(String))
-    keep_for_ide$42: T.untyped = <keep-alive> keep_for_ide$42
-    <cfgAlias>$51: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$53: T.class_of(String) = alias <C String>
-    <statTemp>$49: Runtime object representing type: Generic[String] = <cfgAlias>$51: T.class_of(Generic).[](<cfgAlias>$53: T.class_of(String))
-    <statTemp>$48: Generic[String] = <statTemp>$49: Runtime object representing type: Generic[String].new()
-    <castTemp>$47: Generic[String] = <statTemp>$48: Generic[String].returns_self()
-    <statTemp>$41: Generic[String] = cast(<castTemp>$47: Generic[String], Generic[String]);
-    <cfgAlias>$58: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$60: T.class_of(B) = alias <C B>
-    <statTemp>$56: Sorbet::Private::Static::Void = <cfgAlias>$58: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$60: T.class_of(B))
-    <cfgAlias>$64: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$66: T.class_of(String) = alias <C String>
-    <statTemp>$62: Runtime object representing type: Generic[String] = <cfgAlias>$64: T.class_of(Generic).[](<cfgAlias>$66: T.class_of(String))
-    a: Generic[String] = <statTemp>$62: Runtime object representing type: Generic[String].new()
-    <cfgAlias>$71: T.class_of(B) = alias <C B>
-    <ifTemp>$68: T::Boolean = a: Generic[String].is_a?(<cfgAlias>$71: T.class_of(B))
-    <ifTemp>$68 -> (T::Boolean ? bb2 : bb4)
+    <cfgAlias>$5: T.class_of(Normal) = alias <C Normal>
+    keep_for_ide$4: T.class_of(Normal) = <cfgAlias>$5
+    keep_for_ide$4: T.untyped = <keep-alive> keep_for_ide$4
+    <cfgAlias>$9: T.class_of(Normal) = alias <C Normal>
+    <statTemp>$7: Normal = <cfgAlias>$9: T.class_of(Normal).new()
+    <castTemp>$6: Normal = <statTemp>$7: Normal.returns_self()
+    <statTemp>$3: Normal = cast(<castTemp>$6: Normal, Normal);
+    <cfgAlias>$13: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$15: T.class_of(String) = alias <C String>
+    keep_for_ide$11: Runtime object representing type: Generic[String] = <cfgAlias>$13: T.class_of(Generic).[](<cfgAlias>$15: T.class_of(String))
+    keep_for_ide$11: T.untyped = <keep-alive> keep_for_ide$11
+    <cfgAlias>$20: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$22: T.class_of(String) = alias <C String>
+    <statTemp>$18: Runtime object representing type: Generic[String] = <cfgAlias>$20: T.class_of(Generic).[](<cfgAlias>$22: T.class_of(String))
+    <statTemp>$17: Generic[String] = <statTemp>$18: Runtime object representing type: Generic[String].new()
+    <castTemp>$16: Generic[String] = <statTemp>$17: Generic[String].returns_self()
+    <statTemp>$10: Generic[String] = cast(<castTemp>$16: Generic[String], Generic[String]);
+    <cfgAlias>$26: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$28: T.class_of(String) = alias <C String>
+    <statTemp>$24: Runtime object representing type: Generic[String] = <cfgAlias>$26: T.class_of(Generic).[](<cfgAlias>$28: T.class_of(String))
+    a: Generic[String] = <statTemp>$24: Runtime object representing type: Generic[String].new()
+    <cfgAlias>$33: T.class_of(B) = alias <C B>
+    <ifTemp>$30: T::Boolean = a: Generic[String].is_a?(<cfgAlias>$33: T.class_of(B))
+    <ifTemp>$30 -> (T::Boolean ? bb2 : bb4)
 
 # backedges
 # - bb7(rubyRegionId=0)
@@ -67,43 +49,34 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 bb2[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), a: T.all(Generic[String], B)):
-    <cfgAlias>$74: T.class_of(T) = alias <C T>
-    <cfgAlias>$77: T.class_of(Generic) = alias <C Generic>
-    <cfgAlias>$79: T.class_of(String) = alias <C String>
-    <statTemp>$75: Runtime object representing type: Generic[String] = <cfgAlias>$77: T.class_of(Generic).[](<cfgAlias>$79: T.class_of(String))
-    <cfgAlias>$81: T.class_of(B) = alias <C B>
-    keep_for_ide$72: Runtime object representing type: T.all(Generic[String], B) = <cfgAlias>$74: T.class_of(T).all(<statTemp>$75: Runtime object representing type: Generic[String], <cfgAlias>$81: T.class_of(B))
-    keep_for_ide$72: T.untyped = <keep-alive> keep_for_ide$72
-    <castTemp>$82: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()
-    <statTemp>$67: T.all(Generic[String], B) = cast(<castTemp>$82: T.all(Generic[String], B), T.all(Generic[String], B));
+    <cfgAlias>$36: T.class_of(T) = alias <C T>
+    <cfgAlias>$39: T.class_of(Generic) = alias <C Generic>
+    <cfgAlias>$41: T.class_of(String) = alias <C String>
+    <statTemp>$37: Runtime object representing type: Generic[String] = <cfgAlias>$39: T.class_of(Generic).[](<cfgAlias>$41: T.class_of(String))
+    <cfgAlias>$43: T.class_of(B) = alias <C B>
+    keep_for_ide$34: Runtime object representing type: T.all(Generic[String], B) = <cfgAlias>$36: T.class_of(T).all(<statTemp>$37: Runtime object representing type: Generic[String], <cfgAlias>$43: T.class_of(B))
+    keep_for_ide$34: T.untyped = <keep-alive> keep_for_ide$34
+    <castTemp>$44: T.all(Generic[String], B) = a: T.all(Generic[String], B).returns_self()
+    <statTemp>$29: T.all(Generic[String], B) = cast(<castTemp>$44: T.all(Generic[String], B), T.all(Generic[String], B));
     <unconditional> -> bb4
 
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb2(rubyRegionId=0)
 bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
-    <cfgAlias>$88: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$90: T.class_of(Array)[T::Array[T.untyped]] = alias <C Array>
-    <statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(Array)[T::Array[T.untyped]])
-    <cfgAlias>$94: T.class_of(Integer) = alias <C Integer>
-    <cfgAlias>$96: T.class_of(Integer) = alias <C Integer>
-    <magic>$97: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$92: [T.class_of(Integer), T.class_of(Integer)] = <magic>$97: T.class_of(<Magic>).<build-array>(<cfgAlias>$94: T.class_of(Integer), <cfgAlias>$96: T.class_of(Integer))
-    keep_for_ide$92: T.untyped = <keep-alive> keep_for_ide$92
-    <arrayTemp>$100: Integer(1) = 1
-    <arrayTemp>$101: Integer(2) = 2
-    <magic>$102: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$99: [Integer(1), Integer(2)] = <magic>$102: T.class_of(<Magic>).<build-array>(<arrayTemp>$100: Integer(1), <arrayTemp>$101: Integer(2))
-    <castTemp>$98: [Integer(1), Integer(2)] = <statTemp>$99: [Integer(1), Integer(2)].returns_self()
-    <statTemp>$91: [Integer, Integer] = cast(<castTemp>$98: [Integer(1), Integer(2)], [Integer, Integer]);
-    <cfgAlias>$107: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$109: T.class_of(A) = alias <C A>
-    <statTemp>$105: Sorbet::Private::Static::Void = <cfgAlias>$107: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$109: T.class_of(A))
-    <cfgAlias>$114: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$116: T.class_of(B) = alias <C B>
-    <statTemp>$112: Sorbet::Private::Static::Void = <cfgAlias>$114: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$116: T.class_of(B))
-    <cfgAlias>$119: T.class_of(A) = alias <C A>
-    s: A = <cfgAlias>$119: T.class_of(A).new()
+    <cfgAlias>$49: T.class_of(Integer) = alias <C Integer>
+    <cfgAlias>$51: T.class_of(Integer) = alias <C Integer>
+    <magic>$52: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$47: [T.class_of(Integer), T.class_of(Integer)] = <magic>$52: T.class_of(<Magic>).<build-array>(<cfgAlias>$49: T.class_of(Integer), <cfgAlias>$51: T.class_of(Integer))
+    keep_for_ide$47: T.untyped = <keep-alive> keep_for_ide$47
+    <arrayTemp>$55: Integer(1) = 1
+    <arrayTemp>$56: Integer(2) = 2
+    <magic>$57: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$54: [Integer(1), Integer(2)] = <magic>$57: T.class_of(<Magic>).<build-array>(<arrayTemp>$55: Integer(1), <arrayTemp>$56: Integer(2))
+    <castTemp>$53: [Integer(1), Integer(2)] = <statTemp>$54: [Integer(1), Integer(2)].returns_self()
+    <statTemp>$46: [Integer, Integer] = cast(<castTemp>$53: [Integer(1), Integer(2)], [Integer, Integer]);
+    <cfgAlias>$60: T.class_of(A) = alias <C A>
+    s: A = <cfgAlias>$60: T.class_of(A).new()
     <unconditional> -> bb5
 
 # backedges
@@ -112,13 +85,13 @@ bb4[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>)):
 # - bb9(rubyRegionId=0)
 bb5[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
     # outerLoops: 1
-    <whileTemp>$122: T.untyped = <self>: T.class_of(<root>).rnd()
-    <whileTemp>$122 -> (T.untyped ? bb8 : bb7)
+    <whileTemp>$63: T.untyped = <self>: T.class_of(<root>).rnd()
+    <whileTemp>$63 -> (T.untyped ? bb8 : bb7)
 
 # backedges
 # - bb5(rubyRegionId=0)
 bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
-    <statTemp>$130: NilClass = <self>: T.class_of(<root>).puts(s: A)
+    <statTemp>$71: NilClass = <self>: T.class_of(<root>).puts(s: A)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
@@ -126,16 +99,16 @@ bb7[rubyRegionId=0, firstDead=2](<self>: T.class_of(<root>), s: A):
 # - bb5(rubyRegionId=0)
 bb8[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: A):
     # outerLoops: 1
-    <cfgAlias>$128: T.class_of(B) = alias <C B>
-    <ifTemp>$125: T::Boolean = s: A.is_a?(<cfgAlias>$128: T.class_of(B))
-    <ifTemp>$125 -> (T::Boolean ? bb9 : bb5)
+    <cfgAlias>$69: T.class_of(B) = alias <C B>
+    <ifTemp>$66: T::Boolean = s: A.is_a?(<cfgAlias>$69: T.class_of(B))
+    <ifTemp>$66 -> (T::Boolean ? bb9 : bb5)
 
 # backedges
 # - bb8(rubyRegionId=0)
 bb9[rubyRegionId=0, firstDead=-1](<self>: T.class_of(<root>), s: T.all(A, B)):
     # outerLoops: 1
-    <statTemp>$129: T.all(A, B) = s
-    s: T.all(A, B) = <statTemp>$129: T.all(A, B).returns_self()
+    <statTemp>$70: T.all(A, B) = s
+    s: T.all(A, B) = <statTemp>$70: T.all(A, B).returns_self()
     <unconditional> -> bb5
 
 }

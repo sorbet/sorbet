@@ -25,11 +25,6 @@ build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE
 # this flag here once flipped in Bazel again.
 build --incompatible_strict_action_env
 
-# Enforce that we don't rely on `@bazel_tools//platforms` and instead use the
-# `@platforms` repository for constraint resolution.  See
-# https://github.com/bazelbuild/bazel/issues/8622 for more information.
-build --incompatible_use_platforms_repo_for_constraints
-
 # C / C++ Options
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
@@ -65,7 +60,6 @@ build --copt=-Wno-macro-redefined
 build:dbg --copt=-O0
 build:dbg --compilation_mode=dbg
 build:dbg --config=debugsymbols
-build:dbg --config=rubydbg
 
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 

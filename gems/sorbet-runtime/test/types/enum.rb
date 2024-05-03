@@ -370,6 +370,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
 
   describe 'string value conversion assertions' do
     ENUM_CONVERSION_MSG = /Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead./.freeze
+
     before do
       T::Configuration.expects(:soft_assert_handler).never
     end
@@ -395,8 +396,9 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     ENUM_CONVERSION_MSG_LEGACY = 'Implicit conversion of Enum instances to strings is not allowed. Call #serialize instead.'
     before do
       T::Configuration.enable_legacy_t_enum_migration_mode
-      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
+      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message, storytime:|
         assert_equal(ENUM_CONVERSION_MSG_LEGACY, message)
+        assert_includes(storytime[:caller_location], __FILE__)
       end
     end
 
@@ -456,8 +458,9 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     ENUM_COMPARE_MSG = 'Enum to string comparison not allowed. Compare to the Enum instance directly instead. See go/enum-migration'
     before do
       T::Configuration.enable_legacy_t_enum_migration_mode
-      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message|
+      T::Configuration.expects(:soft_assert_handler).at_least_once.with do |message, storytime:|
         assert_equal(ENUM_COMPARE_MSG, message)
+        assert_includes(storytime[:caller_location], __FILE__)
       end
     end
 

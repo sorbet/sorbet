@@ -113,7 +113,7 @@ module T::Configuration
   # statically, so that methods don't have to guard themselves from being
   # called incorrectly by untyped code.
   #
-  # @param [:never, :compiled, :tests, :always] default_checked_level
+  # @param [:never, :tests, :always] default_checked_level
   def self.default_checked_level=(default_checked_level)
     T::Private::RuntimeLevels.default_checked_level = default_checked_level
   end
@@ -536,6 +536,7 @@ module T::Configuration
 
   @legacy_t_enum_migration_mode = false
   def self.enable_legacy_t_enum_migration_mode
+    T::Enum.include(T::Enum::LegacyMigrationMode)
     @legacy_t_enum_migration_mode = true
   end
   def self.disable_legacy_t_enum_migration_mode

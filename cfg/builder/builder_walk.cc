@@ -169,6 +169,21 @@ InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     return make_insn<Alias>(typeParam);
 }
 
+ast::Send *isKernelProcOrLambda(ast::ExpressionPtr &expr) {
+    auto *send = ast::cast_tree<ast::Send>(expr);
+    if (send == nullptr || send->hasNonBlockArgs() ||
+        (send->fun != core::Names::lambda() && send->fun != core::Names::proc())) {
+        return nullptr;
+    }
+
+    auto *recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+    if (recv == nullptr || recv->symbol != core::Symbols::Kernel()) {
+        return nullptr;
+    }
+
+    return send;
+}
+
 } // namespace
 
 void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc) {
@@ -924,12 +939,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Cast &c) {
-                // This is kind of gross, but it is the only way to ensure that the bits in the
-                // type expression make it into the CFG for LSP to hit on their locations.
-                LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
-                // Ensure later passes don't delete the results of the typeExpr.
-                current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                if (auto *kernelLambda = isKernelProcOrLambda(c.arg)) {
+                    kernelLambda->fun = core::Names::lambdaTLet();
+                    kernelLambda->addPosArg(move(c.typeExpr));
+                } else {
+                    // This is kind of gross, but it is the only way to ensure that the bits in the
+                    // type expression make it into the CFG for LSP to hit on their locations.
+                    LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
+                    current = walk(cctx.withTarget(deadSym), c.typeExpr, current);
+                    // Ensure later passes don't delete the results of the typeExpr.
+                    current->exprs.emplace_back(deadSym, core::LocOffsets::none(), make_insn<KeepAlive>(deadSym));
+                }
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 core::LocOffsets argLoc = c.arg.loc();
                 current = walk(cctx.withTarget(tmp), c.arg, current);

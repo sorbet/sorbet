@@ -63,7 +63,7 @@ def cmd_rubysourcemap(debugger, command, result, dict):
     dir_search = re.search('^File: (.*)/main.c', output)
     if dir_search:
         dirname = dir_search.group(1)
-        ruby_path = ('%s/bazel-sorbet/bazel/sorbet_ruby_2_7_for_compiler' % project_root)
+        ruby_path = ('%s/bazel-sorbet/bazel/sorbet_ruby_3_1' % project_root)
         source_map_command = 'settings set -- target.source-map %s %s' % (dirname, ruby_path)
         print('(lldb) %s' % source_map_command)
         ci.HandleCommand(source_map_command, result)

@@ -101,7 +101,7 @@ module T::Private::Methods
       if !decl.checked.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if (level == :never || level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+      if level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
@@ -119,7 +119,7 @@ module T::Private::Methods
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
-      if decl.checked == :never || decl.checked == :compiled
+      if decl.checked == :never
         raise BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
       end
 
@@ -222,7 +222,7 @@ module T::Private::Methods
       end
       if decl.checked.equal?(ARG_NOT_PROVIDED)
         default_checked_level = T::Private::RuntimeLevels.default_checked_level
-        if (default_checked_level == :never || default_checked_level == :compiled) && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+        if default_checked_level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
           raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
         end
         decl.checked = default_checked_level

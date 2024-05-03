@@ -1,14 +1,11 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=8]():
+bb0[rubyRegionId=0, firstDead=5]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(Sorbet::Private::Static) = alias <C Static>
-    <cfgAlias>$9: T.class_of(Main) = alias <C Main>
-    <statTemp>$5: Sorbet::Private::Static::Void = <cfgAlias>$7: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$9: T.class_of(Main))
-    <cfgAlias>$13: T.class_of(Main) = alias <C Main>
-    <statTemp>$11: Main = <cfgAlias>$13: T.class_of(Main).new()
-    <statTemp>$10: T.untyped = <statTemp>$11: Main.main()
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <cfgAlias>$5: T.class_of(Main) = alias <C Main>
+    <statTemp>$3: Main = <cfgAlias>$5: T.class_of(Main).new()
+    <returnMethodTemp>$2: T.untyped = <statTemp>$3: Main.main()
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges

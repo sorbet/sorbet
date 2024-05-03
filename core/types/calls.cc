@@ -134,7 +134,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     if (method.exists()) {
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
-            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
             if (res.returnType != nullptr) {
@@ -151,7 +151,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     if (method.exists()) {
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
-            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+            DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
             if (res.returnType != nullptr) {
@@ -621,6 +621,17 @@ Loc expandToLeadingComma(const GlobalState &gs, Loc loc) {
     } else {
         return loc;
     }
+}
+
+void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePtr blockType) {
+    if (!blockType) {
+        blockType = Types::untyped(component.method);
+    }
+
+    component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
+    blockType = component.constr->isSolved() ? Types::instantiate(gs, blockType, *component.constr)
+                                             : Types::approximate(gs, blockType, *component.constr);
+    component.blockPreType = blockType;
 }
 
 // This implements Ruby's argument matching logic (assigning values passed to a
@@ -1500,15 +1511,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
-        if (!blockType) {
-            blockType = Types::untyped(method);
-        }
-
-        component.blockReturnType = Types::getProcReturnType(gs, Types::dropNil(gs, blockType));
-        blockType = constr->isSolved() ? Types::instantiate(gs, blockType, *constr)
-                                       : Types::approximate(gs, blockType, *constr);
-        component.blockPreType = blockType;
-        component.blockSpec = bspec.deepCopy();
+        handleBlockType(gs, component, blockType);
+        component.rebind = bspec.rebind;
+        component.rebindLoc = bspec.loc;
     }
 
     TypePtr &resultType = result.returnType;
@@ -4149,6 +4154,31 @@ public:
     }
 } Kernel_proc;
 
+class Kernel_lambdaTLet : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.block == nullptr) {
+            return;
+        }
+
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto procType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        if (!Types::isSubType(gs, procType, Types::nilableProcClass())) {
+            if (auto e = gs.beginError(args.argLoc(0), core::errors::Infer::CastTypeMismatch)) {
+                e.setHeader("Lambda type annotation must be either `{}` or a `{}` type (and possibly nilable)", "Proc",
+                            "T.proc");
+                e.addErrorLine(args.callLoc(), "For lambda here");
+            }
+            return;
+        }
+
+        handleBlockType(gs, res.main, procType);
+    }
+} Kernel_lambdaTLet;
+
 class Kernel_raise : public IntrinsicMethod {
 public:
     vector<NameRef> dispatchesTo() const override {
@@ -4491,6 +4521,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambdaTLet(), &Kernel_lambdaTLet},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::raise(), &Kernel_raise},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::fail(), &Kernel_raise},
 

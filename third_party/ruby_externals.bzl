@@ -46,59 +46,7 @@ def register_ruby_dependencies():
     )
 
     ruby_build = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD"
-    ruby_2_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_2.BUILD"
     ruby_3_3_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_3_3.BUILD"
-    ruby_for_compiler_build = "@com_stripe_ruby_typer//third_party/ruby:ruby_for_compiler.BUILD"
-
-    http_archive(
-        name = "sorbet_ruby_2_6",
-        urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
-        sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
-        strip_prefix = "ruby-2.6.5",
-        build_file = ruby_2_build,
-    )
-
-    urls = _ruby_urls("2.7/ruby-2.7.2.tar.gz")
-    sha256 = "6e5706d0d4ee4e1e2f883db9d768586b4d06567debea353c796ec45e8321c3d4"
-    strip_prefix = "ruby-2.7.2"
-
-    http_archive(
-        name = "sorbet_ruby_2_7_unpatched",
-        urls = urls,
-        sha256 = sha256,
-        strip_prefix = strip_prefix,
-        build_file = ruby_2_build,
-    )
-
-    http_archive(
-        name = "sorbet_ruby_2_7",
-        urls = urls,
-        sha256 = sha256,
-        strip_prefix = strip_prefix,
-        build_file = ruby_2_build,
-        patches = [
-            "@com_stripe_ruby_typer//third_party/ruby:gc-remove-write-barrier.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:dtoa.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:penelope_procc.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:gc-fix-malloc-increase-calculation.patch",  # https://github.com/ruby/ruby/pull/4860
-            "@com_stripe_ruby_typer//third_party/ruby:gc-add-need-major-by.patch",  # https://github.com/ruby/ruby/pull/6791
-            "@com_stripe_ruby_typer//third_party/ruby:thp.patch",
-        ],
-    )
-
-    http_archive(
-        name = "sorbet_ruby_2_7_for_compiler",
-        urls = urls,
-        sha256 = sha256,
-        strip_prefix = strip_prefix,
-        build_file = ruby_for_compiler_build,
-        patches = [
-            "@com_stripe_ruby_typer//third_party/ruby:sorbet_ruby_2_7_for_compiler.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:dtoa-p1.patch",
-        ],
-        patch_tool = "patch",
-        patch_args = ["-p1"],
-    )
 
     http_archive(
         name = "sorbet_ruby_3_1",
@@ -116,26 +64,10 @@ def register_ruby_dependencies():
     )
 
     http_archive(
-        name = "sorbet_ruby_3_2",
-        urls = _ruby_urls("3.2/ruby-3.2.2.tar.gz"),
-        sha256 = "96c57558871a6748de5bc9f274e93f4b5aad06cd8f37befa0e8d94e7b8a423bc",
-        strip_prefix = "ruby-3.2.2",
-        build_file = ruby_build,
-    )
-
-    http_archive(
-        name = "sorbet_ruby_3_3_preview",
-        urls = _ruby_urls("3.3/ruby-3.3.0-preview2.tar.gz"),
-        sha256 = "30ce8b0fe11b37b5ac088f5a5765744b935eac45bb89a9e381731533144f5991",
-        strip_prefix = "ruby-3.3.0-preview2",
-        build_file = ruby_3_3_build,
-    )
-
-    http_archive(
         name = "sorbet_ruby_3_3",
-        urls = _ruby_urls("3.3/ruby-3.3.0.tar.gz"),
-        sha256 = "96518814d9832bece92a85415a819d4893b307db5921ae1f0f751a9a89a56b7d",
-        strip_prefix = "ruby-3.3.0",
+        urls = _ruby_urls("3.3/ruby-3.3.1.tar.gz"),
+        sha256 = "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99",
+        strip_prefix = "ruby-3.3.1",
         build_file = ruby_3_3_build,
         patch_tool = "patch",
         patch_args = ["-p1"],

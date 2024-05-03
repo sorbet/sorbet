@@ -871,6 +871,9 @@ that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
 
+To fix, ensure that the `include` or `extend` line is given at least one
+argument.
+
 ## 4002
 
 Sorbet requires seeing the complete inheritance hierarchy in a codebase. To do
@@ -942,6 +945,8 @@ Sorbet parses the syntax of `include` and `extend` declarations, even in
 that all constants in a Sorbet codebase must resolve, even at `# typed: false`.
 Parsing `include` blocks is required for this, so incorrect usages of `include`
 are reported when encountered.
+
+To fix, ensure that the `include` or `extend` line is not given a block.
 
 ## 4006
 
@@ -1449,9 +1454,68 @@ A class was changed to inherit from a different superclass.
 class A; end
 class B; end
 
+if RUBY_VERSION < "3.0"
+  class C < A; end
+else
+  class C < B; end # error: Parent of class C redefined from A to B
+end
+```
+
+Sorbet requires that a project have a single, unified inheritance hierarchy. A
+class cannot sometimes inherit from one class and sometimes inherit from another
+class depending on code at runtime.
+
+If it's simply not possible to refactor the codebase so that the given class
+always descends from one superclass, the next path forward is to hide all but
+one of the superclasses of this class. For example, using a trick like this with
+`# typed: ignore` files:
+
+```ruby
+# -- main.rb --
+class A; end
+class B; end
+
+if RUBY_VERSION < "3.0"
+  require_relative './c_a.rb'
+else
+  require_relative './c_b.rb'
+end
+
+class C
+  # ...
+end
+
+# -- c_a.rb --
+# typed: ignore
 class C < A; end
+
+# -- c_b.rb --
 class C < B; end
 ```
+
+In this example, Sorbet will think that `C` always descends from `B` statically,
+even though sometimes it may descend from `A`.
+
+Another trick to hide the superclass involves using `Class.new` to hide the
+definition of `C` from Sorbet entirely.
+
+Neither of these tricks work when one of the class definitions with a
+conflicting superclass definition comes from Sorbet's definitions for standard
+library classes. For example, this happens when generating an RBI for a newer
+version of a gem which is also include in Sorbet's stdlib RBI payload.
+
+In these cases, Sorbet provides the
+`--suppress-payload-superclass-redefinition-for` command line flag, which
+suppresses the superclass redefinition error for that class. For example, if the
+class `C` above were a class defined in Sorbet's payload, this would silence the
+errors:
+
+```
+srb tc --suppress-payload-superclass-redefinition-for=C
+```
+
+This flag can be repeated once per payload class with a superclass redefinition
+error.
 
 ## 5013
 

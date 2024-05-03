@@ -1056,7 +1056,8 @@ struct DispatchComponent {
     TypePtr sendTp;
     TypePtr blockReturnType;
     TypePtr blockPreType;
-    ArgInfo blockSpec; // used only by LoadSelf to change type of self inside method.
+    ClassOrModuleRef rebind;
+    Loc rebindLoc;
     std::unique_ptr<TypeConstraint> constr;
 };
 
@@ -1071,7 +1072,7 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,

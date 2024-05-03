@@ -3,6 +3,20 @@
 class T::Enum
   extend T::Props::CustomType
 
+  # Assume that this is always included (even if it isn't) so that it never
+  # shows up in RBI files generated from reflection.
+  module LegacyMigrationMode
+    sig {params(other: T.anything).returns(T::Boolean)}
+    def ==(other); end
+
+    sig {params(other: T.anything).returns(T::Boolean)}
+    def ===(other); end
+
+    sig {params(method: Symbol, other: T.untyped).void}
+    private def comparison_assertion_failed(method, other); end
+  end
+  include LegacyMigrationMode
+
   ## Enum class methods ##
 
   # All the values defined in the Enum class
@@ -64,6 +78,9 @@ class T::Enum
 
   sig {returns(String)}
   def to_s; end
+
+  sig {returns(String)}
+  def to_str; end
 
   sig {returns(String)}
   def inspect; end

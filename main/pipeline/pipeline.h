@@ -25,15 +25,16 @@ std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileR
                                    WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
-void unpartitionPackageFiles(std::vector<ast::ParsedFile> &indexed, std::vector<ast::ParsedFile> &&nonPackageIndexed);
+void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
+                             std::vector<ast::ParsedFile> &&nonPackageFiles);
 
 void setPackagerOptions(core::GlobalState &gs, const options::Options &opts);
 void package(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
              WorkerPool &workers);
 
-ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers,
-                                    core::FoundDefHashes *foundHashes);
+ast::ParsedFilesOrCancelled nameAndResolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes);
 
 // If `foundMethodHashesForFiles` is non-nullopt, incrementalResolve invokes Namer in runIncremental mode.
 //
@@ -48,6 +49,9 @@ incrementalResolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
 
 [[nodiscard]] bool name(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, const options::Options &opts,
                         WorkerPool &workers, core::FoundDefHashes *foundHashes);
+
+ast::ParsedFilesOrCancelled resolve(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                    const options::Options &opts, WorkerPool &workers);
 
 std::vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const std::string &cachePath,
                                                    std::vector<ast::ParsedFile> what, WorkerPool &workers);
