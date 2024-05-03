@@ -53,21 +53,7 @@ void clearCacheForFileAndCode(core::GlobalState &gs, core::FileRef fref,
                               std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> filter) {
     auto &prevErrors = gs.errors[fref];
 
-    gs.tracer().debug("\n\n*** clearing cache\n***before:");
-    for (auto &msg : prevErrors) {
-        const auto &[s, e] = msg->error->loc.position(gs);
-        gs.tracer().debug("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}", msg->error->what.code,
-                          msg->whatFile.data(gs).path(), msg->error->header, msg->kind, s.line, s.column, e.line,
-                          e.column);
-    }
     prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(), filter), prevErrors.end());
-    gs.tracer().debug("\n\n*** clearing cache\n***after:");
-    for (auto &msg : prevErrors) {
-        const auto &[s, e] = msg->error->loc.position(gs);
-        gs.tracer().debug("\n***\tcode: {} whatFile: {} header: {} kind: {} loc: {}:{} {}:{}", msg->error->what.code,
-                          msg->whatFile.data(gs).path(), msg->error->header, msg->kind, s.line, s.column, e.line,
-                          e.column);
-    }
 }
 
 class CFGCollectorAndTyper {
@@ -295,7 +281,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
-            gs.tracer().debug("\n\n*** after {}namer:", runIncrementalNamer ? "incremental " : "");
             for (auto &file : what) {
                 auto code = 5000; // namer errors are 40xx
                 clearCacheForFileAndCode(gs, file.file, [code](const unique_ptr<core::ErrorQueueMessage> &err) {
@@ -321,7 +306,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
-            gs.tracer().debug("\n\n*** after incremental resolver:");
             for (auto &file : what) {
                 clearCacheForFileAndCode(gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                     return err->error->what.code > 4999 && err->error->what.code < 6000;
@@ -904,7 +888,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
         }
 
-        gs->tracer().debug("\n\n*** after full namer:");
         for (auto &file : what) {
             // gs.clearCache
 
@@ -945,7 +928,6 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
-            gs->tracer().debug("\n\n*** after resolver:");
 
             for (auto &file : what) {
                 clearCacheForFileAndCode(*gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {

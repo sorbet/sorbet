@@ -39,12 +39,6 @@ void ErrorQueue::flushAllErrors(GlobalState &gs) {
     gs.errors.clear();
 
     for (auto &it : collectedErrors) {
-        gs.tracer().debug("\n\n*** ErrorQueue::flushAllErrors:");
-        for (const auto &e : it.second) {
-            gs.tracer().debug("\n\t*** code: {} text: {}",
-                              e->error != nullptr ? to_string(e->error->what.code) : "no error code",
-                              e->text.value_or("empty text"));
-        }
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
     }
 }
@@ -74,12 +68,6 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
         }
     }
 
-    gs.tracer().debug("\n\n*** ErrorQueue::flushErrorsForFile:");
-    for (const auto &e : collected[file]) {
-        gs.tracer().debug("\n\t*** code: {} text: {}",
-                          e->error != nullptr ? to_string(e->error->what.code) : "no error code",
-                          e->text.value_or("empty text"));
-    }
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
 
@@ -110,12 +98,6 @@ void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
         errorsToFlush.emplace_back(move(cloned));
     }
 
-    gs.tracer().debug("\n\n*** ErrorQueue::flushButRetainErrorsForFile:");
-    for (const auto &e : errorsToFlush) {
-        gs.tracer().debug("\n\t*** code: {} text: {}",
-                          e->error != nullptr ? to_string(e->error->what.code) : "no error code",
-                          e->text.value_or("empty text"));
-    }
     errorFlusher->flushErrors(logger, gs, file, move(errorsToFlush));
 };
 
