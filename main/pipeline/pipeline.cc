@@ -49,13 +49,6 @@ using namespace std;
 
 namespace sorbet::realmain::pipeline {
 
-void clearCacheForFileAndCode(core::GlobalState &gs, core::FileRef fref,
-                              std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> filter) {
-    auto &prevErrors = gs.errors[fref];
-
-    prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(), filter), prevErrors.end());
-}
-
 class CFGCollectorAndTyper {
     const options::Options &opts;
 
@@ -282,9 +275,9 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(!canceled);
 
             for (auto &file : what) {
-                auto code = 5000; // namer errors are 40xx
-                clearCacheForFileAndCode(gs, file.file, [code](const unique_ptr<core::ErrorQueueMessage> &err) {
-                    return err->error->what.code < code;
+                gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    // Namer errors codes are 40XX
+                    return err->error->what.code < 5000;
                 });
 
                 gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
@@ -307,7 +300,8 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             what = move(result.result());
 
             for (auto &file : what) {
-                clearCacheForFileAndCode(gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                // Resolver errors codes are 50XX
+                gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                     return err->error->what.code > 4999 && err->error->what.code < 6000;
                 });
                 gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
@@ -928,34 +922,6 @@ ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, ve
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                     const options::Options &opts, WorkerPool &workers) {
     try {
-<<<<<<< HEAD
-        auto canceled = name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
-        if (canceled) {
-            return ast::ParsedFilesOrCancelled::cancel(move(what), workers);
-        }
-
-        for (auto &file : what) {
-            // gs.clearCache
-
-            clearCacheForFileAndCode(*gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                return err->error->what.code < 5000;
-            });
-            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
-        }
-        // for (auto &file : what) {
-        // gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
-        // }
-        for (auto &named : what) {
-            if (opts.print.NameTree.enabled) {
-                opts.print.NameTree.fmt("{}\n", named.tree.toStringWithTabs(*gs, 0));
-            }
-            if (opts.print.NameTreeRaw.enabled) {
-                opts.print.NameTreeRaw.fmt("{}\n", named.tree.showRaw(*gs));
-            }
-        }
-
-=======
->>>>>>> master
         if (opts.stopAfterPhase != options::Phase::NAMER) {
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
@@ -978,14 +944,12 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
 
             for (auto &file : what) {
-                clearCacheForFileAndCode(*gs, file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    // Resolver errors codes are 50XX
                     return err->error->what.code > 4999 && err->error->what.code < 6000;
                 });
                 gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
             }
-            // for (auto &file : what) {
-            // gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
-            // }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {

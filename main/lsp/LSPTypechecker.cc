@@ -394,7 +394,6 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
     return epochManager.wasTypecheckingCanceled();
 }
 
-// TODO(iz) add extra flushes
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
                                  shared_ptr<core::ErrorFlusher> errorFlusher, bool cancelable) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
@@ -476,6 +475,15 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         auto foundHashes = nullptr;
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
+
+        for (auto &file : indexedCopies) {
+            gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                // Namer errors codes are 40XX
+                return err->error->what.code < 5000;
+            });
+            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+        }
+
         if (canceled) {
             ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
             return;
