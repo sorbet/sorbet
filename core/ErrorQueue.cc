@@ -8,6 +8,21 @@ namespace sorbet::core {
 
 using namespace std;
 
+ErrorQueueMessage ErrorQueueMessage::clone() {
+    ErrorQueueMessage newMsg;
+
+    newMsg.kind = this->kind;
+    newMsg.whatFile = this->whatFile;
+    newMsg.text = this->text;
+    if (this->error) {
+        newMsg.error = make_unique<Error>(*this->error);
+    }
+    if (this->queryResponse) {
+        newMsg.queryResponse = make_unique<lsp::QueryResponse>(*this->queryResponse);
+    }
+    return newMsg;
+}
+
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
