@@ -2584,4 +2584,11 @@ spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
 }
 
+void GlobalState::clearErrorCacheForFile(
+    core::FileRef fref, std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> predicate) {
+    auto &prevErrors = errors[fref];
+
+    prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(), predicate), prevErrors.end());
+}
+
 } // namespace sorbet::core
