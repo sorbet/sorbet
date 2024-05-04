@@ -766,12 +766,12 @@ int realmain(int argc, char *argv[]) {
             auto canceled =
                 pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
 
-            if(opts.runLSP){
+            if (opts.runLSP) {
                 for (auto &file : nonPackageIndexed) {
                     gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                            // Namer errors codes are 40XX
-                            return err->error->what.code < 5000;
-                            });
+                        // Namer errors codes are 40XX
+                        return err->error->what.code < 5000;
+                    });
                     gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
                 }
             }

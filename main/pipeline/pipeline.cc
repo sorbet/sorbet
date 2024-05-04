@@ -274,12 +274,12 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
-            if (opts.runLSP){
+            if (opts.runLSP) {
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
-                            // Namer errors codes are 40XX
-                            return err->error->what.code < 5000;
-                            });
+                        // Namer errors codes are 40XX
+                        return err->error->what.code < 5000;
+                    });
 
                     gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
                 }
