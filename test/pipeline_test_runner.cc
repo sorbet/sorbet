@@ -157,6 +157,7 @@ public:
     }
 
     void drainErrors(core::GlobalState &gs) {
+        errors.clear();
         // Moves errors from being owned by GlobalState to having been flushed by the flusher
         // In our case, errorCollector is our error flusher (accumulates a vector, instead of
         // printing to stdout).
@@ -167,17 +168,9 @@ public:
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
-    void dropErrors(core::GlobalState &gs) {
-        // Moves errors from being owned by GlobalState to having been flushed by the flusher
-        // In our case, errorCollector is our error flusher (accumulates a vector, instead of
-        // printing to stdout).
-        errorQueue->flushAllErrors(gs);
-        // Retrieves the collected errors, sets it to empty again, and then drops those errors.
-        auto _newErrors = errorCollector->drainErrors();
-    }
-
     void clear(core::GlobalState &gs) {
         got.clear();
+        errors.clear();
         errorQueue->flushAllErrors(gs);
         auto _newErrors = errorCollector->drainErrors();
     }
