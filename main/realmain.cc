@@ -765,6 +765,14 @@ int realmain(int argc, char *argv[]) {
             auto foundHashes = nullptr;
             auto canceled =
                 pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
+
+            for (auto &file : nonPackageIndexed) {
+                gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    // Namer errors codes are 40XX
+                    return err->error->what.code < 5000;
+                });
+                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            }
             ENFORCE(!canceled, "There's no cancellation in batch mode");
 
             pipeline::unpartitionPackageFiles(indexed, move(nonPackageIndexed));
