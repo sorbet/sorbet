@@ -26,11 +26,17 @@ ErrorQueueMessage ErrorQueueMessage::clone() {
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-void ErrorQueue::flushAllErrors(const GlobalState &gs) {
+void ErrorQueue::flushAllErrors(GlobalState &gs) {
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushAllErrors");
     auto collectedErrors = drainAll();
+
+    for (auto &[file, errors] : gs.errors) {
+        move(errors.begin(), errors.end(), std::back_inserter(collectedErrors[file]));
+        errors.clear();
+    }
+    gs.errors.clear();
 
     for (auto &it : collectedErrors) {
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
