@@ -274,6 +274,14 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
+            for (auto &file : what) {
+                gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    // Namer errors codes are 40XX
+                    return err->error->what.code < 5000;
+                });
+
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
                 return what;
@@ -291,6 +299,13 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
+            for (auto &file : what) {
+                // Resolver errors codes are 50XX
+                gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    return err->error->what.code > 4999 && err->error->what.code < 6000;
+                });
+                gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
                 return what;
@@ -927,6 +942,14 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
+
+            for (auto &file : what) {
+                gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                    // Resolver errors codes are 50XX
+                    return err->error->what.code > 4999 && err->error->what.code < 6000;
+                });
+                gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+            }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {
