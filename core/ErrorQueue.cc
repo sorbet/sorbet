@@ -59,6 +59,14 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
+    auto prevErrorsIt = gs.errors.find(file);
+    if (prevErrorsIt != gs.errors.end()) {
+        auto &prevErrors = (*prevErrorsIt).second;
+        for (auto &e : prevErrors) {
+            auto cloned = make_unique<ErrorQueueMessage>(e->clone());
+            collected[file].emplace_back(move(cloned));
+        }
+    }
 
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
