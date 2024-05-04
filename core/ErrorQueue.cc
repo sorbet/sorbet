@@ -47,7 +47,6 @@ bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) const {
 void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 
-    filesFlushedCount.fetch_add(1);
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
 
     core::ErrorQueueMessage msg;

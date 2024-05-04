@@ -1073,10 +1073,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
-    // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
-    // drop errors in LSP mode.
-    ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
-
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
     const uint32_t epoch = epochManager.getStatus().epoch;
@@ -1196,9 +1192,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         for (auto &extension : gs.semanticExtensions) {
             extension->finishTypecheck(gs);
         }
-
-        // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
-        gs.errorQueue->filesFlushedCount = 0;
 
         return;
     }
