@@ -57,6 +57,34 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
 
+void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
+    checkOwned();
+
+    Timer timeit(tracer, "ErrorQueue::flushButRetainErrorsForFile");
+
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        if (!result.gotItem()) {
+            continue;
+        }
+
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+    }
+
+    for (auto &e : collected[file]) {
+        gs.errors[file].emplace_back(move(e));
+    }
+    collected[file].clear();
+
+    std::vector<std::unique_ptr<core::ErrorQueueMessage>> errorsToFlush;
+    for (auto &e : gs.errors[file]) {
+        auto cloned = make_unique<core::ErrorQueueMessage>(e->clone());
+        errorsToFlush.emplace_back(move(cloned));
+    }
+
+    errorFlusher->flushErrors(logger, gs, file, move(errorsToFlush));
+};
+
 void ErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Error;

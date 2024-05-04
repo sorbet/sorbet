@@ -6,6 +6,7 @@
 #include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
 #include "core/lsp/QueryResponse.h"
+#include "GlobalState.h"
 #include <atomic>
 
 namespace sorbet {
@@ -38,6 +39,9 @@ public:
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);
     bool wouldFlushErrorsForFile(FileRef file) const;
+
+    /** Reports errors, but doesn't remove them from internal cache in GlobalState, so they can be re-reported later*/
+    void flushButRetainErrorsForFile(GlobalState &gs, FileRef file);
 
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;
