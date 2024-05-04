@@ -319,6 +319,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     const auto presorted = true;
     const auto cancelable = false;
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
+    gs->errors.clear();
     gs->lspTypecheckCount++;
 
     return toTypecheck;
@@ -548,6 +549,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
     });
 
+    gs->errors.clear();
     // Note: `gs` now holds the value of `finalGS`.
     gs->lspQuery = core::lsp::Query::noQuery();
 
@@ -665,6 +667,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
 
     const auto cancelable = true;
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
+    gs->errors.clear();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
