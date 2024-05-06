@@ -88,9 +88,12 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 documentationLocations.emplace_back(loc);
             }
         }
-        for (auto loc : c->symbolBeforeDealias.dealias(gs).locs(gs)) {
-            if (loc.exists()) {
-                documentationLocations.emplace_back(loc);
+        auto dealiased = c->symbolBeforeDealias.dealias(gs);
+        if (dealiased != c->symbolBeforeDealias) {
+            for (auto loc : dealiased.locs(gs)) {
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
             }
         }
     } else if (auto d = resp->isMethodDef()) {
