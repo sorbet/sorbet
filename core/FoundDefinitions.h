@@ -167,6 +167,16 @@ struct FoundMethod final {
         Flags()
             : isSelfMethod(false), isRewriterSynthesized(false), isAttrReader(false), isAttrBestEffortUIOnly(false),
               discardDef(false), genericPropGetter(false) {}
+
+        bool operator==(const Flags &other) const noexcept {
+            return isSelfMethod == other.isSelfMethod && isRewriterSynthesized == other.isRewriterSynthesized &&
+                   isAttrReader == other.isAttrReader && isAttrBestEffortUIOnly == other.isAttrBestEffortUIOnly &&
+                   discardDef == other.discardDef && genericPropGetter == other.genericPropGetter;
+        }
+
+        bool operator!=(const Flags &other) const noexcept {
+            return !(*this == other);
+        }
     };
     Flags flags;
     CheckSize(Flags, 1, 1);
