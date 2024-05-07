@@ -9,8 +9,9 @@ namespace {
 
 ExpressionPtr deepCopy(const void *avoid, const ExpressionPtr &tree, bool root = false);
 
-template <class T> T deepCopyVec(const void *avoid, const T &origin) {
-    T copy;
+template <unsigned long N>
+InlinedVector<ExpressionPtr, N> deepCopyVec(const void *avoid, const InlinedVector<ExpressionPtr, N> &origin) {
+    InlinedVector<ExpressionPtr, N> copy;
     copy.reserve(origin.size());
     for (const auto &memb : origin) {
         copy.emplace_back(deepCopy(avoid, memb));
@@ -37,6 +38,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::ClassDef: {
             auto *exp = reinterpret_cast<const ClassDef *>(tree);
+            // TODO: pass along singletonAncestors
             return make_expression<ClassDef>(exp->loc, exp->declLoc, exp->symbol, deepCopy(avoid, exp->name),
                                              deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->rhs),
                                              exp->kind);
@@ -87,8 +89,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
 
         case Tag::Rescue: {
             auto *exp = reinterpret_cast<const Rescue *>(tree);
-            return make_expression<Rescue>(exp->loc, deepCopy(avoid, exp->body),
-                                           deepCopyVec<Rescue::RESCUE_CASE_store>(avoid, exp->rescueCases),
+            return make_expression<Rescue>(exp->loc, deepCopy(avoid, exp->body), deepCopyVec(avoid, exp->rescueCases),
                                            deepCopy(avoid, exp->else_), deepCopy(avoid, exp->ensure));
         }
 
