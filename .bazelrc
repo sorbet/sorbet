@@ -12,7 +12,7 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --crosstool_top=@llvm_toolchain_12_0_0//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+build --crosstool_top=@llvm_toolchain_15_0_7//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -44,8 +44,6 @@ build --host_cxxopt=-Wno-pass-failed # host build doesn't have enough optimizati
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
 build --copt=-Wno-macro-redefined
 
-# Clang 12.0.0 has warnings when compiling LLVM 12.0.0 on C++20, sadly.
-# TODO(jez) When we upgrade to LLVM 13.0.0+ can we delete this?
 # TODO(jez) We will need these to build C++20, but emscripten doesn't even know about these options yet.
 # Leaving them commented out so we can uncomment them after upgrading emscripten.
 # build --host_cxxopt=-Wno-deprecated-anon-enum-enum-conversion
@@ -212,9 +210,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_12_0_0/lib/clang/12.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -263,7 +261,7 @@ build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain_12_0_0//:toolchain
+build:webasm --host_crosstool_top=@llvm_toolchain_15_0_7//:toolchain
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist
