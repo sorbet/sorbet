@@ -46,10 +46,10 @@ def register_sorbet_dependencies():
     # `@zlib` if it's present.
     http_archive(
         name = "zlib",
-        urls = _github_public_urls("madler/zlib/archive/cacf7f1d4e3d44d871b605da3b647f07d718623f.zip"),
+        urls = _github_public_urls("madler/zlib/archive/v1.3.1.zip"),
         build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
-        sha256 = "1cce3828ec2ba80ff8a4cac0ab5aa03756026517154c4b450e617ede751d41bd",
-        strip_prefix = "zlib-cacf7f1d4e3d44d871b605da3b647f07d718623f",
+        sha256 = "50b24b47bf19e1f35d2a21ff36d2a366638cdf958219a66f30ce0861201760e6",
+        strip_prefix = "zlib-1.3.1",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
@@ -207,6 +207,7 @@ def register_sorbet_dependencies():
     )
 
     # optimized version of blake2 hashing algorithm
+    # TODO(jez) Add something to use the neon implementation on Apple Silicon
     http_archive(
         name = "com_github_blake2_libb2",
         urls = _github_public_urls("BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip"),
