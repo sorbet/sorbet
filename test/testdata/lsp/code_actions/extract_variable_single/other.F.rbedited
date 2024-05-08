@@ -3,10 +3,10 @@
 # enable-experimental-lsp-extract-to-variable: true
 
 if 1 == 2
-  1 + 1
+  1 + 5
 #     ^ apply-code-action: [A] Extract Variable
 else
-  2 + 3
+  6 + 3
 # ^ apply-code-action: [B] Extract Variable
 end
 
@@ -19,7 +19,7 @@ while 1 == 2
 #     ^^^^^ apply-code-action: [D] Extract Variable
 end
 
-for i in 1..5
+for i in 1..7
   puts i + 1
 #      ^^^^^ apply-code-action: [E] Extract Variable
 end
