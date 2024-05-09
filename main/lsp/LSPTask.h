@@ -5,10 +5,7 @@
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPTypechecker.h"
 #include "main/lsp/json_types.h"
-
-namespace absl {
-class Notification;
-}
+#include "absl/synchronization/notification.h"
 
 namespace sorbet::realmain::lsp {
 class LSPIndexer;
