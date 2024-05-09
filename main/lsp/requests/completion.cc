@@ -299,7 +299,8 @@ vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const ve
 }
 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef maybeAlias,
-                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs) {
+                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs,
+                     core::Loc queryLoc) {
     fmt::memory_buffer result;
     auto shortName = maybeAlias.data(gs)->name.shortName(gs);
     auto isSetter = maybeAlias.data(gs)->name.isSetter(gs);
@@ -315,8 +316,18 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
      * since the rest is likely useless
      */
     if (totalArgs > 0 || dispatchResult.main.blockReturnType != nullptr) {
-        fmt::format_to(std::back_inserter(result), "${{0}}");
-        return to_string(result);
+        auto maybeNewline = queryLoc.adjustLen(gs, 0, 1);
+        // ... but carve out an exception if the query location is at the end of the line, because
+        // then likely it only looks like there are "arguments" to this method call because of how
+        // Ruby allows the `x.` being split from the method name on the next line
+        //
+        // (This isn't a great solution, but I think that we're likely going to revisit generating
+        // snippets here in the future with a bit of an overhaul of how completion works, so I'm
+        // fine with it in the mean time.)
+        if (!maybeNewline.exists() || maybeNewline.source(gs) != "\n") {
+            fmt::format_to(std::back_inserter(result), "${{0}}");
+            return to_string(result);
+        }
     }
 
     if (isSetter) {
@@ -1044,7 +1055,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, constraint, totalArgs);
+        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, constraint, totalArgs, queryLoc);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
