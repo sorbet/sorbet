@@ -1494,7 +1494,7 @@ shared_ptr<ApplyCompletionAssertion> ApplyCompletionAssertion::make(string_view 
 
     ADD_FAIL_CHECK_AT(
         string(filename).c_str(), assertionLine + 1,
-        fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] <index>'. Found '{}'",
+        fmt::format("Improperly formatted apply-completion assertion. Expected '[<version>] item: <index>'. Found '{}'",
                     assertionContents));
 
     return nullptr;
