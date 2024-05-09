@@ -52,6 +52,10 @@ build --copt=-Wno-macro-redefined
 # build --cxxopt=-Wno-deprecated-enum-enum-conversion
 # build --cxxopt=-Wno-ambiguous-reversed-operator
 
+# TODO(jez) Something between Clang 12 and Clang 15 seems to have introduced a
+# warning saying _never_ use unqualified `std` calls...
+build --cxxopt=-Wno-unqualified-std-cast-call --host_cxxopt=-Wno-unqualified-std-cast-call
+
 ##
 ## debug configuration
 ##
