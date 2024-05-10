@@ -21,6 +21,7 @@ end
 
 begin
 ensure
-  6 + 6
+  newVariable = 6
+  6 + newVariable
 #     ^ apply-code-action: [F] Extract Variable
 end
