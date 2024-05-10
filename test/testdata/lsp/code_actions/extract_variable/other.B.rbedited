@@ -24,3 +24,8 @@ for i in 1..5
   puts i + 1
 #      ^^^^^ apply-code-action: [E] Extract Variable
 end
+
+unless 1 == 2
+  puts 2 + 3
+#      ^^^^^ apply-code-action: [F] Extract Variable
+end

@@ -19,3 +19,9 @@ ensure
   5 + newVariable
 #     ^ apply-code-action: [E] Extract Variable
 end
+
+begin
+ensure
+  6 + 6
+#     ^ apply-code-action: [F] Extract Variable
+end

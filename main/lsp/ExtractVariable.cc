@@ -191,7 +191,7 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
                 "loc on node doesn't match the loc found in the tree walk");
         whereToInsert = methodDef->rhs.loc();
     } else if (auto if_ = ast::cast_tree<ast::If>(*enclosingScope)) {
-        if (if_->thenp.loc().contains(locOffsets)) {
+        if (if_->thenp.loc().exists() && if_->thenp.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
             whereToInsert = if_->thenp.loc();
             ENFORCE(if_->thenp.loc() == extractVariableWalk.enclosingScopeLoc,
@@ -203,17 +203,17 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getEdits(LSPTypecheckerD
                     "loc on node doesn't match the loc found in the tree walk");
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(*enclosingScope)) {
-        if (rescue->body.loc().contains(locOffsets)) {
+        if (rescue->body.loc().exists() && rescue->body.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->body));
             ENFORCE(rescue->body.loc() == extractVariableWalk.enclosingScopeLoc,
                     "loc on node doesn't match the loc found in the tree walk");
             whereToInsert = rescue->body.loc();
-        } else if (rescue->else_.loc().contains(locOffsets)) {
+        } else if (rescue->else_.loc().exists() && rescue->else_.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->else_));
             ENFORCE(rescue->else_.loc() == extractVariableWalk.enclosingScopeLoc,
                     "loc on node doesn't match the loc found in the tree walk");
             whereToInsert = rescue->else_.loc();
-        } else if (rescue->ensure.loc().contains(locOffsets)) {
+        } else if (rescue->ensure.loc().exists() && rescue->ensure.loc().contains(locOffsets)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->ensure));
             ENFORCE(rescue->ensure.loc() == extractVariableWalk.enclosingScopeLoc,
                     "loc on node doesn't match the loc found in the tree walk");

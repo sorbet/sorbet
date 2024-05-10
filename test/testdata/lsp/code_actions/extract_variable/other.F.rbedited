@@ -15,8 +15,7 @@ a = (x = 1; x + y)
 #           ^ apply-code-action: [C] Extract Variable
 
 while 1 == 2
-  newVariable = a + y
-  x = newVariable
+  x = a + y
 #     ^^^^^ apply-code-action: [D] Extract Variable
 end
 
@@ -26,6 +25,7 @@ for i in 1..5
 end
 
 unless 1 == 2
-  puts 2 + 3
+  newVariable = 2 + 3
+  puts newVariable
 #      ^^^^^ apply-code-action: [F] Extract Variable
 end
