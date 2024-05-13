@@ -490,7 +490,7 @@ public:
         auto eptr = current_exception();
         if (eptr) {
             try {
-                // Aparently this is the only way to convert a std::exception_ptr to std::exception
+                // Apparently this is the only way to convert a std::exception_ptr to std::exception
                 std::rethrow_exception(eptr);
             } catch (const std::exception &e) {
                 sorbet::fatalLogger->error("Sorbet raised uncaught exception type=\"{}\" what=\"{}\"",

@@ -125,7 +125,7 @@ def endless_method = 1 + 123
 #   1 + 1
 #   2 + 2
 # end
-# However, our tests don't support mutli-line assertions, so this test case is approximating that
+# However, our tests don't support multi-line assertions, so this test case is approximating that
 # by joining the lines with a ; (the parse result will be the same for both cases).
 # TODO(neil): add a multiline test case here once we have multiline assertions.
 
