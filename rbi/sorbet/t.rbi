@@ -127,6 +127,7 @@ module T
   # Deprecated. Use `T::Enum` instead.
   #
   # For more information, see https://sorbet.org/docs/tenum
+  sig { params(values: T::Array[T.anything]).returns(T.untyped) }
   def self.deprecated_enum(values); end
 
   # Type syntax to opt out of static type checking.
