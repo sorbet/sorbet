@@ -258,10 +258,6 @@ sig {params(xs: T::Array[String]).void.checked(:tests)}
 
 # (3) Never runs the runtime checks. Careful!
 sig {params(xs: T::Array[String]).void.checked(:never)}
-
-# (4) Runtime checks only run when the file is using the Sorbet Compiler.
-# In the interpreter, this behaves identically to checked(:never).
-sig {params(xs: T::Array[String]).void.checked(:compiled)}
 ```
 
 If `.checked(...)` is omitted on a sig, the default is `.checked(:always)`. The
