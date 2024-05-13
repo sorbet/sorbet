@@ -159,15 +159,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        url = "https://github.com/abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip",
-        sha256 = "c43b8cd8e306e7fe3f006d880181d60db59a3bae6b6bc725da86a28a6b0f9f30",
-        strip_prefix = "abseil-cpp-8910297baf87e1777c4fd30fb0693eecf9f2c134",
-        patches = [
-            # https://github.com/abseil/abseil-cpp/commit/d2422b19e9ba41c952db1ed5514bb68114c2be15
-            # Abseil builds with `-Wall` which we can't override to silence this warning.
-            "@com_stripe_ruby_typer//third_party:abseil_cpp/low_level_hash_array_parameter.patch",
-        ],
-        patch_args = ["-p1"],
+        url = "https://github.com/abseil/abseil-cpp/archive/20240116.2.zip",
+        sha256 = "69909dd729932cbbabb9eeaff56179e8d124515f5d3ac906663d573d700b4c7d",
+        strip_prefix = "abseil-cpp-20240116.2",
     )
 
     http_archive(
