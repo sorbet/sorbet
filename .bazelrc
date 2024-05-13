@@ -80,7 +80,6 @@ build:dbg-linux --config=dbg --platforms=@//tools/platforms:linux_x86_64
 ##
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
-build:release-common --define mimalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=backtracesymbols
 build:release-common --config=static-libs
@@ -106,6 +105,15 @@ build:release-linux --config=lto-linux --config=release-common
 # Separate config for aarch64, so x86_64 can be differently optimized
 build:release-linux-aarch64 --linkopt=-Wl,-z,relro,-z,now
 build:release-linux-aarch64 --config=lto-linux --config=release-common
+
+# It would be nice to move this back to release-common, but there is a build
+# failure when using clang 15 on macOS to build GNU make via rules_foreign_cc:
+# <https://github.com/bazelbuild/rules_foreign_cc/issues/1186>
+# We only use rules_foreign_cc for mimalloc and we only use mimalloc in release
+# builds, so I'm moving this here until we can figure out a better workaround,
+# or a fix lands upstream.
+build:release-linux --define mimalloc=true
+build:release-linux-aarch64 --define mimalloc=true
 
 # This is to turn on vector instructions where available.
 # We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
