@@ -125,6 +125,7 @@ example, the following is _not_ valid:
 class A
   extend T::Sig
 
+  # ERROR, intentionally unsupported
   sig { params(input_param: T.any('foo', 'bar')).void }
   def a(input_param)
     puts input_param
