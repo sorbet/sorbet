@@ -154,6 +154,7 @@ example, the following is <em>not</em> valid:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span></span>
   extend T::Sig
 
+  <span class="hljs-comment"># ERROR, intentionally unsupported</span>
   sig { params(<span class="hljs-symbol">input_param:</span> T.any(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>)).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">a</span><span class="hljs-params">(input_param)</span></span>
     puts input_param
