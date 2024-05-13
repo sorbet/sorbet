@@ -384,7 +384,7 @@ public:
 };
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
-// For exapmle, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
+// For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
 bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfoImpl &pkg) {
     return pkg.loc.file().data(gs).isPackagedTest();
 }

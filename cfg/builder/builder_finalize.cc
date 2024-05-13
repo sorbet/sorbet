@@ -46,7 +46,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.cond = LocalRef::unconditional();
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
-                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed togather
+                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed together
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));

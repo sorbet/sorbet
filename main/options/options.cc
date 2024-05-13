@@ -430,7 +430,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->implicit_value("everywhere"),
                                     "{[nowhere],everywhere,everywhere-but-tests}");
     options.add_options("advanced")("suppress-payload-superclass-redefinition-for",
-                                    "Explicitly supress the superclass redefinition error for the specified class "
+                                    "Explicitly suppress the superclass redefinition error for the specified class "
                                     "defined in Sorbet's payload. May be repeated.",
                                     cxxopts::value<vector<string>>(), "Fully::Qualified::ClassName");
 
