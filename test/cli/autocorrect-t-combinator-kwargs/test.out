@@ -69,7 +69,22 @@ autocorrect-t-combinator-kwargs.rb:10: Unexpected bare `Symbol(:a)` value found 
 autocorrect-t-combinator-kwargs.rb:10: Unexpected bare `Symbol(:b)` value found in type position https://srb.help/7009
     10 |      any: T.any(Integer, String, a: Integer, b: String),
                                                       ^
-Errors: 12
+
+autocorrect-t-combinator-kwargs.rb:12: Expected `T.any(T::Set[T.anything], T::Array[T.anything])` but found `{a: T.class_of(Integer)}` for argument `values` https://srb.help/7002
+    12 |      enum: T.deprecated_enum(a: Integer),
+                                      ^^^^^^^^^^
+  Expected `T.any(T::Set[T.anything], T::Array[T.anything])` for argument `values` of method `T.deprecated_enum`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L130:
+     130 |  sig { params(values: T.any(T::Set[T.anything], T::Array[T.anything])).returns(T.untyped) }
+                         ^^^^^^
+  Got `{a: T.class_of(Integer)} (shape of T::Hash[T.untyped, T.untyped])` originating from:
+    autocorrect-t-combinator-kwargs.rb:12:
+    12 |      enum: T.deprecated_enum(a: Integer),
+                                      ^^^^^^^^^^
+  Detailed explanation:
+    `Hash` does not derive from `Set`
+    `Hash` does not derive from `Array`
+Errors: 13
 
 --------------------------------------------------------------------------
 
