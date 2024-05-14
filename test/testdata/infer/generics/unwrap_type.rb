@@ -11,25 +11,34 @@ class A
     T.reveal_type(x) # error: `T.type_parameter(:U) (of A#f1)`
 
     type = T::Array[x]
-    T.reveal_type(type) # error: `Runtime object representing type: T::Array[T.type_parameter(:U) (of A#f1)]`
+    #               ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T::Array[T.untyped]`
 
     type = T.class_of(x)
-    T.reveal_type(type) # error: `T.untyped`
+    #                 ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.untyped`
 
     type = T.any(x, x)
-    T.reveal_type(type) # error: `Runtime object representing type: T.type_parameter(:U) (of A#f1)`
+    #            ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    #               ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.untyped`
 
     type = T.all(x, x)
-    T.reveal_type(type) # error: `Runtime object representing type: T.type_parameter(:U) (of A#f1)`
+    #            ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    #               ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.untyped`
 
     type = T.nilable(x)
-    T.reveal_type(type) # error: `Runtime object representing type: T.nilable(T.type_parameter(:U) (of A#f1))`
+    #                ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.untyped`
 
     type = T.proc.params(arg0: x).void
-    T.reveal_type(type) # error: `Runtime object representing type: T.proc.params(arg0: T.type_parameter(:U) (of A#f1)).void`
+    #                          ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.proc.params(arg0: T.untyped).void`
 
     type = T.proc.returns(x)
-    T.reveal_type(type) # error: `Runtime object representing type: T.proc.returns(T.type_parameter(:U) (of A#f1))`
+    #                     ^ error: Unexpected bare `T.type_parameter(:U) (of A#f1)` value found in type position
+    T.reveal_type(type) # error: `Runtime object representing type: T.proc.returns(T.untyped)`
   end
 
   sig do
@@ -41,10 +50,11 @@ class A
     T.reveal_type(x) # error: `T.type_parameter(:U) (of A#f2)`
     f = T.let(
       -> (x) {
-        T.reveal_type(x) # error: `T.type_parameter(:U) (of A#f2)`
+        T.reveal_type(x) # error: `T.untyped`
       },
       T.proc.params(arg0: x).void
       #                   ^ error: Unsupported type syntax
+      #                   ^ error: Unexpected bare `T.type_parameter(:U) (of A#f2)` value found in type position
     )
     T.reveal_type(f) # error: `T.proc.params(arg0: T.untyped).void`
   end
