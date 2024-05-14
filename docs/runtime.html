@@ -272,10 +272,6 @@ sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(
 
 <span class="hljs-comment"># (3) Never runs the runtime checks. Careful!</span>
 sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:never</span>)}
-
-<span class="hljs-comment"># (4) Runtime checks only run when the file is using the Sorbet Compiler.</span>
-<span class="hljs-comment"># In the interpreter, this behaves identically to checked(:never).</span>
-sig {params(<span class="hljs-symbol">xs:</span> T::Array[String]).void.checked(<span class="hljs-symbol">:compiled</span>)}
 </code></pre>
 <p>If <code>.checked(...)</code> is omitted on a sig, the default is <code>.checked(:always)</code>. The
 default checked level can also be configured. For example:</p>
