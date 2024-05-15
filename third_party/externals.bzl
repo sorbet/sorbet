@@ -6,9 +6,8 @@ load("//third_party/openssl:system_openssl_repository.bzl", "system_openssl_repo
 def register_sorbet_dependencies():
     http_archive(
         name = "platforms",
-        urls = _github_public_urls("bazelbuild/platforms/archive/d4c9d7f51a7c403814b60f66d20eeb425fbaaacb.zip"),
-        sha256 = "a5058ac93023092c406432ec650f30ec5a8c75d8b9d13c73150f60a9050a5663",
-        strip_prefix = "platforms-d4c9d7f51a7c403814b60f66d20eeb425fbaaacb",
+        urls = _github_public_urls("bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz"),
+        sha256 = "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
     )
 
     http_archive(
