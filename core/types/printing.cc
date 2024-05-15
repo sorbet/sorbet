@@ -462,7 +462,7 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             int arg_num = 0;
             fmt::format_to(std::back_inserter(buf), "{}",
                            fmt::map_join(
-                               targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
+                               targs_it, this->targs.end(), ", ", [&](auto targ) -> auto{
                                    return fmt::format("arg{}: {}", arg_num++, targ.show(gs, options));
                                }));
 

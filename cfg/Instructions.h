@@ -66,9 +66,11 @@ private:
     friend InstructionPtr;
 };
 
-#define INSN(name)                                                                  \
-    class name;                                                                     \
-    template <> struct InsnToTag<name> { static constexpr Tag value = Tag::name; }; \
+#define INSN(name)                              \
+    class name;                                 \
+    template <> struct InsnToTag<name> {        \
+        static constexpr Tag value = Tag::name; \
+    };                                          \
     class __attribute__((aligned(8))) name final
 
 INSN(Ident) : public Instruction {

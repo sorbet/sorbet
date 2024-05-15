@@ -424,7 +424,7 @@ string getCounterStatistics() {
 
         fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
-                           sortedTimings, "", [](const auto &el) -> auto { return el.second; }));
+                           sortedTimings, "", [](const auto &el) -> auto{ return el.second; }));
     }
 
     {
@@ -440,7 +440,7 @@ string getCounterStatistics() {
 
         fmt::format_to(std::back_inserter(buf), "{}",
                        fmt::map_join(
-                           sortedOther, "", [](const auto &el) -> auto { return el.second; }));
+                           sortedOther, "", [](const auto &el) -> auto{ return el.second; }));
     }
     return to_string(buf);
 }
