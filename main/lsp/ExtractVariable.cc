@@ -73,6 +73,8 @@ public:
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         updateEnclosingScope(tree, classDef.rhs.front().loc().join(classDef.rhs.back().loc()));
+        // Skip loc for class name and anscestors?
+        // TODO: It looks like it already works without it, figure out why
     }
 
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {

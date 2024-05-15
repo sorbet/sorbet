@@ -33,6 +33,7 @@ def extract_method_parameters_2(x, y); end
 #              ^ apply-code-action: [A] Extract Variable
 
 class A
+#     ^ apply-code-action: [A] Extract Variable
   attr_accessor :a
 
   x = 1 + 1
@@ -113,6 +114,7 @@ rescue Exception => e
 end
 
 class B < T::Struct
+#         ^^^^^^^^^ apply-code-action: [A] Extract Variable
   const :baz, String
 # ^^^^^ apply-code-action: [A] Extract Variable
 end
