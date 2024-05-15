@@ -35,6 +35,20 @@ build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
 
+# This is to break a circular dependency. The version of absl we're using
+# suffers from some compiler builtins that have been deprecated. Upstream absl
+# includes patches that avoid those warnings, but upstream absl also requires a
+# version of emscripten that is newer than what we currently build with.
+# Because emscsripten is powered by clang, then upgrading emscripten amounts to
+# upgrading clang and we have a cycle.
+#
+# Rather than upgrade clang AND emscripten at once, I'm choosing to silence
+# these warnings for the time being. This should not affect Sorbet's code,
+# because we don't actually use compiler builtins and I can't see that changing
+# in the near future.
+# TODO(jez) Remove this when we upgrade absl to a more recent version
+build --copt=-Wno-deprecated-builtins
+
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG
 build --host_cxxopt=-Wno-unused-variable --host_cxxopt=-Wno-overloaded-virtual --host_cxxopt=-Wno-unused-const-variable # ragel violates those and we want a silent build
