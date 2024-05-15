@@ -982,13 +982,12 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return make_type<TupleType>(move(unwrappedElems));
-    } else if (isa_type<NamedLiteralType>(tp) || isa_type<IntegerLiteralType>(tp) || isa_type<FloatLiteralType>(tp)) {
-        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-        }
-        return Types::untypedUntracked();
     }
-    return tp;
+
+    if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+        e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+    }
+    return Types::untypedUntracked();
 }
 
 // This method is actually special: not only is it called from dispatchCall in calls.cc, it's
