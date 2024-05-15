@@ -284,6 +284,9 @@ build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=web
 build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
+# Some of our options are only available in newer versions of clang.
+# TODO(jez) Remove this when we upgrade emscripten to the same version of our clang toolchain
+build:webasm --copt=-Wno-unknown-warning-option
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
