@@ -193,12 +193,6 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "build_bazel_rules_nodejs",
-        sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
-        url = "https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz",
-    )
-
-    http_archive(
         name = "com_github_bazelbuild_buildtools",
         url = "https://github.com/bazelbuild/buildtools/archive/5bcc31df55ec1de770cb52887f2e989e7068301f.zip",
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
@@ -266,6 +260,14 @@ def register_sorbet_dependencies():
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
         strip_prefix = "emscripten-llvm-e1.38.25",
+    )
+
+    # TODO(jez) Eventually, remove the above emscsripten stuff if this works out.
+    http_archive(
+        name = "emsdk",
+        sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
+        strip_prefix = "emsdk-3.1.59/bazel",
+        url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
     )
 
     http_archive(

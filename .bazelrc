@@ -262,21 +262,14 @@ build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 ##
 ## Webasm config. Please use either of those depending on your platform
 ##
-build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
-build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
-
-# common webasm config
-# Use --cpu as a differentiator.
-build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
+build:webasm --incompatible_enable_cc_toolchain_resolution
+build:webasm --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
-# Some of our options are only available in newer versions of clang.
-# TODO(jez) Remove this when we upgrade emscripten to the same version of our clang toolchain
-build:webasm --copt=-Wno-unknown-warning-option
-build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
-build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
-# Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain_15_0_7//:toolchain
+# https://emscripten.org/docs/porting/exceptions.html#webassembly-exception-handling-based-support
+build:webasm --features=exceptions --cxxopt=-fwasm-exceptions --linkopt=-fwasm-exceptions
+# Blocked on https://github.com/emscripten-core/emscripten/issues/9780
+build:webasm --copt=-fno-stack-protector
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist
