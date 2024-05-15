@@ -58,4 +58,16 @@ class A
     )
     T.reveal_type(f) # error: `T.proc.params(arg0: T.untyped).void`
   end
+
+  sig do
+    type_parameters(:U)
+      .params(type: T::Types::Base)
+      .void
+  end
+  def f3(type)
+    T.nilable(type)
+    #         ^^^^ error: Unexpected bare `T::Types::Base` value found in type position
+    T.nilable(T.unsafe(type))
+  end
 end
+
