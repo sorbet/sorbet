@@ -414,6 +414,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
 
     {
         JobOutput threadResult;
+        optional<sorbet::FileNotFoundException> fileNotFound;
+        optional<sorbet::FileNotDirException> fileNotDir;
         auto &logger = *spdlog::default_logger();
         for (auto result = resultq->wait_pop_timed(threadResult, sorbet::WorkerPool::BLOCK_INTERVAL(), logger);
              !result.done();
@@ -426,13 +428,27 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                 }
 
                 if (auto *e = std::get_if<sorbet::FileNotFoundException>(&threadResult)) {
-                    throw *e;
+                    if (!fileNotFound.has_value()) {
+                        fileNotFound = *e;
+                    }
                 } else if (auto *e = std::get_if<sorbet::FileNotDirException>(&threadResult)) {
-                    throw *e;
+                    if (!fileNotDir.has_value()) {
+                        fileNotDir = *e;
+                    }
                 } else {
                     ENFORCE(false, "should never get here!");
                 }
             }
+        }
+
+        // If there was an error, don't raise it until after all the worker threads have finished,
+        // because they might be working on something, attempting to write to the pendingJobs
+        // variable stored on our stack, and then suddenly see that stack address gone because we've
+        // raised and jumped elsewhere.
+        if (fileNotFound.has_value()) {
+            throw fileNotFound.value();
+        } else if (fileNotDir.has_value()) {
+            throw fileNotDir.value();
         }
     }
 }
