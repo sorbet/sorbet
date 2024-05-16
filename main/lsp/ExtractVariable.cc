@@ -44,9 +44,11 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
         if (if_->thenp.loc().exists() && if_->thenp.loc().contains(target)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
             whereToInsert = if_->thenp.loc();
-        } else {
+        } else if (if_->elsep.loc().exists() && if_->elsep.loc().contains(target)) {
             ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->elsep));
             whereToInsert = if_->elsep.loc();
+        } else {
+            ENFORCE(false);
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(scope)) {
         if (rescue->body.loc().exists() && rescue->body.loc().contains(target)) {
@@ -74,7 +76,8 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
     return whereToInsert;
 }
 
-class ExtractVariableWalk {
+// This tree walk takes a Loc and looks for nodes that have that Loc exactly
+class LocSearchWalk {
     // The selection loc
     core::Loc targetLoc;
     // At the end of this walk, we want to return what class/method the matching expression was part of.
@@ -126,7 +129,7 @@ public:
     // This vector stores the locs for those nodes, so that in preTransformExpression, we can skip them.
     std::vector<core::LocOffsets> skippedLocs;
 
-    ExtractVariableWalk(core::Loc targetLoc)
+    LocSearchWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
           enclosingClass(nullptr), enclosingMethod(nullptr) {}
 
@@ -227,20 +230,20 @@ public:
 };
 
 vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurrenceEdits() {
-    auto file = selectionLoc.file();
+    const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExtractVariableWalk extractVariableWalk(selectionLoc);
+    LocSearchWalk walk(selectionLoc);
     auto desugaredTree = typechecker.getDesugared(file);
     core::Context ctx(gs, core::Symbols::root(), file);
-    ast::TreeWalk::apply(ctx, extractVariableWalk, desugaredTree);
+    ast::TreeWalk::apply(ctx, walk, desugaredTree);
 
-    if (!extractVariableWalk.foundExactMatch()) {
+    if (!walk.foundExactMatch()) {
         return {};
     }
 
     auto locOffsets = selectionLoc.offsets();
-    auto enclosingScope = extractVariableWalk.enclosingScope;
+    auto enclosingScope = walk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
     // TODO: can we avoid deepCopy?
     matchingNode = walk.matchingNode->deepCopy();
