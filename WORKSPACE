@@ -39,9 +39,10 @@ llvm_toolchain(
     name = "llvm_toolchain_15_0_7",
     absolute_paths = True,
     llvm_mirror_prefixes = [
-        "https://sorbet-deps.s3.us-west-2.amazonaws.com/",
         "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
         "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+        "https://artifactory-content.stripe.build/artifactory/github-archives/llvm/llvm-project/releases/download/llvmorg-",
+        "https://github.com/sorbet/llvm-project/releases/download/llvmorg-",
     ],
     llvm_version = "15.0.7",
 )
