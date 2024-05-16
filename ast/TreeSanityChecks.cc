@@ -106,6 +106,13 @@ void ConstantLit::_sanityCheck() {
 void EmptyTree::_sanityCheck() {}
 
 void Literal::_sanityCheck() {
+    auto tag = value.tag();
+    if (tag != core::TypePtr::Tag::IntegerLiteralType &&
+        tag != core::TypePtr::Tag::FloatLiteralType &&
+        tag != core::TypePtr::Tag::NamedLiteralType &&
+        tag != core::TypePtr::Tag::ClassType) {
+        ENFORCE(false, "unexpected TypePtr::Tag: {}", tag);
+    }
     ENFORCE(value != nullptr);
 }
 
