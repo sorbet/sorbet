@@ -1,5 +1,7 @@
 #include "main/lsp/ExtractVariable.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort/sort.h"
+#include "local_vars/local_vars.h"
 
 using namespace std;
 
@@ -235,8 +237,9 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
 
     LocSearchWalk walk(selectionLoc);
     auto desugaredTree = typechecker.getDesugared(file);
+    auto afterLocalVars = local_vars::LocalVars::run(const_cast<core::GlobalState &>(gs), {move(desugaredTree), file});
     core::Context ctx(gs, core::Symbols::root(), file);
-    ast::TreeWalk::apply(ctx, walk, desugaredTree);
+    ast::TreeWalk::apply(ctx, walk, afterLocalVars.tree);
 
     if (!walk.foundExactMatch()) {
         return {};
@@ -285,5 +288,217 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
     vector<unique_ptr<TextDocumentEdit>> res;
     res.emplace_back(move(docEdit));
     return res;
+}
+
+// This tree walk takes a ExpressionPtr and looks for nodes that are the same as that node
+class ExpressionPtrSearchWalk {
+    ast::ExpressionPtr *targetNode;
+    vector<const ast::ExpressionPtr *> enclosingScopeStack;
+    std::vector<core::LocOffsets> skippedLocs;
+
+    // NOTE: Might want to profile and switch to UnorderedSet.
+    bool shouldSkipLoc(core::LocOffsets loc) {
+        return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
+    }
+
+public:
+    vector<pair<vector<const ast::ExpressionPtr *>, const ast::ExpressionPtr *>> matches;
+    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
+        : targetNode(matchingNode), skippedLocs(skippedLocs) {}
+
+    void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
+        if (!tree.loc().exists()) {
+            return;
+        }
+
+        if (shouldSkipLoc(tree.loc())) {
+            return;
+        }
+
+        // This is probably going to be slow and we'll probably need to come up with some tricks
+        // to make it faster. On the other hand, because this walk is scoped to only the enclosing
+        // method, it might not be too bad.
+        // TODO: think about whether tree.deepEqual(targetNode) would be faster
+        // TODO: see how slow a pathological case is (a long chain of the same nodes with just the deepest
+        // node being different) Ex.
+        //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
+        if (targetNode->deepEqual(tree)) {
+            matches.push_back(pair(enclosingScopeStack, &tree));
+        }
+    }
+    void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformRescue(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+
+    void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.push_back(&tree);
+    }
+
+    void postTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
+        enclosingScopeStack.pop_back();
+    }
+};
+
+std::pair<vector<unique_ptr<TextDocumentEdit>>, int> VariableExtractor::getExtractMultipleOccurrenceEdits() {
+    ENFORCE(matchingNode, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
+    ENFORCE(enclosingClassOrMethod, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
+
+    const auto file = selectionLoc.file();
+    const auto &gs = typechecker.state();
+
+    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocs);
+    core::Context ctx(gs, core::Symbols::root(), file);
+    ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
+
+    auto matches = walk.matches;
+
+    // There should be at least one match (the original selected expression).
+    ENFORCE(matches.size() > 0);
+    if (matches.size() == 1) {
+        return std::pair(vector<unique_ptr<TextDocumentEdit>>(), 1);
+    }
+    fast_sort(
+        matches, [](auto a, auto b) -> auto { return a.second->loc().beginPos() < b.second->loc().beginPos(); });
+
+    // Find LCA enclosing scope
+    const ast::ExpressionPtr *scopeToInsertIn = &enclosingClassOrMethod;
+    auto firstMatch = matches[0].second;
+    for (auto *scope : matches[0].first) {
+        const ast::ExpressionPtr *scopeToCompare = scope;
+        if (ast::isa_tree<ast::If>(*scope)) {
+            auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
+            if (if_.thenp.loc().exists() && if_.thenp.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &if_.thenp;
+            } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &if_.elsep;
+            } else if (if_.cond.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &if_.cond;
+            } else {
+                ENFORCE(false);
+            }
+        } else if (ast::isa_tree<ast::Rescue>(*scope)) {
+            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(*scope);
+            if (rescue.body.loc().exists() && rescue.body.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &rescue.body;
+            } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &rescue.else_;
+            } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &rescue.ensure;
+            } else {
+                auto found = false;
+                for (auto &rescueCase : rescue.rescueCases) {
+                    if (rescueCase.loc().exists() && rescueCase.loc().contains(firstMatch->loc())) {
+                        scopeToCompare = &rescueCase;
+                        found = true;
+                    }
+                }
+                ENFORCE(found, "didn't find match in any of the rescue cases");
+            }
+        } else if (ast::isa_tree<ast::While>(*scope)) {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(*scope);
+            if (while_.body.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &while_.body;
+            } else if (while_.cond.loc().contains(firstMatch->loc())) {
+                scopeToCompare = &while_.cond;
+            } else {
+                ENFORCE(false);
+            }
+        }
+        bool doesNotMatch = false;
+        for (int j = 1; j < matches.size(); j++) {
+            if (!scopeToCompare->loc().contains(matches[j].second->loc())) {
+                doesNotMatch = true;
+                break;
+            }
+        }
+        if (doesNotMatch) {
+            break;
+        }
+        scopeToInsertIn = scopeToCompare;
+    }
+
+    auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch->loc());
+    auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
+    auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
+
+    auto trailing = whereToInsertLoc.beginPos() == startOfLine.beginPos()
+                        // If we're inserting at the start of the line (ignoring whitespace),
+                        // let's put the declaration on a new line (above the current one) instead.
+                        ? fmt::format("\n{}", string(numSpaces, ' '))
+                        : "; ";
+
+    vector<unique_ptr<TextEdit>> edits;
+    if (whereToInsertLoc.endPos() == firstMatch->loc().beginPos()) {
+        // if insertion point is touching the first match, let's merge the 2 edits into one,
+        // to prevent an "overlapping" edit.
+        whereToInsertLoc = whereToInsertLoc.join(core::Loc(file, firstMatch->loc()));
+        edits.emplace_back(make_unique<TextEdit>(
+            Range::fromLoc(gs, whereToInsertLoc),
+            fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
+        for (int j = 1; j < matches.size(); j++) {
+            auto match = matches[j];
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second->loc()));
+            edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
+        }
+    } else {
+        edits.emplace_back(
+            make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
+                                  fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
+        for (auto match : matches) {
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second->loc()));
+            edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
+        }
+    }
+
+    auto docEdit = make_unique<TextDocumentEdit>(
+        make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits));
+
+    vector<unique_ptr<TextDocumentEdit>> res;
+    res.emplace_back(move(docEdit));
+    return std::pair(move(res), matches.size());
 }
 } // namespace sorbet::realmain::lsp
