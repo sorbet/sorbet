@@ -21,6 +21,7 @@ public:
         : typechecker(typechecker), config(config), selectionLoc(selectionLoc), matchingNode(),
           enclosingClassOrMethod(nullptr) {}
     std::vector<std::unique_ptr<TextDocumentEdit>> getExtractSingleOccurrenceEdits();
+    std::pair<std::vector<std::unique_ptr<TextDocumentEdit>>, int> getExtractMultipleOccurrenceEdits();
 };
 
 } // namespace sorbet::realmain::lsp
