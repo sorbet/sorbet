@@ -1291,7 +1291,7 @@ private:
 
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
                            bool isInclude, bool isSuperclass = false) {
-        if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
+        if (ast::isa_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
                 nesting_ = nesting_->parent;

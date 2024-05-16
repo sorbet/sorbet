@@ -430,14 +430,14 @@ public:
         if (body == nullptr) {
             return make_unique<Begin>(loc, sorbet::parser::NodeVec());
         }
-        if (auto *b = parser::cast_node<Begin>(body.get())) {
+        if (parser::isa_node<Begin>(body.get())) {
             if (begin == nullptr && end == nullptr) {
                 // Synthesized (begin) from compstmt "a; b" or (mlhs)
                 // from multi_lhs "(a, b) = *foo".
                 return body;
             }
         }
-        if (auto *m = parser::cast_node<Mlhs>(body.get())) {
+        if (parser::isa_node<Mlhs>(body.get())) {
             return body;
         }
         sorbet::parser::NodeVec stmts;
@@ -536,7 +536,7 @@ public:
         }
 
         bool isNumblock = false;
-        if (auto *numparams = parser::cast_node<NumParams>(args.get())) {
+        if (parser::isa_node<NumParams>(args.get())) {
             isNumblock = true;
         }
 
@@ -1296,7 +1296,7 @@ public:
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
-        if (auto *mlhs = parser::cast_node<Mlhs>(item.get())) {
+        if (parser::isa_node<Mlhs>(item.get())) {
             return item;
         }
         sorbet::parser::NodeVec args;

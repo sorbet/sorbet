@@ -34,7 +34,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
                     replaceNodes[stat.get()] = run(ctx, send, prevStat);
                 }
             }
-        } else if (auto defn = ast::cast_tree<ast::MethodDef>(stat)) {
+        } else if (ast::isa_tree<ast::MethodDef>(stat)) {
             // if we've already seen a bare `module_function` call, then every subsequent method definition needs to get
             // rewritten appropriately
             if (moduleFunctionActive) {
