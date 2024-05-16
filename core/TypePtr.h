@@ -71,8 +71,12 @@ public:
 
     // A mapping from type to the type returned by `cast_type_nonnull`.
     template <typename T, bool isInlined> struct TypeToCastType {};
-    template <typename T> struct TypeToCastType<T, true> { using type = T; };
-    template <typename T> struct TypeToCastType<T, false> { using type = const T &; };
+    template <typename T> struct TypeToCastType<T, true> {
+        using type = T;
+    };
+    template <typename T> struct TypeToCastType<T, false> {
+        using type = const T &;
+    };
 
     // Required for typecase.
     template <class To> static bool isa(const TypePtr &what);

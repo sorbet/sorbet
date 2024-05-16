@@ -629,14 +629,12 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
         for (auto originalTp : asIf.data(gs)->typeMembers()) {
             auto name = originalTp.data(gs)->name;
             SymbolRef align;
-            int i = 0;
             for (auto x : what.data(gs)->typeMembers()) {
                 if (x.data(gs)->name == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;
                 }
-                i++;
             }
             if (!align.exists()) {
                 currentAlignment.emplace_back(Symbols::noTypeMember());

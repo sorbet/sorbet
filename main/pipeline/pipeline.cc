@@ -1138,7 +1138,6 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                 core::FileRef file = job.file;
                                 try {
                                     core::Context ctx(gs, core::Symbols::root(), file);
-                                    auto file = job.file;
                                     typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
                                 } catch (SorbetException &) {
                                     Exception::failInFuzzer();

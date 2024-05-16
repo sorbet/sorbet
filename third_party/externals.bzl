@@ -162,6 +162,12 @@ def register_sorbet_dependencies():
         urls = _github_public_urls("abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip"),
         sha256 = "c43b8cd8e306e7fe3f006d880181d60db59a3bae6b6bc725da86a28a6b0f9f30",
         strip_prefix = "abseil-cpp-8910297baf87e1777c4fd30fb0693eecf9f2c134",
+        patches = [
+            # https://github.com/abseil/abseil-cpp/commit/d2422b19e9ba41c952db1ed5514bb68114c2be15
+            # Abseil builds with `-Wall` which we can't override to silence this warning.
+            "@com_stripe_ruby_typer//third_party:abseil_cpp/low_level_hash_array_parameter.patch",
+        ],
+        patch_args = ["-p1"],
     )
 
     http_archive(
@@ -181,9 +187,9 @@ def register_sorbet_dependencies():
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/ec7f3bcee2a71daf07a6c8876b701d7622044744.zip"),
-        sha256 = "09b4fd4a586d952afe83dca68d1e333a0f0512ea861c12e27596f6f948587a5f",
-        strip_prefix = "bazel-toolchain-ec7f3bcee2a71daf07a6c8876b701d7622044744",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/c2715fcb7ec7fc574eac501007b29277f316099f.zip"),
+        sha256 = "1fee34a3f4123b2ec60d2c81d4805e16e47c7f95b31259272274430a45d4f3da",
+        strip_prefix = "bazel-toolchain-c2715fcb7ec7fc574eac501007b29277f316099f",
     )
 
     http_archive(

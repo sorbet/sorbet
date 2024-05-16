@@ -289,10 +289,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     fmt::format_to(std::back_inserter(all_prints), "Print: [{}]",
                    fmt::map_join(
-                       print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                       print_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
     fmt::format_to(std::back_inserter(all_stop_after), "Stop After: [{}]",
                    fmt::map_join(
-                       stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                       stop_after_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());

@@ -356,16 +356,22 @@ template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
 }
 
 // Required to support cast<TypePtr> specialization.
-template <> struct TypePtr::TypeToIsInlined<TypePtr> { static constexpr bool value = false; };
+template <> struct TypePtr::TypeToIsInlined<TypePtr> {
+    static constexpr bool value = false;
+};
 
 template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;
 }
 
-#define TYPE_IMPL(name, isInlined)                                                                             \
-    class name;                                                                                                \
-    template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
-    template <> struct TypePtr::TypeToIsInlined<name> { static constexpr bool value = isInlined; };            \
+#define TYPE_IMPL(name, isInlined)                                \
+    class name;                                                   \
+    template <> struct TypePtr::TypeToTag<name> {                 \
+        static constexpr TypePtr::Tag value = TypePtr::Tag::name; \
+    };                                                            \
+    template <> struct TypePtr::TypeToIsInlined<name> {           \
+        static constexpr bool value = isInlined;                  \
+    };                                                            \
     class __attribute__((aligned(8))) name
 
 #define TYPE(name) TYPE_IMPL(name, false)

@@ -339,9 +339,11 @@ template <> inline const ExpressionPtr &ExpressionPtr::cast<ExpressionPtr>(const
     return tree;
 }
 
-#define EXPRESSION(name)                                                                  \
-    class name;                                                                           \
-    template <> struct ExpressionToTag<name> { static constexpr Tag value = Tag::name; }; \
+#define EXPRESSION(name)                        \
+    class name;                                 \
+    template <> struct ExpressionToTag<name> {  \
+        static constexpr Tag value = Tag::name; \
+    };                                          \
     class __attribute__((aligned(8))) name final
 
 EXPRESSION(ClassDef) {

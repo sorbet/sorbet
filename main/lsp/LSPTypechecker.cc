@@ -572,10 +572,8 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
         indexedFinalGS.clear();
     }
 
-    int i = -1;
     ENFORCE(updates.updatedFileIndexes.size() == updates.updatedFiles.size());
     for (auto &ast : updates.updatedFileIndexes) {
-        i++;
         const int id = ast.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);

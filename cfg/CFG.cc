@@ -361,7 +361,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
                    fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
+                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
@@ -378,7 +378,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
     fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
                    this->firstDeadInstructionIdx,
                    fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
+                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
@@ -410,7 +410,7 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
                    fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto { return arg.showRaw(gs, cfg); }));
+                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.showRaw(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);

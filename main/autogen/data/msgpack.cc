@@ -158,10 +158,8 @@ MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)) {}
 
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
-    int i = -1;
     mpack_start_array(writer, symbols.size());
     for (auto sym : symbols) {
-        ++i;
         auto str = sym.shortName(ctx);
         packString(writer, str);
     }

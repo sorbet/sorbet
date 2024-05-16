@@ -104,6 +104,7 @@ cc_library(
     hdrs = glob(["include/**/*.hh"]),
     copts = [
         "-Wno-unused-const-variable",
+        "-Wno-unused-but-set-variable",
     ] + select({
         # What we really want here is to say "it's never ok to use -Os, because
         # that will take 2+ minutes to compile." We have to do this to override
