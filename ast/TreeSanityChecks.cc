@@ -109,8 +109,7 @@ void Literal::_sanityCheck() {
     auto tag = value.tag();
     if (tag != core::TypePtr::Tag::IntegerLiteralType &&
         tag != core::TypePtr::Tag::FloatLiteralType &&
-        tag != core::TypePtr::Tag::NamedLiteralType &&
-        tag != core::TypePtr::Tag::ClassType) {
+        tag != core::TypePtr::Tag::NamedLiteralType) {
         ENFORCE(false, "unexpected TypePtr::Tag: {}", tag);
     }
     ENFORCE(value != nullptr);
