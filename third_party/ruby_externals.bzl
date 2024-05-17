@@ -28,20 +28,20 @@ def register_ruby_dependencies():
 
     http_file(
         name = "bundler_stripe",
-        url = "https://rubygems.org/downloads/bundler-1.17.3.gem",
+        urls = _rubygems_urls("bundler-1.17.3.gem"),
         sha256 = "bc4bf75b548b27451aa9f443b18c46a739dd22ad79f7a5f90b485376a67dc352",
     )
 
     http_file(
         name = "rubygems_update_stripe",
-        url = "https://rubygems.org/downloads/rubygems-update-3.5.4.gem",
+        urls = _rubygems_urls("rubygems-update-3.5.4.gem"),
         sha256 = "41d4c93a79426a7e034080cc367c696ee0ae5c26fcfef20bb58f950031c95924",
     )
 
     # Pre Ruby 3.0 needs an older rubygems
     http_file(
         name = "rubygems_update_stripe_ruby2",
-        url = "https://rubygems.org/downloads/rubygems-update-3.3.3.gem",
+        urls = _rubygems_urls("rubygems-update-3.3.3.gem"),
         sha256 = "610aef544e0c15ff3cd5492dff3f5f46bd2062896f4f62c7191432c6f1d681c9",
     )
 
@@ -78,3 +78,12 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:10306_no_hash_allocate_static_kwargs_3_3_only.patch",
         ],
     )
+
+def _rubygems_urls(gem):
+    """
+    Produce a url list that works both with rubygems, and stripe's internal gem cache.
+    """
+    return [
+        "https://rubygems.org/downloads/{}".format(gem),
+        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
+    ]
