@@ -368,7 +368,6 @@ def _github_public_urls(path):
     """
     return [
         "https://github.com/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/github-archives/{}".format(path),
     ]
 
 def _emscripten_urls(path):
@@ -377,5 +376,4 @@ def _emscripten_urls(path):
     """
     return [
         "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/googleapis-storage-cache/webassembly/emscripten-releases-builds/old/{}".format(path),
     ]

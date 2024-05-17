@@ -85,7 +85,6 @@ def _rubygems_urls(gem):
     """
     return [
         "https://rubygems.org/downloads/{}".format(gem),
-        "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
     ]
 
 def _ruby_urls(path):
@@ -94,7 +93,6 @@ def _ruby_urls(path):
     """
     return [
         "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
     ]
 
 def _github_public_urls(path):
@@ -103,5 +101,4 @@ def _github_public_urls(path):
     """
     return [
         "https://github.com/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/github-archives/{}".format(path),
     ]
