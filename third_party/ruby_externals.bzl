@@ -5,7 +5,7 @@ def register_ruby_dependencies():
     libyaml_version = "0.2.5"
     http_archive(
         name = "libyaml",
-        urls = _github_public_urls("yaml/libyaml/releases/download/{}/yaml-{}.tar.gz".format(libyaml_version, libyaml_version)),
+        url = "https://github.com/yaml/libyaml/releases/download/{}/yaml-{}.tar.gz".format(libyaml_version, libyaml_version),
         sha256 = "c642ae9b75fee120b2d96c712538bd2cf283228d2337df2cf2988e3c02678ef4",
         strip_prefix = "yaml-{}".format(libyaml_version),
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libyaml.BUILD",
@@ -14,7 +14,7 @@ def register_ruby_dependencies():
     libffi_version = "3.4.5"
     http_archive(
         name = "libffi",
-        urls = _github_public_urls("libffi/libffi/releases/download/v{}/libffi-{}.tar.gz".format(libffi_version, libffi_version)),
+        url = "https://github.com/libffi/libffi/releases/download/v{}/libffi-{}.tar.gz".format(libffi_version, libffi_version),
         sha256 = "96fff4e589e3b239d888d9aa44b3ff30693c2ba1617f953925a70ddebcc102b2",
         strip_prefix = "libffi-{}".format(libffi_version),
         build_file = "@com_stripe_ruby_typer//third_party/ruby:libffi.BUILD",
@@ -23,7 +23,7 @@ def register_ruby_dependencies():
     http_archive(
         name = "rules_rust",
         sha256 = "25209daff2ba21e818801c7b2dab0274c43808982d6aea9f796d899db6319146",
-        urls = _github_public_urls("bazelbuild/rules_rust/releases/download/0.21.1/rules_rust-v0.21.1.tar.gz"),
+        url = "https://github.com/bazelbuild/rules_rust/releases/download/0.21.1/rules_rust-v0.21.1.tar.gz",
     )
 
     http_file(
@@ -50,7 +50,7 @@ def register_ruby_dependencies():
 
     http_archive(
         name = "sorbet_ruby_3_1",
-        urls = _ruby_urls("3.1/ruby-3.1.4.tar.gz"),
+        url = "https://cache.ruby-lang.org/pub/ruby/3.1/ruby-3.1.4.tar.gz",
         sha256 = "a3d55879a0dfab1d7141fdf10d22a07dbf8e5cdc4415da1bde06127d5cc3c7b6",
         strip_prefix = "ruby-3.1.4",
         build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
@@ -65,7 +65,7 @@ def register_ruby_dependencies():
 
     http_archive(
         name = "sorbet_ruby_3_3",
-        urls = _ruby_urls("3.3/ruby-3.3.1.tar.gz"),
+        url = "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.1.tar.gz",
         sha256 = "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99",
         strip_prefix = "ruby-3.3.1",
         build_file = ruby_3_3_build,
@@ -86,22 +86,4 @@ def _rubygems_urls(gem):
     return [
         "https://rubygems.org/downloads/{}".format(gem),
         "https://artifactory-content.stripe.build/artifactory/gems/gems/{}".format(gem),
-    ]
-
-def _ruby_urls(path):
-    """
-    Produce a url list that works both with ruby-lang.org, and stripe's internal artifact cache.
-    """
-    return [
-        "https://cache.ruby-lang.org/pub/ruby/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/ruby-lang-cache/pub/ruby/{}".format(path),
-    ]
-
-def _github_public_urls(path):
-    """
-    Produce a url list that works both with github, and stripe's internal artifact cache.
-    """
-    return [
-        "https://github.com/{}".format(path),
-        "https://artifactory-content.stripe.build/artifactory/github-archives/{}".format(path),
     ]
