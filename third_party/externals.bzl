@@ -260,7 +260,7 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "emscripten_clang_linux",
-        urls = _emscripten_urls("linux/emscripten-llvm-e1.38.25.tar.gz"),
+        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/linux/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
         strip_prefix = "emscripten-llvm-e1.38.25",
@@ -268,7 +268,7 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "emscripten_clang_darwin",
-        urls = _emscripten_urls("mac/emscripten-llvm-e1.38.25.tar.gz"),
+        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/mac/emscripten-llvm-e1.38.25.tar.gz",
         build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
         sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
         strip_prefix = "emscripten-llvm-e1.38.25",
@@ -361,11 +361,3 @@ def register_sorbet_dependencies():
     )
 
     register_ruby_dependencies()
-
-def _emscripten_urls(path):
-    """
-    Produce a url list that works both with emscripten, and stripe's internal artifact cache.
-    """
-    return [
-        "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/{}".format(path),
-    ]
