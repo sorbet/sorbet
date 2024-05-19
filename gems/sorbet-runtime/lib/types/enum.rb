@@ -273,8 +273,11 @@ class T::Enum
 
   ### Private implementation ###
 
+  UNSET = T.let(Module.new.freeze, Module)
+  private_constant :UNSET
+
   sig {params(serialized_val: SerializedVal).void}
-  def initialize(serialized_val=nil)
+  def initialize(serialized_val=UNSET)
     raise 'T::Enum is abstract' if self.class == T::Enum
     if !self.class.started_initializing?
       raise "Must instantiate all enum values of #{self.class} inside 'enums do'."
@@ -300,7 +303,7 @@ class T::Enum
   sig {params(const_name: Symbol).void}
   def _bind_name(const_name)
     @const_name = const_name
-    @serialized_val = const_to_serialized_val(const_name) if @serialized_val.nil?
+    @serialized_val = const_to_serialized_val(const_name) if @serialized_val.equal?(UNSET)
     freeze
   end
 
