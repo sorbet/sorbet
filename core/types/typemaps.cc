@@ -54,6 +54,11 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
                 if (bound.isFullyDefined()) {
                     return bound;
                 }
+            } else if (tc.hasLowerBound(sym)) {
+                auto bound = tc.findLowerBound(sym);
+                if (bound.isFullyDefined()) {
+                    return bound;
+                }
             }
             break;
         }
@@ -62,6 +67,11 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc, c
                 auto bound = tc.findLowerBound(sym);
                 // TODO(jez) Need to check for isBottom?
                 // if (bound.isFullyDefined() && !bound.isBottom()) {
+                if (bound.isFullyDefined()) {
+                    return bound;
+                }
+            } else if (tc.hasUpperBound(sym)) {
+                auto bound = tc.findUpperBound(sym);
                 if (bound.isFullyDefined()) {
                     return bound;
                 }
