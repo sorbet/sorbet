@@ -171,12 +171,23 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
 
 // Convert this parsedfile to a msgpack representation
 string ParsedFile::toMsgpack(core::Context ctx, int version, const AutogenConfig &autogenCfg) {
-    MsgpackWriter write(version);
-    return write.pack(ctx, *this, autogenCfg);
+    if (autogenCfg.msgpackSkipReferenceMetadata) {
+        MsgpackWriterLite write(version);
+
+        return write.pack(ctx, *this, autogenCfg);
+    } else {
+        MsgpackWriter write(version);
+
+        return write.pack(ctx, *this, autogenCfg);
+    }
 }
 
-string ParsedFile::msgpackGlobalHeader(int version, size_t numFiles) {
-    return MsgpackWriter::msgpackGlobalHeader(version, numFiles);
+string ParsedFile::msgpackGlobalHeader(int version, size_t numFiles, const AutogenConfig &autogenCfg) {
+    if (autogenCfg.msgpackSkipReferenceMetadata) {
+        return MsgpackWriterLite::msgpackGlobalHeader(version, numFiles);
+    } else {
+        return MsgpackWriter::msgpackGlobalHeader(version, numFiles);
+    }
 }
 
 } // namespace sorbet::autogen

@@ -151,11 +151,13 @@ void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, Par
 
     // parent_of
     packDefinitionRef(writer, ref.parent_of);
+
     mpack_finish_array(writer);
 }
 
 MsgpackWriter::MsgpackWriter(int version)
-    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)) {}
+    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
+      pfAttrs(parsedFileAttrMap.at(version)) {}
 
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
     mpack_start_array(writer, symbols.size());
@@ -241,8 +243,6 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     size_t headerSize;
     mpack_writer_init_growable(&writer, &header, &headerSize);
 
-    const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
-
     mpack_start_array(&writer, pfAttrs.size());
 
     if (!symbolsInBody) {
@@ -299,12 +299,9 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     return ret;
 }
 
-string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
+string buildGlobalHeader(int version, size_t numFiles, const std::vector<std::string> &refAttrs,
+                         const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs) {
     string header;
-
-    const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
-    const vector<string> &refAttrs = refAttrMap.at(version);
-    const vector<string> &defAttrs = defAttrMap.at(version);
 
     mpack_writer_t writer;
     char *body;
@@ -338,6 +335,14 @@ string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
     MPACK_FREE(body);
 
     return header;
+}
+
+string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
+    const vector<string> &pfAttrs = parsedFileAttrMap.at(version);
+    const vector<string> &refAttrs = refAttrMap.at(version);
+    const vector<string> &defAttrs = defAttrMap.at(version);
+
+    return buildGlobalHeader(version, numFiles, refAttrs, defAttrs, pfAttrs);
 }
 
 const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{
