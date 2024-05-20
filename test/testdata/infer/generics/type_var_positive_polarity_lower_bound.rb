@@ -18,7 +18,7 @@ def example(x, &blk)
 end
 
 f = T.let(->() { 0 }, T.proc.returns(Integer))
-res = example('', &f)
+res = example('', &f) # error: Expected `T.proc.returns(String)` but found `T.proc.returns(Integer)` for block argument
 T.reveal_type(res) # error: `T.any(String, Integer)`
 
 
@@ -69,7 +69,7 @@ def complicated(exn_class, &blk)
 end
 
 complicated(TypeError) do |raiser|
-  T.reveal_type(raiser) # error: `T.proc.params(arg0: StandardError).void`
+  T.reveal_type(raiser) # error: `T.proc.params(arg0: TypeError).void`
   raiser.call(TypeError.new)
-  raiser.call(ArgumentError.new)
+  raiser.call(ArgumentError.new) # error: Expected `TypeError` but found `ArgumentError` for argument `arg0`
 end
