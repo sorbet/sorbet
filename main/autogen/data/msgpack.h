@@ -18,7 +18,9 @@ private:
     UnorderedMap<core::NameRef, uint32_t> symbolIds;
 
     static const std::map<int, std::vector<std::string>> refAttrMap;
+    static const std::map<int, std::vector<std::string>> refAttrMapSkipMetadata;
     static const std::map<int, std::vector<std::string>> defAttrMap;
+    static const std::map<int, std::vector<std::string>> defAttrMapSkipMetadata;
     static const std::map<int, std::vector<std::string>> parsedFileAttrMap;
 
     // a bunch of helpers
@@ -30,7 +32,8 @@ private:
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
     void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
                         const AutogenConfig &autogenCfg);
-    void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
+    void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref,
+                       const AutogenConfig &autogenCfg);
     static int assertValidVersion(int version) {
         if (version < AutogenVersion::MIN_VERSION || version > AutogenVersion::MAX_VERSION) {
             Exception::raise("msgpack version {} not in available range [{}, {}]", version, AutogenVersion::MIN_VERSION,
@@ -40,7 +43,7 @@ private:
     }
 
 public:
-    MsgpackWriter(int version);
+    MsgpackWriter(int version, const AutogenConfig &autogenCfg);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
     std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);

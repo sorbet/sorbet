@@ -171,7 +171,7 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
 
 // Convert this parsedfile to a msgpack representation
 string ParsedFile::toMsgpack(core::Context ctx, int version, const AutogenConfig &autogenCfg) {
-    MsgpackWriter write(version);
+    MsgpackWriter write(version, autogenCfg);
     return write.pack(ctx, *this, autogenCfg);
 }
 

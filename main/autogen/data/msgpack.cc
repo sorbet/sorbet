@@ -84,9 +84,11 @@ void MsgpackWriter::packDefinition(mpack_writer_t *writer, core::Context ctx, Pa
     auto raw_full_name = pf.showFullName(ctx, def.id);
     packNames(writer, raw_full_name);
 
-    // type
-    auto defType = def.type;
-    mpack_write_u8(writer, static_cast<uint64_t>(defType));
+    if (!autogenCfg.msgpackSkipReferenceMetadata) {
+        // type
+        auto defType = def.type;
+        mpack_write_u8(writer, static_cast<uint64_t>(defType));
+    }
 
     // defines_behavior
     packBool(writer, def.defines_behavior);
@@ -96,46 +98,53 @@ void MsgpackWriter::packDefinition(mpack_writer_t *writer, core::Context ctx, Pa
                                [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); }),
             "RBI files should never define behavior");
 
-    // isEmpty
-    packBool(writer, def.is_empty);
+    if (!autogenCfg.msgpackSkipReferenceMetadata) {
+        // isEmpty
+        packBool(writer, def.is_empty);
 
-    // parent_ref
-    packReferenceRef(writer, def.parent_ref);
+        // parent_ref
+        packReferenceRef(writer, def.parent_ref);
 
-    // aliased_ref
-    packReferenceRef(writer, def.aliased_ref);
+        // aliased_ref
+        packReferenceRef(writer, def.aliased_ref);
 
-    // defining_ref
-    packReferenceRef(writer, def.defining_ref);
-    mpack_finish_array(writer);
+        // defining_ref
+        packReferenceRef(writer, def.defining_ref);
+        mpack_finish_array(writer);
+    }
 }
 
-void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) {
+void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref,
+                                  const AutogenConfig &autogenCfg) {
     mpack_start_array(writer, refAttrs[version].size());
 
-    // scope
-    packDefinitionRef(writer, ref.scope.id());
+    if (!autogenCfg.msgpackSkipReferenceMetadata) {
+        // scope
+        packDefinitionRef(writer, ref.scope.id());
+    }
 
     // name
     packNames(writer, ref.name.nameParts);
 
-    // nesting
-    if (version >= 6) {
-        mpack_write_u32(writer, ref.nestingId);
-    } else {
-        auto &nesting = pf.nestings[ref.nestingId];
-        mpack_start_array(writer, nesting.size());
-        for (auto &scope : nesting) {
-            packDefinitionRef(writer, scope.id());
+    if (!autogenCfg.msgpackSkipReferenceMetadata) {
+        // nesting
+        if (version >= 6) {
+            mpack_write_u32(writer, ref.nestingId);
+        } else {
+            auto &nesting = pf.nestings[ref.nestingId];
+            mpack_start_array(writer, nesting.size());
+            for (auto &scope : nesting) {
+                packDefinitionRef(writer, scope.id());
+            }
+            mpack_finish_array(writer);
         }
-        mpack_finish_array(writer);
-    }
 
-    // expression_range
-    auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
-    packRange(writer, expression_range.first.line, expression_range.second.line);
-    // expression_pos_range
-    packRange(writer, ref.loc.beginPos(), ref.loc.endPos());
+        // expression_range
+        auto expression_range = ctx.locAt(ref.definitionLoc).position(ctx);
+        packRange(writer, expression_range.first.line, expression_range.second.line);
+        // expression_pos_range
+        packRange(writer, ref.loc.beginPos(), ref.loc.endPos());
+    }
 
     // resolved
     if (ref.resolved.empty()) {
@@ -146,16 +155,21 @@ void MsgpackWriter::packReference(mpack_writer_t *writer, core::Context ctx, Par
         packNames(writer, ref.resolved.nameParts);
     }
 
-    // is_defining_ref
-    packBool(writer, ref.is_defining_ref);
+    if (!autogenCfg.msgpackSkipReferenceMetadata) {
+        // is_defining_ref
+        packBool(writer, ref.is_defining_ref);
 
-    // parent_of
-    packDefinitionRef(writer, ref.parent_of);
+        // parent_of
+        packDefinitionRef(writer, ref.parent_of);
+    }
+
     mpack_finish_array(writer);
 }
 
-MsgpackWriter::MsgpackWriter(int version)
-    : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)) {}
+MsgpackWriter::MsgpackWriter(int version, const AutogenConfig &autogenCfg)
+    : version(assertValidVersion(version)),
+      refAttrs(autogenCfg.msgpackSkipReferenceMetadata ? refAttrMapSkipMetadata.at(version) : refAttrMap.at(version)),
+      defAttrs(autogenCfg.msgpackSkipReferenceMetadata ? defAttrMapSkipMetadata.at(version) : defAttrMap.at(version)) {}
 
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const vector<core::NameRef> &symbols) {
     mpack_start_array(writer, symbols.size());
@@ -219,7 +233,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
 
         mpack_start_array(&temporaryWriter, pf.refs.size());
         for (auto &ref : pf.refs) {
-            packReference(&temporaryWriter, ctx, pf, ref);
+            packReference(&temporaryWriter, ctx, pf, ref, autogenCfg);
         }
         mpack_finish_array(&temporaryWriter);
     }
@@ -391,6 +405,19 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
      }},
 };
 
+const map<int, vector<string>> MsgpackWriter::refAttrMapSkipMetadata{
+    {5,
+     {
+         "name",
+         "resolved",
+     }},
+    {6,
+     {
+         "name",
+         "resolved",
+     }},
+};
+
 const map<int, vector<string>> MsgpackWriter::defAttrMap{
     {
         5,
@@ -414,6 +441,23 @@ const map<int, vector<string>> MsgpackWriter::defAttrMap{
             "parent_ref",
             "aliased_ref",
             "defining_ref",
+        },
+    },
+};
+
+const map<int, vector<string>> MsgpackWriter::defAttrMapSkipMetadata{
+    {
+        5,
+        {
+            "raw_full_name",
+            "defines_behavior",
+        },
+    },
+    {
+        6,
+        {
+            "raw_full_name",
+            "defines_behavior",
         },
     },
 };

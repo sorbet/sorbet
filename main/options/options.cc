@@ -158,6 +158,10 @@ bool Printers::isAutogen() const {
     return Autogen.enabled || AutogenMsgPack.enabled || AutogenSubclasses.enabled;
 }
 
+bool Printers::isAutogenMsgpack() const {
+    return AutogenMsgPack.enabled;
+}
+
 struct StopAfterOptions {
     string option;
     Phase flag;
@@ -448,6 +452,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("autogen-behavior-allowed-in-rbi-files-paths",
                                "RBI files defined in these paths can be considered by autogen as behavior-defining.",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("autogen-msgpack-skip-reference-metadata",
+                               "Skip serializing extra metadata on references when printing msgpack in autogen",
+                               cxxopts::value<bool>());
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -839,6 +846,15 @@ void readOptions(Options &opts,
             }
             opts.autogenBehaviorAllowedInRBIFilesPaths =
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
+        }
+
+        opts.autogenMsgpackSkipReferenceMetadata = raw["autogen-msgpack-skip-reference-metadata"].as<bool>();
+        if (opts.autogenMsgpackSkipReferenceMetadata) {
+            if (!opts.print.isAutogenMsgpack()) {
+                logger->error("autogen-skip-reference-metadata can only be used with -p "
+                              "autogen-msgpack");
+                throw EarlyReturnWithCode(1);
+            }
         }
 
         if (opts.print.UntypedBlame.enabled && opts.trackUntyped == core::TrackUntyped::Nowhere) {

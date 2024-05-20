@@ -151,6 +151,7 @@ struct Reference {
 
 struct AutogenConfig {
     const std::vector<std::string> behaviorAllowedInRBIsPaths;
+    const bool msgpackSkipReferenceMetadata = false;
 };
 
 // A `ParsedFile` contains all the `Definition`s and `References` used in a particular file

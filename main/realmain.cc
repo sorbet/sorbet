@@ -797,8 +797,9 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
             }
 
-            autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
-                                                     std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
+            autogen::AutogenConfig autogenCfg = {
+                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
 
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif
