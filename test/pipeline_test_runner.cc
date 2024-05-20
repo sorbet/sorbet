@@ -157,7 +157,6 @@ public:
     }
 
     void drainErrors(core::GlobalState &gs) {
-        errors.clear();
         // Moves errors from being owned by GlobalState to having been flushed by the flusher
         // In our case, errorCollector is our error flusher (accumulates a vector, instead of
         // printing to stdout).
@@ -170,7 +169,6 @@ public:
 
     void clear(core::GlobalState &gs) {
         got.clear();
-        errors.clear();
         errorQueue->flushAllErrors(gs);
         auto _newErrors = errorCollector->drainErrors();
     }
