@@ -276,17 +276,16 @@ that control flow in Sorbet is a syntactic property, not a semantic property
 ## Tips
 
 These are some helpful tips for helping Sorbet track the types of expressions
-throughout a program
+throughout a program.
 
-### Prefer `Array#filter_map`
+### Prefer `xs.compact` to `xs.reject(&:nil?)`
 
-Sorbet does not use boolean predicates like those accepted by `Array#select`,
-`Array#filter`, or `Array#reject` to infer a more narrow type about the element
-of the list.
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
 
-To work around this, prefer `Array#filter_map`, which Sorbet is able to
-understand. Or, when the predicate is specially checking for non-nil, prefer
-`Array#compact`. For example:
+To remove the `nil` values from an Array and have Sorbet understand that they
+are gone, use `Array#compact` instead:
 
 ```ruby
 sig { params(xs: T::Array[T.nilable(Integer)]).void }
@@ -294,23 +293,22 @@ def example(xs)
   ys = xs.reject(&:nil?)
   T.reveal_type(ys) # <- still nilable ❌
 
-  ys = xs.filter_map { |x| x unless x.nil? }
-  T.reveal_type(ys) # <- non-nil ✅
-
   ys = xs.compact # <- non-nil ✅
 end
 ```
 
 <a
-href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20unless%20x.nil%3F%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20non-nil%20%E2%9C%85%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View
 on sorbet.run</a>
 
-How this works: `Array#filter_map` removes any element for which the filter
-returns a falsy value. If the value is truthy, the value at that index is mapped
-to the new, truthy value.
+### Prefer `xs.filter_map { ... }` to `xs.filter { ... }`
 
-To be clear: this technique works with any of the above flow-sensitive
-predicates Sorbet understands, not just for `nil?`. For example:
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
+
+For complicated flow-sensitive predicates (i.e., more than just checking for
+`nil?`), use `Array#filter_map`. For example:
 
 ```ruby
 sig { params(xs: T::Array[T.any(Integer, String)]).void }
@@ -326,3 +324,9 @@ end
 <a
 href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend">View
 on sorbet.run</a>
+
+`Array#filter_map` removes any element for which the filter returns a falsy
+value. If the value is truthy, the value at that index is mapped to the new,
+truthy value. The `x if x.is_a?(Integer)` evaluates to `x` (an `Integer`, thus
+always truthy) if it's an Integer, or implicitly returns `nil` (which is falsy)
+if it's a String.
