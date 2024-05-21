@@ -308,3 +308,21 @@ It's also possible to use `Array#compact` to simplify the specific case when the
 predicate is `nil?`. `Array#filter_map` removes any element for which the filter
 returns a falsy value. If the value is truthy, the value at that index is mapped
 to the new, truthy value.
+
+To be clear: this technique works with any of the above flow-sensitive
+predicates Sorbet understands, not just for `nil?`. For example:
+
+```ruby
+sig { params(xs: T::Array[T.any(Integer, String)]).void }
+def example(xs)
+  ys = xs.select { |x| x.is_a?(Integer) }
+  T.reveal_type(ys) # <- not just Integer ❌
+
+  ys = xs.filter_map { |x| x if x.is_a?(Integer) }
+  T.reveal_type(ys) # <- only Integers ✅
+end
+```
+
+<a
+href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend"
+View on sorbet.run</a>
