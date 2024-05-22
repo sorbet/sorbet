@@ -84,3 +84,7 @@ def example(xs)
   end
   T.reveal_type(res) # error: `T.untyped`
 end
+
+int_or_str_array = T::Array[T.any(Integer, String)].new
+int_array = int_or_str_array.grep(Integer)
+T.reveal_type(int_array) # error: `T::Array[Integer]`

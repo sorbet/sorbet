@@ -749,6 +749,13 @@ module Enumerable
   # res                    #=> [0, 1, 2]
   # ```
   sig do
+    type_parameters(:Instance)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+      )
+      .returns(T::Array[T.all(Elem, T.type_parameter(:Instance))])
+  end
+  sig do
     params(
         arg0: BasicObject,
     )
