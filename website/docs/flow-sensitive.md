@@ -301,14 +301,14 @@ end
 href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.nilable%28Integer%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.reject%28%26%3Anil%3F%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20still%20nilable%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.compact%20%23%20%3C-%20non-nil%20%E2%9C%85%0Aend">View
 on sorbet.run</a>
 
-### Prefer `xs.filter_map { ... }` to `xs.filter { ... }`
+### Prefer `xs.grep(A)` to `xs.filter { |x| x.is_a?(A) }`
 
 Sorbet does not use the boolean predicate accepted by methods like
 `Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
 about the element of the list.
 
-For complicated flow-sensitive predicates (i.e., more than just checking for
-`nil?`), use `Array#filter_map`. For example:
+For the specific case of filtering a list using `is_a?`, prefer using
+`Enumerable#grep`:
 
 ```ruby
 sig { params(xs: T::Array[T.any(Integer, String)]).void }
@@ -316,7 +316,36 @@ def example(xs)
   ys = xs.select { |x| x.is_a?(Integer) }
   T.reveal_type(ys) # <- not just Integer ❌
 
-  ys = xs.filter_map { |x| x if x.is_a?(Integer) }
+  ys = xs.grep(Integer)
+  T.reveal_type(ys) # <- only Integers ✅
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.grep%28Integer%29%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20Integers%20%E2%9C%85%0Aend">View
+on sorbet.run</a>
+
+Two gotchas:
+
+- This requires the RBI definitions inside Sorbet 0.5.11388 or higher. For older
+  Sorbet versions, see the `filter_map` tip below.
+- This only works for classes, not modules.
+
+### Prefer `xs.filter_map { ... }` to `xs.filter { ... }`
+
+Sorbet does not use the boolean predicate accepted by methods like
+`Array#select`, `Array#filter`, or `Array#reject` to infer a more narrow type
+about the element of the list.
+
+For complicated flow-sensitive predicates (i.e., more than just checking for
+`nil?` or `is_a?`), use `Array#filter_map`. For example:
+
+```ruby
+sig { params(xs: T::Array[T.any(Integer, String)]).void }
+def example(xs)
+  ys = xs.select { |x| x.is_a?(Integer) && x.even? }
+  T.reveal_type(ys) # <- not just Integer ❌
+
+  ys = xs.filter_map { |x| x if x.is_a?(Integer) && x.even? }
   T.reveal_type(ys) # <- only Integers ✅
 end
 ```
