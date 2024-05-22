@@ -326,9 +326,10 @@ on sorbet.run</a>
 
 Two gotchas:
 
-- This requires the RBI definitions inside Sorbet 0.5.11388 or higher. For older
-  Sorbet versions, see the `filter_map` tip below.
+- This requires the RBI definitions inside Sorbet 0.5.11388 or higher.
 - This only works for classes, not modules.
+
+If either of these gotchas apply, see the `filter_map` tip below.
 
 ### Prefer `xs.filter_map { ... }` to `xs.filter { ... }`
 
