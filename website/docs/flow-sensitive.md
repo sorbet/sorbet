@@ -263,3 +263,12 @@ View full example on sorbet.run</a>
 > **Note**: Many Ruby constructs that look like local variables are actually
 > method calls without parens! Specifically, watch out for `attr_reader` and
 > zero-argument method definitions.
+
+Note that given Sorbet's architecture, it's not possible to implement some sort
+of annotation that would mark a method as "pure" or "constant," declaring that a
+method always returns the same value across consecutive calls to the method
+(this also precludes special support for methods defined via `const` or
+`attr_reader`). For more information on why, see
+[this blog post](https://blog.jez.io/syntactic-control-flow/) which explains
+that control flow in Sorbet is a syntactic property, not a semantic property
+(which could be influenced by semantic annotations like this).
