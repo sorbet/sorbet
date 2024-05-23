@@ -1820,6 +1820,8 @@ class Socket < BasicSocket
   MSG_DONTROUTE = ::T.let(nil, ::T.untyped)
   # This message should be non-blocking
   MSG_DONTWAIT = ::T.let(nil, ::T.untyped)
+  # [Data completes connection](https://ruby-doc.org/stdlib-3.0.0/libdoc/socket/rdoc/Socket.html#MSG_EOF)
+  MSG_EOF = ::T.let(nil, ::T.untyped) 
   # [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) completes record
   MSG_EOR = ::T.let(nil, ::T.untyped)
   # Fetch message from error queue
