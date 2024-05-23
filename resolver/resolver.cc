@@ -2292,7 +2292,17 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+        auto priorFieldResultType = priorField.data(ctx)->resultType;
+        if (priorFieldResultType == nullptr || castType == nullptr) [[unlikely]] {
+            const auto &file = ctx.file.data(ctx);
+            fatalLogger->error(
+                R"(msg="Bad core::Types::equiv in resolveField" path="{}" priorField="{}" resultTypeNull="{}" castTypeNull="{}")",
+                file.path(), priorField.show(ctx), priorFieldResultType == nullptr ? "true" : "false",
+                castType == nullptr ? "true" : "false");
+            fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        }
+
+        if (core::Types::equiv(ctx, priorFieldResultType, castType)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short
             // circuit.
             return;
