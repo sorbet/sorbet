@@ -797,6 +797,14 @@ class Enumerator::Lazy < Enumerator
       .returns(T::Enumerator::Lazy[T.all(Elem, T.type_parameter(:Instance))])
   end
   sig do
+    type_parameters(:Instance, :U)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+          blk: T.proc.params(arg0: T.type_parameter(:Instance)).returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  sig do
     params(
       arg0: BasicObject
     )
