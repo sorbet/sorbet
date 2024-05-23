@@ -48,6 +48,8 @@ build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initia
 # in the near future.
 # TODO(jez) Remove this when we upgrade absl to a more recent version
 build --copt=-Wno-deprecated-builtins
+build --cxxopt=-Wno-deprecated-builtins
+build --host_cxxopt=-Wno-deprecated-builtins
 
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG
