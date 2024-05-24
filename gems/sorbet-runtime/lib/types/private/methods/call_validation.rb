@@ -299,7 +299,7 @@ module T::Private::Methods::CallValidation
       if owner.singleton_class? && owner.respond_to?(:attached_object)
         # attached_object is new in Ruby 3.2
         "#{owner.attached_object}.#{method.name}"
-      else owner
+      else
         "#{owner}##{method.name}"
       end
 
