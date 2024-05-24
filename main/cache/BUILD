@@ -1,7 +1,7 @@
 cc_library(
     name = "cache",
     srcs = select({
-        "//tools/config:webasm": ["cache-orig.cc"],
+        "@platforms//cpu:wasm32": ["cache-orig.cc"],
         "//conditions:default": ["cache.cc"],
     }),
     hdrs = ["cache.h"],
