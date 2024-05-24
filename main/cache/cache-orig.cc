@@ -1,3 +1,4 @@
+#include "common/kvstore/KeyValueStore.h"
 #include "main/cache/cache.h"
 
 using namespace std;
