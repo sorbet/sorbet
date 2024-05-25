@@ -100,6 +100,11 @@ steps:
     command: .buildkite/build-emscripten.sh
     artifact_paths: _out_/**/*
     <<: *elastic
+  
+  - label: ":linux: build-ruby-wasm.sh"
+    command: .buildkite/build-ruby-wasm.sh
+    artifact_paths: _out_/**/*
+    <<: *elastic
 
   - label: ":linux: build-vscode-extension.sh"
     command: .buildkite/build-vscode-extension.sh
