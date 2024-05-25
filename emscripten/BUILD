@@ -23,6 +23,7 @@ cc_binary(
     # This target won't build successfully on its own because of missing
     # emscripten headers, etc. Therefore, we hide it from wildcards.
     tags = ["manual"],
+    visibility = ["//visibility:public"],
     deps = [
         "//main:realmain",
         "//main/pipeline/semantic_extension:none",
@@ -34,4 +35,5 @@ cc_binary(
 wasm_cc_binary(
     name = "sorbet-wasm.d",
     cc_target = ":sorbet-wasm",
+    visibility = ["//visibility:public"],
 )
