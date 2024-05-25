@@ -6,7 +6,7 @@ BASE_LINKOPTS = [
     "-s",
     "EXPORT_NAME=Sorbet",
     "-s",
-    "EXPORTED_RUNTIME_METHODS=ccall,cwrap,addFunction,Pointer_stringify",
+    "EXPORTED_RUNTIME_METHODS=ccall,cwrap,addFunction,UTF8ToString",
     "-s",
     "INITIAL_MEMORY=67108864",
     # This let's us allocate 1 JavaScript function (the callback for
