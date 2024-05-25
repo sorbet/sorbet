@@ -20,15 +20,15 @@ cc_binary(
     name = "sorbet-wasm",
     srcs = ["main.cc"],
     linkopts = BASE_LINKOPTS,
+    # This target won't build successfully on its own because of missing
+    # emscripten headers, etc. Therefore, we hide it from wildcards.
+    tags = ["manual"],
     deps = [
         "//main:realmain",
         "//main/pipeline/semantic_extension:none",
         "//payload/binary:some",
         "//payload/text:empty",
     ],
-    # This target won't build successfully on its own because of missing
-    # emscripten headers, etc. Therefore, we hide it from wildcards.
-    tags = ["manual"],
 )
 
 wasm_cc_binary(
