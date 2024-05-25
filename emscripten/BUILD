@@ -17,7 +17,7 @@ BASE_LINKOPTS = [
 ]
 
 cc_binary(
-    name = "main",
+    name = "sorbet-wasm",
     srcs = ["main.cc"],
     linkopts = BASE_LINKOPTS,
     deps = [
@@ -32,6 +32,6 @@ cc_binary(
 )
 
 wasm_cc_binary(
-    name = "sorbet-wasm",
-    cc_target = ":main",
+    name = "sorbet-wasm.d",
+    cc_target = ":sorbet-wasm",
 )
