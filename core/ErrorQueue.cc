@@ -36,7 +36,6 @@ void ErrorQueue::flushAllErrors(GlobalState &gs) {
         move(errors.begin(), errors.end(), std::back_inserter(collectedErrors[file]));
         errors.clear();
     }
-    gs.errors.clear();
 
     for (auto &it : collectedErrors) {
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
