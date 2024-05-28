@@ -257,7 +257,7 @@ module Opus::Types::Test
         assert_equal("Return value: Expected type String, got type Symbol with value :foo", lines[0])
         # Note that the paths here could be relative or absolute depending on how this test was invoked.
         assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
-        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12} \(.*foo\)\z}, lines[2])
         assert_empty(lines[3..-1])
       end
 
@@ -275,7 +275,7 @@ module Opus::Types::Test
         assert_equal("Parameter 'bar': Expected type Integer, got type NilClass", lines[0])
         # Note that the paths here could be relative or absolute depending on how this test was invoked.
         assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
-        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12} \(.*foo\)\z}, lines[2])
         assert_empty(lines[3..-1])
       end
 
@@ -293,7 +293,7 @@ module Opus::Types::Test
         assert_equal("Block parameter 'blk': Expected type Proc, got type NilClass", lines[0])
         # Note that the paths here could be relative or absolute depending on how this test was invoked.
         assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
-        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12} \(.*foo\)\z}, lines[2])
         assert_empty(lines[3..-1])
       end
 
@@ -311,7 +311,7 @@ module Opus::Types::Test
         assert_match(/Bind: Expected type Integer, got type Module with value #<Module:0x/, lines[0])
         # Note that the paths here could be relative or absolute depending on how this test was invoked.
         assert_match(%r{\ACaller: .*test.*/types/method_validation.rb:#{__LINE__ - 6}\z}, lines[1])
-        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12}\z}, lines[2])
+        assert_match(%r{\ADefinition: .*test.*/types/method_validation.rb:#{__LINE__ - 12} \(.*foo\)\z}, lines[2])
         assert_empty(lines[3..-1])
       end
 
