@@ -272,6 +272,14 @@ View full example on sorbet.run</a></p>
 method calls without parens! Specifically, watch out for <code>attr_reader</code> and
 zero-argument method definitions.</p>
 </blockquote>
+<p>Note that given Sorbet’s architecture, it’s not possible to implement some sort
+of annotation that would mark a method as “pure” or “constant,” declaring that a
+method always returns the same value across consecutive calls to the method
+(this also precludes special support for methods defined via <code>const</code> or
+<code>attr_reader</code>). For more information on why, see
+<a href="https://blog.jez.io/syntactic-control-flow/">this blog post</a> which explains
+that control flow in Sorbet is a syntactic property, not a semantic property
+(which could be influenced by semantic annotations like this).</p>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
