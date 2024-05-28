@@ -282,7 +282,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             Timer timeit(logger, "autogenDependencyDBPrint");
             if (opts.print.AutogenMsgPack.enabled) {
                 opts.print.AutogenMsgPack.print(
-                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size()));
+                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg));
             }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
@@ -797,8 +797,9 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
             }
 
-            autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
-                                                     std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
+            autogen::AutogenConfig autogenCfg = {
+                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
 
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif

@@ -448,6 +448,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("autogen-behavior-allowed-in-rbi-files-paths",
                                "RBI files defined in these paths can be considered by autogen as behavior-defining.",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("autogen-msgpack-skip-reference-metadata",
+                               "Skip serializing extra metadata on references when printing msgpack in autogen",
+                               cxxopts::value<bool>());
     options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
@@ -809,6 +812,14 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
 
+        if (raw.count("autogen-version") > 0) {
+            if (!opts.print.AutogenMsgPack.enabled) {
+                logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.autogenVersion = raw["autogen-version"].as<int>();
+        }
+
         if (raw.count("autogen-subclasses-parent")) {
             if (!opts.print.AutogenSubclasses.enabled) {
                 logger->error("autogen-subclasses-parent must be used with -p autogen-subclasses");
@@ -839,6 +850,20 @@ void readOptions(Options &opts,
             }
             opts.autogenBehaviorAllowedInRBIFilesPaths =
                 raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
+        }
+
+        opts.autogenMsgpackSkipReferenceMetadata = raw["autogen-msgpack-skip-reference-metadata"].as<bool>();
+        if (opts.autogenMsgpackSkipReferenceMetadata) {
+            if (!opts.print.AutogenMsgPack.enabled) {
+                logger->error("autogen-skip-reference-metadata can only be used with -p autogen-msgpack");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.autogenVersion < 6) {
+                logger->error(
+                    "autogen-skip-reference-metadata can only be used with autogen msgpack version 6 or above");
+                throw EarlyReturnWithCode(1);
+            }
         }
 
         if (opts.print.UntypedBlame.enabled && opts.trackUntyped == core::TrackUntyped::Nowhere) {
@@ -930,13 +955,6 @@ void readOptions(Options &opts,
         opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<uint32_t>();
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
-        if (raw.count("autogen-version") > 0) {
-            if (!opts.print.AutogenMsgPack.enabled) {
-                logger->error("`{}` must also include `{}`", "--autogen-version", "-p autogen-msgpack");
-                throw EarlyReturnWithCode(1);
-            }
-            opts.autogenVersion = raw["autogen-version"].as<int>();
-        }
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
 
