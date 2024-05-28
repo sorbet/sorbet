@@ -82,8 +82,9 @@ public:
 
 void packString(mpack_writer_t *writer, std::string_view str);
 void writeSymbols(core::Context ctx, mpack_writer_t *writer, const std::vector<core::NameRef> &symbols);
-std::string buildGlobalHeader(int version, size_t numFiles, const std::vector<std::string> &refAttrs,
-                              const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs);
+std::string buildGlobalHeader(int version, int serializedVersion, size_t numFiles,
+                              const std::vector<std::string> &refAttrs, const std::vector<std::string> &defAttrs,
+                              const std::vector<std::string> &pfAttrs);
 
 } // namespace sorbet::autogen
 

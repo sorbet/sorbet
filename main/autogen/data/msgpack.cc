@@ -299,7 +299,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, const AutogenConfi
     return ret;
 }
 
-string buildGlobalHeader(int version, size_t numFiles, const std::vector<std::string> &refAttrs,
+string buildGlobalHeader(int version, int serializedVersion, size_t numFiles, const std::vector<std::string> &refAttrs,
                          const std::vector<std::string> &defAttrs, const std::vector<std::string> &pfAttrs) {
     string header;
 
@@ -308,7 +308,7 @@ string buildGlobalHeader(int version, size_t numFiles, const std::vector<std::st
     size_t bodySize;
     mpack_writer_init_growable(&writer, &body, &bodySize);
 
-    mpack_write_u32(&writer, version);
+    mpack_write_u32(&writer, serializedVersion);
 
     mpack_start_array(&writer, pfAttrs.size());
     for (const auto &attr : pfAttrs) {
@@ -342,7 +342,7 @@ string MsgpackWriter::msgpackGlobalHeader(int version, size_t numFiles) {
     const vector<string> &refAttrs = refAttrMap.at(version);
     const vector<string> &defAttrs = defAttrMap.at(version);
 
-    return buildGlobalHeader(version, numFiles, refAttrs, defAttrs, pfAttrs);
+    return buildGlobalHeader(version, version, numFiles, refAttrs, defAttrs, pfAttrs);
 }
 
 const map<int, vector<string>> MsgpackWriter::parsedFileAttrMap{

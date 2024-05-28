@@ -134,7 +134,9 @@ string MsgpackWriterLite::msgpackGlobalHeader(int version, size_t numFiles) {
     const vector<string> &refAttrs = refAttrMap.at(version);
     const vector<string> &defAttrs = defAttrMap.at(version);
 
-    return buildGlobalHeader(version, numFiles, refAttrs, defAttrs, pfAttrs);
+    // set a high-bit (bit 8) on version to 1, to indicate "lite" msgpack mode.
+    int serializedVersion = version + 128;
+    return buildGlobalHeader(version, serializedVersion, numFiles, refAttrs, defAttrs, pfAttrs);
 }
 
 const map<int, vector<string>> MsgpackWriterLite::parsedFileAttrMap{
