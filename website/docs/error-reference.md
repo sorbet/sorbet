@@ -4140,7 +4140,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ❌ error!
 end
 ```
 
@@ -4171,7 +4171,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ✅ no error
 end
 ```
 
