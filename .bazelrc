@@ -23,6 +23,10 @@ build --features=-supports_dynamic_linker
 # Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
 build --features=-libtool --host_features=-libtool
 
+# The errors we were seeing before adding these flags seemed benign.
+# You can see the blame to find the error output we were trying to silence.
+build --cxxopt=-faligned-allocation --host_cxxopt=-faligned-allocation
+
 ##
 ##  Common build options across all build configurations
 ##
