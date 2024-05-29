@@ -105,8 +105,7 @@ mv release/gems/* release
 rmdir release/gems
 rm release/website/website.tar.bz2
 rmdir release/website
-rm release/webasm/sorbet-wasm.*
-rmdir release/webasm
+rm -r release/webasm
 
 pushd release
 files=()
