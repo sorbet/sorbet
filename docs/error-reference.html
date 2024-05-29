@@ -3229,7 +3229,7 @@ throughout the body of the <code>if</code> statement.</p>
     .void
 <span class="hljs-keyword">end</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
-  x.foo <span class="hljs-comment"># error!</span>
+  x.foo <span class="hljs-comment"># ❌ error!</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>This snippet declares a method <code>example</code> with a signature that says it can be
@@ -3255,7 +3255,7 @@ sig <span class="hljs-keyword">do</span>
     .void
 <span class="hljs-keyword">end</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">example</span><span class="hljs-params">(x)</span></span>
-  x.foo <span class="hljs-comment"># error!</span>
+  x.foo <span class="hljs-comment"># ✅ no error</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>Remember that in Sorbet, <a href="/docs/abstract">interfaces</a> must be explicitly
