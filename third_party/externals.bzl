@@ -159,15 +159,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        url = "https://github.com/abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip",
-        sha256 = "c43b8cd8e306e7fe3f006d880181d60db59a3bae6b6bc725da86a28a6b0f9f30",
-        strip_prefix = "abseil-cpp-8910297baf87e1777c4fd30fb0693eecf9f2c134",
-        patches = [
-            # https://github.com/abseil/abseil-cpp/commit/d2422b19e9ba41c952db1ed5514bb68114c2be15
-            # Abseil builds with `-Wall` which we can't override to silence this warning.
-            "@com_stripe_ruby_typer//third_party:abseil_cpp/low_level_hash_array_parameter.patch",
-        ],
-        patch_args = ["-p1"],
+        url = "https://github.com/abseil/abseil-cpp/archive/20240116.2.zip",
+        sha256 = "69909dd729932cbbabb9eeaff56179e8d124515f5d3ac906663d573d700b4c7d",
+        strip_prefix = "abseil-cpp-20240116.2",
     )
 
     http_archive(
@@ -184,24 +178,19 @@ def register_sorbet_dependencies():
         urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
     )
 
-    # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
+    # TODO(jez) We will need some modifications to this, so it will still have to be a fork.
+    # Currently jez-more-tools branch.
     http_archive(
-        name = "com_grail_bazel_toolchain",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/c2715fcb7ec7fc574eac501007b29277f316099f.zip",
-        sha256 = "1fee34a3f4123b2ec60d2c81d4805e16e47c7f95b31259272274430a45d4f3da",
-        strip_prefix = "bazel-toolchain-c2715fcb7ec7fc574eac501007b29277f316099f",
+        name = "toolchains_llvm",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/8d9165fd3560f6ff50bc4794972f714f4ba2adaa.tar.gz",
+        sha256 = "238b5a777bbfac3d5ec35cbd45ae2b84ca4118aa8f902ab27894912352e94658",
+        strip_prefix = "bazel-toolchain-8d9165fd3560f6ff50bc4794972f714f4ba2adaa",
     )
 
     http_archive(
         name = "io_bazel_rules_go",
         sha256 = "d6ab6b57e48c09523e93050f13698f708428cfd5e619252e369d377af6597707",
         url = "https://github.com/bazelbuild/rules_go/releases/download/v0.43.0/rules_go-v0.43.0.zip",
-    )
-
-    http_archive(
-        name = "build_bazel_rules_nodejs",
-        sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
-        url = "https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz",
     )
 
     http_archive(
@@ -247,31 +236,15 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "emscripten_toolchain",
-        url = "https://github.com/kripken/emscripten/archive/1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-toolchain.BUILD",
-        sha256 = "4d6fa350895fabc25b89ce5f9dcb528e719e7c2bf7dacab2a3e3cc818ecd7019",
-        strip_prefix = "emscripten-1.38.25",
+        name = "emsdk",
+        sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
+        strip_prefix = "emsdk-3.1.59/bazel",
+        url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
         patches = [
-            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/emcc.py.patch",
-            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/tools_shared.py.patch",
+            # (cd ~/stripe/github/emsdk/bazel && \
+            #    git diff --relative --no-prefix > ~/stripe/sorbet/third_party/emsdk/emscripten_config.patch)
+            "@com_stripe_ruby_typer//third_party:emsdk/emscripten_config.patch",
         ],
-    )
-
-    http_archive(
-        name = "emscripten_clang_linux",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/linux/emscripten-llvm-e1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
-        sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
-        strip_prefix = "emscripten-llvm-e1.38.25",
-    )
-
-    http_archive(
-        name = "emscripten_clang_darwin",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/mac/emscripten-llvm-e1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
-        sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
-        strip_prefix = "emscripten-llvm-e1.38.25",
     )
 
     http_archive(

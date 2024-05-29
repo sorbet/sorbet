@@ -246,7 +246,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (auto *o2 = cast_type<OrType>(t2)) { // 3, 5, 6
+    if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
@@ -1070,7 +1070,7 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
     } else if (auto *t = cast_type<AndType>(ty)) {
         compareToUntyped(gs, constr, t->left, blame);
         compareToUntyped(gs, constr, t->right, blame);
-    } else if (auto *t = cast_type<TypeVar>(ty)) {
+    } else if (isa_type<TypeVar>(ty)) {
         constr.rememberIsSubtype(gs, ty, blame);
         constr.rememberIsSubtype(gs, blame, ty);
     }

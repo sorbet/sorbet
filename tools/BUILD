@@ -6,8 +6,6 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
-clang_tool("opt")
-
 compilation_database(
     name = "compdb",
     testonly = True,
@@ -49,7 +47,8 @@ compilation_database(
         "//core/sig_finder:sig_finder",
         "//core/source_generator:source_generator",
         "//definition_validator:definition_validator",
-        "//emscripten:main",
+        "//emscripten:sorbet-wasm",
+        "//emscripten:sorbet-wasm.d",
         "//gems/sorbet-runtime:generate_call_validation",
         "//hashing:hashing",
         "//hashing:hashing-orig",

@@ -1,7 +1,7 @@
 cc_library(
     name = "kvstore",
     srcs = select({
-        "//tools/config:webasm": ["KeyValueStore-emscripten.cc"],
+        "@platforms//cpu:wasm32": ["KeyValueStore-emscripten.cc"],
         "//conditions:default": ["KeyValueStore.cc"],
     }),
     hdrs = [
@@ -21,7 +21,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ] + select({
-        "//tools/config:webasm": [],
+        "@platforms//cpu:wasm32": [],
         "//conditions:default": ["@lmdb"],
     }),
 )

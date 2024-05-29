@@ -58,8 +58,8 @@ public:
 class LSPProgrammaticInput final : public LSPInput {
     absl::Mutex mtx;
     // Contains all available messages for processing.
-    std::deque<std::unique_ptr<LSPMessage>> available GUARDED_BY(mtx);
-    bool closed GUARDED_BY(mtx) = false;
+    std::deque<std::unique_ptr<LSPMessage>> available ABSL_GUARDED_BY(mtx);
+    bool closed ABSL_GUARDED_BY(mtx) = false;
 
 public:
     LSPProgrammaticInput() = default;

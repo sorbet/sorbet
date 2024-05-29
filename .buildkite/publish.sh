@@ -40,9 +40,8 @@ if [ "$dryrun" = "" ]; then
 
   rm -rf sorbet.run
   git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master
-  tar -xvf ./_out_/webasm/sorbet-wasm.tar ./sorbet-wasm.wasm ./sorbet-wasm.js
-  mv sorbet-wasm.wasm sorbet.run/docs
-  mv sorbet-wasm.js sorbet.run/docs
+  mv _out_/webasm/sorbet-wasm.wasm sorbet.run/docs
+  mv _out_/webasm/sorbet-wasm.js sorbet.run/docs
   pushd sorbet.run/docs
   git add sorbet-wasm.wasm sorbet-wasm.js
   dirty=
@@ -106,7 +105,7 @@ mv release/gems/* release
 rmdir release/gems
 rm release/website/website.tar.bz2
 rmdir release/website
-rm release/webasm/sorbet-wasm.tar
+rm release/webasm/sorbet-wasm.*
 rmdir release/webasm
 
 pushd release

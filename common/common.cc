@@ -319,7 +319,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                 if (!result.gotItem()) {
                     continue;
                 }
-                if (auto *token = std::get_if<QuitToken>(&job)) {
+                if (std::holds_alternative<QuitToken>(job)) {
                     break;
                 }
 

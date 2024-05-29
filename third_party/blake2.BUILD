@@ -1,5 +1,5 @@
 # note: this isn't the blake2 used in prod builds
-# this one is only used in webasm mode
+# this one is only used in webasm/aarch64 mode
 # prod builds use libb2
 
 cc_library(

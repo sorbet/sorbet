@@ -21,7 +21,7 @@ void initializeSymbolizer(char *argv0) {
     // from absl is looking for, so we can't call absl::InitializeSymbolizer here, otherwise it will
     // log an INFO message to stdout when it starts up suggesting how to work around this.
     //
-    // TODO(trevor) We can uncomment this by upgrading emscripten at some point in the future
+    // TODO(jez) We can uncomment this by upgrading emscripten at some point in the future
     // absl::InitializeSymbolizer(argv0);
 }
 
