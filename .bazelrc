@@ -21,7 +21,7 @@ build --incompatible_enable_cc_toolchain_resolution
 # This feature is intentionally not supported on macOS.
 build --features=-supports_dynamic_linker
 # Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
-build --features=-libtool
+build --features=-libtool --host_features=-libtool
 
 ##
 ##  Common build options across all build configurations
