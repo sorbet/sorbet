@@ -6,8 +6,6 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
-clang_tool("opt")
-
 compilation_database(
     name = "compdb",
     testonly = True,
