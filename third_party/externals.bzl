@@ -240,11 +240,6 @@ def register_sorbet_dependencies():
         sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
         strip_prefix = "emsdk-3.1.59/bazel",
         url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
-        patches = [
-            # (cd ~/stripe/github/emsdk/bazel && \
-            #    git diff --relative --no-prefix > ~/stripe/sorbet/third_party/emsdk/emscripten_config.patch)
-            "@com_stripe_ruby_typer//third_party:emsdk/emscripten_config.patch",
-        ],
     )
 
     http_archive(
