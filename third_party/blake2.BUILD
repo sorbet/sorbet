@@ -25,8 +25,8 @@ cc_library(
 cc_library(
     name = "com_github_blake2_blake2_neon",
     srcs = [
-        "neon/blake2s-neon.c",
         "neon/blake2b-neon.c",
+        "neon/blake2s-neon.c",
     ],
     hdrs = [
         "neon/blake2.h",
