@@ -1,5 +1,4 @@
 import { commands, ExtensionContext, workspace } from "vscode";
-import { TextDocumentPositionParams } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
 import { savePackageFiles } from "./commands/savePackageFiles";
