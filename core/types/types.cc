@@ -943,7 +943,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
                                    "T.unsafe");
                     auto locSource = loc.source(gs);
                     if (locSource.has_value()) {
-                        e.replaceWith("Wrap in `T.unsafe`", loc, fmt::format("T.unsafe({})", locSource.value()));
+                        e.replaceWith("Wrap in `T.unsafe`", loc, "T.unsafe({})", locSource.value());
                     }
                 }
             }

@@ -1692,17 +1692,17 @@ public:
         fmt::format_to(back_inserter(*out), "\"{}\",",
                        absl::StrJoin(pkg.fullName(), "::", core::packages::NameFormatter(gs)));
         out->append("\"imports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
+        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.imports(), ",", ImportFormatter(gs)));
         out->append("],\"testImports\":[");
-        fmt::format_to(back_inserter(*out), absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
+        fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(pkg.testImports(), ",", ImportFormatter(gs)));
         out->append("],\"files\":[");
         const auto it = packageFiles.find(mangledName);
         if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
+            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.files, ",", FileListFormatter(gs)));
         }
         out->append("], \"testFiles\":[");
         if (it != packageFiles.end()) {
-            fmt::format_to(back_inserter(*out), absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
+            fmt::format_to(back_inserter(*out), "{}", absl::StrJoin(it->second.testFiles, ",", FileListFormatter(gs)));
         }
         out->append("]}}");
     }
@@ -1728,7 +1728,8 @@ void Packager::dumpPackageInfo(const core::GlobalState &gs, std::string outputFi
 
     fmt::memory_buffer out;
     fmt::format_to(back_inserter(out), "[");
-    fmt::format_to(back_inserter(out), absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
+    fmt::format_to(back_inserter(out), "{}",
+                   absl::StrJoin(pkgDB.packages(), ",", PackageInfoFormatter(gs, packageFiles)));
     fmt::format_to(back_inserter(out), "]");
     FileOps::write(outputFile, fmt::to_string(out));
 }

@@ -68,17 +68,16 @@ void reportMissingError(const string &filename, const T &assertion, string_view 
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
                            string_view errorPrefix) {
+    auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
+                                 ? fmt::format("untyped: {}", diagnostic.message)
+                                 : fmt::format("error: {}", diagnostic.message);
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
             "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
             "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
             "expected.",
-            errorPrefix,
-            prettyPrintRangeComment(
-                sourceLine, *diagnostic.range,
-                fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
-                            diagnostic.message))));
+            errorPrefix, prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
 }
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
                      int line) {
@@ -510,15 +509,13 @@ bool UntypedAssertion::checkAll(const UnorderedMap<string, shared_ptr<core::File
 bool UntypedAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
     // The error message must contain `message`.
     if (diagnostic.severity != DiagnosticSeverity::Information || diagnostic.message.find(message) == string::npos) {
-        ADD_FAIL_CHECK_AT(
-            filename.c_str(), range->start->line + 1,
-            fmt::format(
-                "{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}", errorPrefix,
-                prettyPrintRangeComment(sourceLine, *range, toString()),
-                prettyPrintRangeComment(
-                    sourceLine, *diagnostic.range,
-                    fmt::format(diagnostic.severity == DiagnosticSeverity::Information ? "untyped: {}" : "error: {}",
-                                diagnostic.message))));
+        auto diagnosticMessage = (diagnostic.severity == DiagnosticSeverity::Information)
+                                     ? fmt::format("untyped: {}", diagnostic.message)
+                                     : fmt::format("error: {}", diagnostic.message);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}Expected information diagnostic of form:\n{}\nFound diagnostic:\n{}",
+                                      errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
+                                      prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
         return false;
     }
     return true;
