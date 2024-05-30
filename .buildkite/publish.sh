@@ -39,7 +39,7 @@ if [ "$dryrun" = "" ]; then
   echo "--- releasing sorbet.run"
 
   rm -rf sorbet.run
-  git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master
+  git clone git@github.com:sorbet/sorbet.run.git --single-branch --branch master --depth 1
   mv _out_/webasm/sorbet-wasm.wasm sorbet.run/docs
   mv _out_/webasm/sorbet-wasm.js sorbet.run/docs
   pushd sorbet.run/docs
