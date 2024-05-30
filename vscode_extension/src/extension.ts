@@ -1,8 +1,6 @@
 import { commands, ExtensionContext, workspace } from "vscode";
-import { TextDocumentPositionParams } from "vscode-languageclient";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
-import { renameSymbol } from "./commands/renameSymbol";
 import { savePackageFiles } from "./commands/savePackageFiles";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
@@ -57,11 +55,6 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand(cmdIds.COPY_SYMBOL_COMMAND_ID, () =>
       copySymbolToClipboard(sorbetExtensionContext),
-    ),
-    commands.registerCommand(
-      cmdIds.RENAME_SYMBOL_COMMAND_ID,
-      (params: TextDocumentPositionParams) =>
-        renameSymbol(sorbetExtensionContext, params),
     ),
     commands.registerCommand(
       cmdIds.SET_LOGLEVEL_COMMAND_ID,
