@@ -201,8 +201,7 @@ def register_sorbet_dependencies():
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
 
-    # optimized version of blake2 hashing algorithm
-    # TODO(jez) Add something to use the neon implementation on Apple Silicon
+    # optimized version of blake2 hashing algorithm, using SSE vector extensions
     http_archive(
         name = "com_github_blake2_libb2",
         url = "https://github.com/BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip",
