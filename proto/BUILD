@@ -1,4 +1,5 @@
-load("@com_google_protobuf//:protobuf.bzl", "cc_proto_library")
+load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 
 filegroup(
     name = "protos",
@@ -6,12 +7,13 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+proto_library(
+    name = "protos_proto",
+    srcs = [":protos"],
+)
+
 cc_proto_library(
     name = "proto",
-    srcs = glob(["**/*.proto"]),
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
     visibility = ["//visibility:public"],
+    deps = [":protos_proto"],
 )
