@@ -178,8 +178,9 @@ def register_sorbet_dependencies():
         urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
     )
 
-    # TODO(jez) We will need some modifications to this, so it will still have to be a fork.
-    # Currently jez-more-tools branch.
+    # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
+    # The `master` branch is the commit of `bazel-contrib/toolchains_llvm` that we're based on
+    # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
     http_archive(
         name = "toolchains_llvm",
         url = "https://github.com/sorbet/bazel-toolchain/archive/8d9165fd3560f6ff50bc4794972f714f4ba2adaa.tar.gz",
