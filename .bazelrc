@@ -2,6 +2,8 @@
 ##  Workarounds for bugs and temporary things
 ##
 
+# TODO(jez) Need to figure out how to specify --macos_minimum_os=13.0.0 on macOS ARM builds
+
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
 
