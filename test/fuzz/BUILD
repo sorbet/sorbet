@@ -63,7 +63,7 @@ proto_library(
 
 cc_proto_library(
     name = "proto",
-    deps = [":proto_proto"],
     tags = ["manual"],
     visibility = ["//tools:__pkg__"],
+    deps = [":proto_proto"],
 )

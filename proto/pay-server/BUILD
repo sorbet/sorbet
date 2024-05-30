@@ -8,6 +8,6 @@ proto_library(
 
 cc_proto_library(
     name = "pay-server",
-    deps = [":pay-server_proto"],
     visibility = ["//visibility:public"],
+    deps = [":pay-server_proto"],
 )
