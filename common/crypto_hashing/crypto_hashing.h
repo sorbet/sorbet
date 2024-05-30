@@ -5,6 +5,8 @@
 extern "C" {
 #if defined(__i386__) || defined(__x86_64__)
 #include "blake2.h"
+#elif defined(__aarch64__)
+#include "neon/blake2.h"
 #else
 #include "ref/blake2.h"
 #endif
