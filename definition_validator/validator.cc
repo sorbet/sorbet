@@ -983,11 +983,8 @@ private:
         }
     }
 
-    core::AutocorrectSuggestion::Edit defineInheritedAbstractMethod(const core::GlobalState &gs,
-                                                                    const core::ClassOrModuleRef sym,
-                                                                    const core::MethodRef abstractMethodRef,
-                                                                    const core::Loc insertAt, const string &format,
-                                                                    const string &classOrModuleIndent) {
+    string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
+                                         const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
         auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
         if (sym.data(gs)->attachedClass(gs).exists()) {
             showOptions = showOptions.withForceSelfPrefix();
@@ -1001,8 +998,7 @@ private:
             absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
             [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
         auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
-
-        return core::AutocorrectSuggestion::Edit{insertAt, fmt::format(format, indentedMethodDefinition)};
+        return indentedMethodDefinition;
     }
 
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
@@ -1046,10 +1042,10 @@ private:
         auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfLine(ctx);
         string classOrModuleIndent(indentLength, ' ');
         auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
-        auto format = "{}\n" + classOrModuleIndent;
 
         vector<core::AutocorrectSuggestion::Edit> edits;
-        if (hasSingleLineDefinition && hasEmptyBody) {
+        bool singleLineAndNoBody = hasSingleLineDefinition && hasEmptyBody;
+        if (singleLineAndNoBody) {
             // First, break the class/module definition up onto multiple lines.
             auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
             edits.emplace_back(
@@ -1059,7 +1055,6 @@ private:
             // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
             // class/module body that we just created.
             insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
-            format = "\n{}";
         }
 
         for (auto proto : missingAbstractMethods) {
@@ -1071,7 +1066,12 @@ private:
                 continue;
             }
 
-            edits.emplace_back(defineInheritedAbstractMethod(ctx, sym, proto, insertAt, format, classOrModuleIndent));
+            auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
+            if (singleLineAndNoBody) {
+                edits.emplace_back(insertAt, fmt::format("\n{}", indentedMethodDefinition));
+            } else {
+                edits.emplace_back(insertAt, fmt::format("{}\n{}", classOrModuleIndent, indentedMethodDefinition));
+            }
         }
 
         if (edits.empty()) {

@@ -2284,22 +2284,22 @@ void Method::sanityCheck(const GlobalState &gs) const {
 
     ENFORCE_NO_TIMER(current == current2);
     for (auto &tp : typeArguments()) {
-        ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), name.toString(gs) + " has a member symbol without a name");
-        ENFORCE_NO_TIMER(tp.exists(), name.toString(gs) + "." + tp.data(gs)->name.toString(gs) +
-                                          " corresponds to a core::Symbols::noTypeArgument()");
+        ENFORCE_NO_TIMER(tp.data(gs)->name.exists(), "{} has a member symbol without a name", name.toString(gs));
+        ENFORCE_NO_TIMER(tp.exists(), "{}.{} corresponds to a core::Symbols::noTypeArgument()", name.toString(gs),
+                         tp.data(gs)->name.toString(gs));
     }
 
     // There should always either be a block argument at the end, or the method should be an alias
-    ENFORCE_NO_TIMER(!this->arguments.empty(), ref(gs).show(gs));
+    ENFORCE_NO_TIMER(!this->arguments.empty(), "{}", ref(gs).show(gs));
 
     if (isa_type<AliasType>(this->resultType)) {
         // The arguments of an alias method don't mean anything. When calling a method alias,
         // we dealias the symbol and use those arguments.
         //
         // This leaves the alias method's arguments vector free for us to stash some information. See resolver.
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
                          ref(gs).show(gs));
-        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }),
+        ENFORCE_NO_TIMER(absl::c_all_of(this->arguments, [](const auto &arg) { return arg.flags.isKeyword; }), "{}",
                          ref(gs).show(gs));
     }
 }
