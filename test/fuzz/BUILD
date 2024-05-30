@@ -1,3 +1,6 @@
+load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
+
 cc_binary(
     name = "fuzz_dash_e",
     srcs = ["empty.cc"],
@@ -52,9 +55,6 @@ cc_test(
         "//test/helpers",
     ],
 )
-
-load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
-load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 
 proto_library(
     name = "proto_proto",
