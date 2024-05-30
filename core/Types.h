@@ -1003,14 +1003,6 @@ struct DispatchArgs {
     bool suppressErrors;
     NameRef enclosingMethodForSuper;
 
-    DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
-                 InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType, const TypeAndOrigins fullType,
-                 const TypePtr &thisType, const std::shared_ptr<const SendAndBlockLink> &block,
-                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper)
-        : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
-          thisType(thisType), block(move(block)), originForUninitialized(originForUninitialized),
-          isPrivateOk(isPrivateOk), suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
-
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
 
