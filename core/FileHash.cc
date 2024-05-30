@@ -145,7 +145,7 @@ void FoundMethodHash::sanityCheck() const {
 
 string FoundMethodHash::toString() const {
     return fmt::format("FoundMethodHash {{ ownerIdx = {}, ownerIsSymbol = {}, useSingletonClass = {}, nameHash = {}, "
-                       "arityHash = {}, isSelfMethod = {} }}",
+                       "arityHash = {} }}",
                        ownerIdx, ownerIsSymbol, useSingletonClass, nameHash._hashValue, arityHash._hashValue);
 }
 
