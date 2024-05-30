@@ -145,7 +145,7 @@ elif [ "$dryrun" = "" ]; then
     # It can take 4+ minutes for the marketplace to "verify" our extension
     # before it shows up as published according to `vsce show`.
     cat "$vsce_publish_output"
-    if grep -qF 'Version number cannot be the same'; then
+    if grep -qF 'Version number cannot be the same' "$vsce_publish_output"; then
       echo "... $extension_release_version is already published"
     else
       exit 1
