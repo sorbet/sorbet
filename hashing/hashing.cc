@@ -80,7 +80,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(spdlog::logger &logger, unique_
 
     auto workers = WorkerPool::create(0, lgs->tracer());
     core::FoundDefHashes foundHashes; // out parameter
-    realmain::pipeline::nameAndResolve(lgs, move(single), opts(), *workers, &foundHashes);
+    realmain::pipeline::nameOnly(lgs, move(single), opts(), *workers, &foundHashes);
 
     return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash), move(foundHashes));
 }

@@ -893,6 +893,13 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return what;
 }
 
+
+bool nameOnly(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, WorkerPool &workers,
+                                           core::FoundDefHashes *foundHashes) {
+    return name(*gs, absl::Span<ast::ParsedFile>(what), opts, workers, foundHashes);
+}
+
 ast::ParsedFilesOrCancelled nameAndResolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
                                            const options::Options &opts, WorkerPool &workers,
                                            core::FoundDefHashes *foundHashes) {
