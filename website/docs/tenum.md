@@ -72,10 +72,10 @@ Sorbet allows using individual enum values in types, especially in union types
 and type aliases. For example:
 
 ```ruby
-RedSuits = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
+RedSuit = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
 ```
 
-This defines a [type alias](type-aliases.md) `RedSuits` composed of only hearts
+This defines a [type alias](type-aliases.md) `RedSuit` composed of only hearts
 and diamonds. (Contrast this with the type `Suit`, composed of all four enum
 values.)
 
@@ -96,7 +96,7 @@ class Suit < T::Enum
     Diamonds = new
   end
 
-  sig { returns(T.nilable(RedSuits)) }
+  sig { returns(T.nilable(RedSuit)) }
   def to_red_suit
     case self
     when Spades, Clubs then nil
@@ -106,20 +106,49 @@ class Suit < T::Enum
   end
 end
 
-RedSuits = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
+RedSuit = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
 ```
 
 There are two components to this example:
 
-1.  We've defined the `RedSuits` enum subset with a type alias. Due to
+1.  We've defined the `RedSuit` enum subset with a type alias. Due to
     limitations in `T::Enum`, this type alias must be declared outside of the
     enum itself (we expect to lift this restriction in the future).
 
 1.  We've added a `to_red_suit` instance method on `Suit` which converts that
     enum value to either `nil` if called on a black suit, or itself otherwise.
 
-This method is structured this way (specifying the "counter examples" of what a
-red suit is) to be **safe in the presence of refactors**.
+This `to_red_suit` conversion function could be called like this:
+
+```ruby
+sig { params(red_suit: Suit).void }
+def takes_red_suit(red_suit)
+  # ...
+end
+
+sig { params(suit: Suit).void }
+def example(suit)
+  red_suit = suit.to_red_suit
+  if red_suit
+    takes_red_suit(red_suit)
+  else
+    puts("#{suit} was not a red suit")
+  end
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7B%20returns%28T.nilable%28RedSuit%29%29%20%7D%0A%20%20def%20to_red_suit%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%2C%20Clubs%20then%20nil%0A%20%20%20%20else%0A%20%20%20%20%20%20self%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0ARedSuit%20%3D%20T.type_alias%20%7B%20T.any%28Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds%29%20%7D%0A%0Asig%20%7B%20params%28red_suit%3A%20Suit%29.void%20%7D%0Adef%20takes_red_suit%28red_suit%29%0A%20%20%23%20...%0Aend%0A%0Asig%20%7B%20params%28suit%3A%20Suit%29.void%20%7D%0Adef%20example%28suit%29%0A%20%20if%20%28red_suit%20%3D%20suit.to_red_suit%29%0A%20%20%20%20takes_red_suit%28red_suit%29%0A%20%20else%0A%20%20%20%20puts%28%22%23%7Bsuit%7D%20was%20not%20a%20red%20suit%22%29%0A%20%20end%0Aend">→
+View full example on sorbet.run</a>
+
+Sorbet knows that `to_red_suit` returns `nil` if the suit was not red, so by
+assigning to a local variable and using `if`, Sorbet's
+[flow-sensitive type checking](flow-sensitive.md) kicks in and allows using
+`red_suit` with the non-nil type `RedSuit` inside the `if` condition.
+
+Note that the structure of the `to_red_suit` method implementation is
+intentional: it specifies the examples of what is **not** a red suit, instead of
+specifying all the cases of what is a red suit in order to be **safe in the
+presence of refactors**.
 
 To outline the refactor-safety of this method, here's an extended explanation.
 For our `Suit` example it gets a little contrived, because there are always only
@@ -127,24 +156,26 @@ four suits and that's very unlikely to change. But we can pretend anyways:
 
 - If a new enum value is added, maybe called `Stars`, Sorbet will catch that the
   `else` branch has type `T.any(Hearts, Diamonds, Stars)`, which is not a
-  subtype of `RedSuits`.
+  subtype of `RedSuit`.
 
   To treat `Stars` as a red suit, we'd want to update the definition of
-  `RedSuits` to mention it. To treat it as not a red suit, we'd want to add it
-  to the `when ... nil` statement.
+  `RedSuit` to mention it. To treat it as not a red suit, we'd want to add it to
+  the `when ... nil` statement.
 
-- If an enum value is removed from `RedSuits`, then Sorbet will report that as a
+- If an enum value is removed from `RedSuit`, then Sorbet will report that as a
   type error similar to the above. After removing a suit from the type alias,
   the fix would be to explicitly list that removed suit in the `when ... nil`
   statement.
 
 - If an enum value is removed from `Suit` entirely, Sorbet reports this as an
   "Unable to resolve constant" error. The fix will be to either remove the
-  reference from the `RedSuits` type alias, or from the `when ... nil` statement
+  reference from the `RedSuit` type alias, or from the `when ... nil` statement
   (depending on what was removed from `Suit`).
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7B%20returns%28T.nilable%28RedSuits%29%29%20%7D%0A%20%20def%20to_red_suit%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%2C%20Clubs%20then%20nil%0A%20%20%20%20else%0A%20%20%20%20%20%20self%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0ARedSuits%20%3D%20T.type_alias%20%7B%20T.any%28Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds%29%20%7D">→
-View full example on sorbet.run</a>
+(It would be possible to achieve the same effect with
+[exhaustiveness on enums](#exhaustiveness), but in this particular case that
+ends up being overkill—we can get the same safety guarantees with less
+redundancy.)
 
 ## Converting enums to other types
 
