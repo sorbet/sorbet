@@ -76,7 +76,7 @@ RedSuits = T.type_alias { T.any(Suit::Hearts, Suit::Diamonds) }
 ```
 
 This defines a [type alias](type-aliases.md) `RedSuits` composed of only hearts
-and diamonds. (Contrast this with the type `Suits`, composed of all four enum
+and diamonds. (Contrast this with the type `Suit`, composed of all four enum
 values.)
 
 ## Defining a subset of an enum
@@ -122,8 +122,8 @@ This method is structured this way (specifying the "counter examples" of what a
 red suit is) to be **safe in the presence of refactors**.
 
 To outline the refactor-safety of this method, here's an extended explanation.
-For our `Suits` example it gets a little contrived, because there are always
-only four suits and that's very unlikely to change. But we can pretend anyways:
+For our `Suit` example it gets a little contrived, because there are always only
+four suits and that's very unlikely to change. But we can pretend anyways:
 
 - If a new enum value is added, maybe called `Stars`, Sorbet will catch that the
   `else` branch has type `T.any(Hearts, Diamonds, Stars)`, which is not a
@@ -138,10 +138,10 @@ only four suits and that's very unlikely to change. But we can pretend anyways:
   the fix would be to explicitly list that removed suit in the `when ... nil`
   statement.
 
-- If an enum value is removed from `Suits` entirely, Sorbet reports this as an
+- If an enum value is removed from `Suit` entirely, Sorbet reports this as an
   "Unable to resolve constant" error. The fix will be to either remove the
   reference from the `RedSuits` type alias, or from the `when ... nil` statement
-  (depending on what was removed from `Suits`).
+  (depending on what was removed from `Suit`).
 
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0A%0A%20%20sig%20%7B%20returns%28T.nilable%28RedSuits%29%29%20%7D%0A%20%20def%20to_red_suit%0A%20%20%20%20case%20self%0A%20%20%20%20when%20Spades%2C%20Clubs%20then%20nil%0A%20%20%20%20else%0A%20%20%20%20%20%20self%0A%20%20%20%20end%0A%20%20end%0Aend%0A%0ARedSuits%20%3D%20T.type_alias%20%7B%20T.any%28Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds%29%20%7D">→
 View full example on sorbet.run</a>
