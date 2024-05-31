@@ -76,6 +76,7 @@ def register_ruby_dependencies():
             "@com_stripe_ruby_typer//third_party/ruby:fix_grapheme_clusters_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10151_no_hash_allocate_static_kwargs_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10306_no_hash_allocate_static_kwargs_3_3_only.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:reinit_native_sched_lock.patch",
         ],
     )
 
