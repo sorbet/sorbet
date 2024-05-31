@@ -406,6 +406,44 @@ flag to Sorbet.
 [super_incompatible]:
   https://sorbet.run/#%23%20typed%3A%20strict%0A%0Aclass%20Parent%0A%20%20extend%20T%3A%3ASig%0A%20%20sig%20%7Breturns%28Integer%29%7D%0A%20%20def%20self.foo%0A%20%20%20%200%0A%20%20end%0Aend%0A%0Aclass%20Child%20%3C%20Parent%0A%20%20sig%20%7Breturns%28String%29%7D%0A%20%20def%20self.foo%0A%20%20%20%20super%0A%20%20end%0Aend
 
+## Why does `T.untyped && T::Boolean` have type `T.nilable(T::Boolean)`?
+
+**The short answer**: because `T.untyped` includes `nil`, and `nil && false` is
+`nil`. Therefore, the whole expression's type is possibly nilable.
+
+**The long answer**: given a snippet like this
+
+```ruby
+sig { params(x: T.untyped, y: T::Boolean).void }
+def example(x, y)
+  res = x && y
+  T.reveal_type(res) # => T.nilable(T::Boolean)
+end
+```
+
+The revealed type is [`T.nilable`](nilable-types.md) despite neither `x` nor `y`
+being `T.nilable`. Ruby's `&&` operator is short-circuiting, and `nil` is falsy:
+
+```ruby
+x = nil && anything_else()
+p(x) # => nil
+```
+
+This `&&` expression evaluates to `nil` without evaluating `anything_else()`.
+
+So thinking about our `res = x && y` expression:
+
+1.  If `x` is `nil`, the whole expression is `nil` and the type must be at least
+    [`NilClass`](class-types.md#nil).
+1.  If `x` is `false`, the whole expression's type must be at least
+    [`FalseClass`](class-types.md#booleans).
+1.  Otherwise, `x` is truthy (only `nil` and `false` are falsy in Ruby), so the
+    expression evaluates to the value of `y`, assuming it's type. In this case,
+    `T::Boolean`.
+
+Therefore, the type is `T.any(NilClass, FalseClass, T::Boolean)` which
+simplifies to `T.nilable(T::Boolean)`.
+
 ## Does Sorbet work with Rake and Rakefiles?
 
 Kind of, with some effort. Rake monkey patches the global `main` object (i.e.,
