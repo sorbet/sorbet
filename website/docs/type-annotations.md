@@ -181,6 +181,25 @@ module B
 end
 ```
 
+### Declaring instance variables in a module
+
+Declaring instance variables in a Ruby module is a little different from
+instance variables in classes. There are a handful of techniques for declaring
+instance variables in modules.
+
+1.  Define a lazily-initialized instance variable, like in [the previous
+    section](#declaring-lazily-initialized-instance-variables).
+
+    This is the most straightforward technique assuming that
+
+Most Ruby modules do not have an `initialize` method. There is no reason this
+must be the case: Ruby modules are allowed to define a 
+
+Because Ruby `module`'s do not have an `initialize` method, declaring instance
+variables is a little different.
+
+1.  If the instance variable is defined by that module, the instance variable 
+
 ## Limitations on instance variable inference
 
 A current shortcoming of Sorbet is that in many cases it cannot reuse static
