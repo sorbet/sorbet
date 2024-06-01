@@ -37,7 +37,8 @@ public:
     bool isEmpty();
 
     void flushAllErrors(GlobalState &gs);
-    void flushErrorsForFile(const GlobalState &gs, FileRef file);
+    // also flushes errors from cache
+    std::vector<std::unique_ptr<ErrorQueueMessage>> flushErrorsForFile(const GlobalState &gs, FileRef file);
     bool wouldFlushErrorsForFile(FileRef file) const;
 
     /** Reports errors, but doesn't remove them from internal cache in GlobalState, so they can be re-reported later*/

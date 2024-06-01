@@ -274,13 +274,35 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
+            // fmt::print("*** flushing errors after {} namer\n", runIncrementalNamer ? "" : "incremental");
             if (opts.runLSP) {
+                // fmt::print("*** before clearing cache:\n");
+                // for (auto const &e : gs.errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Namer errors codes are 40XX
                         return err->error->what.code < 5000;
                     });
+                }
 
+                // fmt::print("*** after clearing cache:\n");
+                // for (auto const &e : gs.errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
+
+                for (auto &file : what) {
                     gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
                 }
             }
@@ -301,15 +323,38 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
+            // fmt::print("*** flushing errors after incremental resolver\n");
             if (opts.runLSP) {
+                // fmt::print("*** before clearing cache:\n");
+                // for (auto const &e : gs.errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Resolver errors codes are 50XX
                         // Errors 7032 and 7010 are infer errors, which might be reported by the resolver
-                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc (resolver) and calls.cc (infer)
-                        // We want to remove them before inference
-                        return (err->error->what.code > 4999 && err->error->what.code < 6000) || err->error->what.code == 7032 || err->error->what.code == 7010;
+                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc
+                        // (resolver) and calls.cc (infer) We want to remove them before inference
+                        return (err->error->what.code > 4999 && err->error->what.code < 6000) ||
+                               err->error->what.code == 7032 || err->error->what.code == 7010;
                     });
+                }
+
+                // fmt::print("*** after clearing cache:\n");
+                // for (auto const &e : gs.errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
+                for (auto &file : what) {
                     gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
                 }
             }
@@ -949,15 +994,38 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
+            // fmt::print("*** flushing errors after resolver\n");
             if (opts.runLSP) {
+                // fmt::print("*** before clearing cache:\n");
+                // for (auto const &e : gs->errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
                 for (auto &file : what) {
                     gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Resolver errors codes are 50XX
                         // Errors 7032 and 7010 are infer errors, which might be reported by the resolver
-                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc (resolver) and calls.cc (infer)
-                        // We want to remove them before inference
-                        return (err->error->what.code > 4999 && err->error->what.code < 6000) || err->error->what.code == 7032 || err->error->what.code == 7010;
+                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc
+                        // (resolver) and calls.cc (infer) We want to remove them before inference
+                        return (err->error->what.code > 4999 && err->error->what.code < 6000) ||
+                               err->error->what.code == 7032 || err->error->what.code == 7010;
                     });
+                }
+
+                // fmt::print("*** after clearing cache:\n");
+                // for (auto const &e : gs->errors) {
+                    // auto errs_string = string();
+                    // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                    // }
+                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // }
+                for (auto &file : what) {
                     gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
                 }
             }
@@ -1103,12 +1171,12 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+std::optional<UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>>> typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable,
                optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
                bool intentionallyLeakASTs) {
     const auto &epochManager = *gs.epochManager;
-    // Record epoch at start of typechecking before any preemption occurs.
+    // Record epoch at start of typecheckins before any preemption occurs.
     const uint32_t epoch = epochManager.getStatus().epoch;
 
     {
@@ -1138,6 +1206,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
             fileq->push(move(resolved), 1);
         }
 
+        UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>> newErrors;
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
@@ -1193,8 +1262,22 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                      !result.done();
                      result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                     if (result.gotItem()) {
+                        // fmt::print("*** cache before flushErrorsForFile:\n");
+                        // for (auto const &e : gs.errors) {
+                            // auto errs_string = string();
+                            // for (auto const &err : e.second) {
+                                // errs_string += " ";
+                                // errs_string += std::to_string(err->error->what.code);
+                            // }
+                            // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(),
+                                       // errs_string);
+                        // }
+
                         for (auto &file : files) {
-                            gs.errorQueue->flushErrorsForFile(gs, file);
+                            auto errors = gs.errorQueue->flushErrorsForFile(gs, file);
+                            for (auto &e : errors) {
+                                newErrors[file].emplace_back(move(e));
+                            }
                         }
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
@@ -1204,7 +1287,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
-                    return;
+                    return std::nullopt;
                 }
             }
 
@@ -1227,7 +1310,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
             extension->finishTypecheck(gs);
         }
 
-        return;
+        return newErrors;
     }
 }
 

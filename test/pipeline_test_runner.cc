@@ -315,6 +315,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto logger = spdlog::stderr_color_mt("fixtures: " + inputPath);
+    // maybe important? error queue setup
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger, errorCollector);
     auto gs = make_unique<core::GlobalState>(errorQueue);
@@ -488,6 +489,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (test.expectations.contains("autogen")) {
+
         {
             core::UnfreezeNameTable nameTableAccess(*gs);
             core::UnfreezeSymbolTable symbolAccess(*gs);
@@ -721,6 +723,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
+        // stopInDebugger();
+        // fails here
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
 

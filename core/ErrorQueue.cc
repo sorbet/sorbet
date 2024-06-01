@@ -36,8 +36,17 @@ void ErrorQueue::flushAllErrors(GlobalState &gs) {
         move(errors.begin(), errors.end(), std::back_inserter(collectedErrors[file]));
         errors.clear();
     }
+    // fmt::print("*** gs.errors.clear() in flushAllErrors\n");
+    // gs.errors.clear();
 
+    // fmt::print("*** flushAllErrors: \n");
     for (auto &it : collectedErrors) {
+        // auto errs_string = string();
+        // for (auto const &err : it.second) {
+            // errs_string += " ";
+            // errs_string += std::to_string(err->error->what.code);
+        // }
+        // fmt::print("*** file: {} size: {} codes: {}\n\n", it.first.id(), it.second.size(), errs_string);
         errorFlusher->flushErrors(logger, gs, it.first, move(it.second));
     }
 }
@@ -49,15 +58,21 @@ bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) const {
     return flusher.wouldFlushErrors(file);
 }
 
-void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
+
+vector<unique_ptr<ErrorQueueMessage>> ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
 
+    vector<unique_ptr<ErrorQueueMessage>> newErrors;
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        newErrors.emplace_back(make_unique<ErrorQueueMessage>(msg.clone()));
         collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
+
+
+
     auto prevErrorsIt = gs.errors.find(file);
     if (prevErrorsIt != gs.errors.end()) {
         auto &prevErrors = (*prevErrorsIt).second;
@@ -67,7 +82,31 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
         }
     }
 
+    // fmt::print("*** flushErrorsForFile file: {} \n", file.id());
+    // auto errs_string = string();
+    // for (auto const &err : collected[file]) {
+        // errs_string += " ";
+        // errs_string += err->error ? std::to_string(err->error->what.code) : "NOT AN ERROR";
+    // }
+    // fmt::print("*** size: {} codes: {}\n\n", collected[file].size(), errs_string);
+
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
+
+    // after slow path cancelation some errors might disappear from editor, but remain in cache
+    // reflushing them
+    // grep for "CanCancelSlowPathWithFastPathThatReintroducesOldError"
+    for (const auto &[f, errors]: gs.errors) {
+        if (!f.exists() || f == file) {
+            continue;
+        }
+
+        std::vector<std::unique_ptr<ErrorQueueMessage>> cachedErrors;
+        for (const auto &e: errors) {
+            cachedErrors.push_back(make_unique<ErrorQueueMessage>(e->clone()));
+            errorFlusher->flushErrors(logger, gs, f, move(cachedErrors));
+        }
+    }
+    return newErrors;
 }
 
 void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
@@ -94,6 +133,15 @@ void ErrorQueue::flushButRetainErrorsForFile(GlobalState &gs, FileRef file) {
         auto cloned = make_unique<core::ErrorQueueMessage>(e->clone());
         errorsToFlush.emplace_back(move(cloned));
     }
+
+
+    // fmt::print("*** flushButRetainErrorsForFile file: {} \n", file.id());
+    // auto errs_string = string();
+    // for (auto const &err : errorsToFlush) {
+        // errs_string += " ";
+        // errs_string += std::to_string(err->error->what.code);
+    // }
+    // fmt::print("*** size: {} codes: {}\n\n", errorsToFlush.size(), errs_string);
 
     errorFlusher->flushErrors(logger, gs, file, move(errorsToFlush));
 };
