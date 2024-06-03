@@ -31,6 +31,8 @@ steps:
           volumes:
             - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
+  - wait: ~
+
   - label: ":linux: linters.sh"
     command: .buildkite/linters.sh
     <<: &elastic
