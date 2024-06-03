@@ -46,8 +46,10 @@
 #include "rewriter/rewriter.h"
 
 extern "C" {
-    #include "prism.h"
+#include "prism.h"
 }
+#include "parser/Builder.h"
+#include <iostream>
 
 using namespace std;
 
@@ -129,6 +131,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
         auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware};
         nodes = parser::Parser::run(gs, file, settings);
     }
+
     if (print.ParseTree.enabled) {
         print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
     }
@@ -142,6 +145,26 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
         print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
     }
     return nodes;
+}
+
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                        bool traceLexer, bool traceParser) {
+    auto source = file.data(gs).source();
+
+    const parser::Builder builder(gs, file);
+
+    pm_parser_t parser;
+    pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source.data()), source.size(), NULL);
+
+    pm_node_t *root = pm_parse(&parser);
+
+    // TODO: figure out what traceParser does
+    std::unique_ptr<parser::Node> ast; // builder.build(<something>, traceParser);
+
+    pm_node_destroy(&parser, root);
+    pm_parser_free(&parser);
+
+    return ast;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -202,6 +225,8 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
+    auto &parser = opts.parser;
+
     ast::ParsedFile rewritten{nullptr, file};
 
     Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
@@ -211,7 +236,15 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (file.data(lgs).strictLevel == core::StrictLevel::Ignore) {
                 return emptyParsedFile(file);
             }
-            auto parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+
+            unique_ptr<parser::Node> parseTree;
+
+            if (parser == options::Parser::SORBET) {
+                parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+            } else if (parser == options::Parser::PRISM) {
+                parseTree = runPrismParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+            } // Any other option would have been handled in the options parser
+
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
@@ -614,11 +647,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
     Timer timeit(gs.tracer(), "index");
     vector<ast::ParsedFile> ret;
     vector<ast::ParsedFile> empty;
-
-    // TODO: remove once we are actually parsing with prism
-    cout << "***"
-         << pm_version()
-         << "***";
 
     if (opts.stopAfterPhase == options::Phase::INIT) {
         return empty;
