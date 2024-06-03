@@ -6,6 +6,31 @@
 steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
+  - label: ":linux: (arm64) build-static-release.sh"
+    command: .buildkite/build-static-release.sh
+    artifact_paths: _out_/**/*
+    agents:
+      os: linux
+      queue: elastic-arm64
+      agents:
+        os: linux
+        queue: elastic-arm64
+    plugins:
+      - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
+          # This image needs to be a [manifest list][0] with constituent images for all of the
+          # supported linux architectures.
+          #
+          # [0]: https://docs.docker.com/reference/cli/docker/manifest/#create-and-push-a-manifest-list
+          image: "sorbetruby/sorbet-build-image:latest"
+          workdir: /app
+          always-pull: false
+          init: true
+          propagate-environment: true
+          environment:
+            - "SORBET_RUBYGEMS_API_KEY"
+          volumes:
+            - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
+
   - label: ":linux: linters.sh"
     command: .buildkite/linters.sh
     <<: &elastic
