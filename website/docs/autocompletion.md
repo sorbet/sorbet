@@ -121,7 +121,61 @@ For more information, see
 
 ![](/img/suggest-sig-completion-item-01.png)
 
-## Completion for YARD snippets
+## Pre-declared snippets
+
+Snippets expand a pre-defined template and allow pieces of the template to be
+filled in with values (most language clients allow pressing `TAB` to cycle
+through the parts of the template that need to be filled in).
+
+Sorbet includes some snippet autocompletion results. These show up in addition
+to any snippets that editors might already be configured with. Snippets from
+Sorbet always show up prefixed with `(sorbet)`:
+
+![](/img/lsp/struct-snippet.png)
+
+In VS Code, snippets also show up with a "square with dashed bottom line" icon.
+See [Wrong completion results](#wrong-completion-results).
+
+If a snippet has the "square with dashed bottom line" icon but does not start
+with `(sorbet)`, it came from some other extension in your developer environment
+and is configured separately.
+
+These are the snippets Sorbet includes.
+
+### Snippets for all Ruby keywords.
+
+For example, typing `case` brings up a completion item which, when accepted,
+expands to
+
+```ruby
+case expr
+when expr
+
+else
+end
+```
+
+Other notable keyword snippets include snippets for `def`, `class`, `module`,
+and `if`.
+
+### Snippets for Sorbet-specific constructs.
+
+You can type `struct` or `enum` and have these auto-expand to
+[T::Struct](tstruct.md) and [T::Enum](tenum.md) classes:
+
+<video autoplay loop muted playsinline style="max-width: calc(min(727px, 100%));">
+  <source src="/img/lsp/struct-enum-snippet.mp4" type="video/mp4">
+</video>
+
+The `struct` and `enum` snippet triggers are not methods that exist at runtime:
+they're only indicators to Sorbet that you're trying to define a `T::Struct` or
+`T::Enum`.
+
+These completions will only show up if there is no explicit receiver for a
+method call (e.g., `x.struct` will not show the `T::Struct` snippet suggestion,
+only `struct`).
+
+### Completion for YARD snippets
 
 Sorbet can suggest a YARD doc snippet for methods.
 
