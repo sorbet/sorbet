@@ -2588,7 +2588,25 @@ void GlobalState::clearErrorCacheForFile(
     core::FileRef fref, std::function<bool(const std::unique_ptr<core::ErrorQueueMessage> &)> predicate) {
     auto &prevErrors = errors[fref];
 
-    prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(), predicate), prevErrors.end());
+    prevErrors.erase(std::remove_if(prevErrors.begin(), prevErrors.end(),
+                                    [&predicate, this](const std::unique_ptr<core::ErrorQueueMessage> &msg) {
+                                        auto shouldRemove = false;
+                                        if (!msg->whatFile.exists()) {
+                                            shouldRemove = true;
+                                        }
+
+                                        if (msg->error) {
+                                            auto loc = msg->error->loc;
+                                            auto fileSize = loc.file().data(*this).source().size();
+                                            if (!loc.exists() || loc.beginPos() > fileSize || loc.endPos() > fileSize) {
+                                                shouldRemove = true;
+                                            }
+                                        } else {
+                                            shouldRemove = true;
+                                        }
+                                        return shouldRemove || predicate(msg);
+                                    }),
+                     prevErrors.end());
 }
 
 } // namespace sorbet::core
