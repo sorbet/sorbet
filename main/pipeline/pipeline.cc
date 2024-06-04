@@ -276,7 +276,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(!canceled);
 
             // fmt::print("*** flushing errors after {} namer\n", runIncrementalNamer ? "" : "incremental");
-            if (opts.runLSP) {
+            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
                 // fmt::print("*** before clearing cache:\n");
                 // for (auto const &e : gs.errors) {
                 // auto errs_string = string();
@@ -325,7 +325,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             what = move(result.result());
 
             // fmt::print("*** flushing errors after incremental resolver\n");
-            if (opts.runLSP) {
+            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
                 // fmt::print("*** before clearing cache:\n");
                 // for (auto const &e : gs.errors) {
                 // auto errs_string = string();
@@ -1282,28 +1282,31 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                         }
 
                         // TODO(iz): this is temporary
-                        for (const auto &[f, errors] : gs.errors) {
-                            if (!f.exists()) {
-                                continue;
-                            }
+                        if (gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
+                            for (const auto &[f, errors] : gs.errors) {
+                                if (!f.exists()) {
+                                    continue;
+                                }
 
-                            if (errors.empty()) {
-                                continue;
-                            }
+                                if (errors.empty()) {
+                                    continue;
+                                }
 
-                            std::vector<std::unique_ptr<core::ErrorQueueMessage>> cachedErrors;
-                            for (const auto &e : errors) {
-                                cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
-                            }
-
-                            // TODO(iz): clean this mess up
-                            if (newErrors[f].size() != 0) {
-                                for (const auto &e : newErrors[f]) {
+                                std::vector<std::unique_ptr<core::ErrorQueueMessage>> cachedErrors;
+                                for (const auto &e : errors) {
                                     cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
                                 }
-                            }
 
-                            gs.errorQueue->errorFlusher->flushErrors(gs.errorQueue->logger, gs, f, move(cachedErrors));
+                                // TODO(iz): clean this mess up
+                                if (newErrors[f].size() != 0) {
+                                    for (const auto &e : newErrors[f]) {
+                                        cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
+                                    }
+                                }
+
+                                gs.errorQueue->errorFlusher->flushErrors(gs.errorQueue->logger, gs, f,
+                                                                         move(cachedErrors));
+                            }
                         }
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
