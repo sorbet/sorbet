@@ -105,6 +105,10 @@ optional<unique_ptr<CodeAction>> resolveCodeAction(LSPWrapper &lspWrapper, int &
 
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::CodeActionResolve, move(codeAction));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+
+    responses.erase(
+        std::remove_if(responses.begin(), responses.end(), [](const auto &msg) { return !msg->isResponse(); }),
+        responses.end());
     {
         INFO("Did not receive exactly one response for a codeAction request.");
         CHECK_EQ(responses.size(), 1);
@@ -137,6 +141,9 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
                                                 move(codeActionContext));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+    responses.erase(
+        std::remove_if(responses.begin(), responses.end(), [](const auto &msg) { return !msg->isResponse(); }),
+        responses.end());
     {
         INFO("Did not receive exactly one response for a codeAction request.");
         CHECK_EQ(responses.size(), 1);
@@ -408,6 +415,9 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
     auto params = make_unique<DocumentSymbolParams>(make_unique<TextDocumentIdentifier>(string(uri)));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentDocumentSymbol, move(params));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+    responses.erase(
+        std::remove_if(responses.begin(), responses.end(), [](const auto &msg) { return !msg->isResponse(); }),
+        responses.end());
     {
         INFO("Did not receive exactly one response for a documentSymbols request.");
         REQUIRE_EQ(responses.size(), 1);
