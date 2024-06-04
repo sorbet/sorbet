@@ -629,12 +629,23 @@ public:
         return foundDefs->addTypeMember(move(found));
     }
 
+    bool sendRecvIsT(const ast::Send &s) {
+        bool result = false;
+
+        typecase(
+            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ExpressionPtr &_default) { result = false; });
+
+        return result;
+    }
+
     core::FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == core::FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = send.fun == core::Names::typeAlias();
+        staticField.isTypeAlias = sendRecvIsT(send) && send.fun == core::Names::typeAlias();
         return foundRef;
     }
 
