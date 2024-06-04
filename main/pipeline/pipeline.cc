@@ -29,6 +29,7 @@
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
 #include "core/ErrorQueue.h"
+#include "core/ErrorQueueMessage.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
@@ -278,12 +279,12 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             if (opts.runLSP) {
                 // fmt::print("*** before clearing cache:\n");
                 // for (auto const &e : gs.errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
@@ -294,12 +295,12 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
                 // fmt::print("*** after clearing cache:\n");
                 // for (auto const &e : gs.errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
 
                 for (auto &file : what) {
@@ -327,12 +328,12 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             if (opts.runLSP) {
                 // fmt::print("*** before clearing cache:\n");
                 // for (auto const &e : gs.errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
@@ -347,12 +348,12 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
                 // fmt::print("*** after clearing cache:\n");
                 // for (auto const &e : gs.errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
                 for (auto &file : what) {
                     gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
@@ -998,12 +999,12 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             if (opts.runLSP) {
                 // fmt::print("*** before clearing cache:\n");
                 // for (auto const &e : gs->errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
                 for (auto &file : what) {
                     gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
@@ -1018,12 +1019,12 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
 
                 // fmt::print("*** after clearing cache:\n");
                 // for (auto const &e : gs->errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-                    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
+                // auto errs_string = string();
+                // for (auto const &err : e.second) {
+                // errs_string += " ";
+                // errs_string += std::to_string(err->error->what.code);
+                // }
+                // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
                 // }
                 for (auto &file : what) {
                     gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
@@ -1171,10 +1172,10 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-std::optional<UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>>> typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable,
-               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
-               bool intentionallyLeakASTs) {
+std::optional<UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::ErrorQueueMessage>>>>
+typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts, WorkerPool &workers,
+          bool cancelable, optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
+          bool intentionallyLeakASTs) {
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typecheckins before any preemption occurs.
     const uint32_t epoch = epochManager.getStatus().epoch;
@@ -1264,13 +1265,13 @@ std::optional<UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Erro
                     if (result.gotItem()) {
                         // fmt::print("*** cache before flushErrorsForFile:\n");
                         // for (auto const &e : gs.errors) {
-                            // auto errs_string = string();
-                            // for (auto const &err : e.second) {
-                                // errs_string += " ";
-                                // errs_string += std::to_string(err->error->what.code);
-                            // }
-                            // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(),
-                                       // errs_string);
+                        // auto errs_string = string();
+                        // for (auto const &err : e.second) {
+                        // errs_string += " ";
+                        // errs_string += std::to_string(err->error->what.code);
+                        // }
+                        // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(),
+                        // errs_string);
                         // }
 
                         for (auto &file : files) {
@@ -1278,6 +1279,31 @@ std::optional<UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Erro
                             for (auto &e : errors) {
                                 newErrors[file].emplace_back(move(e));
                             }
+                        }
+
+                        // TODO(iz): this is temporary
+                        for (const auto &[f, errors] : gs.errors) {
+                            if (!f.exists()) {
+                                continue;
+                            }
+
+                            if (errors.empty()) {
+                                continue;
+                            }
+
+                            std::vector<std::unique_ptr<core::ErrorQueueMessage>> cachedErrors;
+                            for (const auto &e : errors) {
+                                cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
+                            }
+
+                            // TODO(iz): clean this mess up
+                            if (newErrors[f].size() != 0) {
+                                for (const auto &e : newErrors[f]) {
+                                    cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
+                                }
+                            }
+
+                            gs.errorQueue->errorFlusher->flushErrors(gs.errorQueue->logger, gs, f, move(cachedErrors));
                         }
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());

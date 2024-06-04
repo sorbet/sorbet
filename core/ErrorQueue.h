@@ -17,12 +17,12 @@ class ErrorQueue {
 private:
     void checkOwned();
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> drainAll();
-    std::shared_ptr<ErrorFlusher> errorFlusher;
     const std::thread::id owner;
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
 public:
+    std::shared_ptr<ErrorFlusher> errorFlusher;
     spdlog::logger &logger;
     spdlog::logger &tracer;
     std::atomic<bool> hadCritical{false};

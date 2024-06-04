@@ -24,7 +24,7 @@ ErrorQueueMessage ErrorQueueMessage::clone() {
 }
 
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
-    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+    : owner(this_thread::get_id()), errorFlusher(errorFlusher), logger(logger), tracer(tracer){};
 
 void ErrorQueue::flushAllErrors(GlobalState &gs) {
     checkOwned();
@@ -74,22 +74,28 @@ vector<unique_ptr<ErrorQueueMessage>> ErrorQueue::flushErrorsForFile(const Globa
     // after slow path cancelation some errors might disappear from editor, but remain in cache
     // reflushing them
     // grep for "CanCancelSlowPathWithFastPathThatReintroducesOldError"
-    for (const auto &[f, errors] : gs.errors) {
-        if (!f.exists() || f == file) {
-            continue;
-        }
+    // TODO(iz): test/testdata/infer/private_constant_in_rbi__2.rb
+    // fails here
+    //
+    // maybe we should flush cache oustide of error queue s
+    // somewhere near typecheck?
 
-        if (errors.empty()) {
-            continue;
-        }
+    // for (const auto &[f, errors] : gs.errors) {
+    // if (!f.exists() || f == file) {
+    // continue;
+    // }
 
-        std::vector<std::unique_ptr<ErrorQueueMessage>> cachedErrors;
-        for (const auto &e : errors) {
-            cachedErrors.push_back(make_unique<ErrorQueueMessage>(e->clone()));
-        }
+    // if (errors.empty()) {
+    // continue;
+    // }
 
-        errorFlusher->flushErrors(logger, gs, f, move(cachedErrors));
-    }
+    // std::vector<std::unique_ptr<ErrorQueueMessage>> cachedErrors;
+    // for (const auto &e : errors) {
+    // cachedErrors.push_back(make_unique<ErrorQueueMessage>(e->clone()));
+    // }
+
+    // errorFlusher->flushErrors(logger, gs, f, move(cachedErrors));
+    // }
     return newErrors;
 }
 
