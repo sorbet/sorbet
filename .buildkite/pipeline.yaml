@@ -12,9 +12,6 @@ steps:
     agents:
       os: linux
       queue: elastic-arm64
-      agents:
-        os: linux
-        queue: elastic-arm64
     plugins:
       - docker#0d9b114b0ca8ec7167787285274aa3842392374d:
           # This image needs to be a [manifest list][0] with constituent images for all of the
