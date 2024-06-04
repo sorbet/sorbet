@@ -1277,7 +1277,7 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                         for (auto &file : files) {
                             auto errors = gs.errorQueue->flushErrorsForFile(gs, file);
                             for (auto &e : errors) {
-                                newErrors[file].emplace_back(move(e));
+                                newErrors[e->whatFile].emplace_back(move(e));
                             }
                         }
 
