@@ -6,7 +6,7 @@ aaaa =
     ''
   end
 
-T.reveal_type(aaaa) # error: T.any(Integer, String)
+T.reveal_type(aaaa) # error: T.nilable(String)
 
 bbbb = 0
 bbbb =
@@ -14,6 +14,6 @@ bbbb =
     ''
   elsif true
     ''
-  end # error: This code is unreachable
+  end
 
-T.reveal_type(bbbb) # error: `T.any(Integer, String)`
+T.reveal_type(bbbb) # error: `String("")`
