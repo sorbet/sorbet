@@ -3,6 +3,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
@@ -136,10 +137,7 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
 string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
-    string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
-        relativeUri = relativeUri.substr(1);
-    }
+    string_view relativeUri = absl::StripPrefix(filePath, "./");
 
     // Special case: Root uri is '' (happens in Monaco)
     if (clientConfig->rootUri.length() == 0) {
