@@ -4412,7 +4412,8 @@ See also:
 
 ## 7049
 
-See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
+See [Methods with Overloaded Signatures](overloads.md) for complete docs on
+how to declare overloaded methods correctly.
 
 ## 7050
 
