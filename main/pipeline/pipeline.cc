@@ -48,7 +48,7 @@
 extern "C" {
 #include "prism.h"
 }
-#include "parser/Builder.h"
+#include "core/LocOffsets.h"
 #include <iostream>
 
 using namespace std;
@@ -147,19 +147,201 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
+core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
+    uint32_t locStart = static_cast<uint32_t>(loc->start - parser->start);
+    uint32_t locEnd = static_cast<uint32_t>(loc->end - parser->start);
+
+    return core::LocOffsets{locStart, locEnd};
+}
+
+unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser) {
+    switch (PM_NODE_TYPE(node)) {
+        case PM_PROGRAM_NODE: {
+            pm_statements_node *stmts = ((pm_program_node *)node)->statements;
+            return convertPrismToSorbet((pm_node *)stmts, parser);
+
+            break;
+        }
+        case PM_STATEMENTS_NODE: {
+            pm_node_list *body = &((pm_statements_node *)node)->body;
+            // TODO: Handle multiple statements
+            pm_node *first = body->nodes[0];
+
+            return convertPrismToSorbet(first, parser);
+
+            break;
+        }
+        case PM_INTEGER_NODE: {
+            pm_location_t *loc = &node->location;
+            pm_integer_node *intNode = (pm_integer_node *)node;
+
+            return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
+
+            break;
+        }
+        case PM_ALIAS_GLOBAL_VARIABLE_NODE:
+        case PM_ALIAS_METHOD_NODE:
+        case PM_ALTERNATION_PATTERN_NODE:
+        case PM_AND_NODE:
+        case PM_ARGUMENTS_NODE:
+        case PM_ARRAY_NODE:
+        case PM_ARRAY_PATTERN_NODE:
+        case PM_ASSOC_NODE:
+        case PM_ASSOC_SPLAT_NODE:
+        case PM_BACK_REFERENCE_READ_NODE:
+        case PM_BEGIN_NODE:
+        case PM_BLOCK_ARGUMENT_NODE:
+        case PM_BLOCK_LOCAL_VARIABLE_NODE:
+        case PM_BLOCK_NODE:
+        case PM_BLOCK_PARAMETER_NODE:
+        case PM_BLOCK_PARAMETERS_NODE:
+        case PM_BREAK_NODE:
+        case PM_CALL_AND_WRITE_NODE:
+        case PM_CALL_NODE:
+        case PM_CALL_OPERATOR_WRITE_NODE:
+        case PM_CALL_OR_WRITE_NODE:
+        case PM_CALL_TARGET_NODE:
+        case PM_CAPTURE_PATTERN_NODE:
+        case PM_CASE_MATCH_NODE:
+        case PM_CASE_NODE:
+        case PM_CLASS_NODE:
+        case PM_CLASS_VARIABLE_AND_WRITE_NODE:
+        case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE:
+        case PM_CLASS_VARIABLE_OR_WRITE_NODE:
+        case PM_CLASS_VARIABLE_READ_NODE:
+        case PM_CLASS_VARIABLE_TARGET_NODE:
+        case PM_CLASS_VARIABLE_WRITE_NODE:
+        case PM_CONSTANT_AND_WRITE_NODE:
+        case PM_CONSTANT_OPERATOR_WRITE_NODE:
+        case PM_CONSTANT_OR_WRITE_NODE:
+        case PM_CONSTANT_PATH_AND_WRITE_NODE:
+        case PM_CONSTANT_PATH_NODE:
+        case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE:
+        case PM_CONSTANT_PATH_OR_WRITE_NODE:
+        case PM_CONSTANT_PATH_TARGET_NODE:
+        case PM_CONSTANT_PATH_WRITE_NODE:
+        case PM_CONSTANT_READ_NODE:
+        case PM_CONSTANT_TARGET_NODE:
+        case PM_CONSTANT_WRITE_NODE:
+        case PM_DEF_NODE:
+        case PM_DEFINED_NODE:
+        case PM_ELSE_NODE:
+        case PM_EMBEDDED_STATEMENTS_NODE:
+        case PM_EMBEDDED_VARIABLE_NODE:
+        case PM_ENSURE_NODE:
+        case PM_FALSE_NODE:
+        case PM_FIND_PATTERN_NODE:
+        case PM_FLIP_FLOP_NODE:
+        case PM_FLOAT_NODE:
+        case PM_FOR_NODE:
+        case PM_FORWARDING_ARGUMENTS_NODE:
+        case PM_FORWARDING_PARAMETER_NODE:
+        case PM_FORWARDING_SUPER_NODE:
+        case PM_GLOBAL_VARIABLE_AND_WRITE_NODE:
+        case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE:
+        case PM_GLOBAL_VARIABLE_OR_WRITE_NODE:
+        case PM_GLOBAL_VARIABLE_READ_NODE:
+        case PM_GLOBAL_VARIABLE_TARGET_NODE:
+        case PM_GLOBAL_VARIABLE_WRITE_NODE:
+        case PM_HASH_NODE:
+        case PM_HASH_PATTERN_NODE:
+        case PM_IF_NODE:
+        case PM_IMAGINARY_NODE:
+        case PM_IMPLICIT_NODE:
+        case PM_IMPLICIT_REST_NODE:
+        case PM_IN_NODE:
+        case PM_INDEX_AND_WRITE_NODE:
+        case PM_INDEX_OPERATOR_WRITE_NODE:
+        case PM_INDEX_OR_WRITE_NODE:
+        case PM_INDEX_TARGET_NODE:
+        case PM_INSTANCE_VARIABLE_AND_WRITE_NODE:
+        case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE:
+        case PM_INSTANCE_VARIABLE_OR_WRITE_NODE:
+        case PM_INSTANCE_VARIABLE_READ_NODE:
+        case PM_INSTANCE_VARIABLE_TARGET_NODE:
+        case PM_INSTANCE_VARIABLE_WRITE_NODE:
+        case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
+        case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
+        case PM_INTERPOLATED_STRING_NODE:
+        case PM_INTERPOLATED_SYMBOL_NODE:
+        case PM_INTERPOLATED_X_STRING_NODE:
+        case PM_IT_PARAMETERS_NODE:
+        case PM_KEYWORD_HASH_NODE:
+        case PM_KEYWORD_REST_PARAMETER_NODE:
+        case PM_LAMBDA_NODE:
+        case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
+        case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
+        case PM_LOCAL_VARIABLE_OR_WRITE_NODE:
+        case PM_LOCAL_VARIABLE_READ_NODE:
+        case PM_LOCAL_VARIABLE_TARGET_NODE:
+        case PM_LOCAL_VARIABLE_WRITE_NODE:
+        case PM_MATCH_LAST_LINE_NODE:
+        case PM_MATCH_PREDICATE_NODE:
+        case PM_MATCH_REQUIRED_NODE:
+        case PM_MATCH_WRITE_NODE:
+        case PM_MISSING_NODE:
+        case PM_MODULE_NODE:
+        case PM_MULTI_TARGET_NODE:
+        case PM_MULTI_WRITE_NODE:
+        case PM_NEXT_NODE:
+        case PM_NIL_NODE:
+        case PM_NO_KEYWORDS_PARAMETER_NODE:
+        case PM_NUMBERED_PARAMETERS_NODE:
+        case PM_NUMBERED_REFERENCE_READ_NODE:
+        case PM_OPTIONAL_KEYWORD_PARAMETER_NODE:
+        case PM_OPTIONAL_PARAMETER_NODE:
+        case PM_OR_NODE:
+        case PM_PARAMETERS_NODE:
+        case PM_PARENTHESES_NODE:
+        case PM_PINNED_EXPRESSION_NODE:
+        case PM_PINNED_VARIABLE_NODE:
+        case PM_POST_EXECUTION_NODE:
+        case PM_PRE_EXECUTION_NODE:
+        case PM_RANGE_NODE:
+        case PM_RATIONAL_NODE:
+        case PM_REDO_NODE:
+        case PM_REGULAR_EXPRESSION_NODE:
+        case PM_REQUIRED_KEYWORD_PARAMETER_NODE:
+        case PM_REQUIRED_PARAMETER_NODE:
+        case PM_RESCUE_MODIFIER_NODE:
+        case PM_RESCUE_NODE:
+        case PM_REST_PARAMETER_NODE:
+        case PM_RETRY_NODE:
+        case PM_RETURN_NODE:
+        case PM_SELF_NODE:
+        case PM_SHAREABLE_CONSTANT_NODE:
+        case PM_SINGLETON_CLASS_NODE:
+        case PM_SOURCE_ENCODING_NODE:
+        case PM_SOURCE_FILE_NODE:
+        case PM_SOURCE_LINE_NODE:
+        case PM_SPLAT_NODE:
+        case PM_STRING_NODE:
+        case PM_SUPER_NODE:
+        case PM_SYMBOL_NODE:
+        case PM_TRUE_NODE:
+        case PM_UNDEF_NODE:
+        case PM_UNLESS_NODE:
+        case PM_UNTIL_NODE:
+        case PM_WHEN_NODE:
+        case PM_WHILE_NODE:
+        case PM_X_STRING_NODE:
+        case PM_YIELD_NODE:
+        case PM_SCOPE_NODE:
+            std::unique_ptr<parser::Node> ast;
+            return ast;
+    }
+}
+
 unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                                         bool traceLexer, bool traceParser) {
     auto source = file.data(gs).source();
-
-    const parser::Builder builder(gs, file);
 
     pm_parser_t parser;
     pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source.data()), source.size(), NULL);
 
     pm_node_t *root = pm_parse(&parser);
 
-    // TODO: figure out what traceParser does
-    std::unique_ptr<parser::Node> ast; // builder.build(<something>, traceParser);
+    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, &parser);
 
     pm_node_destroy(&parser, root);
     pm_parser_free(&parser);
