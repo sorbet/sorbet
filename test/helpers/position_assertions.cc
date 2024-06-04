@@ -58,7 +58,7 @@ template <typename T> bool isDuplicateDiagnostic(string_view filename, T *assert
 template <typename T>
 void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix,
                         bool missingDuplicate = false) {
-    // stopInDebugger();
+    stopInDebugger();
     auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
     auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,

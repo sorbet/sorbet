@@ -658,7 +658,13 @@ TEST_CASE("LSPTest") {
                 auto textDocContents = test.sourceFileContents[filename]->source();
                 updates.push_back(makeChange(testFileUris[filename], textDocContents, 2 + i));
             }
+
+            stopInDebugger();
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
+            fmt::print("\n*** getLSPResponsesFor:\n");
+            for (auto const &r: responses) {
+                fmt::print("*** {}:\n", r->toJSON(true));
+            }
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
