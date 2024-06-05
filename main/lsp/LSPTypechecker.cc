@@ -188,26 +188,26 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
             filesTypechecked = runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
 
-            fmt::print("*** gs.errors after runFastPath in LSPTypechecker::typecheck");
+            // fmt::print("*** gs.errors after runFastPath in LSPTypechecker::typecheck");
 
-            for (auto &[file, errors] : gs->errors) {
-                fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
-                for (auto &e : errors) {
-                    fmt::print("\n***\t code: {}", e->error->what.code);
-                }
-            }
+            // for (auto &[file, errors] : gs->errors) {
+                // fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
+                // for (auto &e : errors) {
+                    // fmt::print("\n***\t code: {}", e->error->what.code);
+                // }
+            // }
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ true);
-            fmt::print("*** gs.errors after runSlowPath in LSPTypechecker::typecheck");
+            // fmt::print("*** gs.errors after runSlowPath in LSPTypechecker::typecheck");
 
-            for (auto &[file, errors] : gs->errors) {
-                fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
-                for (auto &e : errors) {
-                    fmt::print("\n***\t code: {}", e->error->what.code);
-                }
-            }
+            // for (auto &[file, errors] : gs->errors) {
+                // fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
+                // for (auto &e : errors) {
+                    // fmt::print("\n***\t code: {}", e->error->what.code);
+                // }
+            // }
         }
         epoch.committed = committed;
     }
@@ -364,12 +364,12 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     // }
     // TODO(iz) track what happens with this errors in cache
     auto newErrors = pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
-    fmt::print("\n*** newErrors at the end of runFastPath\n");
+    // fmt::print("\n*** newErrors at the end of runFastPath\n");
     if (newErrors.has_value()) {
         for (auto &[file, errors] : *newErrors) {
-            fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
+            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
             for (auto &e : errors) {
-                fmt::print("\n***\t code: {}", e->error->what.code);
+                // fmt::print("\n***\t code: {}", e->error->what.code);
                 gs->errors[file].emplace_back(move(e));
             }
         }
@@ -652,12 +652,12 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         auto newErrors =
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
 
-        fmt::print("\n*** newErrors at the end of runSlowPath\n");
+        // fmt::print("\n*** newErrors at the end of runSlowPath\n");
         if (newErrors.has_value()) {
             for (auto &[file, errors] : *newErrors) {
-                fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
+                // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
                 for (auto &e : errors) {
-                    fmt::print("\n***\t code: {}", e->error->what.code);
+                    // fmt::print("\n***\t code: {}", e->error->what.code);
                     gs->errors[file].emplace_back(move(e));
                 }
             }
@@ -692,13 +692,13 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     if (couldBeCanceled) {
         ENFORCE(updates.updatedGS.has_value());
 
-        fmt::print("\n***LSPTypechecker::commitFileUpdates (gs before creating undo state):\n");
-        for (auto &[file, errors] : gs->errors) {
-            fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
-            for (auto &e : errors) {
-                fmt::print("\n***\t code: {}", e->error->what.code);
-            }
-        }
+        // fmt::print("\n***LSPTypechecker::commitFileUpdates (gs before creating undo state):\n");
+        // for (auto &[file, errors] : gs->errors) {
+            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
+            // for (auto &e : errors) {
+                // fmt::print("\n***\t code: {}", e->error->what.code);
+            // }
+        // }
         cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
     }
 
@@ -727,13 +727,13 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     if (updates.updatedGS.has_value()) {
         ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast);
         gs = move(updates.updatedGS.value());
-        fmt::print("\n***LSPTypechecker::commitFileUpdates (gs == updates.updatedGS):\n");
-        for (auto &[file, errors] : gs->errors) {
-            fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
-            for (auto &e : errors) {
-                fmt::print("\n***\t code: {}", e->error->what.code);
-            }
-        }
+        // fmt::print("\n***LSPTypechecker::commitFileUpdates (gs == updates.updatedGS):\n");
+        // for (auto &[file, errors] : gs->errors) {
+            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
+            // for (auto &e : errors) {
+                // fmt::print("\n***\t code: {}", e->error->what.code);
+            // }
+        // }
     } else {
         ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
     }

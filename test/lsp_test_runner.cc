@@ -140,7 +140,12 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
     auto params = make_unique<CodeActionParams>(make_unique<TextDocumentIdentifier>(fileUri), range->copy(),
                                                 move(codeActionContext));
     auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentCodeAction, move(params));
+    // fmt::print("\n*** codeAction reg:\n*** {}\n", req->toJSON(true));
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
+    // fmt::print("\n*** getLSPResponsesFor codeActions:\n");
+    // for (auto const &r : responses) {
+        // fmt::print("*** {}:\n", r->toJSON(true));
+    // }
     responses.erase(
         std::remove_if(responses.begin(), responses.end(), [](const auto &msg) { return !msg->isResponse(); }),
         responses.end());
@@ -671,10 +676,10 @@ TEST_CASE("LSPTest") {
 
             stopInDebugger();
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
-            fmt::print("\n*** getLSPResponsesFor:\n");
-            for (auto const &r: responses) {
-                fmt::print("*** {}:\n", r->toJSON(true));
-            }
+            // fmt::print("\n*** getLSPResponsesFor:\n");
+            // for (auto const &r : responses) {
+                // fmt::print("*** {}:\n", r->toJSON(true));
+            // }
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(
                 test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
@@ -800,8 +805,8 @@ TEST_CASE("LSPTest") {
                     }
                 }
 
-                // if there were versions that weren't present in the defAssertions map, an error will have been raised,
-                // but the test will proceed to this point.
+                // if there were versions that weren't present in the defAssertions map, an error will have been
+                // raised, but the test will proceed to this point.
                 if (defs.empty()) {
                     ADD_FAIL_AT(assertion->filename.c_str(), assertion->range->start->line + 1,
                                 fmt::format("Found no def comments for usage comment `{}`", symbol));
@@ -821,8 +826,8 @@ TEST_CASE("LSPTest") {
                     // entryAssertions.
                     UsageAssertion::check(test.sourceFileContents, *lspWrapper, nextId, symbol, *queryLoc,
                                           entryAssertions);
-                    // Check that a highlight request at this location returns all of the entryAssertions for the same
-                    // file as the request.
+                    // Check that a highlight request at this location returns all of the entryAssertions for the
+                    // same file as the request.
                     vector<shared_ptr<RangeAssertion>> filteredEntryAssertions;
                     for (auto &e : entryAssertions) {
                         if (absl::StartsWith(e->getLocation(config)->uri, queryLoc->uri)) {
