@@ -141,6 +141,49 @@ end
 M.foo # error: `M.foo` can never be implemented
 ```
 
+Abstract singleton methods on a class **are** allowed, but are unsound (i.e.,
+they can lead to runtime, type-related exceptions like `TypeError` and
+`NameError` even when there is no `T.untyped` involved):
+
+```ruby
+class AbstractParent
+  abstract!
+  sig { abstract.void } # ❌ BAD: abstract singleton class method!
+  def self.foo; end
+end
+
+class ConcreteChild < AbstractParent
+  sig { override.void }
+  def self.foo = puts("hello!")
+end
+
+sig { params(klass: T.class_of(AbstractParent)).void }
+def example(klass)
+  klass.foo
+end
+
+example(ConcreteChild)  # ✅ okay
+example(AbstractParent) # static:  ✅ no errors
+                        # runtime: 💥 call to abstract method foo
+```
+
+For more information, see this blog post:
+
+[Abstract singleton class methods are an abomination →](https://blog.jez.io/abstract-singleton-methods)
+
+The blog post above discusses the problem and three alternatives to avoid using
+abstract singleton class methods. To summarize:
+
+1.  Declare an interface or abstract module with abstract instance methods, and
+    `extend` that module onto a class.
+
+1.  Use the above approach, but with
+    [`mixes_in_class_methods`](#interfaces-and-the-included-hook), discussed
+    below.
+
+1.  Make the method `overridable` instead of `abstract`, effectively giving the
+    method a default implementation.
+
 ## Interfaces and the `included` hook
 
 A somewhat common pattern in Ruby is to use an `included` hook to mix class
