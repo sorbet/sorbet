@@ -94,14 +94,14 @@ export class SorbetLspConfig implements SorbetLspConfigData {
       this.name = name;
       this.description = description;
       this.cwd = cwd;
-      this.env = { ...process.env, ...env };
+      this.env = { ...env };
       this.command = command;
     } else {
       this.id = idOrData.id;
       this.name = idOrData.name;
       this.description = idOrData.description;
       this.cwd = idOrData.cwd;
-      this.env = { ...process.env, ...idOrData.env };
+      this.env = { ...idOrData.env };
       this.command = [...idOrData.command];
     }
   }
