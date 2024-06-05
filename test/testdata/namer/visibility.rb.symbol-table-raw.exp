@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=67:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=78:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
   class <C <U A>> < <C <U Object>> () @ Loc {file=test/testdata/namer/visibility.rb start=3:1 end=3:8}
     method <C <U A>>#<U f1> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=4:3 end=4:9}
@@ -88,5 +88,15 @@ class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U Foo6>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=63:1 end=63:11}
     type-member(+) <S <C <U Foo6>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo6>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo6) @ Loc {file=test/testdata/namer/visibility.rb start=63:1 end=63:11}
     method <S <C <U Foo6>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=63:1 end=67:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <C <U Foo7>> < <C <U Object>> () @ Loc {file=test/testdata/namer/visibility.rb start=73:1 end=73:11}
+    method <C <U Foo7>>#<U foo> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=77:3 end=77:10}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <S <C <U Foo7>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=73:1 end=73:11}
+    type-member(+) <S <C <U Foo7>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo7>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo7) @ Loc {file=test/testdata/namer/visibility.rb start=73:1 end=73:11}
+    method <S <C <U Foo7>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=73:1 end=78:4}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+  class <C <U NilClass>> < <C <U Object>> (<C <U NilClass>>) @ (Loc {file=test/testdata/namer/visibility.rb start=69:1 end=69:15}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/nil_class.rbi start=removed end=removed})
+    method <C <U NilClass>>#<U private> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=70:3 end=70:14}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
 

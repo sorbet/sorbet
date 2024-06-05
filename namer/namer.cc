@@ -390,7 +390,7 @@ public:
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
 
-                    if (original.recv.tag() != ast::Tag::Local) {
+                    if (!original.recv.isSelfReference()) {
                         break;
                     }
 
