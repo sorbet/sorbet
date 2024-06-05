@@ -151,14 +151,26 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
     uint32_t locStart = static_cast<uint32_t>(loc->start - parser->start);
     uint32_t locEnd = static_cast<uint32_t>(loc->end - parser->start);
 
+    std::cout << "locStart: " << locStart << std::endl;
+    std::cout << "locEnd: " << locEnd << std::endl;
+
     return core::LocOffsets{locStart, locEnd};
 }
 
-unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser) {
+const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_INTEGER_NODE: {
+            pm_integer_node *intNode = (pm_integer_node *)node;
+            pm_location_t *loc = &intNode->base.location;
+
+            // Will only work for positive, 32-bit integers
+            return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
+
+            break;
+        }
         case PM_PROGRAM_NODE: {
             pm_statements_node *stmts = ((pm_program_node *)node)->statements;
-            return convertPrismToSorbet((pm_node *)stmts, parser);
+            return convertPrismToSorbet((pm_node *)stmts, parser, gs);
 
             break;
         }
@@ -167,15 +179,20 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             // TODO: Handle multiple statements
             pm_node *first = body->nodes[0];
 
-            return convertPrismToSorbet(first, parser);
+            return convertPrismToSorbet(first, parser, gs);
 
             break;
         }
-        case PM_INTEGER_NODE: {
-            pm_location_t *loc = &node->location;
-            pm_integer_node *intNode = (pm_integer_node *)node;
+        case PM_STRING_NODE: {
+            pm_string_node *strNode = (pm_string_node *)node;
+            pm_location_t *loc = &strNode->base.location;
 
-            return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
+            auto unescaped = &strNode->unescaped;
+            auto source =
+                std::string(reinterpret_cast<const char *>(pm_string_source(unescaped)), pm_string_length(unescaped));
+
+            // TODO: handle different string encodings
+            return make_unique<parser::String>(locOffset(loc, parser), gs.enterNameUTF8(source));
 
             break;
         }
@@ -315,7 +332,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_SOURCE_FILE_NODE:
         case PM_SOURCE_LINE_NODE:
         case PM_SPLAT_NODE:
-        case PM_STRING_NODE:
         case PM_SUPER_NODE:
         case PM_SYMBOL_NODE:
         case PM_TRUE_NODE:
@@ -336,12 +352,13 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
                                         bool traceLexer, bool traceParser) {
     auto source = file.data(gs).source();
 
+    core::UnfreezeNameTable nameTableAccess(gs);
+
     pm_parser_t parser;
     pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source.data()), source.size(), NULL);
 
     pm_node_t *root = pm_parse(&parser);
-
-    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, &parser);
+    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, &parser, gs);
 
     pm_node_destroy(&parser, root);
     pm_parser_free(&parser);
