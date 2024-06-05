@@ -66,13 +66,10 @@ class Foo6
   def foo; end
 end
 
-class NilClass
-  def private; end
-end
-
 class Foo7
   bar = nil
   bar.private
+  #   ^^^^^^^ error: Method `private` does not exist on `NilClass`
 
   def foo; end
 end
