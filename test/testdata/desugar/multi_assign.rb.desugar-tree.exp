@@ -36,13 +36,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$8 = array
           <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 1, 0)
           a = <assignTemp>$9.[](0)
-          b = <assignTemp>$9.slice(::Range.new(1, -1, false))
+          b = <assignTemp>$9.to_ary()
           <assignTemp>$8
         end
         begin
           <assignTemp>$10 = array
           <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 0, 1)
-          a = <assignTemp>$11.slice(::Range.new(0, -1, true))
+          a = <assignTemp>$11.to_ary()
           b = <assignTemp>$11.[](-1)
           <assignTemp>$10
         end
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 2, 2)
           a = <assignTemp>$13.[](0)
           b = <assignTemp>$13.[](1)
-          c = <assignTemp>$13.slice(::Range.new(2, -2, true))
+          c = <assignTemp>$13.to_ary()
           d = <assignTemp>$13.[](-2)
           e = <assignTemp>$13.[](-1)
           <assignTemp>$12
@@ -68,6 +68,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           a.x=(<assignTemp>$17.[](0))
           b = <assignTemp>$17.[](1)
           <assignTemp>$16
+        end
+        begin
+          <assignTemp>$18 = ::<Magic>.<splat>(<emptyTree>::<C T>.unsafe(array))
+          <assignTemp>$19 = ::<Magic>.<expand-splat>(<assignTemp>$18, 1, 0)
+          a = <assignTemp>$19.[](0)
+          b = <assignTemp>$19.to_ary()
+          <assignTemp>$18
+        end
+        begin
+          <assignTemp>$20 = ::<Magic>.<splat>(<emptyTree>::<C T>.unsafe(array))
+          <assignTemp>$21 = ::<Magic>.<expand-splat>(<assignTemp>$20, 0, 1)
+          a = <assignTemp>$21.to_ary()
+          b = <assignTemp>$21.[](-1)
+          <assignTemp>$20
         end
       end
     end
