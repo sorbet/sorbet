@@ -389,6 +389,11 @@ public:
                 }
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
+
+                    if (!original.recv.isSelfReference()) {
+                        break;
+                    }
+
                     methodVisiStack.back() = optional<core::FoundModifier>{core::FoundModifier{
                         core::FoundModifier::Kind::Method,
                         getOwner(),
