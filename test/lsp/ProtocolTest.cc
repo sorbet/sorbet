@@ -168,11 +168,11 @@ std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
     // Verify that message is sound (contains proper JSON shape for method type) by serializing and re-parsing it.
     auto responses = sendRaw(message.toJSON());
-    fmt::print("\n*** Send:\n{}\n\n", message.toJSON());
-    fmt::print("\n*** Responses:\n");
-    for (auto &resp: responses) {
-        fmt::print("*** {}\n", resp->toJSON());
-    }
+    // fmt::print("\n*** Send:\n{}\n\n", message.toJSON());
+    // fmt::print("\n*** Responses:\n");
+    // for (auto &resp: responses) {
+        // // fmt::print("*** {}\n", resp->toJSON());
+    // }
     return responses;
 }
 
@@ -189,7 +189,7 @@ void ProtocolTest::sendAsyncRaw(const string &json) {
 }
 
 void ProtocolTest::sendAsync(const LSPMessage &message) {
-    fmt::print("\n*** sendAsync:\n{}\n\n", message.toJSON());
+    // fmt::print("\n*** sendAsync:\n{}\n\n", message.toJSON());
     sendAsyncRaw(message.toJSON());
 }
 
@@ -201,7 +201,7 @@ unique_ptr<LSPMessage> ProtocolTest::readAsync() {
     } else {
         FAIL_CHECK("Timeout waiting for LSP response.");
     }
-    fmt::print("\n*** readAsync:\n{}\n\n", msg->toJSON());
+    // fmt::print("\n*** readAsync:\n{}\n\n", msg->toJSON());
     return msg;
 }
 

@@ -224,10 +224,22 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
     CHECK_EQ(msgs.at(0)->method(), LSPMethod::TextDocumentPublishDiagnostics);
     assertErrorDiagnostics({}, {{"foo.rb", 7, "Method `blah` does not exist"}});
 
-    INFO("Expected a diagnostic error, followed by two document symbol responses.");
-    REQUIRE_EQ(msgs.size(), 3);
-    CHECK(msgs.at(1)->isResponse());
-    CHECK(msgs.at(2)->isResponse());
+    INFO("Expected five diagnostic notifications and two document symbol responses.");
+
+    int diagnostics = 0;
+    auto documentSymbols = 0;
+    for (auto const &m : msgs) {
+        if (m->isResponse()) {
+            documentSymbols++;
+        }
+        if (m->isNotification()) {
+            diagnostics++;
+        }
+    }
+
+    REQUIRE_EQ(msgs.size(), 7);
+    REQUIRE_EQ(diagnostics, 5);
+    REQUIRE_EQ(documentSymbols, 2);
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableRequests") {
@@ -243,8 +255,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableReques
                                   4));
 
     auto msgs = send(move(requests));
-    // [diagnostics, documentsymbol, diagnostics]
-    CHECK_EQ(msgs.size(), 3);
+    // [diagnostics, documentsymbol, diagnostics, diagnostics, diagnostics]
+    CHECK_EQ(msgs.size(), 5);
     if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(0)->asNotification())) {
         CHECK((*diagnosticParams)->uri.find("foo.rb") != string::npos);
         auto &diagnostics = (*diagnosticParams)->diagnostics;
@@ -252,7 +264,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableReques
         CHECK(diagnostics.at(0)->message.find("for method result type") != string::npos);
     }
     CHECK(msgs.at(1)->isResponse());
-    if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(2)->asNotification())) {
+    CHECK(msgs.at(2)->isNotification());
+    CHECK(msgs.at(3)->isNotification());
+    if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(4)->asNotification())) {
         CHECK((*diagnosticParams)->uri.find("foo.rb") != string::npos);
         auto &diagnostics = (*diagnosticParams)->diagnostics;
         CHECK_EQ(diagnostics.size(), 1);
