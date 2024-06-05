@@ -159,32 +159,32 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
 
 const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_FLOAT_NODE: {
+            auto floatNode = reinterpret_cast<pm_float_node *>(node);
+            pm_location_t *loc = &floatNode->base.location;
+
+            return make_unique<parser::Float>(locOffset(loc, parser), std::to_string(floatNode->value));
+        }
         case PM_INTEGER_NODE: {
-            pm_integer_node *intNode = (pm_integer_node *)node;
+            auto intNode = reinterpret_cast<pm_integer_node *>(node);
             pm_location_t *loc = &intNode->base.location;
 
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
-
-            break;
         }
         case PM_PROGRAM_NODE: {
-            pm_statements_node *stmts = ((pm_program_node *)node)->statements;
+            pm_statements_node *stmts = (reinterpret_cast<pm_program_node *>(node))->statements;
             return convertPrismToSorbet((pm_node *)stmts, parser, gs);
-
-            break;
         }
         case PM_STATEMENTS_NODE: {
-            pm_node_list *body = &((pm_statements_node *)node)->body;
+            pm_node_list *body = &(reinterpret_cast<pm_statements_node *>(node))->body;
             // TODO: Handle multiple statements
             pm_node *first = body->nodes[0];
 
             return convertPrismToSorbet(first, parser, gs);
-
-            break;
         }
         case PM_STRING_NODE: {
-            pm_string_node *strNode = (pm_string_node *)node;
+            auto strNode = reinterpret_cast<pm_string_node *>(node);
             pm_location_t *loc = &strNode->base.location;
 
             auto unescaped = &strNode->unescaped;
@@ -193,8 +193,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
 
             // TODO: handle different string encodings
             return make_unique<parser::String>(locOffset(loc, parser), gs.enterNameUTF8(source));
-
-            break;
         }
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALIAS_METHOD_NODE:
@@ -249,7 +247,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         case PM_FALSE_NODE:
         case PM_FIND_PATTERN_NODE:
         case PM_FLIP_FLOP_NODE:
-        case PM_FLOAT_NODE:
         case PM_FOR_NODE:
         case PM_FORWARDING_ARGUMENTS_NODE:
         case PM_FORWARDING_PARAMETER_NODE:
