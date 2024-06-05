@@ -2,7 +2,7 @@ class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__1.rbi start=??? end=???}
-    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__2.rb:3
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_constant_in_rbi__2.rb:4
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant_in_rbi__2.rb start=??? end=???}
   module ::Foo < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/infer/private_constant_in_rbi__1.rbi:3
     static-field ::Foo::ANOTHER_PRIVATE_CONST : private -> TrueClass @ test/testdata/infer/private_constant_in_rbi__1.rbi:10
