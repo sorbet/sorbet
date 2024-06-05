@@ -176,6 +176,19 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
             pm_statements_node *stmts = (reinterpret_cast<pm_program_node *>(node))->statements;
             return convertPrismToSorbet((pm_node *)stmts, parser, gs);
         }
+        case PM_RATIONAL_NODE: {
+            auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
+            pm_location_t *loc = &rationalNode->base.location;
+
+            const uint8_t *start = rationalNode->numeric->location.start;
+            const uint8_t *end = rationalNode->numeric->location.end;
+
+            std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
+
+            return make_unique<parser::Rational>(locOffset(loc, parser), value);
+
+            break;
+        }
         case PM_STATEMENTS_NODE: {
             pm_node_list *body = &(reinterpret_cast<pm_statements_node *>(node))->body;
             // TODO: Handle multiple statements
@@ -312,7 +325,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
         case PM_RANGE_NODE:
-        case PM_RATIONAL_NODE:
         case PM_REDO_NODE:
         case PM_REGULAR_EXPRESSION_NODE:
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE:
