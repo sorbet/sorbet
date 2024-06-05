@@ -53,3 +53,15 @@ class Foo4
     private :foo
   end
 end
+
+class Foo5
+  T.unsafe(nil).private
+
+  def foo; end  # this does not end up being private
+end
+
+class Foo6
+  self.private
+
+  def foo; end
+end
