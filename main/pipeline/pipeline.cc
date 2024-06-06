@@ -338,11 +338,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                 for (auto &file : what) {
                     gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Resolver errors codes are 50XX
-                        // Errors 7032 and 7010 are infer errors, which might be reported by the resolver
-                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc
-                        // (resolver) and calls.cc (infer) We want to remove them before inference
-                        return (err->error->what.code > 4999 && err->error->what.code < 6000) ||
-                               err->error->what.code == 7032 || err->error->what.code == 7010;
+                        return err->error->what.code > 4999 && err->error->what.code < 6000;
                     });
                 }
 
@@ -1009,11 +1005,7 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
                 for (auto &file : what) {
                     gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Resolver errors codes are 50XX
-                        // Errors 7032 and 7010 are infer errors, which might be reported by the resolver
-                        // They originate from Types::applyTypeArguments, which might be called from both type_syntax.cc
-                        // (resolver) and calls.cc (infer) We want to remove them before inference
-                        return (err->error->what.code > 4999 && err->error->what.code < 6000) ||
-                               err->error->what.code == 7032 || err->error->what.code == 7010;
+                        return err->error->what.code > 4999 && err->error->what.code < 6000;
                     });
                 }
 
