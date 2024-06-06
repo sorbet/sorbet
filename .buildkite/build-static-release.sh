@@ -28,7 +28,21 @@ esac
 
 echo will run with $CONFIG_OPTS
 
-./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+case "$platform" in
+  darwin-x86_64|darwin-arm64)
+    TARGET_PLATFORM=darwin-x86_64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    mv bazel-bin/main/sorbet sorbet_x86_64
+
+    TARGET_PLATFORM=darwin-arm64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    mv bazel-bin/main/sorbet sorbet_arm64
+
+    lipo -create -output bazel-bin/main/sorbet sorbet_x86_64 sorbet_arm64
+    rm sorbet_x86_64 sorbet_arm64
+    ;;
+  *)
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    ;;
+esac
 
 mkdir gems/sorbet-static/libexec/
 cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
