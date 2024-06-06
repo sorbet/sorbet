@@ -62,7 +62,9 @@ module T::Props
         source = lazily_defined_methods.fetch(name).call
 
         cls = decorated_class
-        cls.class_eval(source.to_s)
+        T::Configuration.without_ruby_warnings do
+          cls.class_eval(source.to_s)
+        end
         cls.send(:private, name)
       end
 
