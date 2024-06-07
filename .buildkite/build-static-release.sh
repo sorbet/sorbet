@@ -16,8 +16,12 @@ case "$platform" in
   linux-aarch64)
     CONFIG_OPTS="--config=release-${platform}"
     ;;
-  darwin-x86_64|darwin-arm64)
+  darwin-x86_64)
     CONFIG_OPTS="--config=release-mac"
+    command -v autoconf >/dev/null 2>&1 || brew install autoconf
+    ;;
+  darwin-arm64)
+    CONFIG_OPTS="--config=release-mac-arm64"
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   *)
