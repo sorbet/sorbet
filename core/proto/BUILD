@@ -23,5 +23,6 @@ cc_library(
         "//core",
         "//proto",
         "//proto/pay-server",
+        "@com_google_protobuf//src/google/protobuf/json",
     ],
 )

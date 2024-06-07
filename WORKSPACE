@@ -29,21 +29,36 @@ load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
 
 bazel_compdb_deps()
 
-load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
-load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain_15_0_7",
     absolute_paths = True,
-    llvm_mirror_prefixes = [
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
-        "https://github.com/sorbet/llvm-project/releases/download/llvmorg-",
+    alternative_llvm_sources = [
+        "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
     llvm_version = "15.0.7",
 )
+
+load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+load("@emsdk//:deps.bzl", emsdk_deps = "deps")
+
+emsdk_deps()
+
+load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
+
+emsdk_emscripten_deps(emscripten_version = "3.1.59")
+
+load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
+
+register_emscripten_toolchains()
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
@@ -70,10 +85,6 @@ bison_register_toolchains(
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
-
-load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories")
-
-node_repositories()
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 

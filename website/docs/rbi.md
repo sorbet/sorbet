@@ -218,6 +218,23 @@ Consider some examples:
 While this is a general rule, we do make exceptions on a case-by-case basis.
 Please open an issue if you're unsure.
 
+## Does the sigil matter in an RBI file?
+
+It does. The primary way it matters is that Sorbet only checks "Method does not
+take a block" errors for methods defined in `# typed: strict` files. If an RBI
+file is `# typed: true`, Sorbet will never report "Method does not take a block"
+errors for methods defined inside it, even if a given method logically takes no
+block.
+
+See [Methods that take no blocks](procs.md#methods-that-take-no-blocks) for
+more.
+
+**Note**: At the moment,
+[this issue](https://github.com/sorbet/sorbet/issues/7941) in Sorbet prevents
+using `# typed: strict` to require that all definitions in an RBI file have
+explicit type annotations. This is not intentional and will be fixed in a future
+version of Sorbet.
+
 ## DSL RBIs
 
 Sorbet by itself does not understand DSLs involving meta-programming, such as

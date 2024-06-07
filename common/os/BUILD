@@ -5,7 +5,7 @@ cc_library(
         "os.cc",
     ] + select({
         "@platforms//os:osx": ["mac.cc"],
-        "//tools/config:webasm": ["emscripten.cc"],
+        "@platforms//cpu:wasm32": ["emscripten.cc"],
         "//conditions:default": ["linux.cc"],
     }),
     hdrs = [

@@ -1,4 +1,5 @@
 #include "core/errors/resolver.h"
+#include "absl/strings/escaping.h"
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/ast.h"
@@ -1074,9 +1075,11 @@ private:
                         e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                     job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                         if (!fileIsPayload && klassDefinedInPayload) {
-                            e.addErrorNote("Add `{}` at the top of this file to silence this error.\n"
-                                           "    Only use this to work around Ruby or gem upgrade incompatibilities.",
-                                           "# allow-parent-payload-override: true");
+                            e.addErrorNote(
+                                "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
+                                "    Only use this to work around Ruby or gem upgrade incompatibilities.",
+                                fmt::format("--suppress-payload-superclass-redefinition-for={}", job.klass.show(ctx)),
+                                "sorbet/config");
                         }
                     }
                 }
@@ -1289,7 +1292,7 @@ private:
 
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
                            bool isInclude, bool isSuperclass = false) {
-        if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
+        if (ast::isa_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
@@ -2287,30 +2290,41 @@ class ResolveTypeMembersAndFieldsWalk {
             // This was previously entered by namer and we are now resolving the type.
             priorField.data(ctx)->resultType = castType;
             return;
-        } else if (core::Types::equiv(ctx, priorField.data(ctx)->resultType, castType)) {
+        }
+
+        auto priorFieldResultType = priorField.data(ctx)->resultType;
+        if (priorFieldResultType == nullptr || castType == nullptr) [[unlikely]] {
+            const auto &file = ctx.file.data(ctx);
+            fatalLogger->error(
+                R"(msg="Bad core::Types::equiv in resolveField" path="{}" priorField="{}" resultTypeNull="{}" castTypeNull="{}")",
+                file.path(), priorField.show(ctx), priorFieldResultType == nullptr ? "true" : "false",
+                castType == nullptr ? "true" : "false");
+            fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
+        }
+
+        if (core::Types::equiv(ctx, priorFieldResultType, castType)) {
             // We already have a symbol for this field, and it matches what we already saw, so we can short
             // circuit.
             return;
-        } else {
-            // We do some normalization here to ensure that the file / line we report the error on doesn't
-            // depend on the order that we traverse files nor the order we traverse within a file.
-            auto priorLoc = priorField.data(ctx)->loc();
-            core::Loc reportOn;
-            core::Loc errorLine;
-            core::Loc thisLoc = core::Loc(job.file, uid->loc);
-            if (thisLoc.file() == priorLoc.file()) {
-                reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
-                errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
-            } else {
-                reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
-                errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
-            }
+        }
 
-            if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
-                e.addErrorLine(errorLine, "Previous declaration is here:");
-            }
-            return;
+        // We do some normalization here to ensure that the file / line we report the error on doesn't
+        // depend on the order that we traverse files nor the order we traverse within a file.
+        auto priorLoc = priorField.data(ctx)->loc();
+        core::Loc reportOn;
+        core::Loc errorLine;
+        core::Loc thisLoc = core::Loc(job.file, uid->loc);
+        if (thisLoc.file() == priorLoc.file()) {
+            reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
+            errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
+        } else {
+            reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
+            errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
+        }
+
+        if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
+            e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
+            e.addErrorLine(errorLine, "Previous declaration is here:");
         }
     }
 

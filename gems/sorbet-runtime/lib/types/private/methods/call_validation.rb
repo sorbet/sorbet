@@ -291,11 +291,21 @@ module T::Private::Methods::CallValidation
 
   def self.report_error(method_sig, error_message, kind, name, type, value, caller_offset: 0)
     caller_loc = T.must(caller_locations(3 + caller_offset, 1))[0]
-    definition_file, definition_line = method_sig.method.source_location
+    method = method_sig.method
+    definition_file, definition_line = method.source_location
+
+    owner = method.owner
+    pretty_method_name =
+      if owner.singleton_class? && owner.respond_to?(:attached_object)
+        # attached_object is new in Ruby 3.2
+        "#{owner.attached_object}.#{method.name}"
+      else
+        "#{owner}##{method.name}"
+      end
 
     pretty_message = "#{kind}#{name ? " '#{name}'" : ''}: #{error_message}\n" \
       "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
-      "Definition: #{definition_file}:#{definition_line}"
+      "Definition: #{definition_file}:#{definition_line} (#{pretty_method_name})"
 
     T::Configuration.call_validation_error_handler(
       method_sig,

@@ -190,7 +190,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
         const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
         if (restArg == nullptr) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
-        } else if (const auto *kwRestArg = ast::cast_tree<ast::KeywordArg>(restArg->expr)) {
+        } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
             argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
         } else {
             ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));

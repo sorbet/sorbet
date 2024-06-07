@@ -1596,6 +1596,21 @@ instead of instance methods (`def foo`).
 
 For more information, see the docs for [Generics](generics.md).
 
+<a class="anchor" aria-hidden="true" id="redeclare-fixed"></a>
+
+**Why does this apply even to `fixed` types?** Sorbet requires redeclaring even
+`fixed` type members and templates. This differs from many other typed,
+object-oriented languages that support generic classes. This choice is an
+implementation detail which simplifies some logic inside Sorbet, specifically
+around responding incrementally to file edits in an editor. It's _not_
+fundamental to Ruby or the type system semantics Sorbet chooses to implement,
+which means that one day we could consider changing Sorbet to support this
+(which would require adjusting Sorbet's algorithm for handling incremental
+updates).
+
+For a more technical explanation, see
+[the Sorbet source code](https://github.com/sorbet/sorbet/blob/233b47bb46fcedb60982fd7f70148f07a147468f/resolver/GlobalPass.cc#L54-L63).
+
 ## 5015
 
 [Variance](<https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)>)
@@ -4140,7 +4155,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ❌ error!
 end
 ```
 
@@ -4171,7 +4186,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ✅ no error
 end
 ```
 
@@ -4397,7 +4412,8 @@ See also:
 
 ## 7049
 
-See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
+See [Methods with Overloaded Signatures](overloads.md) for complete docs on how
+to declare overloaded methods correctly.
 
 ## 7050
 

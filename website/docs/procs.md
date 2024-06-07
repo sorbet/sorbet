@@ -103,6 +103,39 @@ Note that the `yield` itself in the method body doesn't need to change at all.
 Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the `yield` call to the `blk` parameter automatically.
 
+## Methods that do not take blocks
+
+It's hard for Sorbet to know whether a method takes a block or not. Technically,
+Ruby allows passing a block at runtime to **all methods**, regardless of whether
+that method declares an explicit `&blk` parameter or uses the `yield` keyword.
+
+This means that Sorbet can only catch "Method does not take a block" errors when
+the method definition:
+
+- has a signature
+- does not mention a `&blk` parameter
+- is defined in a `# typed: strict` file
+
+Absent all three conditions, Sorbet allows passing a block to a method that
+might not actually accept a block.
+
+### Why `# typed: strict` files?
+
+To ease the adoption in pre-existing Ruby codebases, Sorbet allows methods to
+use `yield` but not declare a `&blk` parameter in `# typed: true` files. We may
+reconsider this decision in the future, but for now, Sorbet can only be sure
+that a method does not take a block if the method is defined in a
+`# typed: strict` file.
+
+Note that this applies to RBI files too: if a method is defined with a
+signature, that does not mention a `&blk` parameter, in a `# typed: strict` RBI
+file, Sorbet will error for attempts to pass a block to the method.
+
+For RBI authors, it's important to ensure that `# typed: strict` RBIs correctly
+declare whether a method takes a block or not, or else use `# typed: true` for
+that RBI file to opt the methods defined in that RBI out of "Method does not
+take a block" errors.
+
 ## Prefer blocks to procs or lambdas
 
 Sorbet's type inference gives substantial preference to Ruby blocks

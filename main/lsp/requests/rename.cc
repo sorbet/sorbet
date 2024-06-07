@@ -116,7 +116,7 @@ public:
         string newsrc;
         if (auto sendResp = response->isSend()) {
             newsrc = replaceMethodNameInSend(string(source.value()), sendResp);
-        } else if (auto defResp = response->isMethodDef()) {
+        } else if (response->isMethodDef()) {
             newsrc = replaceMethodNameInDef(string(source.value()));
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");

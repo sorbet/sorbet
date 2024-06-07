@@ -790,6 +790,21 @@ class Enumerator::Lazy < Enumerator
   # Also aliased as:
   # [`_enumerable_grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html#method-i-_enumerable_grep)
   sig do
+    type_parameters(:Instance)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+      )
+      .returns(T::Enumerator::Lazy[T.all(Elem, T.type_parameter(:Instance))])
+  end
+  sig do
+    type_parameters(:Instance, :U)
+      .params(
+          arg0: T::Class[T.type_parameter(:Instance)],
+          blk: T.proc.params(arg0: T.type_parameter(:Instance)).returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator::Lazy[T.type_parameter(:U)])
+  end
+  sig do
     params(
       arg0: BasicObject
     )

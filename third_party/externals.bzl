@@ -56,9 +56,12 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        url = "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.zip",
-        sha256 = "bf0e5070b4b99240183b29df78155eee335885e53a8af8683964579c214ad301",
-        strip_prefix = "protobuf-3.14.0",
+        url = "https://github.com/protocolbuffers/protobuf/archive/v3.27.0.zip",
+        sha256 = "913530eba097b17f58b9087fe9c4944de87b56913e3e340b91e317d1e6763dde",
+        strip_prefix = "protobuf-3.27.0",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:com_google_protobuf/cpp_opts.bzl.patch",
+        ],
     )
 
     http_archive(
@@ -159,15 +162,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        url = "https://github.com/abseil/abseil-cpp/archive/8910297baf87e1777c4fd30fb0693eecf9f2c134.zip",
-        sha256 = "c43b8cd8e306e7fe3f006d880181d60db59a3bae6b6bc725da86a28a6b0f9f30",
-        strip_prefix = "abseil-cpp-8910297baf87e1777c4fd30fb0693eecf9f2c134",
-        patches = [
-            # https://github.com/abseil/abseil-cpp/commit/d2422b19e9ba41c952db1ed5514bb68114c2be15
-            # Abseil builds with `-Wall` which we can't override to silence this warning.
-            "@com_stripe_ruby_typer//third_party:abseil_cpp/low_level_hash_array_parameter.patch",
-        ],
-        patch_args = ["-p1"],
+        url = "https://github.com/abseil/abseil-cpp/archive/20240116.2.zip",
+        sha256 = "69909dd729932cbbabb9eeaff56179e8d124515f5d3ac906663d573d700b4c7d",
+        strip_prefix = "abseil-cpp-20240116.2",
     )
 
     http_archive(
@@ -184,12 +181,14 @@ def register_sorbet_dependencies():
         urls = ["https://github.com/bazelbuild/rules_cc/archive/726dd8157557f1456b3656e26ab21a1646653405.tar.gz"],
     )
 
-    # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
+    # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
+    # The `master` branch is the commit of `bazel-contrib/toolchains_llvm` that we're based on
+    # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
     http_archive(
-        name = "com_grail_bazel_toolchain",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/c2715fcb7ec7fc574eac501007b29277f316099f.zip",
-        sha256 = "1fee34a3f4123b2ec60d2c81d4805e16e47c7f95b31259272274430a45d4f3da",
-        strip_prefix = "bazel-toolchain-c2715fcb7ec7fc574eac501007b29277f316099f",
+        name = "toolchains_llvm",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/8d9165fd3560f6ff50bc4794972f714f4ba2adaa.tar.gz",
+        sha256 = "238b5a777bbfac3d5ec35cbd45ae2b84ca4118aa8f902ab27894912352e94658",
+        strip_prefix = "bazel-toolchain-8d9165fd3560f6ff50bc4794972f714f4ba2adaa",
     )
 
     http_archive(
@@ -199,20 +198,13 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "build_bazel_rules_nodejs",
-        sha256 = "e79c08a488cc5ac40981987d862c7320cee8741122a2649e9b08e850b6f20442",
-        url = "https://github.com/bazelbuild/rules_nodejs/releases/download/3.8.0/rules_nodejs-3.8.0.tar.gz",
-    )
-
-    http_archive(
         name = "com_github_bazelbuild_buildtools",
         url = "https://github.com/bazelbuild/buildtools/archive/5bcc31df55ec1de770cb52887f2e989e7068301f.zip",
         sha256 = "875d0c49953e221cfc35d2a3846e502f366dfa4024b271fa266b186ca4664b37",
         strip_prefix = "buildtools-5bcc31df55ec1de770cb52887f2e989e7068301f",
     )
 
-    # optimized version of blake2 hashing algorithm
-    # TODO(jez) Add something to use the neon implementation on Apple Silicon
+    # optimized version of blake2 hashing algorithm, using SSE vector extensions
     http_archive(
         name = "com_github_blake2_libb2",
         url = "https://github.com/BLAKE2/libb2/archive/fa83ddbe179912e9a7a57edf0333b33f6ff83056.zip",
@@ -247,31 +239,15 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "emscripten_toolchain",
-        url = "https://github.com/kripken/emscripten/archive/1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-toolchain.BUILD",
-        sha256 = "4d6fa350895fabc25b89ce5f9dcb528e719e7c2bf7dacab2a3e3cc818ecd7019",
-        strip_prefix = "emscripten-1.38.25",
+        name = "emsdk",
+        sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
+        strip_prefix = "emsdk-3.1.59/bazel",
+        url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
         patches = [
-            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/emcc.py.patch",
-            "@com_stripe_ruby_typer//third_party:emscripten_toolchain/tools_shared.py.patch",
+            # (cd ~/stripe/github/emsdk/bazel && \
+            #    git diff --relative --no-prefix > ~/stripe/sorbet/third_party/emsdk/emscripten_config.patch)
+            "@com_stripe_ruby_typer//third_party:emsdk/emscripten_config.patch",
         ],
-    )
-
-    http_archive(
-        name = "emscripten_clang_linux",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/linux/emscripten-llvm-e1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
-        sha256 = "0e9a5a114a60c21604f4038b573109bd31424aeba275b4173480485ca0a56ba4",
-        strip_prefix = "emscripten-llvm-e1.38.25",
-    )
-
-    http_archive(
-        name = "emscripten_clang_darwin",
-        url = "https://storage.googleapis.com/webassembly/emscripten-releases-builds/old/mac/emscripten-llvm-e1.38.25.tar.gz",
-        build_file = "@com_stripe_ruby_typer//third_party:emscripten-clang.BUILD",
-        sha256 = "01519125c613d0b013193eaf5ac5031e6ec34aac2451c357fd4097874ceee38c",
-        strip_prefix = "emscripten-llvm-e1.38.25",
     )
 
     http_archive(
