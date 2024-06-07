@@ -166,4 +166,5 @@ mkdir -p "$BUILD_DIR"
 )
 rm -rf "$BUILD_DIR"
 
+"$bazel_exec_path" clean --expunge
 exec "$bazel_exec_path" "$@"
