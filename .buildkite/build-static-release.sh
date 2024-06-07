@@ -33,6 +33,8 @@ case "$platform" in
     TARGET_PLATFORM=darwin-x86_64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
     mv bazel-bin/main/sorbet sorbet_x86_64
 
+    ./bazel clean --expunge
+
     TARGET_PLATFORM=darwin-arm64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
     mv bazel-bin/main/sorbet sorbet_arm64
 
