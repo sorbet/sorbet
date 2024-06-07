@@ -6,7 +6,7 @@ autocorrect-kwargs.rb:6: `returns` does not accept keyword arguments https://srb
      6 |sig {returns(foo: Integer, bar: String)}
                      ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/7032
+autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/5077
     13 |sig {returns(T::Array[foo: Integer])}
                               ^^^^^^^^^^^^
   Autocorrect: Done
@@ -14,7 +14,7 @@ autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/70
     13 |sig {returns(T::Array[foo: Integer])}
                               ^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
+autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/5076
     13 |sig {returns(T::Array[foo: Integer])}
                               ^^^^^^^^^^^^
 
