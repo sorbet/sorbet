@@ -136,6 +136,7 @@ build:release-linux           --copt=-march=sandybridge
 build:release-sanitized-linux --copt=-march=sandybridge
 
 build:release-mac --config=release-common --platforms=@//tools/platforms:darwin_x86_64
+build:release-mac-arm64 --config=release-common --platforms=@//tools/platforms:darwin_arm64
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
