@@ -39,7 +39,7 @@ class T::ImmutableStruct < T::InexactStruct
 
   # Matches the signature in Props, but raises since this is an immutable struct and only const is allowed
   sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
-  def self.prop(name, cls, rules={})
+  def self.prop(name, cls, **rules)
     return super if (cls.is_a?(Hash) && cls[:immutable]) || rules[:immutable]
 
     raise "Cannot use `prop` in #{self.name} because it is an immutable struct. Use `const` instead"
