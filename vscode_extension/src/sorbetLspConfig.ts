@@ -13,7 +13,7 @@ export interface SorbetLspConfigData {
    */
   readonly name: string;
   /**
-   * Human-readable zlong-form description suitable for hover text or help.
+   * Human-readable long-form description suitable for hover text or help.
    */
   readonly description: string;
   /**
@@ -43,7 +43,7 @@ export class SorbetLspConfig implements SorbetLspConfigData {
    */
   public readonly name: string;
   /**
-   * Human-readable zlong-form description suitable for hover text or help.
+   * Human-readable long-form description suitable for hover text or help.
    */
   public readonly description: string;
   /**
@@ -116,20 +116,17 @@ export class SorbetLspConfig implements SorbetLspConfigData {
    * Deep equality.
    */
   public isEqualTo(other: any): boolean {
-    if (
-      this !== other &&
-      (!(other instanceof SorbetLspConfig) ||
-        this.id !== other.id ||
-        this.name !== other.name ||
-        this.description !== other.description ||
-        this.cwd !== other.cwd ||
-        !deepEqualEnv(this.env, other.env) ||
-        !deepEqual(this.command, other.command))
-    ) {
-      return false;
-    }
+    if (this === other) return true;
+    if (!(other instanceof SorbetLspConfig)) return false;
 
-    return true;
+    return (
+      this.id === other.id &&
+      this.name === other.name &&
+      this.description === other.description &&
+      this.cwd === other.cwd &&
+      deepEqualEnv(this.env, other.env) &&
+      deepEqual(this.command, other.command)
+    );
   }
 
   /**
