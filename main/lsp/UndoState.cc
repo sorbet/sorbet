@@ -30,23 +30,6 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFil
     }
 
     indexedFinalGS = std::move(evictedIndexedFinalGS);
-    // fmt::print("\n***evictedGs.errors:\n");
-    // for (auto &[file, errors]: evictedGs->errors) {
-        // fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*evictedGs).path(), errors.size(), file.id());
-        // for (auto &e : errors) {
-            // fmt::print("\n***\t code: {}", e->error->what.code);
-        // }
-
-    // }
-
-    // fmt::print("\n***gs.errors:\n");
-    // for (auto &[file, errors]: gs->errors) {
-        // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
-        // for (auto &e : errors) {
-            // fmt::print("\n***\t code: {}", e->error->what.code);
-        // }
-
-    // }
     gs = move(evictedGs);
 }
 

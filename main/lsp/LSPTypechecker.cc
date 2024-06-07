@@ -188,26 +188,10 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
 
             filesTypechecked = runFastPath(updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
 
-            // fmt::print("*** gs.errors after runFastPath in LSPTypechecker::typecheck");
-
-            // for (auto &[file, errors] : gs->errors) {
-                // fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
-                // for (auto &e : errors) {
-                    // fmt::print("\n***\t code: {}", e->error->what.code);
-                // }
-            // }
             commitFileUpdates(updates, /* cancelable */ false);
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             committed = runSlowPath(move(updates), workers, errorFlusher, /* cancelable */ true);
-            // fmt::print("*** gs.errors after runSlowPath in LSPTypechecker::typecheck");
-
-            // for (auto &[file, errors] : gs->errors) {
-                // fmt::print("\n*** file: {}, size: {}, id: {}", file.data(*gs).path(), errors.size(), file.id());
-                // for (auto &e : errors) {
-                    // fmt::print("\n***\t code: {}", e->error->what.code);
-                // }
-            // }
         }
         epoch.committed = committed;
     }
@@ -337,45 +321,20 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     const auto presorted = true;
     const auto cancelable = false;
 
-    // fmt::print("*** clearing cache before typecheck in runFastPath:\n");
-    // fmt::print("*** before clearing cache\n");
-    // for (auto const &e : gs->errors) {
-    // auto errs_string = string();
-    // for (auto const &err : e.second) {
-    // errs_string += " ";
-    // errs_string += std::to_string(err->error->what.code);
-    // }
-    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-    // }
     for (auto const &file : sorted) {
         gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
             // clear errors which might be reported in typecheck
             return err->error->what.code > 5999;
         });
     }
-    // fmt::print("*** before clearing cache\n");
-    // for (auto const &e : gs->errors) {
-    // auto errs_string = string();
-    // for (auto const &err : e.second) {
-    // errs_string += " ";
-    // errs_string += std::to_string(err->error->what.code);
-    // }
-    // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-    // }
-    // TODO(iz) track what happens with this errors in cache
     auto newErrors = pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
-    // fmt::print("\n*** newErrors at the end of runFastPath\n");
     if (newErrors.has_value()) {
         for (auto &[file, errors] : *newErrors) {
-            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
             for (auto &e : errors) {
-                // fmt::print("\n***\t code: {}", e->error->what.code);
                 gs->errors[file].emplace_back(move(e));
             }
         }
     }
-    // fmt::print("***  gs->errors.clear(); after typecheck in LSPTypechecker::runFastPath\n");
-    // gs->errors.clear();
     gs->lspTypecheckCount++;
 
     return toTypecheck;
@@ -532,35 +491,16 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
 
-        if (canceled || gs->epochManager->wasTypecheckingCanceled()) {
+        if (canceled)) {
             ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
             return;
         }
-        // fmt::print("*** flushing error  namer\n");
-        // fmt::print("*** before clearing cache:\n");
-        // for (auto const &e : gs->errors) {
-        // auto errs_string = string();
-        // for (auto const &err : e.second) {
-        // errs_string += " ";
-        // errs_string += std::to_string(err->error->what.code);
-        // }
-        // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-        // }
         for (auto &file : indexedCopies) {
             gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                 // Namer errors codes are 40XX
                 return err->error->what.code < 5000;
             });
         }
-
-        // for (auto const &e : gs->errors) {
-        // auto errs_string = string();
-        // for (auto const &err : e.second) {
-        // errs_string += " ";
-        // errs_string += std::to_string(err->error->what.code);
-        // }
-        // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-        // }
         for (auto &file : indexedCopies) {
             gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
         }
@@ -622,50 +562,24 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
-
-        // fmt::print("*** clearing cache before typecheck in runSlowPath:\n");
-        // fmt::print("*** before clearing cache\n");
-        // for (auto const &e : gs->errors) {
-        // auto errs_string = string();
-        // for (auto const &err : e.second) {
-        // errs_string += " ";
-        // errs_string += std::to_string(err->error->what.code);
-        // }
-        // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-        // }
         for (auto const &file : sorted) {
             gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                 // clear errors which might be reported in typecheck
                 return err->error->what.code > 5999;
             });
         }
-        // fmt::print("*** before clearing cache\n");
-        // for (auto const &e : gs->errors) {
-        // auto errs_string = string();
-        // for (auto const &err : e.second) {
-        // errs_string += " ";
-        // errs_string += std::to_string(err->error->what.code);
-        // }
-        // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-        // }
-        // TODO(iz) track what happens with this errors in cache
         auto newErrors =
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
 
-        // fmt::print("\n*** newErrors at the end of runSlowPath\n");
         if (newErrors.has_value()) {
             for (auto &[file, errors] : *newErrors) {
-                // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
                 for (auto &e : errors) {
-                    // fmt::print("\n***\t code: {}", e->error->what.code);
                     gs->errors[file].emplace_back(move(e));
                 }
             }
         }
     });
 
-    // fmt::print("***  gs->errors.clear(); after typecheck in LSPTypechecker::runSlowPath\n");
-    // gs->errors.clear();
     // Note: `gs` now holds the value of `finalGS`.
     gs->lspQuery = core::lsp::Query::noQuery();
 
@@ -691,14 +605,6 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     ENFORCE(!(updates.typecheckingPath == TypecheckingPath::Fast && couldBeCanceled));
     if (couldBeCanceled) {
         ENFORCE(updates.updatedGS.has_value());
-
-        // fmt::print("\n***LSPTypechecker::commitFileUpdates (gs before creating undo state):\n");
-        // for (auto &[file, errors] : gs->errors) {
-            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
-            // for (auto &e : errors) {
-                // fmt::print("\n***\t code: {}", e->error->what.code);
-            // }
-        // }
         cancellationUndoState = make_unique<UndoState>(move(gs), std::move(indexedFinalGS), updates.epoch);
     }
 
@@ -727,13 +633,6 @@ void LSPTypechecker::commitFileUpdates(LSPFileUpdates &updates, bool couldBeCanc
     if (updates.updatedGS.has_value()) {
         ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast);
         gs = move(updates.updatedGS.value());
-        // fmt::print("\n***LSPTypechecker::commitFileUpdates (gs == updates.updatedGS):\n");
-        // for (auto &[file, errors] : gs->errors) {
-            // fmt::print("\n*** file: {}, size: {}", file.data(*gs).path(), errors.size());
-            // for (auto &e : errors) {
-                // fmt::print("\n***\t code: {}", e->error->what.code);
-            // }
-        // }
     } else {
         ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
     }
@@ -796,7 +695,6 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
 
     const auto cancelable = true;
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
-    // fmt::print("***  gs->errors.clear(); after typecheck in LSPTypechecker::query\n");
     gs->errors.clear();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();

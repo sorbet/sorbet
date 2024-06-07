@@ -4,11 +4,7 @@
 #define FULL_BUILD_ONLY(X) X;
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
-#include "absl/strings/match.h"
-#include "absl/strings/str_split.h"
-#include "common/sort/sort.h"
 #include "common/statsd/statsd.h"
-#include "common/strings/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/cache.h"
@@ -770,17 +766,7 @@ int realmain(int argc, char *argv[]) {
             auto canceled =
                 pipeline::name(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers, foundHashes);
 
-            // fmt::print("\n*** flushing errors after namer\n");
             if (opts.runLSP) {
-                // fmt::print("*** before clearing cache:\n");
-                // for (auto const &e : gs->errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-            // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-                // }
                 for (auto &file : nonPackageIndexed) {
                     gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
                         // Namer errors codes are 40XX
@@ -788,15 +774,6 @@ int realmain(int argc, char *argv[]) {
                     });
                 }
 
-                // fmt::print("*** after clearing cache:\n");
-                // for (auto const &e : gs->errors) {
-                    // auto errs_string = string();
-                    // for (auto const &err : e.second) {
-                        // errs_string += " ";
-                        // errs_string += std::to_string(err->error->what.code);
-                    // }
-            // fmt::print("***\tfile: {}, size: {} errors: {}\n", e.first.id(), e.second.size(), errs_string);
-                // }
                 for (auto &file : nonPackageIndexed) {
                     gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
                 }
@@ -849,12 +826,7 @@ int realmain(int argc, char *argv[]) {
                 // we don't need to typecheck when generating rbis
                 pipeline::typecheck(*gs, move(indexed), opts, *workers, /* cancelable */ false, nullopt,
                                     /* presorted */ false, /* intentionallyLeakASTs */ !sorbet::emscripten_build);
-
-                // Intentionally do not clear the cache after typecheck
-                // Otherwise subsequent calls to `flushAllErrors` might lose some errors
-                // gs->errors.clear();
             }
-
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

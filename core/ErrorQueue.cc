@@ -76,26 +76,6 @@ vector<unique_ptr<ErrorQueueMessage>> ErrorQueue::flushErrorsForFile(const Globa
     // grep for "CanCancelSlowPathWithFastPathThatReintroducesOldError"
     // TODO(iz): test/testdata/infer/private_constant_in_rbi__2.rb
     // fails here
-    //
-    // maybe we should flush cache oustide of error queue s
-    // somewhere near typecheck?
-
-    // for (const auto &[f, errors] : gs.errors) {
-    // if (!f.exists() || f == file) {
-    // continue;
-    // }
-
-    // if (errors.empty()) {
-    // continue;
-    // }
-
-    // std::vector<std::unique_ptr<ErrorQueueMessage>> cachedErrors;
-    // for (const auto &e : errors) {
-    // cachedErrors.push_back(make_unique<ErrorQueueMessage>(e->clone()));
-    // }
-
-    // errorFlusher->flushErrors(logger, gs, f, move(cachedErrors));
-    // }
     return newErrors;
 }
 
