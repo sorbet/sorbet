@@ -1,0 +1,52 @@
+commit 9d6b8806a4e0801c260f628e48a21ae94cb3fc91
+Author: John Hawthorn <john@hawthorn.email>
+Date:   Sun Jun 2 23:39:36 2024 -0700
+
+    Avoid unnecessary writes to ISEQ during GC
+    
+    On mark we check whether a callcache has been invalidated and if it has
+    we replace it with the empty callcache, rb_vm_empty_cc(). However we
+    also consider the empty callcache to not be active, and so previously
+    would overwrite it with itself.
+    
+    These additional writes are problematic because they may force
+    Copy-on-Write to occur on the memory page, increasing system memory use.
+
+commit 520ab22725124ef3d588c9ec664b1adfc98da905
+Author: John Hawthorn <john@hawthorn.email>
+Date:   Sun Jun 2 23:40:24 2024 -0700
+
+    Avoid unnecessary writes to imemo_env during GC
+    
+    Similar to the previous commit, to avoid unnecessary Copy-on-Write
+    memory use we should only set this flag when it has not previously been
+    set.
+
+diff --git a/gc.c b/gc.c
+index 378e4a31cb..2023d9a2d1 100644
+--- a/gc.c
++++ b/gc.c
+@@ -7228,7 +7228,9 @@ gc_mark_imemo(rb_objspace_t *objspace, VALUE obj)
+                 GC_ASSERT(env->ep[VM_ENV_DATA_INDEX_ENV] == obj);
+                 GC_ASSERT(VM_ENV_ESCAPED_P(env->ep));
+                 rb_gc_mark_values((long)env->env_size, env->env);
+-                VM_ENV_FLAGS_SET(env->ep, VM_ENV_FLAG_WB_REQUIRED);
++                if (!VM_ENV_FLAGS(env->ep, VM_ENV_FLAG_WB_REQUIRED)) {
++                    VM_ENV_FLAGS_SET(env->ep, VM_ENV_FLAG_WB_REQUIRED);
++                }
+                 gc_mark(objspace, (VALUE)rb_vm_env_prev_env(env));
+                 gc_mark(objspace, (VALUE)env->iseq);
+             }
+diff --git a/iseq.c b/iseq.c
+index 27c5bb5d82..e8cafd6caa 100644
+--- a/iseq.c
++++ b/iseq.c
+@@ -344,7 +344,7 @@ rb_iseq_mark_and_move(rb_iseq_t *iseq, bool reference_updating)
+                 if (cc_is_active(cds[i].cc, reference_updating)) {
+                     rb_gc_mark_and_move_ptr(&cds[i].cc);
+                 }
+-                else {
++                else if (cds[i].cc != rb_vm_empty_cc()) {
+                     cds[i].cc = rb_vm_empty_cc();
+                 }
+             }
