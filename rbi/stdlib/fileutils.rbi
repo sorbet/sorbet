@@ -121,14 +121,14 @@ module FileUtils
   # ```
   sig do
     params(
-      src: T.any(String, Pathname),
+      src: T.any(File, String, Pathname, T::Array[T.any(File, String, Pathname)]),
       dest: T.any(String, Pathname),
       preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       dereference_root: T::Boolean,
       remove_destination: T.nilable(T::Boolean)
-    ).returns(T::Array[String])
+    ).returns(T.nilable(T::Array[String]))
   end
   module_function def cp_r(src, dest, preserve: nil, noop: nil, verbose: nil, dereference_root: true, remove_destination: nil); end
 
@@ -461,7 +461,7 @@ module FileUtils
       preserve: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
-    ).void
+    ).returns(T.nilable(T::Array[T.any(File, String, Pathname)]))
   end
   module_function def cp(src, dest, preserve: nil, noop: nil, verbose: nil); end
 
@@ -543,13 +543,13 @@ module FileUtils
   # ```
   sig do
     params(
-      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      src: T.any(File, String, Pathname, T::Array[T.any(File, String, Pathname)]),
       dest: T.any(String, Pathname),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       dereference_root: T::Boolean,
       remove_destination: T::Boolean
-    ).void
+    ).returns(T.nilable(T::Array[T.any(File, String, Pathname)]))
   end
   module_function def cp_lr(src, dest, noop: nil, verbose: nil, dereference_root: true, remove_destination: false); end
 
@@ -744,13 +744,13 @@ module FileUtils
   # [`move`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-move)
   sig do
     params(
-      src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
+      src: T.any(File, String, Pathname, T::Array[T.any(File, String, Pathname)]),
       dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean),
       secure: T.nilable(T::Boolean)
-    ).returns(T.nilable(Integer))
+    ).returns(T.nilable(T.any(Integer, T::Array[T.any(File, String, Pathname)])))
   end
   module_function def mv(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
