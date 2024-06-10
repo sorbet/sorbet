@@ -822,7 +822,7 @@ module SecureRandom
   # {Section 6.2}[https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-07.html#monotonicity_counters]
   # of the specification.
   sig do
-    params(extra_timestamp_bits: Integer).returns(String)
+    params(extra_timestamp_bits: T.nilable(Integer)).returns(String)
   end
   def self.uuid_v7(extra_timestamp_bits:); end
 end
