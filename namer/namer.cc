@@ -936,8 +936,11 @@ private:
             return;
         }
         auto symMethod = sym.asMethodRef();
+        auto errorClass = symMethod.data(ctx)->loc().file() == ctx.file
+                              ? core::errors::Namer::RedefinitionOfMethod
+                              : core::errors::Namer::RedefinitionOfMethodAcrossFiles;
         if (symMethod.data(ctx)->arguments.size() != parsedArgs.size()) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+            if (auto e = ctx.state.beginError(loc, errorClass)) {
                 if (sym != ctx.owner) {
                     // Subtracting 1 because of the block arg we added everywhere.
                     // Eventually we should be more principled about how we report this.
@@ -971,7 +974,7 @@ private:
             ENFORCE(symArg.flags.isBlock == methodArg.flags.isBlock);
 
             if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                if (auto e = ctx.state.beginError(loc, errorClass)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
@@ -982,7 +985,7 @@ private:
                 return;
             }
             if (symArg.flags.isRepeated != methodArg.flags.isRepeated) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                if (auto e = ctx.state.beginError(loc, errorClass)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
                     e.addErrorLine(sym.loc(ctx),
@@ -992,7 +995,7 @@ private:
                 return;
             }
             if (symArg.flags.isDefault != methodArg.flags.isDefault) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                if (auto e = ctx.state.beginError(loc, errorClass)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx),
                                 methodArg.flags.isDefault ? "an optional" : "a required");
@@ -1004,7 +1007,7 @@ private:
             // Skipping case for isShadow, because shadow args only apply to block parameters,
             // not method parameters.
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
-                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                if (auto e = ctx.state.beginError(loc, errorClass)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
                         sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));

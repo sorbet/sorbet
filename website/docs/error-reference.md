@@ -959,13 +959,16 @@ class or file top-level.
 ## 4010
 
 When using Sorbet, try to avoid redefining a method. A method is redefined when
-a method of the same name is defined in the same class (note that Sorbet
-completely supports overriding methods, where two methods have the same name but
-one is in a parent class and one in a child class).
+a method of the same name is defined in the **same** class (note that redefining
+is not the same as _overriding_, where two methods have the same name but one is
+in a parent class and one in a child class. Sorbet completely supports
+overriding methods, see [Override Checking](override-checking.md) and
+[Abstract Classes and Interfaces](abstract.md)).
 
-If redefining a method is unavoidable, the arity of the new method must match
+When redefining a method is unavoidable, the arity of the new method must match
 the previous method's arity exactly. A method's arity includes how many
-positional arguments a method has, which keyword arguments it takes, etc.
+positional arguments a method has, which keyword arguments it takes, etc. The
+arity _does not_ include parameter or return types.
 
 Determining the arity of the previous method can sometimes be tricky, especially
 when the previous method was defined dynamically by a DSL. In these cases, the
@@ -1021,14 +1024,40 @@ Ruby source file (`*.rb`) and an RBI file (`*.rbi`) specify a signature for a
 method.
 
 That Sorbet supports method redefinitions, including providing multiple
-signatures for a method definition across multiple files, and that this error is
-**only** reported at `# typed: true` and above is an accident of history, and
-part of the reason why Sorbet strongly discourages using method redefinitions.
+signatures for a method definition across multiple files, is an accident of
+history, and part of the reason why Sorbet strongly discourages using method
+redefinitions.
 
 One alternative is to mark the original method `private` and define a new method
-with a new name, instead of redefining the old method. Another alternative is to
-use Sorbet's [editor integration](vscode.md) to rename the old method, declare
-that old method `private`, and define a new method with the original name.
+with a new name, instead of redefining the old method.
+
+```diff
+-  def foo(x); end
++  private def foo(x); end
++
++  def foo_new(x, y); end
+```
+
+Another alternative is to use Sorbet's [editor integration](vscode.md) to rename
+the old method, declare that method `private`, and define a new method with the
+original name.
+
+```diff
+-  def foo(x); end
++  def foo(x, y); end
++
++  private def foo_old(x); end
+```
+
+As of Sorbet version 0.5.TODO, there are two forms of this error: [4010](#4010)
+and [4024](#4024):
+
+- 4010 is only used when the old method and new method occur in the same file.
+  It is only reported at `# typed: true` and above.
+- 4024 is used when the old and new method occur in separate files. It is
+  reported at `# typed: false` and above.
+
+Previous versions only reported this error at `# typed: true` and above.
 
 ## 4011
 
@@ -1274,6 +1303,12 @@ assignment and a class definition for a given constant, you can either:
 
 The `has_attached_class!` annotation is only allowed in a Ruby `module`, not a
 Ruby `class`. For more, see the docs: [`T.attached_class`](attached-class.md).
+
+## 4024
+
+This error is the same as [4010](#4010), but is reported at `# typed: false`
+instead of `# typed: true`. See the docs for [4010](#4010) to learn more about
+method redefinitions.
 
 ## 5001
 

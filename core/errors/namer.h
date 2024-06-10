@@ -26,6 +26,7 @@ constexpr ErrorClass MultipleBehaviorDefs{4019, StrictLevel::False};
 constexpr ErrorClass OldTypeMemberSyntax{4021, StrictLevel::False};
 constexpr ErrorClass ConstantKindRedefinition{4022, StrictLevel::False};
 constexpr ErrorClass HasAttachedClassInClass{4023, StrictLevel::False};
+constexpr ErrorClass RedefinitionOfMethodAcrossFiles{4024, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

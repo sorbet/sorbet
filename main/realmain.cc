@@ -530,6 +530,7 @@ int realmain(int argc, char *argv[]) {
 
     if (gs->runningUnderAutogen) {
         gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod.code);
+        gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethodAcrossFiles.code);
         gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
         gs->suppressErrorClass(core::errors::Namer::ConstantKindRedefinition.code);
         gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
