@@ -991,6 +991,18 @@ private:
                 }
                 return;
             }
+            if (symArg.flags.isDefault != methodArg.flags.isDefault) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("Method `{}` redefined with argument `{}` as {} argument", sym.show(ctx),
+                                methodArg.local.toString(ctx),
+                                methodArg.flags.isDefault ? "an optional" : "a required");
+                    e.addErrorLine(sym.loc(ctx), "The corresponding argument `{}` in the previous definition was {}",
+                                   symArg.show(ctx), symArg.flags.isDefault ? "optional" : "required");
+                }
+                return;
+            }
+            // Skipping case for isShadow, because shadow args only apply to block parameters,
+            // not method parameters.
             if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
