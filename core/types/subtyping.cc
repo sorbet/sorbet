@@ -1161,6 +1161,16 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                            errorDetailsCollector);
                 } else {
+                    // TODO(jez) Are these the best expanations you can give?
+                    // How can you point to further docs/reading in the concise format here?
+                    if constexpr (shouldAddErrorDetails) {
+                        auto subCollector = errorDetailsCollector.newCollector();
+                        auto message = ErrorColors::format(
+                            "A concrete type like `{}` is not a subtype of a generic type like `{}`", t1.show(gs),
+                            t2.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(move(subCollector));
+                    }
                     return false;
                 }
             } else if (!isSelfTypeT2) {
@@ -1169,6 +1179,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
                                                            errorDetailsCollector);
                 } else {
+                    if constexpr (shouldAddErrorDetails) {
+                        auto subCollector = errorDetailsCollector.newCollector();
+                        auto message = ErrorColors::format(
+                            "A generic type like `{}` is not a subtype of a concrete type like `{}`", t1.show(gs),
+                            t2.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(move(subCollector));
+                    }
                     return false;
                 }
             } else {
