@@ -7761,7 +7761,7 @@ class RDoc::RD::Inline
   # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) or a
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If `reference`
   # is not given it will use the text from `rdoc`.
-  def self.new(rdoc, reference); end
+  def self.new(rdoc, reference = _); end
 
   def ==(other); end
 
@@ -7782,16 +7782,6 @@ class RDoc::RD::Inline
   # The markup of this reference in
   # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) format
   def to_s; end
-
-  # Creates a new
-  # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) for
-  # `rdoc` and `reference`.
-  #
-  # `rdoc` may be another
-  # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) or a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If `reference`
-  # is not given it will use the text from `rdoc`.
-  def self.new(rdoc, reference = _); end
 end
 
 # [`RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) format parser for
