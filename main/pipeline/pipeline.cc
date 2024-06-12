@@ -1197,7 +1197,6 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                      !result.done();
                      result = outputq->wait_pop_timed(files, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                     if (result.gotItem()) {
-
                         for (auto &file : files) {
                             auto errors = gs.errorQueue->flushErrorsForFile(gs, file);
                             for (auto &e : errors) {
@@ -1205,6 +1204,9 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                             }
                         }
 
+                        // After slow path cancellation, some errors might disappear from the editor but remain in
+                        // cache. Re-flushing them to ensure accuracy. This issue can be replicated by running a
+                        // specific test. Grep for "CanCancelSlowPathWithFastPathThatReintroducesOldError".
                         if (gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
                             for (const auto &[f, errors] : gs.errors) {
                                 if (!f.exists()) {
@@ -1220,14 +1222,13 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                                     cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
                                 }
 
-                                // TODO(iz): clean this mess up
                                 if (newErrors[f].size() != 0) {
                                     for (const auto &e : newErrors[f]) {
                                         cachedErrors.push_back(make_unique<core::ErrorQueueMessage>(e->clone()));
                                     }
                                 }
 
-                                gs.errorQueue->errorFlusher->flushErrors(gs.errorQueue->logger, gs, f,
+                                gs.errorQueue->flushErrors(gs, f,
                                                                          move(cachedErrors));
                             }
                         }

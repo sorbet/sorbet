@@ -491,7 +491,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
 
-        if (canceled)) {
+        if (canceled) {
             ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
             return;
         }
