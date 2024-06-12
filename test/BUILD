@@ -262,6 +262,15 @@ pipeline_tests(
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
+pipeline_tests(
+    "test_corpus_prism",
+    glob([
+        "prism_regression/**/*.rb",
+    ]),
+    "PosTests",
+    parser = "prism",
+)
+
 test_suite(
     name = "test",
     tests = ["test_corpus"],
@@ -270,6 +279,11 @@ test_suite(
 test_suite(
     name = "whitequark_parser_tests",
     tests = ["whitequark_parser_corpus"],
+)
+
+test_suite(
+    name = "prism",
+    tests = ["test_corpus_prism"],
 )
 
 sh_binary(
