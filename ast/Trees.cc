@@ -150,12 +150,13 @@ bool isa_reference(const ExpressionPtr &what) {
  */
 
 ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, ExpressionPtr name,
-                   ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
+                   ANCESTORS_store ancestors, ANCESTORS_store singletonAncestors, RHS_store rhs, ClassDef::Kind kind)
     : loc(loc), declLoc(declLoc), symbol(symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
-      ancestors(std::move(ancestors)) {
+      ancestors(std::move(ancestors)), singletonAncestors(std::move(singletonAncestors)) {
     categoryCounterInc("trees", "classdef");
     histogramInc("trees.classdef.kind", (int)kind);
     histogramInc("trees.classdef.ancestors", this->ancestors.size());
+    histogramInc("trees.classdef.singletonAncestors", this->singletonAncestors.size());
     histogramInc("trees.classdef.rhs", this->rhs.size());
     _sanityCheck();
 }

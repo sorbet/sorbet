@@ -1529,9 +1529,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                      dctx.enclosingMethodName, dctx.inAnyBlock, true);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
+                ClassDef::ANCESTORS_store singletonAncestors;
                 ExpressionPtr res =
                     MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
-                               std::move(ancestors), std::move(body));
+                               std::move(ancestors), std::move(singletonAncestors), std::move(body));
                 result = std::move(res);
             },
             [&](parser::Class *klass) {
@@ -1539,13 +1540,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                      dctx.enclosingMethodName, dctx.inAnyBlock, false);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
+                ClassDef::ANCESTORS_store singletonAncestors;
                 if (klass->superclass == nullptr) {
                     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
                 } else {
                     ancestors.emplace_back(node2TreeImpl(dctx, std::move(klass->superclass)));
                 }
                 ExpressionPtr res = MK::Class(klass->loc, klass->declLoc, node2TreeImpl(dctx, std::move(klass->name)),
-                                              std::move(ancestors), std::move(body));
+                                              std::move(ancestors), std::move(singletonAncestors), std::move(body));
                 result = std::move(res);
             },
             [&](parser::Arg *arg) {
@@ -1622,11 +1624,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                                      dctx.enclosingMethodName, dctx.inAnyBlock, false);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
+                ClassDef::ANCESTORS_store emptySingletonAncestors;
                 ExpressionPtr res =
                     MK::Class(sclass->loc, sclass->declLoc,
                               make_expression<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Kind::Class,
                                                                core::Names::singleton()),
-                              std::move(emptyAncestors), std::move(body));
+                              std::move(emptyAncestors), std::move(emptySingletonAncestors), std::move(body));
                 result = std::move(res);
             },
             [&](parser::NumBlock *block) {
@@ -2377,6 +2380,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr what) {
     ClassDef::RHS_store rhs;
     ClassDef::ANCESTORS_store ancestors;
+    ClassDef::ANCESTORS_store singletonAncestors;
     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
     auto insSeq = cast_tree<InsSeq>(what);
     if (insSeq) {
@@ -2389,7 +2393,7 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
         rhs.emplace_back(std::move(what));
     }
     return make_expression<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), std::move(ancestors),
-                                     std::move(rhs), ClassDef::Kind::Class);
+                                     std::move(singletonAncestors), std::move(rhs), ClassDef::Kind::Class);
 }
 } // namespace
 

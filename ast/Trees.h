@@ -373,7 +373,7 @@ public:
     ANCESTORS_store singletonAncestors;
 
     ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, ExpressionPtr name,
-             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
+             ANCESTORS_store ancestors, ANCESTORS_store singletonAncestors, RHS_store rhs, ClassDef::Kind kind);
 
     ExpressionPtr deepCopy() const;
 

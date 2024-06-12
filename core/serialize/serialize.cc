@@ -1580,11 +1580,11 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             for (auto &r : rhs) {
                 r = unpickleExpr(p, gs);
             }
-            auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                              (ast::ClassDef::Kind)kind);
+            auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors),
+                                              std::move(singletonAncestors),
+                                              std::move(rhs), (ast::ClassDef::Kind)kind);
             {
                 auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(ret);
-                klass.singletonAncestors = std::move(singletonAncestors);
                 klass.symbol = symbol;
             }
             return ret;

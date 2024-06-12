@@ -277,22 +277,24 @@ public:
     }
 
     static ExpressionPtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                                       ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
-                                       ClassDef::Kind kind) {
+                                       ClassDef::ANCESTORS_store ancestors, ClassDef::ANCESTORS_store singletonAncestors, 
+                                       ClassDef::RHS_store rhs, ClassDef::Kind kind) {
         return make_expression<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
-                                         std::move(rhs), kind);
+                                         std::move(singletonAncestors), std::move(rhs), kind);
     }
 
     static ExpressionPtr Class(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                               ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
-        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                 ClassDef::Kind::Class);
+                               ClassDef::ANCESTORS_store ancestors, ClassDef::ANCESTORS_store singletonAncestors, 
+                               ClassDef::RHS_store rhs) {
+        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(singletonAncestors),
+                                 std::move(rhs), ClassDef::Kind::Class);
     }
 
     static ExpressionPtr Module(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                                ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
-        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
-                                 ClassDef::Kind::Module);
+                                ClassDef::ANCESTORS_store ancestors, ClassDef::ANCESTORS_store singletonAncestors,
+                                ClassDef::RHS_store rhs) {
+        return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(singletonAncestors),
+                                 std::move(rhs), ClassDef::Kind::Module);
     }
 
     static ExpressionPtr Array(core::LocOffsets loc, Array::ENTRY_store entries) {

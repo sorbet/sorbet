@@ -38,8 +38,8 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::ClassDef: {
             auto *exp = reinterpret_cast<const ClassDef *>(tree);
             return make_expression<ClassDef>(exp->loc, exp->declLoc, exp->symbol, deepCopy(avoid, exp->name),
-                                             deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->rhs),
-                                             exp->kind);
+                                             deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->singletonAncestors),
+                                             deepCopyVec(avoid, exp->rhs), exp->kind);
         }
 
         case Tag::MethodDef: {
