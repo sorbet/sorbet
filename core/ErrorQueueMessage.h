@@ -15,6 +15,8 @@ struct ErrorQueueMessage {
     std::optional<std::string> text;
     std::unique_ptr<Error> error;
     std::unique_ptr<lsp::QueryResponse> queryResponse;
+
+    ErrorQueueMessage clone();
 };
 
 } // namespace sorbet::core
