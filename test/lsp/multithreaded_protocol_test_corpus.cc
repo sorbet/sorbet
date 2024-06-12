@@ -34,7 +34,7 @@ void sortTimersByStartTime(vector<unique_ptr<CounterImpl::Timing>> &times) {
 }
 
 void checkDiagnosticTimes(vector<unique_ptr<CounterImpl::Timing>> times, size_t expectedSize,
-                                           bool assertUniqueStartTimes) {
+                          bool assertUniqueStartTimes) {
     CHECK_EQ(times.size(), expectedSize);
     sortTimersByStartTime(times);
 

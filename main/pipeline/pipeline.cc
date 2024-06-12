@@ -1228,8 +1228,7 @@ typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const optio
                                     }
                                 }
 
-                                gs.errorQueue->flushErrors(gs, f,
-                                                                         move(cachedErrors));
+                                gs.errorQueue->flushErrors(gs, f, move(cachedErrors));
                             }
                         }
                     }

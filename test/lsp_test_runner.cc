@@ -144,7 +144,7 @@ optional<vector<unique_ptr<CodeAction>>> requestCodeActions(LSPWrapper &lspWrapp
     auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
     // fmt::print("\n*** getLSPResponsesFor codeActions:\n");
     // for (auto const &r : responses) {
-        // fmt::print("*** {}:\n", r->toJSON(true));
+    // fmt::print("*** {}:\n", r->toJSON(true));
     // }
     responses.erase(
         std::remove_if(responses.begin(), responses.end(), [](const auto &msg) { return !msg->isResponse(); }),
@@ -678,7 +678,7 @@ TEST_CASE("LSPTest") {
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             // fmt::print("\n*** getLSPResponsesFor:\n");
             // for (auto const &r : responses) {
-                // fmt::print("*** {}:\n", r->toJSON(true));
+            // fmt::print("*** {}:\n", r->toJSON(true));
             // }
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(

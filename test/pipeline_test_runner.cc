@@ -489,7 +489,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     if (test.expectations.contains("autogen")) {
-
         {
             core::UnfreezeNameTable nameTableAccess(*gs);
             core::UnfreezeSymbolTable symbolAccess(*gs);
