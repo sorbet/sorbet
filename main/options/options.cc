@@ -163,11 +163,6 @@ struct StopAfterOptions {
     Phase flag;
 };
 
-struct ParserOptions {
-    string option;
-    Parser flag;
-};
-
 const vector<StopAfterOptions> stop_after_options({
     {"init", Phase::INIT},
     {"parser", Phase::PARSER},
@@ -178,11 +173,6 @@ const vector<StopAfterOptions> stop_after_options({
     {"resolver", Phase::RESOLVER},
     {"cfg", Phase::CFG},
     {"inferencer", Phase::INFERENCER},
-});
-
-const vector<ParserOptions> parser_options({
-    {"sorbet", Parser::SORBET},
-    {"prism", Parser::PRISM},
 });
 
 core::TrackUntyped text2TrackUntyped(string_view key, spdlog::logger &logger) {
