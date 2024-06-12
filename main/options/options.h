@@ -111,6 +111,16 @@ enum class Parser {
     SORBET,
 };
 
+struct ParserOptions {
+    std::string option;
+    Parser flag;
+};
+
+const std::vector<ParserOptions> parser_options({
+    {"sorbet", Parser::SORBET},
+    {"prism", Parser::PRISM},
+});
+
 struct AutogenConstCacheConfig {
     // A file which contains a cache that can be used to potentially skip autogen
     std::string cacheFile;

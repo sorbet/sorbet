@@ -357,8 +357,7 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
     }
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                        bool traceLexer, bool traceParser) {
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file) {
     auto source = file.data(gs).source();
 
     core::UnfreezeNameTable nameTableAccess(gs);
@@ -450,7 +449,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (parser == options::Parser::SORBET) {
                 parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
             } else if (parser == options::Parser::PRISM) {
-                parseTree = runPrismParser(lgs, file, print, opts.traceLexer, opts.traceParser);
+                parseTree = runPrismParser(lgs, file);
             } // Any other option would have been handled in the options parser
 
             if (opts.stopAfterPhase == options::Phase::PARSER) {
