@@ -5,6 +5,7 @@
 #include "core/ErrorFlusher.h"
 #include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
+#include "core/GlobalState.h"
 #include "core/lsp/QueryResponse.h"
 #include "GlobalState.h"
 #include <atomic>
@@ -44,6 +45,7 @@ public:
     /** Reports errors, but doesn't remove them from internal cache in GlobalState, so they can be re-reported later*/
     void flushButRetainErrorsForFile(GlobalState &gs, FileRef file);
 
+    void flushErrors(const GlobalState &gs, FileRef file, std::vector<std::unique_ptr<ErrorQueueMessage>> errors);
     /** Checks if the queue is empty. Is approximate if there are any concurrent dequeue/enqueue operations */
     bool queueIsEmptyApprox() const;
 };
