@@ -475,9 +475,19 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
         auto foundHashes = nullptr;
         auto canceled =
             pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexedCopies), config->opts, workers, foundHashes);
+
         if (canceled) {
             ast::ParsedFilesOrCancelled::cancel(move(indexedCopies), workers);
             return;
+        }
+        for (auto &file : indexedCopies) {
+            gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                // Namer errors codes are 40XX
+                return err->error->what.code < 5000;
+            });
+        }
+        for (auto &file : indexedCopies) {
+            gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
         }
 
         auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);

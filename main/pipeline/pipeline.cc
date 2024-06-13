@@ -27,6 +27,7 @@
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
 #include "core/ErrorQueue.h"
+#include "core/ErrorQueueMessage.h"
 #include "core/NameSubstitution.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
@@ -271,6 +272,18 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Cancellation cannot occur during incremental namer.
             ENFORCE(!canceled);
 
+            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
+                for (auto &file : what) {
+                    gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                        // Namer errors codes are 40XX
+                        return err->error->what.code < 5000;
+                    });
+                }
+
+                for (auto &file : what) {
+                    gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+                }
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::NAMER) {
                 return what;
@@ -288,6 +301,18 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             ENFORCE(result.hasResult());
             what = move(result.result());
 
+            if (opts.runLSP && gs.lspQuery.kind == core::lsp::Query::Kind::NONE) {
+                for (auto &file : what) {
+                    gs.clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                        // Resolver errors codes are 50XX
+                        return err->error->what.code > 4999 && err->error->what.code < 6000;
+                    });
+                }
+
+                for (auto &file : what) {
+                    gs.errorQueue->flushButRetainErrorsForFile(gs, file.file);
+                }
+            }
             // Required for autogen tests, which need to control which phase to stop after.
             if (opts.stopAfterPhase == options::Phase::RESOLVER) {
                 return what;
@@ -925,6 +950,18 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
             }
 #endif
 
+            if (opts.runLSP) {
+                for (auto &file : what) {
+                    gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                        // Resolver errors codes are 50XX
+                        return err->error->what.code > 4999 && err->error->what.code < 6000;
+                    });
+                }
+
+                for (auto &file : what) {
+                    gs->errorQueue->flushButRetainErrorsForFile(*gs, file.file);
+                }
+            }
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs->symbolsUsedTotal();
                 for (auto &f : what) {
