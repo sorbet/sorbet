@@ -161,4 +161,8 @@ class Fiber < Object
   # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
   # expression evaluates to.
   def self.yield(*_); end
+
+  def self.[]=(key, value); end
+
+  def self.[](key); end
 end
