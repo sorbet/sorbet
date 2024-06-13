@@ -1,4 +1,5 @@
 GENERATED_SRCS = [
+  "src/diagnostic.c",
   "src/node.c",
   "src/prettyprint.c",
   "src/serialize.c",
