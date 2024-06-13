@@ -319,7 +319,21 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
+
+    for (auto const &file : sorted) {
+        gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+            // clear errors which might be reported in typecheck
+            return err->error->what.code > 5999;
+        });
+    }
+    auto newErrors = pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, std::nullopt, presorted);
+    if (newErrors.has_value()) {
+        for (auto &[file, errors] : *newErrors) {
+            for (auto &e : errors) {
+                gs->errors[file].emplace_back(move(e));
+            }
+        }
+    }
     gs->lspTypecheckCount++;
 
     return toTypecheck;
@@ -547,7 +561,22 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers,
 
         auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
         const auto presorted = true;
-        pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+        for (auto const &file : sorted) {
+            gs->clearErrorCacheForFile(file.file, [](const unique_ptr<core::ErrorQueueMessage> &err) {
+                // clear errors which might be reported in typecheck
+                return err->error->what.code > 5999;
+            });
+        }
+        auto newErrors =
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
+
+        if (newErrors.has_value()) {
+            for (auto &[file, errors] : *newErrors) {
+                for (auto &e : errors) {
+                    gs->errors[file].emplace_back(move(e));
+                }
+            }
+        }
     });
 
     // Note: `gs` now holds the value of `finalGS`.
