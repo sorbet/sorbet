@@ -694,6 +694,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
 
     const auto cancelable = true;
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
+    gs->errors.clear();
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
