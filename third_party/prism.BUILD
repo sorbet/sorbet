@@ -21,7 +21,7 @@ genrule(
     #
     # Pass the RUBY_PATH variable to the build using the --define flag, e.g.
     # ./bazel build //main:sorbet --config=dbg --define RUBY_PATH=/path/to/ruby
-    export PATH="$(RUBY_PATH):$$PATH"
+    export PATH="$(RUBY_PATH)/bin:$$PATH"
 
     cd external/prism
 
