@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [proj-parsing-w-prism-in-sorbet]
+  pull_request:
+    branches: [proj-parsing-w-prism-in-sorbet]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Prism Parser Regression Tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.0
+      - name: Run tests
+        run: ./bazel test //test:prism --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=all
