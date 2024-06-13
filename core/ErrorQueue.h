@@ -1,13 +1,13 @@
 #ifndef SORBET_ERROR_QUEUE_H
 #define SORBET_ERROR_QUEUE_H
 
+#include "GlobalState.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorFlusher.h"
 #include "core/ErrorFlusherStdout.h"
 #include "core/ErrorQueueMessage.h"
 #include "core/GlobalState.h"
 #include "core/lsp/QueryResponse.h"
-#include "GlobalState.h"
 #include <atomic>
 
 namespace sorbet {
