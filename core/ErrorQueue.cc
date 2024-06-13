@@ -26,7 +26,7 @@ ErrorQueueMessage ErrorQueueMessage::clone() {
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-void ErrorQueue::flushAllErrors(const GlobalState &gs) {
+void ErrorQueue::flushAllErrors(GlobalState &gs) {
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushAllErrors");
@@ -44,7 +44,7 @@ bool ErrorQueue::wouldFlushErrorsForFile(FileRef file) const {
     return flusher.wouldFlushErrors(file);
 }
 
-void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
+vector<unique_ptr<ErrorQueueMessage>> ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     checkOwned();
 
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");

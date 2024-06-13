@@ -36,8 +36,9 @@ public:
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
 
-    void flushAllErrors(const GlobalState &gs);
-    void flushErrorsForFile(const GlobalState &gs, FileRef file);
+    void flushAllErrors(GlobalState &gs);
+    // also flushes errors from cache
+    std::vector<std::unique_ptr<ErrorQueueMessage>> flushErrorsForFile(const GlobalState &gs, FileRef file);
     bool wouldFlushErrorsForFile(FileRef file) const;
 
     /** Reports errors, but doesn't remove them from internal cache in GlobalState, so they can be re-reported later*/
