@@ -406,6 +406,23 @@ ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
     return MK::EmptyTree();
 }
 
+// Desugar multiple left hand side assignments into a sequence of assignments
+//
+// Considering this example:
+// ```rb
+// arr = [1, 2, 3]
+// a, *b = arr
+// ```
+//
+// We desugar the assignment `a, *b = arr` into:
+// ```rb
+// tmp = ::<Magic>.expandSplat(arr, 1, 0)
+// a = tmp[0]
+// b = tmp.to_ary
+// ```
+//
+// While calling `to_ary` doesn't return the correct value if we were to execute this code,
+// it returns the correct type from a static point of view.
 ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
     InsSeq::STATS_store stats;
 
@@ -433,6 +450,8 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
                 }
                 auto lhloc = lh.loc();
                 auto zlhloc = lhloc.copyWithZeroLength();
+                // Calling `to_ary` is not faithful to the runtime behavior,
+                // but that it is faithful to the expected static type-checking behavior.
                 auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
                 stats.emplace_back(MK::Assign(lhloc, std::move(lh), std::move(ary)));
             }
