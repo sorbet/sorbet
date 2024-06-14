@@ -173,8 +173,28 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
             return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
         }
         case PM_PROGRAM_NODE: {
-            pm_statements_node *stmts = (reinterpret_cast<pm_program_node *>(node))->statements;
-            return convertPrismToSorbet((pm_node *)stmts, parser, gs);
+            pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
+            pm_statements_node *stmts = programNode->statements;
+
+            auto size = stmts->body.size;
+
+            // For a single statement, do not create a Begin node and just return the statement
+            if (size == 1) {
+                return convertPrismToSorbet((pm_node *)stmts->body.nodes[0], parser, gs);
+            }
+
+            // For multiple statements, convert each statement and add them to the body of a Begin node
+            parser::NodeVec sorbetStmts;
+
+            for (int i = 0; i < stmts->body.size; i++) {
+                pm_node_t *node = stmts->body.nodes[i];
+                unique_ptr<parser::Node> convertedStmt = convertPrismToSorbet(node, parser, gs);
+                sorbetStmts.emplace_back(std::move(convertedStmt));
+            }
+
+            auto *loc = &programNode->base.location;
+
+            return make_unique<parser::Begin>(locOffset(loc, parser), std::move(sorbetStmts));
         }
         case PM_RATIONAL_NODE: {
             auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
@@ -190,11 +210,7 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
             break;
         }
         case PM_STATEMENTS_NODE: {
-            pm_node_list *body = &(reinterpret_cast<pm_statements_node *>(node))->body;
-            // TODO: Handle multiple statements
-            pm_node *first = body->nodes[0];
-
-            return convertPrismToSorbet(first, parser, gs);
+            Exception::raise("Handling for statements node should be performed in program node");
         }
         case PM_STRING_NODE: {
             auto strNode = reinterpret_cast<pm_string_node *>(node);
