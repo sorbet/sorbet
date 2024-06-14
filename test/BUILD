@@ -266,6 +266,7 @@ pipeline_tests(
     "test_corpus_prism",
     glob([
         "prism_regression/**/*.rb",
+        "prism_regression/**/*.exp",
     ]),
     "PosTests",
     parser = "prism",
