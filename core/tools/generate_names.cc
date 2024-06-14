@@ -51,7 +51,6 @@ NameDef names[] = {
     {"tripleEq", "==="},
     {"orOp", "|"},
     {"backtick", "`"},
-    {"slice"},
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
