@@ -121,8 +121,8 @@ public:
     // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
     const ast::ExpressionPtr *matchingNode;
-    const ast::ExpressionPtr *enclosingClass;
-    const ast::ExpressionPtr *enclosingMethod;
+    const ast::ExpressionPtr *matchingNodeEnclosingClass;
+    const ast::ExpressionPtr *matchingNodeEnclosingMethod;
     // It's not valid to extract
     // - a parameter
     // - the lhs of an assign
@@ -133,7 +133,7 @@ public:
 
     LocSearchWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
-          enclosingClass(nullptr), enclosingMethod(nullptr) {}
+          matchingNodeEnclosingClass(nullptr), matchingNodeEnclosingMethod(nullptr) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
@@ -143,9 +143,9 @@ public:
                 !ast::isa_tree<ast::RescueCase>(tree) && !ast::isa_tree<ast::InsSeq>(tree)) {
                 matchingNode = &tree;
                 ENFORCE(!enclosingClassStack.empty());
-                enclosingClass = enclosingClassStack.back();
+                matchingNodeEnclosingClass = enclosingClassStack.back();
                 if (!enclosingMethodStack.empty()) {
-                    enclosingMethod = enclosingMethodStack.back();
+                    matchingNodeEnclosingMethod = enclosingMethodStack.back();
                 }
             }
         }
@@ -250,10 +250,10 @@ vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurren
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
     // TODO: can we avoid deepCopy?
     matchingNode = walk.matchingNode->deepCopy();
-    if (walk.enclosingMethod) {
-        enclosingClassOrMethod = walk.enclosingMethod->deepCopy();
+    if (walk.matchingNodeEnclosingMethod) {
+        enclosingClassOrMethod = walk.matchingNodeEnclosingMethod->deepCopy();
     } else {
-        enclosingClassOrMethod = walk.enclosingClass->deepCopy();
+        enclosingClassOrMethod = walk.matchingNodeEnclosingClass->deepCopy();
     }
     skippedLocs = walk.skippedLocs;
 
