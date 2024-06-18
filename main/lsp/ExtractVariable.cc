@@ -231,7 +231,9 @@ public:
     }
 };
 
-vector<unique_ptr<TextDocumentEdit>> VariableExtractor::getExtractSingleOccurrenceEdits() {
+vector<unique_ptr<TextDocumentEdit>>
+VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
+                                                   const LSPConfiguration &config) {
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
@@ -383,7 +385,9 @@ public:
     }
 };
 
-std::pair<vector<unique_ptr<TextDocumentEdit>>, int> VariableExtractor::getExtractMultipleOccurrenceEdits() {
+std::pair<vector<unique_ptr<TextDocumentEdit>>, int>
+VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
+                                                     const LSPConfiguration &config) {
     ENFORCE(matchingNode, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
     ENFORCE(enclosingClassOrMethod, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
 
