@@ -274,9 +274,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // until the user has actually selected the action. We can't do that here because
             // we need to do the core computation to know if extracting the current selection is
             // valid in the first place, to decide if we can show the code action or not.
-            VariableExtractor variableExtractor(typechecker, config, loc);
+            VariableExtractor variableExtractor(loc);
             Timer timeit(gs.tracer(), "Extract to Variable (single occurrence)");
-            auto singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits();
+            auto singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
             timeit.setEndTime();
             if (!singleOccurrenceDocumentEdits.empty()) {
                 // TODO: should we rename to something like "Extract Variable (this occurrence only)"?
@@ -292,7 +292,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 // TODO(neil): trigger a rename for newVariable
                 Timer timeit(gs.tracer(), "Extract to Variable (all occurrences)");
                 auto [multipleOccurrenceDocumentEdits, numOccurences] =
-                    variableExtractor.getExtractMultipleOccurrenceEdits();
+                    variableExtractor.getExtractMultipleOccurrenceEdits(typechecker, config);
                 timeit.setEndTime();
                 if (!multipleOccurrenceDocumentEdits.empty()) {
                     auto action =
