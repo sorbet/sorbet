@@ -506,8 +506,15 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
-        auto foreignKwLoc = ret.foreignKwLit.loc();
-        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, foreignKwLoc, fkMethod, std::move(arg),
+
+        core::LocOffsets methodLoc;
+        if (ret.foreignKwLit != nullptr) {
+          methodLoc = ret.foreignKwLit.loc();
+        } else {
+          methodLoc = loc;
+        }
+
+        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethod, std::move(arg),
                                                      ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
