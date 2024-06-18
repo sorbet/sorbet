@@ -110,6 +110,7 @@ struct PropInfo {
     ast::ExpressionPtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
+    ast::ExpressionPtr foreignKwLit;
     ast::ExpressionPtr foreign;
     ast::ExpressionPtr enum_;
     ast::ExpressionPtr ifunset;
@@ -312,6 +313,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
         if (foreignTree != nullptr) {
             ret.foreign = move(foreignTree);
+            ret.foreignKwLit = move(fk);
             if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
@@ -504,7 +506,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
-        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg),
+        auto foreignKwLoc = ret.foreignKwLit.loc();
+        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, foreignKwLoc, fkMethod, std::move(arg),
                                                      ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
