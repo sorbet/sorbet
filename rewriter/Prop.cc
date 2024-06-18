@@ -509,9 +509,9 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         core::LocOffsets methodLoc;
         if (ret.foreignKwLit != nullptr) {
-          methodLoc = ret.foreignKwLit.loc();
+            methodLoc = ret.foreignKwLit.loc();
         } else {
-          methodLoc = loc;
+            methodLoc = loc;
         }
 
         auto fkMethodDef = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethod, std::move(arg),
