@@ -184,13 +184,16 @@ skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryRespon
     return move(queryResponses[0]);
 }
 
-unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+vector<unique_ptr<core::lsp::QueryResponse>>
+getQueryResponsesForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    vector<unique_ptr<core::lsp::QueryResponse>> responses;
+
     // Find all references might show an Ident last if its a `prop`, and the Ident will be the
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        return skipLiteralIfMethodDef(queryResponses);
+        responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
+        return responses;
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -208,13 +211,16 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
         }
 
         if ((*resp)->isMethodDef()) {
-            return move(*resp);
+            responses.emplace_back(move(*resp));
+            return responses;
         } else {
-            return skipLiteralIfMethodDef(queryResponses);
+            responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
+            return responses;
         }
     }
 
-    return skipLiteralIfMethodDef(queryResponses);
+    responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
+    return responses;
 }
 
 /**

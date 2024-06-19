@@ -116,8 +116,8 @@ skipLiteralIfMethodDef(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &q
 
 // prop/const/attr setters are bogged down with a bunch of extra Ident and Literal query
 // responses, which don't make sense to use find all references on.
-std::unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+getQueryResponsesForFindAllReferences(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

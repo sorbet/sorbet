@@ -12,6 +12,12 @@ class ReferencesTask final : public LSPRequestTask {
     core::SymbolRef findSym(const core::GlobalState &gs, const std::vector<core::NameRef> &fullName,
                             core::SymbolRef underNamespace);
 
+private:
+    bool notifyAboutUntypedFile = false;
+    std::vector<std::unique_ptr<Location>>
+    getLocationsFromQueryResponse(LSPTypecheckerDelegate &typechecker, const core::GlobalState &gs, core::FileRef fref,
+                                  bool fileIsTyped, std::unique_ptr<core::lsp::QueryResponse> resp);
+
 public:
     ReferencesTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ReferenceParams> params);
 
