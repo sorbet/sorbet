@@ -198,8 +198,14 @@ std::unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelega
     }
     if (!queryResponses.empty()) {
         auto responses = getQueryResponsesForFindAllReferences(queryResponses);
+        vector<unique_ptr<Location>> resultLocations;
 
-        response->result = getLocationsFromQueryResponse(typechecker, gs, fref, fileIsTyped, move(responses[0]));
+        for (auto &resp : move(responses)) {
+            auto locations = getLocationsFromQueryResponse(typechecker, gs, fref, fileIsTyped, move(resp));
+            absl::c_move(move(locations), back_inserter(resultLocations));
+        }
+
+        response->result = move(resultLocations);
     } else if (fref.exists() && !fileIsTyped) {
         // The first check ensures that the file actually exists (and therefore
         // we could have gotten responses) and the second check is what we are
