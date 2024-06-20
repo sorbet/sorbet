@@ -323,9 +323,10 @@ public:
         // node being different) Ex.
         //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
         if (targetNode->structurallyEqual(tree)) {
-            matches.push_back(pair(enclosingScopeStack, &tree));
+            matches.emplace_back(enclosingScopeStack, &tree);
         }
     }
+
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
         enclosingScopeStack.push_back(&tree);
     }
@@ -399,12 +400,11 @@ VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegat
     auto matches = walk.matches;
 
     // There should be at least one match (the original selected expression).
-    ENFORCE(matches.size() > 0);
+    ENFORCE(!matches.empty());
     if (matches.size() == 1) {
         return std::pair(vector<unique_ptr<TextDocumentEdit>>(), 1);
     }
-    fast_sort(
-        matches, [](auto a, auto b) -> auto{ return a.second->loc().beginPos() < b.second->loc().beginPos(); });
+    fast_sort(matches, [](auto a, auto b) { return a.second->loc().beginPos() < b.second->loc().beginPos(); });
 
     // Find LCA enclosing scope
     const ast::ExpressionPtr *scopeToInsertIn = &enclosingClassOrMethod;
@@ -450,14 +450,14 @@ VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegat
                 ENFORCE(false);
             }
         }
-        bool doesNotMatch = false;
+        bool allMatch = true;
         for (int j = 1; j < matches.size(); j++) {
             if (!scopeToCompare->loc().contains(matches[j].second->loc())) {
-                doesNotMatch = true;
+                allMatch = false;
                 break;
             }
         }
-        if (doesNotMatch) {
+        if (!allMatch) {
             break;
         }
         scopeToInsertIn = scopeToCompare;
