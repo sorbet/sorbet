@@ -322,7 +322,7 @@ public:
         // TODO: see how slow a pathological case is (a long chain of the same nodes with just the deepest
         // node being different) Ex.
         //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
-        if (targetNode->deepEqual(tree)) {
+        if (targetNode->structurallyEqual(tree)) {
             matches.push_back(pair(enclosingScopeStack, &tree));
         }
     }
