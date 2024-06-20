@@ -384,9 +384,8 @@ public:
     }
 };
 
-std::pair<vector<unique_ptr<TextDocumentEdit>>, int>
-VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
-                                                     const LSPConfiguration &config) {
+MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
+                                                                              const LSPConfiguration &config) {
     ENFORCE(matchingNode, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
     ENFORCE(enclosingClassOrMethod, "getExtractMultipleOccurrenceEdits called before getExtractSingleOccurrenceEdits");
 
@@ -402,7 +401,7 @@ VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegat
     // There should be at least one match (the original selected expression).
     ENFORCE(!matches.empty());
     if (matches.size() == 1) {
-        return std::pair(vector<unique_ptr<TextDocumentEdit>>(), 1);
+        return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
     fast_sort(matches, [](auto a, auto b) { return a.second->loc().beginPos() < b.second->loc().beginPos(); });
 
@@ -501,6 +500,6 @@ VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegat
 
     vector<unique_ptr<TextDocumentEdit>> res;
     res.emplace_back(move(docEdit));
-    return std::pair(move(res), matches.size());
+    return {move(res), matches.size()};
 }
 } // namespace sorbet::realmain::lsp
