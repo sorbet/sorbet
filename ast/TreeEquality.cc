@@ -7,27 +7,27 @@ namespace sorbet::ast {
 
 namespace {
 
-bool deepEqual(const void *avoid, const ExpressionPtr &tree, const ExpressionPtr &other, bool root = false);
+bool structurallyEqual(const void *avoid, const ExpressionPtr &tree, const ExpressionPtr &other, bool root = false);
 
 template <unsigned long N>
-bool deepEqualVec(const void *avoid, const InlinedVector<ExpressionPtr, N> &a,
-                  const InlinedVector<ExpressionPtr, N> &b) {
+bool structurallyEqualVec(const void *avoid, const InlinedVector<ExpressionPtr, N> &a,
+                          const InlinedVector<ExpressionPtr, N> &b) {
     if (a.size() != b.size()) {
         return false;
     }
     for (int i = 0; i < a.size(); i++) {
-        if (!deepEqual(avoid, a[i], b[i])) {
+        if (!structurallyEqual(avoid, a[i], b[i])) {
             return false;
         }
     }
     return true;
 }
 
-class DeepEqualError {};
+class StructurallyEqualError {};
 
-bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *other, bool root) {
+bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const void *other, bool root) {
     if (!root && tree == avoid) {
-        throw DeepEqualError();
+        throw StructurallyEqualError();
     }
 
     switch (tag) {
@@ -37,8 +37,8 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::Send: {
             auto *a = reinterpret_cast<const Send *>(tree);
             auto *b = reinterpret_cast<const Send *>(other);
-            return deepEqual(avoid, a->recv, b->recv) && a->fun == b->fun &&
-                   deepEqualVec(avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse());
+            return structurallyEqual(avoid, a->recv, b->recv) && a->fun == b->fun &&
+                   structurallyEqualVec(avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse());
         }
 
         case Tag::ClassDef: {
@@ -47,16 +47,16 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
             if (a->symbol != b->symbol) {
                 return false;
             }
-            if (!deepEqual(avoid, a->name, b->name)) {
+            if (!structurallyEqual(avoid, a->name, b->name)) {
                 return false;
             }
-            if (!deepEqualVec(avoid, a->ancestors, b->ancestors)) {
+            if (!structurallyEqualVec(avoid, a->ancestors, b->ancestors)) {
                 return false;
             }
-            if (!deepEqualVec(avoid, a->singletonAncestors, b->singletonAncestors)) {
+            if (!structurallyEqualVec(avoid, a->singletonAncestors, b->singletonAncestors)) {
                 return false;
             }
-            if (!deepEqualVec(avoid, a->rhs, b->rhs)) {
+            if (!structurallyEqualVec(avoid, a->rhs, b->rhs)) {
                 return false;
             }
             if (a->kind != b->kind) {
@@ -74,10 +74,10 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
             if (a->name != b->name) {
                 return false;
             }
-            if (!deepEqualVec(avoid, a->args, b->args)) {
+            if (!structurallyEqualVec(avoid, a->args, b->args)) {
                 return false;
             }
-            if (!deepEqual(avoid, a->rhs, b->rhs)) {
+            if (!structurallyEqual(avoid, a->rhs, b->rhs)) {
                 return false;
             }
             if (a->flags != b->flags) {
@@ -89,20 +89,20 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::If: {
             auto *a = reinterpret_cast<const If *>(tree);
             auto *b = reinterpret_cast<const If *>(other);
-            return deepEqual(avoid, a->cond, b->cond) && deepEqual(avoid, a->thenp, b->thenp) &&
-                   deepEqual(avoid, a->elsep, b->elsep);
+            return structurallyEqual(avoid, a->cond, b->cond) && structurallyEqual(avoid, a->thenp, b->thenp) &&
+                   structurallyEqual(avoid, a->elsep, b->elsep);
         }
 
         case Tag::While: {
             auto *a = reinterpret_cast<const While *>(tree);
             auto *b = reinterpret_cast<const While *>(other);
-            return deepEqual(avoid, a->cond, b->cond) && deepEqual(avoid, a->body, b->body);
+            return structurallyEqual(avoid, a->cond, b->cond) && structurallyEqual(avoid, a->body, b->body);
         }
 
         case Tag::Break: {
             auto *a = reinterpret_cast<const Break *>(tree);
             auto *b = reinterpret_cast<const Break *>(other);
-            if (!deepEqual(avoid, a->expr, b->expr)) {
+            if (!structurallyEqual(avoid, a->expr, b->expr)) {
                 return false;
             }
             return true;
@@ -115,27 +115,28 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::Next: {
             auto *a = reinterpret_cast<const Next *>(tree);
             auto *b = reinterpret_cast<const Next *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::Return: {
             auto *a = reinterpret_cast<const Return *>(tree);
             auto *b = reinterpret_cast<const Return *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::RescueCase: {
             auto *a = reinterpret_cast<const RescueCase *>(tree);
             auto *b = reinterpret_cast<const RescueCase *>(other);
-            return deepEqualVec(avoid, a->exceptions, b->exceptions) && deepEqual(avoid, a->var, b->var) &&
-                   deepEqual(avoid, a->body, b->body);
+            return structurallyEqualVec(avoid, a->exceptions, b->exceptions) &&
+                   structurallyEqual(avoid, a->var, b->var) && structurallyEqual(avoid, a->body, b->body);
         }
 
         case Tag::Rescue: {
             auto *a = reinterpret_cast<const Rescue *>(tree);
             auto *b = reinterpret_cast<const Rescue *>(other);
-            return deepEqual(avoid, a->body, b->body) && deepEqualVec(avoid, a->rescueCases, b->rescueCases) &&
-                   deepEqual(avoid, a->else_, b->else_) && deepEqual(avoid, a->ensure, b->ensure);
+            return structurallyEqual(avoid, a->body, b->body) &&
+                   structurallyEqualVec(avoid, a->rescueCases, b->rescueCases) &&
+                   structurallyEqual(avoid, a->else_, b->else_) && structurallyEqual(avoid, a->ensure, b->ensure);
         }
 
         case Tag::Local: {
@@ -153,55 +154,55 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::RestArg: {
             auto *a = reinterpret_cast<const RestArg *>(tree);
             auto *b = reinterpret_cast<const RestArg *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::KeywordArg: {
             auto *a = reinterpret_cast<const KeywordArg *>(tree);
             auto *b = reinterpret_cast<const KeywordArg *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::OptionalArg: {
             auto *a = reinterpret_cast<const OptionalArg *>(tree);
             auto *b = reinterpret_cast<const OptionalArg *>(other);
-            return deepEqual(avoid, a->expr, b->expr) && deepEqual(avoid, a->default_, b->default_);
+            return structurallyEqual(avoid, a->expr, b->expr) && structurallyEqual(avoid, a->default_, b->default_);
         }
 
         case Tag::BlockArg: {
             auto *a = reinterpret_cast<const BlockArg *>(tree);
             auto *b = reinterpret_cast<const BlockArg *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::ShadowArg: {
             auto *a = reinterpret_cast<const ShadowArg *>(tree);
             auto *b = reinterpret_cast<const ShadowArg *>(other);
-            return deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::Assign: {
             auto *a = reinterpret_cast<const Assign *>(tree);
             auto *b = reinterpret_cast<const Assign *>(other);
-            return deepEqual(avoid, a->lhs, b->lhs) && deepEqual(avoid, a->rhs, b->rhs);
+            return structurallyEqual(avoid, a->lhs, b->lhs) && structurallyEqual(avoid, a->rhs, b->rhs);
         }
 
         case Tag::Cast: {
             auto *a = reinterpret_cast<const Cast *>(tree);
             auto *b = reinterpret_cast<const Cast *>(other);
-            return a->type == b->type && deepEqual(avoid, a->arg, b->arg) && a->cast == b->cast &&
-                   deepEqual(avoid, a->typeExpr, b->typeExpr);
+            return a->type == b->type && structurallyEqual(avoid, a->arg, b->arg) && a->cast == b->cast &&
+                   structurallyEqual(avoid, a->typeExpr, b->typeExpr);
         }
 
         case Tag::Hash: {
             auto *a = reinterpret_cast<const Hash *>(tree);
             auto *b = reinterpret_cast<const Hash *>(other);
-            return deepEqualVec(avoid, a->keys, b->keys) && deepEqualVec(avoid, a->values, b->values);
+            return structurallyEqualVec(avoid, a->keys, b->keys) && structurallyEqualVec(avoid, a->values, b->values);
         }
         case Tag::Array: {
             auto *a = reinterpret_cast<const Array *>(tree);
             auto *b = reinterpret_cast<const Array *>(other);
-            return deepEqualVec(avoid, a->elems, b->elems);
+            return structurallyEqualVec(avoid, a->elems, b->elems);
         }
 
         case Tag::Literal: {
@@ -237,13 +238,13 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            return deepEqual(avoid, a->scope, b->scope) && a->cnst == b->cnst;
+            return structurallyEqual(avoid, a->scope, b->scope) && a->cnst == b->cnst;
         }
 
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            return a->symbol == b->symbol && deepEqual(avoid, a->original, b->original);
+            return a->symbol == b->symbol && structurallyEqual(avoid, a->original, b->original);
         }
 
         case Tag::ZSuperArgs: {
@@ -253,13 +254,13 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
         case Tag::Block: {
             auto *a = reinterpret_cast<const Block *>(tree);
             auto *b = reinterpret_cast<const Block *>(other);
-            return deepEqualVec(avoid, a->args, b->args) && deepEqual(avoid, a->body, b->body);
+            return structurallyEqualVec(avoid, a->args, b->args) && structurallyEqual(avoid, a->body, b->body);
         }
 
         case Tag::InsSeq: {
             auto *a = reinterpret_cast<const InsSeq *>(tree);
             auto *b = reinterpret_cast<const InsSeq *>(other);
-            return deepEqualVec(avoid, a->stats, b->stats) && deepEqual(avoid, a->expr, b->expr);
+            return structurallyEqualVec(avoid, a->stats, b->stats) && structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::RuntimeMethodDefinition: {
@@ -270,39 +271,39 @@ bool deepEqual(const void *avoid, const Tag tag, const void *tree, const void *o
     }
 }
 
-bool deepEqual(const void *avoid, const ExpressionPtr &tree, const ExpressionPtr &other, bool root) {
+bool structurallyEqual(const void *avoid, const ExpressionPtr &tree, const ExpressionPtr &other, bool root) {
     ENFORCE(tree != nullptr);
     ENFORCE(tree != nullptr);
     if (tree.tag() != other.tag()) {
         return false;
     }
 
-    return deepEqual(avoid, tree.tag(), tree.get(), other.get(), root);
+    return structurallyEqual(avoid, tree.tag(), tree.get(), other.get(), root);
 }
 
 } // namespace
 
-bool ExpressionPtr::deepEqual(const ExpressionPtr &other) const {
+bool ExpressionPtr::structurallyEqual(const ExpressionPtr &other) const {
     if (tag() != other.tag()) {
         return false;
     }
     try {
-        return sorbet::ast::deepEqual(get(), tag(), get(), other.get(), true);
-    } catch (DeepEqualError &e) {
+        return sorbet::ast::structurallyEqual(get(), tag(), get(), other.get(), true);
+    } catch (StructurallyEqualError &e) {
         return false;
     }
 }
 
-#define EQUAL_IMPL(name)                                                                                \
-    bool name::deepEqual(const ExpressionPtr &other) const {                                            \
-        if (ExpressionToTag<name>::value != other.tag()) {                                              \
-            return false;                                                                               \
-        }                                                                                               \
-        try {                                                                                           \
-            return sorbet::ast::deepEqual(this, ExpressionToTag<name>::value, this, other.get(), true); \
-        } catch (DeepEqualError & e) {                                                                  \
-            return false;                                                                               \
-        }                                                                                               \
+#define EQUAL_IMPL(name)                                                                                        \
+    bool name::structurallyEqual(const ExpressionPtr &other) const {                                            \
+        if (ExpressionToTag<name>::value != other.tag()) {                                                      \
+            return false;                                                                                       \
+        }                                                                                                       \
+        try {                                                                                                   \
+            return sorbet::ast::structurallyEqual(this, ExpressionToTag<name>::value, this, other.get(), true); \
+        } catch (StructurallyEqualError & e) {                                                                  \
+            return false;                                                                                       \
+        }                                                                                                       \
     }
 
 EQUAL_IMPL(EmptyTree);
