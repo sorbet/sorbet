@@ -406,7 +406,7 @@ VariableExtractor::getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegat
         return std::pair(vector<unique_ptr<TextDocumentEdit>>(), 1);
     }
     fast_sort(
-        matches, [](auto a, auto b) -> auto { return a.second->loc().beginPos() < b.second->loc().beginPos(); });
+        matches, [](auto a, auto b) -> auto{ return a.second->loc().beginPos() < b.second->loc().beginPos(); });
 
     // Find LCA enclosing scope
     const ast::ExpressionPtr *scopeToInsertIn = &enclosingClassOrMethod;
