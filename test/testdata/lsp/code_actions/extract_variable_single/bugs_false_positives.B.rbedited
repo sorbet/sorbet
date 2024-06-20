@@ -8,12 +8,12 @@
 /W[aeiou]rd/i
 #           ^ apply-code-action: [A] Extract Variable
 
-  /W[aeiou]rd/i
+  newVariable = A[aeiou]rd
+  /newVariable/m
 #  ^^^^^^^^^^ apply-code-action: [B] Extract Variable
 
 class A < T::Struct
-  newVariable = :x
-  prop newVariable, String
+  prop :x, Integer
 #      ^^ apply-code-action: [C] Extract Variable
   prop :y, String
 #          ^^^^^^ apply-code-action: [D] Extract Variable
