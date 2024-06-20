@@ -1,7 +1,6 @@
 #include "main/lsp/ExtractVariable.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
-#include "local_vars/local_vars.h"
 
 using namespace std;
 
@@ -238,10 +237,9 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     const auto &gs = typechecker.state();
 
     LocSearchWalk walk(selectionLoc);
-    auto desugaredTree = typechecker.getDesugared(file);
-    auto afterLocalVars = local_vars::LocalVars::run(const_cast<core::GlobalState &>(gs), {move(desugaredTree), file});
+    auto afterLocalVars = typechecker.getLocalVarTrees(file);
     core::Context ctx(gs, core::Symbols::root(), file);
-    ast::TreeWalk::apply(ctx, walk, afterLocalVars.tree);
+    ast::TreeWalk::apply(ctx, walk, afterLocalVars);
 
     if (!walk.foundExactMatch()) {
         return {};
