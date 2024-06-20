@@ -52,14 +52,14 @@ end
 
 # it fails if a concrete module doesn't implement abstract methods
   module M2
-# ^^^^^^^^^ error: Missing definitions for abstract methods
+# ^^^^^^^^^ error: Missing definitions for abstract methods in `M2`
   extend T::Helpers
   include AbstractMixin
 end
 
 # it fails if a class method is unimplemented
   class C3 < AbstractClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass.foo`
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass.foo` in `C3`
   extend T::Sig
   extend T::Helpers
   sig { override.returns(Object) }
@@ -68,7 +68,7 @@ end
 
 # it fails if an instance method is unimplemented
   class C4 < AbstractClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass#bar`
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Missing definition for abstract method `AbstractClass#bar` in `C4`
   extend T::Sig
   extend T::Helpers
   sig {override.returns(Object)}
