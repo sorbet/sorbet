@@ -292,11 +292,13 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 result.emplace_back(move(action));
 
                 vector<unique_ptr<TextDocumentEdit>> multipleOccurrenceDocumentEdits;
-                int numOccurences;
+                size_t numOccurences;
                 {
                     Timer timeit(gs.tracer(), "Extract to Variable (all occurrences)");
-                    std::tie(multipleOccurrenceDocumentEdits, numOccurences) =
+                    auto multipleOccurrenceResult =
                         variableExtractor.getExtractMultipleOccurrenceEdits(typechecker, config);
+                    multipleOccurrenceDocumentEdits = std::move(multipleOccurrenceResult.documentEdits);
+                    numOccurences = multipleOccurrenceResult.numOccurences;
                 }
                 if (!multipleOccurrenceDocumentEdits.empty()) {
                     auto action =
