@@ -302,7 +302,7 @@ class ExpressionPtrSearchWalk {
     }
 
 public:
-    vector<pair<vector<const ast::ExpressionPtr *>, const ast::ExpressionPtr *>> matches;
+    vector<pair<vector<const ast::ExpressionPtr *>, core::LocOffsets>> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
         : targetNode(matchingNode), skippedLocs(skippedLocs) {}
 
@@ -323,7 +323,7 @@ public:
         // node being different) Ex.
         //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
         if (targetNode->structurallyEqual(tree)) {
-            matches.emplace_back(enclosingScopeStack, &tree);
+            matches.emplace_back(enclosingScopeStack, tree.loc());
         }
     }
 
@@ -403,7 +403,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     if (matches.size() == 1) {
         return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
-    fast_sort(matches, [](auto a, auto b) { return a.second->loc().beginPos() < b.second->loc().beginPos(); });
+    fast_sort(matches, [](auto a, auto b) { return a.second.beginPos() < b.second.beginPos(); });
 
     // Find LCA enclosing scope
     const ast::ExpressionPtr *scopeToInsertIn = &enclosingClassOrMethod;
@@ -412,27 +412,27 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         const ast::ExpressionPtr *scopeToCompare = scope;
         if (ast::isa_tree<ast::If>(*scope)) {
             auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
-            if (if_.thenp.loc().exists() && if_.thenp.loc().contains(firstMatch->loc())) {
+            if (if_.thenp.loc().exists() && if_.thenp.loc().contains(firstMatch)) {
                 scopeToCompare = &if_.thenp;
-            } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(firstMatch->loc())) {
+            } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(firstMatch)) {
                 scopeToCompare = &if_.elsep;
-            } else if (if_.cond.loc().contains(firstMatch->loc())) {
+            } else if (if_.cond.loc().contains(firstMatch)) {
                 scopeToCompare = &if_.cond;
             } else {
                 ENFORCE(false);
             }
         } else if (ast::isa_tree<ast::Rescue>(*scope)) {
             auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(*scope);
-            if (rescue.body.loc().exists() && rescue.body.loc().contains(firstMatch->loc())) {
+            if (rescue.body.loc().exists() && rescue.body.loc().contains(firstMatch)) {
                 scopeToCompare = &rescue.body;
-            } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(firstMatch->loc())) {
+            } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(firstMatch)) {
                 scopeToCompare = &rescue.else_;
-            } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(firstMatch->loc())) {
+            } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(firstMatch)) {
                 scopeToCompare = &rescue.ensure;
             } else {
                 auto found = false;
                 for (auto &rescueCase : rescue.rescueCases) {
-                    if (rescueCase.loc().exists() && rescueCase.loc().contains(firstMatch->loc())) {
+                    if (rescueCase.loc().exists() && rescueCase.loc().contains(firstMatch)) {
                         scopeToCompare = &rescueCase;
                         found = true;
                     }
@@ -441,9 +441,9 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
             }
         } else if (ast::isa_tree<ast::While>(*scope)) {
             auto &while_ = ast::cast_tree_nonnull<ast::While>(*scope);
-            if (while_.body.loc().contains(firstMatch->loc())) {
+            if (while_.body.loc().contains(firstMatch)) {
                 scopeToCompare = &while_.body;
-            } else if (while_.cond.loc().contains(firstMatch->loc())) {
+            } else if (while_.cond.loc().contains(firstMatch)) {
                 scopeToCompare = &while_.cond;
             } else {
                 ENFORCE(false);
@@ -451,7 +451,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         }
         bool allMatch = true;
         for (int j = 1; j < matches.size(); j++) {
-            if (!scopeToCompare->loc().contains(matches[j].second->loc())) {
+            if (!scopeToCompare->loc().contains(matches[j].second)) {
                 allMatch = false;
                 break;
             }
@@ -462,7 +462,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         scopeToInsertIn = scopeToCompare;
     }
 
-    auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch->loc());
+    auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch);
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
     auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
 
@@ -473,16 +473,16 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
                         : "; ";
 
     vector<unique_ptr<TextEdit>> edits;
-    if (whereToInsertLoc.endPos() == firstMatch->loc().beginPos()) {
+    if (whereToInsertLoc.endPos() == firstMatch.beginPos()) {
         // if insertion point is touching the first match, let's merge the 2 edits into one,
         // to prevent an "overlapping" edit.
-        whereToInsertLoc = whereToInsertLoc.join(core::Loc(file, firstMatch->loc()));
+        whereToInsertLoc = whereToInsertLoc.join(core::Loc(file, firstMatch));
         edits.emplace_back(make_unique<TextEdit>(
             Range::fromLoc(gs, whereToInsertLoc),
             fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
         for (int j = 1; j < matches.size(); j++) {
             auto match = matches[j];
-            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second->loc()));
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second));
             edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
         }
     } else {
@@ -490,7 +490,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
             make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
                                   fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
         for (auto match : matches) {
-            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second->loc()));
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second));
             edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
         }
     }
