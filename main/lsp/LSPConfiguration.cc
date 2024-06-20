@@ -14,7 +14,6 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 constexpr string_view sorbetScheme = "sorbet:"sv;
-constexpr string_view httpsScheme = "https"sv;
 } // namespace
 
 namespace {
@@ -134,24 +133,19 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {
-    ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
-    string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
-        relativeUri = relativeUri.substr(1);
-    }
 
     // Special case: Root uri is '' (happens in Monaco)
     if (clientConfig->rootUri.length() == 0) {
-        return string(relativeUri);
+        return string(filePath);
     }
 
     // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
     if (clientConfig->enableSorbetURIs &&
         FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
-        return absl::StrCat(sorbetScheme, relativeUri);
+        return absl::StrCat(sorbetScheme, filePath);
     }
-    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
+    return absl::StrCat(clientConfig->rootUri, "/", filePath);
 }
 
 string urlDecode(string_view uri) {
@@ -188,18 +182,7 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
         ++start;
     }
 
-    string path = string(start, uri.end());
-
-    const bool isHttps = isSorbetURI && absl::StartsWith(path, httpsScheme) && path.length() > httpsScheme.length() &&
-                         path[httpsScheme.length()] == ':';
-    if (isHttps) {
-        return path;
-    } else if (rootPath.length() > 0) {
-        return absl::StrCat(rootPath, "/", path);
-    } else {
-        // Special case: Folder is '' (current directory)
-        return path;
-    }
+    return string(start, uri.end());
 }
 
 core::FileRef LSPConfiguration::uri2FileRef(const core::GlobalState &gs, string_view uri) const {
