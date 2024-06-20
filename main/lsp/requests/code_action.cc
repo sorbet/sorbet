@@ -275,9 +275,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // we need to do the core computation to know if extracting the current selection is
             // valid in the first place, to decide if we can show the code action or not.
             VariableExtractor variableExtractor(loc);
-            Timer timeit(gs.tracer(), "Extract to Variable (single occurrence)");
-            auto singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
-            timeit.setEndTime();
+            vector<unique_ptr<TextDocumentEdit>> singleOccurrenceDocumentEdits;
+            {
+                Timer timeit(gs.tracer(), "Extract to Variable (single occurrence)");
+                singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
+            }
             if (!singleOccurrenceDocumentEdits.empty()) {
                 // TODO: should we rename to something like "Extract Variable (this occurrence only)"?
                 auto action = make_unique<CodeAction>("Extract Variable");
@@ -289,11 +291,13 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
 
-                // TODO(neil): trigger a rename for newVariable
-                Timer timeit(gs.tracer(), "Extract to Variable (all occurrences)");
-                auto [multipleOccurrenceDocumentEdits, numOccurences] =
-                    variableExtractor.getExtractMultipleOccurrenceEdits(typechecker, config);
-                timeit.setEndTime();
+                vector<unique_ptr<TextDocumentEdit>> multipleOccurrenceDocumentEdits;
+                int numOccurences;
+                {
+                    Timer timeit(gs.tracer(), "Extract to Variable (all occurrences)");
+                    std::tie(multipleOccurrenceDocumentEdits, numOccurences) =
+                        variableExtractor.getExtractMultipleOccurrenceEdits(typechecker, config);
+                }
                 if (!multipleOccurrenceDocumentEdits.empty()) {
                     auto action =
                         make_unique<CodeAction>(fmt::format("Extract Variable (all {} occurrences)", numOccurences));
@@ -305,6 +309,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     action->edit = move(workspaceEdit);
                     result.emplace_back(move(action));
                 }
+
+                // TODO(neil): trigger a rename for newVariable
             }
         }
     }
