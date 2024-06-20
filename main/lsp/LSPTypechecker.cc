@@ -13,6 +13,7 @@
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/sig_finder/sig_finder.h"
 #include "hashing/hashing.h"
+#include "local_vars/local_vars.h"
 #include "main/cache/cache.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/ErrorFlusherLSP.h"
@@ -685,8 +686,9 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
     return errorCollector->drainErrors();
 }
 
-ast::ExpressionPtr LSPTypechecker::getDesugared(core::FileRef fref) const {
-    return pipeline::desugarOne(config->opts, *gs, fref);
+ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
+    auto afterDesugar = pipeline::desugarOne(config->opts, *gs, fref);
+    return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
 const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
@@ -792,8 +794,8 @@ std::vector<ast::ParsedFile> LSPTypecheckerDelegate::getResolved(const std::vect
     return typechecker.getResolved(frefs, workers);
 }
 
-ast::ExpressionPtr LSPTypecheckerDelegate::getDesugared(core::FileRef fref) const {
-    return typechecker.getDesugared(fref);
+ast::ExpressionPtr LSPTypecheckerDelegate::getLocalVarTrees(core::FileRef fref) const {
+    return typechecker.getLocalVarTrees(fref);
 }
 
 const core::GlobalState &LSPTypecheckerDelegate::state() const {
