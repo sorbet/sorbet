@@ -687,6 +687,10 @@ void readOptions(Options &opts,
         if (raw["simulate-crash"].as<bool>()) {
             Exception::raise("simulated crash");
         }
+        opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
+        while (opts.waitForDebugger && !stopInDebugger()) {
+            // spin
+        }
 
         if (raw.count("allowed-extension") > 0) {
             auto exts = raw["allowed-extension"].as<vector<string>>();
@@ -918,7 +922,6 @@ void readOptions(Options &opts,
         if (raw.count("suggest-unsafe") > 0) {
             opts.suggestUnsafe = raw["suggest-unsafe"].as<string>();
         }
-        opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.traceLexer = raw["trace-lexer"].as<bool>();
         opts.traceParser = raw["trace-parser"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();

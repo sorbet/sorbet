@@ -390,9 +390,6 @@ int realmain(int argc, char *argv[]) {
     vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     options::Options opts;
     options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
-    while (opts.waitForDebugger && !stopInDebugger()) {
-        // spin
-    }
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
