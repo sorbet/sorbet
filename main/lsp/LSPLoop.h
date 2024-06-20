@@ -111,13 +111,15 @@ SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym
 std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, core::ClassOrModuleRef sym,
                                                       bool includeSelf);
 
-std::unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+skipLiteralsExtractMethodDefs(const core::GlobalState &gs,
+                              std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
 // prop/const/attr setters are bogged down with a bunch of extra Ident and Literal query
 // responses, which don't make sense to use find all references on.
 std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-getQueryResponsesForFindAllReferences(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+getQueryResponsesForFindAllReferences(const core::GlobalState &gs,
+                                      std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

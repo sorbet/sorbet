@@ -197,20 +197,8 @@ std::unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelega
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
     }
     if (!queryResponses.empty()) {
-        for (auto &resp : queryResponses) {
-            if (auto defResp = resp->isMethodDef()) {
-                cout << params->textDocument->uri << " " << params->position->showRaw() << " METHOD " << defResp->symbol.showFullName(gs) << endl;
-            } else if (auto fieldResp = resp->isField()) {
-                cout << params->textDocument->uri << " " << params->position->showRaw() << " METHOD " << fieldResp->symbol.showFullName(gs) << endl;
-            } else if (resp->isLiteral()) {
-                cout << params->textDocument->uri << " " << params->position->showRaw() << " LIT" << endl;
-            } else if (auto identResp = resp->isIdent()) {
-                cout << params->textDocument->uri << " " << params->position->showRaw() << " IDENT " << identResp->variable.showRaw(gs) << endl;
-            }
-        }
-
         vector<unique_ptr<Location>> resultLocations;
-        auto responses = getQueryResponsesForFindAllReferences(queryResponses);
+        auto responses = getQueryResponsesForFindAllReferences(gs, queryResponses);
 
         for (auto &resp : move(responses)) {
             auto locations = getLocationsFromQueryResponse(typechecker, gs, fref, fileIsTyped, move(resp));

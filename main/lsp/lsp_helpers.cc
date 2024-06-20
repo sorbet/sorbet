@@ -171,29 +171,57 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
     return subclasses;
 }
 
-unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+vector<unique_ptr<core::lsp::QueryResponse>>
+skipLiteralsExtractMethodDefs(const core::GlobalState &gs,
+                              vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    vector<unique_ptr<core::lsp::QueryResponse>> responses;
+
+    // Collect all method definitions until we see a non-literal response,
+    // which indicates the end of the stack.
+    //
+    // NOTE: When synthesized in the rewriter, it's possible for multiple overlapping methods
+    // to fall under the purview of an LSP query location. Some may "cover" the query location
+    // without being *exactly* at that location. In this scenario, we trust the first method
+    // result in the stack -- we capture it plus any results whose location *exactly* matches
+    // the first one.
+
+    // Keep track of first method def loc
+    core::Loc firstLoc;
+
     for (auto &r : queryResponses) {
         if (r->isMethodDef()) {
-            return move(r);
+            auto loc = r->getLoc();
+            if (!firstLoc.exists()) {
+                firstLoc = loc;
+                responses.emplace_back(move(r));
+            } else if (loc == firstLoc) {
+                responses.emplace_back(move(r));
+            }
         } else if (!r->isLiteral()) {
             break;
         }
     }
 
-    return move(queryResponses[0]);
+    // Return method definitions if any
+    if (!responses.empty()) {
+        return responses;
+    }
+
+    // If no methods were found, return the first response
+    responses.emplace_back(move(queryResponses[0]));
+    return responses;
 }
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-getQueryResponsesForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+getQueryResponsesForFindAllReferences(const core::GlobalState &gs,
+                                      vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     vector<unique_ptr<core::lsp::QueryResponse>> responses;
 
     // Find all references might show an Ident last if its a `prop`, and the Ident will be the
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
-        return responses;
+        return skipLiteralsExtractMethodDefs(gs, queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -214,13 +242,11 @@ getQueryResponsesForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse
             responses.emplace_back(move(*resp));
             return responses;
         } else {
-            responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
-            return responses;
+            return skipLiteralsExtractMethodDefs(gs, queryResponses);
         }
     }
 
-    responses.emplace_back(skipLiteralIfMethodDef(queryResponses));
-    return responses;
+    return skipLiteralsExtractMethodDefs(gs, queryResponses);
 }
 
 /**

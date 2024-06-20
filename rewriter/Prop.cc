@@ -503,7 +503,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
+        auto arg = ast::MK::KeywordArgWithDefault(core::LocOffsets::none(), core::Names::allowDirectMutation(),
+                                                  ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
 
@@ -527,10 +528,11 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        auto arg2 = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
+        auto arg2 = ast::MK::KeywordArgWithDefault(core::LocOffsets::none(), core::Names::allowDirectMutation(),
+                                                   ast::MK::Nil(loc));
         ast::MethodDef::Flags fkBangFlags;
         fkBangFlags.discardDef = true;
-        auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
+        auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethodBang, std::move(arg2),
                                                          ast::MK::RaiseTypedUnimplemented(loc), fkBangFlags);
         nodes.emplace_back(std::move(fkMethodDefBang));
     }

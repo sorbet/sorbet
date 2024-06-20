@@ -113,7 +113,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         }
         const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
 
-        auto responses = getQueryResponsesForFindAllReferences(queryResponses);
+        auto responses = getQueryResponsesForFindAllReferences(gs, queryResponses);
         vector<unique_ptr<DocumentHighlight>> resultHighlights;
 
         for (auto &resp : move(responses)) {
