@@ -247,9 +247,7 @@ bool sorbet::FileOps::isFolder(string_view path, string_view ignorePattern, cons
 }
 
 // Simple, naive implementation of regexp-free ignore rules.
-// TODO(jez) The basePath argument is unused here now.
-bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view relative_path,
-                                    const vector<string> &absoluteIgnorePatterns,
+bool sorbet::FileOps::isFileIgnored(string_view relative_path, const vector<string> &absoluteIgnorePatterns,
                                     const vector<string> &relativeIgnorePatterns) {
     for (auto &p : absoluteIgnorePatterns) {
         if (relative_path.substr(0, p.length()) == p &&
@@ -306,8 +304,8 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     ++pendingJobs;
     jobq->push(path, 1);
 
-    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
-                                               &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
+    workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &extensions, &recursive,
+                                               &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
         Job job;
         vector<string> output;
 
@@ -363,8 +361,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     }
 
                     auto fullPath = path == "." ? string(nameview) : fmt::format("{}/{}", path, nameview);
-                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
-                                                       relativeIgnorePatterns)) {
+                    if (sorbet::FileOps::isFileIgnored(fullPath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
                         continue;
                     }
 

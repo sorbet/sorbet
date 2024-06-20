@@ -141,8 +141,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
     }
 
     // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
-    if (clientConfig->enableSorbetURIs &&
-        FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
+    if (clientConfig->enableSorbetURIs && FileOps::isFileIgnored(filePath, opts.lspDirsMissingFromClient, {})) {
         return absl::StrCat(sorbetScheme, filePath);
     }
     return absl::StrCat(clientConfig->rootUri, "/", filePath);
@@ -249,7 +248,7 @@ vector<string> LSPConfiguration::frefsToPaths(const core::GlobalState &gs, const
 }
 
 bool LSPConfiguration::isFileIgnored(string_view filePath) const {
-    return FileOps::isFileIgnored(rootPath, filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
+    return FileOps::isFileIgnored(filePath, opts.absoluteIgnorePatterns, opts.relativeIgnorePatterns);
 }
 
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
