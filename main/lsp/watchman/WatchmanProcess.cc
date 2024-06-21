@@ -114,6 +114,13 @@ void WatchmanProcess::start() {
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 
+        if (auto res = readResponse(file, fd, buffer)) {
+            if (!res->d.HasMember("subscribe")) {
+                // Something we don't understand yet.
+                logger->debug("Unknown Watchman response:\n{}", res->line);
+            }
+        }
+
         while (!isStopped()) {
             ReadResponse res;
             if (auto maybeRes = readResponse(file, fd, buffer)) {
@@ -146,7 +153,7 @@ void WatchmanProcess::start() {
                     auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
                     processStateLeave(move(stateLeave));
                 });
-            } else if (!d.HasMember("subscribe")) {
+            } else {
                 // Something we don't understand yet.
                 logger->debug("Unknown Watchman response:\n{}", line);
             }
