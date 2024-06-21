@@ -80,7 +80,7 @@ optional<WatchmanProcess::ReadResponse> WatchmanProcess::readResponse(FILE *file
 void WatchmanProcess::start() {
     auto mainPid = getpid();
     try {
-        string subscriptionName = fmt::format("ruby-typer-{}", getpid());
+        string subscriptionName = fmt::format("sorbet-{}", getpid());
 
         logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
                       workSpace, fmt::join(extensions, ","), subscriptionName);
