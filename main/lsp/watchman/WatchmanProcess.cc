@@ -1,5 +1,6 @@
 #include "WatchmanProcess.h"
 #include "common/FileOps.h"
+#include "common/Subprocess.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
 #include "main/lsp/LSPConfiguration.h"
@@ -84,6 +85,38 @@ void WatchmanProcess::start() {
 
         logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
                       workSpace, fmt::join(extensions, ","), subscriptionName);
+
+        auto watchProjectResult = Subprocess::spawn(watchmanPath, {"--no-pretty", "watch-project", workSpace}, nullopt);
+        if (watchProjectResult.has_value()) {
+            logger->debug(watchProjectResult->output);
+        }
+
+        if (!watchProjectResult.has_value() || watchProjectResult->status != 0) {
+            auto msg = fmt::format(
+                "Error running Watchman (with `{} --no-pretty watch-project {}`).\n"
+                "Watchman is required for Sorbet to detect changes to files made outside of your code editor.\n"
+                "Don't need Watchman? Run Sorbet with `--disable-watchman`.",
+                watchmanPath, workSpace);
+            logger->error(msg);
+            exitWithCode(1, msg);
+            return;
+        }
+
+        rapidjson::MemoryPoolAllocator<> alloc;
+        rapidjson::Document d(&alloc);
+        if (d.Parse(watchProjectResult->output.c_str(), watchProjectResult->output.size()).HasParseError()) {
+            auto msg = fmt::format("Error parsing Watchman response: `{}` is not a valid json object",
+                                   watchProjectResult->output);
+            logger->error(msg);
+            exitWithCode(1, msg);
+            return;
+        }
+
+        string watchRoot;
+        catchDeserializationError(*logger, watchProjectResult->output, [&d, &watchRoot /*, this*/]() {
+            auto queryResponse = sorbet::realmain::lsp::WatchmanWatchProjectResponse::fromJSONValue(d);
+            watchRoot = std::move(queryResponse->watch);
+        });
 
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
