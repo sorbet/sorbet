@@ -80,6 +80,11 @@ void WatchmanProcess::start() {
 
         string buffer;
 
+        // TODO(jez) I don't think we actually get to send multiple commands over stdin?
+        // We need to do something like send a watch-project command first, and follow up with one
+        // subscribe command for every path in rawInputDirNames, which needs 1 + N commands instead
+        // of only 1 like there is right now.
+
         // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
         // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this

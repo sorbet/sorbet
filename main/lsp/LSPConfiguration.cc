@@ -16,6 +16,7 @@ namespace {
 constexpr string_view sorbetScheme = "sorbet:"sv;
 } // namespace
 
+// TODO(jez) audit rawInputDirNames -> only needed for watchman at this point
 namespace {
 
 MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
