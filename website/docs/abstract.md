@@ -231,11 +231,6 @@ end
 C.new(name: "Some::Long::Namespace").short_name # => "Namespace"
 ```
 
-### Declaring requirements of an interface
-
-Letting abstract methods be implemented by inherited methods is particularly
-useful for expressing dependencies between
-
 ### Consequences for runtime signature checking
 
 Letting abstract methods be implemented by inherited methods relies on the fact
