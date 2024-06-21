@@ -94,8 +94,6 @@ public:
     const std::shared_ptr<spdlog::logger> logger;
     /** If true, all queries will hit the slow path. */
     const bool disableFastPath;
-    /** File system root of LSP client workspace. May be empty if it is the current working directory. */
-    const std::string rootPath;
 
     // The following properties are configured during initialization.
 

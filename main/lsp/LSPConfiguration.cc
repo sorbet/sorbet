@@ -18,21 +18,6 @@ constexpr string_view sorbetScheme = "sorbet:"sv;
 
 namespace {
 
-string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
-                   const shared_ptr<spdlog::logger> &logger) {
-    if (opts.rawInputDirNames.size() != 1) {
-        auto msg =
-            fmt::format("Sorbet's language server requires a single input directory. However, {} are configured: [{}]",
-                        opts.rawInputDirNames.size(), absl::StrJoin(opts.rawInputDirNames, ", "));
-        logger->error(msg);
-        auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
-        output->write(make_unique<LSPMessage>(
-            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
-        throw EarlyReturnWithCode(1);
-    }
-    return opts.rawInputDirNames.at(0);
-}
-
 MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
     if (absl::c_find(formats, MarkupKind::Markdown) != formats.end()) {
         return MarkupKind::Markdown;
@@ -44,8 +29,7 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
-    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), disableFastPath(disableFastPath),
-      rootPath(getRootPath(output, opts, logger)) {}
+    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), disableFastPath(disableFastPath) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {
