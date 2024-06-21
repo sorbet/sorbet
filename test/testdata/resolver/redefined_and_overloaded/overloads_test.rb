@@ -5,13 +5,14 @@ class A
 
   sig {params(x: Integer).void}
   sig {params(x: Integer, y: String).void}
-  def self.example(x, y='')
+  def self.example(x, y='') # error: against an overloaded signature
   end
 
   sig {params(x: Integer).void}
   sig {params(x: Integer, y: String).void}
   sig {params(x: Integer, y: String, z: Float).void}
   def self.example(x, y='', z=0.0) # error: Method `A.example` redefined without matching argument count. Expected: `2`, got: `3`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: against an overloaded signature
   end
 end
 
