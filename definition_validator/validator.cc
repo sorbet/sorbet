@@ -1035,10 +1035,10 @@ private:
         }
 
         if (missingAbstractMethods.size() > 1) {
-            errorBuilder.setHeader("Missing definitions for abstract methods");
+            errorBuilder.setHeader("Missing definitions for abstract methods in `{}`", sym.show(ctx));
         } else {
-            errorBuilder.setHeader("Missing definition for abstract method `{}`",
-                                   missingAbstractMethods.front().show(ctx));
+            errorBuilder.setHeader("Missing definition for abstract method `{}` in `{}`",
+                                   missingAbstractMethods.front().show(ctx), sym.show(ctx));
         }
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
