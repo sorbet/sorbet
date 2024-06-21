@@ -207,7 +207,7 @@ constexpr string_view OVERLOADS_TEST_RB = "overloads_test.rb"sv;
 }
 
 bool File::permitOverloadDefinitions() const {
-    return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB;
+    return this->isRBI() || FileOps::getFileName(this->path()) == OVERLOADS_TEST_RB || this->isStdlib();
 }
 
 bool File::isPackage() const {

@@ -33,7 +33,7 @@ class HasOverloads
     )
     .returns(Symbol)
   end
-  def overloaded(arg0, arg1=arg0, arg2=arg0);
+  def overloaded(arg0, arg1=arg0, arg2=arg0); # error: against an overloaded signature
     make_untyped
   end
 
@@ -51,7 +51,7 @@ class HasOverloads
     )
     .returns(Symbol)
   end
-  def invalid_overloaded(a:, b:);
+  def invalid_overloaded(a:, b:); # error: against an overloaded signature
     #                    ^^ error: Bad parameter ordering for `a`, expected `b` instead
     #                        ^^ error: Bad parameter ordering for `b`, expected `a` instead
     make_untyped
@@ -67,7 +67,7 @@ class OverloadAndGenerics
 
   sig {params(x: Elem).returns(Elem)}
   sig {params(x: String).returns(String)}
-  def overloaded(x); arg0; end
+  def overloaded(x); arg0; end # error: against an overloaded signature
 end
 
 class Foo
@@ -93,7 +93,7 @@ class PrivateOverloads
 
   sig {returns(NilClass)}
   sig {params(x: Integer).returns(Integer)}
-  private def foo(x=nil); end
+  private def foo(x=nil); end # error: against an overloaded signature
 end
 
 po1 = PrivateOverloads.new.foo # error: Non-private call to private method
@@ -111,25 +111,25 @@ class BlockOverloads
 
   sig { returns(A) }
   sig { params(blk: T.proc.void).returns(B) }
-  def simple(&blk); end
+  def simple(&blk); end # error: against an overloaded signature
 
   sig { params(blk: NilClass).returns(A) }
   sig { params(blk: T.proc.void).returns(B) }
-  def explicit_nilclass(&blk); end
+  def explicit_nilclass(&blk); end # error: against an overloaded signature
 
   sig { returns(A) }
   sig { params(blk: T.nilable(T.proc.void)).returns(B) }
-  def ambiguous_nilable_a(&blk); end
+  def ambiguous_nilable_a(&blk); end # error: against an overloaded signature
   sig { params(blk: T.nilable(T.proc.void)).returns(B) }
   sig { returns(A) }
-  def ambiguous_nilable_b(&blk); end
+  def ambiguous_nilable_b(&blk); end # error: against an overloaded signature
 
   sig { returns(A) }
   sig { params(blk: T.untyped).returns(B) }
-  def ambiguous_untyped_a(&blk); end
+  def ambiguous_untyped_a(&blk); end # error: against an overloaded signature
   sig { params(blk: T.untyped).returns(B) }
   sig { returns(A) }
-  def ambiguous_untyped_b(&blk); end
+  def ambiguous_untyped_b(&blk); end # error: against an overloaded signature
 
   sig { returns(A) }
   sig do
@@ -137,14 +137,14 @@ class BlockOverloads
       .params(blk: T.proc.returns(T.type_parameter(:U)))
       .returns(T.type_parameter(:U))
   end
-  def not_fully_defined(&blk); end
+  def not_fully_defined(&blk); end # error: against an overloaded signature
   sig do
     type_parameters(:U)
       .params(blk: T.proc.returns(T.type_parameter(:U)))
       .returns(T.type_parameter(:U))
   end
   sig { returns(A) }
-  def not_fully_defined_flipped(&blk); end
+  def not_fully_defined_flipped(&blk); end # error: against an overloaded signature
 
   def test
     x = simple

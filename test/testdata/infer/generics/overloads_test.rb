@@ -10,7 +10,7 @@ sig do
   params(x: String)
     .returns(T.nilable(String))
 end
-def example(x)
+def example(x) # error: against an overloaded signature
 end
 
 xs = T::Array[Integer].new
@@ -36,7 +36,7 @@ sig do
     )
     .void
 end
-def self.example2(type=T.unsafe(nil), *args, &blk)
+def self.example2(type=T.unsafe(nil), *args, &blk) # error: against an overloaded signature
 end
 
 example2(Integer, "--jobs=<n>") do |x|
