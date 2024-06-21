@@ -41,7 +41,7 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
 
 } // namespace
 
-optional<string> WatchmanProcess::readLine(FILE *file, int fd, string &buffer) {
+optional<WatchmanProcess::ReadResponse> WatchmanProcess::readResponse(FILE *file, int fd, string &buffer) {
     errno = 0;
     auto maybeLine = FileOps::readLineFromFd(fd, buffer);
     if (maybeLine.result == FileOps::ReadResult::Timeout) {
@@ -61,7 +61,20 @@ optional<string> WatchmanProcess::readLine(FILE *file, int fd, string &buffer) {
 
     ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
 
-    return move(maybeLine.output.value());
+    if (!maybeLine.output.has_value()) {
+        return nullopt;
+    }
+
+    auto line = move(maybeLine.output.value());
+    rapidjson::MemoryPoolAllocator<> alloc;
+    rapidjson::Document d(&alloc);
+    logger->debug(line);
+    if (d.Parse(line.c_str(), line.size()).HasParseError()) {
+        logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
+        return nullopt;
+    }
+
+    return make_optional<ReadResponse>(move(line), move(d));
 }
 
 void WatchmanProcess::start() {
@@ -102,19 +115,17 @@ void WatchmanProcess::start() {
         logger->debug(subscribeCommand);
 
         while (!isStopped()) {
-            string line;
-            if (auto maybeLine = readLine(file, fd, buffer)) {
-                line = move(maybeLine.value());
+            ReadResponse res;
+            if (auto maybeRes = readResponse(file, fd, buffer)) {
+                res = move(maybeRes.value());
             } else {
                 continue;
             }
 
-            rapidjson::MemoryPoolAllocator<> alloc;
-            rapidjson::Document d(&alloc);
-            logger->debug(line);
-            if (d.Parse(line.c_str(), line.size()).HasParseError()) {
-                logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
-            } else if (d.HasMember("is_fresh_instance")) {
+            auto line = move(res.line);
+            auto d = move(res.d);
+
+            if (d.HasMember("is_fresh_instance")) {
                 catchDeserializationError(*logger, line, [&d, this]() {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
                     processQueryResponse(move(queryResponse));

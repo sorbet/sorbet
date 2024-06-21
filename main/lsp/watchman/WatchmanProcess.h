@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "core/core.h"
 #include "main/lsp/MessageQueueState.h"
+#include "rapidjson/document.h"
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::lsp {
@@ -47,7 +48,13 @@ private:
 
     void enqueueNotification(std::unique_ptr<NotificationMessage> notification);
 
-    std::optional<std::string> readLine(FILE *file, int fd, std::string &buffer);
+    struct ReadResponse {
+        std::string line;
+        rapidjson::Document d;
+        ReadResponse() = default;
+        ReadResponse(std::string &&line, rapidjson::Document &&d) : line(std::move(line)), d(std::move(d)) {}
+    };
+    std::optional<ReadResponse> readResponse(FILE *file, int fd, std::string &buffer);
 
     void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>);
 
