@@ -74,6 +74,12 @@ in the editor.
 You can use the `sorbet.lspConfigs` setting described above to have the VS Code
 extension always pass these command line flags when starting Sorbet.
 
+Also, watchman requires that watched projects either be version controlled (e.g.
+have a `.git` folder in the project root) or have a `.watchmanconfig` file at
+the root of the project. Without one of these, watchman will not be able to
+start successfully. See [LSP: A note on watchman](lsp.md#a-note-on-watchman) for
+more.
+
 ## Features
 
 Live error squiggles for Sorbet typechecking errors

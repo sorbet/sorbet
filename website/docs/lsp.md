@@ -402,6 +402,20 @@ Sorbet easier to use when not using Sorbet over SSH like this). But as
 specified, the current protocol is not powerful enough to completely replace
 Sorbet's need for watchman.
 
+Also, watchman uses an algorithm to find the "project path" when setting up file
+watches. This algorithm is
+[described here](https://facebook.github.io/watchman/docs/cmd/watch-project#whats-a-project-path)
+in detail, but basically reduces to "there must be either a `.git`, `.hg`,
+`.svn`, or `.watchmanconfig` file in the watched folder or some parent folder."
+This list of project indicators is not configurable by Sorbet--it can only be
+configured globally for an entire machine. See
+[`root_files`](https://facebook.github.io/watchman/docs/config#root_files) and
+[Resolution / Scoping](https://facebook.github.io/watchman/docs/config#resolution--scoping)
+for more.
+
+Thus, to use Sorbet with watchman in a project that does not use Git, create an
+empty `.watchmanconfig` file in the root of the project.
+
 [version 3.17]:
   https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#version_3_17_0
 [`initialize`]:
