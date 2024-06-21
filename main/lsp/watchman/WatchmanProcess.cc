@@ -38,7 +38,31 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
         logger.error("Unable to deserialize Watchman request: {}\nOriginal request:\n{}", e.what(), line);
     }
 }
+
 } // namespace
+
+optional<string> WatchmanProcess::readLine(FILE *file, int fd, string &buffer) {
+    errno = 0;
+    auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+    if (maybeLine.result == FileOps::ReadResult::Timeout) {
+        // Timeout occurred. See if we should abort before reading further.
+        return nullopt;
+    }
+
+    if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+        if (errno == EINTR) {
+            return nullopt;
+        }
+
+        // Exit loop; unable to read from Watchman process.
+        exitWithCode(1, nullopt);
+        return nullopt;
+    }
+
+    ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
+
+    return move(maybeLine.output.value());
+}
 
 void WatchmanProcess::start() {
     auto mainPid = getpid();
@@ -50,6 +74,11 @@ void WatchmanProcess::start() {
 
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
+
+        auto file = p.output();
+        auto fd = fileno(file);
+
+        string buffer;
 
         // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]], but Stripe
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
@@ -72,33 +101,14 @@ void WatchmanProcess::start() {
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 
-        auto file = p.output();
-        auto fd = fileno(file);
-
-        string buffer;
-
         while (!isStopped()) {
-            errno = 0;
-            auto maybeLine = FileOps::readLineFromFd(fd, buffer);
-            if (maybeLine.result == FileOps::ReadResult::Timeout) {
-                // Timeout occurred. See if we should abort before reading further.
+            string line;
+            if (auto maybeLine = readLine(file, fd, buffer)) {
+                line = move(maybeLine.value());
+            } else {
                 continue;
             }
 
-            if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
-                if (errno == EINTR) {
-                    continue;
-                }
-
-                // Exit loop; unable to read from Watchman process.
-                exitWithCode(1, nullopt);
-                break;
-            }
-
-            ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
-
-            const string &line = *maybeLine.output;
-            // Line found!
             rapidjson::MemoryPoolAllocator<> alloc;
             rapidjson::Document d(&alloc);
             logger->debug(line);
