@@ -47,6 +47,8 @@ private:
 
     void enqueueNotification(std::unique_ptr<NotificationMessage> notification);
 
+    std::optional<std::string> readLine(FILE *file, int fd, std::string &buffer);
+
     void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>);
 
     void processStateEnter(std::unique_ptr<sorbet::realmain::lsp::WatchmanStateEnter>);
