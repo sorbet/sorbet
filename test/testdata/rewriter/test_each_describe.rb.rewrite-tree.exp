@@ -53,8 +53,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def <it 'do this thing'><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
         begin
-          <emptyTree>::<C T>.reveal_type(@enabled)
-          <emptyTree>::<C T>.reveal_type(flag_enabled)
+          "do this thing"
+          begin
+            <emptyTree>::<C T>.reveal_type(@enabled)
+            <emptyTree>::<C T>.reveal_type(flag_enabled)
+          end
         end
       end
     end
@@ -85,7 +88,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
-        <emptyTree>
+        ""
       end
     end
 
@@ -108,7 +111,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
-        <emptyTree>
+        ""
       end
     end
 
@@ -131,7 +134,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it ''><<todo method>>(&<blk>)
       [true, false].each() do |flag_enabled|
-        <emptyTree>
+        ""
       end
     end
 

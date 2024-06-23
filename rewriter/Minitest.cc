@@ -139,9 +139,8 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
     return body;
 }
 
-string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
+string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
-    string argString;
     if (argLit != nullptr) {
         if (argLit->isString()) {
             return argLit->asString().show(ctx);
@@ -232,13 +231,30 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                 new_args.emplace_back(arg.deepCopy());
             }
 
-            // add the destructuring statements to the block if they're present
-            if (!destructuringStmts.empty()) {
+            // Make sure the `it` argument makes it in to be typechecked.
+            if (destructuringStmts.empty()) {
+                if (send->fun == core::Names::it()) {
+                    if (ast::isa_tree<ast::EmptyTree>(body)) {
+                        body = move(send->getPosArg(0));
+                    } else {
+                        ast::InsSeq::STATS_store stmts;
+                        stmts.emplace_back(move(send->getPosArg(0)));
+                        body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                    }
+                }
+            } else {
                 ast::InsSeq::STATS_store stmts;
                 for (auto &stmt : destructuringStmts) {
                     stmts.emplace_back(stmt.deepCopy());
                 }
-                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                // Ensure the possibly-string-interpolating `it` argument
+                // can see the assignments from destructuring.
+                if (send->fun == core::Names::it()) {
+                    stmts.emplace_back(move(send->getPosArg(0)));
+                }
+                auto loc = body.loc();
+                loc = loc.join(stmts[0].loc()).join(stmts[stmts.size() - 1].loc());
+                body = ast::MK::InsSeq(loc, std::move(stmts), std::move(body));
             }
 
             auto blk = ast::MK::Block(send->block()->loc, move(body), std::move(new_args));
