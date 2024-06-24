@@ -124,17 +124,17 @@ core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
 
 } // namespace
 
-ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body);
+ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe);
 
-ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body) {
-    body = recurse(ctx, isClass, std::move(body));
+ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
+    body = recurse(ctx, isClass, std::move(body), insideDescribe);
 
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
         for (auto &exp : bodySeq->stats) {
-            exp = recurse(ctx, isClass, std::move(exp));
+            exp = recurse(ctx, isClass, std::move(exp), insideDescribe);
         }
 
-        bodySeq->expr = recurse(ctx, isClass, std::move(bodySeq->expr));
+        bodySeq->expr = recurse(ctx, isClass, std::move(bodySeq->expr), insideDescribe);
     }
     return body;
 }
@@ -337,7 +337,7 @@ ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef e
     return body;
 }
 
-ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send) {
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *send, bool insideDescribe) {
     if (!send->hasBlock()) {
         return nullptr;
     }
@@ -387,8 +387,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(
-            ast::MK::SyntheticMethod0(send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body))));
+        auto method = addSigVoid(ast::MK::SyntheticMethod0(
+            send->loc, declLoc, name, prepareBody(ctx, isClass, std::move(block->body), insideDescribe)));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -409,7 +409,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         ast::ClassDef::RHS_store rhs;
         const bool bodyIsClass = true;
-        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body)));
+        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
@@ -420,8 +420,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
         const bool bodyIsClass = false;
         auto declLoc = declLocForSendWithBlock(*send);
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
-                                                           prepareBody(ctx, bodyIsClass, std::move(block->body))));
+        auto method = addSigVoid(
+            ast::MK::SyntheticMethod0(send->loc, declLoc, std::move(name),
+                                      prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
@@ -429,10 +430,10 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
     return nullptr;
 }
 
-ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body) {
+ast::ExpressionPtr recurse(core::MutableContext ctx, bool isClass, ast::ExpressionPtr body, bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, bodySend);
+        auto change = runSingle(ctx, isClass, bodySend, insideDescribe);
         if (change) {
             return change;
         }
@@ -446,7 +447,8 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         return stats;
     }
 
-    auto exp = runSingle(ctx, isClass, send);
+    auto insideDescribe = false;
+    auto exp = runSingle(ctx, isClass, send, insideDescribe);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
