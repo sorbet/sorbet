@@ -706,6 +706,37 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         whoKnows.sanityCheck();
         return;
     }
+
+    if (send->fun == core::Names::checkMatchArray()) {
+        auto tupleType = core::cast_type<core::TupleType>(send->args[1].type);
+        if (tupleType == nullptr) {
+            return;
+        }
+
+        auto typeTestType = core::Types::bottom();
+        for (const auto &klassType : tupleType->elems) {
+            // This mimics the non-T::Class case in `updateKnowledgeKindOf`
+            // We could extend this to `T::Class` types in the future, but let's start simple.
+            auto klass = core::Types::getRepresentedClass(ctx, klassType);
+            if (!klass.exists()) {
+                return;
+            }
+
+            auto ty = klass.data(ctx)->externalType();
+            if (ty.isUntyped()) {
+                return;
+            }
+
+            typeTestType = core::Types::any(ctx, move(typeTestType), move(ty));
+        }
+
+        auto ref = send->args[0].variable;
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, typeTestType);
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, typeTestType);
+
+        whoKnows.sanityCheck();
+        return;
+    }
 }
 
 void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins) {
