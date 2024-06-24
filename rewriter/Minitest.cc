@@ -397,9 +397,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         return nullptr;
     }
     auto &arg = send->getPosArg(0);
-    auto argString = to_s(ctx, arg);
 
     if (send->fun == core::Names::describe()) {
+        auto argString = to_s(ctx, arg);
         ast::ClassDef::ANCESTORS_store ancestors;
 
         // Avoid subclassing the containing context when it's a module, as that will produce an error in typed: false
@@ -416,6 +416,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
         auto declLoc = declLocForSendWithBlock(*send);
         return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs));
     } else if (send->fun == core::Names::it()) {
+        auto argString = to_s(ctx, arg);
         ConstantMover constantMover;
         ast::TreeWalk::apply(ctx, constantMover, block->body);
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
@@ -426,6 +427,15 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
                                       prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe)));
         method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
+    } else if (insideDescribe && send->fun == core::Names::let() && ast::isa_tree<ast::Literal>(arg)) {
+        auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(arg);
+        if (!argLiteral.isName()) {
+            return nullptr;
+        }
+
+        auto declLoc = declLocForSendWithBlock(*send);
+        auto methodName = argLiteral.asName();
+        return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
     }
 
     return nullptr;
