@@ -52,10 +52,9 @@ void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::Expressio
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
-        // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
-            ENFORCE(ctx.owner.isMethod());
-            klass = ctx.owner.owner(ctx).asClassOrModuleRef();
+            ENFORCE(ctx.owner.isMethod() || ctx.owner.isClassOrModule());
+            klass = ctx.owner.enclosingClass(ctx);
         } else {
             // Class var.
             klass = ctx.owner.enclosingClass(ctx);
