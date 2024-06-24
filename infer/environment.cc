@@ -507,31 +507,31 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
                                         const core::TypePtr &klassType, cfg::LocalRef ref,
                                         KnowledgeFilter &knowledgeFilter) {
-        auto &whoKnows = getKnowledge(local);
+    auto &whoKnows = getKnowledge(local);
 
-        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType();
-            if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
-            }
-        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-            if (klassTypeApp->klass == core::Symbols::Class()) {
-                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
-                                                                       core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
+    core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+    if (klass.exists()) {
+        auto ty = klass.data(ctx)->externalType();
+        if (!ty.isUntyped()) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+        }
+    } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+        if (klassTypeApp->klass == core::Symbols::Class()) {
+            auto currentAlignment =
+                core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Class());
+            auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+            });
+            ENFORCE(it != currentAlignment.end());
+            auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
+            if (!instanceTy.isUntyped()) {
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
+                // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                // https://github.com/sorbet/sorbet/issues/4358
             }
         }
+    }
 }
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
