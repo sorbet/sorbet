@@ -588,15 +588,16 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        auto &klassType = send->args[0].type;
+        const auto &klassType = send->args[0].type;
+
         core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+        auto ref = send->recv.variable;
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType();
             if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
             }
-            whoKnows.sanityCheck();
         } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
             if (klassTypeApp->klass == core::Symbols::Class()) {
                 auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
@@ -607,13 +608,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 ENFORCE(it != currentAlignment.end());
                 auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
                 if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, instanceTy);
+                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
                     // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
                     // https://github.com/sorbet/sorbet/issues/4358
                 }
             }
         }
 
+        whoKnows.sanityCheck();
         return;
     }
 
@@ -668,31 +670,32 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
+        // `when` against class literal
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        const auto &recvType = send->recv.type;
+        const auto &klassType = send->recv.type;
 
-        // `when` against class literal
-        core::ClassOrModuleRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
-        if (representedClass.exists()) {
-            auto representedType = representedClass.data(ctx)->externalType();
-            if (!representedType.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
+        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+        auto ref = send->args[0].variable;
+        if (klass.exists()) {
+            auto ty = klass.data(ctx)->externalType();
+            if (!ty.isUntyped()) {
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
             }
-        } else if (auto *recvApp = core::cast_type<core::AppliedType>(recvType)) {
-            if (recvApp->klass == core::Symbols::Class()) {
-                auto currentAlignment =
-                    core::Types::alignBaseTypeArgs(ctx, recvApp->klass, recvApp->targs, core::Symbols::Class());
+        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+            if (klassTypeApp->klass == core::Symbols::Class()) {
+                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
+                                                                       core::Symbols::Class());
                 auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
                     return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
                 });
                 ENFORCE(it != currentAlignment.end());
-                auto instanceTy = recvApp->targs[distance(currentAlignment.begin(), it)];
+                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
                 if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, instanceTy);
+                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
                     // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
                     // https://github.com/sorbet/sorbet/issues/4358
                 }
@@ -700,13 +703,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         // `when` against singleton
-        if (core::isa_type<core::ClassType>(recvType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
+        if (core::isa_type<core::ClassType>(klassType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(klassType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s.symbol)) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
             }
         }
         whoKnows.sanityCheck();
