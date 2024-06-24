@@ -504,6 +504,36 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 
 } // namespace
 
+void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
+                                        const core::TypePtr &klassType, cfg::LocalRef ref,
+                                        KnowledgeFilter &knowledgeFilter) {
+        auto &whoKnows = getKnowledge(local);
+
+        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+        if (klass.exists()) {
+            auto ty = klass.data(ctx)->externalType();
+            if (!ty.isUntyped()) {
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+            }
+        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+            if (klassTypeApp->klass == core::Symbols::Class()) {
+                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
+                                                                       core::Symbols::Class());
+                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+                });
+                ENFORCE(it != currentAlignment.end());
+                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
+                if (!instanceTy.isUntyped()) {
+                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
+                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                    // https://github.com/sorbet/sorbet/issues/4358
+                }
+            }
+        }
+}
+
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
     if (!send->fun.isUpdateKnowledgeName()) {
@@ -589,32 +619,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->args[0].type;
-
-        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
         auto ref = send->recv.variable;
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType();
-            if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
-            }
-        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-            if (klassTypeApp->klass == core::Symbols::Class()) {
-                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
-                                                                       core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
-
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
         whoKnows.sanityCheck();
         return;
     }
@@ -670,37 +676,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
-        // `when` against class literal
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
         auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->recv.type;
-
-        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
         auto ref = send->args[0].variable;
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType();
-            if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
-            }
-        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-            if (klassTypeApp->klass == core::Symbols::Class()) {
-                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
-                                                                       core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
+        // `when` against class literal
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
 
         // `when` against singleton
         if (core::isa_type<core::ClassType>(klassType)) {
