@@ -3723,6 +3723,55 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
+class Magic_checkMatchArray : public IntrinsicMethod {
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::tripleEq()};
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto tupleType = core::cast_type<core::TupleType>(args.args[1]->type);
+        if (tupleType == nullptr) {
+            return;
+        }
+
+        auto testedType = args.args[0]->type;
+        if (testedType.isUntyped()) {
+            return;
+        }
+
+        auto testedSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(testedType)) {
+            testedSym = cast_type_nonnull<ClassType>(testedType).symbol;
+        } else if (auto *app = cast_type<AppliedType>(testedType)) {
+            testedSym = app->klass;
+        }
+        if (testedSym.exists() && testedSym.data(gs)->flags.isSealed) {
+            testedType = testedSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
+        auto typeTestType = core::Types::bottom();
+        for (const auto &klassType : tupleType->elems) {
+            auto klass = core::Types::getRepresentedClass(gs, klassType);
+            if (!klass.exists()) {
+                return;
+            }
+
+            auto ty = klass.data(gs)->externalType();
+            if (ty.isUntyped()) {
+                return;
+            }
+
+            typeTestType = core::Types::any(gs, move(typeTestType), move(ty));
+        }
+
+        if (Types::isSubType(gs, testedType, typeTestType)) {
+            res.returnType = Types::trueClass();
+        } else if (Types::glb(gs, testedType, typeTestType).isBottom()) {
+            res.returnType = Types::falseClass();
+        }
+    }
+} Magic_checkMatchArray;
+
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -4491,6 +4540,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashNoDup(), &Magic_toHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHash(), &Magic_mergeHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHashValues(), &Magic_mergeHashValues},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkMatchArray(), &Magic_checkMatchArray},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
