@@ -301,8 +301,65 @@ class ExpressionPtrSearchWalk {
         return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
     }
 
+    void computeLCA(const core::LocOffsets matchLoc) {
+        if (LCAScopeStack.empty()) {
+            for (auto *scope : enclosingScopeStack) {
+                const ast::ExpressionPtr *scopeToCompare = scope;
+                if (ast::isa_tree<ast::If>(*scope)) {
+                    auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
+                    if (if_.thenp.loc().exists() && if_.thenp.loc().contains(matchLoc)) {
+                        scopeToCompare = &if_.thenp;
+                    } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(matchLoc)) {
+                        scopeToCompare = &if_.elsep;
+                    } else if (if_.cond.loc().contains(matchLoc)) {
+                        scopeToCompare = &if_.cond;
+                    } else {
+                        ENFORCE(false);
+                    }
+                } else if (ast::isa_tree<ast::Rescue>(*scope)) {
+                    auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(*scope);
+                    if (rescue.body.loc().exists() && rescue.body.loc().contains(matchLoc)) {
+                        scopeToCompare = &rescue.body;
+                    } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(matchLoc)) {
+                        scopeToCompare = &rescue.else_;
+                    } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(matchLoc)) {
+                        scopeToCompare = &rescue.ensure;
+                    } else {
+                        auto found = false;
+                        for (auto &rescueCase : rescue.rescueCases) {
+                            if (rescueCase.loc().exists() && rescueCase.loc().contains(matchLoc)) {
+                                scopeToCompare = &rescueCase;
+                                found = true;
+                            }
+                        }
+                        ENFORCE(found, "didn't find match in any of the rescue cases");
+                    }
+                } else if (ast::isa_tree<ast::While>(*scope)) {
+                    auto &while_ = ast::cast_tree_nonnull<ast::While>(*scope);
+                    if (while_.body.loc().contains(matchLoc)) {
+                        scopeToCompare = &while_.body;
+                    } else if (while_.cond.loc().contains(matchLoc)) {
+                        scopeToCompare = &while_.cond;
+                    } else {
+                        ENFORCE(false);
+                    }
+                }
+                LCAScopeStack.push_back(scopeToCompare);
+            }
+        } else {
+            for (size_t i = 0; i < LCAScopeStack.size(); i++) {
+                auto *scopeToCompare = LCAScopeStack[i];
+                if (!scopeToCompare->loc().contains(matchLoc)) {
+                    LCAScopeStack.erase(LCAScopeStack.begin() + i, LCAScopeStack.end());
+                    break;
+                }
+            }
+        }
+    }
+
 public:
-    vector<pair<vector<const ast::ExpressionPtr *>, core::LocOffsets>> matches;
+    vector<const ast::ExpressionPtr *> LCAScopeStack;
+    vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
         : targetNode(matchingNode), skippedLocs(skippedLocs) {}
 
@@ -323,7 +380,8 @@ public:
         // node being different) Ex.
         //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
         if (targetNode->structurallyEqual(tree)) {
-            matches.emplace_back(enclosingScopeStack, tree.loc());
+            matches.emplace_back(tree.loc());
+            computeLCA(tree.loc());
         }
     }
 
@@ -403,64 +461,11 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     if (matches.size() == 1) {
         return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
-    fast_sort(matches, [](auto a, auto b) { return a.second.beginPos() < b.second.beginPos(); });
 
-    // Find LCA enclosing scope
-    const ast::ExpressionPtr *scopeToInsertIn = &enclosingClassOrMethod;
-    auto firstMatch = matches[0].second;
-    for (auto *scope : matches[0].first) {
-        const ast::ExpressionPtr *scopeToCompare = scope;
-        if (ast::isa_tree<ast::If>(*scope)) {
-            auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
-            if (if_.thenp.loc().exists() && if_.thenp.loc().contains(firstMatch)) {
-                scopeToCompare = &if_.thenp;
-            } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(firstMatch)) {
-                scopeToCompare = &if_.elsep;
-            } else if (if_.cond.loc().contains(firstMatch)) {
-                scopeToCompare = &if_.cond;
-            } else {
-                ENFORCE(false);
-            }
-        } else if (ast::isa_tree<ast::Rescue>(*scope)) {
-            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(*scope);
-            if (rescue.body.loc().exists() && rescue.body.loc().contains(firstMatch)) {
-                scopeToCompare = &rescue.body;
-            } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(firstMatch)) {
-                scopeToCompare = &rescue.else_;
-            } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(firstMatch)) {
-                scopeToCompare = &rescue.ensure;
-            } else {
-                auto found = false;
-                for (auto &rescueCase : rescue.rescueCases) {
-                    if (rescueCase.loc().exists() && rescueCase.loc().contains(firstMatch)) {
-                        scopeToCompare = &rescueCase;
-                        found = true;
-                    }
-                }
-                ENFORCE(found, "didn't find match in any of the rescue cases");
-            }
-        } else if (ast::isa_tree<ast::While>(*scope)) {
-            auto &while_ = ast::cast_tree_nonnull<ast::While>(*scope);
-            if (while_.body.loc().contains(firstMatch)) {
-                scopeToCompare = &while_.body;
-            } else if (while_.cond.loc().contains(firstMatch)) {
-                scopeToCompare = &while_.cond;
-            } else {
-                ENFORCE(false);
-            }
-        }
-        bool allMatch = true;
-        for (int j = 1; j < matches.size(); j++) {
-            if (!scopeToCompare->loc().contains(matches[j].second)) {
-                allMatch = false;
-                break;
-            }
-        }
-        if (!allMatch) {
-            break;
-        }
-        scopeToInsertIn = scopeToCompare;
-    }
+    const ast::ExpressionPtr *scopeToInsertIn = walk.LCAScopeStack.back();
+
+    fast_sort(matches, [](auto a, auto b) { return a.beginPos() < b.beginPos(); });
+    auto firstMatch = matches[0];
 
     auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch);
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
@@ -482,7 +487,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
             fmt::format("newVariable = {}{}newVariable", selectionLoc.source(gs).value(), trailing)));
         for (int j = 1; j < matches.size(); j++) {
             auto match = matches[j];
-            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second));
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match));
             edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
         }
     } else {
@@ -490,7 +495,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
             make_unique<TextEdit>(Range::fromLoc(gs, whereToInsertLoc),
                                   fmt::format("newVariable = {}{}", selectionLoc.source(gs).value(), trailing)));
         for (auto match : matches) {
-            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match.second));
+            auto matchLoc = Range::fromLoc(gs, core::Loc(file, match));
             edits.emplace_back(make_unique<TextEdit>(std::move(matchLoc), "newVariable"));
         }
     }
