@@ -543,10 +543,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
+    if (!knowledgeFilter.isNeeded(local)) {
+        return;
+    }
+
     if (send->fun == core::Names::bang()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
@@ -564,9 +565,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::nil_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
@@ -575,9 +573,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::blank_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
@@ -592,9 +587,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::present_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
@@ -614,9 +606,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->args[0].type;
         auto ref = send->recv.variable;
@@ -626,9 +615,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
@@ -676,9 +662,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->recv.type;
         auto ref = send->args[0].variable;
