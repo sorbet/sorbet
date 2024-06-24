@@ -16,6 +16,10 @@ class Minitest::Spec < Minitest::Test
     end
   end
   extend DSL
+
+  def self.test_each(iter, &blk)
+    iter.each(&blk)
+  end
 end
 # ---------------------------------------------------------------------
 
@@ -44,16 +48,16 @@ class MyTestHelper < Minitest::Spec
 
     it 'example' do
       res = untyped_helper()
-      T.reveal_type(res)
+      T.reveal_type(res) # error: `T.untyped`
       puts(res)
 
       res = let_with_sig()
-      T.reveal_type(res)
+      T.reveal_type(res) # error: `String`
       puts(res)
 
       begin
         res = let_with_bad_sig()
-        T.reveal_type(res) # => `Integer`
+        T.reveal_type(res) # error: `Integer`
       rescue TypeError => ex
         puts(ex.message)
       end
@@ -62,7 +66,44 @@ class MyTestHelper < Minitest::Spec
     it 'counter examples' do
       # This will run ok but Sorbet rejects it, in case there are other `let` DSLs
       # (Sorbet has always rejected it--the recent additions to support `let` are strictly additive)
-      defined_outside()
+      begin
+        defined_outside() # error: Method `defined_outside` does not exist
+      rescue NameError => ex
+        puts(ex.message)
+      end
+    end
+
+    test_each(['once']) do |once|
+      it 'inside each' do
+        res = let_with_sig
+        T.reveal_type(res) # error: `String`
+        puts(once)
+      end
+    end
+  end
+
+  test_each(['foo', 'bar']) do |test_case|
+    describe("for #{test_case}") do
+      sig { returns(NilClass) } # error: Only valid `it`, `before`, `after`, and `describe` blocks can appear within `test_each`
+      let(:another_helper) { puts('another') }
+      it 'does the thing' do
+        begin
+          # This one is from the other describe block, not ours
+          let_with_sig # error: Method `let_with_sig` does not exist
+        rescue NameError => ex
+          puts(ex)
+        end
+
+        res = another_helper
+        T.reveal_type(res) # error: `NilClass`
+
+        begin
+          # `let`-defined methods which are defined outside describe are not supported (out of caution in rewriter)
+          defined_outside # error: Method `defined_outside` does not exist
+        rescue NameError => ex
+          puts(ex)
+        end
+      end
     end
   end
 end
