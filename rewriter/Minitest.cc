@@ -247,6 +247,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
             return constantMover.addConstantsToExpression(send->loc, move(method));
         } else if (send->fun == core::Names::describe() && send->numPosArgs() == 1 && send->hasBlock() &&
                    send->block()->args.size() == 0) {
+            // TODO(jez) Do we need special handling for these describe blocks, or are they handled already?
             return prepareTestEachBody(ctx, eachName, std::move(send->block()->body), args,
                                        std::move(destructuringStmts), iteratee);
         }
