@@ -142,12 +142,8 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
 string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
-    if (argLit != nullptr) {
-        if (argLit->isString()) {
-            return argLit->asString().show(ctx);
-        } else if (argLit->isSymbol()) {
-            return argLit->asSymbol().show(ctx);
-        }
+    if (argLit != nullptr && argLit->isName()) {
+        return argLit->asName().show(ctx);
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {

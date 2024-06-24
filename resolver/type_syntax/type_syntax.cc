@@ -1038,7 +1038,7 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             }
             auto val = move(maybeVal.value());
             auto lit = ast::cast_tree<ast::Literal>(ktree);
-            if (lit && (lit->isSymbol() || lit->isString())) {
+            if (lit && lit->isName()) {
                 ENFORCE(core::isa_type<core::NamedLiteralType>(lit->value));
                 keys.emplace_back(lit->value);
                 values.emplace_back(val);
