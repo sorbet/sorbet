@@ -410,7 +410,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         ast::ClassDef::RHS_store rhs;
         const bool bodyIsClass = true;
-        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body), insideDescribe));
+        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true));
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
