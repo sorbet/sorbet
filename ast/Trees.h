@@ -1035,9 +1035,11 @@ public:
     std::string nodeName() const;
     bool isString() const;
     bool isSymbol() const;
+    bool isName() const;
     bool isNil(const core::GlobalState &gs) const;
     core::NameRef asString() const;
     core::NameRef asSymbol() const;
+    core::NameRef asName() const;
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
 
