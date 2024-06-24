@@ -547,8 +547,9 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
+    auto &whoKnows = getKnowledge(local);
+
     if (send->fun == core::Names::bang()) {
-        auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
             whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
@@ -565,7 +566,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::nil_p()) {
-        auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
@@ -579,7 +579,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -593,7 +592,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -606,7 +604,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
-        auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->args[0].type;
         auto ref = send->recv.variable;
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
@@ -615,7 +612,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
 
@@ -662,7 +658,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
-        auto &whoKnows = getKnowledge(local);
         const auto &klassType = send->recv.type;
         auto ref = send->args[0].variable;
         // `when` against class literal
@@ -701,7 +696,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
 
-        auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         if (send->fun == core::Names::leq()) {
             // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
