@@ -253,7 +253,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
                    ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
             auto argLiteral = ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(0));
             if (argLiteral.isName()) {
-                auto declLoc = declLocForSendWithBlock(*send);
+                auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
                 auto methodName = argLiteral.asName();
                 return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(send->block()->body));
             }
@@ -441,7 +441,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             return nullptr;
         }
 
-        auto declLoc = declLocForSendWithBlock(*send);
+        auto declLoc = send->loc.copyWithZeroLength().join(argLiteral.loc);
         auto methodName = argLiteral.asName();
         return ast::MK::SyntheticMethod0(send->loc, declLoc, methodName, std::move(block->body));
     }

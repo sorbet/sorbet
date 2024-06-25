@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 
 require_relative '../../../gems/sorbet-runtime/lib/sorbet-runtime'
 
@@ -12,12 +12,12 @@ class Minitest::Test < Minitest::Runnable; end
 class Minitest::Spec < Minitest::Test
   module DSL
     if T.unsafe(false)
-      def let(name, &block); end
+      def let(name, &block); end # error: does not have a `sig`
     end
   end
   extend DSL
 
-  def self.test_each(iter, &blk)
+  def self.test_each(iter, &blk) # error: does not have a `sig`
     iter.each(&blk)
   end
 end
@@ -33,6 +33,7 @@ class MyTestHelper < Minitest::Spec
 
   describe 'test' do
     let(:untyped_helper) {
+  # ^^^^^^^^^^^^^^^^^^^ error: does not have a `sig`
       'hello'
     }
 
