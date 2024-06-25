@@ -34,14 +34,19 @@ annotations (which would be a cycle). Keep in mind that Sorbet respects
 overloaded and redefined methods, so even simple expressions like these do not
 always have well-known result types.
 
-(**Note**: Newer versions of Sorbet will attempt to assume that the type of
+Newer versions of Sorbet will attempt to assume that the type of
 `A = MyClass.new` is in fact `MyClass`, and require an explicit annotation
 _only_ when that assumption turns out to be incorrect, for example due to an
-override.)
+override.
 
 Also, for **frozen** array literals assigned to constants, Sorbet assumes a
-[tuple type](tuple.md) instead of an [array type](stdlib-generics.md), because
+[tuple type](tuples.md) instead of an [array type](stdlib-generics.md), because
 it knows that the array cannot be re-assigned or mutated.
+
+For hash literals, Sorbet always infers a [hash type](stdlib-generics.md) (even
+for frozen hash literals) because [shape types](shapes.md) are not yet mature
+enough to be automatically inferred. It's still possible to use an explicit type
+annotation to declare a constant as having a shape type.
 
 ## ... for instance variables?
 
