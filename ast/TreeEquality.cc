@@ -38,6 +38,7 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
             auto *a = reinterpret_cast<const Send *>(tree);
             auto *b = reinterpret_cast<const Send *>(other);
             return structurallyEqual(avoid, a->recv, b->recv) && a->fun == b->fun &&
+                   a->numPosArgs() == b->numPosArgs() && a->flags == b->flags &&
                    structurallyEqualVec(avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse());
         }
 

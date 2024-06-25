@@ -761,6 +761,10 @@ public:
 
         // In C++20 we can replace this with bit field initialzers
         Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
+        bool operator==(const Flags &other) const noexcept {
+            return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
+                   hasBlock == other.hasBlock;
+        }
     };
     CheckSize(Flags, 1, 1);
 
