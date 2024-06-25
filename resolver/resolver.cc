@@ -2337,6 +2337,8 @@ class ResolveTypeMembersAndFieldsWalk {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
+            // TODO(jez) Make this recursive. You can have arrays of arrays of literals.
+            // TODO(jez) Handle ClassOrModule symbol ConstantLit
             [&](const ast::Array &arr) {
                 if (arr.elems.empty()) {
                     return;
@@ -2348,7 +2350,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
                         typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                     } else {
-                        // TODO(jez) Handle ClassOrModule symbol ConstantLit
                         return;
                     }
                 }
@@ -2365,7 +2366,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
                         typeKeys.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                     }
-                    // TODO(jez) Handle ClassOrModule symbol ConstantLit
                 }
                 vector<core::TypePtr> typeValues;
                 typeValues.reserve(hsh.values.size());
@@ -2373,7 +2373,6 @@ class ResolveTypeMembersAndFieldsWalk {
                     if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
                         typeValues.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                     }
-                    // TODO(jez) Handle ClassOrModule symbol ConstantLit
                 }
                 result = core::Types::hashOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeKeys)),
                                              core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeValues)));
@@ -2403,7 +2402,6 @@ class ResolveTypeMembersAndFieldsWalk {
                             typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                         } else {
                             return;
-                            // TODO(jez) Handle ClassOrModule symbol ConstantLit
                         }
                     }
                     result = core::make_type<core::TupleType>(move(typeElems));
@@ -2414,7 +2412,6 @@ class ResolveTypeMembersAndFieldsWalk {
                         if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
                             typeKeys.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                         }
-                        // TODO(jez) Handle ClassOrModule symbol ConstantLit
                     }
                     vector<core::TypePtr> typeValues;
                     typeValues.reserve(hsh->values.size());
@@ -2422,7 +2419,6 @@ class ResolveTypeMembersAndFieldsWalk {
                         if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
                             typeValues.emplace_back(core::Types::dropLiteral(ctx, lit->value));
                         }
-                        // TODO(jez) Handle ClassOrModule symbol ConstantLit
                     }
                     // Intentionally not inferring a shape type here, because it would be more
                     // unsafe than inferring a hash. People can always explicitly annotate the
