@@ -2333,50 +2333,12 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr,
+                                                           bool isFrozen) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
-            // TODO(jez) Make this recursive. You can have arrays of arrays of literals.
             // TODO(jez) Handle ClassOrModule symbol ConstantLit
-            [&](const ast::Array &arr) {
-                if (arr.elems.empty()) {
-                    return;
-                }
-
-                vector<core::TypePtr> typeElems;
-                typeElems.reserve(arr.elems.size());
-                for (const auto &elem : arr.elems) {
-                    if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                        typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                    } else {
-                        return;
-                    }
-                }
-                result = core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
-            },
-            [&](const ast::Hash &hsh) {
-                if (hsh.keys.empty() || hsh.values.empty()) {
-                    return;
-                }
-
-                vector<core::TypePtr> typeKeys;
-                typeKeys.reserve(hsh.keys.size());
-                for (const auto &elem : hsh.keys) {
-                    if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                        typeKeys.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                    }
-                }
-                vector<core::TypePtr> typeValues;
-                typeValues.reserve(hsh.values.size());
-                for (const auto &elem : hsh.values) {
-                    if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                        typeValues.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                    }
-                }
-                result = core::Types::hashOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeKeys)),
-                                             core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeValues)));
-            },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
@@ -2388,46 +2350,74 @@ class ResolveTypeMembersAndFieldsWalk {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
+                // Don't recurse--just take the type from the cast verbatim (no inference)
                 result = cast.type;
             },
-            [&](const ast::Send &send) {
-                if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock()) {
+            [&](const ast::Array &arr) {
+                if (arr.elems.empty()) {
+                    // Require type annotation for empty array, instead of inferring something like
+                    // T.untyped or T.noreturn
                     return;
                 }
-                if (auto *arr = ast::cast_tree<ast::Array>(send.recv)) {
-                    vector<core::TypePtr> typeElems;
-                    typeElems.reserve(arr->elems.size());
-                    for (const auto &elem : arr->elems) {
-                        if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                            typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                        } else {
-                            return;
-                        }
+
+                vector<core::TypePtr> typeElems;
+                typeElems.reserve(arr.elems.size());
+                for (const auto &elem : arr.elems) {
+                    auto typeElem = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    if (typeElem == nullptr) {
+                        return;
                     }
+                    typeElems.emplace_back(move(typeElem));
+                }
+
+                if (isFrozen) {
                     result = core::make_type<core::TupleType>(move(typeElems));
-                } else if (auto *hsh = ast::cast_tree<ast::Hash>(send.recv)) {
-                    vector<core::TypePtr> typeKeys;
-                    typeKeys.reserve(hsh->keys.size());
-                    for (const auto &elem : hsh->keys) {
-                        if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                            typeKeys.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                        }
-                    }
-                    vector<core::TypePtr> typeValues;
-                    typeValues.reserve(hsh->values.size());
-                    for (const auto &elem : hsh->values) {
-                        if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
-                            typeValues.emplace_back(core::Types::dropLiteral(ctx, lit->value));
-                        }
-                    }
-                    // Intentionally not inferring a shape type here, because it would be more
-                    // unsafe than inferring a hash. People can always explicitly annotate the
-                    // constant to overrule this decision.
-                    result = core::Types::hashOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeKeys)),
-                                                 core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeValues)));
+                } else {
+                    result =
+                        core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
                 }
             },
-            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
+            [&](const ast::Hash &hsh) {
+                if (hsh.keys.empty() || hsh.values.empty()) {
+                    return;
+                }
+
+                vector<core::TypePtr> typeKeys;
+                typeKeys.reserve(hsh.keys.size());
+                for (const auto &elem : hsh.keys) {
+                    auto typeKey = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    if (typeKey == nullptr) {
+                        return;
+                    }
+                    typeKeys.emplace_back(move(typeKey));
+                }
+                vector<core::TypePtr> typeValues;
+                typeValues.reserve(hsh.values.size());
+                for (const auto &elem : hsh.values) {
+                    auto typeValue = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    if (typeValue == nullptr) {
+                        return;
+                    }
+                    typeValues.emplace_back(move(typeValue));
+                }
+                // Intentionally not inferring a shape type here (even if isFrozen), because it
+                // would be more unsafe than inferring a hash. People can always explicitly annotate
+                // the constant to overrule this decision and get a shape-typed constant.
+                result = core::Types::hashOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeKeys)),
+                                             core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeValues)));
+            },
+            [&](const ast::Send &send) {
+                if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
+                    !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
+                    return;
+                }
+                auto recvType = resolveConstantType(ctx, send.recv, /* isFrozen */ true);
+                if (recvType == nullptr) {
+                    return;
+                }
+                result = move(recvType);
+            },
+            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr, /* isFrozen */ false); },
             [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
@@ -2438,7 +2428,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs, /* isFrozen */ false)) {
                 return resultType;
             }
         }
@@ -2453,7 +2443,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
-        auto resultType = resolveConstantType(ctx, asgn->rhs);
+        auto resultType = resolveConstantType(ctx, asgn->rhs, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
