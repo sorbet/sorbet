@@ -230,7 +230,6 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
                 auto class_type_b = core::cast_type_nonnull<core::ClassType>(bType);
                 return class_type_a.symbol == class_type_b.symbol;
             } else {
-                // TODO(neil): are there any more cases we need to handle?
                 ENFORCE(false, "unexpected TypePtr::Tag: {}", aType.tag());
             }
             return false;
