@@ -14,8 +14,9 @@ namespace sorbet::rewriter {
 namespace {
 
 enum class FromWhere {
+    Before,
     Inside,
-    Outside,
+    After,
 };
 
 bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -51,7 +52,7 @@ ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
 
 void badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOffsets line1Loc) {
     if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::BadTEnumSyntax)) {
-        e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
+        e.setHeader("All non-enum constants in a `{}` must be defined after the `{}` block", "T::Enum", "enums do");
         e.addErrorLine(ctx.locAt(line1Loc), "Enclosing definition here");
     }
 }
@@ -118,6 +119,12 @@ std::optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::Clas
 
     auto *selfNew = findSelfNew(asgn->rhs);
     if (selfNew == nullptr) {
+        if (fromWhere == FromWhere::After) {
+            // Allow non-enum constants to be defined after `enums do`
+            // (type aliases, type members, etc.)
+            return {};
+        }
+
         badConst(ctx, stat.loc(), klass->loc);
         return {};
     }
@@ -207,19 +214,31 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract(), locZero));
     klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed(), locZero));
     core::TypePtr serializeReturnType = core::Types::bottom();
+    auto fromWhere = FromWhere::Before;
+    core::Loc enumsDoLoc;
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
+            if (fromWhere != FromWhere::Before) {
+                if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
+                    e.setHeader("Duplicate `{}` block in `{}`", "enums do", "T::Enum");
+                    e.addErrorLine(enumsDoLoc, "Previous `{}` block here", "enums do");
+                }
+            } else {
+                fromWhere = FromWhere::Inside;
+                enumsDoLoc = ctx.locAt(enumsDo->loc);
+            }
+
             auto *block = enumsDo->block();
             vector<ast::ExpressionPtr> newStats;
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
-                    auto type = collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
+                    auto type = collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats);
                     serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
                 }
-                auto type = collectNewStats(ctx, klass, std::move(insSeq->expr), FromWhere::Inside, newStats);
+                auto type = collectNewStats(ctx, klass, std::move(insSeq->expr), fromWhere, newStats);
                 serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
             } else {
-                auto type = collectNewStats(ctx, klass, std::move(block->body), FromWhere::Inside, newStats);
+                auto type = collectNewStats(ctx, klass, std::move(block->body), fromWhere, newStats);
                 serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
             }
 
@@ -230,9 +249,10 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
             block->body = ast::MK::InsSeq(block->loc, std::move(insSeqStats), ast::MK::Nil(block->loc));
             klass->rhs.emplace_back(std::move(stat));
+            fromWhere = FromWhere::After;
         } else {
             vector<ast::ExpressionPtr> newStats;
-            collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside, newStats);
+            collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats);
             for (auto &newStat : newStats) {
                 klass->rhs.emplace_back(std::move(newStat));
             }
