@@ -37,15 +37,32 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::Send: {
             auto *a = reinterpret_cast<const Send *>(tree);
             auto *b = reinterpret_cast<const Send *>(other);
-            return structurallyEqual(avoid, a->recv, b->recv) && a->fun == b->fun &&
-                   a->numPosArgs() == b->numPosArgs() && a->flags == b->flags &&
-                   structurallyEqualVec(avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse());
+            if (a->fun != b->fun) {
+                return false;
+            }
+
+            if (a->flags != b->flags) {
+                return false;
+            }
+
+            if (a->numPosArgs() != b->numPosArgs()) {
+                return false;
+            }
+
+            if (!structurallyEqual(avoid, a->recv, b->recv)) {
+                return false;
+            }
+
+            return structurallyEqualVec(avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse());
         }
 
         case Tag::ClassDef: {
             auto *a = reinterpret_cast<const ClassDef *>(tree);
             auto *b = reinterpret_cast<const ClassDef *>(other);
             if (a->symbol != b->symbol) {
+                return false;
+            }
+            if (a->kind != b->kind) {
                 return false;
             }
             if (!structurallyEqual(avoid, a->name, b->name)) {
@@ -60,9 +77,6 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
             if (!structurallyEqualVec(avoid, a->rhs, b->rhs)) {
                 return false;
             }
-            if (a->kind != b->kind) {
-                return false;
-            }
             return true;
         }
 
@@ -75,13 +89,13 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
             if (a->name != b->name) {
                 return false;
             }
-            if (!structurallyEqualVec(avoid, a->args, b->args)) {
+            if (a->flags != b->flags) {
                 return false;
             }
             if (!structurallyEqual(avoid, a->rhs, b->rhs)) {
                 return false;
             }
-            if (a->flags != b->flags) {
+            if (!structurallyEqualVec(avoid, a->args, b->args)) {
                 return false;
             }
             return true;
@@ -103,10 +117,7 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::Break: {
             auto *a = reinterpret_cast<const Break *>(tree);
             auto *b = reinterpret_cast<const Break *>(other);
-            if (!structurallyEqual(avoid, a->expr, b->expr)) {
-                return false;
-            }
-            return true;
+            return structurallyEqual(avoid, a->expr, b->expr);
         }
 
         case Tag::Retry: {
@@ -128,16 +139,28 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::RescueCase: {
             auto *a = reinterpret_cast<const RescueCase *>(tree);
             auto *b = reinterpret_cast<const RescueCase *>(other);
-            return structurallyEqualVec(avoid, a->exceptions, b->exceptions) &&
-                   structurallyEqual(avoid, a->var, b->var) && structurallyEqual(avoid, a->body, b->body);
+            if (!structurallyEqual(avoid, a->var, b->var)) {
+                return false;
+            }
+            if (!structurallyEqual(avoid, a->body, b->body)) {
+                return false;
+            }
+            return structurallyEqualVec(avoid, a->exceptions, b->exceptions);
         }
 
         case Tag::Rescue: {
             auto *a = reinterpret_cast<const Rescue *>(tree);
             auto *b = reinterpret_cast<const Rescue *>(other);
-            return structurallyEqual(avoid, a->body, b->body) &&
-                   structurallyEqualVec(avoid, a->rescueCases, b->rescueCases) &&
-                   structurallyEqual(avoid, a->else_, b->else_) && structurallyEqual(avoid, a->ensure, b->ensure);
+            if (!structurallyEqual(avoid, a->body, b->body)) {
+                return false;
+            }
+            if (!structurallyEqual(avoid, a->else_, b->else_)) {
+                return false;
+            }
+            if (!structurallyEqual(avoid, a->ensure, b->ensure)) {
+                return false;
+            }
+            return structurallyEqualVec(avoid, a->rescueCases, b->rescueCases);
         }
 
         case Tag::Local: {
@@ -191,8 +214,13 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::Cast: {
             auto *a = reinterpret_cast<const Cast *>(tree);
             auto *b = reinterpret_cast<const Cast *>(other);
-            return a->type == b->type && structurallyEqual(avoid, a->arg, b->arg) && a->cast == b->cast &&
-                   structurallyEqual(avoid, a->typeExpr, b->typeExpr);
+            if (a->type != b->type) {
+                return false;
+            }
+            if (a->cast != b->cast) {
+                return false;
+            }
+            return structurallyEqual(avoid, a->arg, b->arg) && structurallyEqual(avoid, a->typeExpr, b->typeExpr);
         }
 
         case Tag::Hash: {
@@ -238,7 +266,10 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            return structurallyEqual(avoid, a->scope, b->scope) && a->cnst == b->cnst;
+            if (a->cnst != b->cnst) {
+                return false;
+            }
+            return structurallyEqual(avoid, a->scope, b->scope);
         }
 
         case Tag::ConstantLit: {

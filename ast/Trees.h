@@ -765,6 +765,10 @@ public:
             return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
                    hasBlock == other.hasBlock;
         }
+
+        bool operator!=(const Flags &other) const noexcept {
+            return !(*this == other);
+        }
     };
     CheckSize(Flags, 1, 1);
 
