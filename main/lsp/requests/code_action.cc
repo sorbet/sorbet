@@ -281,7 +281,6 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
             }
             if (!singleOccurrenceDocumentEdits.empty()) {
-                // TODO: should we rename to something like "Extract Variable (this occurrence only)"?
                 auto action = make_unique<CodeAction>("Extract Variable");
                 action->kind = CodeActionKind::RefactorExtract;
 
