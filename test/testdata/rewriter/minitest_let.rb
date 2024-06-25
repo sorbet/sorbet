@@ -12,7 +12,7 @@ class Minitest::Test < Minitest::Runnable; end
 class Minitest::Spec < Minitest::Test
   module DSL
     if T.unsafe(false)
-      def let(name, &block); end
+      def let(name, &block); end # error: does not have a `sig`
     end
   end
   extend DSL
