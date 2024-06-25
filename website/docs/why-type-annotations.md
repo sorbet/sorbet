@@ -21,9 +21,10 @@ method signature type inference.
 Similarly, Sorbet only attempts to do type inference for constants when the type
 of the constant is knowable without needing to do type inference.
 
-This means that simple constants like `X = ""` or `Y = 1` do not need type
-annotations—Sorbet can syntactically see that the type of these constants are
-`String` and `Integer` respectively.
+This means that simple constants like `X = ""`, `Y = 1`, or `Z = [1, ""]` do not
+need type annotations—Sorbet can syntactically see that the type of these
+constants are `String`, `Integer`, and `T::Array[T.any(Integer, String)]`
+respectively.
 
 However, to know the type of constant assignments like `A = MyClass.new` or
 `B = 1 + 1`, Sorbet needs to know the result type of the `new` and `+` methods,
@@ -37,6 +38,10 @@ always have well-known result types.
 `A = MyClass.new` is in fact `MyClass`, and require an explicit annotation
 _only_ when that assumption turns out to be incorrect, for example due to an
 override.)
+
+Also, for **frozen** array literals assigned to constants, Sorbet assumes a
+[tuple type](tuple.md) instead of an [array type](stdlib-generics.md), because
+it knows that the array cannot be re-assigned or mutated.
 
 ## ... for instance variables?
 

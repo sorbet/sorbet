@@ -2337,6 +2337,24 @@ class ResolveTypeMembersAndFieldsWalk {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
+            // TODO(jez) ast::Hash
+            [&](const ast::Array &arr) {
+                if (arr.elems.empty()) {
+                    return;
+                }
+
+                vector<core::TypePtr> typeElems;
+                typeElems.reserve(arr.elems.size());
+                for (const auto &elem : arr.elems) {
+                    if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
+                        typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
+                    } else {
+                        // TODO(jez) Handle ClassOrModule symbol ConstantLit
+                        return;
+                    }
+                }
+                result = core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
+            },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
@@ -2349,6 +2367,26 @@ class ResolveTypeMembersAndFieldsWalk {
                     }
                 }
                 result = cast.type;
+            },
+            [&](const ast::Send &send) {
+                if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock()) {
+                    return;
+                }
+                auto *arr = ast::cast_tree<ast::Array>(send.recv);
+                if (arr == nullptr) {
+                    return;
+                }
+                vector<core::TypePtr> typeElems;
+                typeElems.reserve(arr->elems.size());
+                for (const auto &elem : arr->elems) {
+                    if (auto *lit = ast::cast_tree<ast::Literal>(elem)) {
+                        typeElems.emplace_back(core::Types::dropLiteral(ctx, lit->value));
+                    } else {
+                        return;
+                        // TODO(jez) Handle ClassOrModule symbol ConstantLit
+                    }
+                }
+                result = core::make_type<core::TupleType>(move(typeElems));
             },
             [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
             [&](const ast::ExpressionPtr &expr) {});
