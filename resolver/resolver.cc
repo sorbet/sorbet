@@ -2338,7 +2338,32 @@ class ResolveTypeMembersAndFieldsWalk {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
-            // TODO(jez) Handle ClassOrModule symbol ConstantLit
+            [&](const ast::ConstantLit &cnst) {
+                // This should only be from a recursive call, because if it's at the top-level of a
+                // constant Assign node, it'll have been treated as a static field class alias
+                // resolution item.
+                ENFORCE(cnst.symbol.exists());
+                if (!cnst.symbol.exists()) {
+                    return;
+                }
+
+                if (cnst.symbol.isClassOrModule() && cnst.symbol != core::Symbols::StubModule()) {
+                    auto externalType =
+                        cnst.symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                    if (externalType.isUntyped()) {
+                        return;
+                    }
+                    result = move(externalType);
+                } else if (cnst.symbol.isStaticField(ctx) &&
+                           core::isa_type<core::ClassType>(cnst.symbol.resultType(ctx))) {
+                    auto resultType = cnst.symbol.resultType(ctx);
+                    auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
+                    if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                        return;
+                    }
+                    result = resultType;
+                }
+            },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
