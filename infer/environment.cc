@@ -718,16 +718,18 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             // This mimics the non-T::Class case in `updateKnowledgeKindOf`
             // We could extend this to `T::Class` types in the future, but let's start simple.
             auto klass = core::Types::getRepresentedClass(ctx, klassType);
-            if (!klass.exists()) {
+            if (klass.exists()) {
+                auto ty = klass.data(ctx)->externalType();
+                if (ty.isUntyped()) {
+                    return;
+                }
+
+                typeTestType = core::Types::any(ctx, move(typeTestType), move(ty));
+            } else if (isSingleton(ctx, klassType)) {
+                typeTestType = core::Types::any(ctx, move(typeTestType), klassType);
+            } else {
                 return;
             }
-
-            auto ty = klass.data(ctx)->externalType();
-            if (ty.isUntyped()) {
-                return;
-            }
-
-            typeTestType = core::Types::any(ctx, move(typeTestType), move(ty));
         }
 
         auto ref = send->args[0].variable;

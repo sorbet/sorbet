@@ -3723,6 +3723,29 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
+// Returns true if the type is exactly the class of a specific enum value. For example, given:
+//
+//   class C < T::Enum
+//     enums do
+//       X = new
+//       Y = new
+//     end
+//   end
+//
+//  class TotallyUnrelatedThing ; end
+//
+// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
+static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
+    bool must_exist = false;
+    auto unwrapped = unwrapSymbol(gs, type, must_exist);
+
+    if (!unwrapped.exists()) {
+        return false;
+    }
+
+    return unwrapped.data(gs)->name.isTEnumName(gs);
+}
+
 class Magic_checkMatchArray : public IntrinsicMethod {
     vector<NameRef> dispatchesTo() const override {
         return {core::Names::tripleEq()};
@@ -3752,16 +3775,18 @@ class Magic_checkMatchArray : public IntrinsicMethod {
         auto typeTestType = core::Types::bottom();
         for (const auto &klassType : tupleType->elems) {
             auto klass = core::Types::getRepresentedClass(gs, klassType);
-            if (!klass.exists()) {
+            if (klass.exists()) {
+                auto ty = klass.data(gs)->externalType();
+                if (ty.isUntyped()) {
+                    return;
+                }
+
+                typeTestType = core::Types::any(gs, move(typeTestType), move(ty));
+            } else if (isEnumValueClass(gs, klassType)) {
+                typeTestType = core::Types::any(gs, move(typeTestType), klassType);
+            } else {
                 return;
             }
-
-            auto ty = klass.data(gs)->externalType();
-            if (ty.isUntyped()) {
-                return;
-            }
-
-            typeTestType = core::Types::any(gs, move(typeTestType), move(ty));
         }
 
         if (Types::isSubType(gs, testedType, typeTestType)) {
@@ -4389,30 +4414,6 @@ public:
         res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
-
-// Returns true if the type is exactly the class of a specific enum value. For example, given:
-//
-//   class C < T::Enum
-//     enums do
-//       X = new
-//       Y = new
-//     end
-//   end
-//
-//  class TotallyUnrelatedThing ; end
-//
-// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
-static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
-    bool must_exist = false;
-    auto unwrapped = unwrapSymbol(gs, type, must_exist);
-
-    if (!unwrapped.exists()) {
-        return false;
-    }
-
-    return unwrapped.data(gs)->name.isTEnumName(gs);
-}
-
 class T_Enum_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {

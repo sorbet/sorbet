@@ -65,3 +65,46 @@ def example(int, int_or_str, sym)
     T.reveal_type(untyped) # error: `T.nilable(TrueClass)`
   end
 end
+
+class Suit < T::Enum
+  enums do
+    Spades = new
+    Hearts = new
+    Clubs = new
+    Diamonds = new
+  end
+end
+
+RedSuits = T.let(
+  [Suit::Hearts, Suit::Diamonds].freeze,
+  [Suit::Hearts, Suit::Diamonds]
+)
+
+sig { params(suit: Suit).void }
+def enum_example(suit)
+  case suit
+  when *RedSuits
+    T.reveal_type(suit) # error: `T.any(Suit::Hearts, Suit::Diamonds)`
+  else
+    T.reveal_type(suit) # error: `T.any(Suit::Clubs, Suit::Spades)`
+  end
+
+  case suit
+  when *RedSuits
+    T.reveal_type(suit) # error: `T.any(Suit::Hearts, Suit::Diamonds)`
+  when *[Suit::Clubs, Suit::Spades]
+    nil
+  else
+    T.absurd(suit)
+    T.reveal_type(suit) # error: This code is unreachable
+  end
+
+  bool = case suit
+  when *RedSuits
+    T.reveal_type(suit) # error: `T.any(Suit::Hearts, Suit::Diamonds)`
+    true
+  when *[Suit::Clubs, Suit::Spades]
+    false
+  end
+  T.reveal_type(bool) # error: `T::Boolean`
+end
