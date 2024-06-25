@@ -2348,8 +2348,12 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
 
                 if (cnst.symbol.isClassOrModule() && cnst.symbol != core::Symbols::StubModule()) {
-                    auto externalType =
-                        cnst.symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                    auto singletonClass = cnst.symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                    if (singletonClass.data(ctx)->resultType == nullptr) {
+                        // Has not been filled in yet, will be filled in during this phase.
+                        return;
+                    }
+                    auto externalType = singletonClass.data(ctx)->externalType();
                     if (externalType.isUntyped()) {
                         return;
                     }
