@@ -656,17 +656,10 @@ public:
         }
 
         auto isSymbol = lit->isSymbol();
-        core::NameRef nameRef;
-        if (!lit) {
+        if (!lit || !lit->isName()) {
             return;
         }
-        if (isSymbol) {
-            nameRef = lit->asSymbol();
-        } else if (lit->isString()) {
-            nameRef = lit->asString();
-        } else {
-            return;
-        }
+        auto nameRef = lit->asName();
 
         if (isSymbol && !hashKeySymbols.contains(nameRef)) {
             hashKeySymbols[nameRef] = key.loc();

@@ -514,24 +514,18 @@ public:
     }
 
     void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
-        auto target = core::NameRef::noName();
-        if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
-            if (sym->isSymbol()) {
-                target = sym->asSymbol();
-            } else if (sym->isString()) {
-                target = sym->asString();
-            }
+        auto sym = ast::cast_tree<ast::Literal>(arg);
+        if (sym == nullptr || !sym->isName()) {
+            return;
         }
 
-        if (target.exists()) {
-            foundDefs->addModifier(core::FoundModifier{
-                core::FoundModifier::Kind::ClassOrStaticField,
-                getOwner(),
-                arg.loc(),
-                /*name*/ modifierName,
-                target,
-            });
-        }
+        foundDefs->addModifier(core::FoundModifier{
+            core::FoundModifier::Kind::ClassOrStaticField,
+            getOwner(),
+            arg.loc(),
+            /*name*/ modifierName,
+            sym->asName(),
+        });
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {

@@ -24,16 +24,11 @@ static bool isLiteralTrue(const core::GlobalState &gs, const ast::ExpressionPtr 
 
 static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     auto lit = ast::cast_tree<ast::Literal>(node);
-    if (!lit) {
+    if (!lit || !lit->isName()) {
         return nullopt;
     }
-    if (lit->isSymbol()) {
-        return lit->asSymbol();
-    } else if (lit->isString()) {
-        return lit->asString();
-    } else {
-        return nullopt;
-    }
+
+    return lit->asName();
 }
 
 vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Send *send) {

@@ -42,17 +42,11 @@ private:
 
     core::NameRef unwrapLiteralToName(ExpressionPtr &arg) {
         auto *literal = cast_tree<Literal>(arg);
-        if (literal == nullptr) {
+        if (literal == nullptr || !literal->isName()) {
             return core::NameRef::noName();
         }
 
-        if (literal->isString()) {
-            return literal->asString();
-        } else if (literal->isSymbol()) {
-            return literal->asSymbol();
-        } else {
-            return core::NameRef::noName();
-        }
+        return literal->asName();
     }
 
 public:
