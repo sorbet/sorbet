@@ -38,8 +38,8 @@ x = 2 + 3
 You may still provide a wider type annotation if you would like. This can
 occasionally be helpful if you want the type of a variable to be broader than
 Sorbet's inferred type, such as in situations where you are changing the value
-of a variable in a loop to something that is broader than the expression that
-you use to initialize the variable:
+of a variable in a loop or block to something that is broader than the
+expression used to initialize the variable:
 
 ```ruby
 # without this T.let, x would have the inferred type NilClass

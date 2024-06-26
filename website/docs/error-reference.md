@@ -3257,7 +3257,7 @@ found_valid = false
 
 list.each do |elem|
   # Might change the type of `found_valid` to `TrueClass`
-  found_valid = true if valid?(elem) # error: Changing the type of a variable in a loop
+  found_valid = true if valid?(elem) # error: Changing the type of a variable is not permitted
 end
 ```
 
