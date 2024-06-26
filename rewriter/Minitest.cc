@@ -139,6 +139,22 @@ ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass, ast::Expr
     return body;
 }
 
+// Namer only looks at ancestors at the ClassDef top-level. If a `describe` block has ancestor items
+// at the top level inside the InsSeq of the Block body, that should count as a an ancestor in namer.
+// But if we just plop the whole InsSeq as a single element inside the the ClassDef rhs, they won't
+// be at the top level anymore.
+ast::ClassDef::RHS_store flattenDescribeBody(ast::ExpressionPtr body) {
+    ast::ClassDef::RHS_store rhs;
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+        absl::c_move(bodySeq->stats, back_inserter(rhs));
+        rhs.emplace_back(move(bodySeq->expr));
+    } else {
+        rhs.emplace_back(move(body));
+    }
+
+    return rhs;
+}
+
 string to_s(core::Context ctx, ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
@@ -416,13 +432,14 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
             ancestors.emplace_back(ast::MK::Self(arg.loc()));
         }
 
-        ast::ClassDef::RHS_store rhs;
         const bool bodyIsClass = true;
-        rhs.emplace_back(prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true));
+        auto rhs = prepareBody(ctx, bodyIsClass, std::move(block->body), /* insideDescribe */ true);
+
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         auto declLoc = declLocForSendWithBlock(*send);
-        return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs));
+        return ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
+                              flattenDescribeBody(move(rhs)));
     } else if (send->fun == core::Names::it()) {
         auto argString = to_s(ctx, arg);
         ConstantMover constantMover;

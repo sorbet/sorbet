@@ -84,8 +84,6 @@ describe 'extends T::Sig' do
   extend T::Sig
 
   sig { returns(Integer) }
-# ^^^ error: Method `sig` does not exist
-  #     ^^^^^^^ error: Method `returns` does not exist
   def example = 0
 
   it 'calls example' do
