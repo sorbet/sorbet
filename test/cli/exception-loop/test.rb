@@ -23,7 +23,7 @@ def example1
       T.reveal_type(e) # error: `T.nilable(A)`
       raises_b
     rescue B => e
-      #         ^ error: Changing the type of a variable in a loop is not permitted
+      #         ^ error: Changing the type of a variable is not permitted in loops and blocks
     end
   end
 end

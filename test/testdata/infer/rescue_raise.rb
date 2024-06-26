@@ -95,7 +95,7 @@ def example6
         begin
           puts
         rescue TypeError => e
-          #                 ^ error: Changing the type of a variable in a loop is not permitted
+          #                 ^ error: Changing the type of a variable is not permitted in loops and blocks
           T.reveal_type(e) # error: `T.untyped`
         end
       end

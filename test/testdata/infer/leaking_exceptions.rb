@@ -10,6 +10,6 @@ end
 loop do
   begin
     puts e
-  rescue B => e # error: Changing the type of a variable in a loop is not permitted
+  rescue B => e # error: Changing the type of a variable is not permitted in loops and blocks
   end
 end

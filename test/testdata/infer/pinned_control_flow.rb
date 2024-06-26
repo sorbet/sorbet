@@ -11,9 +11,9 @@ class Main
   def post_pin
     while foo
         if foo
-            a = 1 # error: Changing the type of a variable in a loop is not permitted
+            a = 1 # error: Changing the type of a variable is not permitted in loops and blocks
         else
-            a = "1" # error: Changing the type of a variable in a loop is not permitted
+            a = "1" # error: Changing the type of a variable is not permitted in loops and blocks
         end
     end
     a
@@ -22,7 +22,7 @@ class Main
   def metatype_pin
     a = 1
     while foo
-        a = T::Array[Integer] # error: Changing the type of a variable in a loop is not permitted
+        a = T::Array[Integer] # error: Changing the type of a variable is not permitted in loops and blocks
           # ^^^^^^^^^^^^^^^^^ error: Unsupported usage of bare type
     end
     a
