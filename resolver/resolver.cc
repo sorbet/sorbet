@@ -2408,35 +2408,6 @@ class ResolveTypeMembersAndFieldsWalk {
                         core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
                 }
             },
-            [&](const ast::Hash &hsh) {
-                if (hsh.keys.empty() || hsh.values.empty()) {
-                    return;
-                }
-
-                vector<core::TypePtr> typeKeys;
-                typeKeys.reserve(hsh.keys.size());
-                for (const auto &elem : hsh.keys) {
-                    auto typeKey = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
-                    if (typeKey == nullptr) {
-                        return;
-                    }
-                    typeKeys.emplace_back(move(typeKey));
-                }
-                vector<core::TypePtr> typeValues;
-                typeValues.reserve(hsh.values.size());
-                for (const auto &elem : hsh.values) {
-                    auto typeValue = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
-                    if (typeValue == nullptr) {
-                        return;
-                    }
-                    typeValues.emplace_back(move(typeValue));
-                }
-                // Intentionally not inferring a shape type here (even if isFrozen), because it
-                // would be more unsafe than inferring a hash. People can always explicitly annotate
-                // the constant to overrule this decision and get a shape-typed constant.
-                result = core::Types::hashOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeKeys)),
-                                             core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeValues)));
-            },
             [&](const ast::Send &send) {
                 if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
                     !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {

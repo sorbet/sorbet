@@ -43,11 +43,6 @@ Also, for **frozen** array literals assigned to constants, Sorbet assumes a
 [tuple type](tuples.md) instead of an [array type](stdlib-generics.md), because
 it knows that the array cannot be re-assigned or mutated.
 
-For hash literals, Sorbet always infers a [hash type](stdlib-generics.md) (even
-for frozen hash literals) because [shape types](shapes.md) are not yet mature
-enough to be automatically inferred. It's still possible to use an explicit type
-annotation to declare a constant as having a shape type.
-
 ## ... for instance variables?
 
 Sorbet always requires type annotations for instance and class variables, with a

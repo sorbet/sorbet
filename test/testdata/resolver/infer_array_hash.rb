@@ -5,8 +5,8 @@ Y0 = [1, ''].freeze
 
 X1 = [1, puts] # error: must have type annotations
 
-X2 = {foo: 0, 'bar' => false}
-Y2 = {foo: 0, 'bar' => false}.freeze
+X2 = {foo: 0, 'bar' => false} # error: must have type annotations
+Y2 = {foo: 0, 'bar' => false}.freeze # error: must have type annotations
 
 X3 = {foo: puts} # error: must have type annotations
 
@@ -45,8 +45,8 @@ def revealed_types # error: does not have a `sig`
 
   T.reveal_type(X1) # error: `T.untyped`
 
-  T.reveal_type(X2) # error: `T::Hash[T.any(Symbol, String), T.any(Integer, FalseClass)]`
-  T.reveal_type(Y2) # error: `T::Hash[T.any(Symbol, String), T.any(Integer, FalseClass)]`
+  T.reveal_type(X2) # error: `T.untyped`
+  T.reveal_type(Y2) # error: `T.untyped`
 
   T.reveal_type(X3) # error: `T.untyped`
 
