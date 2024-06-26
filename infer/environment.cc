@@ -481,7 +481,20 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
+bool isSingleton(core::Context ctx, core::TypePtr ty) {
+    auto sym = core::Symbols::noClassOrModule();
+    if (core::isa_type<core::ClassType>(ty)) {
+        auto c = core::cast_type_nonnull<core::ClassType>(ty);
+        sym = c.symbol;
+    } else if (core::isa_type<core::AppliedType>(ty)) {
+        auto &a = core::cast_type_nonnull<core::AppliedType>(ty);
+        sym = a.klass;
+    }
+
+    if (!sym.exists()) {
+        return false;
+    }
+
     // Singletons that are built into the Ruby VM
     if (sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass()) {
         return true;
@@ -504,6 +517,36 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 
 } // namespace
 
+void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, core::Loc loc,
+                                        const core::TypePtr &klassType, cfg::LocalRef ref,
+                                        KnowledgeFilter &knowledgeFilter) {
+    auto &whoKnows = getKnowledge(local);
+
+    core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
+    if (klass.exists()) {
+        auto ty = klass.data(ctx)->externalType();
+        if (!ty.isUntyped()) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, ty);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, ty);
+        }
+    } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
+        if (klassTypeApp->klass == core::Symbols::Class()) {
+            auto currentAlignment =
+                core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs, core::Symbols::Class());
+            auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
+                return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
+            });
+            ENFORCE(it != currentAlignment.end());
+            auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
+            if (!instanceTy.isUntyped()) {
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, instanceTy);
+                // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
+                // https://github.com/sorbet/sorbet/issues/4358
+            }
+        }
+    }
+}
+
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
     if (!send->fun.isUpdateKnowledgeName()) {
@@ -513,11 +556,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         return;
     }
 
+    if (!knowledgeFilter.isNeeded(local)) {
+        return;
+    }
+
+    auto &whoKnows = getKnowledge(local);
+
     if (send->fun == core::Names::bang()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
             whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
@@ -534,10 +579,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::nil_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
@@ -545,16 +586,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::blank_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -562,16 +599,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::present_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            auto &whoKnows = getKnowledge(local);
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
@@ -584,44 +617,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     // TODO(jez) We should probably update this to be aware of T::NonForcingConstants.non_forcing_is_a?
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
-        auto &klassType = send->args[0].type;
-        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
-        if (klass.exists()) {
-            auto ty = klass.data(ctx)->externalType();
-            if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-            }
-            whoKnows.sanityCheck();
-        } else if (auto *klassTypeApp = core::cast_type<core::AppliedType>(klassType)) {
-            if (klassTypeApp->klass == core::Symbols::Class()) {
-                auto currentAlignment = core::Types::alignBaseTypeArgs(ctx, klassTypeApp->klass, klassTypeApp->targs,
-                                                                       core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = klassTypeApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
-
+        const auto &klassType = send->args[0].type;
+        auto ref = send->recv.variable;
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
+        whoKnows.sanityCheck();
         return;
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
         const auto &recvType = send->recv.type;
 
@@ -633,32 +636,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-
-            auto argSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(argType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(argType);
-                argSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(argType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(argType);
-                argSymbol = a.klass;
-            }
-            if (argSymbol.exists() && isSingleton(ctx, argSymbol)) {
+            if (isSingleton(ctx, argType)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
 
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-
-            core::ClassOrModuleRef recvSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(recvType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(recvType);
-                recvSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(recvType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(recvType);
-                recvSymbol = a.klass;
-            }
-            if (recvSymbol.exists() && isSingleton(ctx, recvSymbol)) {
+            if (isSingleton(ctx, recvType)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -668,46 +653,17 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::tripleEq()) {
-        if (!knowledgeFilter.isNeeded(local)) {
-            return;
-        }
-        auto &whoKnows = getKnowledge(local);
-        const auto &recvType = send->recv.type;
-
+        const auto &klassType = send->recv.type;
+        auto ref = send->args[0].variable;
         // `when` against class literal
-        core::ClassOrModuleRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
-        if (representedClass.exists()) {
-            auto representedType = representedClass.data(ctx)->externalType();
-            if (!representedType.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, representedType);
-            }
-        } else if (auto *recvApp = core::cast_type<core::AppliedType>(recvType)) {
-            if (recvApp->klass == core::Symbols::Class()) {
-                auto currentAlignment =
-                    core::Types::alignBaseTypeArgs(ctx, recvApp->klass, recvApp->targs, core::Symbols::Class());
-                auto it = absl::c_find_if(currentAlignment, [&](auto tmRef) {
-                    return tmRef.data(ctx)->name == core::Names::Constants::AttachedClass();
-                });
-                ENFORCE(it != currentAlignment.end());
-                auto instanceTy = recvApp->targs[distance(currentAlignment.begin(), it)];
-                if (!instanceTy.isUntyped()) {
-                    whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, instanceTy);
-                    // Omitting falsy().addNoTypeTest because #4358 is even more prevalent with `T::Class` types
-                    // https://github.com/sorbet/sorbet/issues/4358
-                }
-            }
-        }
+        updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
 
         // `when` against singleton
-        if (core::isa_type<core::ClassType>(recvType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
-            // check if s is a singleton. in this case we can learn that
-            // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s.symbol)) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-            }
+        // check if s is a singleton. in this case we can learn that
+        // a failed comparison means that type test would also fail
+        if (isSingleton(ctx, klassType)) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
         }
         whoKnows.sanityCheck();
         return;
@@ -732,7 +688,6 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
 
-        auto &whoKnows = getKnowledge(local);
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         if (send->fun == core::Names::leq()) {
             // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
