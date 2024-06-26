@@ -437,8 +437,20 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         // Avoid subclassing the containing context when it's a module, as that will produce an error in typed: false
         // files
-        if (isClass) {
-            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+        if (send->recv.isSelfReference()) {
+            if (isClass) {
+                ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            }
+        } else {
+            ENFORCE(isRSpec(send->recv));
+            auto exampleGroup = ast::MK::EmptyTree();
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
+            exampleGroup =
+                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
+            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
+                                                       core::Names::Constants::ExampleGroup());
+            ancestors.emplace_back(move(exampleGroup));
         }
 
         const bool bodyIsClass = true;

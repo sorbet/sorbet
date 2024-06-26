@@ -269,6 +269,8 @@ NameDef names[] = {
     {"constSet", "const_set"},
     {"collect"},
     {"RSpec", "RSpec", true},
+    {"Core", "Core", true},
+    {"ExampleGroup", "ExampleGroup", true},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
