@@ -2334,14 +2334,16 @@ class ResolveTypeMembersAndFieldsWalk {
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
     [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr,
-                                                           bool isFrozen) {
+                                                           bool topCall, bool isFrozen) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
             [&](const ast::ConstantLit &cnst) {
-                // This should only be from a recursive call, because if it's at the top-level of a
-                // constant Assign node, it'll have been treated as a static field class alias
-                // resolution item.
+                if (topCall) {
+                    // This needs to be treated as a static field class alias, which is handled elsewhere.
+                    return;
+                }
+
                 ENFORCE(cnst.symbol.exists());
                 if (!cnst.symbol.exists()) {
                     return;
@@ -2392,7 +2394,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 vector<core::TypePtr> typeElems;
                 typeElems.reserve(arr.elems.size());
                 for (const auto &elem : arr.elems) {
-                    auto typeElem = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    auto typeElem = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
                     if (typeElem == nullptr) {
                         return;
                     }
@@ -2414,7 +2416,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 vector<core::TypePtr> typeKeys;
                 typeKeys.reserve(hsh.keys.size());
                 for (const auto &elem : hsh.keys) {
-                    auto typeKey = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    auto typeKey = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
                     if (typeKey == nullptr) {
                         return;
                     }
@@ -2423,7 +2425,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 vector<core::TypePtr> typeValues;
                 typeValues.reserve(hsh.values.size());
                 for (const auto &elem : hsh.values) {
-                    auto typeValue = resolveConstantType(ctx, elem, /* isFrozen */ false);
+                    auto typeValue = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
                     if (typeValue == nullptr) {
                         return;
                     }
@@ -2440,13 +2442,15 @@ class ResolveTypeMembersAndFieldsWalk {
                     !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
                     return;
                 }
-                auto recvType = resolveConstantType(ctx, send.recv, /* isFrozen */ true);
+                auto recvType = resolveConstantType(ctx, send.recv, /* topCall */ false, /* isFrozen */ true);
                 if (recvType == nullptr) {
                     return;
                 }
                 result = move(recvType);
             },
-            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr, /* isFrozen */ false); },
+            [&](const ast::InsSeq &outer) {
+                result = resolveConstantType(ctx, outer.expr, /* topCall */ false, /* isFrozen */ false);
+            },
             [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
@@ -2457,7 +2461,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            if (auto resultType = resolveConstantType(ctx, asgn->rhs, /* isFrozen */ false)) {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ false, /* isFrozen */ false)) {
                 return resultType;
             }
         }
@@ -2472,7 +2476,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
-        auto resultType = resolveConstantType(ctx, asgn->rhs, /* isFrozen */ false);
+        auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
