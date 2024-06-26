@@ -481,7 +481,20 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
+bool isSingleton(core::Context ctx, core::TypePtr ty) {
+    auto sym = core::Symbols::noClassOrModule();
+    if (core::isa_type<core::ClassType>(ty)) {
+        auto c = core::cast_type_nonnull<core::ClassType>(ty);
+        sym = c.symbol;
+    } else if (core::isa_type<core::AppliedType>(ty)) {
+        auto &a = core::cast_type_nonnull<core::AppliedType>(ty);
+        sym = a.klass;
+    }
+
+    if (!sym.exists()) {
+        return false;
+    }
+
     // Singletons that are built into the Ruby VM
     if (sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass()) {
         return true;
@@ -623,32 +636,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-
-            auto argSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(argType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(argType);
-                argSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(argType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(argType);
-                argSymbol = a.klass;
-            }
-            if (argSymbol.exists() && isSingleton(ctx, argSymbol)) {
+            if (isSingleton(ctx, argType)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
 
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-
-            core::ClassOrModuleRef recvSymbol = core::Symbols::noClassOrModule();
-            if (core::isa_type<core::ClassType>(recvType)) {
-                auto c = core::cast_type_nonnull<core::ClassType>(recvType);
-                recvSymbol = c.symbol;
-            } else if (core::isa_type<core::AppliedType>(recvType)) {
-                auto &a = core::cast_type_nonnull<core::AppliedType>(recvType);
-                recvSymbol = a.klass;
-            }
-            if (recvSymbol.exists() && isSingleton(ctx, recvSymbol)) {
+            if (isSingleton(ctx, recvType)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -664,14 +659,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter);
 
         // `when` against singleton
-        if (core::isa_type<core::ClassType>(klassType)) {
-            auto s = core::cast_type_nonnull<core::ClassType>(klassType);
-            // check if s is a singleton. in this case we can learn that
-            // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s.symbol)) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
-            }
+        // check if s is a singleton. in this case we can learn that
+        // a failed comparison means that type test would also fail
+        if (isSingleton(ctx, klassType)) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
+            whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
         }
         whoKnows.sanityCheck();
         return;
