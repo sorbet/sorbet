@@ -336,6 +336,15 @@ bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_sto
     });
 }
 
+bool isRSpec(const ast::ExpressionPtr &recv) {
+    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
+    if (cnst == nullptr) {
+        return false;
+    }
+
+    return cnst->cnst == core::Names::Constants::RSpec();
+}
+
 // this just walks the body of a `test_each` and tries to transform every statement
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
@@ -369,7 +378,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference()) {
+    if (!send->recv.isSelfReference() && !(send->fun == core::Names::describe() && isRSpec(send->recv))) {
         return nullptr;
     }
 

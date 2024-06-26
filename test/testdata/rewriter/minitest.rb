@@ -78,6 +78,23 @@ class MyTest
         end
       end
     end
+
+    class RSpec
+      def self.describe(thing, &blk); end
+    end
+    RSpec.describe "an explicit receiver" do
+      def some_method
+      end
+
+      def self.let(sym, &blk); end
+
+      let(:some_let) {}
+
+      it 'thing' do
+        some_method
+        some_let
+      end
+    end
 end
 
 describe 'extends T::Sig' do

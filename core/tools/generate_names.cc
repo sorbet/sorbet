@@ -268,6 +268,7 @@ NameDef names[] = {
     {"testEachHash", "test_each_hash"},
     {"constSet", "const_set"},
     {"collect"},
+    {"RSpec", "RSpec", true},
 
     {"dslOptional", "dsl_optional"},
     {"dslRequired", "dsl_required"},
