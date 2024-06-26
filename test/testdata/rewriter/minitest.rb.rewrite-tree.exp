@@ -253,49 +253,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       "calls example"
       <runtime method definition of <it 'calls example'>>
     end
-
-    class <emptyTree>::<C RSpec><<C <todo sym>>> < (::<todo sym>)
-      def self.describe<<todo method>>(thing, &blk)
-        <emptyTree>
-      end
-
-      <runtime method definition of self.describe>
-    end
-
-    class <emptyTree>::<C <describe 'an explicit receiver'>><<C <todo sym>>> < (<self>)
-      def some_method<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      def self.let<<todo method>>(sym, &blk)
-        <emptyTree>
-      end
-
-      def some_let<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.void()
-      end
-
-      def <it 'thing'><<todo method>>(&<blk>)
-        begin
-          <self>.some_method()
-          <self>.some_let()
-        end
-      end
-
-      begin
-        <runtime method definition of some_method>
-        <runtime method definition of self.let>
-        <runtime method definition of some_let>
-        begin
-          "thing"
-          <runtime method definition of <it 'thing'>>
-        end
-      end
-    end
   end
 
   <runtime method definition of junk>
