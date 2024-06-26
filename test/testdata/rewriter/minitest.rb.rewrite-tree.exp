@@ -228,6 +228,36 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def example<<todo method>>(&<blk>)
+      0
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'calls example'><<todo method>>(&<blk>)
+      begin
+        res = <self>.example()
+        <emptyTree>::<C T>.reveal_type(res)
+      end
+    end
+
+    begin
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+      <runtime method definition of example>
+      begin
+        "calls example"
+        <runtime method definition of <it 'calls example'>>
+      end
+    end
+  end
+
   <runtime method definition of junk>
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
