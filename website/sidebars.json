@@ -73,7 +73,6 @@
   },
   "talks": {
     "Talks": [
-      // pdxrb2020
       "talks/ruby-kaigi-2018",
       "talks/strange-loop-2018",
       "talks/ruby-conf-2018",
