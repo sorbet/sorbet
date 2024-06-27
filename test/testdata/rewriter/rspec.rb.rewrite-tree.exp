@@ -1,0 +1,57 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RSpec><<C <todo sym>>> < (::<todo sym>)
+    def self.describe<<todo method>>(thing, &blk)
+      <emptyTree>
+    end
+
+    <runtime method definition of self.describe>
+  end
+
+  class <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+    def self.include_context<<todo method>>(context, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of self.include_context>
+  end
+
+  class <emptyTree>::<C <describe 'my group'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    def some_method<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    def self.let<<todo method>>(sym, &blk)
+      <emptyTree>
+    end
+
+    def some_let<<todo method>>(&<blk>)
+      0
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
+    def <it 'thing'><<todo method>>(&<blk>)
+      begin
+        <self>.some_method()
+        <self>.some_let()
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include_context("bar")
+
+    <runtime method definition of some_method>
+
+    <runtime method definition of self.let>
+
+    <runtime method definition of some_let>
+
+    begin
+      "thing"
+      <runtime method definition of <it 'thing'>>
+    end
+  end
+end
