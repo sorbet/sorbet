@@ -249,11 +249,11 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     auto enclosingScope = walk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
     // TODO: can we avoid deepCopy?
-    matchingNode = walk.matchingNode->deepCopy();
+    matchingNode = walk.matchingNode;
     if (walk.matchingNodeEnclosingMethod) {
-        enclosingClassOrMethod = walk.matchingNodeEnclosingMethod->deepCopy();
+        enclosingClassOrMethod = walk.matchingNodeEnclosingMethod;
     } else {
-        enclosingClassOrMethod = walk.matchingNodeEnclosingClass->deepCopy();
+        enclosingClassOrMethod = walk.matchingNodeEnclosingClass;
     }
     skippedLocs = walk.skippedLocs;
 
@@ -292,7 +292,7 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
 
 // This tree walk takes a ExpressionPtr and looks for nodes that are the same as that node
 class ExpressionPtrSearchWalk {
-    ast::ExpressionPtr *targetNode;
+    const ast::ExpressionPtr *targetNode;
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
     std::vector<core::LocOffsets> skippedLocs;
 
@@ -360,10 +360,11 @@ class ExpressionPtrSearchWalk {
 public:
     vector<const ast::ExpressionPtr *> LCAScopeStack;
     vector<core::LocOffsets> matches;
-    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
+    ExpressionPtrSearchWalk(const ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
         : targetNode(matchingNode), skippedLocs(skippedLocs) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
+        fmt::print("visiting: {}\n", tree.toString(ctx));
         if (!tree.loc().exists()) {
             return;
         }
@@ -450,9 +451,10 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocs);
+    ExpressionPtrSearchWalk walk(matchingNode, skippedLocs);
     core::Context ctx(gs, core::Symbols::root(), file);
-    ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
+    ast::ConstTreeWalk::apply(ctx, walk, *enclosingClassOrMethod);
+    /* fmt::print("enclosingClassOrMethod: {}\n", enclosingClassOrMethod->toString(gs)); */
 
     auto matches = walk.matches;
 

@@ -14,8 +14,8 @@ struct MultipleOccurrenceResult {
 
 class VariableExtractor {
     const core::Loc selectionLoc;
-    ast::ExpressionPtr matchingNode;
-    ast::ExpressionPtr enclosingClassOrMethod;
+    const ast::ExpressionPtr *matchingNode;
+    const ast::ExpressionPtr *enclosingClassOrMethod;
     std::vector<core::LocOffsets> skippedLocs;
 
 public:
