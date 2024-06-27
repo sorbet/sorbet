@@ -14,14 +14,14 @@ struct MultipleOccurrenceResult {
 
 class VariableExtractor {
     const core::Loc selectionLoc;
-    ast::ExpressionPtr matchingNode;
-    ast::ExpressionPtr enclosingClassOrMethod;
+    const ast::ExpressionPtr *matchingNode;
+    const ast::ExpressionPtr *enclosingClassOrMethod;
     std::vector<core::LocOffsets> skippedLocs;
 
 public:
     VariableExtractor(const core::Loc selectionLoc)
         : selectionLoc(selectionLoc), matchingNode(), enclosingClassOrMethod(nullptr) {}
-    std::vector<std::unique_ptr<TextDocumentEdit>>
+    std::pair<std::vector<std::unique_ptr<TextDocumentEdit>>, ast::ExpressionPtr>
     getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config);
     MultipleOccurrenceResult getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
                                                                const LSPConfiguration &config);

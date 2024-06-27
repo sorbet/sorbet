@@ -275,11 +275,14 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // we need to do the core computation to know if extracting the current selection is
             // valid in the first place, to decide if we can show the code action or not.
             VariableExtractor variableExtractor(loc);
-            vector<unique_ptr<TextDocumentEdit>> singleOccurrenceDocumentEdits;
+            pair<vector<unique_ptr<TextDocumentEdit>>, ast::ExpressionPtr> singleOccurrenceDocumentEditsResult;
             {
                 Timer timeit(gs.tracer(), "Extract to Variable (single occurrence)");
-                singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
+                singleOccurrenceDocumentEditsResult =
+                    variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
             }
+            auto singleOccurrenceDocumentEdits = move(singleOccurrenceDocumentEditsResult.first);
+            auto afterLocalVars = move(singleOccurrenceDocumentEditsResult.second);
             if (!singleOccurrenceDocumentEdits.empty()) {
                 auto action = make_unique<CodeAction>("Extract Variable");
                 action->kind = CodeActionKind::RefactorExtract;
