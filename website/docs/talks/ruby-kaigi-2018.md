@@ -4,6 +4,9 @@ title: A practical type system for Ruby at Stripe
 sidebar_label: RubyKaigi 2018
 ---
 
+**Date**: May 31, 2018\
+**Speakers**: Dmitry Petrashko, Paul Tarjan, Nelson Elhage
+
 - [→ Talk page](https://rubykaigi.org/2018/presentations/DarkDimius.html#may31)
 - [→ Video](https://www.youtube.com/watch?v=eCnnBS2LXcI)
 - [→ Slides](https://sorbet.run/talks/RubyKaigi2018/#/)
