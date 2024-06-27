@@ -481,7 +481,7 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::TypePtr ty) {
+bool isSingleton(core::Context ctx, core::TypePtr ty, bool includeSingletonClasses) {
     auto sym = core::Symbols::noClassOrModule();
     if (core::isa_type<core::ClassType>(ty)) {
         auto c = core::cast_type_nonnull<core::ClassType>(ty);
@@ -506,7 +506,8 @@ bool isSingleton(core::Context ctx, core::TypePtr ty) {
     }
 
     // attachedClass on untyped symbol is defined to return itself
-    if (sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() && sym.data(ctx)->flags.isFinal) {
+    if (includeSingletonClasses && sym != core::Symbols::untyped() && sym.data(ctx)->attachedClass(ctx).exists() &&
+        sym.data(ctx)->flags.isFinal) {
         // This is a Ruby singleton class object
         return true;
     }
@@ -634,16 +635,17 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         ENFORCE(argType != nullptr);
         ENFORCE(recvType != nullptr);
+        auto includeSingletonClasses = true;
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-            if (isSingleton(ctx, argType)) {
+            if (isSingleton(ctx, argType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
 
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
-            if (isSingleton(ctx, recvType)) {
+            if (isSingleton(ctx, recvType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -660,8 +662,15 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         // `when` against singleton
         // check if s is a singleton. in this case we can learn that
-        // a failed comparison means that type test would also fail
-        if (isSingleton(ctx, klassType)) {
+        // a failed comparison means that type test would also fail.
+        //
+        // Have to exclude singleton classes, because this logic only applies for non-`Module`
+        // types, where `===` is `Kernel#===` (and is the same as `Kernel#==`).
+        //
+        // In other words, this half of the `===` logic behaves more like the `==` case in
+        // `updateKnowledge`, excluding Module objects.
+        auto includeSingletonClasses = false;
+        if (isSingleton(ctx, klassType, includeSingletonClasses)) {
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, klassType);
         }
