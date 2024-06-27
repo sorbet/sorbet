@@ -127,10 +127,10 @@ If Sorbet blindly assumed that `false` and `true` literals had type
 `TrueClass` or `FalseClass`, and be unable to maintain these knowledge sets.
 Real-world code depends on patterns like this surprisingly frequently.
 
-We have decided that the error message for changing a variable in a loop is very
-clear, has an autocorrect, and the resulting `T.let`'d code is very obvious. But
-if we did it the other way, sometimes requiring people to explicitly annotate
-`T.let(true, TrueClass)`:
+We have decided that the error message for changing a variable in a loop or
+block is very clear, has an autocorrect, and the resulting `T.let`'d code is
+very obvious. But if we did it the other way, sometimes requiring people to
+explicitly annotate `T.let(true, TrueClass)`:
 
 1. this pattern would look odd ("of course `true` has type `TrueClass`, isn't
    this annotation useless?"), and also

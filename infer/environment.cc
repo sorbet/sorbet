@@ -1714,7 +1714,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                 }
                             }
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing the type of a variable in a loop is not permitted");
+                                e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
                                 e.addErrorSection(core::ErrorSection(
                                     core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(

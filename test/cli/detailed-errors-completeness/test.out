@@ -207,7 +207,7 @@ test.rb:60: `[String]` is not a supertype of lower bound of type member `::A::X`
   Detailed explanation:
     `Middle` is not a subtype of `String` for index `0` of `1`-tuple
 
-test.rb:80: Changing the type of a variable in a loop is not permitted https://srb.help/7001
+test.rb:80: Changing the type of a variable is not permitted in loops and blocks https://srb.help/7001
     80 |  a = ['']
               ^^^^
   Existing variable has type: `[Integer(1)]`
