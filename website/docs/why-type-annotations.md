@@ -43,6 +43,14 @@ Also, for **frozen** array literals assigned to constants, Sorbet assumes a
 [tuple type](tuples.md) instead of an [array type](stdlib-generics.md), because
 it knows that the array cannot be re-assigned or mutated.
 
+```ruby
+MutableArray = [1, 2]
+T.reveal_type(MutableArray) # => `T::Array[Integer]`
+
+FrozenArray = [1, 2].freeze
+T.reveal_type(FrozenArray) # => `[Integer, Integer] (2-tuple)`
+```
+
 ## ... for instance variables?
 
 Sorbet always requires type annotations for instance and class variables, with a
