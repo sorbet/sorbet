@@ -84,8 +84,8 @@ the fact that it is initialized with an expression that evaluates to an
 <p>You may still provide a wider type annotation if you would like. This can
 occasionally be helpful if you want the type of a variable to be broader than
 Sorbet’s inferred type, such as in situations where you are changing the value
-of a variable in a loop to something that is broader than the expression that
-you use to initialize the variable:</p>
+of a variable in a loop or block to something that is broader than the
+expression used to initialize the variable:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># without this T.let, x would have the inferred type NilClass</span>
 x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
 (<span class="hljs-number">0</span>..<span class="hljs-number">10</span>).each <span class="hljs-keyword">do</span> <span class="hljs-params">|n|</span>

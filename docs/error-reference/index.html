@@ -2548,7 +2548,7 @@ found_valid = <span class="hljs-literal">false</span>
 
 list.each <span class="hljs-keyword">do</span> <span class="hljs-params">|elem|</span>
   <span class="hljs-comment"># Might change the type of `found_valid` to `TrueClass`</span>
-  found_valid = <span class="hljs-literal">true</span> <span class="hljs-keyword">if</span> valid?(elem) <span class="hljs-comment"># error: Changing the type of a variable in a loop</span>
+  found_valid = <span class="hljs-literal">true</span> <span class="hljs-keyword">if</span> valid?(elem) <span class="hljs-comment"># error: Changing the type of a variable is not permitted</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
 <p>The fix, again, is to use <code>T.let</code> to widen the type to <code>T::Boolean</code>:</p>

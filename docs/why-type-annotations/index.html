@@ -155,10 +155,10 @@ type.”</p>
 <code>T::Boolean</code>, it would forget in which individual branches the variable had type
 <code>TrueClass</code> or <code>FalseClass</code>, and be unable to maintain these knowledge sets.
 Real-world code depends on patterns like this surprisingly frequently.</p>
-<p>We have decided that the error message for changing a variable in a loop is very
-clear, has an autocorrect, and the resulting <code>T.let</code>'d code is very obvious. But
-if we did it the other way, sometimes requiring people to explicitly annotate
-<code>T.let(true, TrueClass)</code>:</p>
+<p>We have decided that the error message for changing a variable in a loop or
+block is very clear, has an autocorrect, and the resulting <code>T.let</code>'d code is
+very obvious. But if we did it the other way, sometimes requiring people to
+explicitly annotate <code>T.let(true, TrueClass)</code>:</p>
 <ol>
 <li>this pattern would look odd (“of course <code>true</code> has type <code>TrueClass</code>, isn’t
 this annotation useless?”), and also</li>
