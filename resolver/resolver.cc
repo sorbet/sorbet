@@ -2333,10 +2333,43 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr,
+                                                           bool topCall, bool isFrozen) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = core::Types::dropLiteral(ctx, a.value); },
+            [&](const ast::ConstantLit &cnst) {
+                if (topCall) {
+                    // This needs to be treated as a static field class alias, which is handled elsewhere.
+                    return;
+                }
+
+                ENFORCE(cnst.symbol.exists());
+                if (!cnst.symbol.exists()) {
+                    return;
+                }
+
+                if (cnst.symbol.isClassOrModule() && cnst.symbol != core::Symbols::StubModule()) {
+                    auto singletonClass = cnst.symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                    if (singletonClass.data(ctx)->resultType == nullptr) {
+                        // Has not been filled in yet, will be filled in during this phase.
+                        return;
+                    }
+                    auto externalType = singletonClass.data(ctx)->externalType();
+                    if (externalType.isUntyped()) {
+                        return;
+                    }
+                    result = move(externalType);
+                } else if (cnst.symbol.isStaticField(ctx) &&
+                           core::isa_type<core::ClassType>(cnst.symbol.resultType(ctx))) {
+                    auto resultType = cnst.symbol.resultType(ctx);
+                    auto classType = core::cast_type_nonnull<core::ClassType>(resultType);
+                    if (!classType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                        return;
+                    }
+                    result = resultType;
+                }
+            },
             [&](const ast::Cast &cast) {
                 if (cast.type == core::Types::todo()) {
                     return;
@@ -2348,9 +2381,47 @@ class ResolveTypeMembersAndFieldsWalk {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
+                // Don't recurse--just take the type from the cast verbatim (no inference)
                 result = cast.type;
             },
-            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
+            [&](const ast::Array &arr) {
+                if (arr.elems.empty()) {
+                    // Require type annotation for empty array, instead of inferring something like
+                    // T.untyped or T.noreturn
+                    return;
+                }
+
+                vector<core::TypePtr> typeElems;
+                typeElems.reserve(arr.elems.size());
+                for (const auto &elem : arr.elems) {
+                    auto typeElem = resolveConstantType(ctx, elem, /* topCall */ false, /* isFrozen */ false);
+                    if (typeElem == nullptr) {
+                        return;
+                    }
+                    typeElems.emplace_back(move(typeElem));
+                }
+
+                if (isFrozen) {
+                    result = core::make_type<core::TupleType>(move(typeElems));
+                } else {
+                    result =
+                        core::Types::arrayOf(ctx, core::Types::dropLiteral(ctx, core::Types::lubAll(ctx, typeElems)));
+                }
+            },
+            [&](const ast::Send &send) {
+                if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
+                    !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
+                    return;
+                }
+                auto recvType = resolveConstantType(ctx, send.recv, /* topCall */ false, /* isFrozen */ true);
+                if (recvType == nullptr) {
+                    return;
+                }
+                result = move(recvType);
+            },
+            [&](const ast::InsSeq &outer) {
+                result = resolveConstantType(ctx, outer.expr, /* topCall */ false, /* isFrozen */ false);
+            },
             [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
@@ -2361,7 +2432,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ false, /* isFrozen */ false)) {
                 return resultType;
             }
         }
@@ -2376,7 +2447,7 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         // Hoisted out here to report an error from within resolveConstantType when using
         // `T.assert_type!` even on the fast path
-        auto resultType = resolveConstantType(ctx, asgn->rhs);
+        auto resultType = resolveConstantType(ctx, asgn->rhs, /* topCall */ true, /* isFrozen */ false);
         if (data->resultType == nullptr) {
             // Do not attempt to suggest types for aliases that fail to resolve in package files.
             if (resultType == nullptr && !ctx.file.data(ctx).isPackage()) {
