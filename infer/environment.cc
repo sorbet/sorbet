@@ -725,7 +725,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 }
 
                 typeTestType = core::Types::any(ctx, move(typeTestType), move(ty));
-            } else if (isSingleton(ctx, klassType)) {
+            } else if (isSingleton(ctx, klassType, /* includeSingletonClasses */ false)) {
                 typeTestType = core::Types::any(ctx, move(typeTestType), klassType);
             } else {
                 return;
