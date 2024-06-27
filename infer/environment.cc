@@ -481,7 +481,7 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::TypePtr ty, bool includeSingletonClasses) {
+bool isSingleton(core::Context ctx, const core::TypePtr &ty, bool includeSingletonClasses) {
     auto sym = core::Symbols::noClassOrModule();
     if (core::isa_type<core::ClassType>(ty)) {
         auto c = core::cast_type_nonnull<core::ClassType>(ty);
