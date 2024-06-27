@@ -10,4 +10,4 @@ C = B1 + 1 # does only a single iteration at a time
 E = F # doesn't do forward references
 F = 0
 
-G = ["foo", 1, :symbol] # widens proxy types
+G = ["foo", 1, :symbol, puts] # widens proxy types
