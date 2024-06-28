@@ -521,15 +521,17 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             // block argument if its arity is greater than 1 (even when not using any destructuring
             // parameters like `|(x, y)|`)
             if (paramProcArity == 1 && blockParamType->targs.size() == 2 && blockFixedArity != 1) {
-                if (auto *paramProcArg0Type = cast_type<TupleType>(blockParamType->targs[1])) {
-                    if (paramProcArg0Type->elems.size() < blockFixedArity) {
+                auto blockParamTArgs1 = Types::resultTypeAsSeenFrom(gs, blockParamType->targs[1],
+                                                                    candidate.data(gs)->owner, inClass, targs);
+                if (auto *tupleType = cast_type<TupleType>(blockParamTArgs1)) {
+                    if (tupleType->elems.size() < blockFixedArity) {
                         it = leftCandidates.erase(it);
                         continue;
                     } else {
                         ++it;
                         continue;
                     }
-                } else if (blockParamType->targs[1].derivesFrom(gs, Symbols::Array())) {
+                } else if (blockParamTArgs1.derivesFrom(gs, Symbols::Array())) {
                     // Don't know the length of the array, so we can't know the expected arity
                     // of the block.
                     ++it;
