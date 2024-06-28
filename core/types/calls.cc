@@ -358,8 +358,6 @@ struct GuessOverloadCandidate {
     shared_ptr<TypeConstraint> constr;
 };
 
-// Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
-// arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
