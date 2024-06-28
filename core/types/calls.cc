@@ -540,7 +540,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                         ++it;
                         continue;
                     }
-                } else if (blockParamTArgs1.derivesFrom(gs, Symbols::Array())) {
+                } else if (!blockParamTArgs1.isUntyped() && blockParamTArgs1.derivesFrom(gs, Symbols::Array())) {
                     // Don't know the length of the array, so we can't know the expected arity
                     // of the block.
                     ++it;
