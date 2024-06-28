@@ -228,6 +228,29 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     return current;
 }
 
+BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+                                        BasicBlock *current) {
+    LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
+    auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
+    if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
+        LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
+        ENFORCE(cctx.link.get() != nullptr);
+        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(cctx.link, exprSym));
+    }
+
+    if (cctx.nextScope == nullptr) {
+        if (auto e = cctx.ctx.beginError(loc, core::errors::CFG::NoNextScope)) {
+            e.setHeader("No `{}` block around `{}`", "do", "next");
+        }
+        // I guess just keep going into deadcode?
+        unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, loc);
+    } else {
+        unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, loc);
+    }
+
+    return cctx.inWhat.deadBlock();
+}
+
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
     auto *join = cctx.inWhat.freshBlock(cctx.loops, a);
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
@@ -684,27 +707,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](const ast::Block &a) { Exception::raise("should never encounter a bare Block"); },
 
-            [&](ast::Next &a) {
-                LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
-                auto afterNext = walk(cctx.withTarget(exprSym), a.expr, current);
-                if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
-                    LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
-                    ENFORCE(cctx.link.get() != nullptr);
-                    afterNext->exprs.emplace_back(dead, a.loc, make_insn<BlockReturn>(cctx.link, exprSym));
-                }
-
-                if (cctx.nextScope == nullptr) {
-                    if (auto e = cctx.ctx.beginError(a.loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `{}` block around `{}`", "do", "next");
-                    }
-                    // I guess just keep going into deadcode?
-                    unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a.loc);
-                } else {
-                    unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, a.loc);
-                }
-
-                ret = cctx.inWhat.deadBlock();
-            },
+            [&](ast::Next &a) { ret = walkBlockReturn(cctx, a.loc, a.expr, current); },
 
             [&](ast::Break &a) {
                 LocalRef exprSym = cctx.newTemporary(core::Names::returnTemp());
