@@ -336,15 +336,6 @@ bool isDestructuringInsSeq(core::GlobalState &gs, const ast::MethodDef::ARGS_sto
     });
 }
 
-bool isRSpec(const ast::ExpressionPtr &recv) {
-    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(recv);
-    if (cnst == nullptr) {
-        return false;
-    }
-
-    return cnst->cnst == core::Names::Constants::RSpec();
-}
-
 // this just walks the body of a `test_each` and tries to transform every statement
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                        ast::MethodDef::ARGS_store &args, ast::InsSeq::STATS_store destructuringStmts,
@@ -378,7 +369,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
     auto *block = send->block();
 
-    if (!send->recv.isSelfReference() && !(send->fun == core::Names::describe() && isRSpec(send->recv))) {
+    if (!send->recv.isSelfReference()) {
         return nullptr;
     }
 
@@ -437,20 +428,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, ast::Send *
 
         // Avoid subclassing the containing context when it's a module, as that will produce an error in typed: false
         // files
-        if (send->recv.isSelfReference()) {
-            if (isClass) {
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
-            }
-        } else {
-            ENFORCE(isRSpec(send->recv));
-            auto exampleGroup = ast::MK::EmptyTree();
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::RSpec());
-            exampleGroup =
-                ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup), core::Names::Constants::Core());
-            exampleGroup = ast::MK::UnresolvedConstant(send->recv.loc(), move(exampleGroup),
-                                                       core::Names::Constants::ExampleGroup());
-            ancestors.emplace_back(move(exampleGroup));
+        if (isClass) {
+            ancestors.emplace_back(ast::MK::Self(arg.loc()));
         }
 
         const bool bodyIsClass = true;
