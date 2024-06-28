@@ -473,6 +473,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         fallback = leftCandidates[0].candidate;
     }
 
+    MethodRef blockFallback;
     {
         auto blockFixedArity = block == nullptr ? nullopt : block->fixedArity();
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
@@ -481,6 +482,10 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             ENFORCE(!params.empty(), "Should at least have a block parameter.");
             const auto &lastParam = params.back();
             auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
+            if (mentionsBlockParam && !blockFallback.exists()) {
+                blockFallback = candidate;
+            }
+
             if (block == nullptr) {
                 // keep only candidates that have a block iff we are passing one
                 if (mentionsBlockParam && lastParam.type != nullptr &&
@@ -570,6 +575,9 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     if (!leftCandidates.empty()) {
         return leftCandidates[0].candidate;
+    }
+    if (block != nullptr) {
+        return blockFallback;
     }
     return fallback;
 }
