@@ -253,3 +253,260 @@ class Proc10 < Proc
   alias_method :[], :call
 end
 
+module Kernel
+  # Equivalent to
+  # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new),
+  # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)
+  # objects check the number of parameters passed when called.
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped,
+          arg8: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped,
+          arg8: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
+        blk: T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped,
+          arg8: T.untyped,
+          arg9: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+      .returns(
+        T.proc.params(
+          arg0: T.untyped,
+          arg1: T.untyped,
+          arg2: T.untyped,
+          arg3: T.untyped,
+          arg4: T.untyped,
+          arg5: T.untyped,
+          arg6: T.untyped,
+          arg7: T.untyped,
+          arg8: T.untyped,
+          arg9: T.untyped
+        )
+          .returns(T.type_parameter(:Return))
+      )
+  end
+  def lambda(&blk); end
+end
+
