@@ -1477,7 +1477,20 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(i.link);
                 ENFORCE(i.link->result->main.blockReturnType != nullptr);
 
+                tp.type = core::Types::bottom();
+                tp.origins.emplace_back(ctx.locAt(bind.loc));
+
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
+
+                if (i.link->result->main.method == core::Symbols::Kernel_lambda()) {
+                    if (auto *appType = core::cast_type<core::AppliedType>(i.link->result->returnType)) {
+                        if (auto procType = core::Types::getProcArity(*appType)) {
+                            appType->targs[0] = core::Types::dropLiteral(ctx, typeAndOrigin.type);
+                            return;
+                        }
+                    }
+                }
+
                 auto expectedType = i.link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
@@ -1512,9 +1525,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
                 }
-
-                tp.type = core::Types::bottom();
-                tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::Literal &i) {
                 tp.type = i.value;
