@@ -95,7 +95,16 @@ int main(int argc, char **argv) {
           "  # Equivalent to\n"
           "  # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new),\n"
           "  # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)\n"
-          "  # objects check the number of parameters passed when called.\n";
+          "  # objects check the number of parameters passed when called.\n"
+          "  sig do\n"
+          "    type_parameters(:Return)\n"
+          "      .params(\n"
+          "        blk: T.untyped\n"
+          "      )\n"
+          "      .returns(\n"
+          "        Proc\n"
+          "      )\n"
+          "  end\n";
 
     for (int arity = 0; arity <= MAX_PROC_ARITY; ++arity) {
         emitLambdaOverload(rb, arity);

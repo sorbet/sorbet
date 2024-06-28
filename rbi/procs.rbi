@@ -261,6 +261,15 @@ module Kernel
   sig do
     type_parameters(:Return)
       .params(
+        blk: T.untyped
+      )
+      .returns(
+        Proc
+      )
+  end
+  sig do
+    type_parameters(:Return)
+      .params(
         blk: T.proc.returns(T.type_parameter(:Return))
       )
       .returns(
