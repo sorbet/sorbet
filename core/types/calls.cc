@@ -531,6 +531,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 auto blockParamTArgs1 = Types::resultTypeAsSeenFrom(gs, blockParamType->targs[1],
                                                                     candidate.data(gs)->owner, inClass, targs);
                 if (auto *tupleType = cast_type<TupleType>(blockParamTArgs1)) {
+                    // If the call site is requesting more arguments than the definition can supply,
+                    // reject this candidate.
                     if (tupleType->elems.size() < blockFixedArity) {
                         it = leftCandidates.erase(it);
                         continue;
@@ -547,6 +549,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             }
 
             if (paramProcArity < blockFixedArity) {
+                // If the call site is requesting more arguments than the definition can supply,
+                // reject this candidate.
                 it = leftCandidates.erase(it);
                 continue;
             }
