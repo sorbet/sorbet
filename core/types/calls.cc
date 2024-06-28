@@ -580,7 +580,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     if (!leftCandidates.empty()) {
         return leftCandidates[0].candidate;
     }
-    if (block != nullptr) {
+    if (block != nullptr && blockFallback.exists()) {
         return blockFallback;
     }
     return fallback;
