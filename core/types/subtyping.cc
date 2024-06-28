@@ -228,6 +228,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             categoryCounterInc("lub", "<top");
             return t1;
         }
+        if (mayBeSpecial1.symbol == Symbols::void_()) {
+            categoryCounterInc("lub", "<void");
+            return Types::top();
+        }
     }
 
     if (isa_type<ClassType>(t2)) {
@@ -243,6 +247,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (mayBeSpecial2.symbol == Symbols::top()) {
             categoryCounterInc("lub", "top>");
             return t2;
+        }
+        if (mayBeSpecial2.symbol == Symbols::void_()) {
+            categoryCounterInc("lub", "void>");
+            return Types::top();
         }
     }
 
@@ -668,7 +676,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     if (isa_type<ClassType>(t1)) {
         auto mayBeSpecial1 = cast_type_nonnull<ClassType>(t1);
-        if (mayBeSpecial1.symbol == Symbols::top()) {
+        if (mayBeSpecial1.symbol == Symbols::top() || mayBeSpecial1.symbol == Symbols::void_()) {
             categoryCounterInc("glb", "<top");
             return t2;
         }
@@ -677,7 +685,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             // `glb(T.untyped,<any>)` will reduce to `T.untyped`.
             if (isa_type<ClassType>(t2)) {
                 auto mayBeSpecial2 = cast_type_nonnull<ClassType>(t2);
-                if (mayBeSpecial2.symbol == Symbols::top()) {
+                if (mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_()) {
                     categoryCounterInc("glb", "top>");
                     return t1;
                 }
@@ -693,7 +701,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     if (isa_type<ClassType>(t2)) {
         auto mayBeSpecial2 = cast_type_nonnull<ClassType>(t2);
-        if (mayBeSpecial2.symbol == Symbols::top()) {
+        if (mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_()) {
             categoryCounterInc("glb", "top>");
             return t1;
         }
@@ -1109,10 +1117,11 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (mayBeSpecial1.symbol == Symbols::bottom()) {
             return true;
         }
-        if (mayBeSpecial1.symbol == Symbols::top()) {
+        if (mayBeSpecial1.symbol == Symbols::top() || mayBeSpecial1.symbol == Symbols::void_()) {
             if (isa_type<ClassType>(t2)) {
                 auto mayBeSpecial2 = cast_type_nonnull<ClassType>(t2);
-                return mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::untyped();
+                return mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_() ||
+                       mayBeSpecial2.symbol == Symbols::untyped();
             } else {
                 return false;
             }
@@ -1130,7 +1139,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (mayBeSpecial2.symbol == Symbols::bottom()) {
             return false; // (bot, bot) is handled above.
         }
-        if (mayBeSpecial2.symbol == Symbols::top()) {
+        if (mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_()) {
             return true;
         }
     }
