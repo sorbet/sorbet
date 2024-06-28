@@ -114,6 +114,20 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+bool isKernelLambda(ast::Send &s) {
+    if (s.fun != core::Names::lambda()) {
+        return false;
+    }
+
+    // Only handle `-> () {}` and `Kernel.lambda` lambdas for now, because there's nothing stopping
+    // someone from defining a method called `lambda` on their own that behaves differently.
+    //
+    // We could revisit this in the future but for now let's be conservative.
+
+    auto *cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
+    return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
+}
+
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     const auto &ctx = cctx.ctx;
     auto method = cctx.inWhat.symbol;
@@ -352,6 +366,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                  */
             },
             [&](ast::Return &a) {
+                if (cctx.isInsideLambda) {
+                    ret = walkBlockReturn(cctx, a.loc, a.expr, current);
+                    return;
+                }
+
                 LocalRef retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a.expr, current);
                 cont->exprs.emplace_back(cctx.target, a.loc, make_insn<Return>(retSym, a.expr.loc())); // dead assign.
@@ -644,11 +663,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     unconditionalJump(current, headerBlock, cctx.inWhat, s.loc);
 
                     LocalRef blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
-                    auto blockLast = walk(cctx.withTarget(blockrv)
-                                              .withBlockBreakTarget(cctx.target)
-                                              .withLoopScope(headerBlock, postBlock, true)
-                                              .withSendAndBlockLink(link),
-                                          s.block()->body, argBlock);
+                    BasicBlock *blockLast;
+                    {
+                        auto newCctx = cctx.withTarget(blockrv)
+                                           .withBlockBreakTarget(cctx.target)
+                                           .withLoopScope(headerBlock, postBlock, true)
+                                           .withSendAndBlockLink(link);
+                        newCctx.isInsideLambda = isKernelLambda(s);
+                        blockLast = walk(newCctx, s.block()->body, argBlock);
+                    }
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
 
