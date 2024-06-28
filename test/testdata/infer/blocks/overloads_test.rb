@@ -91,3 +91,30 @@ res = block_arity_overload_good_order_choice do |x, y|
   T.reveal_type(y) # error: `Integer`
 end
 T.reveal_type(res) # error: `String`
+
+sig { params(blk: T.proc.void).returns(Symbol) }
+sig { params(blk: T.proc.params(x: T.untyped).void).returns(Integer) }
+def block_arity_overload_untyped(&blk) # error: Refusing to typecheck
+  if blk.parameters.size == 1
+    yield [1, 2, 3]
+  end
+end
+
+res = block_arity_overload_untyped do
+end
+T.reveal_type(res) # error: `Symbol`
+res = block_arity_overload_untyped do |x|
+  T.reveal_type(x) # error: `T.untyped`
+end
+T.reveal_type(res) # error: `Integer`
+res = block_arity_overload_untyped do |x, y|
+  # This is wrong, because the lack of types makes us guess the wrong overload.
+  T.reveal_type(x) # error: `NilClass`
+  T.reveal_type(y) # error: `NilClass`
+end
+T.reveal_type(res) # error: `Symbol`
+res = block_arity_overload_untyped do |(x, y)|
+  T.reveal_type(x) # error: `T.untyped`
+  T.reveal_type(y) # error: `T.untyped`
+end
+T.reveal_type(res) # error: `Integer`
