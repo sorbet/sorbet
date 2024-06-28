@@ -476,16 +476,16 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             const auto &[candidate, constr] = *it;
-            const auto &args = candidate.data(gs)->arguments;
-            ENFORCE(!args.empty(), "Should at least have a block argument.");
-            const auto &lastArg = args.back();
-            auto mentionsBlockArg = !lastArg.isSyntheticBlockArgument();
+            const auto &params = candidate.data(gs)->arguments;
+            ENFORCE(!params.empty(), "Should at least have a block parameter.");
+            const auto &lastParam = params.back();
+            auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
             if (block != nullptr) {
-                if (!mentionsBlockArg || lastArg.type == Types::nilClass()) {
+                if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
-                if (auto blockParamType = cast_type<AppliedType>(lastArg.type)) {
+                if (auto blockParamType = cast_type<AppliedType>(lastParam.type)) {
                     if (auto paramProcArity = Types::getProcArity(*blockParamType)) {
                         if (auto blockFixedArity = block->fixedArity()) {
                             if (blockFixedArity == 1) {
@@ -508,8 +508,8 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     }
                 }
             } else {
-                if (mentionsBlockArg && lastArg.type != nullptr &&
-                    (!lastArg.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastArg.type))) {
+                if (mentionsBlockParam && lastParam.type != nullptr &&
+                    (!lastParam.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastParam.type))) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
