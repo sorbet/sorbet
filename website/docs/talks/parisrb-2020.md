@@ -1,5 +1,5 @@
 ---
-id: ParisRB 2020
+id: parisrb-2020
 title: Sorbet: A type checker for Ruby 3 you can use today!
 sidebar_label: ParisRB 2020
 ---
