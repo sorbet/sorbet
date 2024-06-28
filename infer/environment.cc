@@ -1407,9 +1407,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
-                if (methodReturnType == core::Types::void_()) {
-                    methodReturnType = core::Types::top();
-                }
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            core::UntypedMode::AlwaysCompatible,
@@ -1446,9 +1443,6 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 auto expectedType = i.link->result->main.blockReturnType;
-                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
-                    expectedType = core::Types::top();
-                }
                 bool isSubtype;
                 core::ErrorSection::Collector errorDetailsCollector;
                 if (i.link->result->main.constr) {
