@@ -475,7 +475,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         fallback = leftCandidates[0].candidate;
     }
 
-    { // keep only candidates that have a block iff we are passing one
+    {
         auto blockFixedArity = block == nullptr ? nullopt : block->fixedArity();
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             const auto &[candidate, constr] = *it;
@@ -483,56 +483,65 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             ENFORCE(!params.empty(), "Should at least have a block parameter.");
             const auto &lastParam = params.back();
             auto mentionsBlockParam = !lastParam.isSyntheticBlockArgument();
-            if (block != nullptr) {
-                if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
-                    it = leftCandidates.erase(it);
-                    continue;
-                }
-
-                if (!blockFixedArity.has_value()) {
-                    ++it;
-                    continue;
-                }
-
-                auto blockParamType = cast_type<AppliedType>(lastParam.type);
-                if (blockParamType == nullptr) {
-                    ++it;
-                    continue;
-                }
-
-                auto paramProcArity = Types::getProcArity(*blockParamType);
-                if (!paramProcArity.has_value()) {
-                    ++it;
-                    continue;
-                }
-
-                if (paramProcArity == 1 && blockParamType->targs.size() == 2) {
-                    if (auto *paramProcArg0Type = cast_type<TupleType>(blockParamType->targs[1])) {
-                        if (blockFixedArity != 1 && paramProcArg0Type->elems.size() > blockFixedArity) {
-                            it = leftCandidates.erase(it);
-                            continue;
-                        } else {
-                            ++it;
-                            continue;
-                        }
-                    } else if (blockParamType->targs[1].derivesFrom(gs, Symbols::Array())) {
-                        // Don't know the length of the array, so we can't know the expected arity
-                        // of the block.
-                        ++it;
-                        continue;
-                    }
-                }
-
-                if (paramProcArity < blockFixedArity) {
-                    it = leftCandidates.erase(it);
-                    continue;
-                }
-            } else {
+            if (block == nullptr) {
+                // keep only candidates that have a block iff we are passing one
                 if (mentionsBlockParam && lastParam.type != nullptr &&
                     (!lastParam.type.isFullyDefined() || !Types::isSubType(gs, Types::nilClass(), lastParam.type))) {
                     it = leftCandidates.erase(it);
                     continue;
+                } else {
+                    ++it;
+                    continue;
                 }
+            }
+
+            if (!mentionsBlockParam || lastParam.type == Types::nilClass()) {
+                // keep only candidates that have a block iff we are passing one
+                it = leftCandidates.erase(it);
+                continue;
+            }
+
+            if (!blockFixedArity.has_value()) {
+                // Don't bother with block arguments that have keyword or repeated args
+                ++it;
+                continue;
+            }
+
+            // Don't bother if we don't have a T.proc type, where we can't know the specific arity
+            auto blockParamType = cast_type<AppliedType>(lastParam.type);
+            if (blockParamType == nullptr) {
+                ++it;
+                continue;
+            }
+            auto paramProcArity = Types::getProcArity(*blockParamType);
+            if (!paramProcArity.has_value()) {
+                ++it;
+                continue;
+            }
+
+            // When yielding a single value yielded to a block, the Ruby VM will splat it into the
+            // block argument if its arity is greater than 1 (even when not using any destructuring
+            // parameters like `|(x, y)|`)
+            if (paramProcArity == 1 && blockParamType->targs.size() == 2 && blockFixedArity != 1) {
+                if (auto *paramProcArg0Type = cast_type<TupleType>(blockParamType->targs[1])) {
+                    if (paramProcArg0Type->elems.size() < blockFixedArity) {
+                        it = leftCandidates.erase(it);
+                        continue;
+                    } else {
+                        ++it;
+                        continue;
+                    }
+                } else if (blockParamType->targs[1].derivesFrom(gs, Symbols::Array())) {
+                    // Don't know the length of the array, so we can't know the expected arity
+                    // of the block.
+                    ++it;
+                    continue;
+                }
+            }
+
+            if (paramProcArity < blockFixedArity) {
+                it = leftCandidates.erase(it);
+                continue;
             }
             ++it;
         }
