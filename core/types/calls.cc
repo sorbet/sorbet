@@ -476,6 +476,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     }
 
     { // keep only candidates that have a block iff we are passing one
+        auto blockFixedArity = block == nullptr ? nullopt : block->fixedArity();
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             const auto &[candidate, constr] = *it;
             const auto &params = candidate.data(gs)->arguments;
@@ -487,27 +488,44 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                     it = leftCandidates.erase(it);
                     continue;
                 }
-                if (auto blockParamType = cast_type<AppliedType>(lastParam.type)) {
-                    if (auto paramProcArity = Types::getProcArity(*blockParamType)) {
-                        if (auto blockFixedArity = block->fixedArity()) {
-                            if (blockFixedArity == 1) {
-                                if (paramProcArity > blockFixedArity) {
-                                    it = leftCandidates.erase(it);
-                                    continue;
-                                }
-                            } else if (paramProcArity == 1 && blockParamType->targs.size() == 2 &&
-                                       isa_type<TupleType>(blockParamType->targs[1])) {
-                                auto &paramProcArg0Type = cast_type_nonnull<TupleType>(blockParamType->targs[1]);
-                                if (paramProcArg0Type.elems.size() > blockFixedArity) {
-                                    it = leftCandidates.erase(it);
-                                    continue;
-                                }
-                            } else if (paramProcArity > blockFixedArity) {
-                                it = leftCandidates.erase(it);
-                                continue;
-                            }
+
+                if (!blockFixedArity.has_value()) {
+                    ++it;
+                    continue;
+                }
+
+                auto blockParamType = cast_type<AppliedType>(lastParam.type);
+                if (blockParamType == nullptr) {
+                    ++it;
+                    continue;
+                }
+
+                auto paramProcArity = Types::getProcArity(*blockParamType);
+                if (!paramProcArity.has_value()) {
+                    ++it;
+                    continue;
+                }
+
+                if (paramProcArity == 1 && blockParamType->targs.size() == 2) {
+                    if (auto *paramProcArg0Type = cast_type<TupleType>(blockParamType->targs[1])) {
+                        if (blockFixedArity != 1 && paramProcArg0Type->elems.size() > blockFixedArity) {
+                            it = leftCandidates.erase(it);
+                            continue;
+                        } else {
+                            ++it;
+                            continue;
                         }
+                    } else if (blockParamType->targs[1].derivesFrom(gs, Symbols::Array())) {
+                        // Don't know the length of the array, so we can't know the expected arity
+                        // of the block.
+                        ++it;
+                        continue;
                     }
+                }
+
+                if (paramProcArity < blockFixedArity) {
+                    it = leftCandidates.erase(it);
+                    continue;
                 }
             } else {
                 if (mentionsBlockParam && lastParam.type != nullptr &&
