@@ -124,8 +124,8 @@ class Index extends React.Component {
                 },
                 {
                   title: 'Sorbet: A type checker for Ruby 3 you can use today!',
-                  link: '/docs/talks/pairsrb-2020',
-                  venue: 'PairsRB 2020',
+                  link: '/docs/talks/parisrb-2020',
+                  venue: 'ParisRB 2020',
                 },
                 {
                   title: 'Sorbet: A type checker for Ruby 3 you can use today!',

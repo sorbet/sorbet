@@ -1,7 +1,7 @@
 ---
-id: PairsRB 2020
+id: parisrb-2020
 title: Sorbet: A type checker for Ruby 3 you can use today!
-sidebar_label: PairsRB 2020
+sidebar_label: ParisRB 2020
 ---
 
 **Date**: February 19, 2020\
@@ -9,7 +9,7 @@ sidebar_label: PairsRB 2020
 
 - [→ Talk page](https://2020.rubyparis.org/#schedule)
 - [→ Video](https://www.youtube.com/watch?v=O154LCbFNOY)
-- [→ Slides](https://sorbet.run/talks/PairsRB2020/#/)
+- [→ Slides](https://sorbet.run/talks/ParisRB2020/#/)
 
 ## Abstract
 
