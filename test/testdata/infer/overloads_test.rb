@@ -148,12 +148,12 @@ class BlockOverloads
 
   sig { params(blk: T.proc.void).returns(Integer) }
   sig { params(blk: T.proc.params(x: String).void).returns(String) }
-  def block_arity_overload(&blk)
+  def block_arity_overload(&blk) # error: against an overloaded signature
   end
 
   sig { returns(Integer) }
   sig { params(blk: T.proc.params(xy: [Integer, Integer]).void).returns(String) }
-  def block_tuple_overload(&blk)
+  def block_tuple_overload(&blk) # error: against an overloaded signature
   end
 
   def test
@@ -215,7 +215,7 @@ class BlockOverloads
     T.reveal_type(x) # error: `Integer`
 
     x = block_tuple_overload do |tuple|
-      T.reveal_type(tuple) # error: `[Integer, Integer]` (2-tuple)
+      T.reveal_type(tuple) # error: `[Integer, Integer] (2-tuple)`
     end
     T.reveal_type(x) # error: `String`
 
