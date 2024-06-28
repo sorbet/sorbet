@@ -1485,7 +1485,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (i.link->result->main.method == core::Symbols::Kernel_lambda()) {
                     if (auto *appType = core::cast_type<core::AppliedType>(i.link->result->returnType)) {
                         if (auto procType = core::Types::getProcArity(*appType)) {
-                            appType->targs[0] = core::Types::dropLiteral(ctx, typeAndOrigin.type);
+                            auto blockReturnType = core::Types::dropLiteral(ctx, typeAndOrigin.type);
+                            appType->targs[0] = (appType->targs[0].isUntyped())
+                                                    ? blockReturnType
+                                                    : core::Types::any(ctx, appType->targs[0], blockReturnType);
                             return;
                         }
                     }
