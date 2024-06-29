@@ -414,8 +414,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "and `export` directives."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("ignore-package-directories",
-                               "Extra parent directories which should ignored for the purposes of packaging.",
+    options.add_options("dev")("ignore-packaging-in-directories",
+                               "Extra directories which should be ignored for the purposes of packaging. "
+                               "Constants defined in these will not be treated as belonging to a package and "
+                               "packaging-related errors will be ignored within them.",
                                cxxopts::value<vector<string>>(), "string");
     buildAutogenCacheOptions(options);
 
@@ -1002,13 +1004,13 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("ignore-package-directories")) {
+        if (raw.count("ignore-packaging-in-directories")) {
             if (!opts.stripePackages) {
-                logger->error("--ignore-package-directories can only be specified in --stripe-packages mode");
+                logger->error("--ignore-packaging-in-directories can only be specified in --stripe-packages mode");
                 throw EarlyReturnWithCode(1);
             }
 
-            for (const string &dirName : raw["ignore-package-directories"].as<vector<string>>()) {
+            for (const string &dirName : raw["ignore-packaging-in-directories"].as<vector<string>>()) {
                 if (dirName.back() != '/') {
                     logger->error("--extra-package-files-directory-prefix-slash directory path must have slash "
                                   "(/) at the end");
