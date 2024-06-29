@@ -1482,10 +1482,12 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     auto &pkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     if (!pkg.exists()) {
         // Don't transform, but raise an error on the first line.
-        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-            e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
-                        "of its parent directories",
-                        ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
+        if (!pkg.ignoreForPackaging()) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
+                e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
+                            "of its parent directories",
+                            ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
+            }
         }
         return;
     }
@@ -1605,11 +1607,6 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
                 ast::ParsedFile &job = files[idx];
                 if (result.gotItem()) {
                     auto &file = job.file.data(gs);
-                    const auto path = file.path();
-                    if (absl::c_any_of(gs.packageDB().ignorePackageDirs(),
-                                       [&](const std::string &dir) { return absl::StartsWith(path, dir); })) {
-                        continue;
-                    }
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
                     if (file.isPackage()) {

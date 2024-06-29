@@ -12,6 +12,10 @@ bool PackageInfo::exists() const {
     return mangledName().exists();
 }
 
+bool PackageInfo::ignoreForPackaging() const {
+    return false;
+}
+
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
     return mangledName() == rhs.mangledName();
 }
