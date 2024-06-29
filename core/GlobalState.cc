@@ -2386,13 +2386,14 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                                     std::string errorHint) {
+                                     const std::vector<std::string> &ignorePackageDirs, std::string errorHint) {
     ENFORCE(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
+    packageDB_.ignorePackageDirs_ = ignorePackageDirs;
 
     std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {

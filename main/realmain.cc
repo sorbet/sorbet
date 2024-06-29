@@ -666,7 +666,7 @@ int realmain(int argc, char *argv[]) {
                 gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
                                        opts.extraPackageFilesDirectorySlashPrefixes,
                                        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                                       opts.stripePackagesHint);
+                                       opts.ignorePackageDirectories, opts.stripePackagesHint);
             }
 
             packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));

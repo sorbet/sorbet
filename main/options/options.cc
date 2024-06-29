@@ -414,6 +414,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "and `export` directives."
                                "This option must be used in conjunction with --stripe-packages",
                                cxxopts::value<vector<string>>(), "string");
+    options.add_options("dev")("ignore-package-directories",
+                               "Extra parent directories which should ignored for the purposes of packaging.",
+                               cxxopts::value<vector<string>>(), "string");
     buildAutogenCacheOptions(options);
 
     options.add_options("advanced")("error-url-base",
@@ -996,6 +999,22 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.allowRelaxedPackagerChecksFor.emplace_back(ns);
+            }
+        }
+
+        if (raw.count("ignore-package-directories")) {
+            if (!opts.stripePackages) {
+                logger->error("--ignore-package-directories can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+
+            for (const string &dirName : raw["ignore-package-directories"].as<vector<string>>()) {
+                if (dirName.back() != '/') {
+                    logger->error("--extra-package-files-directory-prefix-slash directory path must have slash "
+                                  "(/) at the end");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.ignorePackageDirectories.emplace_back(dirName);
             }
         }
 

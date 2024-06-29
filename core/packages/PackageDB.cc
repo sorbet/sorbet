@@ -173,6 +173,11 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
+        if (std::find(ignorePackageDirs_.begin(), ignorePackageDirs_.end(), path.substr(0, curPrefixPos + 1)) !=
+            ignorePackageDirs_.end()) {
+            return NONE_PKG;
+        }
+
         const auto &it = packagesByPathPrefix.find(path.substr(0, curPrefixPos + 1));
         if (it != packagesByPathPrefix.end()) {
             const auto &pkg = getPackageInfo(it->second);
@@ -219,6 +224,10 @@ const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscoreP
 
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
     return extraPackageFilesDirectorySlashPrefixes_;
+}
+
+const std::vector<std::string> &PackageDB::ignorePackageDirs() const {
+    return ignorePackageDirs_;
 }
 
 const std::string_view PackageDB::errorHint() const {

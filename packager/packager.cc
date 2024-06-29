@@ -1605,6 +1605,11 @@ void Packager::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<ast::P
                 ast::ParsedFile &job = files[idx];
                 if (result.gotItem()) {
                     auto &file = job.file.data(gs);
+                    const auto path = file.path();
+                    if (absl::c_any_of(gs.packageDB().ignorePackageDirs(),
+                                       [&](const std::string &dir) { return absl::StartsWith(path, dir); })) {
+                        continue;
+                    }
                     core::Context ctx(gs, core::Symbols::root(), job.file);
 
                     if (file.isPackage()) {
