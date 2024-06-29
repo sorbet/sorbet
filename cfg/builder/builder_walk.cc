@@ -669,7 +669,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                                            .withBlockBreakTarget(cctx.target)
                                            .withLoopScope(headerBlock, postBlock, true)
                                            .withSendAndBlockLink(link);
-                        newCctx.isInsideLambda = isKernelLambda(s);
+                        if (isKernelLambda(s)) {
+                            newCctx.isInsideLambda = true;
+                        }
                         blockLast = walk(newCctx, s.block()->body, argBlock);
                     }
                     if (blockLast != cctx.inWhat.deadBlock()) {

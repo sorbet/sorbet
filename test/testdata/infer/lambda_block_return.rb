@@ -33,3 +33,22 @@ def proc_to_lambda
   f = Kernel.lambda(&p)
   f.call.to_s
 end
+
+sig { params(blk: T.proc.returns(NilClass)).void }
+def takes_nil_block(&blk)
+  yield
+end
+
+sig { returns(String) }
+def block_inside_lambda
+  f = ->() {
+    takes_nil_block do
+      # At runtime, this returns from the lambda, but Sorbet treats it like it
+      # returns from the enclosing block. This would be nice to fix, because
+      # there is no workaround for this except manually raising and catching
+      # exceptions.
+      return 0 # error: Expected `NilClass` but found `Integer(0)` for block result type
+    end
+  }
+  f.call.to_s
+end
