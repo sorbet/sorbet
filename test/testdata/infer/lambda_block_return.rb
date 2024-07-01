@@ -46,9 +46,14 @@ def block_inside_lambda
       # At runtime, this returns from the lambda, but Sorbet treats it like it
       # returns from the enclosing block. This would be nice to fix, because
       # there is no workaround for this except manually raising and catching
-      # exceptions.
+      # exceptions. (Should be no error.)
       return 0 # error: Expected `NilClass` but found `Integer(0)` for block result type
     end
+
+    nil
   }
+
+  # Should be `T.proc.returns(T.nilable(Integer))`
+  T.reveal_type(f) # error: `T.proc.returns(NilClass)`
   f.call.to_s
 end
