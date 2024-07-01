@@ -681,6 +681,10 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::Kernel(), Names::lambda()).build();
     ENFORCE(method == Symbols::Kernel_lambda());
 
+    typeArgument = enterTypeArgument(Loc::none(), Symbols::Kernel_lambda(), Names::returnType(), Variance::CoVariant);
+    ENFORCE(typeArgument == Symbols::Kernel_lambda_returnType());
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+
     method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::type(), Types::top()).build();
     ENFORCE(method == Symbols::Kernel_lambdaTLet());
 

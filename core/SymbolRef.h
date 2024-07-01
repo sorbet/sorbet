@@ -1101,6 +1101,10 @@ public:
         return MethodRef::fromRaw(20);
     }
 
+    static TypeArgumentRef Kernel_lambda_returnType() {
+        return TypeArgumentRef::fromRaw(4);
+    }
+
     static MethodRef Kernel_lambdaTLet() {
         return MethodRef::fromRaw(21);
     }
