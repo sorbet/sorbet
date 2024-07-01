@@ -461,6 +461,10 @@ void GlobalState::initEmpty() {
         enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
     klass.data(*this)->setIsModule(false);
     ENFORCE(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
+    typeArgument =
+        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
+    ENFORCE(typeArgument == Symbols::todoTypeArgument());
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     method =
         enterMethod(*this, Symbols::Sorbet_Private_Static(), core::Names::guessedTypeTypeParameterHolder()).build();
     ENFORCE(method == Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder());
@@ -679,11 +683,6 @@ void GlobalState::initEmpty() {
 
     method = enterMethod(*this, Symbols::Kernel(), Names::lambdaTLet()).typedArg(Names::type(), Types::top()).build();
     ENFORCE(method == Symbols::Kernel_lambdaTLet());
-
-    typeArgument =
-        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
-    ENFORCE(typeArgument == Symbols::todoTypeArgument());
-    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
