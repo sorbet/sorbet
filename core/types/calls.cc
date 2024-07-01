@@ -3721,6 +3721,80 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
+// Returns true if the type is exactly the class of a specific enum value. For example, given:
+//
+//   class C < T::Enum
+//     enums do
+//       X = new
+//       Y = new
+//     end
+//   end
+//
+//  class TotallyUnrelatedThing ; end
+//
+// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
+static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
+    bool must_exist = false;
+    auto unwrapped = unwrapSymbol(gs, type, must_exist);
+
+    if (!unwrapped.exists()) {
+        return false;
+    }
+
+    return unwrapped.data(gs)->name.isTEnumName(gs);
+}
+
+class Magic_checkMatchArray : public IntrinsicMethod {
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::tripleEq()};
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto tupleType = core::cast_type<core::TupleType>(args.args[1]->type);
+        if (tupleType == nullptr) {
+            return;
+        }
+
+        auto testedType = args.args[0]->type;
+        if (testedType.isUntyped()) {
+            return;
+        }
+
+        auto testedSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(testedType)) {
+            testedSym = cast_type_nonnull<ClassType>(testedType).symbol;
+        } else if (auto *app = cast_type<AppliedType>(testedType)) {
+            testedSym = app->klass;
+        }
+        if (testedSym.exists() && testedSym.data(gs)->flags.isSealed) {
+            testedType = testedSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
+        auto typeTestType = core::Types::bottom();
+        for (const auto &klassType : tupleType->elems) {
+            auto klass = core::Types::getRepresentedClass(gs, klassType);
+            if (klass.exists()) {
+                auto ty = klass.data(gs)->externalType();
+                if (ty.isUntyped()) {
+                    return;
+                }
+
+                typeTestType = core::Types::any(gs, move(typeTestType), move(ty));
+            } else if (isEnumValueClass(gs, klassType)) {
+                typeTestType = core::Types::any(gs, move(typeTestType), klassType);
+            } else {
+                return;
+            }
+        }
+
+        if (Types::isSubType(gs, testedType, typeTestType)) {
+            res.returnType = Types::trueClass();
+        } else if (Types::glb(gs, testedType, typeTestType).isBottom()) {
+            res.returnType = Types::falseClass();
+        }
+    }
+} Magic_checkMatchArray;
+
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -4338,30 +4412,6 @@ public:
         res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
-
-// Returns true if the type is exactly the class of a specific enum value. For example, given:
-//
-//   class C < T::Enum
-//     enums do
-//       X = new
-//       Y = new
-//     end
-//   end
-//
-//  class TotallyUnrelatedThing ; end
-//
-// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
-static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
-    bool must_exist = false;
-    auto unwrapped = unwrapSymbol(gs, type, must_exist);
-
-    if (!unwrapped.exists()) {
-        return false;
-    }
-
-    return unwrapped.data(gs)->name.isTEnumName(gs);
-}
-
 class T_Enum_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4489,6 +4539,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashNoDup(), &Magic_toHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHash(), &Magic_mergeHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHashValues(), &Magic_mergeHashValues},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkMatchArray(), &Magic_checkMatchArray},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
