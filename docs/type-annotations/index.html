@@ -96,15 +96,28 @@ x = T.let(<span class="hljs-literal">nil</span>, T.nilable(Integer))
 <p>Sorbet does <em>very</em> minimal inference for types of constants. These are the cases
 where Sorbet infers constant types:</p>
 <ul>
-<li><p>Constants initialized with simple literals (like <code>&quot;foo&quot;</code> or <code>123</code>) will have
-their types inferred. Importantly, this does not include <code>Array</code> or <code>Hash</code>
+<li><p>Constants initialized with simple literals (like <code>&quot;foo&quot;</code>, <code>123</code>, or <code>[&quot;&quot;]</code>)
+will have their types inferred. Importantly, this does not include <code>Hash</code>
 literals.</p></li>
+<li><p>Constants initialized as an alias to another constant, like <code>X = Y</code>. Sorbet
+infers the type of <code>X</code> to be whatever the type of <code>Y</code> is (if <code>Y</code> has neither
+an explicit nor an inferred type, <code>X</code> will be inferred to be <code>T.untyped</code>).</p></li>
+<li><p>Array literal type inference is recursive, so Sorbet will only assume an array
+type for an array literal if the contents of the array are all literals
+(including class or module constant literals).</p></li>
+<li><p>Array literals are inferred to have type <code>T::Array[...]</code> where <code>...</code> is a
+<a href="/docs/union-types">union type</a> of all the types of elements in the array. If the
+array literal is also frozen with the <code>.freeze</code> method, the inferred type will
+be a <a href="/docs/tuples">tuple type</a> instead. This array vs tuple decision is not
+recursive, because <code>.freeze</code> is not recursive. To have Sorbet infer array of
+tuples types, call <code>.freeze</code> on each array nested inside the top-level array.</p></li>
 <li><p>Constants initialized with a call to <code>SomeClass.new</code> will have their type
 inferred to <code>SomeClass</code>. Importantly, this assumption happens <strong>regardless</strong>
 of whether the <code>new</code> method actually returns an instance of <code>SomeClass</code>, which
 might not be the case if the <code>new</code> method has been overridden.</p>
 <p>In these cases, Sorbet reports an error stating that it requires an explicit
-type annotation to correct the faulty assumption.</p></li>
+type annotation to correct the faulty assumption. This only applies at the
+top-level (e.g., not inside arrays).</p></li>
 </ul>
 <p>In all other cases, Sorbet does not infer the types of constants, and will
 assume a type of <code>T.untyped</code>. In <a href="/docs/static"><code># typed: strict</code></a> files, Sorbet
