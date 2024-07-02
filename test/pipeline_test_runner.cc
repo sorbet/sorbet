@@ -226,31 +226,31 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(*gs); });
 
-        ast::ParsedFile localNamed;
+        core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+        ast::ParsedFile localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
+
+        // TODO: handler.addObserved(*gs, "local-vars-tree") ?
 
         // Rewriter
         ast::ParsedFile rewritten;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
-            core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
+            core::MutableContext ctx(*gs, core::Symbols::root(), localNamed.file);
             bool previous = gs->runningUnderAutogen;
             gs->runningUnderAutogen = test.expectations.contains("autogen");
-            rewritten =
-                testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
+            rewritten = testSerialize(
+                *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(localNamed.tree)), localNamed.file});
             gs->runningUnderAutogen = previous;
         }
 
         handler.addObserved(*gs, "rewrite-tree", [&]() { return rewritten.tree.toString(*gs); });
         handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
 
-        core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
-        localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewritten)));
+        handler.addObserved(*gs, "index-tree", [&]() { return rewritten.tree.toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return rewritten.tree.showRaw(*gs); });
 
-        handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
-
-        trees.emplace_back(move(localNamed));
+        trees.emplace_back(move(rewritten));
     }
 
     return trees;
@@ -436,8 +436,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 auto nodes = parser::Parser::run(*rbiGenGs, file, settings);
                 core::MutableContext ctx(*rbiGenGs, core::Symbols::root(), file);
                 auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file};
-                tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
                 tree = testSerialize(*rbiGenGs, local_vars::LocalVars::run(ctx, move(tree)));
+                tree = ast::ParsedFile{rewriter::Rewriter::run(ctx, move(tree.tree)), tree.file};
 
                 if (tree.file.data(*rbiGenGs).isPackage()) {
                     packageTrees.emplace_back(move(tree));
@@ -773,13 +773,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
+        // local vars
+        file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
+        // TODO: handler.addObserved(*gs, "local-vars-tree") ?
+
         // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
         handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree.showRaw(*gs); });
-
-        // local vars
-        file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
         handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
         handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 

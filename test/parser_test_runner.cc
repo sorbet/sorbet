@@ -25,7 +25,6 @@
 #include "core/serialize/serialize.h"
 #include "definition_validator/validator.h"
 #include "infer/infer.h"
-#include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
