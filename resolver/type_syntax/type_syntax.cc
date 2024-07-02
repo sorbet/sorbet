@@ -844,8 +844,6 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
 
             auto arr = ast::cast_tree<ast::Array>(send.getPosArg(0));
             if (arr == nullptr) {
-                // TODO(pay-server) unsilence this error and support enums from pay-server
-                { return TypeSyntax::ResultType{core::Types::Object(), core::Symbols::noClassOrModule()}; }
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                 }
