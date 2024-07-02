@@ -54,9 +54,24 @@ end
 Sorbet does _very_ minimal inference for types of constants. These are the cases
 where Sorbet infers constant types:
 
-- Constants initialized with simple literals (like `"foo"` or `123`) will have
-  their types inferred. Importantly, this does not include `Array` or `Hash`
+- Constants initialized with simple literals (like `"foo"`, `123`, or `[""]`)
+  will have their types inferred. Importantly, this does not include `Hash`
   literals.
+
+- Constants initialized as an alias to another constant, like `X = Y`. Sorbet
+  infers the type of `X` to be whatever the type of `Y` is (if `Y` has neither
+  an explicit nor an inferred type, `X` will be inferred to be `T.untyped`).
+
+- Array literal type inference is recursive, so Sorbet will only assume an array
+  type for an array literal if the contents of the array are all literals
+  (including class or module constant literals).
+
+- Array literals are inferred to have type `T::Array[...]` where `...` is a
+  [union type](union-types.md) of all the types of elements in the array. If the
+  array literal is also frozen with the `.freeze` method, the inferred type will
+  be a [tuple type](tuples.md) instead. This array vs tuple decision is not
+  recursive, because `.freeze` is not recursive. To have Sorbet infer array of
+  tuples types, call `.freeze` on each array nested inside the top-level array.
 
 - Constants initialized with a call to `SomeClass.new` will have their type
   inferred to `SomeClass`. Importantly, this assumption happens **regardless**
@@ -64,7 +79,8 @@ where Sorbet infers constant types:
   might not be the case if the `new` method has been overridden.
 
   In these cases, Sorbet reports an error stating that it requires an explicit
-  type annotation to correct the faulty assumption.
+  type annotation to correct the faulty assumption. This only applies at the
+  top-level (e.g., not inside arrays).
 
 In all other cases, Sorbet does not infer the types of constants, and will
 assume a type of `T.untyped`. In [`# typed: strict`](static.md) files, Sorbet
