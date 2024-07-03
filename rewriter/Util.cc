@@ -16,9 +16,15 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return nullptr;
         }
         if (send->fun == core::Names::enum_() || send->fun == core::Names::deprecatedEnum()) {
-            // T.deprecated_enum() is weird, and accepts values instead of types. Just copy
-            // it blindly through.
-            return send->deepCopy();
+            // T.deprecated_enum() is weird, and accepts values instead of types.
+            if (ast::cast_tree<ast::Array>(send->getPosArg(0))) {
+                // Just copy it blindly through if it's passed a literal array.
+                return send->deepCopy();
+            } else {
+                // If it's not passed a literal, we'll treat it as Object eventually (see
+                // case core::Names::deprecatedEnum(): in interpretTCombinator), so let's replace it with Object now.
+                return (ast::MK::Constant(send->loc, core::Symbols::Object()));
+            }
         }
 
         if (send->fun == core::Names::params() && !send->hasPosArgs() && !send->hasKwSplat()) {
