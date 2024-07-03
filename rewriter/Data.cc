@@ -97,7 +97,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
         sigArgs.emplace_back(ast::MK::Symbol(symLoc, name));
         sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
 
-        auto argName = ast::MK::Local(symLoc, name);
+        auto argName = ast::MK::ResolvedLocal(symLoc, name);
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
         body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
