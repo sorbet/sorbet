@@ -144,6 +144,10 @@ TypePtr Types::Object() {
     return make_type<ClassType>(Symbols::Object());
 }
 
+TypePtr Types::BasicObject() {
+    return make_type<ClassType>(Symbols::BasicObject());
+}
+
 TypePtr Types::falsyTypes() {
     static auto res = OrType::make_shared(Types::nilClass(), Types::falseClass());
     return res;

@@ -128,6 +128,7 @@ public:
     static TypePtr Float();
     static TypePtr Boolean();
     static TypePtr Object();
+    static TypePtr BasicObject();
     static TypePtr arrayOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
