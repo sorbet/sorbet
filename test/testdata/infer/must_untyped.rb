@@ -13,4 +13,4 @@ object = T.let(nil, Object)
 T.must(object) # error: `T.must` called on `Object`, which is redundant
 
 basic_object = T.let(nil, BasicObject)
-T.must(object) # error: `T.must` called on `BasicObject`, which is redundant
+T.must(basic_object) # error: `T.must` called on `BasicObject`, which is redundant
