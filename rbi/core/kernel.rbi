@@ -1887,7 +1887,8 @@ module Kernel
   # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)
   # objects check the number of parameters passed when called.
   sig do
-    params(
+    type_parameters(:return_type) # Used by Kernel#lambda intrinsic in calls.cc
+    .params(
         blk: T.untyped,
     )
     .returns(Proc)

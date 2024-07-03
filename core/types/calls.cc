@@ -4221,8 +4221,16 @@ public:
         }
         auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
         vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, untypedWithBlame);
+        // TODO(jez) Should be able to suport Kernel#proc in the same way
+        auto isLambda = res.main.method == Symbols::Kernel_lambda();
+        if (isLambda) {
+            targs[0] = make_type<TypeVar>(Symbols::Kernel_lambda_returnType());
+        }
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.returnType = make_type<core::AppliedType>(procClass, move(targs));
+        if (isLambda) {
+            handleBlockType(gs, res.main, res.returnType);
+        }
     }
 } Kernel_proc;
 

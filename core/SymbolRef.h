@@ -851,21 +851,21 @@ public:
         return TypeMemberRef::fromRaw(0);
     }
 
+    static TypeArgumentRef todoTypeArgument() {
+        return TypeArgumentRef::fromRaw(1);
+    }
+
     static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return MethodRef::fromRaw(2);
     }
 
     static TypeArgumentRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return TypeArgumentRef::fromRaw(1);
+        return TypeArgumentRef::fromRaw(2);
     }
 
     static TypeArgumentRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
-        return TypeArgumentRef::fromRaw(2);
-    }
-
-    static TypeArgumentRef todoTypeArgument() {
         return TypeArgumentRef::fromRaw(3);
     }
 
@@ -1097,8 +1097,16 @@ public:
         return MethodRef::fromRaw(19);
     }
 
-    static MethodRef Kernel_lambdaTLet() {
+    static MethodRef Kernel_lambda() {
         return MethodRef::fromRaw(20);
+    }
+
+    static TypeArgumentRef Kernel_lambda_returnType() {
+        return TypeArgumentRef::fromRaw(4);
+    }
+
+    static MethodRef Kernel_lambdaTLet() {
+        return MethodRef::fromRaw(21);
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
