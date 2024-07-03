@@ -67,17 +67,6 @@ core::TypePtr TypeSyntax::getResultType(core::Context ctx, const ast::Expression
     }
 }
 
-TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::Context ctx, const ast::ExpressionPtr &expr,
-                                                        const ParsedSig &sigBeingParsed, TypeSyntaxArgs args) {
-    auto result = getResultTypeAndBindWithSelfTypeParams(ctx, expr, sigBeingParsed, args);
-    if (result.has_value()) {
-        result->type = core::Types::unwrapSelfTypeParam(ctx, result->type);
-        return result.value();
-    } else {
-        return {core::Types::todo(), core::Symbols::noClassOrModule()};
-    }
-}
-
 namespace {
 
 // Parse a literal type for use with `T.deprecated_enum`. If the type is indeed a literal, this will return the
