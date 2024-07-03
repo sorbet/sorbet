@@ -603,4 +603,77 @@ class Range < Object
     .returns(T::Boolean)
   end
   def member?(obj); end
+
+  # Returns `true` if `range` overlaps with `self`, `false` otherwise:
+  # 
+  # ```ruby
+  # (0..2).overlap?(1..3) #=> true
+  # (0..2).overlap?(3..4) #=> false
+  # (0..).overlap?(..0)   #=> true
+  # ``` 
+  #
+  # With non-range argument, raises [`TypeError`](https://docs.ruby-lang.org/en/3.3/TypeError.html).
+  # 
+  # ```ruby
+  # (1..3).overlap?(1)         # TypeError
+  # ``` 
+  #
+  # Returns `false` if an internal call to `<=>` returns `nil`; that is, the operands are not comparable.
+  # 
+  # ```ruby
+  # (1..3).overlap?('a'..'d')  # => false
+  # ```
+  # 
+  # Returns `false` if `self` or `range` is empty. “Empty range” means that its begin value is larger than, or equal for
+  # an exclusive range, its end value.
+  # 
+  # ```ruby
+  # (4..1).overlap?(2..3)      # => false
+  # (4..1).overlap?(..3)       # => false
+  # (4..1).overlap?(2..)       # => false
+  # (2...2).overlap?(1..2)     # => false
+  #
+  # (1..4).overlap?(3..2)      # => false
+  # (..4).overlap?(3..2)       # => false
+  # (1..).overlap?(3..2)       # => false
+  # (1..2).overlap?(2...2)     # => false
+  # ```
+  # 
+  # Returns `false` if the begin value one of self and range is larger than, or equal if the other is an exclusive
+  # range, the end value of the other:
+  # 
+  # ```ruby
+  # (4..5).overlap?(2..3)      # => false
+  # (4..5).overlap?(2...4)     # => false
+  #
+  # (1..2).overlap?(3..4)      # => false
+  # (1...3).overlap?(3..4)     # => false
+  # ```
+  # 
+  # Returns `false` if the end value one of `self` and `range` is larger than, or equal for an exclusive range, the end
+  # value of the other:
+  # 
+  # ```ruby
+  # (4..5).overlap?(2..3)      # => false
+  # (4..5).overlap?(2...4)     # => false
+  # 
+  # (1..2).overlap?(3..4)      # => false
+  # (1...3).overlap?(3..4)     # => false
+  # ```
+  # 
+  # Note that the method wouldn’t make any assumptions about the beginless range being actually empty, even if its upper
+  # bound is the minimum possible value of its type, so all this would return `true`:
+  # 
+  # ```ruby
+  # (...-Float::INFINITY).overlap?(...-Float::INFINITY) # => true
+  # (..."").overlap?(..."") # => true
+  # (...[]).overlap?(...[]) # => true
+  # ```
+  # 
+  # Even if those ranges are effectively empty (no number can be smaller than `-Float::INFINITY`), they are still
+  # considered overlapping with themselves.
+  # Related: [`Range#cover?`](https://docs.ruby-lang.org/en/3.3/Range.html#method-i-cover-3F).
+  sig { params(other: T::Range[T.untyped]).returns(T::Boolean) }
+  def overlap?(other)
+  end
 end
