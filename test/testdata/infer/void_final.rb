@@ -14,6 +14,6 @@ def main
     #^^^^^^ error: Branching on `void` value
     T.reveal_type(result) # error: Revealed type: `Sorbet::Private::Static::Void`
   else
-    T.reveal_type(result) # error: This code is unreachable
+    T.reveal_type(result) # error: `T.nilable(FalseClass)`
   end
 end
