@@ -4417,13 +4417,23 @@ to declare overloaded methods correctly.
 
 ## 7050
 
-Calling `T.must` with an untyped object is an indication that code that was
-considered typed (and `T.must` was ensuring that the value was not `nil`) is not
-typed anymore.
+Calling `T.must` when the argument is `T.untyped`, `T.anything`, `Object`, or
+`BasicObject` is redundant. This indicates that either:
 
-This was separated from [7015](#7015) to maintain this error in
-`# typed: strict` and above, but allow for [7015](#7015) to be enforced at lower
-strictness levels.
+- a previously-typed argument became untyped, indicating a regression in type
+  safety somewhere, or
+- the code does not benefit from `T.must`, because the type before and after the
+  call is the same.
+
+If raising an exception for `nil` values is the desired runtime behavior, do so
+explicitly:
+
+```ruby
+raise if x == nil
+```
+
+This was separated from [7015](#7015) allow it to be autocorrected independently
+from invalid usages of `T.let` and `T.cast`.
 
 ## 7051
 
