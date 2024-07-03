@@ -188,13 +188,14 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     UnorderedMap<core::NameRef, ArgKind> argKindMap;
     for (const auto &arg : methodDef->args) {
         const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
+        auto name = ast::MK::arg2Local(arg)->localVariable._name;
         if (restArg == nullptr) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
+            argKindMap[name] = ArgKind::Plain;
         } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
+            argKindMap[name] = ArgKind::KeywordRestArg;
         } else {
-            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::RestArg;
+            ENFORCE(ast::isa_tree<ast::Local>(restArg->expr));
+            argKindMap[name] = ArgKind::RestArg;
         }
     }
 

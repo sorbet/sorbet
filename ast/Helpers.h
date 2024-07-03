@@ -480,27 +480,6 @@ public:
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
     }
 
-    static core::NameRef arg2Name(const ExpressionPtr &arg) {
-        auto *cursor = &arg;
-        while (true) {
-            if (auto *local = cast_tree<UnresolvedIdent>(*cursor)) {
-                ENFORCE(local->kind == UnresolvedIdent::Kind::Local);
-                return local->name;
-            }
-
-            // Recurse into structure to find the UnresolvedIdent
-            typecase(
-                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
-                [&](const class KeywordArg &kw) { cursor = &kw.expr; },
-                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
-                [&](const class BlockArg &blk) { cursor = &blk.expr; },
-                [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
-                // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
-        }
-    }
-
     static ast::Local const *arg2Local(const ast::ExpressionPtr &arg) {
         auto *cursor = &arg;
         while (true) {
