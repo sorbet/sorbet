@@ -673,7 +673,7 @@ class Range < Object
   # Even if those ranges are effectively empty (no number can be smaller than `-Float::INFINITY`), they are still
   # considered overlapping with themselves.
   # Related: [`Range#cover?`](https://docs.ruby-lang.org/en/3.3/Range.html#method-i-cover-3F).
-  sig { params(other: T::Range[T.untyped]).returns(T::Boolean) }
+  sig { params(other: T::Range[T.anything]).returns(T::Boolean) }
   def overlap?(other)
   end
 end
