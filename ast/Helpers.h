@@ -253,7 +253,7 @@ public:
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::ARGS_store args, ExpressionPtr rhs,
                                 MethodDef::Flags flags = MethodDef::Flags()) {
-        if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
+        if (args.empty() || (!isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
             args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::ResolvedLocal(blkLoc, core::Names::blkArg())));
         }
