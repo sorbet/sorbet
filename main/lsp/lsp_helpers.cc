@@ -172,7 +172,27 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
 }
 
 unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
+                              vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    auto &resp = queryResponses[0];
+    auto *litResp = resp->isLiteral();
+    if (litResp == nullptr || queryResponses.size() <= 1) {
+        return nullptr;
+    }
+    auto identResp = queryResponses[1]->isIdent();
+    if (identResp == nullptr || identResp->termLoc.adjust(gs, 0, -1) != litResp->termLoc) {
+        return nullptr;
+    }
+
+    return move(queryResponses[1]);
+}
+
+unique_ptr<core::lsp::QueryResponse>
 skipLiteralIfMethodDef(const core::GlobalState &gs, vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    if (auto punnedKwarg = skipLiteralIfPunnedKeywordArg(gs, queryResponses)) {
+        return punnedKwarg;
+    }
+
     for (auto &r : queryResponses) {
         if (r->isMethodDef()) {
             return move(r);

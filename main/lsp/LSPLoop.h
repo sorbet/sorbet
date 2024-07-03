@@ -112,6 +112,10 @@ std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &g
                                                       bool includeSelf);
 
 std::unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
+                              std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+
+std::unique_ptr<core::lsp::QueryResponse>
 skipLiteralIfMethodDef(const core::GlobalState &gs,
                        std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
