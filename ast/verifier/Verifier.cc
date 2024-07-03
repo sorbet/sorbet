@@ -10,7 +10,11 @@ class VerifierWalker {
 public:
     void preTransformExpressionPtr(core::Context ctx, const ExpressionPtr &original) {
         if (!isa_tree<EmptyTree>(original)) {
-            ENFORCE(original.loc().exists(), "location is unset");
+            auto local = ast::cast_tree<Local>(original);
+            if (!local || local->localVariable._name != core::Names::blkArg()) {
+                // local_vars creates a call to super with a synthetic <blk> that has no loc
+                ENFORCE(original.loc().exists(), "location is unset");
+            }
         }
 
         original._sanityCheck();
