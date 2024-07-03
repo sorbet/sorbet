@@ -172,7 +172,7 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
 }
 
 unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+skipLiteralIfMethodDef(const core::GlobalState &gs, vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     for (auto &r : queryResponses) {
         if (r->isMethodDef()) {
             return move(r);
@@ -185,12 +185,13 @@ skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryRespon
 }
 
 unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+getQueryResponseForFindAllReferences(const core::GlobalState &gs,
+                                     vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     // Find all references might show an Ident last if its a `prop`, and the Ident will be the
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        return skipLiteralIfMethodDef(queryResponses);
+        return skipLiteralIfMethodDef(gs, queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -210,11 +211,11 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
         if ((*resp)->isMethodDef()) {
             return move(*resp);
         } else {
-            return skipLiteralIfMethodDef(queryResponses);
+            return skipLiteralIfMethodDef(gs, queryResponses);
         }
     }
 
-    return skipLiteralIfMethodDef(queryResponses);
+    return skipLiteralIfMethodDef(gs, queryResponses);
 }
 
 /**

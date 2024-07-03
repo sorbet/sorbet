@@ -67,7 +67,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = skipLiteralIfMethodDef(queryResponses);
+        auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
         // Only support go-to-definition on constants and fields in untyped files.
         if (auto c = resp->isConstant()) {

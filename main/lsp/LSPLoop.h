@@ -112,12 +112,14 @@ std::vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &g
                                                       bool includeSelf);
 
 std::unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+skipLiteralIfMethodDef(const core::GlobalState &gs,
+                       std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
 // prop/const/attr setters are bogged down with a bunch of extra Ident and Literal query
 // responses, which don't make sense to use find all references on.
 std::unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
+getQueryResponseForFindAllReferences(const core::GlobalState &gs,
+                                     std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

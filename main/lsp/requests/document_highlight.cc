@@ -61,7 +61,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         }
         const bool fileIsTyped = file.data(gs).strictLevel >= core::StrictLevel::True;
 
-        auto resp = getQueryResponseForFindAllReferences(queryResponses);
+        auto resp = getQueryResponseForFindAllReferences(gs, queryResponses);
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {
