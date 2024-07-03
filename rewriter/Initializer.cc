@@ -68,16 +68,16 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
         return;
     }
 
-    auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs);
-    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
+    auto rhs = ast::cast_tree<ast::Local>(assn->rhs);
+    if (rhs == nullptr) {
         return;
     }
 
-    auto typeExpr = argTypeMap.find(rhs->name);
+    auto typeExpr = argTypeMap.find(rhs->localVariable._name);
     if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
         auto loc = rhs->loc;
         auto type = (*typeExpr->second).deepCopy();
-        auto it = argKindMap.find(rhs->name);
+        auto it = argKindMap.find(rhs->localVariable._name);
         if (it == argKindMap.end()) {
             return;
         }
