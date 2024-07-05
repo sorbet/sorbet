@@ -165,9 +165,11 @@ T.reveal_type(f) # => T.proc.params(arg0: T.untyped).returns(T.untyped) ‼️
 takes_lambda(f)
 ```
 
-Sorbet does not do type inference for procs and lambdas. For blocks, it doesn't
-have to do type inference: Sorbet simply reads the type of the block argument
-from the associated method.
+Sorbet does not do type inference for procs, and only does return-type inference
+for lambdas (not argument type inference).
+
+For blocks, Sorbet doesn't have to do type inference: it simply reads the type
+of the block from the associated method.
 
 By contrast, Sorbet computes a type for all non-block arguments (including procs
 and lambdas) **before** type checking a call to a method. That means that even
@@ -238,6 +240,13 @@ but it comes down to a combination of performance and simplicity.
   f = T.let(lambda { 0 },        T.proc.returns(Integer)) ❌
   f = T.let(proc { 0 },          T.proc.returns(Integer)) ❌
   ```
+
+- For lambdas, use `-> () { ... }` or `Kernel.lambda { ... }` syntax instead of
+  `lambda { ... }` syntax.
+
+  This will ensure that Sorbet treats `return` inside the lambda as returning
+  from the lambda, not from the enclosing method (which is one main difference
+  that sets lambdas apart from procs/blocks in Ruby).
 
 ## Annotating the self type with `T.proc.bind`
 
