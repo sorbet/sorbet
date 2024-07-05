@@ -1109,6 +1109,14 @@ public:
         return MethodRef::fromRaw(21);
     }
 
+    static MethodRef Kernel_proc() {
+        return MethodRef::fromRaw(22);
+    }
+
+    static TypeArgumentRef Kernel_proc_returnType() {
+        return TypeArgumentRef::fromRaw(5);
+    }
+
     static ClassOrModuleRef Magic_UntypedSource() {
         return ClassOrModuleRef::fromRaw(99);
     }

@@ -1875,7 +1875,8 @@ module Kernel
   # Equivalent to
   # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
   sig do
-    params(
+    type_parameters(:return_type) # Used by Kernel#proc intrinsic in calls.cc
+    .params(
         blk: T.untyped,
     )
     .returns(Proc)
