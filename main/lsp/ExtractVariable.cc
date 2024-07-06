@@ -84,8 +84,8 @@ class LocSearchWalk {
     // At the end of this walk, we want to return what class/method the matching expression was part of.
     // To do that, we can maintain a stack of classes/method, so that when we get a match, we can capture
     // the current top of the stack as the "deepest" class/method
-    vector<ast::ExpressionPtr *> enclosingClassStack;
-    vector<ast::ExpressionPtr *> enclosingMethodStack;
+    vector<const ast::ExpressionPtr *> enclosingClassStack;
+    vector<const ast::ExpressionPtr *> enclosingMethodStack;
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -120,8 +120,8 @@ public:
     // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
     const ast::ExpressionPtr *matchingNode;
-    ast::ExpressionPtr *matchingNodeEnclosingClass;
-    ast::ExpressionPtr *matchingNodeEnclosingMethod;
+    const ast::ExpressionPtr *matchingNodeEnclosingClass;
+    const ast::ExpressionPtr *matchingNodeEnclosingMethod;
     // It's not valid to extract
     // - a parameter
     // - the lhs of an assign
@@ -159,7 +159,7 @@ public:
         updateEnclosingScope(tree, insSeq.loc);
     }
 
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         enclosingClassStack.push_back(&tree);
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         updateEnclosingScope(tree, classDef.rhs.front().loc().join(classDef.rhs.back().loc()));
@@ -169,7 +169,7 @@ public:
         enclosingClassStack.pop_back();
     }
 
-    void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
         enclosingMethodStack.push_back(&tree);
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (!methodDef.args.empty()) {
