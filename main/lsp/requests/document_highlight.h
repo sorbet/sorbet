@@ -8,6 +8,12 @@ class TextDocumentPositionParams;
 class DocumentHighlightTask final : public LSPRequestTask {
     std::unique_ptr<TextDocumentPositionParams> params;
 
+private:
+    std::vector<std::unique_ptr<DocumentHighlight>>
+    getHighlightsFromQueryResponse(LSPTypecheckerDelegate &typechecker, std::string_view uri,
+                                   const core::GlobalState &gs, core::FileRef fref, bool fileIsTyped,
+                                   std::unique_ptr<core::lsp::QueryResponse> resp);
+
 public:
     DocumentHighlightTask(const LSPConfiguration &config, MessageId id,
                           std::unique_ptr<TextDocumentPositionParams> params);

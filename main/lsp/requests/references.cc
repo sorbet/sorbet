@@ -65,7 +65,116 @@ core::SymbolRef ReferencesTask::findSym(const core::GlobalState &gs, const vecto
     return symToCheck;
 }
 
-unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
+vector<std::unique_ptr<Location>>
+ReferencesTask::getLocationsFromQueryResponse(LSPTypecheckerDelegate &typechecker, const core::GlobalState &gs,
+                                              core::FileRef fref, bool fileIsTyped,
+                                              std::unique_ptr<core::lsp::QueryResponse> resp) {
+    // If file is untyped, only supports find reference requests from constants and class definitions.
+    if (auto constResp = resp->isConstant()) {
+        if (fref.data(gs).isPackage()) {
+            // Special handling for package files.
+            //
+            // Case 1. get-refs on a package declaration
+            //   class Foo < PackageSpec
+            //         ^^^
+            //   Returns all `import Foo` statements, globally
+            //
+            // Case 2. get-refs on an import statement
+            //
+            //  class Foo < PackageSpec
+            //    ...
+            //
+            //    import Bar
+            //          ^^^
+            //  Returns all usages of `Bar` or `Test::Bar` *within* the Foo package only.
+            //
+            // Case 3. get-refs on an export statement
+            //
+            //  class Foo < PackageSpec
+            //    ...
+            //
+            //    export Foo::A
+            //                ^
+            //  Returns all global usages of Foo::A
+
+            auto packageName = gs.packageDB().getPackageNameForFile(fref);
+            auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
+
+            if (!symsToCheck.empty()) {
+                std::vector<std::unique_ptr<Location>> locations;
+
+                for (auto &symToCheck : symsToCheck) {
+                    for (auto &location :
+                         extractLocations(typechecker.state(),
+                                          getReferencesToSymbolInPackage(typechecker, packageName, symToCheck))) {
+                        locations.emplace_back(std::move(location));
+                    }
+                }
+
+                return locations;
+            } else {
+                // Fall back to normal case when we are not querying for an external symbol, e.g. class Foo <
+                // PackageSpec declarations, or export statements.
+                return extractLocations(typechecker.state(),
+                                        getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+            }
+        } else {
+            // Normal handling for non-package files
+            return extractLocations(typechecker.state(),
+                                    getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
+        }
+    } else if (auto fieldResp = resp->isField()) {
+        // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+        return extractLocations(typechecker.state(),
+                                getReferencesToAccessor(typechecker,
+                                                        getAccessorInfo(typechecker.state(), fieldResp->symbol),
+                                                        fieldResp->symbol));
+    } else if (auto defResp = resp->isMethodDef()) {
+        if (fileIsTyped) {
+            // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+            return extractLocations(typechecker.state(),
+                                    getReferencesToAccessor(typechecker,
+                                                            getAccessorInfo(typechecker.state(), defResp->symbol),
+                                                            defResp->symbol));
+        } else {
+            this->notifyAboutUntypedFile = true;
+        }
+    } else if (auto identResp = resp->isIdent()) {
+        if (fileIsTyped) {
+            auto loc = identResp->termLoc;
+            if (loc.exists()) {
+                auto run2 = typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
+                                                                               identResp->enclosingMethodLoc,
+                                                                               identResp->variable),
+                                              {loc.file()});
+                return extractLocations(gs, run2.responses);
+            }
+        } else {
+            this->notifyAboutUntypedFile = true;
+        }
+    } else if (auto sendResp = resp->isSend()) {
+        if (fileIsTyped) {
+            auto start = sendResp->dispatchResult.get();
+            vector<std::unique_ptr<core::lsp::QueryResponse>> responses;
+            while (start != nullptr) {
+                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                    // This could be a `prop` or `attr_*`, which has multiple associated symbols.
+                    responses =
+                        getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), start->main.method),
+                                                start->main.method, move(responses));
+                }
+                start = start->secondary.get();
+            }
+            return extractLocations(typechecker.state(), responses);
+        } else {
+            this->notifyAboutUntypedFile = true;
+        }
+    }
+
+    return {};
+}
+
+std::unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentReferences);
     ShowOperation op(config, ShowOperation::Kind::References);
 
@@ -82,124 +191,29 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
     response->result = variant<JSONNullObject, vector<unique_ptr<Location>>>(JSONNullObject());
     auto &queryResponses = result.responses;
-    bool notifyAboutUntypedFile = false;
     core::FileRef fref = config.uri2FileRef(gs, params->textDocument->uri);
     bool fileIsTyped = false;
     if (fref.exists()) {
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
     }
     if (!queryResponses.empty()) {
-        auto resp = getQueryResponseForFindAllReferences(queryResponses);
+        vector<unique_ptr<Location>> resultLocations;
+        auto responses = getQueryResponsesForFindAllReferences(gs, queryResponses);
 
-        // If file is untyped, only supports find reference requests from constants and class definitions.
-        if (auto constResp = resp->isConstant()) {
-            if (fref.data(gs).isPackage()) {
-                // Special handling for package files.
-                //
-                // Case 1. get-refs on a package declaration
-                //   class Foo < PackageSpec
-                //         ^^^
-                //   Returns all `import Foo` statements, globally
-                //
-                // Case 2. get-refs on an import statement
-                //
-                //  class Foo < PackageSpec
-                //    ...
-                //
-                //    import Bar
-                //          ^^^
-                //  Returns all usages of `Bar` or `Test::Bar` *within* the Foo package only.
-                //
-                // Case 3. get-refs on an export statement
-                //
-                //  class Foo < PackageSpec
-                //    ...
-                //
-                //    export Foo::A
-                //                ^
-                //  Returns all global usages of Foo::A
-
-                auto packageName = gs.packageDB().getPackageNameForFile(fref);
-                auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
-
-                if (!symsToCheck.empty()) {
-                    std::vector<std::unique_ptr<Location>> locations;
-
-                    for (auto &symToCheck : symsToCheck) {
-                        for (auto &location :
-                             extractLocations(typechecker.state(),
-                                              getReferencesToSymbolInPackage(typechecker, packageName, symToCheck))) {
-                            locations.emplace_back(std::move(location));
-                        }
-                    }
-
-                    response->result = std::move(locations);
-                } else {
-                    // Fall back to normal case when we are not querying for an external symbol, e.g. class Foo <
-                    // PackageSpec declarations, or export statements.
-                    response->result = extractLocations(
-                        typechecker.state(), getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
-                }
-            } else {
-                // Normal handling for non-package files
-                response->result = extractLocations(typechecker.state(),
-                                                    getReferencesToSymbol(typechecker, constResp->symbolBeforeDealias));
-            }
-        } else if (auto fieldResp = resp->isField()) {
-            // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-            response->result = extractLocations(
-                typechecker.state(),
-                getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), fieldResp->symbol),
-                                        fieldResp->symbol));
-        } else if (auto defResp = resp->isMethodDef()) {
-            if (fileIsTyped) {
-                // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                response->result = extractLocations(
-                    typechecker.state(),
-                    getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), defResp->symbol),
-                                            defResp->symbol));
-            } else {
-                notifyAboutUntypedFile = true;
-            }
-        } else if (auto identResp = resp->isIdent()) {
-            if (fileIsTyped) {
-                auto loc = identResp->termLoc;
-                if (loc.exists()) {
-                    auto run2 = typechecker.query(core::lsp::Query::createVarQuery(identResp->enclosingMethod,
-                                                                                   identResp->enclosingMethodLoc,
-                                                                                   identResp->variable),
-                                                  {loc.file()});
-                    response->result = extractLocations(gs, run2.responses);
-                }
-            } else {
-                notifyAboutUntypedFile = true;
-            }
-        } else if (auto sendResp = resp->isSend()) {
-            if (fileIsTyped) {
-                auto start = sendResp->dispatchResult.get();
-                vector<unique_ptr<core::lsp::QueryResponse>> responses;
-                while (start != nullptr) {
-                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                        // This could be a `prop` or `attr_*`, which has multiple associated symbols.
-                        responses = getReferencesToAccessor(typechecker,
-                                                            getAccessorInfo(typechecker.state(), start->main.method),
-                                                            start->main.method, move(responses));
-                    }
-                    start = start->secondary.get();
-                }
-                response->result = extractLocations(typechecker.state(), responses);
-            } else {
-                notifyAboutUntypedFile = true;
-            }
+        for (auto &resp : move(responses)) {
+            auto locations = getLocationsFromQueryResponse(typechecker, gs, fref, fileIsTyped, move(resp));
+            absl::c_move(move(locations), back_inserter(resultLocations));
         }
+
+        response->result = move(resultLocations);
     } else if (fref.exists() && !fileIsTyped) {
         // The first check ensures that the file actually exists (and therefore
         // we could have gotten responses) and the second check is what we are
         // actually interested in.
-        notifyAboutUntypedFile = true;
+        this->notifyAboutUntypedFile = true;
     }
 
-    if (notifyAboutUntypedFile) {
+    if (this->notifyAboutUntypedFile) {
         ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         ENFORCE(level < core::StrictLevel::True);
