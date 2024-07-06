@@ -84,8 +84,8 @@ class LocSearchWalk {
     // At the end of this walk, we want to return what class/method the matching expression was part of.
     // To do that, we can maintain a stack of classes/method, so that when we get a match, we can capture
     // the current top of the stack as the "deepest" class/method
-    vector<const ast::ExpressionPtr *> enclosingClassStack;
-    vector<const ast::ExpressionPtr *> enclosingMethodStack;
+    vector<optional<reference_wrapper<const ast::ExpressionPtr>>> enclosingClassStack;
+    vector<optional<reference_wrapper<const ast::ExpressionPtr>>> enclosingMethodStack;
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -93,7 +93,7 @@ class LocSearchWalk {
         }
 
         if (!enclosingScopeLoc.exists() || enclosingScopeLoc.contains(nodeLoc)) {
-            enclosingScope = &node;
+            enclosingScope = node;
             enclosingScopeLoc = nodeLoc;
             return;
         }
@@ -112,16 +112,16 @@ class LocSearchWalk {
 
 public:
     // After the walk is complete, this should point to the deepest scope that contains targetLoc
-    const ast::ExpressionPtr *enclosingScope;
+    optional<reference_wrapper<const ast::ExpressionPtr>> enclosingScope;
     // enclosingScope is the ClassDef/MethodDef/etc. that contains targetLoc.
     // enclosingScopeLoc stores the Loc of the body of that scope.
     // For example, the RHS of the ClassDef doesn't have an ExpressionPtr with a Loc,
     // but enclosingScopeLoc will be a Loc that represents the body of the ClassDef RHS
     // (excluding things like the class name, superclass, and class/end keywords).
     core::LocOffsets enclosingScopeLoc;
-    const ast::ExpressionPtr *matchingNode;
-    const ast::ExpressionPtr *matchingNodeEnclosingClass;
-    const ast::ExpressionPtr *matchingNodeEnclosingMethod;
+    optional<reference_wrapper<const ast::ExpressionPtr>> matchingNode;
+    optional<reference_wrapper<const ast::ExpressionPtr>> matchingNodeEnclosingClass;
+    optional<reference_wrapper<const ast::ExpressionPtr>> matchingNodeEnclosingMethod;
     // It's not valid to extract
     // - a parameter
     // - the lhs of an assign
@@ -131,8 +131,8 @@ public:
     std::vector<core::LocOffsets> skippedLocs;
 
     LocSearchWalk(core::Loc targetLoc)
-        : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
-          matchingNodeEnclosingClass(nullptr), matchingNodeEnclosingMethod(nullptr) {}
+        : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullopt),
+          matchingNodeEnclosingClass(nullopt), matchingNodeEnclosingMethod(nullopt) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (tree.loc() == targetLoc.offsets()) {
@@ -140,7 +140,7 @@ public:
             if (!ast::isa_tree<ast::Break>(tree) && !ast::isa_tree<ast::Next>(tree) &&
                 !ast::isa_tree<ast::Return>(tree) && !ast::isa_tree<ast::Retry>(tree) &&
                 !ast::isa_tree<ast::RescueCase>(tree) && !ast::isa_tree<ast::InsSeq>(tree)) {
-                matchingNode = &tree;
+                matchingNode = tree;
                 ENFORCE(!enclosingClassStack.empty());
                 matchingNodeEnclosingClass = enclosingClassStack.back();
                 if (!enclosingMethodStack.empty()) {
@@ -151,7 +151,7 @@ public:
     }
 
     bool foundExactMatch() {
-        return matchingNode && !shouldSkipLoc(matchingNode->loc());
+        return matchingNode.has_value() && !shouldSkipLoc(matchingNode.value().get().loc());
     }
 
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -160,7 +160,7 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingClassStack.push_back(&tree);
+        enclosingClassStack.push_back(tree);
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         updateEnclosingScope(tree, classDef.rhs.front().loc().join(classDef.rhs.back().loc()));
     }
@@ -170,7 +170,7 @@ public:
     }
 
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingMethodStack.push_back(&tree);
+        enclosingMethodStack.push_back(tree);
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (!methodDef.args.empty()) {
             skipLoc(methodDef.args.front().loc().join(methodDef.args.back().loc()));
@@ -291,8 +291,8 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
 
 // This tree walk takes a ExpressionPtr and looks for nodes that are the same as that node
 class ExpressionPtrSearchWalk {
-    const ast::ExpressionPtr *targetNode;
-    vector<const ast::ExpressionPtr *> enclosingScopeStack;
+    reference_wrapper<const ast::ExpressionPtr> targetNode;
+    vector<optional<reference_wrapper<const ast::ExpressionPtr>>> enclosingScopeStack;
     std::vector<core::LocOffsets> skippedLocs;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
@@ -302,32 +302,32 @@ class ExpressionPtrSearchWalk {
 
     void computeLCA(const core::LocOffsets matchLoc) {
         if (LCAScopeStack.empty()) {
-            for (auto *scope : enclosingScopeStack) {
-                const ast::ExpressionPtr *scopeToCompare = scope;
+            for (auto scope : enclosingScopeStack) {
+                auto scopeToCompare = scope;
                 if (ast::isa_tree<ast::If>(*scope)) {
                     auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
                     if (if_.thenp.loc().exists() && if_.thenp.loc().contains(matchLoc)) {
-                        scopeToCompare = &if_.thenp;
+                        scopeToCompare = if_.thenp;
                     } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(matchLoc)) {
-                        scopeToCompare = &if_.elsep;
+                        scopeToCompare = if_.elsep;
                     } else if (if_.cond.loc().contains(matchLoc)) {
-                        scopeToCompare = &if_.cond;
+                        scopeToCompare = if_.cond;
                     } else {
                         ENFORCE(false);
                     }
                 } else if (ast::isa_tree<ast::Rescue>(*scope)) {
                     auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(*scope);
                     if (rescue.body.loc().exists() && rescue.body.loc().contains(matchLoc)) {
-                        scopeToCompare = &rescue.body;
+                        scopeToCompare = rescue.body;
                     } else if (rescue.else_.loc().exists() && rescue.else_.loc().contains(matchLoc)) {
-                        scopeToCompare = &rescue.else_;
+                        scopeToCompare = rescue.else_;
                     } else if (rescue.ensure.loc().exists() && rescue.ensure.loc().contains(matchLoc)) {
-                        scopeToCompare = &rescue.ensure;
+                        scopeToCompare = rescue.ensure;
                     } else {
                         auto found = false;
                         for (auto &rescueCase : rescue.rescueCases) {
                             if (rescueCase.loc().exists() && rescueCase.loc().contains(matchLoc)) {
-                                scopeToCompare = &rescueCase;
+                                scopeToCompare = rescueCase;
                                 found = true;
                             }
                         }
@@ -336,9 +336,9 @@ class ExpressionPtrSearchWalk {
                 } else if (ast::isa_tree<ast::While>(*scope)) {
                     auto &while_ = ast::cast_tree_nonnull<ast::While>(*scope);
                     if (while_.body.loc().contains(matchLoc)) {
-                        scopeToCompare = &while_.body;
+                        scopeToCompare = while_.body;
                     } else if (while_.cond.loc().contains(matchLoc)) {
-                        scopeToCompare = &while_.cond;
+                        scopeToCompare = while_.cond;
                     } else {
                         ENFORCE(false);
                     }
@@ -347,8 +347,8 @@ class ExpressionPtrSearchWalk {
             }
         } else {
             for (size_t i = 0; i < LCAScopeStack.size(); i++) {
-                auto *scopeToCompare = LCAScopeStack[i];
-                if (!scopeToCompare->loc().contains(matchLoc)) {
+                auto scopeToCompare = LCAScopeStack[i];
+                if (!scopeToCompare.value().get().loc().contains(matchLoc)) {
                     LCAScopeStack.erase(LCAScopeStack.begin() + i, LCAScopeStack.end());
                     break;
                 }
@@ -357,9 +357,9 @@ class ExpressionPtrSearchWalk {
     }
 
 public:
-    vector<const ast::ExpressionPtr *> LCAScopeStack;
+    vector<optional<reference_wrapper<const ast::ExpressionPtr>>> LCAScopeStack;
     vector<core::LocOffsets> matches;
-    ExpressionPtrSearchWalk(const ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
+    ExpressionPtrSearchWalk(const ast::ExpressionPtr &matchingNode, std::vector<core::LocOffsets> skippedLocs)
         : targetNode(matchingNode), skippedLocs(skippedLocs) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -378,14 +378,14 @@ public:
         // TODO: see how slow a pathological case is (a long chain of the same nodes with just the deepest
         // node being different) Ex.
         //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
-        if (targetNode->structurallyEqual(tree)) {
+        if (targetNode.get().structurallyEqual(tree)) {
             matches.emplace_back(tree.loc());
             computeLCA(tree.loc());
         }
     }
 
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -393,7 +393,7 @@ public:
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -401,7 +401,7 @@ public:
     }
 
     void preTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformMethodDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -409,7 +409,7 @@ public:
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -417,7 +417,7 @@ public:
     }
 
     void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -425,7 +425,7 @@ public:
     }
 
     void preTransformRescue(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformRescue(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -433,7 +433,7 @@ public:
     }
 
     void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
-        enclosingScopeStack.push_back(&tree);
+        enclosingScopeStack.push_back(tree);
     }
 
     void postTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -449,7 +449,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(matchingNode, skippedLocs);
+    ExpressionPtrSearchWalk walk(matchingNode.value().get(), skippedLocs);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::ConstTreeWalk::apply(ctx, walk, *enclosingClassOrMethod);
 
@@ -461,7 +461,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
 
-    const ast::ExpressionPtr *scopeToInsertIn = walk.LCAScopeStack.back();
+    auto scopeToInsertIn = walk.LCAScopeStack.back();
 
     fast_sort(matches, [](auto a, auto b) { return a.beginPos() < b.beginPos(); });
     auto firstMatch = matches[0];
