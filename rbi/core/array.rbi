@@ -2812,10 +2812,11 @@ class Array < Object
   # See also
   # [`Array#union`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-union).
   sig do
-    params(
-        arg0: T::Array[Elem],
+    type_parameters(:U)
+    .params(
+        arg0: T::Array[T.type_parameter(:U)],
     )
-    .returns(T::Array[Elem])
+    .returns(T::Array[T.any(Elem, T.type_parameter(:U))])
   end
   def |(arg0); end
 
