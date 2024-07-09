@@ -276,6 +276,22 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
       assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
     end
+
+    it 'handles exceptions without a #backtrace_locations' do
+      mock = Object.new
+      def mock.transform_values(...)
+        raise NoMethodError, "undefined method 'transform_values'", caller # rubocop:disable Style/RaiseArgs
+      end
+
+      m = a_serializable
+      m.instance_variable_set(:@foo, mock)
+      e = assert_raises(NoMethodError) do
+        m.serialize
+      end
+
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
+      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
+    end
   end
 
   class HasUnstoredProp < T::Struct
