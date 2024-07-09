@@ -19,6 +19,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       SPADE = new('_spade_')
       DIAMOND = new('_diamond_')
       HEART = new('_heart_')
+      NONE = new(nil)
     end
   end
 
@@ -38,6 +39,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         assert_equal('_spade_', CardSuitCustom::SPADE.serialize)
         assert_equal('_diamond_', CardSuitCustom::DIAMOND.serialize)
         assert_equal('_heart_', CardSuitCustom::HEART.serialize)
+        assert_equal(nil, CardSuitCustom::NONE.serialize)
       end
     end
   end
@@ -361,10 +363,11 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
           enums do
             new('foo')
             new
+            new(nil)
           end
         end
       end
-      assert_equal('Enum values must be assigned to constants: ["foo", nil]', ex.message)
+      assert_equal('Enum values must be assigned to constants: ["foo", T::Enum::UNSET, nil]', ex.message)
     end
   end
 
