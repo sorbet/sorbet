@@ -7,10 +7,24 @@
 
 namespace sorbet::realmain::lsp {
 
+struct MultipleOccurrenceResult {
+    std::vector<std::unique_ptr<TextDocumentEdit>> documentEdits;
+    size_t numOccurences;
+};
+
 class VariableExtractor {
+    const core::Loc selectionLoc;
+    ast::ExpressionPtr matchingNode;
+    ast::ExpressionPtr enclosingClassOrMethod;
+    std::vector<core::LocOffsets> skippedLocs;
+
 public:
-    static std::vector<std::unique_ptr<TextDocumentEdit>>
-    getEdits(LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config, const core::Loc selectionLoc);
+    VariableExtractor(const core::Loc selectionLoc)
+        : selectionLoc(selectionLoc), matchingNode(), enclosingClassOrMethod(nullptr) {}
+    std::vector<std::unique_ptr<TextDocumentEdit>>
+    getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker, const LSPConfiguration &config);
+    MultipleOccurrenceResult getExtractMultipleOccurrenceEdits(const LSPTypecheckerDelegate &typechecker,
+                                                               const LSPConfiguration &config);
 };
 
 } // namespace sorbet::realmain::lsp

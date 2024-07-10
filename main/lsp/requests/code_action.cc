@@ -270,25 +270,48 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
     } else {
         // Selection
         if (config.opts.lspExtractToVariableEnabled) {
-            // For move method to new module we use canResolveLazily to defer the computation
+            // For "move method to new module" we use canResolveLazily to defer the computation
             // until the user has actually selected the action. We can't do that here because
-            // we need to do the core computation to know if extract the current selection is
+            // we need to do the core computation to know if extracting the current selection is
             // valid in the first place, to decide if we can show the code action or not.
-            Timer timeit(gs.tracer(), "Extract to Variable");
-
-            auto documentEdits = VariableExtractor::getEdits(typechecker, config, loc);
-            if (!documentEdits.empty()) {
+            VariableExtractor variableExtractor(loc);
+            vector<unique_ptr<TextDocumentEdit>> singleOccurrenceDocumentEdits;
+            {
+                Timer timeit(gs.tracer(), "Extract to Variable (single occurrence)");
+                singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
+            }
+            if (!singleOccurrenceDocumentEdits.empty()) {
                 auto action = make_unique<CodeAction>("Extract Variable");
                 action->kind = CodeActionKind::RefactorExtract;
 
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
-                workspaceEdit->documentChanges = move(documentEdits);
+                workspaceEdit->documentChanges = move(singleOccurrenceDocumentEdits);
 
                 action->edit = move(workspaceEdit);
                 result.emplace_back(move(action));
 
+                vector<unique_ptr<TextDocumentEdit>> multipleOccurrenceDocumentEdits;
+                size_t numOccurences;
+                {
+                    Timer timeit(gs.tracer(), "Extract to Variable (all occurrences)");
+                    auto multipleOccurrenceResult =
+                        variableExtractor.getExtractMultipleOccurrenceEdits(typechecker, config);
+                    multipleOccurrenceDocumentEdits = std::move(multipleOccurrenceResult.documentEdits);
+                    numOccurences = multipleOccurrenceResult.numOccurences;
+                }
+                if (!multipleOccurrenceDocumentEdits.empty()) {
+                    auto action =
+                        make_unique<CodeAction>(fmt::format("Extract Variable (all {} occurrences)", numOccurences));
+                    action->kind = CodeActionKind::RefactorExtract;
+
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    workspaceEdit->documentChanges = move(multipleOccurrenceDocumentEdits);
+
+                    action->edit = move(workspaceEdit);
+                    result.emplace_back(move(action));
+                }
+
                 // TODO(neil): trigger a rename for newVariable
-                // TODO(neil): replace other occurrences of this expression with newVariable
             }
         }
     }

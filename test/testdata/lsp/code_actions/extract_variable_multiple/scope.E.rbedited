@@ -1,0 +1,23 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
+
+def foo(x)
+  if x
+    puts x + 1
+  end
+  if x; puts x + 1 end
+# ^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Variable
+# ^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Extract Variable (all 2 occurrences)
+
+  while T.unsafe(nil)
+    puts x + 1
+  end
+  while T.unsafe(nil); puts x + 1 end
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Variable
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [D] Extract Variable (all 2 occurrences)
+
+  if (x + 2; newVariable = x + 2; newVariable); end
+#            ^^^^^ apply-code-action: [E] Extract Variable
+#            ^^^^^ apply-code-action: [F] Extract Variable (all 2 occurrences)
+end
