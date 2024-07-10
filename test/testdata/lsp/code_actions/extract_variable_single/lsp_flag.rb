@@ -5,5 +5,5 @@
 
 def example(x)
   xs = []
-#      ^^ apply-code-action: [A] Extract Variable
+#      ^^ apply-code-action: [A] Extract Variable (this occurrence only)
 end

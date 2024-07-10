@@ -13,7 +13,7 @@ def rescue_1
     4 + 22
   ensure
     5 + 22
-  #     ^^ apply-code-action: [A] Extract Variable
+  #     ^^ apply-code-action: [A] Extract Variable (this occurrence only)
   #     ^^ apply-code-action: [B] Extract Variable (all 4 occurrences)
   end
 end
@@ -24,7 +24,7 @@ def rescue_1
     2 + 22
     2 + 22
     2 + 22
-  # ^^^^^^ apply-code-action: [C] Extract Variable
+  # ^^^^^^ apply-code-action: [C] Extract Variable (this occurrence only)
   # ^^^^^^ apply-code-action: [D] Extract Variable (all 3 occurrences)
   rescue ArgumentError
     3 + 22

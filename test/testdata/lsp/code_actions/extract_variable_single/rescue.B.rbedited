@@ -4,24 +4,24 @@
 
 begin
   1 + 11
-#     ^^ apply-code-action: [A] Extract Variable
+#     ^^ apply-code-action: [A] Extract Variable (this occurrence only)
 rescue Errno::ENOENT
   newVariable = 22
   2 + newVariable
-#     ^^ apply-code-action: [B] Extract Variable
+#     ^^ apply-code-action: [B] Extract Variable (this occurrence only)
 rescue ArgumentError
   3 + 33
-#     ^^ apply-code-action: [C] Extract Variable
+#     ^^ apply-code-action: [C] Extract Variable (this occurrence only)
 else
   4 + 44
-#     ^^ apply-code-action: [D] Extract Variable
+#     ^^ apply-code-action: [D] Extract Variable (this occurrence only)
 ensure
   5 + 55
-#     ^^ apply-code-action: [E] Extract Variable
+#     ^^ apply-code-action: [E] Extract Variable (this occurrence only)
 end
 
 begin
 ensure
   6 + 66
-#     ^^ apply-code-action: [F] Extract Variable
+#     ^^ apply-code-action: [F] Extract Variable (this occurrence only)
 end
