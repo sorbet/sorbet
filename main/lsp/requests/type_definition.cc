@@ -1,6 +1,7 @@
 #include "main/lsp/requests/type_definition.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
@@ -103,7 +104,7 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
     if (!queryResponses.empty()) {
         const bool fileIsTyped =
             config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = move(queryResponses[0]);
+        auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
         // Only support go-to-type-definition on constants and fields in untyped files.
         if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {

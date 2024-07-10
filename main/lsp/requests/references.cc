@@ -89,7 +89,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
         fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
     }
     if (!queryResponses.empty()) {
-        auto resp = getQueryResponseForFindAllReferences(queryResponses);
+        auto resp = getQueryResponseForFindAllReferences(gs, queryResponses);
 
         // If file is untyped, only supports find reference requests from constants and class definitions.
         if (auto constResp = resp->isConstant()) {

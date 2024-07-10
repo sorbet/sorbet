@@ -312,7 +312,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
     shared_ptr<AbstractRewriter> renamer;
     if (auto constResp = resp->isConstant()) {
         // Sanity check the text.

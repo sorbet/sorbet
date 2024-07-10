@@ -33,7 +33,7 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
     core::SymbolRef sym;
     if (auto c = resp->isConstant()) {
