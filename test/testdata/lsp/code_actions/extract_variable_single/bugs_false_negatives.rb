@@ -9,6 +9,6 @@
 a = 1
 
 case a
-#    ^ apply-code-action: [A] Extract Variable
+#    ^ apply-code-action: [A] Extract Variable (this occurrence only)
 when Integer
 end

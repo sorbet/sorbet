@@ -281,7 +281,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 singleOccurrenceDocumentEdits = variableExtractor.getExtractSingleOccurrenceEdits(typechecker, config);
             }
             if (!singleOccurrenceDocumentEdits.empty()) {
-                auto action = make_unique<CodeAction>("Extract Variable");
+                auto action = make_unique<CodeAction>("Extract Variable (this occurrence only)");
                 action->kind = CodeActionKind::RefactorExtract;
 
                 auto workspaceEdit = make_unique<WorkspaceEdit>();
