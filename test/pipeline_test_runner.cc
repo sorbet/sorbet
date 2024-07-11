@@ -211,7 +211,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
             nodes = parser::Parser::run(*gs, file, settings);
         } else if (parser == realmain::options::Parser::PRISM) {
             std::cout << "Parsing with prism" << std::endl;
-            nodes = realmain::pipeline::runPrismParser(*gs, file);
+            nodes = realmain::pipeline::runPrismParser(*gs, file, false);
         }
 
         handler.drainErrors(*gs);

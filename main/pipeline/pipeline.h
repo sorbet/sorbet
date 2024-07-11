@@ -26,7 +26,7 @@ std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, 
 std::vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> files, const options::Options &opts,
                                    WorkerPool &workers, const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
-std::unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file);
+std::unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser);
 size_t partitionPackageFiles(const core::GlobalState &gs, absl::Span<core::FileRef> files);
 void unpartitionPackageFiles(std::vector<ast::ParsedFile> &packageFiles,
                              std::vector<ast::ParsedFile> &&nonPackageFiles);

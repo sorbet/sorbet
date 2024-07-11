@@ -373,7 +373,7 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
     }
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file) {
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser) {
     auto source = file.data(gs).source();
 
     core::UnfreezeNameTable nameTableAccess(gs);
@@ -382,6 +382,11 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
     pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source.data()), source.size(), NULL);
 
     pm_node_t *root = pm_parse(&parser);
+
+    if (stopAfterParser) {
+        return std::unique_ptr<parser::Node>();
+    }
+
     std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, &parser, gs);
 
     pm_node_destroy(&parser, root);
@@ -462,13 +467,15 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
             unique_ptr<parser::Node> parseTree;
 
+            bool stopAfterParser = opts.stopAfterPhase == options::Phase::PARSER;
+
             if (parser == options::Parser::SORBET) {
                 parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
             } else if (parser == options::Parser::PRISM) {
-                parseTree = runPrismParser(lgs, file);
+                parseTree = runPrismParser(lgs, file, stopAfterParser);
             } // Any other option would have been handled in the options parser
 
-            if (opts.stopAfterPhase == options::Phase::PARSER) {
+            if (stopAfterParser) {
                 return emptyParsedFile(file);
             }
             tree = runDesugar(lgs, file, move(parseTree), print);
