@@ -371,13 +371,6 @@ public:
             return;
         }
 
-        // This is probably going to be slow and we'll probably need to come up with some tricks
-        // to make it faster. On the other hand, because this walk is scoped to only the enclosing
-        // method, it might not be too bad.
-        // TODO: think about whether tree.deepEqual(targetNode) would be faster
-        // TODO: see how slow a pathological case is (a long chain of the same nodes with just the deepest
-        // node being different) Ex.
-        //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
         if (targetNode->structurallyEqual(tree)) {
             matches.emplace_back(tree.loc());
             computeLCA(tree.loc());
