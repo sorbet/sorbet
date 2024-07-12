@@ -1490,8 +1490,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                               core::Names::tripleEq(), zeroLengthRecvLoc, MK::Local(zeroLengthRecvLoc, tempRecv));
 
                 unique_ptr<parser::Node> sendNode =
-                    make_unique<parser::Send>(loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method,
-                                              csend->methodLoc, std::move(csend->args));
+                    make_unique<parser::Send>(loc, make_unique<parser::LVar>(zeroLengthRecvLoc, tempRecv),
+                                              csend->method, csend->methodLoc, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
                 ExpressionPtr nil =
