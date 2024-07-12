@@ -1693,7 +1693,19 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
 
 NameRef SerializerImpl::unpickleNameRef(UnPickler &p, const GlobalState &gs) {
     NameRef name = NameRef::fromRawUnchecked(p.getU4());
-    name.sanityCheck(gs);
+
+    // We don't call NameRef::sanityCheck here because basically the only thing that method is going
+    // to do is attempt to const_cast (!!) the GlobalState and re-enter the NameRef, in an attempt
+    // to ENFORCE that re-entering the thing with the given name produces the same result.
+    //
+    // For unpickled NameRefs, that might not be the case: the GlobalState we're unpickling a tree
+    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex`, which
+    // doesn't have a complete name table (it will only have the names created by generate_names.cc)
+    // which normally isn't important because mergeIndexResults skips ast::Substitute::run for trees
+    // which came out of the cache (e.g., it assumes those trees are getting merged into a
+    // GlobalState which was already fetched from the cache and thus already had the name table
+    // loaded via Serializer::loadGlobalState).
+
     return name;
 }
 
