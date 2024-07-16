@@ -1183,23 +1183,36 @@ public:
         }
 
         auto symbol = id->symbol.asClassOrModuleRef().data(ctx);
-        if (!symbol->flags.isAbstract) {
+        auto typeArity = symbol->typeArity(ctx);
+        if (!symbol->flags.isAbstract && typeArity == 0) {
             return;
         }
 
-        auto singletonClass = symbol->lookupSingletonClass(ctx.state);
-        if (!singletonClass.exists()) {
-            return;
+        if (symbol->flags.isAbstract) {
+            auto singletonClass = symbol->lookupSingletonClass(ctx.state);
+            if (!singletonClass.exists()) {
+                return;
+            }
+
+            auto method_new = singletonClass.data(ctx)->findMethodTransitive(ctx.state, core::Names::new_());
+            // If the .new method we find is owned by Class, that means
+            // there was no user defined .new method, which warrants an error.
+            if (method_new.data(ctx)->owner == core::Symbols::Class()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
+                    auto symbolName = id->symbol.show(ctx);
+                    e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                    e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+                }
+            }
         }
 
-        auto method_new = singletonClass.data(ctx)->findMethodTransitive(ctx.state, core::Names::new_());
-        // If the .new method we find is owned by Class, that means
-        // there was no user defined .new method, which warrants an error.
-        if (method_new.data(ctx)->owner == core::Symbols::Class()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::AbstractClassInstantiated)) {
+        if (typeArity != 0) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InstantiateGenericWithoutTypeArguments)) {
                 auto symbolName = id->symbol.show(ctx);
-                e.setHeader("Attempt to instantiate abstract class `{}`", symbolName);
+                e.setHeader("Attempt to instantiate generic class `{}` without type arguments", symbolName);
                 e.addErrorLine(id->symbol.loc(ctx), "`{}` defined here", symbolName);
+                e.replaceWith("Insert untyped for all arguments", ctx.locAt(send.recv.loc()).copyEndWithZeroLength(),
+                              "[{}]", absl::StrJoin(vector<string>{typeArity, "T.untyped"}, ", "));
             }
         }
     }
