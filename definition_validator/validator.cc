@@ -1206,7 +1206,7 @@ public:
             }
         }
 
-        if (typeArity != 0) {
+        if (typeArity != 0 && !id->symbol.asClassOrModuleRef().isLegacyStdlibGeneric()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InstantiateGenericWithoutTypeArguments)) {
                 auto symbolName = id->symbol.show(ctx);
                 e.setHeader("Attempt to instantiate generic class `{}` without type arguments", symbolName);
