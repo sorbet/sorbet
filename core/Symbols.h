@@ -460,7 +460,7 @@ public:
     // Return the number of type parameters that must be passed to instantiate
     // this generic type. May differ from typeMembers.size() if some type
     // members have fixed values.
-    int typeArity(const GlobalState &gs) const;
+    size_t typeArity(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 

@@ -2248,8 +2248,8 @@ TypeParameter TypeParameter::deepCopy(const GlobalState &to) const {
     return result;
 }
 
-int ClassOrModule::typeArity(const GlobalState &gs) const {
-    int arity = 0;
+size_t ClassOrModule::typeArity(const GlobalState &gs) const {
+    size_t arity = 0;
     for (auto &tm : this->typeMembers()) {
         if (!tm.data(gs)->flags.isFixed) {
             ++arity;
