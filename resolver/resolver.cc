@@ -3863,7 +3863,7 @@ private:
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
-    void processInSeq(core::Context ctx, ast::InsSeq &seq) {
+    void processInsSeq(core::Context ctx, ast::InsSeq &seq) {
         InlinedVector<ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
@@ -4187,7 +4187,7 @@ public:
     }
 
     void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
-        processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
+        processInsSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
     }
 };
 
