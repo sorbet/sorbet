@@ -25,7 +25,7 @@ run_sorbet
 echo "====second run (warm cache)===="
 run_sorbet
 
-echo '# comment' >> "$dir/a.rb"
+echo 'class A2; end' >> "$dir/a.rb"
 
 echo "====first after change (one cache miss)===="
 run_sorbet
