@@ -31,3 +31,10 @@ echo "====first after change (one cache miss)===="
 run_sorbet
 echo "====second after change (warm cache)===="
 run_sorbet
+
+echo '# comment' >> "$dir/a.rb"
+
+echo "====first after comment change (one cache miss)===="
+run_sorbet
+echo "====second after comment change (warm cache)===="
+run_sorbet
