@@ -224,8 +224,6 @@ hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(
                               ^^^^^^^^^^^
   Detailed explanation:
     `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
-    `[Symbol, Integer]` is not a subtype of `[String, Integer]` for covariant type member `Hash::Elem`
-      `Symbol` is not a subtype of `String` for index `0` of `2`-tuple
     `Hash` does not derive from `NilClass`
 
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002

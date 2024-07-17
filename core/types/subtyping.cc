@@ -1259,29 +1259,32 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!doesMemberMatch) {
                 result = false;
                 if constexpr (shouldAddErrorDetails) {
-                    string variance;
-                    string joiningText;
-                    switch (idxTypeMember.data(gs)->variance()) {
-                        case Variance::CoVariant: {
-                            variance = "covariant";
-                            joiningText = "a subtype of";
-                            break;
+                    if (!(a2->klass == Symbols::Hash() &&
+                          idxTypeMember.data(gs)->name == core::Names::Constants::Elem())) {
+                        string variance;
+                        string joiningText;
+                        switch (idxTypeMember.data(gs)->variance()) {
+                            case Variance::CoVariant: {
+                                variance = "covariant";
+                                joiningText = "a subtype of";
+                                break;
+                            }
+                            case Variance::Invariant: {
+                                variance = "invariant";
+                                joiningText = "equivalent to";
+                                break;
+                            }
+                            case Variance::ContraVariant: {
+                                variance = "contravariant";
+                                joiningText = "a supertype of";
+                                break;
+                            }
                         }
-                        case Variance::Invariant: {
-                            variance = "invariant";
-                            joiningText = "equivalent to";
-                            break;
-                        }
-                        case Variance::ContraVariant: {
-                            variance = "contravariant";
-                            joiningText = "a supertype of";
-                            break;
-                        }
+                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(std::move(subCollector));
                     }
-                    auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
-                                                       joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
-                    subCollector.message = message;
-                    errorDetailsCollector.addErrorDetails(std::move(subCollector));
                 } else {
                     break;
                 }
