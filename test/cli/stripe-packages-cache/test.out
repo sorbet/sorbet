@@ -1,0 +1,16 @@
+====first run (cold cache)====
+                         types.input.files :              4
+            types.input.files.kvstore.miss :              1
+           types.input.files.kvstore.write :              1
+====second run (warm cache)====
+                         types.input.files :              4
+             types.input.files.kvstore.hit :              1
+           types.input.files.kvstore.write :              0
+====first after change (one cache miss)====
+                         types.input.files :              4
+             types.input.files.kvstore.hit :              1
+           types.input.files.kvstore.write :              0
+====second after change (warm cache)====
+                         types.input.files :              4
+             types.input.files.kvstore.hit :              1
+           types.input.files.kvstore.write :              0
