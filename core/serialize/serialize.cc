@@ -54,8 +54,7 @@ public:
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
     static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &);
-    static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
-    static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
+    static NameRef unpickleNameRef(UnPickler &p);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
 
     SerializerImpl() = delete;
@@ -1434,7 +1433,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     switch (static_cast<ast::Tag>(kind)) {
         case ast::Tag::Send: {
             auto loc = unpickleLocOffsets(p);
-            NameRef fun = unpickleNameRef(p, gs);
+            NameRef fun = unpickleNameRef(p);
             auto funLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
             ast::Send::Flags flags;
@@ -1485,13 +1484,13 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::UnresolvedConstantLit: {
             auto loc = unpickleLocOffsets(p);
-            NameRef cnst = unpickleNameRef(p, gs);
+            NameRef cnst = unpickleNameRef(p);
             auto scope = unpickleExpr(p, gs);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
         case ast::Tag::Local: {
             auto loc = unpickleLocOffsets(p);
-            NameRef nm = unpickleNameRef(p, gs);
+            NameRef nm = unpickleNameRef(p);
             auto unique = p.getU4();
             LocalVariable lv(nm, unique);
             return ast::make_expression<ast::Local>(loc, lv);
@@ -1597,7 +1596,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();
             auto rhs = unpickleExpr(p, gs);
@@ -1671,7 +1670,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::UnresolvedIdent: {
             auto loc = unpickleLocOffsets(p);
             auto kind = (ast::UnresolvedIdent::Kind)p.getU1();
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             return ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
         }
         case ast::Tag::ConstantLit: {
@@ -1682,7 +1681,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             auto isSelfMethod = p.getU1();
             return ast::make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
         }
@@ -1691,7 +1690,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     Exception::raise("Not handled {}", kind);
 }
 
-NameRef SerializerImpl::unpickleNameRef(UnPickler &p, const GlobalState &gs) {
+NameRef SerializerImpl::unpickleNameRef(UnPickler &p) {
     NameRef name = NameRef::fromRawUnchecked(p.getU4());
 
     // We don't call NameRef::sanityCheck here because basically the only thing that method is going
