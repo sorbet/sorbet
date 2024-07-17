@@ -304,7 +304,7 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
 
 bool structurallyEqual(const void *avoid, const ExpressionPtr &tree, const ExpressionPtr &other, bool root) {
     ENFORCE(tree != nullptr);
-    ENFORCE(tree != nullptr);
+    ENFORCE(other != nullptr);
     if (tree.tag() != other.tag()) {
         return false;
     }
