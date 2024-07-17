@@ -167,6 +167,21 @@ def f(x); ...; end</code></pre>
     </tr>
     <tr>
       <td>
+        <code>MyClass & MyInterface</code>
+      </td>
+      <td>
+        <code>T.all(MyClass, MyInterface)</code>
+      </td>
+      <td>
+        Sorbet uses <code>T.all(...)</code> to declare <a
+        href="/docs/intersection-types">Intersection types</a>. Note that since
+        Sorbet's type system is nominal (unlike TypeScript's structural type
+        system), <code>T.all</code> typically only makes sense when at most one
+        of the types is a class type (and the rest are modules/interfaces).
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>x?: string</code>,<br>
         <code>x: string | null</code>
       </td>
