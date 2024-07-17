@@ -1314,7 +1314,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
         }
     });
 
-    bool written = false;
+    size_t written = 0;
     {
         vector<pair<string, vector<uint8_t>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
@@ -1323,12 +1323,13 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     kvstore->write(move(a.first), move(a.second));
-                    written = true;
+                    written++;
                 }
             }
         }
     }
-    return written;
+    prodCounterAdd("types.input.files.kvstore.write", written);
+    return written != 0;
 }
 
 vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,

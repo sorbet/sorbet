@@ -42,23 +42,17 @@ void maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const opti
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
     // TODO: Move these methods into this file.
-    auto wroteGlobalState = payload::retainGlobalState(gs, opts, ownedKvstore);
-    if (wroteGlobalState) {
-        // Only write changes to disk if GlobalState changed since the last time.
-        pipeline::cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
-        auto sizeBytes = ownedKvstore->cacheSize();
-        OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
-        prodCounterInc("cache.committed");
+    payload::retainGlobalState(gs, opts, ownedKvstore);
+    pipeline::cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
+    auto sizeBytes = ownedKvstore->cacheSize();
+    OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
+    prodCounterInc("cache.committed");
 
-        size_t usedPercent = round((sizeBytes * 100.0) / opts.maxCacheSizeBytes);
-        prodCounterSet("cache.used_bytes", sizeBytes);
-        prodCounterSet("cache.used_percent", usedPercent);
-        gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet_full_version_string,
-                          sizeBytes, usedPercent);
-    } else {
-        prodCounterInc("cache.aborted");
-        OwnedKeyValueStore::abort(move(ownedKvstore));
-    }
+    size_t usedPercent = round((sizeBytes * 100.0) / opts.maxCacheSizeBytes);
+    prodCounterSet("cache.used_bytes", sizeBytes);
+    prodCounterSet("cache.used_percent", usedPercent);
+    gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet_full_version_string,
+                      sizeBytes, usedPercent);
 }
 
 } // namespace sorbet::realmain::cache
