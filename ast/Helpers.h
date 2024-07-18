@@ -250,6 +250,13 @@ public:
                                              core::make_type<core::NamedLiteralType>(core::Symbols::String(), value));
     }
 
+    static ExpressionPtr MethodNoBlk(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                                     MethodDef::ARGS_store args, ExpressionPtr rhs,
+                                     MethodDef::Flags flags = MethodDef::Flags()) {
+        return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args),
+                                          std::move(rhs), flags);
+    }
+
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::ARGS_store args, ExpressionPtr rhs,
                                 MethodDef::Flags flags = MethodDef::Flags()) {
