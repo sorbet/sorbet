@@ -123,24 +123,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
+    <runtime method definition of foreign_lazy>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
+    <runtime method definition of foreign_lazy=>
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
+    <runtime method definition of foreign_proc>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
+    <runtime method definition of foreign_proc=>
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
+    <runtime method definition of foreign_invalid>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
+    <runtime method definition of foreign_invalid=>
   end
 end

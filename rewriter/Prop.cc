@@ -397,7 +397,6 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
     } else if (ret.ifunset == nullptr) {
         if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
-            flags.isAttrReader = true;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), flags));
             } else {
