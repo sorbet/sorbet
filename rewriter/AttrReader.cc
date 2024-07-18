@@ -131,51 +131,6 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
     }
 }
 
-ast::Send *findSendChecked(ast::Send *sharedSig) {
-    ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
-
-    auto *block = sharedSig->block();
-    auto body = ast::cast_tree<ast::Send>(block->body);
-
-    while (body != nullptr && body->fun != core::Names::checked()) {
-        body = ast::cast_tree<ast::Send>(body->recv);
-    }
-
-    return body;
-}
-
-// Heuristic to check if user-provided sig adds no runtime checking on top of an attr_reader.
-//
-// A user-provided sig causes an attr_reader method to behave differently from a normal attr_reader
-// method at runtime.
-//
-// If the answer would be "maybe adds runtime checking, but hard to tell," we answer that it does add
-// checking to be safe. Thus, the naming of this method is important: we can't rename this method to
-// `sigIsChecked` and negate all true/false. (Put another way: double negation elimination doesn't
-// apply here).
-bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
-    // No sig? Then definitely not checked at runtime.
-    if (sig == nullptr) {
-        return true;
-    }
-
-    auto checked = findSendChecked(sig);
-    if (checked == nullptr || checked->numPosArgs() != 1) {
-        // Unknown: default to false
-        return false;
-    }
-
-    auto lit = ast::cast_tree<ast::Literal>(checked->getPosArg(0));
-    if (lit == nullptr || !lit->isSymbol()) {
-        // Unknown: default to false
-        return false;
-    }
-
-    // Treats `.checked(:tests)` as unknown, therefore not unchecked.
-    // Also treats `.checked(:compiled)` as unknown, therefore not unchecked.
-    return lit->asSymbol() == core::Names::never();
-}
-
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
 ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, core::LocOffsets nameLoc) {
@@ -299,9 +254,6 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
-            if (sigIsUnchecked(ctx, sig)) {
-                flags.isAttrReader = true;
-            }
             auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
             stats.emplace_back(std::move(reader));
         }
