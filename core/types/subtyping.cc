@@ -1294,10 +1294,28 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         // alight type params.
         return result;
     }
-    if (isa_type<AppliedType>(t2)) {
+    if (auto *a2 = cast_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
             return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
         }
+
+        if constexpr (shouldAddErrorDetails) {
+            if (a2->klass != Symbols::Class() || !isa_type<ClassType>(t1)) {
+                return false;
+            }
+            const auto &c1 = cast_type_nonnull<ClassType>(t1);
+            auto maybeAttachedClass = c1.symbol.data(gs)->attachedClass(gs);
+            if (!maybeAttachedClass.exists() || !maybeAttachedClass.data(gs)->isModule()) {
+                return false;
+            }
+
+            auto subCollector = errorDetailsCollector.newCollector();
+            subCollector.message = ErrorColors::format(
+                "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.",
+                t1.show(gs), "Module", "Class", "T.class_of");
+            errorDetailsCollector.addErrorDetails(move(subCollector));
+        }
+
         return false;
     }
 

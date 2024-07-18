@@ -290,4 +290,18 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 24
+
+class_of.rb:10: Expected `T::Class[IFoo]` but found `T.class_of(IFoo)` for argument `klass` https://srb.help/7002
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Expected `T::Class[IFoo]` for argument `klass` of method `Object#takes_t_class_ifoo`:
+    class_of.rb:6:
+     6 |sig { params(klass: T::Class[IFoo]).void }
+                     ^^^^^
+  Got `T.class_of(IFoo)` originating from:
+    class_of.rb:10:
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Detailed explanation:
+    `T.class_of(IFoo)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
+Errors: 25
