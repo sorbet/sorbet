@@ -1086,23 +1086,7 @@ ClassDef{
           rhs = EmptyTree
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.prop>
 
         Send{
           flags = {privateOk}
@@ -1782,77 +1766,13 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of foo>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foo=>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo2 }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foo2>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo2= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foo2=>
       ]
     }
 
@@ -5799,41 +5719,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :default }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of default>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :default= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of default=>
 
         Send{
           flags = {privateOk}
@@ -5866,41 +5754,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :t_nilable }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of t_nilable>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :t_nilable= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of t_nilable=>
 
         Send{
           flags = {privateOk}
@@ -5921,41 +5777,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :array }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of array>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :array= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of array=>
 
         Send{
           flags = {privateOk}
@@ -5991,41 +5815,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :t_array }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of t_array>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :t_array= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of t_array=>
 
         Send{
           flags = {privateOk}
@@ -6065,41 +5857,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :hash_of }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of hash_of>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :hash_of= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of hash_of=>
 
         Send{
           flags = {privateOk}
@@ -6122,23 +5882,7 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :const_explicit }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of const_explicit>
 
         Send{
           flags = {privateOk}
@@ -6159,23 +5903,7 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :const }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of const>
 
         Send{
           flags = {privateOk}
@@ -6203,41 +5931,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :enum_prop }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of enum_prop>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :enum_prop= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of enum_prop=>
 
         Send{
           flags = {privateOk}
@@ -6263,41 +5959,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of foreign>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foreign=>
 
         Send{
           flags = {privateOk}
@@ -6338,41 +6002,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_lazy }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of foreign_lazy>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_lazy= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foreign_lazy=>
 
         Send{
           flags = {privateOk}
@@ -6412,41 +6044,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_proc }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of foreign_proc>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_proc= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foreign_proc=>
 
         Send{
           flags = {privateOk}
@@ -6483,41 +6083,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_invalid }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of foreign_invalid>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_invalid= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foreign_invalid=>
 
         Send{
           flags = {privateOk}
@@ -6540,41 +6108,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :ifunset }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of ifunset>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :ifunset= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of ifunset=>
 
         Send{
           flags = {privateOk}
@@ -6609,41 +6145,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :ifunset_nilable }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of ifunset_nilable>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :ifunset_nilable= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of ifunset_nilable=>
 
         Send{
           flags = {privateOk}
@@ -6670,41 +6174,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :empty_hash_rules }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of empty_hash_rules>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :empty_hash_rules= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of empty_hash_rules=>
 
         Send{
           flags = {privateOk}
@@ -6740,41 +6212,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :hash_rules }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of hash_rules>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :hash_rules= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of hash_rules=>
       ]
     }
 
@@ -7257,41 +6697,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :token_prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.token_prop>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :created_prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.created_prop>
 
         Send{
           flags = {privateOk}
@@ -7307,41 +6715,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :token }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of token>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :token= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of token=>
 
         Send{
           flags = {privateOk}
@@ -7357,41 +6733,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :created }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of created>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :created= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of created=>
       ]
     }
 
@@ -7770,41 +7114,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :timestamped_token_prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.timestamped_token_prop>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :created_prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.created_prop>
 
         Send{
           flags = {privateOk}
@@ -7820,41 +7132,9 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :token }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of token>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :token= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of token=>
 
         Send{
           flags = {privateOk}
@@ -7872,23 +7152,7 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :created }
-            Literal{ value = :genericPropGetter }
-          ]
-        }
+        <runtime method definition of created>
       ]
     }
 
@@ -8601,150 +7865,22 @@ ClassDef{
           ]
         }
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_self_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :encrypted_prop }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of self.encrypted_prop>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foo>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :encrypted_foo }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of encrypted_foo>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foo= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of foo=>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :encrypted_foo= }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of encrypted_foo=>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :bar }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of bar>
 
-        Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :encrypted_bar }
-            Literal{ value = :normal }
-          ]
-        }
+        <runtime method definition of encrypted_bar>
       ]
     }
 
-    Send{
-      flags = {}
-      recv = ConstantLit{
-        symbol = (module ::Sorbet::Private::Static)
-        orig = nullptr
-      }
-      fun = <U keep_def>
-      block = nullptr
-      pos_args = 3
-      args = [
-        Local{
-          localVariable = <U <self>>
-        }
-        Literal{ value = :main }
-        Literal{ value = :normal }
-      ]
-    }
+    <runtime method definition of main>
   ]
 }

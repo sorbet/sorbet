@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :prop, :normal)
+    <runtime method definition of self.prop>
 
     <self>.prop()
 
@@ -115,13 +115,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :genericPropGetter)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    <runtime method definition of foo=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo2, :normal)
+    <runtime method definition of foo2>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo2=, :normal)
+    <runtime method definition of foo2=>
   end
 
   class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
@@ -514,101 +514,101 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:default, <emptyTree>::<C String>, :default, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :default, :genericPropGetter)
+    <runtime method definition of default>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :default=, :normal)
+    <runtime method definition of default=>
 
     <self>.prop(:t_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable, :genericPropGetter)
+    <runtime method definition of t_nilable>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_nilable=, :normal)
+    <runtime method definition of t_nilable=>
 
     <self>.prop(:array, <emptyTree>::<C Array>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array, :genericPropGetter)
+    <runtime method definition of array>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :array=, :normal)
+    <runtime method definition of array=>
 
     <self>.prop(:t_array, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_array, :genericPropGetter)
+    <runtime method definition of t_array>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :t_array=, :normal)
+    <runtime method definition of t_array=>
 
     <self>.prop(:hash_of, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C Symbol>, <emptyTree>::<C String>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_of, :genericPropGetter)
+    <runtime method definition of hash_of>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_of=, :normal)
+    <runtime method definition of hash_of=>
 
     <self>.prop(:const_explicit, <emptyTree>::<C String>, :immutable, true, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :const_explicit, :genericPropGetter)
+    <runtime method definition of const_explicit>
 
     <self>.const(:const, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :const, :genericPropGetter)
+    <runtime method definition of const>
 
     <self>.prop(:enum_prop, <emptyTree>::<C String>, :enum, ["hello", "goodbye"], :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop, :genericPropGetter)
+    <runtime method definition of enum_prop>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :enum_prop=, :normal)
+    <runtime method definition of enum_prop=>
 
     <self>.prop(:foreign, <emptyTree>::<C String>, :foreign, <emptyTree>::<C ForeignClass>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign, :genericPropGetter)
+    <runtime method definition of foreign>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign=, :normal)
+    <runtime method definition of foreign=>
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :genericPropGetter)
+    <runtime method definition of foreign_lazy>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
+    <runtime method definition of foreign_lazy=>
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc, :genericPropGetter)
+    <runtime method definition of foreign_proc>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
+    <runtime method definition of foreign_proc=>
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :genericPropGetter)
+    <runtime method definition of foreign_invalid>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
+    <runtime method definition of foreign_invalid=>
 
     <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset, :normal)
+    <runtime method definition of ifunset>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset=, :normal)
+    <runtime method definition of ifunset=>
 
     <self>.prop(:ifunset_nilable, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :ifunset, "", :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable, :normal)
+    <runtime method definition of ifunset_nilable>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :ifunset_nilable=, :normal)
+    <runtime method definition of ifunset_nilable=>
 
     <self>.prop(:empty_hash_rules, <emptyTree>::<C String>, {:without_accessors => true})
 
-    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules, :genericPropGetter)
+    <runtime method definition of empty_hash_rules>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :empty_hash_rules=, :normal)
+    <runtime method definition of empty_hash_rules=>
 
     <self>.prop(:hash_rules, <emptyTree>::<C String>, {:enum => ["hello", "goodbye"], :without_accessors => true})
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules, :genericPropGetter)
+    <runtime method definition of hash_rules>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :hash_rules=, :normal)
+    <runtime method definition of hash_rules=>
   end
 
   class <emptyTree>::<C PropHelpers><<C <todo sym>>> < (::<todo sym>)
@@ -666,21 +666,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :token_prop, :normal)
+    <runtime method definition of self.token_prop>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+    <runtime method definition of self.created_prop>
 
     <self>.token_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+    <runtime method definition of token>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+    <runtime method definition of token=>
 
     <self>.created_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+    <runtime method definition of created>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created=, :normal)
+    <runtime method definition of created=>
   end
 
   class <emptyTree>::<C PropHelpers2><<C <todo sym>>> < (::<todo sym>)
@@ -727,19 +727,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :timestamped_token_prop, :normal)
+    <runtime method definition of self.timestamped_token_prop>
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :created_prop, :normal)
+    <runtime method definition of self.created_prop>
 
     <self>.timestamped_token_prop(:without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token, :genericPropGetter)
+    <runtime method definition of token>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :token=, :normal)
+    <runtime method definition of token=>
 
     <self>.created_prop(:immutable, true, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :created, :genericPropGetter)
+    <runtime method definition of created>
   end
 
   class <emptyTree>::<C Chalk>::<C ODM>::<C Document><<C <todo sym>>> < (::<todo sym>)
@@ -803,20 +803,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :encrypted_prop, :normal)
+    <runtime method definition of self.encrypted_prop>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+    <runtime method definition of foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo, :normal)
+    <runtime method definition of encrypted_foo>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+    <runtime method definition of foo=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_foo=, :normal)
+    <runtime method definition of encrypted_foo=>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+    <runtime method definition of bar>
 
-    ::Sorbet::Private::Static.keep_def(<self>, :encrypted_bar, :normal)
+    <runtime method definition of encrypted_bar>
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
+  <runtime method definition of main>
 end
