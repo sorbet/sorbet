@@ -27,11 +27,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <before><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         begin
-          <emptyTree>::<C T>.reveal_type(flag_enabled)
-          <emptyTree>::<C Flag>.enable(flag_enabled)
-          @enabled = <cast:let>(flag_enabled, <todo sym>, <emptyTree>::<C T>::<C Boolean>)
+          <emptyTree>::<C T>.reveal_type(flag_enabled$1)
+          <emptyTree>::<C Flag>.enable(flag_enabled$1)
+          @enabled = <cast:let>(flag_enabled$1, <todo sym>, <emptyTree>::<C T>::<C Boolean>)
         end
       end
     end
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <after><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         @enabled = false
       end
     end
@@ -51,15 +51,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'do this thing'><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         begin
           <emptyTree>::<C T>.reveal_type(@enabled)
-          <emptyTree>::<C T>.reveal_type(flag_enabled)
+          <emptyTree>::<C T>.reveal_type(flag_enabled$1)
         end
       end
     end
 
-    <self>.test_each([true, false]) do |flag_enabled|
+    <self>.test_each([true, false]) do |flag_enabled$1|
       begin
         <runtime method definition of <before>>
         <runtime method definition of <after>>
@@ -73,7 +73,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <self>.test_each([true, false]) do |flag_enabled|
+    <self>.test_each([true, false]) do |flag_enabled$1|
       <runtime method definition of nope>
     end
   end
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it ''><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         <emptyTree>
       end
     end
@@ -93,7 +93,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <self>.test_each([true, false]) do |flag_enabled|
+    <self>.test_each([true, false]) do |flag_enabled$1|
       begin
         <runtime method definition of <it ''>>
         <runtime method definition of nope>
@@ -107,7 +107,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it ''><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         <emptyTree>
       end
     end
@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    <self>.test_each([true, false]) do |flag_enabled|
+    <self>.test_each([true, false]) do |flag_enabled$1|
       begin
         <runtime method definition of <it ''>>
         <runtime method definition of nope>
@@ -130,15 +130,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it ''><<todo method>>(&<blk>)
-      [true, false].each() do |flag_enabled|
+      [true, false].each() do |flag_enabled$1|
         <emptyTree>
       end
     end
 
-    <self>.test_each([true, false]) do |flag_enabled|
+    <self>.test_each([true, false]) do |flag_enabled$1|
       begin
-        x = flag_enabled
-        <self>.puts(x)
+        x$1 = flag_enabled$1
+        <self>.puts(x$1)
         <runtime method definition of <it ''>>
       end
     end

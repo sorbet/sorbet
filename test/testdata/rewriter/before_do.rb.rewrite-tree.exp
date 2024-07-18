@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def initialize<<todo method>>(name, &<blk>)
-      <self>.<super>(ZSuperArgs)
+      <self>.<super>(name)
     end
 
     <runtime method definition of initialize>
