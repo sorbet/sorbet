@@ -1604,7 +1604,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs);
             }
-            auto ret = ast::MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
+            auto ret = ast::MK::Method(loc, declLoc, name, std::move(args), std::move(rhs));
 
             {
                 auto &method = ast::cast_tree_nonnull<ast::MethodDef>(ret);
