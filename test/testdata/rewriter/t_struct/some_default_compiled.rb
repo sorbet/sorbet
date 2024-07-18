@@ -1,4 +1,3 @@
-# compiled: true
 # typed: strict
 
 class SomeDefault < T::Struct

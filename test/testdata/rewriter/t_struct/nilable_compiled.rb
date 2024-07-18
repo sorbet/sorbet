@@ -1,4 +1,3 @@
-# compiled: true
 # typed: strict
 
 class Nilable < T::Struct
