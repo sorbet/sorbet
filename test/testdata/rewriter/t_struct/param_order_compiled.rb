@@ -1,4 +1,3 @@
-# compiled: true
 # typed: strict
 
 # We run checks to ensure that all optional arguments to a method appear after all required arguments. This means that

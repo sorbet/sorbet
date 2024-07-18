@@ -1,4 +1,3 @@
-# compiled: true
 # typed: true
 
 class A
