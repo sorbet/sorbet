@@ -165,8 +165,8 @@ T.reveal_type(f) # => T.proc.params(arg0: T.untyped).returns(T.untyped) ‼️
 takes_lambda(f)
 ```
 
-Sorbet does not do type inference for procs, and only does return-type inference
-for lambdas (not argument type inference).
+For lambdas and procs, sorbet only does return-type inference (not argument type
+inference).
 
 For blocks, Sorbet doesn't have to do type inference: it simply reads the type
 of the block from the associated method.
