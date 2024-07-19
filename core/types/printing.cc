@@ -426,24 +426,9 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
-    if (this->klass == Symbols::Array()) {
-        fmt::format_to(std::back_inserter(buf), "T::Array");
-    } else if (this->klass == Symbols::Hash()) {
-        fmt::format_to(std::back_inserter(buf), "T::Hash");
-    } else if (this->klass == Symbols::Enumerable()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerable");
-    } else if (this->klass == Symbols::Enumerator()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator");
-    } else if (this->klass == Symbols::Enumerator_Lazy()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator::Lazy");
-    } else if (this->klass == Symbols::Enumerator_Chain()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator::Chain");
-    } else if (this->klass == Symbols::Range()) {
-        fmt::format_to(std::back_inserter(buf), "T::Range");
-    } else if (this->klass == Symbols::Set()) {
-        fmt::format_to(std::back_inserter(buf), "T::Set");
-    } else if (this->klass == Symbols::Class()) {
-        fmt::format_to(std::back_inserter(buf), "T::Class");
+    auto forwarderClass = this->klass.forwarderForBuiltinGeneric();
+    if (forwarderClass.exists()) {
+        fmt::format_to(std::back_inserter(buf), "{}", forwarderClass.show(gs, options));
     } else if (std::optional<int> procArity = Types::getProcArity(*this)) {
         fmt::format_to(std::back_inserter(buf), "T.proc");
 
