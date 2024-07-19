@@ -426,10 +426,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
-    auto forwarderClass = this->klass.forwarderForBuiltinGeneric();
-    if (forwarderClass.exists()) {
-        fmt::format_to(std::back_inserter(buf), "{}", forwarderClass.show(gs, options));
-    } else if (std::optional<int> procArity = Types::getProcArity(*this)) {
+    if (std::optional<int> procArity = Types::getProcArity(*this)) {
         fmt::format_to(std::back_inserter(buf), "T.proc");
 
         // The first element in targs is the return type.
@@ -460,6 +457,11 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
             fmt::format_to(std::back_inserter(buf), ".returns({})", return_type.show(gs, options));
         }
         return to_string(buf);
+    }
+
+    auto forwarderClass = this->klass.forwarderForBuiltinGeneric();
+    if (forwarderClass.exists()) {
+        fmt::format_to(std::back_inserter(buf), "{}", forwarderClass.show(gs, options));
     } else {
         // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
         if (options.useValidSyntax && this->klass.data(gs)->isSingletonClass(gs)) {
