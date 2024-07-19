@@ -814,4 +814,19 @@ class Proc < Object
   # See also
   # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-lambda-3F).
   def yield(*_); end
+
+  sig do
+    type_parameters(:Return2)
+      .params(g: T::Proc[T.type_parameter(:Return2)])
+      .returns(T::Proc[T.type_parameter(:Return2)])
+  end
+  sig do
+     params(g: T.anything).returns(T::Proc[T.untyped])
+  end
+  def >>(g); end
+
+  sig do
+    params(g: T.anything).returns(T::Proc[Return])
+  end
+  def <<(g); end
 end
