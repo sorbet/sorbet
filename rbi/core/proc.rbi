@@ -347,6 +347,11 @@
 #
 # Numbered parameters were introduced in Ruby 2.7.
 class Proc < Object
+  # The return type of this proc. It accepts any and all arguments. To
+  # constraint the list of arguments that this proc can take, use a `T.proc`
+  # type.
+  Return = type_member(:out)
+
   # Creates a new [`Proc`](https://docs.ruby-lang.org/en/3.2/Proc.html)
   # object, bound to the current context.
   #
