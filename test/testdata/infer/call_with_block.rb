@@ -73,4 +73,4 @@ res = generic_param(
   0,
   &T.unsafe(:even?)
 )
-T.reveal_type(res) # error: `T.untyped`
+T.reveal_type(res) # error: `Integer`
