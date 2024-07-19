@@ -84,15 +84,35 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",  "parse-tree-whitequark",
-                                          "desugar-tree",     "desugar-tree-raw", "rewrite-tree",
-                                          "rewrite-tree-raw", "index-tree",       "index-tree-raw",
-                                          "symbol-table",     "symbol-table-raw", "name-tree",
-                                          "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
-                                          "flatten-tree",     "flatten-tree-raw", "cfg",
-                                          "cfg-raw",          "cfg-text",         "autogen",
-                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimized-rbi",    "rbi-gen"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-whitequark",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "local-vars-tree",
+                                          "local-vars-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "cfg-text",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt",
+                                          "autocorrects",
+                                          "minimized-rbi",
+                                          "rbi-gen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -229,7 +249,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
         core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
         ast::ParsedFile localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
 
-        // TODO: handler.addObserved(*gs, "local-vars-tree") ?
+        handler.addObserved(*gs, "local-vars-tree", [&]() { return localNamed.tree.toString(*gs); });
+        handler.addObserved(*gs, "local-vars-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
 
         // Rewriter
         ast::ParsedFile rewritten;
@@ -775,7 +796,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
-        // TODO: handler.addObserved(*gs, "local-vars-tree") ?
+        handler.addObserved(*gs, "local-vars-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "local-vars-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
         // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});

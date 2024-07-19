@@ -51,9 +51,11 @@ using namespace std;
 string singleTest;
 
 UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
-    "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
+    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree",
+    "desugar-tree-raw", "local-vars-tree", "local-vars-tree-raw",   "rewrite-tree",
+    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table",
+    "symbol-table-raw", "name-tree",       "name-tree-raw",         "resolve-tree",
+    "resolve-tree-raw", "flatten-tree",    "flatten-tree-raw",      "cfg",
     "cfg-raw",          "autogen",         "document-symbols"};
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */

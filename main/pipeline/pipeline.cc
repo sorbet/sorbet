@@ -215,7 +215,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
-            // TODO: add a print.LocalVars and print.LocalVarsRaw option
+            if (print.LocalVarsTree.enabled) {
+                print.LocalVarsTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
+            }
+            if (print.LocalVarsTreeRaw.enabled) {
+                print.LocalVarsTreeRaw.fmt("{}\n", tree.showRaw(lgs));
+            }
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
             }

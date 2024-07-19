@@ -20,6 +20,8 @@ passes=(
   parse-tree-json
   desugar-tree
   desugar-tree-raw
+  local-vars-tree
+  local-vars-tree-raw
   rewrite-tree
   rewrite-tree-raw
   index-tree

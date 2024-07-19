@@ -47,6 +47,8 @@ struct Printers {
     PrinterConfig ParseTreeWhitequark;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
+    PrinterConfig LocalVarsTree;
+    PrinterConfig LocalVarsTreeRaw;
     PrinterConfig RewriterTree;
     PrinterConfig RewriterTreeRaw;
     PrinterConfig IndexTree;
