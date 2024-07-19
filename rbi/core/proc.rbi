@@ -366,8 +366,8 @@ class Proc < Object
   # ```ruby
   # Proc.new    #=> ArgumentError
   # ```
-  sig {params(blk: Proc).returns(T.attached_class)}
-  def self.new(&blk); end
+  sig {params(blk: T::Proc[T.untyped]).void}
+  def initialize(&blk); end
 
   # Invokes the block with `obj` as the proc's parameter like
   # [`Proc#call`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-call).
@@ -467,7 +467,7 @@ class Proc < Object
         arg0: T.untyped,
         blk: T.untyped,
     )
-    .returns(T.untyped)
+    .returns(Return)
   end
   def call(*arg0, &blk); end
 
@@ -509,7 +509,7 @@ class Proc < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.untyped)
+    .returns(Return)
   end
   def [](*arg0); end
 
@@ -554,7 +554,7 @@ class Proc < Object
     params(
         arity: Integer,
     )
-    .returns(Proc)
+    .returns(T::Proc[T.untyped])
   end
   def curry(arity=T.unsafe(nil)); end
 
