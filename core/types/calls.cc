@@ -2661,19 +2661,16 @@ private:
         }
 
         {
+            auto nonNilPassedInBlockType = Types::dropNil(gs, passedInBlockType);
+            auto passedInBlockReturnType = Types::getProcReturnType(gs, nonNilPassedInBlockType);
             auto it = &dispatched;
             while (it != nullptr) {
                 if (it->main.method.exists()) {
-                    const auto &methodArgs = it->main.method.data(gs)->arguments;
-                    ENFORCE(!methodArgs.empty());
-                    const auto &bspec = methodArgs.back();
-                    ENFORCE(bspec.flags.isBlock);
-
-                    auto bspecType = bspec.type;
-                    if (bspecType) {
+                    const auto &blockReturnType = it->main.blockReturnType;
+                    if (blockReturnType) {
                         // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
-                        Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, bspecType,
+                        Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockReturnType, blockReturnType,
                                                         UntypedMode::AlwaysCompatible, ErrorSection::Collector::NO_OP);
                     }
                 }
@@ -4223,16 +4220,12 @@ public:
         }
         auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
         vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, untypedWithBlame);
-        // TODO(jez) Should be able to suport Kernel#proc in the same way
         auto isLambda = res.main.method == Symbols::Kernel_lambda();
-        if (isLambda) {
-            targs[0] = make_type<TypeVar>(Symbols::Kernel_lambda_returnType());
-        }
+        targs[0] = isLambda ? make_type<TypeVar>(Symbols::Kernel_lambda_returnType())
+                            : make_type<TypeVar>(Symbols::Kernel_proc_returnType());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.returnType = make_type<core::AppliedType>(procClass, move(targs));
-        if (isLambda) {
-            handleBlockType(gs, res.main, res.returnType);
-        }
+        handleBlockType(gs, res.main, res.returnType);
     }
 } Kernel_proc;
 
