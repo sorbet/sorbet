@@ -54,4 +54,4 @@ end
 sig { params(x: T.untyped).void }
 def method_name_missing(x)
   x.
-end # error: unexpected token "return"
+end # error: unexpected token "end"
