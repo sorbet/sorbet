@@ -3743,7 +3743,7 @@ private:
                 arg.type = std::move(spec->type);
                 // Passing in a noOp collector even though this call is used for error reporting,
                 // because it's unlikely we'll add more details to a subtype check for T.nilable(Proc)
-                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProcClass())) {
+                if (isBlkArg && !core::Types::isSubType(ctx, arg.type, core::Types::nilableProc())) {
                     if (auto e = ctx.state.beginError(spec->nameLoc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Block argument type must be either `{}` or a `{}` type (and possibly nilable)",
                                     "Proc", "T.proc");

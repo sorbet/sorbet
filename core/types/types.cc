@@ -119,12 +119,13 @@ TypePtr Types::hashOfUntyped(sorbet::core::SymbolRef blame) {
     }
 }
 
-TypePtr Types::procClass() {
-    return make_type<ClassType>(Symbols::Proc());
+TypePtr Types::procOf(const TypePtr &returnType) {
+    vector<TypePtr> targs{move(returnType)};
+    return make_type<AppliedType>(Symbols::Proc(), move(targs));
 }
 
-TypePtr Types::nilableProcClass() {
-    static auto res = OrType::make_shared(nilClass(), procClass());
+TypePtr Types::nilableProc() {
+    static auto res = OrType::make_shared(nilClass(), procOf(Types::top()));
     return res;
 }
 

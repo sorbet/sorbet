@@ -133,8 +133,8 @@ public:
     static TypePtr rangeOfUntyped(sorbet::core::SymbolRef blame);
     static TypePtr hashOfUntyped();
     static TypePtr hashOfUntyped(sorbet::core::SymbolRef blame);
-    static TypePtr procClass();
-    static TypePtr nilableProcClass();
+    static TypePtr procOf(const TypePtr &returnType);
+    static TypePtr nilableProc();
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
     static absl::Span<const ClassOrModuleRef> falsySymbols();
@@ -731,7 +731,7 @@ private:
      * constructor, so the friend declaration doesn't work), we provide the
      * `make_shared` helper here.
      */
-    friend TypePtr Types::nilableProcClass();
+    friend TypePtr Types::nilableProc();
     friend TypePtr Types::falsyTypes();
     friend TypePtr Types::Boolean();
     friend class NameSubstitution;
