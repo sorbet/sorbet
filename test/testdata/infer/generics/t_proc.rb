@@ -7,12 +7,13 @@ sig do
     .returns(T.type_parameter(:Return))
 end
 def example(&blk)
-  res = yield
+  res = yield(x: 0)
   T.reveal_type(res)
   res
 end
 
 res = example do |x:|
+  T.reveal_type(x)
   0
 end
 T.reveal_type(res)
