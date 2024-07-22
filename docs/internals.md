@@ -20,8 +20,8 @@ unfinished or confusing section!
 - [Phases](#phases)
   - [Parser](#parser)
   - [Desugar](#desugar)
-  - [Rewriter](#rewriter)
   - [LocalVars](#localvars)
+  - [Rewriter](#rewriter)
   - [Namer](#namer)
   - [Resolver](#resolver)
   - [CFG](#cfg)
@@ -122,8 +122,8 @@ another or make modifications within the IR they were given.
 | 1   | [Parser], `-p parse-tree`        |                     |                                   |
 |     |                                  | [`parser::Node`]    |                                   |
 | 2   | [Desugar], `-p desugar-tree`     |                     |                                   |
-| 3   |                                  | [`ast::Expression`] | [Rewriter]                        |
-| 4   |                                  | [`ast::Expression`] | [LocalVars], `-p rewrite-tree`    |
+| 3   |                                  | [`ast::Expression`] | [LocalVars], `-p local-vars-tree` |
+| 4   |                                  | [`ast::Expression`] | [Rewriter] `-p rewrite-tree`      |
 | 5   |                                  | [`ast::Expression`] | [Namer], `-p name-tree` (*)       |
 | 6   |                                  | [`ast::Expression`] | [Resolver], `-p resolve-tree` (*) |
 | 6   |                                  | [`ast::Expression`] | [DefinitionValidator] (**)        |
@@ -193,6 +193,19 @@ If you pass the `-p desugar-tree` or `-p desugar-tree-raw` option to `sorbet`,
 you can see what a Ruby program looks like after being desugared.
 
 
+### LocalVars
+
+This is a fairly short pass. It converts the `ast::UnresolvedIdent` AST nodes
+that correspond to local variables to `ast::Local` nodes (`ast::UnresolvedIdent`
+nodes are also used for instance variables, class variables, and global
+variables, not just local variables, but those are handled by other phases).
+
+For the most part doing this is very straightforwardly accomplished with a tree
+traversal. One trick is that local variables record which Ruby block (like `do
+... end`) they're a part of. (Ruby blocks introduce new lexical scopes; things
+like `if` / `else` and `begin` / `end` expressions do not.)
+
+
 ### Rewriter
 
 The Rewriter pass is sort of like a domain-specific desugar pass. It takes
@@ -220,18 +233,6 @@ resolver or infer), but instead we've reimplemented functionality in the
 Rewriter pass. This keeps the surface area of the API we'd have to present to
 plugins in the future small.
 
-
-### LocalVars
-
-This is a fairly short pass. It converts the `ast::UnresolvedIdent` AST nodes
-that correspond to local variables to `ast::Local` nodes (`ast::UnresolvedIdent`
-nodes are also used for instance variables, class variables, and global
-variables, not just local variables, but those are handled by other phases).
-
-For the most part doing this is very straightforwardly accomplished with a tree
-traversal. One trick is that local variables record which Ruby block (like `do
-... end`) they're a part of. (Ruby blocks introduce new lexical scopes; things
-like `if` / `else` and `begin` / `end` expressions do not.)
 
 ### Namer
 
