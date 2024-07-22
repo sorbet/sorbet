@@ -50,3 +50,9 @@ class Child < Parent
     nil
   end
 end
+
+sig { params(x: T.untyped).void }
+def method_name_missing(x)
+  x.
+# ^^ error: Call to method `<method-name-missing>` on `T.untyped`
+end # error: unexpected token "return"
