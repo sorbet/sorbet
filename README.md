@@ -938,15 +938,11 @@ using [Docusaurus](https://docusaurus.io/).
 ### Bazel
 
 Bazel supports having a persistent cache of previous build results so that
-rebuilds for the same input files are fast. To enable this feature, run these
-commands to create a `./.bazelrc.local` and cache folder:
+rebuilds for the same input files are fast. To enable this feature, run this
+script to create a `./.bazelrc.local` and cache folder:
 
 ```shell
-# The .bazelrc.local will live in the sorbet repo so it doesn't interfere with
-# other bazel-based repos you have.
-echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
-echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
-mkdir -p "$HOME/.cache/sorbet/bazel-cache"
+tools/create_local_bazelrc.sh
 ```
 
 ### Multiple git worktrees
