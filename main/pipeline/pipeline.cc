@@ -174,12 +174,25 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         }
         case PM_PROGRAM_NODE: {
             pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
-            pm_statements_node *stmts = programNode->statements;
 
-            auto size = stmts->body.size;
+            return convertPrismToSorbet(reinterpret_cast<pm_node *>(programNode->statements), parser, gs);
+        }
+        case PM_RATIONAL_NODE: {
+            auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
+            pm_location_t *loc = &rationalNode->base.location;
+
+            const uint8_t *start = rationalNode->numeric->location.start;
+            const uint8_t *end = rationalNode->numeric->location.end;
+
+            std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
+
+            return make_unique<parser::Rational>(locOffset(loc, parser), value);
+        }
+        case PM_STATEMENTS_NODE: {
+            pm_statements_node *stmts = reinterpret_cast<pm_statements_node *>(node);
 
             // For a single statement, do not create a Begin node and just return the statement
-            if (size == 1) {
+            if (stmts->body.size == 1) {
                 return convertPrismToSorbet((pm_node *)stmts->body.nodes[0], parser, gs);
             }
 
@@ -192,25 +205,9 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
                 sorbetStmts.emplace_back(std::move(convertedStmt));
             }
 
-            auto *loc = &programNode->base.location;
+            auto *loc = &stmts->base.location;
 
             return make_unique<parser::Begin>(locOffset(loc, parser), std::move(sorbetStmts));
-        }
-        case PM_RATIONAL_NODE: {
-            auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
-            pm_location_t *loc = &rationalNode->base.location;
-
-            const uint8_t *start = rationalNode->numeric->location.start;
-            const uint8_t *end = rationalNode->numeric->location.end;
-
-            std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
-
-            return make_unique<parser::Rational>(locOffset(loc, parser), value);
-
-            break;
-        }
-        case PM_STATEMENTS_NODE: {
-            Exception::raise("Handling for statements node should be performed in program node");
         }
         case PM_STRING_NODE: {
             auto strNode = reinterpret_cast<pm_string_node *>(node);
