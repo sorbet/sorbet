@@ -2259,7 +2259,7 @@ int ClassOrModule::typeArity(const GlobalState &gs) const {
 }
 
 void ClassOrModule::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     ClassOrModuleRef current = this->ref(gs);
@@ -2276,7 +2276,7 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
 }
 
 void Method::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     MethodRef current = this->ref(gs);
@@ -2305,7 +2305,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
 }
 
 void Field::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     FieldRef current = this->ref(gs);
@@ -2322,7 +2322,7 @@ void Field::sanityCheck(const GlobalState &gs) const {
 }
 
 void TypeParameter::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     SymbolRef current = this->ref(gs);

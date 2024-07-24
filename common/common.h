@@ -61,7 +61,7 @@ constexpr bool skip_slow_enforce = false;
     } while (false);
 
 #define DEBUG_ONLY(X) \
-    if (debug_mode) { \
+    if constexpr (debug_mode) { \
         X;            \
     }
 

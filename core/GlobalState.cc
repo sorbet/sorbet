@@ -214,7 +214,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         }
         data->mixins() = std::move(newMixins);
         data->flags.isLinearizationComputed = true;
-        if (debug_mode) {
+        if constexpr (debug_mode) {
             for (auto oldMixin : currentMixins) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
                         ofClass.showFullName(gs), oldMixin.showFullName(gs));
@@ -2012,7 +2012,7 @@ string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
 }
 
 void GlobalState::sanityCheckTableSizes() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     if constexpr (fuzz_mode) {
@@ -2034,7 +2034,7 @@ void GlobalState::sanityCheckTableSizes() const {
 }
 
 void GlobalState::sanityCheckNames() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     if constexpr (fuzz_mode) {
@@ -2058,7 +2058,7 @@ void GlobalState::sanityCheckNames() const {
 }
 
 void GlobalState::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     if constexpr (fuzz_mode) {

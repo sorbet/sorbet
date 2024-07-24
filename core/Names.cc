@@ -156,7 +156,7 @@ string_view NameRef::shortName(const GlobalState &gs) const {
 }
 
 void NameRef::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     switch (kind()) {
