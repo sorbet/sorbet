@@ -1087,7 +1087,6 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
     ENFORCE_NO_TIMER(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE_NO_TIMER(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
     uint32_t unique = 1;
@@ -1131,7 +1130,6 @@ SymbolRef GlobalState::lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name
     ENFORCE_NO_TIMER(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE_NO_TIMER(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
     uint32_t unique = 1;
@@ -1218,7 +1216,6 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     ENFORCE_NO_TIMER(name.kind() != core::NameKind::UNIQUE ||
                      name.dataUnique(*this)->uniqueNameKind != core::UniqueNameKind::MangleRename);
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
@@ -1256,7 +1253,6 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     flags.isTypeMember = true;
 
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
@@ -1302,7 +1298,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     flags.isTypeArgument = true;
 
     auto ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->typeArguments().size());
 
     for (auto typeArg : ownerScope->typeArguments()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
@@ -1336,7 +1331,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
 
 MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
@@ -1404,7 +1398,6 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     ENFORCE_NO_TIMER(name.exists());
 
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
@@ -1434,7 +1427,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     ENFORCE_NO_TIMER(name.exists());
 
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
-    histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
@@ -1500,7 +1492,6 @@ string_view GlobalState::enterString(string_view nm) {
         }
     });
     auto ret = strings.enterString(nm);
-    counterInc("strings");
     return ret;
 }
 
@@ -1516,10 +1507,7 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
-                counterInc("names.utf8.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.utf8");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
@@ -1541,10 +1529,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UTF8 && name.dataUtf8(*this)->utf8 == nm) {
-                counterInc("names.utf8.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.utf8");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
@@ -1594,10 +1579,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
-                counterInc("names.constant.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.constant");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
@@ -1654,10 +1636,7 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
         if (bucket.hash == hs) {
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::CONSTANT && name.dataCnst(*this)->original == original) {
-                counterInc("names.constant.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.constant");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
@@ -1723,10 +1702,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
                 name.dataUnique(*this)->num == num && name.dataUnique(*this)->original == original) {
-                counterInc("names.unique.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
@@ -1749,10 +1725,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
             auto name = NameRef::fromRaw(*this, bucket.rawId);
             if (name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->uniqueNameKind == uniqueNameKind &&
                 name.dataUnique(*this)->num == num && name.dataUnique(*this)->original == original) {
-                counterInc("names.unique.hit");
                 return name;
-            } else {
-                counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probeCount) & mask;
