@@ -36,7 +36,7 @@ public:
 };
 
 ExpressionPtr Verifier::run(core::Context ctx, ExpressionPtr node) {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return node;
     }
     VerifierWalker vw;
