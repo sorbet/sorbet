@@ -157,7 +157,7 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
     return core::LocOffsets{locStart, locEnd};
 }
 
-const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
+unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
@@ -170,6 +170,21 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
             pm_location_t *loc = &floatNode->base.location;
 
             return make_unique<parser::Float>(locOffset(loc, parser), std::to_string(floatNode->value));
+        }
+        case PM_IF_NODE: {
+            auto ifNode = reinterpret_cast<pm_if_node *>(node);
+            auto *loc = &ifNode->base.location;
+
+            auto predicate = convertPrismToSorbet(ifNode->predicate, parser, gs);
+
+            std::unique_ptr<parser::Node> ifTrue;
+
+            if (ifNode->statements != nullptr) {
+                ifTrue = convertPrismToSorbet(reinterpret_cast<pm_node *>(ifNode->statements), parser, gs);
+            }
+
+            // TODO: handle elsif/else clause
+            return make_unique<parser::If>(locOffset(loc, parser), std::move(predicate), std::move(ifTrue), nullptr);
         }
         case PM_INTEGER_NODE: {
             auto intNode = reinterpret_cast<pm_integer_node *>(node);
@@ -297,7 +312,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         case PM_GLOBAL_VARIABLE_WRITE_NODE:
         case PM_HASH_NODE:
         case PM_HASH_PATTERN_NODE:
-        case PM_IF_NODE:
         case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
