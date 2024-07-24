@@ -4,7 +4,7 @@
 module T::Types
   class TypedSet < TypedEnumerable
     def underlying_class
-      Hash
+      Set
     end
 
     # overrides Base
