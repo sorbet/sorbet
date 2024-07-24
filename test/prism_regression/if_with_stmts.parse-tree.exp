@@ -1,0 +1,17 @@
+If {
+  condition = True {
+  }
+  then_ = Begin {
+    stmts = [
+      True {
+      }
+      Integer {
+        val = "4"
+      }
+      String {
+        val = <U string>
+      }
+    ]
+  }
+  else_ = NULL
+}
