@@ -1223,7 +1223,6 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE_NO_TIMER(store.isClassOrModule(), "existing symbol is not a class or module");
-        counterInc("symbols.hit");
         return store.asClassOrModuleRef();
     }
 
@@ -1263,7 +1262,6 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     if (store.exists()) {
         ENFORCE_NO_TIMER(store.isTypeMember() && store.asTypeMemberRef().data(*this)->flags.hasFlags(flags),
                          "existing symbol has wrong flags");
-        counterInc("symbols.hit");
         return store.asTypeMemberRef();
     }
 
@@ -1309,7 +1307,6 @@ TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef
     for (auto typeArg : ownerScope->typeArguments()) {
         if (typeArg.dataAllowingNone(*this)->name == name) {
             ENFORCE_NO_TIMER(typeArg.dataAllowingNone(*this)->flags.hasFlags(flags), "existing symbol has wrong flags");
-            counterInc("symbols.hit");
             if (!symbolTableFrozen) {
                 typeArg.data(*this)->addLoc(*this, loc);
             } else {
@@ -1344,7 +1341,6 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE_NO_TIMER(store.isMethod(), "existing symbol is not a method");
-        counterInc("symbols.hit");
         return store.asMethodRef();
     }
 
@@ -1413,7 +1409,6 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE_NO_TIMER(store.isField(*this), "existing symbol is not a field");
-        counterInc("symbols.hit");
         return store.asFieldRef();
     }
 
@@ -1444,7 +1439,6 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     auto &store = ownerScope->members()[name];
     if (store.exists()) {
         ENFORCE_NO_TIMER(store.isStaticField(*this), "existing symbol is not a static field");
-        counterInc("symbols.hit");
 
         // Ensures that locs get properly updated on the fast path
         auto fieldRef = store.asFieldRef();
