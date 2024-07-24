@@ -108,7 +108,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 }
 
 void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     for (auto &bb : cfg.basicBlocks) {

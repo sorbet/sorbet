@@ -216,7 +216,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
 }
 
 void KnowledgeFact::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     for (auto &a : yesTypeTests) {
@@ -353,7 +353,7 @@ void TestedKnowledge::emitKnowledgeSizeMetric() const {
 }
 
 void TestedKnowledge::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     _truthy->sanityCheck();

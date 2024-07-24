@@ -214,7 +214,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         }
         data->mixins() = std::move(newMixins);
         data->flags.isLinearizationComputed = true;
-        if (debug_mode) {
+        if constexpr (debug_mode) {
             for (auto oldMixin : currentMixins) {
                 ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
                         ofClass.showFullName(gs), oldMixin.showFullName(gs));
@@ -2011,10 +2011,10 @@ string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
 }
 
 void GlobalState::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         // it's very slow to check this and it didn't find bugs
         return;
     }
@@ -2023,11 +2023,12 @@ void GlobalState::sanityCheck() const {
     ENFORCE_NO_TIMER(namesUsedTotal() > 0, "empty name table size");
     ENFORCE_NO_TIMER(!strings.empty(), "empty string table size");
     ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
-    ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0, "name hash table size is not a power of two");
+    ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
+                     "name hash table size is not a power of two");
     ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
-                namesByHash.capacity(),
-            "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
-            namesUsedTotal(), namesByHash.capacity());
+                         namesByHash.capacity(),
+                     "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
+                     namesUsedTotal(), namesByHash.capacity());
     ENFORCE_NO_TIMER(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
 
     {
