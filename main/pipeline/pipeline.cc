@@ -159,6 +159,12 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
 
 const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_FALSE_NODE: {
+            auto falseNode = reinterpret_cast<pm_false_node *>(node);
+            pm_location_t *loc = &falseNode->base.location;
+
+            return make_unique<parser::False>(locOffset(loc, parser));
+        }
         case PM_FLOAT_NODE: {
             auto floatNode = reinterpret_cast<pm_float_node *>(node);
             pm_location_t *loc = &floatNode->base.location;
@@ -220,6 +226,13 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
             // TODO: handle different string encodings
             return make_unique<parser::String>(locOffset(loc, parser), gs.enterNameUTF8(source));
         }
+        case PM_TRUE_NODE: {
+            auto trueNode = reinterpret_cast<pm_true_node *>(node);
+            pm_location_t *loc = &trueNode->base.location;
+
+            return make_unique<parser::True>(locOffset(loc, parser));
+        }
+
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
@@ -270,7 +283,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         case PM_EMBEDDED_STATEMENTS_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
-        case PM_FALSE_NODE:
         case PM_FIND_PATTERN_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
@@ -356,7 +368,6 @@ const unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t
         case PM_SPLAT_NODE:
         case PM_SUPER_NODE:
         case PM_SYMBOL_NODE:
-        case PM_TRUE_NODE:
         case PM_UNDEF_NODE:
         case PM_UNLESS_NODE:
         case PM_UNTIL_NODE:
