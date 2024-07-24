@@ -7,10 +7,21 @@ module T::Types
 end
 
 class T::Types::Base
+  abstract!
+
   def self.method_added(method_name); end
+
+  sig { abstract.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def recursively_valid?(obj); end
+
+  # Should return `String` but this is hard because technically
+  # `T::Types::Simple` returns `nil` if given an anonymous module.
+  # We should fix this later.
+  sig { abstract.returns(T.untyped) }
   def name; end
+
   def subtype_of?(t2); end
   def to_s; end
   def describe_obj(obj); end
@@ -22,102 +33,188 @@ class T::Types::Base
 end
 
 class T::Types::Simple < T::Types::Base
+  sig { params(raw_type: Module).void }
   def initialize(raw_type); end
+
+  sig { override.returns(T.nilable(String)) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { returns(Module) }
   def raw_type; end
 end
 
 class T::Types::Union < T::Types::Base
+  sig { params(types: T::Array[T.untyped]).void }
   def initialize(types); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { returns(T::Array[T::Types::Base]) }
   def types; end
 end
 
 class T::Types::Intersection < T::Types::Base
+  sig { params(types: T::Array[T.anything]).void }
   def initialize(types); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { returns(T::Array[T::Types::Base]) }
   def types; end
 end
 
 class T::Types::ClassOf < T::Types::Base
+  sig { params(type: Module).void }
   def initialize(type); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def subtype_of_single?(other); end
   def describe_obj(obj); end
+
+  sig { returns(Module) }
   def type; end
+
   def [](*types); end
 end
 
 class T::Types::FixedArray < T::Types::Base
+  sig { params(types: T::Array[T.anything]).void }
   def initialize(types); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def describe_obj(obj); end
+
+  sig { returns(T::Array[T::Types::Base]) }
   def types; end
 end
 
 class T::Types::FixedHash < T::Types::Base
+  sig { params(types: T::Hash[T.untyped, T.anything]).void }
   def initialize(types); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def describe_obj(obj); end
+
+  sig { returns(T::Hash[T.untyped, T::Types::Base]) }
   def types; end
 end
 
 class T::Types::Untyped < T::Types::Base
+  sig { void }
   def initialize; end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
 end
 
 class T::Types::Anything < T::Types::Base
-  sig {void}
+  sig { void }
   def initialize; end
 
-  sig {returns(String)}
+  sig { override.returns(String) }
   def name; end
 
-  sig {params(obj: T.anything).returns(T::Boolean)}
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
 end
 
 class T::Types::Proc < T::Types::Base
+  sig { params(arg_types: T::Hash[T.untyped, T.anything], returns: T.anything).void }
   def initialize(arg_types, returns); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { returns(T::Hash[T.untyped, T::Types::Base]) }
   def arg_types; end
+
+  sig { returns(T::Types::Base) }
   def returns; end
 end
 
 class T::Types::NoReturn < T::Types::Base
+  sig { void }
   def initialize; end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
 end
 
 class T::Types::Enum < T::Types::Base
+  sig { params(values: T.anything).void }
   def initialize(values); end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { override.returns(String) }
   def name; end
+
   def describe_obj(obj); end
+
+  sig { returns(T.anything) }
   def values; end
 end
 
 class T::Types::TEnum < T::Types::Base
+  sig { params(val: T::Enum).void }
   def initialize(val); end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { override.returns(String) }
   def name; end
+
   def describe_obj(obj); end
+
+  sig { returns(T::Enum) }
   def val; end
 end
 
 class T::Types::SelfType < T::Types::Base
+  sig { void }
   def initialize(); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -125,9 +222,16 @@ end
 
 class T::Types::TypeVariable < T::Types::Base
   def initialize(variance); end
+
+  sig { override.returns(String) }
   def name; end
+
   def subtype_of_single?(type); end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { returns(Symbol) }
   def variance; end
 end
 
@@ -139,69 +243,144 @@ end
 
 class T::Types::TypeParameter < T::Types::Base
   def initialize(name); end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def subtype_of_single?(type); end
+
+  sig { override.returns(String) }
   def name; end
+
   def self.make(name); end
 end
 
 # --- stdlib generics ---
 
 class T::Types::TypedArray < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
+
   def new(*args); end
+  def recursively_valid?(obj); end
 end
 
 class T::Types::TypedHash < T::Types::TypedEnumerable
   def initialize(keys:, values:); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def keys; end
   def values; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedEnumerable < T::Types::Base
+  abstract!
+
+  sig { params(type: T::Enumerable[T.anything]).void }
   def initialize(type); end
+
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
   def describe_obj(obj); end
+
+  sig { overridable.returns(T::Types::Base) }
   def type; end
+
+  sig { abstract.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedSet < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  def recursively_valid?(obj); end
+
   def new(*args); end
-  def type; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedRange < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  def recursively_valid?(obj); end
+
   def new(*args); end
-  def type; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedEnumerator < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  def recursively_valid?(obj); end
+
   def new(*args); end
-  def type; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedEnumeratorLazy < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  def recursively_valid?(obj); end
+
   def new(*args); end
-  def type; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
+  sig { override.returns(String) }
   def name; end
+
+  sig { override.params(obj: T.anything).returns(T::Boolean) }
   def valid?(obj); end
+
+  def recursively_valid?(obj); end
+
   def new(*args); end
-  def type; end
+
+  sig { override.returns(Module) }
+  def underlying_class; end
 end
 
 class T::Types::TypedClass < T::Types::Base
