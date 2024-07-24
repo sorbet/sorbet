@@ -1061,7 +1061,8 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     typeArguments.reserve(typeArgumentsSizeScaled);
     typeMembers.reserve(typeMembersSizeScaled);
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
-    sanityCheck();
+    sanityCheckTableSizes();
+    sanityCheckNames();
 
     trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeArguments={} "
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
@@ -1698,7 +1699,7 @@ void GlobalState::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsig
 }
 
 void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
-    sanityCheck();
+    sanityCheckNames();
     utf8Names.reserve(utf8NameSize);
     constantNames.reserve(constantNameSize);
     uniqueNames.reserve(uniqueNameSize);
@@ -2008,6 +2009,51 @@ string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
     return Symbols::root().toStringWithOptions(*this, 0, showFull, showRaw);
 }
 
+void GlobalState::sanityCheckTableSizes() const {
+    if (!debug_mode) {
+        return;
+    }
+    if (fuzz_mode) {
+        // it's very slow to check this and it didn't find bugs
+        return;
+    }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheckTableSizes");
+    ENFORCE(namesUsedTotal() > 0, "empty name table size");
+    ENFORCE(!strings.empty(), "empty string table size");
+    ENFORCE(!namesByHash.empty(), "empty name hash table size");
+    ENFORCE((namesByHash.size() & (namesByHash.size() - 1)) == 0, "name hash table size is not a power of two");
+    ENFORCE(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
+                namesByHash.capacity(),
+            "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
+            namesUsedTotal(), namesByHash.capacity());
+    ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
+}
+
+void GlobalState::sanityCheckNames() const {
+    if (!debug_mode) {
+        return;
+    }
+    if (fuzz_mode) {
+        // it's very slow to check this and it didn't find bugs
+        return;
+    }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
+
+    for (uint32_t i = 0; i < utf8Names.size(); i++) {
+        NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
+    }
+
+    for (uint32_t i = 0; i < constantNames.size(); i++) {
+        NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
+    }
+
+    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
+        NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
+    }
+}
+
 void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
@@ -2018,30 +2064,9 @@ void GlobalState::sanityCheck() const {
     }
 
     Timer timeit(tracer(), "GlobalState::sanityCheck");
-    ENFORCE(namesUsedTotal() > 0, "empty name table size");
-    ENFORCE(!strings.empty(), "empty string table size");
-    ENFORCE(!namesByHash.empty(), "empty name hash table size");
-    ENFORCE((namesByHash.size() & (namesByHash.size() - 1)) == 0, "name hash table size is not a power of two");
-    ENFORCE(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
-                namesByHash.capacity(),
-            "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
-            namesUsedTotal(), namesByHash.capacity());
-    ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
 
-    {
-        Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
-        for (uint32_t i = 0; i < utf8Names.size(); i++) {
-            NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
-        }
-
-        for (uint32_t i = 0; i < constantNames.size(); i++) {
-            NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
-        }
-
-        for (uint32_t i = 0; i < uniqueNames.size(); i++) {
-            NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
-        }
-    }
+    sanityCheckTableSizes();
+    sanityCheckNames();
 
     {
         Timer timeit(tracer(), "GlobalState::sanityCheck (symbols)");
