@@ -2028,63 +2028,69 @@ void GlobalState::sanityCheck() const {
             namesUsedTotal(), namesByHash.capacity());
     ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
 
-    for (uint32_t i = 0; i < utf8Names.size(); i++) {
-        NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
-    }
+    {
+        Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
+        for (uint32_t i = 0; i < utf8Names.size(); i++) {
+            NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
+        }
 
-    for (uint32_t i = 0; i < constantNames.size(); i++) {
-        NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
-    }
+        for (uint32_t i = 0; i < constantNames.size(); i++) {
+            NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
+        }
 
-    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
-        NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
-    }
-
-    int i = -1;
-    for (auto &sym : classAndModules) {
-        i++;
-        if (i != 0) {
-            sym.sanityCheck(*this);
+        for (uint32_t i = 0; i < uniqueNames.size(); i++) {
+            NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
         }
     }
 
-    i = -1;
-    for (auto &sym : methods) {
-        i++;
-        if (i != 0) {
-            sym.sanityCheck(*this);
+    {
+        Timer timeit(tracer(), "GlobalState::sanityCheck (symbols)");
+        int i = -1;
+        for (auto &sym : classAndModules) {
+            i++;
+            if (i != 0) {
+                sym.sanityCheck(*this);
+            }
         }
-    }
 
-    i = -1;
-    for (auto &sym : fields) {
-        i++;
-        if (i != 0) {
-            sym.sanityCheck(*this);
+        i = -1;
+        for (auto &sym : methods) {
+            i++;
+            if (i != 0) {
+                sym.sanityCheck(*this);
+            }
         }
-    }
 
-    i = -1;
-    for (auto &sym : typeArguments) {
-        i++;
-        if (i != 0) {
-            sym.sanityCheck(*this);
+        i = -1;
+        for (auto &sym : fields) {
+            i++;
+            if (i != 0) {
+                sym.sanityCheck(*this);
+            }
         }
-    }
 
-    i = -1;
-    for (auto &sym : typeMembers) {
-        i++;
-        if (i != 0) {
-            sym.sanityCheck(*this);
+        i = -1;
+        for (auto &sym : typeArguments) {
+            i++;
+            if (i != 0) {
+                sym.sanityCheck(*this);
+            }
         }
-    }
-    for (auto &ent : namesByHash) {
-        if (ent.rawId == 0) {
-            continue;
+
+        i = -1;
+        for (auto &sym : typeMembers) {
+            i++;
+            if (i != 0) {
+                sym.sanityCheck(*this);
+            }
         }
-        ENFORCE_NO_TIMER(ent.hash == hashNameRef(*this, NameRef::fromRaw(*this, ent.rawId)),
-                         "name hash table corruption");
+        for (auto &ent : namesByHash) {
+            if (ent.rawId == 0) {
+                continue;
+            }
+            ENFORCE_NO_TIMER(ent.hash == hashNameRef(*this, NameRef::fromRaw(*this, ent.rawId)),
+                             "name hash table corruption");
+        }
     }
 }
 
