@@ -2015,7 +2015,7 @@ void GlobalState::sanityCheckTableSizes() const {
     if (!debug_mode) {
         return;
     }
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         // it's very slow to check this and it didn't find bugs
         return;
     }
@@ -2037,7 +2037,7 @@ void GlobalState::sanityCheckNames() const {
     if (!debug_mode) {
         return;
     }
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         // it's very slow to check this and it didn't find bugs
         return;
     }
@@ -2061,7 +2061,7 @@ void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
     }
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         // it's very slow to check this and it didn't find bugs
         return;
     }

@@ -811,7 +811,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
     // via fuzzing (e.g. https://github.com/sorbet/sorbet/issues/128).
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return res;
     }
 
