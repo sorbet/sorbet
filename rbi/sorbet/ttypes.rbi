@@ -176,7 +176,7 @@ class T::Types::NoReturn < T::Types::Base
 end
 
 class T::Types::Enum < T::Types::Base
-  sig { params(values: T.anything).void }
+  sig { params(values: T.any(T::Set[T.anything], T::Array[T.anything])).void }
   def initialize(values); end
 
   sig { override.params(obj: Kernel).returns(T::Boolean) }
@@ -187,7 +187,7 @@ class T::Types::Enum < T::Types::Base
 
   def describe_obj(obj); end
 
-  sig { returns(T.anything) }
+  sig { returns(T.any(T::Set[T.anything], T::Array[T.anything])) }
   def values; end
 end
 
