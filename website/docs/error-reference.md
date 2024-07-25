@@ -3137,6 +3137,51 @@ class PossiblyEmptyBox
 end
 ```
 
+## 5076
+
+Sorbet found a reference to a generic type with the wrong number of type
+arguments.
+
+Here we defined `MyMap` as a generic class expecting two type parameters
+`KeyType` and `ValueType` but we try to instantiate it with only one type
+argument:
+
+```rb
+class MyMap
+  extend T::Generic
+
+  KeyType = type_member
+  ValueType = type_member
+
+  # ...
+end
+
+MyMap[String].new # error: Wrong number of type parameters for `MyMap`. Expected: `2`, got: `1`
+```
+
+Unless a type member was `fixed`, it is always required to pass the correct
+amount of type arguments. `T.untyped` can also be used if the type is not
+relevant at this point:
+
+```rb
+MyMap[String, Integer].new
+MyMap[String, String].new
+MyMap[String, T.untyped].new
+```
+
+## 5077
+
+When passing type arguments to generic classes, to use [shape types](shapes.md),
+use curly brackets around the keys and values of the shape type:
+
+```ruby
+# CORRECT
+T::Array[{key: Integer}].new
+
+# BAD
+T::Array[key: Integer].new
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside

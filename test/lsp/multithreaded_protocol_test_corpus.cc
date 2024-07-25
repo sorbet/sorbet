@@ -11,6 +11,16 @@ using namespace std;
 using namespace sorbet::realmain::lsp;
 
 namespace {
+
+optional<unique_ptr<SorbetTypecheckRunInfo>> getTypecheckRunInfo(LSPMessage &msg) {
+    if (msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo) {
+        unique_ptr<SorbetTypecheckRunInfo> &typecheckInfo =
+            get<unique_ptr<SorbetTypecheckRunInfo>>(msg.asNotification().params);
+        return move(typecheckInfo);
+    }
+    return nullopt;
+}
+
 optional<SorbetTypecheckRunStatus> getTypecheckRunStatus(const LSPMessage &msg) {
     if (msg.isNotification() && msg.method() == LSPMethod::SorbetTypecheckRunInfo) {
         auto &typecheckInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg.asNotification().params);
@@ -223,7 +233,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
 
     // Wait for typechecking to begin to avoid races.
     {
-        auto status = getTypecheckRunStatus(*readAsync());
+        auto message = readAsync();
+        auto status = getTypecheckRunStatus(*message);
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
@@ -235,12 +246,19 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
                           "# typed: true\n\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef bar\n10\nend\nend\n", 2,
                           false));
     // Pause so that all latency timers for the above operations get reported.
-    this_thread::sleep_for(timestampGranularity);
+    this_thread::sleep_for(chrono::milliseconds(2));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // Wait for first typecheck run to get canceled.
     {
-        auto status = getTypecheckRunStatus(*readAsync());
+        auto message = readAsync();
+        // Errors are reported after each phase
+        // So we might receive a publishDiagnostics notification
+        // The next one after should be a typechecking status
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto status = getTypecheckRunStatus(*message);
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
     }
@@ -294,12 +312,16 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     // Send a hover to request the documentation string.
     sendAsync(*hover("foo.rb", 2, 6));
     // Pause so that all latency timers for the above operations get reported.
+
     this_thread::sleep_for(chrono::milliseconds(2));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
     // First response should be hover.
     {
         auto response = readAsync();
+        while (response->isNotification() && response->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            response = readAsync();
+        }
         REQUIRE(response->isResponse());
         auto &hoverText =
             get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*response->asResponse().result));
@@ -581,7 +603,14 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
 
     // Wait for typechecking to begin to avoid races.
     {
-        auto status = getTypecheckRunStatus(*readAsync());
+        // Errors are reported after each phase
+        // So we might receive a publishDiagnostics notification
+        // The next one after should be a typechecking status
+        auto message = readAsync();
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto status = getTypecheckRunStatus(*message);
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
@@ -629,7 +658,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
 
     // Wait for typechecking to begin to avoid races.
     {
-        auto status = getTypecheckRunStatus(*readAsync());
+        auto message = readAsync();
+        auto status = getTypecheckRunStatus(*message);
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
@@ -663,14 +693,14 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
         send(*openFile("bar.rb",
                        "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef str\n10\nend\nend\n")),
         {});
-    // baz uses it
+    // baz1 uses it
     assertErrorDiagnostics(
         send(*openFile(
-            "baz.rb",
+            "baz1.rb",
             "# typed: true\nclass Baz\nextend T::Sig\nsig{returns(String)}\ndef bar\nBar.new.str\nend\nend\n")),
-        {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
+        {{"baz1.rb", 5, "Expected `String` but found `Integer` for method result type"}});
 
-    // Slow path: Introduce syntax error to foo.rb and change method sig in bar.rb to fix error in baz.rb
+    // Slow path: Introduce syntax error to foo.rb and change method sig in bar.rb to fix error in baz1.rb
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\n", 2, true));
     sendAsync(*changeFile(
@@ -680,21 +710,56 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 
     // Wait for typechecking to begin to avoid races.
     {
-        auto status = getTypecheckRunStatus(*readAsync());
+        auto message = readAsync();
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto status = getTypecheckRunStatus(*message);
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // Fast path: Undo previous changes. Should re-introduce error on baz.rb.
+    // Fast path: Undo previous changes. Should re-introduce error on baz1.rb.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend\n", 3));
     sendAsync(*changeFile(
         "bar.rb", "# typed: true\n\nclass Bar\nextend T::Sig\n\nsig{returns(Integer)}\ndef str\n10\nend\nend\n", 3));
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
 
-    // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
+    {
+        auto message = readAsync();
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto info = getTypecheckRunInfo(*message);
+        REQUIRE(info.has_value());
+        REQUIRE_EQ((*info)->typecheckingPath, TypecheckingPath::Slow);
+        REQUIRE_EQ((*info)->status, SorbetTypecheckRunStatus::Cancelled);
+    }
+
+    {
+        auto message = readAsync();
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto info = getTypecheckRunInfo(*message);
+        REQUIRE(info.has_value());
+        REQUIRE_EQ((*info)->typecheckingPath, TypecheckingPath::Fast);
+        REQUIRE_EQ((*info)->status, SorbetTypecheckRunStatus::Started);
+    }
+    {
+        auto message = readAsync();
+        while (message->isNotification() && message->method() == LSPMethod::TextDocumentPublishDiagnostics) {
+            message = readAsync();
+        }
+        auto info = getTypecheckRunInfo(*message);
+        REQUIRE(info.has_value());
+        REQUIRE_EQ((*info)->typecheckingPath, TypecheckingPath::Fast);
+        REQUIRE_EQ((*info)->status, SorbetTypecheckRunStatus::Ended);
+    }
+    // Send a no-op to clear out the pipeline. Should have one error on baz1.rb.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                           {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
+                           {{"baz1.rb", 5, "Expected `String` but found `Integer` for method result type"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7,
                          /* assertUniqueStartTimes */ false);
 }
