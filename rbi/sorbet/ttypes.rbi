@@ -302,7 +302,7 @@ class T::Types::TypedEnumerable < T::Types::Base
   sig { overridable.returns(T::Types::Base) }
   def type; end
 
-  sig { abstract.returns(Module) }
+  sig { overridable.returns(Module) }
   def underlying_class; end
 end
 
@@ -388,7 +388,7 @@ class T::Types::TypedClass < T::Types::Base
   sig {returns(String)}
   def name; end
 
-  sig {params(obj: Kernel).returns(T::Boolean)}
+  sig {override.params(obj: Kernel).returns(T::Boolean)}
   def valid?(obj); end
 
   sig {returns(T::Types::Base)}
