@@ -288,7 +288,7 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
 end
 
 class T::Types::TypedEnumerable < T::Types::Base
-  sig { params(type: T::Enumerable[T.anything]).void }
+  sig { params(type: T.anything).void }
   def initialize(type); end
 
   sig { override.returns(String) }
