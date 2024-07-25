@@ -365,6 +365,6 @@ class ObjectSpace::WeakKeyMap < Object
   def inspect; end
   
   # Returns true if key is a key in self, otherwise false.
-  sig {params(key: T.any).returns(T::Boolean)}
+  sig {params(key: T.untyped).returns(T::Boolean)}
   def key?(key); end
 end
