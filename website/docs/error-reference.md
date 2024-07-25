@@ -3137,6 +3137,15 @@ class PossiblyEmptyBox
 end
 ```
 
+## 5076
+
+`T.nilable` expects exactly one argument. A common typo is `T.nilable(X, Y)` to
+mean `T.nilable(T.any(X, Y))` (which would also be the same as `T.any(NilClass,
+X, Y)`).
+
+See [Nilable Types](nilable-types.md) and [Union Types](union-types.md) for more
+information.
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
