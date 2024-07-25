@@ -11,7 +11,7 @@ class T::Types::Base
 
   def self.method_added(method_name); end
 
-  sig { abstract.params(obj: T.anything).returns(T::Boolean) }
+  sig { abstract.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -39,7 +39,7 @@ class T::Types::Simple < T::Types::Base
   sig { override.returns(T.nilable(String)) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { returns(Module) }
@@ -53,7 +53,7 @@ class T::Types::Union < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { returns(T::Array[T::Types::Base]) }
@@ -67,7 +67,7 @@ class T::Types::Intersection < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { returns(T::Array[T::Types::Base]) }
@@ -81,7 +81,7 @@ class T::Types::ClassOf < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def subtype_of_single?(other); end
@@ -100,7 +100,7 @@ class T::Types::FixedArray < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def describe_obj(obj); end
@@ -116,7 +116,7 @@ class T::Types::FixedHash < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def describe_obj(obj); end
@@ -132,7 +132,7 @@ class T::Types::Untyped < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -143,7 +143,7 @@ class T::Types::Anything < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -154,7 +154,7 @@ class T::Types::Proc < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { returns(T::Hash[T.untyped, T::Types::Base]) }
@@ -171,7 +171,7 @@ class T::Types::NoReturn < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -179,7 +179,7 @@ class T::Types::Enum < T::Types::Base
   sig { params(values: T.anything).void }
   def initialize(values); end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { override.returns(String) }
@@ -195,7 +195,7 @@ class T::Types::TEnum < T::Types::Base
   sig { params(val: T::Enum).void }
   def initialize(val); end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { override.returns(String) }
@@ -214,7 +214,7 @@ class T::Types::SelfType < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -228,7 +228,7 @@ class T::Types::TypeVariable < T::Types::Base
 
   def subtype_of_single?(type); end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { returns(Symbol) }
@@ -244,7 +244,7 @@ end
 class T::Types::TypeParameter < T::Types::Base
   def initialize(name); end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def subtype_of_single?(type); end
@@ -261,7 +261,7 @@ class T::Types::TypedArray < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   sig { override.returns(Module) }
@@ -277,7 +277,7 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def keys; end
@@ -288,15 +288,13 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
 end
 
 class T::Types::TypedEnumerable < T::Types::Base
-  abstract!
-
   sig { params(type: T::Enumerable[T.anything]).void }
   def initialize(type); end
 
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def describe_obj(obj); end
@@ -312,7 +310,7 @@ class T::Types::TypedSet < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -327,7 +325,7 @@ class T::Types::TypedRange < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -342,7 +340,7 @@ class T::Types::TypedEnumerator < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -357,7 +355,7 @@ class T::Types::TypedEnumeratorLazy < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -372,7 +370,7 @@ class T::Types::TypedEnumeratorChain < T::Types::TypedEnumerable
   sig { override.returns(String) }
   def name; end
 
-  sig { override.params(obj: T.anything).returns(T::Boolean) }
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
   def recursively_valid?(obj); end
@@ -390,7 +388,7 @@ class T::Types::TypedClass < T::Types::Base
   sig {returns(String)}
   def name; end
 
-  sig {params(obj: T.anything).returns(T::Boolean)}
+  sig {params(obj: Kernel).returns(T::Boolean)}
   def valid?(obj); end
 
   sig {returns(T::Types::Base)}
