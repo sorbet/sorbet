@@ -105,3 +105,31 @@ class FullyQualifiedDataUsages
   Bar.new(1).a
   Quux.new()
 end
+
+SquaredPoint = Data.define(:x, :y) do
+  def initialize(x:, y:)
+    super(x: x ** 2, y: y ** 2)
+  end
+end
+
+BadSquaredPoint = Data.define(:x, :y) do
+  def initialize(x:) # error: Method `BadSquaredPoint#initialize` redefined without matching argument count. Expected: `2`, got: `1`
+    super(x: x ** 2, y: 10)
+  end
+end
+
+module TypedData
+  BasicMoney = Data.define(:amount, :currency) do
+    extend T::Sig
+
+    sig { params(amount: Numeric, currency: String).void }
+    def initialize(amount:, currency:) = super
+  end
+
+  MoneyWithTypeCoercionIsUntyped = Data.define(:amount, :currency) do
+    extend T::Sig
+
+    sig { params(amount: T.any(Numeric, String, Time), currency: String).void }
+    def initialize(amount:, currency:) = super(amount: amount.to_i, currency:)
+  end
+end
