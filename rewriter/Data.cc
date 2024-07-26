@@ -15,30 +15,70 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isMissingInitialize(const core::GlobalState &gs, const ast::Send *send) {
+const ast::Send *findParams(ast::ExpressionPtr *send) {
+    ast::Send *sig = ASTUtil::castSig(*send);
+    if (sig == nullptr) {
+        return nullptr;
+    }
+
+    auto *block = sig->block();
+    if (block == nullptr) {
+        return nullptr;
+    }
+
+    auto *bodyBlock = ast::cast_tree<ast::Send>(block->body);
+
+    while (bodyBlock && bodyBlock->fun != core::Names::params()) {
+        bodyBlock = ast::cast_tree<ast::Send>(bodyBlock->recv);
+    }
+
+    return bodyBlock;
+}
+
+optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::GlobalState &gs, ast::Send *send) {
     if (!send->hasBlock()) {
-        return true;
+        return {};
     }
 
     auto block = send->block();
 
     if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
-        auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
-
-        if (methodDef && methodDef->name == core::Names::initialize()) {
-            return false;
-        }
-
+        ast::ExpressionPtr *prevStat = nullptr;
         for (auto &&stat : insSeq->stats) {
-            methodDef = ast::cast_tree<ast::MethodDef>(stat);
+            auto methodDef = ast::cast_tree<ast::MethodDef>(stat);
 
             if (methodDef && methodDef->name == core::Names::initialize()) {
-                return false;
+                const ast::Send *sig = findParams(prevStat);
+                return {{methodDef, sig}};
+            }
+
+            prevStat = &stat;
+        }
+
+        // the last expression of the block is stored separately as expr
+        auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
+        if (methodDef && methodDef->name == core::Names::initialize()) {
+            const ast::Send *sig = findParams(prevStat);
+            return {{methodDef, sig}};
+        }
+    }
+
+    return {};
+}
+
+ast::ExpressionPtr getMemberType(core::MutableContext ctx, const ast::Send *params, core::NameRef name,
+                                 core::LocOffsets loc) {
+    if (params) {
+        for (int i = 0; i < params->numKwArgs(); i++) {
+            auto key = ast::cast_tree<ast::Literal>(params->getKwKey(i))->asName();
+
+            if (key.toString(ctx) == name.toString(ctx)) {
+                return params->getKwValue(i).deepCopy();
             }
         }
     }
 
-    return true;
+    return ast::MK::Constant(loc, core::Symbols::BasicObject());
 }
 
 } // namespace
@@ -76,6 +116,12 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     ast::Send::ARGS_store sigArgs;
     ast::ClassDef::RHS_store body;
 
+    auto initialize = getInitialize(ctx, send);
+    const ast::Send *initializeSigParams = nullptr;
+    if (initialize.has_value()) {
+        initializeSigParams = initialize.value().second;
+    }
+
     for (int i = 0; i < send->numPosArgs(); i++) {
         auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
         if (!sym || !sym->isName()) {
@@ -94,16 +140,19 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
             symLoc = ctx.locAt(symLoc).adjust(ctx, 1, 0).offsets();
         }
 
+        auto memberType = getMemberType(ctx, initializeSigParams, name, symLoc);
+
         sigArgs.emplace_back(ast::MK::Symbol(symLoc, name));
-        sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
+        sigArgs.emplace_back(ASTUtil::dupType(memberType));
 
         auto argName = ast::MK::Local(symLoc, name);
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
+        body.emplace_back(ast::MK::Sig(symLoc, {}, ASTUtil::dupType(memberType)));
         body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
     }
 
-    if (isMissingInitialize(ctx, send)) {
+    if (!initialize.has_value()) {
         body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
         body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
                                                    ast::MK::RaiseUnimplemented(loc)));

@@ -100,3 +100,10 @@ class FullyQualifiedDataUsages
   Foo.new(1).a
   Bar.new(1).a
 end
+
+Money = Data.define(:amount, :currency) do
+  extend T::Sig
+
+  sig { params(amount: Numeric, currency: String).void }
+  def initialize(amount:, currency:) = super
+end
