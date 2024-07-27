@@ -79,3 +79,7 @@ x = [[3.4], [1, "a"]]
 T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
 x = [[3.4, "a"], [:a, 5]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
+
+# sampling
+T.assert_type([1, 2, 3].sample, T.nilable(Integer))
+T.assert_type([1, 2, 3].sample(2), T::Array[Integer])
