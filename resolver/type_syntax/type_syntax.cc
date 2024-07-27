@@ -1386,7 +1386,8 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         auto genericClass = corrected.asClassOrModuleRef();
         ENFORCE_NO_TIMER(genericClass.exists());
         core::CallLocs locs{ctx.file, s.loc, s.recv.loc(), s.funLoc, argLocs};
-        auto out = core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass);
+        auto out =
+            core::Types::applyTypeArguments(ctx, locs, s.numPosArgs(), targs, genericClass, /* inResolver */ true);
 
         if (out.isUntyped()) {
             // Using a generic untyped type here will lead to incorrect handling of global state hashing,

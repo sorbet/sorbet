@@ -167,7 +167,8 @@ std::vector<std::unique_ptr<LSPMessage>> ProtocolTest::sendRaw(const std::string
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(const LSPMessage &message) {
     // Verify that message is sound (contains proper JSON shape for method type) by serializing and re-parsing it.
-    return sendRaw(message.toJSON());
+    auto responses = sendRaw(message.toJSON());
+    return responses;
 }
 
 vector<unique_ptr<LSPMessage>> ProtocolTest::send(vector<unique_ptr<LSPMessage>> messages) {

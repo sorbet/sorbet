@@ -28,8 +28,6 @@ class RealDataDesugar
 end
 
 class TwoDatas
-    A = Data.define(:foo)
-    B = Data.define(:foo)
 end
 
 class AccidentallyData
