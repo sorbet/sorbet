@@ -3919,7 +3919,7 @@ private:
             },
 
             [&](ast::MethodDef &mdef) {
-                if constexpr (debug_mode) {
+                if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
                     bool rewritten = mdef.flags.isRewriterSynthesized;
                     bool isRBI = ctx.file.data(ctx).isRBI();

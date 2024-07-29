@@ -614,6 +614,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         return empty;
     }
 
+    gs.sanityCheck();
+
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         for (auto file : files) {

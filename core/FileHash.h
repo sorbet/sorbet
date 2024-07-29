@@ -20,8 +20,8 @@ public:
     WithoutUniqueNameHash(const WithoutUniqueNameHash &nm) noexcept = default;
     WithoutUniqueNameHash() noexcept : _hashValue(0){};
     inline bool operator==(const WithoutUniqueNameHash &rhs) const noexcept {
-        ENFORCE_NO_TIMER(isDefined());
-        ENFORCE_NO_TIMER(rhs.isDefined());
+        ENFORCE(isDefined());
+        ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
@@ -52,8 +52,8 @@ public:
     FullNameHash(const FullNameHash &nm) noexcept = default;
     FullNameHash() noexcept : _hashValue(0){};
     inline bool operator==(const FullNameHash &rhs) const noexcept {
-        ENFORCE_NO_TIMER(isDefined());
-        ENFORCE_NO_TIMER(rhs.isDefined());
+        ENFORCE(isDefined());
+        ENFORCE(rhs.isDefined());
         return _hashValue == rhs._hashValue;
     }
 
@@ -299,19 +299,19 @@ struct LocalSymbolTableHashes {
     bool isInvalidParse() const {
         DEBUG_ONLY(
             if (hierarchyHash == HASH_STATE_INVALID_PARSE) {
-                ENFORCE_NO_TIMER(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(staticFieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(classAliasHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classModuleHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeMemberHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(fieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classAliasHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(methodHash == core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             } else {
-                ENFORCE_NO_TIMER(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(staticFieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(classAliasHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
-                ENFORCE_NO_TIMER(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classModuleHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(typeMemberHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(fieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(staticFieldHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(classAliasHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
+                ENFORCE(methodHash != core::LocalSymbolTableHashes::HASH_STATE_INVALID_PARSE);
             });
         return hierarchyHash == HASH_STATE_INVALID_PARSE;
     }

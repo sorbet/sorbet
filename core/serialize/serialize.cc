@@ -132,7 +132,7 @@ void Pickler::putU1(uint8_t u) {
 }
 
 uint8_t UnPickler::getU1() {
-    ENFORCE_NO_TIMER(zeroCounter == 0);
+    ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
 }
@@ -477,7 +477,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::ShapeType: {
             auto &hash = cast_type_nonnull<ShapeType>(what);
             p.putU4(hash.keys.size());
-            ENFORCE_NO_TIMER(hash.keys.size() == hash.values.size());
+            ENFORCE(hash.keys.size() == hash.values.size());
             for (auto &el : hash.keys) {
                 pickle(p, el);
             }
@@ -753,8 +753,8 @@ ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalSt
         auto sym = SymbolRef::fromRaw(p.getU4());
         if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
             result.name != core::Names::noMethod()) {
-            ENFORCE_NO_TIMER(name.exists());
-            ENFORCE_NO_TIMER(sym.exists());
+            ENFORCE(name.exists());
+            ENFORCE(sym.exists());
         }
         result.members()[name] = sym;
     }
@@ -951,19 +951,19 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "readNames");
 
         int namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
+        ENFORCE(namesSize > 0);
         utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             utf8Names.emplace_back(unpickleUTF8Name(p, result));
         }
         namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
+        ENFORCE(namesSize > 0);
         constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             constantNames.emplace_back(unpickleConstantName(p, result));
         }
         namesSize = p.getU4();
-        ENFORCE_NO_TIMER(namesSize > 0);
+        ENFORCE(namesSize > 0);
         uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             uniqueNames.emplace_back(unpickleUniqueName(p, result));
@@ -974,35 +974,35 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "readSymbols");
 
         int classAndModuleSize = p.getU4();
-        ENFORCE_NO_TIMER(classAndModuleSize > 0);
+        ENFORCE(classAndModuleSize > 0);
         classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
             classAndModules.emplace_back(unpickleClassOrModule(p, &result));
         }
 
         int methodSize = p.getU4();
-        ENFORCE_NO_TIMER(methodSize > 0);
+        ENFORCE(methodSize > 0);
         methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
             methods.emplace_back(unpickleMethod(p, &result));
         }
 
         int fieldSize = p.getU4();
-        ENFORCE_NO_TIMER(fieldSize > 0);
+        ENFORCE(fieldSize > 0);
         fields.reserve(nextPowerOfTwo(fieldSize));
         for (int i = 0; i < fieldSize; i++) {
             fields.emplace_back(unpickleField(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
-        ENFORCE_NO_TIMER(typeArgumentSize > 0);
+        ENFORCE(typeArgumentSize > 0);
         typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
             typeArguments.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
-        ENFORCE_NO_TIMER(typeMemberSize > 0);
+        ENFORCE(typeMemberSize > 0);
         typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
             typeMembers.emplace_back(unpickleTypeParameter(p, &result));
@@ -1080,8 +1080,8 @@ std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs)
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
-    ENFORCE_NO_TIMER(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
-                     "Can't load into a non-empty state");
+    ENFORCE(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
+            "Can't load into a non-empty state");
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
 }
@@ -1252,7 +1252,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::Hash: {
             auto &h = ast::cast_tree_nonnull<ast::Hash>(what);
             pickle(p, h.loc);
-            ENFORCE_NO_TIMER(h.values.size() == h.keys.size());
+            ENFORCE(h.values.size() == h.keys.size());
             p.putU4(h.values.size());
             for (auto &v : h.values) {
                 pickle(p, v);
