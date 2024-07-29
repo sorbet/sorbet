@@ -765,7 +765,7 @@ void checkTNilableArity(core::Context ctx, const ast::Send &send) {
     auto errLoc = send.numPosArgs() > 0 ? send.argsLoc() : send.loc;
     if (auto e = ctx.beginError(errLoc, core::errors::Resolver::TNilableArity)) {
         e.setHeader("`{}` expects exactly `{}` arguments, but got `{}`", "T.nilable", 1, send.numPosArgs());
-        if (send.numPosArgs() > 1 && !send.hasKwArgs() && send.argsLoc().exists()) {
+        if (canWrapWithTAny) {
             e.addErrorNote("Did you mean to use `{}` around the inner arguments?", "T.any");
             auto replaceLoc = ctx.locAt(send.argsLoc());
             e.replaceWith("Wrap args with T.any", replaceLoc, "T.any({})", replaceLoc.source(ctx).value());
