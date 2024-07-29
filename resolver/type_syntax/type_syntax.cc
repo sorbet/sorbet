@@ -607,7 +607,7 @@ bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::strin
     }
 }
 
-void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
+void checkUnexpectedKwargs(core::Context ctx, const ast::Send &send) {
     if (!send.hasKwArgs()) {
         return;
     }
@@ -690,7 +690,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
                                                TypeSyntaxArgs args) {
     if (send.numPosArgs() != 1 || send.hasKwArgs()) {
         checkTypeFunArity(ctx, send, 1, 1);
-        unexpectedKwargs(ctx, send);
+        checkUnexpectedKwargs(ctx, send);
         return core::Symbols::untyped();
     }
 
@@ -779,7 +779,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
                 checkTNilableArity(ctx, send);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeResult = getResultTypeAndBindWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -809,7 +809,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::all().rawId(): {
             if (send.numPosArgs() < 2 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 2, SIZE_MAX);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -831,7 +831,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::any().rawId(): {
             if (send.numPosArgs() < 2 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 2, SIZE_MAX);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -853,7 +853,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::typeParameter().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 1, 1);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.getPosArg(0));
@@ -881,7 +881,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::deprecatedEnum().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 1, 1);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
@@ -950,7 +950,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::untyped().rawId(): {
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             return TypeSyntax::ResultType{core::Types::untyped(args.untypedBlame), core::Symbols::noClassOrModule()};
@@ -958,7 +958,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::selfType().rawId():
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             if (args.allowSelfType) {
@@ -979,7 +979,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             }
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
@@ -1028,7 +1028,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::noreturn().rawId(): {
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noClassOrModule()};
@@ -1036,7 +1036,7 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::anything().rawId(): {
             if (send.numPosArgs() != 0 || send.hasKwArgs()) {
                 checkTypeFunArity(ctx, send, 0, 0);
-                unexpectedKwargs(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             return TypeSyntax::ResultType{core::Types::top(), core::Symbols::noClassOrModule()};
