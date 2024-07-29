@@ -1977,7 +1977,7 @@ string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
     return Symbols::root().toStringWithOptions(*this, 0, showFull, showRaw);
 }
 
-void GlobalState::sanityCheck() const {
+void GlobalState::sanityCheckTableSizes() const {
     if constexpr (!debug_mode) {
         return;
     }
@@ -1986,7 +1986,7 @@ void GlobalState::sanityCheck() const {
         return;
     }
 
-    Timer timeit(tracer(), "GlobalState::sanityCheck");
+    Timer timeit(tracer(), "GlobalState::sanityCheckTableSizes");
     ENFORCE_NO_TIMER(namesUsedTotal() > 0, "empty name table size");
     ENFORCE_NO_TIMER(!strings.empty(), "empty string table size");
     ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
@@ -1997,6 +1997,20 @@ void GlobalState::sanityCheck() const {
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
                      namesUsedTotal(), namesByHash.capacity());
     ENFORCE_NO_TIMER(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
+}
+
+void GlobalState::sanityCheck() const {
+    if constexpr (!debug_mode) {
+        return;
+    }
+    if constexpr (fuzz_mode) {
+        // it's very slow to check this and it didn't find bugs
+        return;
+    }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheck");
+
+    sanityCheckTableSizes();
 
     {
         Timer timeit(tracer(), "GlobalState::sanityCheck (names)");

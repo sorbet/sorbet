@@ -194,6 +194,7 @@ public:
     unsigned int filesUsed() const;
     unsigned int symbolsUsedTotal() const;
 
+    void sanityCheckTableSizes() const;
     void sanityCheck() const;
     void markAsPayload();
 
