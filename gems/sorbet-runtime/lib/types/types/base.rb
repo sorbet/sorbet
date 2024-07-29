@@ -21,7 +21,7 @@ module T::Types
       valid?(obj)
     end
 
-    define_method(:valid?) do |obj|
+    define_method(:valid?) do |_obj|
       raise NotImplementedError
     end
 
