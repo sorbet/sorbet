@@ -160,6 +160,28 @@ def cant_call_only_absurd(x)
   T.absurd(x) # error: This code is unreachable
 end
 
+sig { params(x: T.noreturn).void }
+def allows_arg_noreturn(x)
+  T.absurd(x)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
+end
+
+sig { params(x: T.noreturn, y: T.noreturn).void }
+def allows_args_noreturn(x, y)
+  T.absurd(x)
+  T.absurd(y)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
+end
+
+sig { params(x: T.all(Integer, String)).void }
+def intersects_to_bottom(x)
+  T.absurd(x)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
+end
+
 # --- reasonable usage on global, class, instance, and local variables --------
 $some_global = T.let(true, T::Boolean)
 
@@ -264,26 +286,4 @@ end
 sig{void}
 def rejects_absurd_on_integer_literal
   T.absurd(42) # error: `T.absurd` expects to be called on a variable
-end
-
-sig { params(x: T.noreturn).void }
-def allows_arg_noreturn(x)
-  T.absurd(x)
-  puts(x)
-# ^^^^^^^ error: This code is unreachable
-end
-
-sig { params(x: T.noreturn, y: T.noreturn).void }
-def allows_args_noreturn(x, y)
-  T.absurd(x)
-  T.absurd(y)
-  puts(x)
-# ^^^^^^^ error: This code is unreachable
-end
-
-sig { params(x: T.all(Integer, String)).void }
-def intersects_to_bottom(x)
-  T.absurd(x)
-  puts(x)
-# ^^^^^^^ error: This code is unreachable
 end
