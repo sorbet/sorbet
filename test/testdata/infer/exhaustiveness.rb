@@ -152,12 +152,7 @@ end
 
 def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
-  T.absurd(temp1) # error: This code is unreachable
-end
-
-sig {params(x: T.noreturn).returns(T.noreturn)}
-def cant_call_only_absurd(x)
-  T.absurd(x) # error: This code is unreachable
+  T.absurd(temp1)
 end
 
 sig { params(x: T.noreturn).void }
