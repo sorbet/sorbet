@@ -152,12 +152,29 @@ end
 
 def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
-  T.absurd(temp1) # error: This code is unreachable
+  T.absurd(temp1)
 end
 
-sig {params(x: T.noreturn).returns(T.noreturn)}
-def cant_call_only_absurd(x)
-  T.absurd(x) # error: This code is unreachable
+sig { params(x: T.noreturn).void }
+def allows_arg_noreturn(x)
+  T.absurd(x)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
+end
+
+sig { params(x: T.noreturn, y: T.noreturn).void }
+def allows_args_noreturn(x, y)
+  T.absurd(x)
+  T.absurd(y)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
+end
+
+sig { params(x: T.all(Integer, String)).void }
+def intersects_to_bottom(x)
+  T.absurd(x)
+  puts(x)
+# ^^^^^^^ error: This code is unreachable
 end
 
 # --- reasonable usage on global, class, instance, and local variables --------
