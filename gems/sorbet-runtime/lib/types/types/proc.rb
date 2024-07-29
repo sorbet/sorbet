@@ -51,7 +51,7 @@ module T::Types
           return false
         end
         arg_types.values.zip(other.arg_types.values).all? do |a, b|
-          b.subtype_of?(a)
+          !b.nil? && b.subtype_of?(a)
         end && returns.subtype_of?(other.returns)
       else
         false

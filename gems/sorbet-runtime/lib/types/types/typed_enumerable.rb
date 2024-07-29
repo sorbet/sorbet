@@ -47,11 +47,10 @@ module T::Types
           true
         end
       when Hash
-        return false unless type.is_a?(FixedArray)
-        types = type.types
-        return false if types.count != 2
-        key_type = types[0]
-        value_type = types[1]
+        type_ = self.type
+        return false unless type_.is_a?(FixedArray)
+        key_type, value_type = type_.types
+        return false if key_type.nil? || value_type.nil? || type_.types.size > 2
         obj.each_pair do |key, val|
           # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
           # iterate over a [key, value] array, so we can't just use the type.recursively_valid?(v)
@@ -179,7 +178,7 @@ module T::Types
 
     class Untyped < TypedEnumerable
       def initialize
-        super(T.untyped)
+        super(T::Types::Untyped::Private::INSTANCE)
       end
 
       def valid?(obj)

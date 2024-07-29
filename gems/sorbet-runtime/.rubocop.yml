@@ -35,6 +35,8 @@ Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
 Style/SingleLineMethods:
   Enabled: false
+Style/RedundantSelf:
+  Enabled: false
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
