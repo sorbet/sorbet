@@ -190,6 +190,26 @@ void addMultiStatementSigAutocorrect(core::Context ctx, core::ErrorBuilder &e, c
     e.replaceWith("Use a chained sig builder", ctx.locAt(insseq->loc), "{}", replacement);
 }
 
+void checkTypeFunArity(core::Context ctx, const ast::Send &send, size_t minArity, size_t maxArity) {
+    const auto &file = ctx.file.data(ctx);
+    if (!(file.isRBI() || file.strictLevel < core::StrictLevel::True)) {
+        // We want to rely on the infer error here, because it will be more descriptive.
+        // We do still need to report an error in `# typed: false` files and RBI files where
+        // inference will not run.
+        return;
+    }
+
+    if (send.numPosArgs() < minArity || send.numPosArgs() > maxArity) {
+        auto errLoc = send.numPosArgs() > 0 ? send.argsLoc() : send.loc;
+        if (auto e = ctx.beginError(errLoc, core::errors::Resolver::InvalidTypeDeclaration)) {
+            auto howMany = minArity == maxArity ? "exactly" : "at least";
+            auto plural = minArity == 1 ? "" : "s";
+            e.setHeader("`{}` expects {} `{}` argument{}, but got `{}`", send.fun.show(ctx), howMany, minArity, plural,
+                        send.numPosArgs());
+        }
+    }
+}
+
 optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                                TypeSyntaxArgs args) {
     ParsedSig sig;
@@ -287,9 +307,11 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
         // so we don't report multiple "method does not exist" errors arising from the same expression
         bool reportedInvalidMethod = false;
         switch (send->fun.rawId()) {
-            case core::Names::proc().rawId():
+            case core::Names::proc().rawId(): {
+                checkTypeFunArity(ctx, *send, 0, 0);
                 sig.seen.proc = true;
                 break;
+            }
             case core::Names::bind().rawId(): {
                 if (sig.seen.bind) {
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -522,14 +544,18 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 
                 break;
             }
-            case core::Names::void_().rawId():
+            case core::Names::void_().rawId(): {
+                checkTypeFunArity(ctx, *send, 0, 0);
                 sig.seen.void_ = true;
                 sig.returns = core::Types::void_();
                 sig.returnsLoc = ctx.locAt(send->loc);
                 break;
-            case core::Names::checked().rawId():
+            }
+            case core::Names::checked().rawId(): {
+                checkTypeFunArity(ctx, *send, 1, 1);
                 sig.seen.checked = true;
                 break;
+            }
             case core::Names::onFailure().rawId():
                 break;
             case core::Names::final_().rawId():
@@ -581,7 +607,7 @@ bool recurseOrType(core::Context ctx, core::TypePtr type, std::vector<std::strin
     }
 }
 
-void unexpectedKwargs(core::Context ctx, const ast::Send &send) {
+void checkUnexpectedKwargs(core::Context ctx, const ast::Send &send) {
     if (!send.hasKwArgs()) {
         return;
     }
@@ -663,7 +689,8 @@ void maybeSuggestTClass(core::Context ctx, core::ErrorBuilder &e, core::LocOffse
 optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                TypeSyntaxArgs args) {
     if (send.numPosArgs() != 1 || send.hasKwArgs()) {
-        unexpectedKwargs(ctx, send);
+        checkTypeFunArity(ctx, send, 1, 1);
+        checkUnexpectedKwargs(ctx, send);
         return core::Symbols::untyped();
     }
 
@@ -722,16 +749,39 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     return singleton;
 }
 
+void checkTNilableArity(core::Context ctx, const ast::Send &send) {
+    const auto &file = ctx.file.data(ctx);
+    auto willReportInferError = !(file.isRBI() || file.strictLevel < core::StrictLevel::True);
+    auto canWrapWithTAny = send.numPosArgs() > 1 && !send.hasKwArgs() && send.argsLoc().exists();
+
+    if (willReportInferError && !canWrapWithTAny) {
+        // No use reporting a double error
+        return;
+    }
+
+    // Reports a double error when `willReportInferError && canWrapWithTAny`, so that we can attach
+    // an autocorrect even in files that have infer run on them.
+
+    auto errLoc = send.numPosArgs() > 0 ? send.argsLoc() : send.loc;
+    if (auto e = ctx.beginError(errLoc, core::errors::Resolver::TNilableArity)) {
+        e.setHeader("`{}` expects exactly `{}` arguments, but got `{}`", "T.nilable", 1, send.numPosArgs());
+        if (canWrapWithTAny) {
+            e.addErrorNote("Did you mean to use `{}` around the inner arguments?", "T.any");
+            auto replaceLoc = ctx.locAt(send.argsLoc());
+            e.replaceWith("Wrap args with T.any", replaceLoc, "T.any({})", replaceLoc.source(ctx).value());
+        }
+    }
+}
+
 optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                                       TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
-                return TypeSyntax::ResultType{core::Types::untypedUntracked(),
-                                              core::Symbols::noClassOrModule()}; // error will be reported in infer.
+                checkTNilableArity(ctx, send);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
-
             auto maybeResult = getResultTypeAndBindWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
             if (!maybeResult.has_value()) {
                 return nullopt;
@@ -757,8 +807,9 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
         }
         case core::Names::all().rawId(): {
-            if (send.numPosArgs() == 0 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
+            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 2, SIZE_MAX);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -778,8 +829,9 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
             return TypeSyntax::ResultType{result, core::Symbols::noClassOrModule()};
         }
         case core::Names::any().rawId(): {
-            if (send.numPosArgs() == 0 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
+            if (send.numPosArgs() < 2 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 2, SIZE_MAX);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto maybeResult = getResultTypeWithSelfTypeParams(ctx, send.getPosArg(0), sig, args);
@@ -800,7 +852,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         }
         case core::Names::typeParameter().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
+                checkTypeFunArity(ctx, send, 1, 1);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.getPosArg(0));
@@ -827,7 +880,8 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
         case core::Names::enum_().rawId():
         case core::Names::deprecatedEnum().rawId(): {
             if (send.numPosArgs() != 1 || send.hasKwArgs()) {
-                unexpectedKwargs(ctx, send);
+                checkTypeFunArity(ctx, send, 1, 1);
+                checkUnexpectedKwargs(ctx, send);
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
@@ -893,9 +947,20 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                 return nullopt;
             }
         }
-        case core::Names::untyped().rawId():
+        case core::Names::untyped().rawId(): {
+            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 0, 0);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+            }
             return TypeSyntax::ResultType{core::Types::untyped(args.untypedBlame), core::Symbols::noClassOrModule()};
+        }
         case core::Names::selfType().rawId():
+            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 0, 0);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+            }
             if (args.allowSelfType) {
                 return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::Symbols::noClassOrModule()};
             }
@@ -911,6 +976,11 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                                 "T.experimental_attached_class");
                     e.replaceWith("Replace with `T.attached_class`", ctx.locAt(send.loc), "T.attached_class");
                 }
+            }
+            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 0, 0);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
             }
 
             ENFORCE(ctx.owner.isClassOrModule());
@@ -955,10 +1025,22 @@ optional<TypeSyntax::ResultType> interpretTCombinator(core::Context ctx, const a
                                               core::Symbols::noClassOrModule()};
             }
         }
-        case core::Names::noreturn().rawId():
+        case core::Names::noreturn().rawId(): {
+            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 0, 0);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+            }
             return TypeSyntax::ResultType{core::Types::bottom(), core::Symbols::noClassOrModule()};
-        case core::Names::anything().rawId():
+        }
+        case core::Names::anything().rawId(): {
+            if (send.numPosArgs() != 0 || send.hasKwArgs()) {
+                checkTypeFunArity(ctx, send, 0, 0);
+                checkUnexpectedKwargs(ctx, send);
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::Symbols::noClassOrModule()};
+            }
             return TypeSyntax::ResultType{core::Types::top(), core::Symbols::noClassOrModule()};
+        }
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {

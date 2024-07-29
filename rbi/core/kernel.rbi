@@ -536,7 +536,7 @@ module Kernel
 
   sig do
     params(
-        arg0: T.any(Module),
+        arg0: Module,
     )
     .returns(T::Boolean)
   end
