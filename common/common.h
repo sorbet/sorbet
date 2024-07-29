@@ -60,9 +60,9 @@ constexpr bool skip_slow_enforce = false;
         }                                   \
     } while (false);
 
-#define DEBUG_ONLY(X)           \
-    if constexpr (debug_mode) { \
-        X;                      \
+#define DEBUG_ONLY(X) \
+    if (debug_mode) { \
+        X;            \
     }
 
 #define SLOW_DEBUG_ONLY(X)                                      \

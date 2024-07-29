@@ -61,7 +61,7 @@ GENERATE_CALL_MEMBER(underlying,
 } // namespace
 
 void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
-    ENFORCE_NO_TIMER(ptr != nullptr);
+    ENFORCE(ptr != nullptr);
 
 #define DELETE_TYPE(T) delete reinterpret_cast<T *>(ptr);
 

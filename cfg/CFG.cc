@@ -186,7 +186,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 }
 
 void CFG::sanityCheck(core::Context ctx) {
-    if constexpr (!debug_mode) {
+    if (!debug_mode) {
         return;
     }
 

@@ -120,7 +120,7 @@ private:
         val |= static_cast<tagged_storage>(inlinedValue) << 16;
 
         // Asserts that tag isn't using the bit which we use to indicate that value is _not_ inlined.
-        ENFORCE_NO_TIMER((val & NOT_INLINED_MASK) == 0);
+        ENFORCE((val & NOT_INLINED_MASK) == 0);
 
         return val;
     }
