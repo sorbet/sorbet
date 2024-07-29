@@ -195,6 +195,7 @@ public:
     unsigned int symbolsUsedTotal() const;
 
     void sanityCheckTableSizes() const;
+    void sanityCheckNames() const;
     void sanityCheck() const;
     void markAsPayload();
 

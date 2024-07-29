@@ -1999,6 +1999,31 @@ void GlobalState::sanityCheckTableSizes() const {
     ENFORCE_NO_TIMER(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
 }
 
+void GlobalState::sanityCheckNames() const {
+    if constexpr (!debug_mode) {
+        return;
+    }
+
+    if constexpr (fuzz_mode) {
+        // it's very slow to check this and it didn't find bugs
+        return;
+    }
+
+    Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
+
+    for (uint32_t i = 0; i < utf8Names.size(); i++) {
+        NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
+    }
+
+    for (uint32_t i = 0; i < constantNames.size(); i++) {
+        NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
+    }
+
+    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
+        NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
+    }
+}
+
 void GlobalState::sanityCheck() const {
     if constexpr (!debug_mode) {
         return;
@@ -2011,21 +2036,7 @@ void GlobalState::sanityCheck() const {
     Timer timeit(tracer(), "GlobalState::sanityCheck");
 
     sanityCheckTableSizes();
-
-    {
-        Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
-        for (uint32_t i = 0; i < utf8Names.size(); i++) {
-            NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
-        }
-
-        for (uint32_t i = 0; i < constantNames.size(); i++) {
-            NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
-        }
-
-        for (uint32_t i = 0; i < uniqueNames.size(); i++) {
-            NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
-        }
-    }
+    sanityCheckNames();
 
     {
         Timer timeit(tracer(), "GlobalState::sanityCheck (symbols)");
