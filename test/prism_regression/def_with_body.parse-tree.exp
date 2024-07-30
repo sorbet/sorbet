@@ -1,0 +1,7 @@
+DefMethod {
+  name = <U foo>
+  args = NULL
+  body = Integer {
+    val = "5"
+  }
+}
