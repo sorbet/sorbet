@@ -24,3 +24,20 @@ T.assert_type!(w, T::Array[String])
 "foo".encode("encoding", "other_encoding", fallback: {})
 "foo".encode("encoding", fallback: {})
 "foo".encode(fallback: {})
+
+# match
+m1 = "foo".match("f")
+m2 = "foo".match("f", 1)
+T.assert_type(m1, T.nilable(MatchData))
+T.assert_type(m2, T.nilable(MatchData))
+
+m3 = "foo".match("f") do |m|
+  T.assert_type(m, MatchData)
+  [m]
+end
+m4 = "foo".match("f", 1) do |m|
+  T.assert_type(m, MatchData)
+  [m]
+end
+T.assert_type(m3, T.nilable(T::Array[MatchData]))
+T.assert_type(m4, T.nilable(T::Array[MatchData]))

@@ -1652,17 +1652,17 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
-        blk: T.untyped,
+        arg1: Integer,
     )
     .returns(T.nilable(MatchData))
   end
   sig do
-    params(
+    type_parameters(:P).params(
         arg0: T.any(Regexp, String),
         arg1: Integer,
-        blk: T.untyped,
+        blk: T.proc.params(arg0: MatchData).returns(T.type_parameter(:P)),
     )
-    .returns(T.nilable(MatchData))
+    .returns(T.nilable(T.type_parameter(:P)))
   end
   def match(arg0, arg1=T.unsafe(nil), &blk); end
 
