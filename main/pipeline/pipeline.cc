@@ -154,6 +154,13 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
     return core::LocOffsets{locStart, locEnd};
 }
 
+std::string_view prismConstantName(pm_constant_id_t name, pm_parser_t *parser) {
+    pm_constant_pool_t *constantPool = &parser->constant_pool;
+    pm_constant_t *constant = pm_constant_pool_id_to_constant(constantPool, name);
+
+    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+}
+
 unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
         case PM_DEF_NODE: {
@@ -161,10 +168,7 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             pm_location_t *loc = &defNode->base.location;
             pm_location_t *declLoc = &defNode->def_keyword_loc;
 
-            pm_constant_pool_t *constantPool = &parser->constant_pool;
-            pm_constant_t *nameConstant = pm_constant_pool_id_to_constant(constantPool, defNode->name);
-
-            std::string_view name(reinterpret_cast<const char *>(nameConstant->start), nameConstant->length);
+            std::string_view name = prismConstantName(defNode->name, parser);
 
             unique_ptr<parser::Node> params;
             unique_ptr<parser::Node> body;
@@ -264,10 +268,7 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             auto requiredParamNode = reinterpret_cast<pm_required_parameter_node *>(node);
             pm_location_t *loc = &requiredParamNode->base.location;
 
-            pm_constant_pool_t *constantPool = &parser->constant_pool;
-            pm_constant_t *nameConstant = pm_constant_pool_id_to_constant(constantPool, requiredParamNode->name);
-
-            std::string_view name(reinterpret_cast<const char *>(nameConstant->start), nameConstant->length);
+            std::string_view name = prismConstantName(requiredParamNode->name, parser);
 
             return make_unique<parser::Arg>(locOffset(loc, parser), gs.enterNameUTF8(name));
         }
