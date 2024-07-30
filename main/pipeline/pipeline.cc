@@ -151,9 +151,6 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
     uint32_t locStart = static_cast<uint32_t>(loc->start - parser->start);
     uint32_t locEnd = static_cast<uint32_t>(loc->end - parser->start);
 
-    std::cout << "locStart: " << locStart << std::endl;
-    std::cout << "locEnd: " << locEnd << std::endl;
-
     return core::LocOffsets{locStart, locEnd};
 }
 
