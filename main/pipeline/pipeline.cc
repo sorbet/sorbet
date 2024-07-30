@@ -156,6 +156,26 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
 
 unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_DEF_NODE: {
+            auto defNode = reinterpret_cast<pm_def_node *>(node);
+            pm_location_t *loc = &defNode->base.location;
+            pm_location_t *declLoc = &defNode->def_keyword_loc;
+
+            pm_constant_pool_t *constantPool = &parser->constant_pool;
+            pm_constant_t *nameConstant = pm_constant_pool_id_to_constant(constantPool, defNode->name);
+
+            std::string_view name(reinterpret_cast<const char *>(nameConstant->start), nameConstant->length);
+
+            unique_ptr<parser::Node> args;
+            unique_ptr<parser::Node> body;
+
+            if (defNode->body != nullptr) {
+                body = convertPrismToSorbet(defNode->body, parser, gs);
+            }
+
+            return make_unique<parser::DefMethod>(locOffset(loc, parser), locOffset(declLoc, parser),
+                                                  gs.enterNameUTF8(name), std::move(args), std::move(body));
+        }
         case PM_ELSE_NODE: {
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
 
@@ -304,7 +324,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_CONSTANT_READ_NODE:
         case PM_CONSTANT_TARGET_NODE:
         case PM_CONSTANT_WRITE_NODE:
-        case PM_DEF_NODE:
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_STATEMENTS_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
