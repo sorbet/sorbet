@@ -1,10 +1,18 @@
 #include "main/lsp/ExtractVariable.h"
+#include "absl/strings/escaping.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 
 using namespace std;
 
 namespace sorbet::realmain::lsp {
+
+void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
+                  const core::Loc selectionLoc, const std::string message) {
+    logger->debug("ExtractToVariable: {}", message);
+    logger->debug("selectionLoc=\"{}\"", selectionLoc.showRaw(gs));
+    logger->debug("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+}
 
 core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::LocOffsets target) {
     // The ENFORCE(!ast::isa_tree<ast::InsSeq>(...)) are there check that the enclosingScope returned
@@ -248,6 +256,11 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     auto locOffsets = selectionLoc.offsets();
     auto enclosingScope = walk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
+    if (!whereToInsert.exists()) {
+        logDebugInfo(config.logger, gs, selectionLoc,
+                     "failed to determine whereToInsert in getExtractSingleOccurrenceEdits");
+        return {};
+    }
     matchingNode = walk.matchingNode->deepCopy();
     if (walk.matchingNodeEnclosingMethod) {
         enclosingClassOrMethod = std::move(*walk.matchingNodeEnclosingMethod);
@@ -467,6 +480,11 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     auto firstMatch = matches[0];
 
     auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch);
+    if (!whereToInsert.exists()) {
+        logDebugInfo(config.logger, gs, selectionLoc,
+                     "failed to determine whereToInsert in getExtractMultipleOccurrenceEdits");
+        return {};
+    }
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
     auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
 
