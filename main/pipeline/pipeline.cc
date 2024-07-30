@@ -156,6 +156,14 @@ core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
 
 unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_ELSE_NODE: {
+            auto elseNode = reinterpret_cast<pm_else_node *>(node);
+
+            if (elseNode->statements == nullptr)
+                return nullptr;
+
+            return convertPrismToSorbet(reinterpret_cast<pm_node *>(elseNode->statements), parser, gs);
+        }
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
             pm_location_t *loc = &falseNode->base.location;
@@ -175,13 +183,18 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             auto predicate = convertPrismToSorbet(ifNode->predicate, parser, gs);
 
             std::unique_ptr<parser::Node> ifTrue;
+            std::unique_ptr<parser::Node> ifFalse;
 
             if (ifNode->statements != nullptr) {
                 ifTrue = convertPrismToSorbet(reinterpret_cast<pm_node *>(ifNode->statements), parser, gs);
             }
 
-            // TODO: handle elsif/else clause
-            return make_unique<parser::If>(locOffset(loc, parser), std::move(predicate), std::move(ifTrue), nullptr);
+            if (ifNode->consequent != nullptr) {
+                ifFalse = convertPrismToSorbet(ifNode->consequent, parser, gs);
+            }
+
+            return make_unique<parser::If>(locOffset(loc, parser), std::move(predicate), std::move(ifTrue),
+                                           std::move(ifFalse));
         }
         case PM_INTEGER_NODE: {
             auto intNode = reinterpret_cast<pm_integer_node *>(node);
@@ -291,7 +304,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_CONSTANT_WRITE_NODE:
         case PM_DEF_NODE:
         case PM_DEFINED_NODE:
-        case PM_ELSE_NODE:
         case PM_EMBEDDED_STATEMENTS_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:

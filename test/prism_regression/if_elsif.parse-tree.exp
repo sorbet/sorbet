@@ -1,0 +1,17 @@
+If {
+  condition = True {
+  }
+  then_ = String {
+    val = <U one>
+  }
+  else_ = If {
+    condition = False {
+    }
+    then_ = String {
+      val = <U two>
+    }
+    else_ = String {
+      val = <U three>
+    }
+  }
+}
