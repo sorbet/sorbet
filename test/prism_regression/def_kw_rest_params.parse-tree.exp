@@ -1,0 +1,11 @@
+DefMethod {
+  name = <U foo>
+  args = Args {
+    args = [
+      Kwrestarg {
+        name = <U a>
+      }
+    ]
+  }
+  body = NULL
+}
