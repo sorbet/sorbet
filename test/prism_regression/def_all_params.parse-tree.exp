@@ -11,6 +11,9 @@ DefMethod {
           val = "2"
         }
       }
+      Blockarg {
+        name = <U blk>
+      }
     ]
   }
   body = NULL
