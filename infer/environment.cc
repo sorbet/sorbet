@@ -685,17 +685,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         const auto &argType = send->args[0].type;
-
-        if (core::isa_type<core::ClassType>(argType)) {
-            auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
-            if (!argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
-                return;
-            }
-        } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
-                return;
-            }
-        } else {
+        auto argSym = core::Types::getRepresentedClass(ctx, argType);
+        if (!argSym.exists() || !argSym.data(ctx)->isClass()) {
             return;
         }
 
