@@ -256,9 +256,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
 
             auto requireds = absl::MakeSpan((&paramsNode->requireds)->nodes, (&paramsNode->requireds)->size);
             auto optionals = absl::MakeSpan((&paramsNode->optionals)->nodes, (&paramsNode->optionals)->size);
+            auto keywords = absl::MakeSpan((&paramsNode->keywords)->nodes, (&paramsNode->keywords)->size);
 
             parser::NodeVec params;
-            params.reserve(requireds.size() + optionals.size() + paramsNode->block == nullptr ? 0 : 1);
+            params.reserve(requireds.size() + optionals.size() + keywords.size() + paramsNode->block == nullptr ? 0
+                                                                                                                : 1);
 
             for (auto &param : requireds) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
@@ -266,6 +268,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             }
 
             for (auto &param : optionals) {
+                unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
+                params.emplace_back(std::move(sorbetParam));
+            }
+
+            for (auto &param : keywords) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
                 params.emplace_back(std::move(sorbetParam));
             }
@@ -293,6 +300,14 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
 
             return make_unique<parser::Rational>(locOffset(loc, parser), value);
+        }
+        case PM_REQUIRED_KEYWORD_PARAMETER_NODE: {
+            auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
+            pm_location_t *loc = &requiredKeywordParamNode->base.location;
+
+            std::string_view name = prismConstantName(requiredKeywordParamNode->name, parser);
+
+            return make_unique<parser::Kwarg>(locOffset(loc, parser), gs.enterNameUTF8(name));
         }
         case PM_REQUIRED_PARAMETER_NODE: {
             auto requiredParamNode = reinterpret_cast<pm_required_parameter_node *>(node);
@@ -456,7 +471,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_RANGE_NODE:
         case PM_REDO_NODE:
         case PM_REGULAR_EXPRESSION_NODE:
-        case PM_REQUIRED_KEYWORD_PARAMETER_NODE:
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_REST_PARAMETER_NODE:

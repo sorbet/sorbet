@@ -1,3 +1,3 @@
 # typed: true
 
-def foo(a, b = 2, &blk); end
+def foo(a, b = 2, c:, &blk); end
