@@ -23,6 +23,9 @@ DefMethod {
           val = "5"
         }
       }
+      Kwrestarg {
+        name = <U f>
+      }
       Blockarg {
         name = <U blk>
       }
