@@ -1,0 +1,17 @@
+DefMethod {
+  name = <U foo>
+  args = Args {
+    args = [
+      Arg {
+        name = <U a>
+      }
+      Optarg {
+        name = <U b>
+        default_ = Integer {
+          val = "2"
+        }
+      }
+    ]
+  }
+  body = NULL
+}

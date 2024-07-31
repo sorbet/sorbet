@@ -231,17 +231,33 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
         }
+        case PM_OPTIONAL_PARAMETER_NODE: {
+            auto optionalParamNode = reinterpret_cast<pm_optional_parameter_node *>(node);
+            pm_location_t *loc = &optionalParamNode->base.location;
+            pm_location_t *nameLoc = &optionalParamNode->name_loc;
+
+            std::string_view name = prismConstantName(optionalParamNode->name, parser);
+            auto value = convertPrismToSorbet(optionalParamNode->value, parser, gs);
+
+            return make_unique<parser::Optarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
+                                               locOffset(nameLoc, parser), std::move(value));
+        }
         case PM_PARAMETERS_NODE: {
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
             pm_location_t *loc = &paramsNode->base.location;
 
-            pm_node_list_t *requiredsList = &paramsNode->requireds;
-            auto requireds = absl::MakeSpan(requiredsList->nodes, requiredsList->size);
+            auto requireds = absl::MakeSpan((&paramsNode->requireds)->nodes, (&paramsNode->requireds)->size);
+            auto optionals = absl::MakeSpan((&paramsNode->optionals)->nodes, (&paramsNode->optionals)->size);
 
             parser::NodeVec params;
-            params.reserve(requireds.size());
+            params.reserve(requireds.size() + optionals.size());
 
             for (auto &param : requireds) {
+                unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
+                params.emplace_back(std::move(sorbetParam));
+            }
+
+            for (auto &param : optionals) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
                 params.emplace_back(std::move(sorbetParam));
             }
@@ -418,7 +434,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE:
-        case PM_OPTIONAL_PARAMETER_NODE:
         case PM_OR_NODE:
         case PM_PARENTHESES_NODE:
         case PM_PINNED_EXPRESSION_NODE:
