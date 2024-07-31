@@ -11,6 +11,9 @@ DefMethod {
           val = "2"
         }
       }
+      Kwarg {
+        name = <U c>
+      }
       Blockarg {
         name = <U blk>
       }
