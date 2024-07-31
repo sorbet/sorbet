@@ -270,8 +270,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             auto keywords = absl::MakeSpan((&paramsNode->keywords)->nodes, (&paramsNode->keywords)->size);
 
             parser::NodeVec params;
-            params.reserve(requireds.size() + optionals.size() + keywords.size() + paramsNode->block == nullptr ? 0
-                                                                                                                : 1);
+
+            auto blockSize = paramsNode->block == nullptr ? 0 : 1;
+            auto restSize = paramsNode->rest == nullptr ? 0 : 1;
+
+            params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + blockSize);
 
             for (auto &param : requireds) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
@@ -281,6 +284,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             for (auto &param : optionals) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
                 params.emplace_back(std::move(sorbetParam));
+            }
+
+            if (paramsNode->rest != nullptr) {
+                unique_ptr<parser::Node> rest = convertPrismToSorbet(paramsNode->rest, parser, gs);
+                params.emplace_back(std::move(rest));
             }
 
             for (auto &param : keywords) {
@@ -327,6 +335,16 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             std::string_view name = prismConstantName(requiredParamNode->name, parser);
 
             return make_unique<parser::Arg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+        }
+        case PM_REST_PARAMETER_NODE: {
+            auto restParamNode = reinterpret_cast<pm_rest_parameter_node *>(node);
+            pm_location_t *loc = &restParamNode->base.location;
+            pm_location_t *nameLoc = &restParamNode->name_loc;
+
+            std::string_view name = prismConstantName(restParamNode->name, parser);
+
+            return make_unique<parser::Restarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
+                                                locOffset(nameLoc, parser));
         }
         case PM_STATEMENTS_NODE: {
             pm_statements_node *stmts_node = reinterpret_cast<pm_statements_node *>(node);
@@ -483,7 +501,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_REGULAR_EXPRESSION_NODE:
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
-        case PM_REST_PARAMETER_NODE:
         case PM_RETRY_NODE:
         case PM_RETURN_NODE:
         case PM_SELF_NODE:

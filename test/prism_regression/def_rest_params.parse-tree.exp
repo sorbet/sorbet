@@ -1,0 +1,11 @@
+DefMethod {
+  name = <U foo>
+  args = Args {
+    args = [
+      Restarg {
+        name = <U a>
+      }
+    ]
+  }
+  body = NULL
+}
