@@ -11,13 +11,16 @@ DefMethod {
           val = "2"
         }
       }
-      Kwarg {
+      Restarg {
         name = <U c>
       }
-      Kwoptarg {
+      Kwarg {
         name = <U d>
+      }
+      Kwoptarg {
+        name = <U e>
         default_ = Integer {
-          val = "4"
+          val = "5"
         }
       }
       Blockarg {
