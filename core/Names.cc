@@ -156,7 +156,7 @@ string_view NameRef::shortName(const GlobalState &gs) const {
 }
 
 void NameRef::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     switch (kind()) {
@@ -203,7 +203,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                     return false;
             }
         case NameKind::CONSTANT:
-            ENFORCE(dataCnst(gs)->original.isValidConstantName(gs));
+            ENFORCE_NO_TIMER(dataCnst(gs)->original.isValidConstantName(gs));
             return true;
     }
 }
@@ -447,7 +447,7 @@ UTF8NameData::UTF8NameData(const UTF8Name &ref, const GlobalState &gs) : DebugOn
 NameDataDebugCheck::NameDataDebugCheck(const GlobalState &gs) : gs(gs), nameCountAtCreation(gs.namesUsedTotal()) {}
 
 void NameDataDebugCheck::check() const {
-    ENFORCE(nameCountAtCreation == gs.namesUsedTotal());
+    ENFORCE_NO_TIMER(nameCountAtCreation == gs.namesUsedTotal());
 }
 
 const UniqueName *UniqueNameData::operator->() const {
