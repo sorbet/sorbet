@@ -14,6 +14,12 @@ DefMethod {
       Kwarg {
         name = <U c>
       }
+      Kwoptarg {
+        name = <U d>
+        default_ = Integer {
+          val = "4"
+        }
+      }
       Blockarg {
         name = <U blk>
       }
