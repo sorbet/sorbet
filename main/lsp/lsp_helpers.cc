@@ -44,6 +44,11 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
+
+    if (name == core::Names::requiredAncestorsLin()) {
+        return true;
+    }
+
     return false;
 }
 
