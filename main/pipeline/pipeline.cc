@@ -239,6 +239,17 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
         }
+        case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: {
+            auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
+            pm_location_t *loc = &optionalKeywordParamNode->base.location;
+            pm_location_t *nameLoc = &optionalKeywordParamNode->name_loc;
+
+            std::string_view name = prismConstantName(optionalKeywordParamNode->name, parser);
+            unique_ptr<parser::Node> value = convertPrismToSorbet(optionalKeywordParamNode->value, parser, gs);
+
+            return make_unique<parser::Kwoptarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
+                                                 locOffset(nameLoc, parser), std::move(value));
+        }
         case PM_OPTIONAL_PARAMETER_NODE: {
             auto optionalParamNode = reinterpret_cast<pm_optional_parameter_node *>(node);
             pm_location_t *loc = &optionalParamNode->base.location;
@@ -461,7 +472,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
-        case PM_OPTIONAL_KEYWORD_PARAMETER_NODE:
         case PM_OR_NODE:
         case PM_PARENTHESES_NODE:
         case PM_PINNED_EXPRESSION_NODE:
