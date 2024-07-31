@@ -239,6 +239,14 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
         }
+        case PM_KEYWORD_REST_PARAMETER_NODE: {
+            auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
+            pm_location_t *loc = &keywordRestParamNode->base.location;
+
+            std::string_view name = prismConstantName(keywordRestParamNode->name, parser);
+
+            return make_unique<parser::Kwrestarg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+        }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: {
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
             pm_location_t *loc = &optionalKeywordParamNode->base.location;
@@ -271,10 +279,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
 
             parser::NodeVec params;
 
-            auto blockSize = paramsNode->block == nullptr ? 0 : 1;
             auto restSize = paramsNode->rest == nullptr ? 0 : 1;
+            auto kwrestSize = paramsNode->keyword_rest == nullptr ? 0 : 1;
+            auto blockSize = paramsNode->block == nullptr ? 0 : 1;
 
-            params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + blockSize);
+            params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + kwrestSize + blockSize);
 
             for (auto &param : requireds) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
@@ -294,6 +303,11 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             for (auto &param : keywords) {
                 unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param, parser, gs);
                 params.emplace_back(std::move(sorbetParam));
+            }
+
+            if (paramsNode->keyword_rest != nullptr) {
+                unique_ptr<parser::Node> keywordRest = convertPrismToSorbet(paramsNode->keyword_rest, parser, gs);
+                params.emplace_back(std::move(keywordRest));
             }
 
             if (paramsNode->block != nullptr) {
@@ -469,7 +483,6 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
         case PM_INTERPOLATED_X_STRING_NODE:
         case PM_IT_PARAMETERS_NODE:
         case PM_KEYWORD_HASH_NODE:
-        case PM_KEYWORD_REST_PARAMETER_NODE:
         case PM_LAMBDA_NODE:
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
