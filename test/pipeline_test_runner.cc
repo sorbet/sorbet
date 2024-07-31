@@ -261,6 +261,7 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> skipRBIExportEnforcementDirs;
     vector<std::string> allowRelaxedPackagerChecksFor;
+    vector<std::string> ignorePackageDirectories;
 
     auto extraDirUnderscore =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
@@ -278,11 +279,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
+    auto ignorePackageDir = StringPropertyAssertion::getValue("ignore-packaging-in", assertions);
+    if (ignorePackageDir.has_value()) {
+        ignorePackageDirectories.emplace_back(ignorePackageDir.value());
+    }
+
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
         gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashPrefixes,
-                               {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+                               {}, allowRelaxedPackagerChecksFor, ignorePackageDirectories, "PACKAGE_ERROR_HINT");
     }
 }
 

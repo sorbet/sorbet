@@ -574,6 +574,10 @@ TEST_CASE("LSPTest") {
             if (skipImportVisibility.has_value()) {
                 opts->allowRelaxedPackagerChecksFor.emplace_back(skipImportVisibility.value());
             }
+            auto ignorePackageDir = StringPropertyAssertion::getValue("ignore-packaging-in", assertions);
+            if (ignorePackageDir.has_value()) {
+                opts->ignorePackageDirectories.emplace_back(ignorePackageDir.value());
+            }
         }
         opts->disableWatchman = true;
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";

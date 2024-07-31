@@ -48,6 +48,7 @@ public:
     virtual core::Loc fullLoc() const = 0;
     virtual core::Loc declLoc() const = 0;
     virtual bool exists() const final;
+    virtual bool ignoreForPackaging() const;
     std::string show(const core::GlobalState &gs) const;
     core::ClassOrModuleRef getRootSymbolForAutocorrectSearch(const core::GlobalState &gs,
                                                              core::SymbolRef suggestionScope) const;

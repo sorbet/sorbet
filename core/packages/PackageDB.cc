@@ -28,7 +28,7 @@ public:
 
     unique_ptr<PackageInfo> deepCopy() const {
         notImplemented();
-        return make_unique<NonePackage>();
+        return make_unique<NonePackage>(isIgnored);
     }
 
     Loc fullLoc() const {
@@ -67,6 +67,10 @@ public:
         return false;
     }
 
+    bool ignoreForPackaging() const {
+        return isIgnored;
+    }
+
     std::vector<std::vector<core::NameRef>> exports() const {
         return vector<vector<core::NameRef>>();
     }
@@ -84,18 +88,27 @@ public:
         notImplemented();
         return nullopt;
     }
-
     ~NonePackage() {}
+
+    NonePackage(bool ignored) : isIgnored(ignored) {}
 
 private:
     const vector<string> prefixes;
     const vector<core::NameRef> emptyName;
+    const bool isIgnored;
 
     void notImplemented() const {
         ENFORCE(false, "Not implemented for NonePackage");
     }
 };
-static const NonePackage NONE_PKG;
+// A package maps to `NONE_PKG` if we're running under
+// --stripe-packages mode and there is no nearest enclosing package
+// file.
+static const NonePackage NONE_PKG(false);
+// A package maps to `IGNORED_PKG` if we're running under
+// --stripe-packages mode and we've explicitly put it underneath an
+// ignored directory (e.g. for RBI files.)
+static const NonePackage IGNORED_PKG(true);
 } // namespace
 
 UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
@@ -173,6 +186,11 @@ const PackageInfo &PackageDB::getPackageForFile(const core::GlobalState &gs, cor
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
+        if (std::find(ignorePackageDirs_.begin(), ignorePackageDirs_.end(), path.substr(0, curPrefixPos + 1)) !=
+            ignorePackageDirs_.end()) {
+            return IGNORED_PKG;
+        }
+
         const auto &it = packagesByPathPrefix.find(path.substr(0, curPrefixPos + 1));
         if (it != packagesByPathPrefix.end()) {
             const auto &pkg = getPackageInfo(it->second);
@@ -221,6 +239,10 @@ const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefix
     return extraPackageFilesDirectorySlashPrefixes_;
 }
 
+const std::vector<std::string> &PackageDB::ignorePackageDirs() const {
+    return ignorePackageDirs_;
+}
+
 const std::string_view PackageDB::errorHint() const {
     return errorHint_;
 }
@@ -242,6 +264,7 @@ PackageDB PackageDB::deepCopy() const {
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;
     result.errorHint_ = this->errorHint_;
+    result.ignorePackageDirs_ = this->ignorePackageDirs_;
     return result;
 }
 
