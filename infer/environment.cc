@@ -680,17 +680,19 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
         const auto &recvType = send->recv.type;
+        if (!recvType.derivesFrom(ctx, core::Symbols::Module())) {
+            return;
+        }
+
         const auto &argType = send->args[0].type;
 
         if (core::isa_type<core::ClassType>(argType)) {
             auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
-            if (!recvType.derivesFrom(ctx, core::Symbols::Module()) ||
-                !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+            if (!argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!recvType.derivesFrom(ctx, core::Symbols::Module()) ||
-                !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+            if (!argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else {
