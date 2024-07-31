@@ -9,9 +9,8 @@ namespace sorbet::realmain::lsp {
 
 void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::GlobalState &gs,
                   const core::Loc selectionLoc, const std::string message) {
-    logger->debug("ExtractToVariable: {}", message);
-    logger->debug("selectionLoc=\"{}\"", selectionLoc.showRaw(gs));
-    logger->debug("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+    logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
+    logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }
 
 core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::LocOffsets target) {
