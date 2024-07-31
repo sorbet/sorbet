@@ -679,7 +679,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
-        const auto &argType = send->args[0].type;
+        auto argType = send->args[0].type;
         if (argType.isUntyped() ||
             (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
             return;
@@ -691,8 +691,18 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         auto argSym = core::Types::getRepresentedClass(ctx, argType);
-        if (!argSym.exists() || !argSym.data(ctx)->isClass()) {
+        if (!argSym.exists()) {
             return;
+        }
+
+        const auto &argSymData = argSym.data(ctx);
+        if (argSymData->isModule()) {
+            if (recvType.derivesFrom(ctx, core::Symbols::Class())) {
+                argType = core::Types::tClass(argSymData->externalType());
+            } else {
+                // Can't support this case until we have T::Module
+                return;
+            }
         }
 
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
