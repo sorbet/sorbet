@@ -220,23 +220,25 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             return make_unique<parser::Rational>(locOffset(loc, parser), value);
         }
         case PM_STATEMENTS_NODE: {
-            pm_statements_node *stmts = reinterpret_cast<pm_statements_node *>(node);
+            pm_statements_node *stmts_node = reinterpret_cast<pm_statements_node *>(node);
+
+            auto stmts = absl::MakeSpan(stmts_node->body.nodes, stmts_node->body.size);
 
             // For a single statement, do not create a Begin node and just return the statement
-            if (stmts->body.size == 1) {
-                return convertPrismToSorbet((pm_node *)stmts->body.nodes[0], parser, gs);
+            if (stmts.size() == 1) {
+                return convertPrismToSorbet((pm_node *)stmts.front(), parser, gs);
             }
 
             // For multiple statements, convert each statement and add them to the body of a Begin node
             parser::NodeVec sorbetStmts;
+            sorbetStmts.reserve(stmts.size());
 
-            for (int i = 0; i < stmts->body.size; i++) {
-                pm_node_t *node = stmts->body.nodes[i];
+            for (auto& node : stmts) {
                 unique_ptr<parser::Node> convertedStmt = convertPrismToSorbet(node, parser, gs);
                 sorbetStmts.emplace_back(std::move(convertedStmt));
             }
 
-            auto *loc = &stmts->base.location;
+            auto *loc = &stmts_node->base.location;
 
             return make_unique<parser::Begin>(locOffset(loc, parser), std::move(sorbetStmts));
         }
