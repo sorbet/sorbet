@@ -1444,8 +1444,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     methodReturnType = core::Types::top();
                 }
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
-                                                           core::UntypedMode::AlwaysCompatible,
+                if (!core::Types::equivUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
                                                            errorDetailsCollector)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto owner = ctx.owner;
