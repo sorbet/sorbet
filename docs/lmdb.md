@@ -113,6 +113,26 @@ python -mlmdb --env . shell
 # ...           f.write(b'\n')
 ```
 
+Does the same as the `shell` subcommand, but in a script:
+
+```python
+#!/usr/bin/env python3
+
+import lmdb
+
+env = '/home/jez/sorbet-cache.bak'
+ENV = lmdb.open(env, map_size=10_485_760, max_dbs=128, create=False)
+
+with open('/tmp/out.txt', 'wb') as f:
+  with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+      cursor = txn.cursor()
+      for key, val in cursor:
+          f.write(key)
+          f.write(b'\t')
+          f.write(str(len(val)).encode())
+          f.write(b'\n')
+```
+
 
 [LMDB]: http://www.lmdb.tech/doc/index.html
 [`lmdb` package]: https://pypi.org/project/lmdb/
