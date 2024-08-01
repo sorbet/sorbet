@@ -732,10 +732,8 @@ int realmain(int argc, char *argv[]) {
 
                 // Cache these before any pipeline::package rewrites, so that the cache is still
                 // usable regardless of whether `--stripe-packages` was passed.
-                // Want to keep the kvstore around so we can still write to it later.
-                kvstore = cache::ownIfUnchanged(
-                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
-                                                              *workers, indexed));
+                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
+                                                     indexed);
 
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
