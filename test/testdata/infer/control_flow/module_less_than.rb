@@ -31,7 +31,7 @@ def valid?(obj)
     end
 
     if obj <= M
-      T.reveal_type(obj) # error: `T::Class[T.anything]`
+      T.reveal_type(obj) # error: `T::Class[M]`
     end
   end
 
@@ -64,11 +64,11 @@ end
 sig { params(klass: T.class_of(T::Enum)).void }
 def class_lt_module(klass)
   if klass < Exportable
-    T.reveal_type(klass) # error: `T.class_of(T::Enum)`
+    T.reveal_type(klass) # error: `T.class_of(T::Enum)[T.all(T::Enum, Exportable)]`
     value = klass.try_deserialize("foo")
     raise unless value
-    exported = value.export # error: Method `export` does not exist on `T::Enum`
-    T.reveal_type(exported) # error: `T.untyped`
+    exported = value.export
+    T.reveal_type(exported) # error: `Integer`
   end
 end
 
@@ -105,7 +105,7 @@ end
 sig { params(klass: T::Class[T.anything], mod: Module).void }
 def nothing_special_for_class_methods(klass, mod)
   if klass < HasClassMethods
-    T.reveal_type(klass) # error: `T::Class[T.anything]`
+    T.reveal_type(klass) # error: `T::Class[HasClassMethods]`
   end
 
   if mod < HasClassMethods
