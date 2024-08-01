@@ -697,7 +697,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         const auto &argSymData = argSym.data(ctx);
         if (argSymData->isModule()) {
-            if (recvType.derivesFrom(ctx, core::Symbols::Class())) {
+            if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
                 argType = core::Types::tClass(argSymData->externalType());
             } else {
                 // Can't support this case until we have T::Module
