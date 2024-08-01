@@ -90,27 +90,32 @@ python -mlmdb --env example-cache shell
 # [GCC 5.4.0 20160609] on linux
 # Type "help", "copyright", "credits" or "license" for more information.
 # (InteractiveConsole)
-# >>> subdb = ENV.open_db(b'default')
-# >>> with ENV.begin() as txn:
-# ...     txn.stat(subdb)
-# ...
+```
+
+Shell snippets:
+
+```python
+subdb = ENV.open_db(b'default')
+with ENV.begin() as txn:
+    txn.stat(subdb)
 # {'psize': 4096, 'depth': 2, 'branch_pages': 1, 'leaf_pages': 20, 'overflow_pages': 699, 'entries': 90}
 
 # Print a list of key<TAB>len(val) pairs to out.txt:
-cd /tmp/sorbet-cache
-python -mlmdb --env . shell
-# Python 3.9.12 (main, Mar 23 2022, 21:36:19)
-# [GCC 5.4.0 20160609] on linux
-# Type "help", "copyright", "credits" or "license" for more information.
-# (InteractiveConsole)
-# >>> with open('/tmp/out.txt', 'wb') as f:
-# ...   with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
-# ...       cursor = txn.cursor()
-# ...       for key, val in cursor:
-# ...           f.write(key)
-# ...           f.write(b'\t')
-# ...           f.write(str(len(val)).encode())
-# ...           f.write(b'\n')
+with open('/tmp/out.txt', 'wb') as f:
+  with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+      cursor = txn.cursor()
+      for key, val in cursor:
+          f.write(key)
+          f.write(b'\t')
+          f.write(str(len(val)).encode())
+          f.write(b'\n')
+
+# Get the value for a single key (in the shell):
+with ENV.begin(db=ENV.open_db(b'experimentalfastpath')) as txn:
+  txn.get(b'DB_FORMAT_VERSION')
+
+# open another database in the shell, for comparison purposes
+env2 = lmdb.open('/tmp/sorbet-cache', map_size=10_485_760, max_dbs=128, create=False)
 ```
 
 Does the same as the `shell` subcommand, but in a script:
