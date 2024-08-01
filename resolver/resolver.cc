@@ -3565,40 +3565,6 @@ private:
         return true;
     }
 
-    static void recordMethodInfoInSig(core::Context ctx, core::MethodRef method, ParsedSig &sig,
-                                      const ast::MethodDef &mdef) {
-        // Later passes are going to separate the sig and the method definition.
-        // Record some information in the sig call itself so that we can reassociate
-        // them later in the compiler.
-        if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
-            return;
-        }
-
-        // Note that the sig still needs to send to a method called "sig" so that
-        // code completion in LSP works.  We change the receiver, below, so that
-        // sigs that don't pass through here still reflect the user's intent.
-        auto *send = sig.origSend;
-        auto *self = ast::cast_tree<ast::Local>(send->getPosArg(0));
-        if (self == nullptr) {
-            return;
-        }
-
-        // We distinguish "user-written" sends by checking for self.
-        // T::Sig::WithoutRuntime.sig wouldn't have any runtime effect that we need
-        // to record later.
-        if (self->localVariable != core::LocalVariable::selfVariable()) {
-            return;
-        }
-
-        auto *cnst = ast::cast_tree<ast::ConstantLit>(send->recv);
-        ENFORCE(cnst != nullptr, "sig send receiver must be a ConstantLit if we got a ParsedSig from the send");
-
-        cnst->symbol = core::Symbols::Sorbet_Private_Static_ResolvedSig();
-
-        send->addPosArg(mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
-        send->addPosArg(ast::MK::Symbol(send->loc, method.data(ctx)->name));
-    }
-
     struct OverloadedMethodArgInformation {
         std::vector<core::ArgInfo> posArgs;
         std::vector<core::ArgInfo> kwArgs;
@@ -3828,7 +3794,6 @@ private:
             }
         }
 
-        recordMethodInfoInSig(ctx, method, sig, mdef);
         return info;
     }
 
@@ -4137,43 +4102,6 @@ public:
                                 "as abstract using `abstract!` or `interface!`");
                 }
             }
-
-            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-            // behavior of the runtime, but only in compiled files.
-            if (ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
-                return;
-            }
-            ast::Send::ARGS_store args;
-
-            auto argIdx = -1;
-            auto numPosArgs = 0;
-            for (auto &arg : mdef.args) {
-                ++argIdx;
-
-                const ast::Local *local = nullptr;
-                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-                    local = ast::cast_tree<ast::Local>(opt->expr);
-                } else {
-                    local = ast::cast_tree<ast::Local>(arg);
-                }
-
-                auto &info = mdef.symbol.data(ctx)->arguments[argIdx];
-                if (info.flags.isKeyword) {
-                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                    args.emplace_back(local->deepCopy());
-                } else if (info.flags.isRepeated || info.flags.isBlock) {
-                    // Explicitly skip for now.
-                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                    // callWithSplatAndBlock
-                } else {
-                    args.emplace_back(local->deepCopy());
-                    ++numPosArgs;
-                }
-            }
-
-            auto self = ast::MK::Self(mdef.loc);
-            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::untypedSuper(),
-                                     mdef.loc.copyWithZeroLength(), numPosArgs, std::move(args));
         } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->flags.isInterface) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
