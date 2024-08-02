@@ -83,18 +83,18 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        auto retType = sendResp->dispatchResult->returnType;
-        auto &constraint = sendResp->dispatchResult->main.constr;
+        auto retType = s->dispatchResult->returnType;
+        auto &constraint = s->dispatchResult->main.constr;
         if (constraint) {
             retType = core::Types::instantiate(gs, retType, *constraint);
         }
-        if (sendResp->dispatchResult->main.method.exists() &&
-            sendResp->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
+        if (s->dispatchResult->main.method.exists() &&
+            s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
             // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
             // the result type.
             typeString = retType.showWithMoreInfo(gs);
         } else {
-            typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint, options);
+            typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
         }
     } else if (auto c = resp->isConstant()) {
         for (auto loc : c->symbolBeforeDealias.locs(gs)) {
@@ -111,7 +111,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString = prettyTypeForConstant(gs, constResp->symbolBeforeDealias);
+        typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
     } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {
@@ -119,8 +119,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type,
-                                                                 nullptr, options);
+        typeString =
+            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, nullptr, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
@@ -129,14 +129,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        core::TypePtr retType = resp->getRetType();
+        auto retType = resp->getRetType();
         // Some untyped arguments have null types.
         if (!retType) {
             retType = core::Types::untypedUntracked();
         }
         typeString = retType.showWithMoreInfo(gs);
     } else {
-        core::TypePtr retType = resp->getRetType();
+        auto retType = resp->getRetType();
         // Some untyped arguments have null types.
         if (!retType) {
             retType = core::Types::untypedUntracked();
