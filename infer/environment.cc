@@ -679,6 +679,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
+        //
         auto argType = send->args[0].type;
         if (argType.isUntyped() ||
             (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
@@ -695,10 +696,18 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
 
+        // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
+        // that `x == A`, which would mean `x` still has type `T.class_of(A)`.
+        bool canAddNoTypeTest = send->fun == core::Names::leq();
+
         const auto &argSymData = argSym.data(ctx);
         if (argSymData->isModule()) {
             if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
                 argType = core::Types::tClass(argSymData->externalType());
+
+                // Can't add noTypeTest for module types, because Ruby has multiple inheritance for modules
+                // Even if the current recv doesn't include argSym, that doesn't mean that a subclass couldn't.
+                canAddNoTypeTest = false;
             } else {
                 // Can't support this case until we have T::Module
                 return;
@@ -706,9 +715,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-        if (send->fun == core::Names::leq()) {
-            // We only know the NoTypeTest for `<=`, not `<`, because `x < A` being false could mean
-            // that `x == A`, which would mean `x` still has type `T.class_of(A)`.
+        if (canAddNoTypeTest) {
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         }
         whoKnows.sanityCheck();

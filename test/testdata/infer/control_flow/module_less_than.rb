@@ -112,3 +112,12 @@ def nothing_special_for_class_methods(klass, mod)
     T.reveal_type(mod) # error: `Module`
   end
 end
+
+sig { params(other: T.class_of(A)).void }
+def module_should_not_add_noTypeTest(other)
+  if other <= M
+    T.reveal_type(other) # error: `T.class_of(A)[T.all(A, M)]`
+  end
+
+  T.reveal_type(other) # error: `T.class_of(A)`
+end
