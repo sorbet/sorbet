@@ -24,7 +24,7 @@ def main
 # ^ hover: String
   #       ^ hover: Dog
   #          ^ hover: Dog
-  #           ^ hover: sig { returns(String) }
+  #           ^ hover: (nothing)
   #            ^ hover: sig { returns(String) }
   #             ^ hover: sig { returns(String) }
 
