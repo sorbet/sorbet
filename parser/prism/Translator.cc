@@ -130,9 +130,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *declLoc = &classNode->class_keyword_loc;
 
             auto name = translate(reinterpret_cast<pm_node *>(classNode->constant_path));
+            std::unique_ptr<parser::Node> superclass;
+
+            if (classNode->superclass != nullptr) {
+                superclass = translate(reinterpret_cast<pm_node *>(classNode->superclass));
+            }
 
             return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                              std::move(name), nullptr, nullptr);
+                                              std::move(name), std::move(superclass), nullptr);
         }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`

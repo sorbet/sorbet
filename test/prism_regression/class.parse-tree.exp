@@ -1,8 +1,23 @@
-Class {
-  name = Const {
-    scope = NULL
-    name = <C <U Parent>>
-  }
-  superclass = NULL
-  body = NULL
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = NULL
+        name = <C <U Parent>>
+      }
+      superclass = NULL
+      body = NULL
+    }
+    Class {
+      name = Const {
+        scope = NULL
+        name = <C <U Child>>
+      }
+      superclass = Const {
+        scope = NULL
+        name = <C <U Parent>>
+      }
+      body = NULL
+    }
+  ]
 }
