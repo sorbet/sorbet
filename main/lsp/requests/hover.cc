@@ -49,11 +49,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
     if (queryResponses.empty()) {
-        auto fref = config.uri2FileRef(gs, params->textDocument->uri);
-        ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         if (level < core::StrictLevel::True) {
             auto text = level == core::StrictLevel::Ignore
@@ -75,6 +78,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     string typeString;
 
     if (auto s = resp->isSend()) {
+        // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+        if (s->funLoc().contains(queryLoc)) {
         auto start = s->dispatchResult.get();
         if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
             auto loc = start->main.method.data(gs)->loc();
@@ -95,6 +100,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             typeString = retType.showWithMoreInfo(gs);
         } else {
             typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
+        }
         }
     } else if (auto c = resp->isConstant()) {
         for (auto loc : c->symbolBeforeDealias.locs(gs)) {
