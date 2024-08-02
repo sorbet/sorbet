@@ -26,7 +26,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             std::unique_ptr<parser::Node> parent;
             if (constantPathNode->parent) {
+                // This constant reference is chained onto another constant reference.
+                // E.g. if `node` is pointing to `B`, then then `A` is the `parent` in `A::B::C`.
                 parent = translate(reinterpret_cast<pm_node *>(constantPathNode->parent));
+            } else { // This is a fully qualified constant reference, like `::A`.
+                pm_location_t *delimiterLoc = &constantPathNode->delimiter_loc; // The location of the `::`
+                parent = make_unique<parser::Cbase>(parser.translateLocation(delimiterLoc));
             }
 
             return make_unique<parser::Const>(parser.translateLocation(loc), std::move(parent),
