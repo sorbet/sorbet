@@ -124,6 +124,16 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return sendNode;
             }
         }
+        case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
+            auto classNode = reinterpret_cast<pm_class_node *>(node);
+            pm_location_t *loc = &classNode->base.location;
+            pm_location_t *declLoc = &classNode->class_keyword_loc;
+
+            auto name = translate(reinterpret_cast<pm_node *>(classNode->constant_path));
+
+            return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
+                                              std::move(name), nullptr, nullptr);
+        }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
             auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
@@ -491,7 +501,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CASE_MATCH_NODE:
         case PM_CASE_NODE:
-        case PM_CLASS_NODE:
         case PM_CLASS_VARIABLE_AND_WRITE_NODE:
         case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_CLASS_VARIABLE_OR_WRITE_NODE:
