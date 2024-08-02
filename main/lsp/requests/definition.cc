@@ -110,26 +110,26 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
             if (sendResp->funLoc().contains(queryLoc)) {
-            auto start = sendResp->dispatchResult.get();
-            while (start != nullptr) {
-                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    auto loc = start->main.method.data(gs)->loc();
-                    if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
-                        auto nextMethod = firstMethodAfterQuery(typechecker, sendResp->termLoc());
-                        if (nextMethod.exists()) {
-                            auto parentMethod = findParentMethod(gs, nextMethod);
-                            if (parentMethod.exists()) {
-                                // actually, jump to the definition of the abstract method, instead of
-                                // the definition of `override` in builder.rbi
-                                loc = parentMethod.data(gs)->loc();
+                auto start = sendResp->dispatchResult.get();
+                while (start != nullptr) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                        auto loc = start->main.method.data(gs)->loc();
+                        if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
+                            auto nextMethod = firstMethodAfterQuery(typechecker, sendResp->termLoc());
+                            if (nextMethod.exists()) {
+                                auto parentMethod = findParentMethod(gs, nextMethod);
+                                if (parentMethod.exists()) {
+                                    // actually, jump to the definition of the abstract method, instead of
+                                    // the definition of `override` in builder.rbi
+                                    loc = parentMethod.data(gs)->loc();
+                                }
                             }
                         }
-                    }
 
-                    addLocIfExists(gs, locations, loc);
+                        addLocIfExists(gs, locations, loc);
+                    }
+                    start = start->secondary.get();
                 }
-                start = start->secondary.get();
-            }
             }
         }
     }

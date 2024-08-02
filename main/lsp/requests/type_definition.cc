@@ -119,9 +119,9 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
             if (sendResp->funLoc().contains(queryLoc)) {
-            for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
-                addLocIfExists(gs, locations, loc);
-            }
+                for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
+                    addLocIfExists(gs, locations, loc);
+                }
             }
         }
     }

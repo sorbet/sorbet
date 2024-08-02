@@ -80,27 +80,27 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
     if (auto s = resp->isSend()) {
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
         if (s->funLoc().contains(queryLoc)) {
-        auto start = s->dispatchResult.get();
-        if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-            auto loc = start->main.method.data(gs)->loc();
-            if (loc.exists()) {
-                documentationLocations.emplace_back(loc);
+            auto start = s->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                auto loc = start->main.method.data(gs)->loc();
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
             }
-        }
 
-        auto retType = s->dispatchResult->returnType;
-        auto &constraint = s->dispatchResult->main.constr;
-        if (constraint) {
-            retType = core::Types::instantiate(gs, retType, *constraint);
-        }
-        if (s->dispatchResult->main.method.exists() &&
-            s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
-            // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
-            // the result type.
-            typeString = retType.showWithMoreInfo(gs);
-        } else {
-            typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
-        }
+            auto retType = s->dispatchResult->returnType;
+            auto &constraint = s->dispatchResult->main.constr;
+            if (constraint) {
+                retType = core::Types::instantiate(gs, retType, *constraint);
+            }
+            if (s->dispatchResult->main.method.exists() &&
+                s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
+                // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
+                // the result type.
+                typeString = retType.showWithMoreInfo(gs);
+            } else {
+                typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
+            }
         }
     } else if (auto c = resp->isConstant()) {
         for (auto loc : c->symbolBeforeDealias.locs(gs)) {
