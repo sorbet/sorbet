@@ -5,7 +5,6 @@
 ====second run (warm cache)====
                          types.input.files :              3
              types.input.files.kvstore.hit :              3
-           types.input.files.kvstore.write :              0
 ====first after change (one cache miss)====
                          types.input.files :              3
              types.input.files.kvstore.hit :              2
@@ -14,13 +13,11 @@
 ====second after change (warm cache)====
                          types.input.files :              3
              types.input.files.kvstore.hit :              3
-           types.input.files.kvstore.write :              0
 ====first after comment change (one cache miss)====
                          types.input.files :              3
              types.input.files.kvstore.hit :              2
             types.input.files.kvstore.miss :              1
-           types.input.files.kvstore.write :              1
 ====second after comment change (warm cache)====
                          types.input.files :              3
-             types.input.files.kvstore.hit :              3
-           types.input.files.kvstore.write :              0
+             types.input.files.kvstore.hit :              2
+            types.input.files.kvstore.miss :              1
