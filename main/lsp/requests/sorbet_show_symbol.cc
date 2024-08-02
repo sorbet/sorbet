@@ -51,7 +51,7 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
         sym = f->symbol;
     } else if (auto s = resp->isSend()) {
         // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
-        if (s->funLoc().contains(queryLoc)) {
+        if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
             if (s->dispatchResult->secondary == nullptr) {
                 // Multiple results not currently supported.
                 sym = s->dispatchResult->main.method;

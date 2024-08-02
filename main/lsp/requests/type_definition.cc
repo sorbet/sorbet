@@ -118,7 +118,7 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
-            if (sendResp->funLoc().contains(queryLoc)) {
+            if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
                 for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
                     addLocIfExists(gs, locations, loc);
                 }

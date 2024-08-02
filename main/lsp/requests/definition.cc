@@ -109,7 +109,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
             // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
-            if (sendResp->funLoc().contains(queryLoc)) {
+            if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
                 auto start = sendResp->dispatchResult.get();
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
