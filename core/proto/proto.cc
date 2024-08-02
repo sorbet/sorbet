@@ -379,17 +379,6 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
     }
 }
 
-com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel compiled) {
-    switch (compiled) {
-        case core::CompiledLevel::None:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledNone;
-        case core::CompiledLevel::False:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledFalse;
-        case core::CompiledLevel::True:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledTrue;
-    }
-}
-
 com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
                                                       const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
@@ -413,7 +402,6 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         entry->set_sigil(strictToProto(file.data(gs).originalSigil));
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
-        entry->set_compiled(compiledToProto(file.data(gs).compiledLevel));
 
         auto frefIdIt = untypedUsages.find(i);
         if (frefIdIt != untypedUsages.end()) {

@@ -17,19 +17,10 @@ message File {
         Stdlib = 11;
     }
 
-    // Unfortunately, proto enums use C++ enum rules, not C++ enum class scoping rules.
-    // We have to choose names here that don't overlap with StrictLevel.
-    enum CompiledLevel {
-        CompiledNone = 0;
-        CompiledFalse = 1;
-        CompiledTrue = 2;
-    }
-
     string path = 1;
     StrictLevel sigil = 2;
     StrictLevel strict = 3;
     StrictLevel min_error_level = 4;
-    CompiledLevel compiled = 5;
     // Note: a value of zero and an unset field look the same.
     int32 untyped_usages = 6;
     string pkg = 7;
