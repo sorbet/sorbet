@@ -1,7 +1,6 @@
 #ifndef SORBET_AST_FILES_H
 #define SORBET_AST_FILES_H
 
-#include "core/CompiledLevel.h"
 #include "core/FileRef.h"
 #include "core/LocOffsets.h"
 #include "core/Names.h"
@@ -36,7 +35,6 @@ public:
     friend class ::sorbet::core::serialize::SerializerImpl;
 
     static StrictLevel fileStrictSigil(std::string_view source);
-    static CompiledLevel fileCompiledSigil(std::string_view source);
     static PackagedLevel filePackagedSigil(std::string_view source);
 
     std::string_view path() const;
@@ -125,8 +123,6 @@ public:
 public:
     const StrictLevel originalSigil;
     StrictLevel strictLevel;
-
-    const CompiledLevel compiledLevel;
 
 private:
     std::shared_ptr<const FileHash> hash_;
