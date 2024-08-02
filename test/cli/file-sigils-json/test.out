@@ -5,8 +5,7 @@ No errors! Great job.
   {
    "path": "./compiled-false.rb",
    "strict": "False",
-   "min_error_level": "Max",
-   "compiled": "CompiledFalse"
+   "min_error_level": "Max"
   },
   {
    "path": "./compiled-none.rb",
@@ -17,8 +16,7 @@ No errors! Great job.
    "path": "./compiled-true.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max",
-   "compiled": "CompiledTrue"
+   "min_error_level": "Max"
   }
  ]
 }
@@ -29,8 +27,7 @@ No errors! Great job.
   {
    "path": "./compiled-false.rb",
    "strict": "False",
-   "min_error_level": "Max",
-   "compiled": "CompiledFalse"
+   "min_error_level": "Max"
   },
   {
    "path": "./compiled-none.rb",
@@ -41,8 +38,7 @@ No errors! Great job.
    "path": "./compiled-true.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max",
-   "compiled": "CompiledTrue"
+   "min_error_level": "Max"
   }
  ]
 }
@@ -53,8 +49,7 @@ No errors! Great job.
   {
    "path": "compiled-false.rb",
    "strict": "False",
-   "min_error_level": "Max",
-   "compiled": "CompiledFalse"
+   "min_error_level": "Max"
   },
   {
    "path": "compiled-none.rb",
@@ -65,8 +60,7 @@ No errors! Great job.
    "path": "compiled-true.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max",
-   "compiled": "CompiledTrue"
+   "min_error_level": "Max"
   }
  ]
 }

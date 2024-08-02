@@ -17,10 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@my_parent_method)
-        <self>.class().decorator().prop_get_logic(<self>, :my_parent_method, arg2)
-      end
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -28,10 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :my_parent_method)
-        <self>.instance_variable_set(:@my_parent_method, arg0)
-      end
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
@@ -47,10 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method<<todo method>>(&<blk>)
-      begin
-        arg2 = <self>.instance_variable_get(:@my_child_method)
-        <self>.class().decorator().prop_get_logic(<self>, :my_child_method, arg2)
-      end
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -58,10 +49,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_child_method=<<todo method>>(arg0, &<blk>)
-      begin
-        ::T::Configuration.prop_freeze_handler().call(<self>, :my_child_method)
-        <self>.instance_variable_set(:@my_child_method, arg0)
-      end
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
