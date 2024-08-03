@@ -23,10 +23,10 @@ sig {
   ).void
 }
 def example(x1, x2, x3)
-  T.reveal_type(x1) # error: `T.all(MParent[Other1], Other2, MChild[T.anything])`
-  takes_mchild_other1(x1) # error: but found
-  T.reveal_type(x2) # error: `T.all(MParent[Other1], Other2, MChild[T.anything])`
-  takes_mchild_other1(x2) # error: but found
+  T.reveal_type(x1) # error: `T.all(MChild[Other1], Other2)`
+  takes_mchild_other1(x1)
+  T.reveal_type(x2) # error: `T.all(MChild[Other1], Other2)`
+  takes_mchild_other1(x2)
   T.reveal_type(x3) # error: `T.all(MChild[Other1], Other2)`
   takes_mchild_other1(x3)
 end
