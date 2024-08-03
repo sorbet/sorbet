@@ -1654,8 +1654,9 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
     }
 
     if (auto *appliedType = cast_type<AppliedType>(wrapped)) {
-        if (appliedType->klass == core::Symbols::Class()) {
-            // T::Class[...].new is not implemented--users should just use Class.new(super_class)
+        if (appliedType->klass == core::Symbols::Class() || appliedType->klass == core::Symbols::Module()) {
+            // T::Class[...].new and T::Module[...].new are not implemented--users should use
+            // Class.new(super_class) or Module.new
             return false;
         }
 
@@ -2096,6 +2097,7 @@ public:
     }
 } DeclBuilderForProcs_bind;
 
+// TODO(jez) After the T::Module change, we can consider moving this to Kernel instead of Object
 class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3000,7 +3002,7 @@ public:
                                 "T.attached_class");
                 } else {
                     // Technically, this error message should also have something like "..., or
-                    // instance methods on `::Class`", but that makes the error message wordy, and
+                    // instance methods on `::Class` and `::Module`", but that makes the error message wordy, and
                     // anyone who cares about that technicality likely knows what they're doing.
                     e.setHeader(
                         "`{}` may only be used in singleton methods on classes or instance methods on `{}` modules",
@@ -4515,6 +4517,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Range(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Set(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Module(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
     {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},

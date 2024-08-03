@@ -1093,6 +1093,10 @@ public:
         return ClassOrModuleRef::fromRaw(97);
     }
 
+    static ClassOrModuleRef T_Module() {
+        return ClassOrModuleRef::fromRaw(98);
+    }
+
     static MethodRef T_Generic_squareBrackets() {
         return MethodRef::fromRaw(19);
     }
