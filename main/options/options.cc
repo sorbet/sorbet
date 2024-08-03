@@ -295,6 +295,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                        stop_after_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
 
     // Advanced options
+    options.add_options("advanced")("e-rbi", "Parse an inline RBI string",
+                                    cxxopts::value<string>()->default_value(empty.inlineRBIInput), "string");
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
@@ -792,6 +794,7 @@ void readOptions(Options &opts,
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.didYouMean = raw["did-you-mean"].as<bool>();
         opts.inlineInput = raw["e"].as<string>();
+        opts.inlineRBIInput = raw["e-rbi"].as<string>();
         if (opts.autocorrect && opts.silenceErrors) {
             logger->error("You may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
