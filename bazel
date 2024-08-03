@@ -52,10 +52,7 @@ case "$bazel_installer_platform" in
     bazel_installer_platform="linux-arm64"
     ;;
   darwin-x86_64) ;;
-  darwin-arm64)
-    # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now
-    bazel_installer_platform="darwin-x86_64"
-    ;;
+  darwin-arm64) ;;
   *)
     echo >&2 "Building on $bazel_installer_platform is not implemented"
     exit 1

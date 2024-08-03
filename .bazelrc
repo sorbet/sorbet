@@ -2,8 +2,12 @@
 ##  Workarounds for bugs and temporary things
 ##
 
+# TODO(jez) Need to figure out how to specify --macos_minimum_os=13.0.0 on macOS ARM builds
+
 try-import .bazelrc.local
 startup --host_jvm_args=-Xmx3072m # we need at least 3G to reliably build, the default is to use 1/4 of memory, which makes flaky on 8G boxes
+
+common --noenable_bzlmod
 
 # enable https://github.com/google/googletest/pull/1653
 common:build --define absl=1
@@ -19,7 +23,11 @@ build --incompatible_enable_cc_toolchain_resolution
 # This feature is intentionally not supported on macOS.
 build --features=-supports_dynamic_linker
 # Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
-build --features=-libtool
+build --features=-libtool --host_features=-libtool
+
+# The errors we were seeing before adding these flags seemed benign.
+# You can see the blame to find the error output we were trying to silence.
+build --cxxopt=-faligned-allocation --host_cxxopt=-faligned-allocation
 
 ##
 ##  Common build options across all build configurations
