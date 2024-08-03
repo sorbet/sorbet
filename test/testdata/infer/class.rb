@@ -15,3 +15,6 @@ class TestCase
     T.reveal_type(self.class.class) # error: `T::Class[T.class_of(TestCase)]`
   end
 end
+
+T.reveal_type(0.class) # error: `T.class_of(Integer)[Integer(0)]`
+T.reveal_type([0, 1].class) # error: `T.class_of(Array)[[Integer(0), Integer(1)]]`
