@@ -1618,6 +1618,14 @@ module Opus::Types::Test
         it "returns false for a simple unrelated class" do
           assert_equal(false, subtype?(T.class_of(Base), Mixin1))
         end
+
+        it "returns true for a singleton of a class against T::Class[...]" do
+          assert_equal(true, subtype?(T.class_of(Base), T::Class[T.anything]))
+        end
+
+        it "returns false for a singleton of a module against T::Class[...]" do
+          assert_equal(false, subtype?(T.class_of(Mixin1), T::Class[T.anything]))
+        end
       end
 
       describe 'tuples' do
