@@ -32,7 +32,7 @@ module T::Types
       when Simple
         @type.is_a?(other.raw_type)
       when TypedClass
-        true
+        @type.is_a?(other.underlying_class)
       else
         false
       end
