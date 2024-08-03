@@ -1021,7 +1021,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
 
-            [&](const ast::EmptyTree &n) { ret = current; },
+            [&](const ast::EmptyTree &n) {
+                auto methodLocs = cctx.inWhat.symbol.data(cctx.ctx)->locs();
+                auto enclosingLoc = cctx.ctx.locAt(cctx.inWhat.loc);
+                auto ownerLoc = absl::c_find_if(methodLocs, [&](auto &loc) { return enclosingLoc.contains(loc); });
+                auto nilLoc =
+                    ownerLoc != methodLocs.end() ? ownerLoc->offsets() : cctx.inWhat.loc.copyEndWithZeroLength();
+                current->exprs.emplace_back(cctx.target, nilLoc, make_insn<Literal>(core::Types::nilClass()));
+                ret = current;
+            },
 
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
