@@ -702,16 +702,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
         const auto &argSymData = argSym.data(ctx);
         if (argSymData->isModule()) {
-            if (!recvType.isUntyped() && recvType.derivesFrom(ctx, core::Symbols::Class())) {
-                argType = core::Types::tClass(argSymData->externalType());
+            argType = core::Types::tModule(argSymData->externalType());
 
-                // Can't add noTypeTest for module types, because Ruby has multiple inheritance for modules
-                // Even if the current recv doesn't include argSym, that doesn't mean that a subclass couldn't.
-                canAddNoTypeTest = false;
-            } else {
-                // Can't support this case until we have T::Module
-                return;
-            }
+            // Can't add noTypeTest for module types, because Ruby has multiple inheritance for modules
+            // Even if the current recv doesn't include argSym, that doesn't mean that a subclass couldn't.
+            canAddNoTypeTest = false;
         }
 
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
