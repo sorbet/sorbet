@@ -1782,16 +1782,16 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
+    // We don't actually need this invariant anymore, but we introduced it for the purpose of
+    // T::Class, so it's nice to keep.
     ENFORCE(self->isClassModuleSet(), "{}", selfRef.show(gs));
-    if (self->isClass()) {
-        auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
-        // Initialize the bounds of AttachedClass as todo, as they will be updated
-        // to the externalType of the attached class for the upper bound, and bottom
-        // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-        auto todo = make_type<ClassType>(Symbols::todo());
-        tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
-    }
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;
