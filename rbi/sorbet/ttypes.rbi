@@ -58,6 +58,9 @@ class T::Types::Union < T::Types::Base
 
   sig { returns(T::Array[T::Types::Base]) }
   def types; end
+
+  sig { returns(T.nilable(T::Types::Base)) }
+  def unwrap_nilable; end
 end
 
 class T::Types::Intersection < T::Types::Base
