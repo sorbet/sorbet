@@ -1145,7 +1145,7 @@ class Hash < Object
   # ```
   sig do
     params(
-        arg0: K,
+        arg0: T.untyped,
     )
     .returns(T::Hash[K, V])
   end
