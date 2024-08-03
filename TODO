@@ -1,3 +1,7 @@
 T.class_of()[] on modules
 Names::Constants::AttachedClass
 <AttachedClass>
+
+Partially reverts:
+- https://github.com/sorbet/sorbet/pull/6883
+- https://github.com/sorbet/sorbet/pull/6781
