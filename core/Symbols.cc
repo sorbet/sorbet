@@ -24,7 +24,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 51;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 70;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 106;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -437,9 +437,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
         if (options.useValidSyntax || !attached.exists()) {
-            // Attached wont exist for a number of cases:
-            // - owner is a module that doesn't use has_attached_class!
-            // - owner is a singleton class of a module
+            // Attached wont exist in any ClassOrModule instance that uses has_attached_class!
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
@@ -1729,16 +1727,16 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
+    // We don't actually need this invariant anymore, but we introduced it for the purpose of
+    // T::Class, so it's nice to keep.
     ENFORCE(self->isClassModuleSet(), "{}", selfRef.show(gs));
-    if (self->isClass()) {
-        auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
-        // Initialize the bounds of AttachedClass as todo, as they will be updated
-        // to the externalType of the attached class for the upper bound, and bottom
-        // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-        auto todo = make_type<ClassType>(Symbols::todo());
-        tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
-    }
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;

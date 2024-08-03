@@ -307,6 +307,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
+                // TODO(jez) Should we be doing this logic for modules too?
+                // I'm down, but I would like to see what fails so I can write a test for it
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
                 auto singletonSuperClass = attached.data(gs)->superClass().data(gs)->lookupSingletonClass(gs);
                 if (!singletonSuperClass.exists()) {
