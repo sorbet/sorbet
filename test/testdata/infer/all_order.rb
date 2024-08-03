@@ -34,6 +34,3 @@ end
 sig { params(mchild_other1: MChild[Other1]).void }
 def takes_mchild_other1(mchild_other1)
 end
-
-
-
