@@ -1762,8 +1762,6 @@ bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
         auto sym = cast_type_nonnull<ClassType>(wrapped).symbol;
         if (sym == Symbols::untyped() || sym == Symbols::bottom()) {
             return false;
-        } else if (sym.data(gs)->isSingletonClass(gs)) {
-            return false;
         }
     }
 
