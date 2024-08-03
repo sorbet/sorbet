@@ -31,7 +31,7 @@ module T::Types
         @type <= other.type
       when Simple
         @type.is_a?(other.raw_type)
-      when TypedClass
+      when TypedClass, TypedModule
         @type.is_a?(other.underlying_class)
       else
         false

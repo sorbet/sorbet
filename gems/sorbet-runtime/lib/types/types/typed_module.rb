@@ -33,7 +33,7 @@ module T::Types
     # overrides Base
     private def subtype_of_single?(type)
       case type
-      when Module
+      when TypedModule
         # treat like generics are erased
         true
       when Simple
