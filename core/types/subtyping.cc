@@ -171,6 +171,12 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
     } else if (Types::isSubType(gs, n2, n1)) {
         categoryCounterInc("glbDistributeAnd.outcome", "ZZZn2");
         return n2;
+    } else if (!isa_type<AndType>(n1)) {
+        categoryCounterInc("glbDistributeAnd.outcome", "n1a1r");
+        return AndType::make_shared(n1, a1->right);
+    } else if (!isa_type<AndType>(n2)) {
+        categoryCounterInc("glbDistributeAnd.outcome", "a1ln2");
+        return AndType::make_shared(a1->left, n2);
     }
 
     categoryCounterInc("glbDistributeAnd.outcome", "worst");

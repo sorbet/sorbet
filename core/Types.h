@@ -183,6 +183,7 @@ public:
     // TODO(jez) After T::Module change: audit tClass usages to see if there are opportunities to
     // make something more general that uses tModule.
     static TypePtr tClass(const TypePtr &attachedClass);
+    static TypePtr tModule(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 
     /** Recursively replaces proxies with their underlying types */

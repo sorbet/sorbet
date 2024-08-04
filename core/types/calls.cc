@@ -2096,14 +2096,14 @@ public:
 } DeclBuilderForProcs_bind;
 
 // TODO(jez) After the T::Module change, we can consider moving this to Kernel instead of Object
-class Object_class : public IntrinsicMethod {
+class Kernel_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto tClassSelfType = Types::tClass(args.selfType);
-        if (self.data(gs)->isModule()) {
-            ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
+        auto returnType = self.data(gs)->isClass() ? Types::tClass(args.selfType) : Types::tModule(args.selfType);
+        if (gs.requiresAncestorEnabled) {
+            // TODO(jez) Re-evaluate this case
             // This normally can't happen, because `Object` is not an ancestor of any module
             // instance by default. But Sorbet supports requires ancestor in a really weird way (by
             // simply dispatching to a completely unrelated method) which means that sometimes we
@@ -2112,29 +2112,30 @@ public:
             // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
             // which will not actually reflect how `.class` in a module instance method works at runtime.
             // (see https://sorbet.org/docs/class-of#tclass_of-and-modules)
-            res.returnType = tClassSelfType;
+            res.returnType = returnType;
             return;
         }
 
+        // TODO(jez) If this code is correct you can simplify, especially once you figure out what
+        // to do about the requiresAncestorEnabled case above.
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
-        if (!singleton.exists()) {
-            res.returnType = tClassSelfType;
-            return;
+        if (singleton.exists() && self.data(gs)->isClass()) {
+            // `singleton` might have more type members than just the `<AttachedClass>` one.
+            // Calling `externalType` is the easiest way to get proper defaults for all of those.
+            // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
+            //     T.class_of(MyClass)[MyClass, ...]
+            // Then the `T.all` is the easiest way to narrow *only* the type argument that
+            // corresponds to the `<AttachedClass>` type member, because `T.all` has logic to align
+            // type members in parent/child classes. The `T.all` gets pushed through and collapsed
+            // like normal, and ends up something like
+            //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
+            // (This matters, btw, in case the receiver is something like a generic.)
+            returnType = Types::all(gs, move(returnType), singleton.data(gs)->externalType());
         }
 
-        // `singleton` might have more type members than just the `<AttachedClass>` one.
-        // Calling `externalType` is the easiest way to get proper defaults for all of those.
-        // For the `<AttachedClass>` type member, we'll default it to its upper bound, like
-        //     T.class_of(MyClass)[MyClass, ...]
-        // Then the `T.all` is the easiest way to narrow *only* the type argument that
-        // corresponds to the `<AttachedClass>` type member, because `T.all` has logic to align
-        // type members in parent/child classes. The `T.all` gets pushed through and collapsed
-        // like normal, and ends up something like
-        //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
-        // (This matters, btw, in case the receiver is something like a generic.)
-        res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
+        res.returnType = returnType;
     }
-} Object_class;
+} Kernel_class;
 
 class Class_new : public IntrinsicMethod {
 public:
@@ -4517,8 +4518,9 @@ const vector<Intrinsic> intrinsics{
     {Symbols::T_Class(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
     {Symbols::T_Module(), Intrinsic::Kind::Singleton, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {Symbols::Object(), Intrinsic::Kind::Instance, Names::class_(), &Object_class},
-    {Symbols::Object(), Intrinsic::Kind::Instance, Names::singletonClass(), &Object_class},
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::class_(), &Kernel_class},
+    // TODO(jez) Test singleton_class to make sure it works
+    {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::singletonClass(), &Kernel_class},
 
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::new_(), &Class_new},
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},

@@ -117,10 +117,8 @@ module ObjectSpace
   # ```
   sig {returns(T::Enumerator[BasicObject])}
   sig {params(blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
-  sig {type_parameters(:Instance).params(mod: T::Class[T.type_parameter(:Instance)]).returns(T::Enumerator[T.type_parameter(:Instance)])}
-  sig {type_parameters(:Instance).params(mod: T::Class[T.type_parameter(:Instance)], blk: T.proc.params(obj: T.type_parameter(:Instance)).void).returns(Integer)}
-  sig {params(mod: Module).returns(T::Enumerator[BasicObject])}
-  sig {params(mod: Module, blk: T.proc.params(obj: BasicObject).void).returns(Integer)}
+  sig {type_parameters(:Instance).params(mod: T::Module[T.type_parameter(:Instance)]).returns(T::Enumerator[T.type_parameter(:Instance)])}
+  sig {type_parameters(:Instance).params(mod: T::Module[T.type_parameter(:Instance)], blk: T.proc.params(obj: T.type_parameter(:Instance)).void).returns(Integer)}
   def self.each_object(mod=BasicObject, &blk)
   end
 
