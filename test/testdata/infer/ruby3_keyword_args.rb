@@ -27,3 +27,10 @@ end
 
 blk = Proc.new {}
 foo("", tags: {}, x: 1, &blk)
+
+module B
+  def self.inner_foo(arg0 = [], arg1: true); end
+  def self.outer_foo(arg0)
+    inner_foo(arg0)
+  end
+end
