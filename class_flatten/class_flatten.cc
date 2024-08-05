@@ -75,7 +75,6 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;
-        ast::ExpressionPtr replacement = ast::MK::EmptyTree();
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -111,7 +110,7 @@ public:
         classes[classStack.back()] = std::move(tree);
         classStack.pop_back();
 
-        tree = std::move(replacement);
+        tree = ast::MK::EmptyTree();
     };
 
     ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {
