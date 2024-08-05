@@ -273,9 +273,9 @@ unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *pars
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
             pm_location_t *loc = &paramsNode->base.location;
 
-            auto requireds = absl::MakeSpan((&paramsNode->requireds)->nodes, (&paramsNode->requireds)->size);
-            auto optionals = absl::MakeSpan((&paramsNode->optionals)->nodes, (&paramsNode->optionals)->size);
-            auto keywords = absl::MakeSpan((&paramsNode->keywords)->nodes, (&paramsNode->keywords)->size);
+            auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
+            auto optionals = absl::MakeSpan(paramsNode->optionals.nodes, paramsNode->optionals.size);
+            auto keywords = absl::MakeSpan(paramsNode->keywords.nodes, paramsNode->keywords.size);
 
             parser::NodeVec params;
 
