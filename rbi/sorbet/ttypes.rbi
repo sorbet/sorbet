@@ -29,6 +29,15 @@ class T::Types::Base
   def error_message_for_obj_recursive(obj); end
   def validate!(obj); end
   def hash; end
+
+  # Type equivalence, defined by serializing the type to a string (with
+  # `#name`) and comparing the resulting strings for equality.
+  #
+  # NOTE: Equality on types is almost never what you want. The vast majority of
+  # the time, what you actually care about is whether one type is a subtype of
+  # another type. (This `==` method doesn't even implement "type equivalence"
+  # which would be whether t1 <: t2 && t2 <: t1).
+  sig { params(other: T.anything).returns(T::Boolean) }
   def ==(other); end
 end
 
