@@ -426,63 +426,48 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
     fmt::memory_buffer buf;
-    if (this->klass == Symbols::Array()) {
-        fmt::format_to(std::back_inserter(buf), "T::Array");
-    } else if (this->klass == Symbols::Hash()) {
-        fmt::format_to(std::back_inserter(buf), "T::Hash");
-    } else if (this->klass == Symbols::Enumerable()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerable");
-    } else if (this->klass == Symbols::Enumerator()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator");
-    } else if (this->klass == Symbols::Enumerator_Lazy()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator::Lazy");
-    } else if (this->klass == Symbols::Enumerator_Chain()) {
-        fmt::format_to(std::back_inserter(buf), "T::Enumerator::Chain");
-    } else if (this->klass == Symbols::Range()) {
-        fmt::format_to(std::back_inserter(buf), "T::Range");
-    } else if (this->klass == Symbols::Set()) {
-        fmt::format_to(std::back_inserter(buf), "T::Set");
-    } else if (this->klass == Symbols::Class()) {
-        fmt::format_to(std::back_inserter(buf), "T::Class");
-    } else {
-        if (std::optional<int> procArity = Types::getProcArity(*this)) {
-            fmt::format_to(std::back_inserter(buf), "T.proc");
+    if (std::optional<int> procArity = Types::getProcArity(*this)) {
+        fmt::format_to(std::back_inserter(buf), "T.proc");
 
-            // The first element in targs is the return type.
-            // The rest are the arguments (in the correct order)
-            ENFORCE(this->targs.size() == *procArity + 1, "Proc must have exactly arity + 1 targs");
-            auto targs_it = this->targs.begin();
-            auto return_type = *targs_it;
-            targs_it++;
+        // The first element in targs is the return type.
+        // The rest are the arguments (in the correct order)
+        ENFORCE(this->targs.size() == *procArity + 1, "Proc must have exactly arity + 1 targs");
+        auto targs_it = this->targs.begin();
+        auto return_type = *targs_it;
+        targs_it++;
 
-            if (*procArity > 0) {
-                fmt::format_to(std::back_inserter(buf), ".params(");
-            }
-
-            int arg_num = 0;
-            fmt::format_to(std::back_inserter(buf), "{}",
-                           fmt::map_join(
-                               targs_it, this->targs.end(), ", ", [&](auto targ) -> auto{
-                                   return fmt::format("arg{}: {}", arg_num++, targ.show(gs, options));
-                               }));
-
-            if (*procArity > 0) {
-                fmt::format_to(std::back_inserter(buf), ")");
-            }
-
-            if (return_type == core::Types::void_()) {
-                fmt::format_to(std::back_inserter(buf), ".void");
-            } else {
-                fmt::format_to(std::back_inserter(buf), ".returns({})", return_type.show(gs, options));
-            }
-            return to_string(buf);
-        } else {
-            // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
-            if (options.useValidSyntax && this->klass.data(gs)->isSingletonClass(gs)) {
-                return this->klass.show(gs, options);
-            }
-            fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
+        if (*procArity > 0) {
+            fmt::format_to(std::back_inserter(buf), ".params(");
         }
+
+        int arg_num = 0;
+        fmt::format_to(std::back_inserter(buf), "{}",
+                       fmt::map_join(
+                           targs_it, this->targs.end(), ", ", [&](auto targ) -> auto{
+                               return fmt::format("arg{}: {}", arg_num++, targ.show(gs, options));
+                           }));
+
+        if (*procArity > 0) {
+            fmt::format_to(std::back_inserter(buf), ")");
+        }
+
+        if (return_type == core::Types::void_()) {
+            fmt::format_to(std::back_inserter(buf), ".void");
+        } else {
+            fmt::format_to(std::back_inserter(buf), ".returns({})", return_type.show(gs, options));
+        }
+        return to_string(buf);
+    }
+
+    auto forwarderClass = this->klass.forwarderForBuiltinGeneric();
+    if (forwarderClass.exists()) {
+        fmt::format_to(std::back_inserter(buf), "{}", forwarderClass.show(gs, options));
+    } else {
+        // T.class_of(klass)[arg1, arg2] is never valid syntax in an RBI
+        if (options.useValidSyntax && this->klass.data(gs)->isSingletonClass(gs)) {
+            return this->klass.show(gs, options);
+        }
+        fmt::format_to(std::back_inserter(buf), "{}", this->klass.show(gs, options));
     }
     auto targs = this->targs;
     auto typeMembers = this->klass.data(gs)->typeMembers();
