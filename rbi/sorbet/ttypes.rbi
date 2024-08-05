@@ -58,6 +58,9 @@ class T::Types::Union < T::Types::Base
 
   sig { returns(T::Array[T::Types::Base]) }
   def types; end
+
+  sig { returns(T.nilable(T::Types::Base)) }
+  def unwrap_nilable; end
 end
 
 class T::Types::Intersection < T::Types::Base
@@ -280,7 +283,10 @@ class T::Types::TypedHash < T::Types::TypedEnumerable
   sig { override.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
+  sig { returns(T::Types::Base) }
   def keys; end
+
+  sig { returns(T::Types::Base) }
   def values; end
 
   sig { override.returns(Module) }
