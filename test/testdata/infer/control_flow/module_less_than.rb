@@ -117,6 +117,7 @@ sig { params(other: T.class_of(A)).void }
 def module_should_not_add_noTypeTest(other)
   if other <= M
     T.reveal_type(other) # error: `T.class_of(A)[T.all(A, M)]`
+    return
   end
 
   T.reveal_type(other) # error: `T.class_of(A)`
