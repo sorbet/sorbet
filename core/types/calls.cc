@@ -2101,7 +2101,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto tClassSelfType = Types::tClass(args.selfType);
+        auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
         if (self.data(gs)->isModule()) {
             ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
             // This normally can't happen, because `Object` is not an ancestor of any module
