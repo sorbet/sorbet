@@ -402,6 +402,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         entry->set_sigil(strictToProto(file.data(gs).originalSigil));
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
+        entry->set_compiled(com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledNone);
 
         auto frefIdIt = untypedUsages.find(i);
         if (frefIdIt != untypedUsages.end()) {
