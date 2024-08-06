@@ -873,10 +873,6 @@ void GlobalState::initEmpty() {
     Symbols::StubSuperClass().data(*this)->setIsModule(false);
     Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
-    // Synthesize T::Utils
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
-    klass.data(*this)->setIsModule(true);
-
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
     ENFORCE_NO_TIMER(klass == Symbols::Magic_UntypedSource());
 
