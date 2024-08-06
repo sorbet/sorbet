@@ -102,7 +102,9 @@ module T::Props
           else
             inners = type.types.map {|t| generate(t, mode, varname)}.uniq
             if inners.length <= 1
-              # Handle, e.g., T::Boolean
+              # Handle, e.g., T::Boolean, but more generally, any union type
+              # where all variants require the same serde transformations
+              # (e.g., T.any(Integer, Symbol))
               inners.first
             else
               # We currently deep_clone_object if the type was T.any(Integer, Float).
