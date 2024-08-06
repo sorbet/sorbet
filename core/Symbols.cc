@@ -22,11 +22,11 @@ namespace sorbet::core {
 
 using namespace std;
 
-const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
+const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 217;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 56;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 72;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 111;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -439,9 +439,7 @@ string TypeMemberRef::show(const GlobalState &gs, ShowOptions options) const {
         auto owner = sym->owner.asClassOrModuleRef();
         auto attached = owner.data(gs)->attachedClass(gs);
         if (options.useValidSyntax || !attached.exists()) {
-            // Attached wont exist for a number of cases:
-            // - owner is a module that doesn't use has_attached_class!
-            // - owner is a singleton class of a module
+            // Attached wont exist in any ClassOrModule instance that uses has_attached_class!
             return "T.attached_class";
         }
         return fmt::format("T.attached_class (of {})", attached.show(gs, options));
@@ -631,9 +629,9 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
-           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Enumerable() ||
-           *this == Symbols::T_Enumerator() || *this == Symbols::T_Enumerator_Lazy() ||
-           *this == Symbols::T_Enumerator_Chain();
+           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Module() ||
+           *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
+           *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
 }
 
 ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
@@ -655,6 +653,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Set();
     } else if (*this == Symbols::T_Class()) {
         return Symbols::Class();
+    } else if (*this == Symbols::T_Module()) {
+        return Symbols::Module();
     } else {
         return *this;
     }
@@ -679,6 +679,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Set();
     } else if (*this == Symbols::Class()) {
         return Symbols::T_Class();
+    } else if (*this == Symbols::Module()) {
+        return Symbols::T_Module();
     } else {
         return Symbols::noClassOrModule();
     }
@@ -1780,16 +1782,16 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     singletonInfo->setSuperClass(Symbols::todo());
     singletonInfo->setIsModule(false);
 
+    // We don't actually need this invariant anymore, but we introduced it for the purpose of
+    // T::Class, so it's nice to keep.
     ENFORCE(self->isClassModuleSet(), "{}", selfRef.show(gs));
-    if (self->isClass()) {
-        auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
+    auto tp = gs.enterTypeMember(self->loc(), singleton, Names::Constants::AttachedClass(), Variance::CoVariant);
 
-        // Initialize the bounds of AttachedClass as todo, as they will be updated
-        // to the externalType of the attached class for the upper bound, and bottom
-        // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-        auto todo = make_type<ClassType>(Symbols::todo());
-        tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
-    }
+    // Initialize the bounds of AttachedClass as todo, as they will be updated
+    // to the externalType of the attached class for the upper bound, and bottom
+    // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
+    auto todo = make_type<ClassType>(Symbols::todo());
+    tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
     return singleton;

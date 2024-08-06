@@ -39,7 +39,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
         assert_equal('_spade_', CardSuitCustom::SPADE.serialize)
         assert_equal('_diamond_', CardSuitCustom::DIAMOND.serialize)
         assert_equal('_heart_', CardSuitCustom::HEART.serialize)
-        assert_equal(nil, CardSuitCustom::NONE.serialize)
+        assert_nil(CardSuitCustom::NONE.serialize)
       end
     end
   end

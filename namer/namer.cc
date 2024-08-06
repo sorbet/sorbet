@@ -726,7 +726,7 @@ using ClassBehaviorLocsMap = UnorderedMap<core::ClassOrModuleRef, BehaviorLocs>;
 bool isBadHasAttachedClass(core::Context ctx, core::NameRef name) {
     auto owner = ctx.owner.asClassOrModuleRef();
     return name == core::Names::Constants::AttachedClass() && owner != core::Symbols::Class() &&
-           owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx);
+           owner != core::Symbols::Module() && owner.data(ctx)->isClass() && !owner.data(ctx)->isSingletonClass(ctx);
 }
 
 /**
@@ -2010,8 +2010,8 @@ public:
             // We could go out of our way to try to not even define the <AttachedClass> type member,
             // in an attempt to maintain an invariant that <AttachedClass> is only ever defined on
             // - modules
-            // - class singleton classes
-            // - ::Class itself
+            // - singleton classes
+            // - ::Class / ::Module
             // But then in GlobalPass, resolveTypeMember would simply mangle rename things so that
             // the <AttachedClass> symbol pointed to a type member symbol anyways (instead of a
             // static field or type alias symbol). So let's just report an error and then continue

@@ -22,6 +22,7 @@ represent these values, too. Here's the syntax Sorbet uses:
 | `T::Enumerator::Lazy[Integer]`  | [1, 2, 3].each.lazy                   |
 | `T::Enumerator::Chain[Integer]` | [1, 2].chain([3])                     |
 | `T::Class[Integer]`             | Integer                               |
+| `T::Module[Integer]`            | Kernel                                |
 
 ## Why the `T::` prefix?
 

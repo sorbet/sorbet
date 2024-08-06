@@ -1163,9 +1163,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
             auto klass = sym.asClassOrModuleRef();
             // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
             // same way that we check against types like `Array`
-            if (klass.isBuiltinGenericForwarder() || klass.data(ctx)->typeArity(ctx) > 0) {
+            if (klass.isBuiltinGenericForwarder() ||
+                (klass != core::Symbols::Module() && klass.data(ctx)->typeArity(ctx) > 0)) {
                 // Class is not isLegacyStdlibGeneric (because its type members don't default to T.untyped),
                 // but we want to report this syntax error at `# typed: strict` like other stdlib classes.
+                // TODO(jez) Allow T::Module without making an error for Module first
                 auto level = klass.isLegacyStdlibGeneric() || klass == core::Symbols::Class()
                                  ? core::errors::Resolver::GenericClassWithoutTypeArgsStdlib
                                  : core::errors::Resolver::GenericClassWithoutTypeArgs;

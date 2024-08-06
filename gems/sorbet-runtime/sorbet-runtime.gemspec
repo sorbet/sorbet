@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
+  s.add_development_dependency 'debug'
   # for running ruby subprocesses
   s.add_development_dependency 'subprocess', '~> 1.5.3'
 end

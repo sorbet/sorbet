@@ -76,10 +76,42 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
                 // We'd only get this type member redeclaration error in a singleton class if
                 // the attached class of this singleton class is a module (because all classes'
                 // singleton classes get the `<AttachedClass>` type member declared)
+                //
+                // TODO(jez) This is going to cause some minor nightmares...
+                //
+                //     module M
+                //       extend T::Generic
+                //       has_attached_class!(:out)
+                //     end
+                //     module N
+                //       extend M
+                //     end
+                //
+                //     module X
+                //       extend T::Helpers
+                //       module CM
+                //         extend T::Generic
+                //         has_attached_class!(:out)
+                //       end
+                //       mixes_in_class_methods(CM)
+                //     end
+                //     module Y
+                //       include X
+                //     end
+                //
+                // Both of these are cases where we benefit a lot from this error getting reported,
+                // and people are going to be super confused if the fact that module singleton
+                // classes inherit an <AttachedClass> from ::Module silences this error. Can we keep
+                // reporting it anyways?
+                //
+                // Do we want to block this feature on building support for Concern-like things
+                // and/or make mixes_in_class_methods working like Concern at runtime?
                 ENFORCE(sym.data(gs)->attachedClass(gs).data(gs)->isModule());
                 e.setHeader("`{}` was declared `{}` and so cannot be `{}`ed into the module `{}`", parent.show(gs),
                             hasAttachedClass, "extend", sym.data(gs)->attachedClass(gs).show(gs));
             } else if (sym.data(gs)->derivesFrom(gs, core::Symbols::Class())) {
+                // TODO(jez) Unlike with ::Class, `class A < ::Module` is allowed by the VM.
+                // Does that invalidate any assumptions here?
                 e.setHeader("`{}` is a subclass of `{}` which is not allowed", sym.show(gs), "Class");
             } else {
                 // sym is a normal, non singleton class
@@ -305,6 +337,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 // Note: this depends on attached classes having lower indexes in name table than their singletons
                 ref.data(gs)->setSuperClass(core::Symbols::Module());
             } else {
+                // TODO(jez) Should we be doing this logic for modules too?
+                // I'm down, but I would like to see what fails so I can write a test for it
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
                 auto singletonSuperClass = attached.data(gs)->superClass().data(gs)->lookupSingletonClass(gs);
                 if (!singletonSuperClass.exists()) {

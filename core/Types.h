@@ -180,6 +180,8 @@ public:
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr setOf(const TypePtr &elem);
+    // TODO(jez) After T::Module change: audit tClass usages to see if there are opportunities to
+    // make something more general that uses tModule.
     static TypePtr tClass(const TypePtr &attachedClass);
     static TypePtr dropNil(const GlobalState &gs, const TypePtr &from);
 

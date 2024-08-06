@@ -350,6 +350,12 @@ module T::Class
   # Don't use case/when on T::Class--just use `when Class` instead.
   def self.===(arg0); end
 end
+module T::Module
+  # Type syntax to specify the element type of a standard library Module
+  def self.[](type); end
+  # Don't use case/when on T::Module--just use `when Module` instead.
+  def self.===(arg0); end
+end
 module T::Enumerable
   # Type syntax to specify the element type of a standard library Enumerable
   def self.[](type); end
