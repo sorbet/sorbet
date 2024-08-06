@@ -91,7 +91,7 @@ module T::Props
             "T::Props::Utils.deep_clone_object(#{varname})"
           end
         when T::Types::Union
-          non_nil_type = T::Utils.unwrap_nilable(type)
+          non_nil_type = type.unwrap_nilable
           if non_nil_type
             inner = generate(non_nil_type, mode, varname)
             if inner.nil?
