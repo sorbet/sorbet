@@ -95,11 +95,20 @@ module T::Props
           if non_nil_type
             inner = generate(non_nil_type, mode, varname)
             if inner.nil?
-              nil
+              return nil
             else
-              "#{varname}.nil? ? nil : #{inner}"
+              return "#{varname}.nil? ? nil : #{inner}"
             end
-          elsif type.types.all? {|t| generate(t, mode, varname).nil?}
+          end
+
+          if (partitioned = partition_single_enum_class(type))
+            enum_class, non_enum_types = partitioned
+            if non_enum_types.all? {|t| generate(t, mode, varname).nil?}
+              return handle_enum_union(enum_class, mode, varname)
+            end
+          end
+
+          if type.types.all? {|t| generate(t, mode, varname).nil?}
             # Handle, e.g., T::Boolean
             nil
           else
@@ -177,9 +186,49 @@ module T::Props
         end
       end
 
+      sig do
+        params(enum_type: T.class_of(T::Enum), mode: ModeType, varname: String)
+          .returns(String)
+          .checked(:never)
+      end
+      private_class_method def self.handle_enum_union(enum_type, mode, varname)
+        case mode
+        when Serialize
+          "case #{varname} when T::Enum then #{varname}.serialize else #{varname} end"
+        when Deserialize
+          type_name = T.must(module_name(enum_type))
+          "#{type_name}.try_deserialize(#{varname}) || #{varname}"
+        else
+          T.absurd(mode)
+        end
+      end
+
       sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
       private_class_method def self.module_name(type)
         T::Configuration.module_name_mangler.call(type)
+      end
+
+      sig do
+        params(type: T::Types::Union)
+          .returns(T.nilable([T.class_of(T::Enum), T::Array[T::Types::Base]]))
+          .checked(:never)
+      end
+      private_class_method def self.partition_single_enum_class(type)
+        non_enum_types = T::Array[T::Types::Base].new
+        enum_classes = type.types.filter_map do |type|
+          if type.is_a?(T::Types::Simple) && (raw_type = type.raw_type) < T::Enum
+            raw_type
+          else
+            non_enum_types << type
+            nil
+          end
+        end
+
+        if (enum_classes.length == 1)
+          [enum_classes.fetch(0), non_enum_types]
+        else
+          nil
+        end
       end
     end
   end
