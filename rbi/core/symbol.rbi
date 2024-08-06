@@ -255,7 +255,7 @@ class Symbol < Object
   # ```ruby
   # (1..3).collect(&:to_s)  #=> ["1", "2", "3"]
   # ```
-  sig {returns(Proc)}
+  sig {returns(T::Proc[T.untyped])}
   def to_proc(); end
 
   # Same as `sym.to_s.upcase.intern`.
