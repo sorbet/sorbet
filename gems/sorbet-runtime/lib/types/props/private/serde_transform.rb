@@ -215,16 +215,16 @@ module T::Props
       end
       private_class_method def self.partition_single_enum_class(type)
         non_enum_types = T::Array[T::Types::Base].new
-        enum_classes = type.types.filter_map do |type|
-          if type.is_a?(T::Types::Simple) && (raw_type = type.raw_type) < T::Enum
+        enum_classes = type.types.filter_map do |t|
+          if t.is_a?(T::Types::Simple) && (raw_type = t.raw_type) < T::Enum
             raw_type
           else
-            non_enum_types << type
+            non_enum_types << t
             nil
           end
         end
 
-        if (enum_classes.length == 1)
+        if enum_classes.length == 1
           [enum_classes.fetch(0), non_enum_types]
         else
           nil
