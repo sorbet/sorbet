@@ -127,10 +127,6 @@ bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     }
 
     auto recv = ast::cast_tree<ast::ConstantLit>(send.recv);
-    if (recv != nullptr && recv->symbol == core::Symbols::Sorbet_Private_Static_ResolvedSig()) {
-        // Regardless of how many arguments this method has, we already marked it resolved, so it's good.
-        return true;
-    }
 
     auto nargs = send.numPosArgs();
     if (!(nargs == 1 || nargs == 2)) {

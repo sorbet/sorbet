@@ -39,7 +39,7 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
         return false;
     }
 
-    if (methodData->flags.isAbstract && ctx.file.data(ctx).compiledLevel != core::CompiledLevel::True) {
+    if (methodData->flags.isAbstract) {
         return false;
     }
 

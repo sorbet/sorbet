@@ -649,12 +649,6 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export_all());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ResolvedSig());
-    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
-    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSig());
-    klass = Symbols::Sorbet_Private_Static_ResolvedSig().data(*this)->singletonClass(*this);
-    ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ResolvedSigSingleton());
-
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());

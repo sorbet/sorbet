@@ -81,10 +81,6 @@ StrictLevel File::fileStrictSigil(string_view source) {
     return ParseSigil<StrictLevel>::parse(source);
 }
 
-CompiledLevel File::fileCompiledSigil(string_view source) {
-    return ParseSigil<CompiledLevel>::parse(source);
-}
-
 PackagedLevel File::filePackagedSigil(string_view source) {
     return ParseSigil<PackagedLevel>::parse(source);
 }
@@ -117,7 +113,7 @@ File::Flags::Flags(string_view path)
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
     : epoch(epoch), sourceType(sourceType), flags(path_), packagedLevel{File::filePackagedSigil(source_)},
       path_(move(path_)), source_(move(source_)), originalSigil(fileStrictSigil(this->source_)),
-      strictLevel(originalSigil), compiledLevel(fileCompiledSigil(this->source_)) {}
+      strictLevel(originalSigil) {}
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
     string sourceCopy = source_;
