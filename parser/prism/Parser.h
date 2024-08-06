@@ -10,7 +10,12 @@ extern "C" {
 
 namespace sorbet::parser::Prism {
 
+class Node;
+
 class Parser final {
+    friend class Node;
+    friend struct NodeDeleter;
+
     std::shared_ptr<pm_parser_t> parser;
 
 public:
@@ -30,10 +35,36 @@ public:
     // Expose the raw parser pointer temporarily, until we build wrappers for the other APIs
     pm_parser_t *tmp_public_get_raw_parser_pointer();
 
-    pm_node_t *parse_root();
+    Node parse_root();
 
 private:
     pm_parser_t *get_raw_parser_pointer();
+};
+
+class Node final {
+    struct NodeDeleter {
+        Parser parser;
+
+        void operator()(pm_node_t *node) {
+            pm_node_destroy(parser.get_raw_parser_pointer(), node);
+        }
+    };
+
+    friend class Parser;
+
+    Parser parser;
+    std::unique_ptr<pm_node_t, NodeDeleter> node;
+
+    Node(Parser parser, pm_node_t *node) : parser{parser}, node{node, NodeDeleter{parser}} {}
+
+    Node(const Node &) = delete;            // Copy constructor
+    Node &operator=(const Node &) = delete; // Copy assignment
+
+public:
+    // Expose the raw parser pointer temporarily, until we build wrappers for the other APIs
+    pm_node_t *tmp_public_get_raw_node_pointer() {
+        return node.get();
+    }
 };
 
 } // namespace sorbet::parser::Prism

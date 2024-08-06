@@ -10,8 +10,9 @@ pm_parser_t *Parser::get_raw_parser_pointer() {
     return parser.get();
 }
 
-pm_node_t *Parser::parse_root() {
-    return pm_parse(parser.get());
+Node Parser::parse_root() {
+    pm_node_t *root = pm_parse(parser.get());
+    return Node{*this, root};
 };
 
 }; // namespace sorbet::parser::Prism
