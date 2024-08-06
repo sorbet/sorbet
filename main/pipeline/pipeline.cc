@@ -546,18 +546,13 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
     core::UnfreezeNameTable nameTableAccess(gs);
 
     Prism::Parser parser{source};
-
-    pm_node_t *root = parser.parse_root();
+    Prism::Node root = parser.parse_root();
 
     if (stopAfterParser) {
         return std::unique_ptr<parser::Node>();
     }
 
-    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, parser.tmp_public_get_raw_parser_pointer(), gs);
-
-    pm_node_destroy(parser.tmp_public_get_raw_parser_pointer(), root);
-
-    return ast;
+    return convertPrismToSorbet(root.tmp_public_get_raw_node_pointer(), parser.tmp_public_get_raw_parser_pointer(), gs);
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
