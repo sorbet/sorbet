@@ -1110,7 +1110,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(97);
+        return ClassOrModuleRef::fromRaw(96);
     }
 
     static FieldRef Magic_UntypedSource_super() {
