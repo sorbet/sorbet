@@ -2275,16 +2275,6 @@ public:
     }
 } SorbetPrivateStatic_sig;
 
-class SorbetPrivateStaticResolvedSig_sig : public IntrinsicMethod {
-public:
-    // Forward Sorbet::Private::Static::ResolvedSig.sig(recv, ..., <self-method>, <method-name>) {...} to recv.sig(...)
-    // {...}
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        const size_t selfAndMethodSymbol = 2;
-        applySig(gs, args, res, selfAndMethodSymbol);
-    }
-} SorbetPrivateStaticResolvedSig_sig;
-
 class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4523,8 +4513,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
-    {Symbols::Sorbet_Private_Static_ResolvedSig(), Intrinsic::Kind::Singleton, Names::sig(),
-     &SorbetPrivateStaticResolvedSig_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
