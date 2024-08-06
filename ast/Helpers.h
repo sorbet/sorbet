@@ -102,6 +102,11 @@ public:
         return make_expression<ConstantLit>(loc, symbol, nullptr);
     }
 
+    // TODO: rename
+    static ExpressionPtr ResolvedLocal(core::LocOffsets loc, core::NameRef name, uint32_t unique = 0) {
+        return make_expression<ast::Local>(loc, core::LocalVariable(name, unique));
+    }
+
     static ExpressionPtr Local(core::LocOffsets loc, core::NameRef name) {
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }
@@ -110,12 +115,13 @@ public:
         return make_expression<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
     }
 
-    static ExpressionPtr KeywordArg(core::LocOffsets loc, core::NameRef name) {
-        return make_expression<ast::KeywordArg>(loc, Local(loc, name));
+    static ExpressionPtr KeywordArg(core::LocOffsets loc, core::NameRef name, bool shouldBeResolved = false) {
+        return make_expression<ast::KeywordArg>(loc, shouldBeResolved ? ResolvedLocal(loc, name) : Local(loc, name));
     }
 
-    static ExpressionPtr KeywordArgWithDefault(core::LocOffsets loc, core::NameRef name, ExpressionPtr default_) {
-        return OptionalArg(loc, KeywordArg(loc, name), std::move(default_));
+    static ExpressionPtr KeywordArgWithDefault(core::LocOffsets loc, core::NameRef name, ExpressionPtr default_,
+                                               bool shouldBeResolved = false) {
+        return OptionalArg(loc, KeywordArg(loc, name, shouldBeResolved), std::move(default_));
     }
 
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
@@ -244,12 +250,19 @@ public:
                                              core::make_type<core::NamedLiteralType>(core::Symbols::String(), value));
     }
 
+    static ExpressionPtr MethodNoBlk(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                                     MethodDef::ARGS_store args, ExpressionPtr rhs,
+                                     MethodDef::Flags flags = MethodDef::Flags()) {
+        return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args),
+                                          std::move(rhs), flags);
+    }
+
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::ARGS_store args, ExpressionPtr rhs,
                                 MethodDef::Flags flags = MethodDef::Flags()) {
-        if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
+        if (args.empty() || (!isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
-            args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::ResolvedLocal(blkLoc, core::Names::blkArg())));
         }
         return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args),
                                           std::move(rhs), flags);
@@ -472,27 +485,6 @@ public:
 
     static bool isSelfNew(ast::Send *send) {
         return send->fun == core::Names::new_() && send->recv.isSelfReference();
-    }
-
-    static core::NameRef arg2Name(const ExpressionPtr &arg) {
-        auto *cursor = &arg;
-        while (true) {
-            if (auto *local = cast_tree<UnresolvedIdent>(*cursor)) {
-                ENFORCE(local->kind == UnresolvedIdent::Kind::Local);
-                return local->name;
-            }
-
-            // Recurse into structure to find the UnresolvedIdent
-            typecase(
-                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
-                [&](const class KeywordArg &kw) { cursor = &kw.expr; },
-                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
-                [&](const class BlockArg &blk) { cursor = &blk.expr; },
-                [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
-                // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
-        }
     }
 
     static ast::Local const *arg2Local(const ast::ExpressionPtr &arg) {

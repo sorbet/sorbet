@@ -21,9 +21,27 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -54,11 +72,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -88,9 +103,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -121,11 +135,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -155,9 +166,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -193,11 +203,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -247,9 +254,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -285,11 +291,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -339,9 +342,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -380,11 +382,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -414,9 +413,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -455,11 +453,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -489,9 +484,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -538,11 +532,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -570,9 +561,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -590,11 +580,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -606,41 +593,6 @@ ClassDef{
             } }]
           rhs = EmptyTree
         }
-
-        Send{
-          flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
-          fun = <U extend>
-          block = nullptr
-          pos_args = 1
-          args = [
-            UnresolvedConstantLit{
-              cnst = <C <U Sig>>
-              scope = UnresolvedConstantLit{
-                cnst = <C <U T>>
-                scope = EmptyTree
-              }
-            }
-          ]
-        }
-
-        <runtime method definition of takes_positional>
-
-        <runtime method definition of takes_keyword>
-
-        <runtime method definition of takes_two_keyword>
-
-        <runtime method definition of takes_positional_then_keyword>
-
-        <runtime method definition of takes_rest>
-
-        <runtime method definition of takes_keyword_rest>
-
-        <runtime method definition of takes_block>
-
-        <runtime method definition of zsuper_inside_block>
       ]
     }
 
@@ -658,9 +610,8 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -691,11 +642,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -725,9 +673,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -758,11 +705,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -793,9 +737,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -831,11 +774,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -872,9 +812,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -910,11 +849,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -950,9 +886,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -991,11 +926,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -1055,9 +987,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -1096,11 +1027,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -1142,9 +1070,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -1191,11 +1118,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -1228,9 +1152,8 @@ ClassDef{
 
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -1248,11 +1171,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -1289,22 +1209,6 @@ ClassDef{
             ]
           }
         }
-
-        <runtime method definition of takes_positional>
-
-        <runtime method definition of takes_keyword>
-
-        <runtime method definition of takes_two_keyword>
-
-        <runtime method definition of takes_positional_then_keyword>
-
-        <runtime method definition of takes_rest>
-
-        <runtime method definition of takes_keyword_rest>
-
-        <runtime method definition of takes_block>
-
-        <runtime method definition of zsuper_inside_block>
       ]
     }
 
@@ -1319,9 +1223,27 @@ ClassDef{
       rhs = [
         Send{
           flags = {privateOk}
-          recv = ConstantLit{
-            symbol = (module ::Sorbet::Private::Static)
-            orig = nullptr
+          recv = Local{
+            localVariable = <U <self>>
+          }
+          fun = <U extend>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U Sig>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U T>>
+                scope = EmptyTree
+              }
+            }
+          ]
+        }
+
+        Send{
+          flags = {privateOk}
+          recv = Local{
+            localVariable = <U <self>>
           }
           fun = <U sig>
           block = Block {
@@ -1339,11 +1261,8 @@ ClassDef{
               ]
             }
           }
-          pos_args = 1
+          pos_args = 0
           args = [
-            Local{
-              localVariable = <U <self>>
-            }
           ]
         }
 
@@ -1365,27 +1284,6 @@ ClassDef{
             ]
           }
         }
-
-        Send{
-          flags = {privateOk}
-          recv = Local{
-            localVariable = <U <self>>
-          }
-          fun = <U extend>
-          block = nullptr
-          pos_args = 1
-          args = [
-            UnresolvedConstantLit{
-              cnst = <C <U Sig>>
-              scope = UnresolvedConstantLit{
-                cnst = <C <U T>>
-                scope = EmptyTree
-              }
-            }
-          ]
-        }
-
-        <runtime method definition of super_inside_module>
       ]
     }
   ]

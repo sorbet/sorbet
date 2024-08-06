@@ -240,8 +240,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def <it 'calls example'><<todo method>>(&<blk>)
       begin
-        res = <self>.example()
-        <emptyTree>::<C T>.reveal_type(res)
+        res$3 = <self>.example()
+        <emptyTree>::<C T>.reveal_type(res$3)
       end
     end
 

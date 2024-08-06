@@ -197,7 +197,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::ExpressionPtr tree) {
     auto &print = opts.print;
-    ast::ParsedFile rewritten{nullptr, file};
+    ast::ParsedFile result{nullptr, file};
 
     Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
     try {
@@ -214,16 +214,22 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
             }
+            tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
+            if (print.LocalVarsTree.enabled) {
+                print.LocalVarsTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
+            }
+            if (print.LocalVarsTreeRaw.enabled) {
+                print.LocalVarsTreeRaw.fmt("{}\n", tree.showRaw(lgs));
+            }
+            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
+                return emptyParsedFile(file);
+            }
             tree = runRewriter(lgs, file, move(tree));
             if (print.RewriterTree.enabled) {
                 print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
             }
             if (print.RewriterTreeRaw.enabled) {
                 print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
-            }
-            tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
-            if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
-                return emptyParsedFile(file);
             }
         }
         if (print.IndexTree.enabled) {
@@ -236,8 +242,8 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             return emptyParsedFile(file);
         }
 
-        rewritten.tree = move(tree);
-        return rewritten;
+        result.tree = move(tree);
+        return result;
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {

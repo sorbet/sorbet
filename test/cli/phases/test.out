@@ -28,6 +28,25 @@ ClassDef{
   ]
 }
 --- desugar-tree-raw end ---
+--- local-vars-tree start ---
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  1
+end
+--- local-vars-tree end ---
+--- local-vars-tree-raw start ---
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Literal{ value = 1 }
+  ]
+}
+--- local-vars-tree-raw end ---
 --- rewrite-tree start ---
 class <emptyTree><<C <root>>> < (::<todo sym>)
   1

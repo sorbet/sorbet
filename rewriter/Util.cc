@@ -16,9 +16,15 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return nullptr;
         }
         if (send->fun == core::Names::enum_() || send->fun == core::Names::deprecatedEnum()) {
-            // T.deprecated_enum() is weird, and accepts values instead of types. Just copy
-            // it blindly through.
-            return send->deepCopy();
+            // T.deprecated_enum() is weird, and accepts values instead of types.
+            if (ast::cast_tree<ast::Array>(send->getPosArg(0))) {
+                // Just copy it blindly through if it's passed a literal array.
+                return send->deepCopy();
+            } else {
+                // If it's not passed a literal, we'll treat it as Object eventually (see
+                // case core::Names::deprecatedEnum(): in interpretTCombinator), so let's replace it with Object now.
+                return (ast::MK::Constant(send->loc, core::Symbols::Object()));
+            }
         }
 
         if (send->fun == core::Names::params() && !send->hasPosArgs() && !send->hasKwSplat()) {
@@ -259,7 +265,8 @@ ast::ExpressionPtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core:
 ast::ExpressionPtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
                                   ast::ExpressionPtr rhs, ast::MethodDef::Flags flags) {
     flags.isAttrBestEffortUIOnly = true;
-    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs), flags);
+    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::ResolvedLocal(argLoc, core::Names::arg0()), move(rhs),
+                                     flags);
 }
 
 ast::ExpressionPtr ASTUtil::mkNilable(core::LocOffsets loc, ast::ExpressionPtr type) {

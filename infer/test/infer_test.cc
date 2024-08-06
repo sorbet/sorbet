@@ -35,8 +35,8 @@ void processSource(core::GlobalState &cb, string str) {
     auto ast = parser::Parser::run(cb, fileId, settings);
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), fileId);
     auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
-    tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
     tree = local_vars::LocalVars::run(ctx, move(tree));
+    tree.tree = rewriter::Rewriter::run(ctx, move(tree.tree));
     vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
     auto workers = WorkerPool::create(0, *logger);

@@ -107,8 +107,9 @@ vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send 
         if (doWriters) {
             auto sig = ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                      ast::MK::Untyped(loc));
-            auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol().addEq(ctx),
-                                                 ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
+            auto def =
+                ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol().addEq(ctx),
+                                          ast::MK::ResolvedLocal(loc, core::Names::arg0()), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceWriter) {
                 addInstanceCounterPart(result, sig, def);

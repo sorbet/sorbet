@@ -68,16 +68,16 @@ void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
         return;
     }
 
-    auto rhs = ast::cast_tree<ast::UnresolvedIdent>(assn->rhs);
-    if (rhs == nullptr || rhs->kind != ast::UnresolvedIdent::Kind::Local) {
+    auto rhs = ast::cast_tree<ast::Local>(assn->rhs);
+    if (rhs == nullptr) {
         return;
     }
 
-    auto typeExpr = argTypeMap.find(rhs->name);
+    auto typeExpr = argTypeMap.find(rhs->localVariable._name);
     if (typeExpr != argTypeMap.end() && isCopyableType(*typeExpr->second)) {
         auto loc = rhs->loc;
         auto type = (*typeExpr->second).deepCopy();
-        auto it = argKindMap.find(rhs->name);
+        auto it = argKindMap.find(rhs->localVariable._name);
         if (it == argKindMap.end()) {
             return;
         }
@@ -188,13 +188,14 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     UnorderedMap<core::NameRef, ArgKind> argKindMap;
     for (const auto &arg : methodDef->args) {
         const auto *restArg = ast::cast_tree<ast::RestArg>(arg);
+        auto name = ast::MK::arg2Local(arg)->localVariable._name;
         if (restArg == nullptr) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::Plain;
+            argKindMap[name] = ArgKind::Plain;
         } else if (ast::isa_tree<ast::KeywordArg>(restArg->expr)) {
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::KeywordRestArg;
+            argKindMap[name] = ArgKind::KeywordRestArg;
         } else {
-            ENFORCE(ast::isa_tree<ast::UnresolvedIdent>(restArg->expr));
-            argKindMap[ast::MK::arg2Name(arg)] = ArgKind::RestArg;
+            ENFORCE(ast::isa_tree<ast::Local>(restArg->expr));
+            argKindMap[name] = ArgKind::RestArg;
         }
     }
 

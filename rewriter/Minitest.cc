@@ -289,19 +289,19 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 }
 
 bool isDestructuringArg(core::GlobalState &gs, const ast::MethodDef::ARGS_store &args, const ast::ExpressionPtr &expr) {
-    auto *local = ast::cast_tree<ast::UnresolvedIdent>(expr);
-    if (local == nullptr || local->kind != ast::UnresolvedIdent::Kind::Local) {
+    auto *local = ast::cast_tree<ast::Local>(expr);
+    if (local == nullptr) {
         return false;
     }
 
-    auto name = local->name;
+    auto name = local->localVariable._name;
     if (name.kind() != core::NameKind::UNIQUE || name.dataUnique(gs)->original != core::Names::destructureArg()) {
         return false;
     }
 
     return absl::c_find_if(args, [name](auto &argExpr) {
-               auto *arg = ast::cast_tree<ast::UnresolvedIdent>(argExpr);
-               return arg && arg->name == name;
+               auto *arg = ast::cast_tree<ast::Local>(argExpr);
+               return arg && arg->localVariable._name == name;
            }) != args.end();
 }
 

@@ -233,22 +233,6 @@ ClassDef{
             } }]
           rhs = EmptyTree
         }
-
-        <runtime method definition of takes_positional>
-
-        <runtime method definition of takes_keyword>
-
-        <runtime method definition of takes_two_keyword>
-
-        <runtime method definition of takes_positional_then_keyword>
-
-        <runtime method definition of takes_rest>
-
-        <runtime method definition of takes_keyword_rest>
-
-        <runtime method definition of takes_block>
-
-        <runtime method definition of zsuper_inside_block>
       ]
     }
 
@@ -575,22 +559,6 @@ ClassDef{
             ]
           }
         }
-
-        <runtime method definition of takes_positional>
-
-        <runtime method definition of takes_keyword>
-
-        <runtime method definition of takes_two_keyword>
-
-        <runtime method definition of takes_positional_then_keyword>
-
-        <runtime method definition of takes_rest>
-
-        <runtime method definition of takes_keyword_rest>
-
-        <runtime method definition of takes_block>
-
-        <runtime method definition of zsuper_inside_block>
       ]
     }
 
@@ -629,8 +597,6 @@ ClassDef{
             ]
           }
         }
-
-        <runtime method definition of super_inside_module>
       ]
     }
   ]

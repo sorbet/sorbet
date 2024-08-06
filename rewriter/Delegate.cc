@@ -109,8 +109,8 @@ vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Se
 
         // def $methodName(*arg0, &blk); end
         ast::MethodDef::ARGS_store args;
-        args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-        args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+        args.emplace_back(ast::MK::RestArg(loc, ast::MK::ResolvedLocal(loc, core::Names::arg0())));
+        args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::ResolvedLocal(loc, core::Names::blkArg())));
 
         methodStubs.push_back(ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree()));
     }
