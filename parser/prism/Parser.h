@@ -8,6 +8,8 @@ extern "C" {
 #include "prism.h"
 }
 
+#include "core/LocOffsets.h"
+
 namespace sorbet::parser::Prism {
 
 class Node;
@@ -36,6 +38,7 @@ public:
     pm_parser_t *tmp_public_get_raw_parser_pointer();
 
     Node parse_root();
+    core::LocOffsets translateLocation(pm_location_t *location);
 
 private:
     pm_parser_t *get_raw_parser_pointer();
