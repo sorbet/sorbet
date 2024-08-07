@@ -145,7 +145,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 }
 
 unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, Prism::Parser parser, core::GlobalState &gs) {
-    return Prism::Translator().convertPrismToSorbet(node, parser, gs);
+    return Prism::Translator(parser, gs).convertPrismToSorbet(node);
 }
 
 unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser) {
