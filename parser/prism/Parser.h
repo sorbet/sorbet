@@ -32,7 +32,7 @@ public:
     }
 
     Parser(const Parser &) = default;
-    Parser &operator=(const Parser &) = delete;
+    Parser &operator=(const Parser &) = default;
 
     Node parse_root();
     core::LocOffsets translateLocation(pm_location_t *location);
