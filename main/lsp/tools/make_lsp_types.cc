@@ -1306,6 +1306,16 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         classTypes);
 
     /* Watchman JSON response objects */
+    auto WatchmanWatchProjectResponse =
+        makeObject("WatchmanWatchProjectResponse",
+                   {
+                       makeField("version", JSONString),
+                       makeField("watcher", JSONString),
+                       makeField("watch", JSONString),
+                       makeField("relative_path", "relativePath", makeOptional(JSONString)),
+                   },
+                   classTypes);
+
     auto WatchmanQueryResponse = makeObject("WatchmanQueryResponse",
                                             {
                                                 makeField("version", JSONString),
