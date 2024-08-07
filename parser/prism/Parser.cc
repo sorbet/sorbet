@@ -22,4 +22,10 @@ core::LocOffsets Parser::translateLocation(pm_location_t *location) {
     return core::LocOffsets{start, end};
 }
 
+std::string_view Parser::resolveConstant(pm_constant_id_t constant_id) {
+    pm_constant_t *constant = pm_constant_pool_id_to_constant(&parser->constant_pool, constant_id);
+
+    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
+}
+
 }; // namespace sorbet::parser::Prism

@@ -7,26 +7,13 @@ using std::unique_ptr;
 
 namespace sorbet::parser::Prism {
 
-namespace {
-
-std::string_view prismConstantName(pm_constant_id_t name, Parser parser_wrapper) {
-    auto parser = parser_wrapper.tmp_public_get_raw_parser_pointer();
-
-    pm_constant_pool_t *constantPool = &parser->constant_pool;
-    pm_constant_t *constant = pm_constant_pool_id_to_constant(constantPool, name);
-
-    return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
-}
-
-} // namespace
-
 std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, Parser parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_PARAMETER_NODE: {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
 
-            std::string_view name = prismConstantName(blockParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(blockParamNode->name);
 
             return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -35,7 +22,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             pm_location_t *loc = &defNode->base.location;
             pm_location_t *declLoc = &defNode->def_keyword_loc;
 
-            std::string_view name = prismConstantName(defNode->name, parser);
+            std::string_view name = parser.resolveConstant(defNode->name);
 
             unique_ptr<parser::Node> params;
             unique_ptr<parser::Node> body;
@@ -102,7 +89,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
             pm_location_t *loc = &keywordRestParamNode->base.location;
 
-            std::string_view name = prismConstantName(keywordRestParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(keywordRestParamNode->name);
 
             return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -111,7 +98,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             pm_location_t *loc = &optionalKeywordParamNode->base.location;
             pm_location_t *nameLoc = &optionalKeywordParamNode->name_loc;
 
-            std::string_view name = prismConstantName(optionalKeywordParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(optionalKeywordParamNode->name);
             unique_ptr<parser::Node> value = convertPrismToSorbet(optionalKeywordParamNode->value, parser, gs);
 
             return make_unique<parser::Kwoptarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
@@ -122,7 +109,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             pm_location_t *loc = &optionalParamNode->base.location;
             pm_location_t *nameLoc = &optionalParamNode->name_loc;
 
-            std::string_view name = prismConstantName(optionalParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(optionalParamNode->name);
             auto value = convertPrismToSorbet(optionalParamNode->value, parser, gs);
 
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
@@ -197,7 +184,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
             pm_location_t *loc = &requiredKeywordParamNode->base.location;
 
-            std::string_view name = prismConstantName(requiredKeywordParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(requiredKeywordParamNode->name);
 
             return make_unique<parser::Kwarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -205,7 +192,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             auto requiredParamNode = reinterpret_cast<pm_required_parameter_node *>(node);
             pm_location_t *loc = &requiredParamNode->base.location;
 
-            std::string_view name = prismConstantName(requiredParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(requiredParamNode->name);
 
             return make_unique<parser::Arg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -214,7 +201,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             pm_location_t *loc = &restParamNode->base.location;
             pm_location_t *nameLoc = &restParamNode->name_loc;
 
-            std::string_view name = prismConstantName(restParamNode->name, parser);
+            std::string_view name = parser.resolveConstant(restParamNode->name);
 
             return make_unique<parser::Restarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                 parser.translateLocation(nameLoc));
