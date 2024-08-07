@@ -1,7 +1,5 @@
 #include "Translator.h"
 
-#include "core/LocOffsets.h"
-
 template class std::unique_ptr<sorbet::parser::Node>;
 
 using std::make_unique;
@@ -10,15 +8,6 @@ using std::unique_ptr;
 namespace sorbet::parser::Prism {
 
 namespace {
-
-core::LocOffsets locOffset(pm_location_t *loc, Parser parser_wrapper) {
-    auto parser = parser_wrapper.tmp_public_get_raw_parser_pointer();
-
-    uint32_t locStart = static_cast<uint32_t>(loc->start - parser->start);
-    uint32_t locEnd = static_cast<uint32_t>(loc->end - parser->start);
-
-    return core::LocOffsets{locStart, locEnd};
-}
 
 std::string_view prismConstantName(pm_constant_id_t name, Parser parser_wrapper) {
     auto parser = parser_wrapper.tmp_public_get_raw_parser_pointer();
@@ -39,7 +28,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string_view name = prismConstantName(blockParamNode->name, parser);
 
-            return make_unique<parser::Blockarg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+            return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_DEF_NODE: {
             auto defNode = reinterpret_cast<pm_def_node *>(node);
@@ -59,7 +48,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
                 params = convertPrismToSorbet(reinterpret_cast<pm_node *>(defNode->parameters), parser, gs);
             }
 
-            return make_unique<parser::DefMethod>(locOffset(loc, parser), locOffset(declLoc, parser),
+            return make_unique<parser::DefMethod>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                   gs.enterNameUTF8(name), std::move(params), std::move(body));
         }
         case PM_ELSE_NODE: {
@@ -74,13 +63,13 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
             pm_location_t *loc = &falseNode->base.location;
 
-            return make_unique<parser::False>(locOffset(loc, parser));
+            return make_unique<parser::False>(parser.translateLocation(loc));
         }
         case PM_FLOAT_NODE: {
             auto floatNode = reinterpret_cast<pm_float_node *>(node);
             pm_location_t *loc = &floatNode->base.location;
 
-            return make_unique<parser::Float>(locOffset(loc, parser), std::to_string(floatNode->value));
+            return make_unique<parser::Float>(parser.translateLocation(loc), std::to_string(floatNode->value));
         }
         case PM_IF_NODE: {
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
@@ -99,7 +88,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
                 ifFalse = convertPrismToSorbet(ifNode->consequent, parser, gs);
             }
 
-            return make_unique<parser::If>(locOffset(loc, parser), std::move(predicate), std::move(ifTrue),
+            return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
         }
         case PM_INTEGER_NODE: {
@@ -107,7 +96,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             pm_location_t *loc = &intNode->base.location;
 
             // Will only work for positive, 32-bit integers
-            return make_unique<parser::Integer>(locOffset(loc, parser), std::to_string(intNode->value.value));
+            return make_unique<parser::Integer>(parser.translateLocation(loc), std::to_string(intNode->value.value));
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: {
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
@@ -115,7 +104,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string_view name = prismConstantName(keywordRestParamNode->name, parser);
 
-            return make_unique<parser::Kwrestarg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+            return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: {
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
@@ -125,8 +114,8 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             std::string_view name = prismConstantName(optionalKeywordParamNode->name, parser);
             unique_ptr<parser::Node> value = convertPrismToSorbet(optionalKeywordParamNode->value, parser, gs);
 
-            return make_unique<parser::Kwoptarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
-                                                 locOffset(nameLoc, parser), std::move(value));
+            return make_unique<parser::Kwoptarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
+                                                 parser.translateLocation(nameLoc), std::move(value));
         }
         case PM_OPTIONAL_PARAMETER_NODE: {
             auto optionalParamNode = reinterpret_cast<pm_optional_parameter_node *>(node);
@@ -136,8 +125,8 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
             std::string_view name = prismConstantName(optionalParamNode->name, parser);
             auto value = convertPrismToSorbet(optionalParamNode->value, parser, gs);
 
-            return make_unique<parser::Optarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
-                                               locOffset(nameLoc, parser), std::move(value));
+            return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
+                                               parser.translateLocation(nameLoc), std::move(value));
         }
         case PM_PARAMETERS_NODE: {
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
@@ -186,7 +175,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
                 params.emplace_back(std::move(block));
             }
 
-            return make_unique<parser::Args>(locOffset(loc, parser), std::move(params));
+            return make_unique<parser::Args>(parser.translateLocation(loc), std::move(params));
         }
         case PM_PROGRAM_NODE: {
             pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
@@ -202,7 +191,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
 
-            return make_unique<parser::Rational>(locOffset(loc, parser), value);
+            return make_unique<parser::Rational>(parser.translateLocation(loc), value);
         }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: {
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
@@ -210,7 +199,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string_view name = prismConstantName(requiredKeywordParamNode->name, parser);
 
-            return make_unique<parser::Kwarg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+            return make_unique<parser::Kwarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_REQUIRED_PARAMETER_NODE: {
             auto requiredParamNode = reinterpret_cast<pm_required_parameter_node *>(node);
@@ -218,7 +207,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string_view name = prismConstantName(requiredParamNode->name, parser);
 
-            return make_unique<parser::Arg>(locOffset(loc, parser), gs.enterNameUTF8(name));
+            return make_unique<parser::Arg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_REST_PARAMETER_NODE: {
             auto restParamNode = reinterpret_cast<pm_rest_parameter_node *>(node);
@@ -227,8 +216,8 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             std::string_view name = prismConstantName(restParamNode->name, parser);
 
-            return make_unique<parser::Restarg>(locOffset(loc, parser), gs.enterNameUTF8(name),
-                                                locOffset(nameLoc, parser));
+            return make_unique<parser::Restarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
+                                                parser.translateLocation(nameLoc));
         }
         case PM_STATEMENTS_NODE: {
             pm_statements_node *stmts_node = reinterpret_cast<pm_statements_node *>(node);
@@ -251,7 +240,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
 
             auto *loc = &stmts_node->base.location;
 
-            return make_unique<parser::Begin>(locOffset(loc, parser), std::move(sorbetStmts));
+            return make_unique<parser::Begin>(parser.translateLocation(loc), std::move(sorbetStmts));
         }
         case PM_STRING_NODE: {
             auto strNode = reinterpret_cast<pm_string_node *>(node);
@@ -262,13 +251,13 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, 
                 std::string(reinterpret_cast<const char *>(pm_string_source(unescaped)), pm_string_length(unescaped));
 
             // TODO: handle different string encodings
-            return make_unique<parser::String>(locOffset(loc, parser), gs.enterNameUTF8(source));
+            return make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
         }
         case PM_TRUE_NODE: {
             auto trueNode = reinterpret_cast<pm_true_node *>(node);
             pm_location_t *loc = &trueNode->base.location;
 
-            return make_unique<parser::True>(locOffset(loc, parser));
+            return make_unique<parser::True>(parser.translateLocation(loc));
         }
 
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:

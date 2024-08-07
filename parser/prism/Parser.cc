@@ -15,4 +15,11 @@ Node Parser::parse_root() {
     return Node{*this, root};
 };
 
+core::LocOffsets Parser::translateLocation(pm_location_t *location) {
+    uint32_t start = static_cast<uint32_t>(location->start - parser->start);
+    uint32_t end = static_cast<uint32_t>(location->end - parser->start);
+
+    return core::LocOffsets{start, end};
+}
+
 }; // namespace sorbet::parser::Prism
