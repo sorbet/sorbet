@@ -41,6 +41,7 @@
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "parser/prism/Parser.h"
 #include "pipeline.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -52,6 +53,7 @@ extern "C" {
 #include <iostream>
 
 using namespace std;
+namespace Prism = sorbet::parser::Prism;
 
 namespace sorbet::realmain::pipeline {
 
@@ -543,19 +545,17 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
 
     core::UnfreezeNameTable nameTableAccess(gs);
 
-    pm_parser_t parser;
-    pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source.data()), source.size(), NULL);
+    Prism::Parser parser{source};
 
-    pm_node_t *root = pm_parse(&parser);
+    pm_node_t *root = parser.parse_root();
 
     if (stopAfterParser) {
         return std::unique_ptr<parser::Node>();
     }
 
-    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, &parser, gs);
+    std::unique_ptr<parser::Node> ast = convertPrismToSorbet(root, parser.tmp_public_get_raw_parser_pointer(), gs);
 
-    pm_node_destroy(&parser, root);
-    pm_parser_free(&parser);
+    pm_node_destroy(parser.tmp_public_get_raw_parser_pointer(), root);
 
     return ast;
 }
