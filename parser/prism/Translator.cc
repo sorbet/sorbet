@@ -7,7 +7,7 @@ using std::unique_ptr;
 
 namespace sorbet::parser::Prism {
 
-std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) {
+std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_PARAMETER_NODE: {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
@@ -28,11 +28,11 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             unique_ptr<parser::Node> body;
 
             if (defNode->body != nullptr) {
-                body = convertPrismToSorbet(defNode->body);
+                body = translate(defNode->body);
             }
 
             if (defNode->parameters != nullptr) {
-                params = convertPrismToSorbet(reinterpret_cast<pm_node *>(defNode->parameters));
+                params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
             }
 
             return make_unique<parser::DefMethod>(parser.translateLocation(loc), parser.translateLocation(declLoc),
@@ -44,7 +44,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             if (elseNode->statements == nullptr)
                 return nullptr;
 
-            return convertPrismToSorbet(reinterpret_cast<pm_node *>(elseNode->statements));
+            return translate(reinterpret_cast<pm_node *>(elseNode->statements));
         }
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
@@ -62,17 +62,17 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
             auto *loc = &ifNode->base.location;
 
-            auto predicate = convertPrismToSorbet(ifNode->predicate);
+            auto predicate = translate(ifNode->predicate);
 
             std::unique_ptr<parser::Node> ifTrue;
             std::unique_ptr<parser::Node> ifFalse;
 
             if (ifNode->statements != nullptr) {
-                ifTrue = convertPrismToSorbet(reinterpret_cast<pm_node *>(ifNode->statements));
+                ifTrue = translate(reinterpret_cast<pm_node *>(ifNode->statements));
             }
 
             if (ifNode->consequent != nullptr) {
-                ifFalse = convertPrismToSorbet(ifNode->consequent);
+                ifFalse = translate(ifNode->consequent);
             }
 
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
@@ -99,7 +99,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             pm_location_t *nameLoc = &optionalKeywordParamNode->name_loc;
 
             std::string_view name = parser.resolveConstant(optionalKeywordParamNode->name);
-            unique_ptr<parser::Node> value = convertPrismToSorbet(optionalKeywordParamNode->value);
+            unique_ptr<parser::Node> value = translate(optionalKeywordParamNode->value);
 
             return make_unique<parser::Kwoptarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                  parser.translateLocation(nameLoc), std::move(value));
@@ -110,7 +110,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             pm_location_t *nameLoc = &optionalParamNode->name_loc;
 
             std::string_view name = parser.resolveConstant(optionalParamNode->name);
-            auto value = convertPrismToSorbet(optionalParamNode->value);
+            auto value = translate(optionalParamNode->value);
 
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                parser.translateLocation(nameLoc), std::move(value));
@@ -132,32 +132,32 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + kwrestSize + blockSize);
 
             for (auto &param : requireds) {
-                unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param);
+                unique_ptr<parser::Node> sorbetParam = translate(param);
                 params.emplace_back(std::move(sorbetParam));
             }
 
             for (auto &param : optionals) {
-                unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param);
+                unique_ptr<parser::Node> sorbetParam = translate(param);
                 params.emplace_back(std::move(sorbetParam));
             }
 
             if (paramsNode->rest != nullptr) {
-                unique_ptr<parser::Node> rest = convertPrismToSorbet(paramsNode->rest);
+                unique_ptr<parser::Node> rest = translate(paramsNode->rest);
                 params.emplace_back(std::move(rest));
             }
 
             for (auto &param : keywords) {
-                unique_ptr<parser::Node> sorbetParam = convertPrismToSorbet(param);
+                unique_ptr<parser::Node> sorbetParam = translate(param);
                 params.emplace_back(std::move(sorbetParam));
             }
 
             if (paramsNode->keyword_rest != nullptr) {
-                unique_ptr<parser::Node> keywordRest = convertPrismToSorbet(paramsNode->keyword_rest);
+                unique_ptr<parser::Node> keywordRest = translate(paramsNode->keyword_rest);
                 params.emplace_back(std::move(keywordRest));
             }
 
             if (paramsNode->block != nullptr) {
-                unique_ptr<parser::Node> block = convertPrismToSorbet(reinterpret_cast<pm_node *>(paramsNode->block));
+                unique_ptr<parser::Node> block = translate(reinterpret_cast<pm_node *>(paramsNode->block));
                 params.emplace_back(std::move(block));
             }
 
@@ -166,7 +166,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
         case PM_PROGRAM_NODE: {
             pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
 
-            return convertPrismToSorbet(reinterpret_cast<pm_node *>(programNode->statements));
+            return translate(reinterpret_cast<pm_node *>(programNode->statements));
         }
         case PM_RATIONAL_NODE: {
             auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
@@ -212,7 +212,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
 
             // For a single statement, do not create a Begin node and just return the statement
             if (stmts.size() == 1) {
-                return convertPrismToSorbet((pm_node *)stmts.front());
+                return translate((pm_node *)stmts.front());
             }
 
             // For multiple statements, convert each statement and add them to the body of a Begin node
@@ -220,7 +220,7 @@ std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node) 
             sorbetStmts.reserve(stmts.size());
 
             for (auto &node : stmts) {
-                unique_ptr<parser::Node> convertedStmt = convertPrismToSorbet(node);
+                unique_ptr<parser::Node> convertedStmt = translate(node);
                 sorbetStmts.emplace_back(std::move(convertedStmt));
             }
 
