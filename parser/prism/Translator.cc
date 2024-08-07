@@ -383,4 +383,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
+std::unique_ptr<parser::Node> Translator::translate(const Node &node) {
+    return translate(node.get_raw_node_pointer());
+}
+
 }; // namespace sorbet::parser::Prism
