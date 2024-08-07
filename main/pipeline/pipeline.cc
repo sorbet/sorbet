@@ -144,7 +144,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser, core::GlobalState &gs) {
+unique_ptr<parser::Node> convertPrismToSorbet(pm_node_t *node, Prism::Parser parser, core::GlobalState &gs) {
     return Prism::Translator().convertPrismToSorbet(node, parser, gs);
 }
 
@@ -160,7 +160,7 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
         return std::unique_ptr<parser::Node>();
     }
 
-    return convertPrismToSorbet(root.tmp_public_get_raw_node_pointer(), parser.tmp_public_get_raw_parser_pointer(), gs);
+    return convertPrismToSorbet(root.tmp_public_get_raw_node_pointer(), parser, gs);
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
