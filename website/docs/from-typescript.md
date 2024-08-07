@@ -153,6 +153,19 @@ def f(x); ...; end</code></pre>
     </tr>
     <tr>
       <td>
+        <code>Record<string, ValueType></code>
+      </td>
+      <td>
+        <code>T::Hash[String, ValueType]</code>
+      </td>
+      <td>
+        This creates an object type whose property keys are of type <code>String</code>
+        and whose property values are of type <code>ValueType</code> using a Sorbet
+        <a href="https://sorbet.org/docs/stdlib-generics">Hash</a>.
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>number | string</code>
       </td>
       <td>
