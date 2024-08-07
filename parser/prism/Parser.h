@@ -34,9 +34,6 @@ public:
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = delete;
 
-    // Expose the raw parser pointer temporarily, until we build wrappers for the other APIs
-    pm_parser_t *tmp_public_get_raw_parser_pointer();
-
     Node parse_root();
     core::LocOffsets translateLocation(pm_location_t *location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
