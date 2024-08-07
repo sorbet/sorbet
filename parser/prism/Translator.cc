@@ -4,7 +4,8 @@
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
-using namespace std;
+using std::make_unique;
+using std::unique_ptr;
 
 namespace sorbet::parser::Prism {
 
