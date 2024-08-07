@@ -11,14 +11,18 @@ namespace sorbet::parser::Prism {
 
 namespace {
 
-core::LocOffsets locOffset(pm_location_t *loc, pm_parser_t *parser) {
+core::LocOffsets locOffset(pm_location_t *loc, Parser parser_wrapper) {
+    auto parser = parser_wrapper.tmp_public_get_raw_parser_pointer();
+
     uint32_t locStart = static_cast<uint32_t>(loc->start - parser->start);
     uint32_t locEnd = static_cast<uint32_t>(loc->end - parser->start);
 
     return core::LocOffsets{locStart, locEnd};
 }
 
-std::string_view prismConstantName(pm_constant_id_t name, pm_parser_t *parser) {
+std::string_view prismConstantName(pm_constant_id_t name, Parser parser_wrapper) {
+    auto parser = parser_wrapper.tmp_public_get_raw_parser_pointer();
+
     pm_constant_pool_t *constantPool = &parser->constant_pool;
     pm_constant_t *constant = pm_constant_pool_id_to_constant(constantPool, name);
 
@@ -27,8 +31,7 @@ std::string_view prismConstantName(pm_constant_id_t name, pm_parser_t *parser) {
 
 } // namespace
 
-std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, pm_parser_t *parser,
-                                                               core::GlobalState &gs) {
+std::unique_ptr<parser::Node> Translator::convertPrismToSorbet(pm_node_t *node, Parser parser, core::GlobalState &gs) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BLOCK_PARAMETER_NODE: {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
