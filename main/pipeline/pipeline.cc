@@ -156,7 +156,7 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
         return std::unique_ptr<parser::Node>();
     }
 
-    return Prism::Translator(parser, gs).translate(root.tmp_public_get_raw_node_pointer());
+    return Prism::Translator(parser, gs).translate(std::move(root));
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
