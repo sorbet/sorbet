@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rubocop-performance', '1.13.2'
   # for reproducing race conditions in tests
   s.add_development_dependency 'concurrent-ruby', '~> 1.1.5'
+  s.add_development_dependency 'debug'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
   # for running ruby subprocesses
