@@ -612,9 +612,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'unions of two different serializables' do
-    it 'are just cloned on serde' do
+    it 'are cloned on deser but not serialize' do
       obj = MyNilableSerializable.new
-      T::Props::Utils.expects(:deep_clone_object).with(obj).at_least_once.returns(obj)
+      T::Props::Utils.expects(:deep_clone_object).with(obj).never
+      T::Props::Utils.expects(:deep_clone_object).with(obj.serialize).returns(obj)
 
       s = MultipleStructUnionStruct.new(prop: obj)
       assert_equal(obj, MultipleStructUnionStruct.from_hash(s.serialize).prop)
