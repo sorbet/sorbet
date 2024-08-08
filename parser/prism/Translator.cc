@@ -419,6 +419,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Return>(parser.translateLocation(loc), std::move(returnValues));
         }
+        case PM_SELF_NODE: {
+            auto selfNode = reinterpret_cast<pm_singleton_class_node *>(node);
+            pm_location_t *loc = &selfNode->base.location;
+
+            return make_unique<parser::Self>(parser.translateLocation(loc));
+        }
         case PM_STATEMENTS_NODE: {
             auto inlineIfSingle = true;
             return translateStatements(reinterpret_cast<pm_statements_node *>(node), inlineIfSingle);
@@ -584,7 +590,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_RETRY_NODE:
-        case PM_SELF_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SINGLETON_CLASS_NODE:
         case PM_SOURCE_ENCODING_NODE:
