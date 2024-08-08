@@ -1,4 +1,15 @@
-Const {
-  scope = NULL
-  name = <C <U SimpleConstant>>
+Begin {
+  stmts = [
+    Const {
+      scope = NULL
+      name = <C <U SimpleConstant>>
+    }
+    Const {
+      scope = Const {
+        scope = NULL
+        name = <C <U Nested>>
+      }
+      name = <C <U Constant>>
+    }
+  ]
 }
