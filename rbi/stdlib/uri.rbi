@@ -143,6 +143,7 @@ module URI
   REL_PATH = T.let(T.unsafe(nil), Regexp)
   REL_URI = T.let(T.unsafe(nil), Regexp)
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
+  RFC2396_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
   TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
