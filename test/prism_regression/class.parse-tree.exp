@@ -19,5 +19,17 @@ Begin {
       }
       body = NULL
     }
+    SClass {
+      expr = Self {
+      }
+      body = NULL
+    }
+    SClass {
+      expr = Const {
+        scope = NULL
+        name = <C <U Parent>>
+      }
+      body = NULL
+    }
   ]
 }
