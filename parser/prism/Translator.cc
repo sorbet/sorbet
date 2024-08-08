@@ -17,6 +17,21 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_CONSTANT_PATH_NODE: {
+            // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
+            auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
+            pm_location_t *loc = &constantPathNode->base.location;
+
+            std::string_view name = parser.resolveConstant(constantPathNode->name);
+
+            std::unique_ptr<parser::Node> parent;
+            if (constantPathNode->parent) {
+                parent = translate(reinterpret_cast<pm_node *>(constantPathNode->parent));
+            }
+
+            return make_unique<parser::Const>(parser.translateLocation(loc), std::move(parent),
+                                              gs.enterNameConstant(name));
+        }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like "Foo"
             auto constantReadNode = reinterpret_cast<pm_constant_read_node *>(node);
             pm_location_t *loc = &constantReadNode->base.location;
@@ -288,7 +303,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_OPERATOR_WRITE_NODE:
         case PM_CONSTANT_OR_WRITE_NODE:
         case PM_CONSTANT_PATH_AND_WRITE_NODE:
-        case PM_CONSTANT_PATH_NODE:
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE:
         case PM_CONSTANT_PATH_OR_WRITE_NODE:
         case PM_CONSTANT_PATH_TARGET_NODE:
