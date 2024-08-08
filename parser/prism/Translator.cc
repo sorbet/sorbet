@@ -403,8 +403,16 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_X_STRING_NODE:
         case PM_YIELD_NODE:
         case PM_SCOPE_NODE:
-            std::unique_ptr<parser::Node> ast;
-            return ast;
+            auto type_id = PM_NODE_TYPE(node);
+            auto type_name = pm_node_type_to_str(type_id);
+
+            fmt::memory_buffer buf;
+            fmt::format_to(std::back_inserter(buf), "Unimplemented node type {} (#{}).", type_name, type_id);
+            std::string s = fmt::to_string(buf);
+
+            auto fakeLocation = core::LocOffsets{0, 1};
+
+            return make_unique<parser::String>(fakeLocation, gs.enterNameUTF8(s));
     }
 }
 
