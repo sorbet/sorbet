@@ -97,8 +97,8 @@ the features Sorbet provides.
     </tr>
     <tr>
       <td>
-        <code>Record&lt;KeyType, ValueType></code><br>
-        <code>Map&lt;KeyType, ValueType></code><br>
+        <code>Record&lt;KeyType, ValueType&gt;</code><br>
+        <code>Map&lt;KeyType, ValueType&gt;</code><br>
         <code>{[x: KeyType]: ValueType}</code>
       </td>
       <td>
