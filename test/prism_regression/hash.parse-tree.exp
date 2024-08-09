@@ -1,0 +1,43 @@
+Begin {
+  stmts = [
+    Hash {
+      kwargs = false
+      pairs = [
+        Pair {
+          key = Symbol {
+            val = <U k1>
+          }
+          value = String {
+            val = <U v1>
+          }
+        }
+      ]
+    }
+    Hash {
+      kwargs = false
+      pairs = [
+        Pair {
+          key = Symbol {
+            val = <U k2>
+          }
+          value = String {
+            val = <U v2>
+          }
+        }
+      ]
+    }
+    Hash {
+      kwargs = false
+      pairs = [
+        Pair {
+          key = String {
+            val = <U k3>
+          }
+          value = String {
+            val = <U v3>
+          }
+        }
+      ]
+    }
+  ]
+}
