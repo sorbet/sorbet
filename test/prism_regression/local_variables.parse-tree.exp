@@ -1,0 +1,23 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = LVarLhs {
+        name = <U local_variable1>
+      }
+      rhs = Integer {
+        val = "123"
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U local_variable2>
+      }
+      rhs = Send {
+        receiver = NULL
+        method = <U this_is_a_method_call>
+        args = [
+        ]
+      }
+    }
+  ]
+}
