@@ -282,6 +282,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_LOCAL_VARIABLE_READ_NODE: {
+            auto localVarReadNode = reinterpret_cast<pm_local_variable_read_node *>(node);
+            pm_location_t *loc = &localVarReadNode->base.location;
+
+            std::string_view name = parser.resolveConstant(localVarReadNode->name);
+
+            return make_unique<parser::LVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
             auto localVarWriteNode = reinterpret_cast<pm_local_variable_write_node *>(node);
             pm_location_t *loc = &localVarWriteNode->base.location;
@@ -631,7 +639,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE:
-        case PM_LOCAL_VARIABLE_READ_NODE:
         case PM_LOCAL_VARIABLE_TARGET_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:

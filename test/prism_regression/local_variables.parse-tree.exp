@@ -19,5 +19,13 @@ Begin {
         ]
       }
     }
+    Assign {
+      lhs = LVarLhs {
+        name = <U local_variable2>
+      }
+      rhs = LVar {
+        name = <U local_variable1>
+      }
+    }
   ]
 }
