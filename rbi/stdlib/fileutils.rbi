@@ -676,11 +676,13 @@ module FileUtils
       src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
+      relative: T::Boolean,
+      target_directory: T::Boolean,
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).void
   end
-  module_function def ln_s(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def ln_s(src, dest, force: nil, relative: false, target_directory: true, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`ln_s`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln_s)
@@ -689,11 +691,13 @@ module FileUtils
       src: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
       dest: T.any(String, Pathname),
       force: T.nilable(T::Boolean),
+      relative: T::Boolean,
+      target_directory: T::Boolean,
       noop: T.nilable(T::Boolean),
       verbose: T.nilable(T::Boolean)
     ).void
   end
-  module_function def symlink(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def symlink(src, dest, force: nil, relative: false, target_directory: true, noop: nil, verbose: nil); end
 
   # Same as
   #
