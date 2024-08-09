@@ -140,20 +140,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Float>(parser.translateLocation(loc), std::to_string(floatNode->value));
         }
         case PM_HASH_NODE: {
-            auto hashNode = reinterpret_cast<pm_hash_node *>(node);
-            pm_location_t *loc = &hashNode->base.location;
-
-            parser::NodeVec sorbetHashKVPairs{};
-
-            auto keywordPairs = absl::MakeSpan(hashNode->elements.nodes, hashNode->elements.size);
-
-            for (auto &pair : keywordPairs) {
-                unique_ptr<parser::Node> sorbetKVPair = translate(pair);
-                sorbetHashKVPairs.emplace_back(std::move(sorbetKVPair));
-            }
-
-            return make_unique<parser::Hash>(parser.translateLocation(loc), /*kwargs*/ false,
-                                             std::move(sorbetHashKVPairs));
+            auto usedForKeywordArgs = false;
+            return translateHash(node, reinterpret_cast<pm_hash_node *>(node)->elements, usedForKeywordArgs);
         }
         case PM_IF_NODE: {
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
@@ -183,19 +171,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Integer>(parser.translateLocation(loc), std::to_string(intNode->value.value));
         }
         case PM_KEYWORD_HASH_NODE: {
-            auto keywordsNode = reinterpret_cast<pm_keyword_hash_node *>(node);
-            pm_location_t *loc = &keywordsNode->base.location;
-
-            parser::NodeVec sorbetKVPairs{};
-
-            auto keywordPairs = absl::MakeSpan(keywordsNode->elements.nodes, keywordsNode->elements.size);
-
-            for (auto &pair : keywordPairs) {
-                unique_ptr<parser::Node> sorbetKVPair = translate(pair);
-                sorbetKVPairs.emplace_back(std::move(sorbetKVPair));
-            }
-
-            return make_unique<parser::Hash>(parser.translateLocation(loc), /*kwargs*/ true, std::move(sorbetKVPairs));
+            auto usedForKeywordArgs = true;
+            return translateHash(node, reinterpret_cast<pm_keyword_hash_node *>(node)->elements, usedForKeywordArgs);
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: {
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
@@ -509,6 +486,35 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
 std::unique_ptr<parser::Node> Translator::translate(const Node &node) {
     return translate(node.get_raw_node_pointer());
+}
+
+// Translates the given Prism elements into a `parser::Hash`.
+// The elements are are usually key/value pairs, but can also be Hash splats (`**`).
+//
+// This method is used by:
+//   * PM_HASH_NODE (Hash literals)
+//   * PM_KEYWORD_HASH_NODE (keyword arguments to a method call)
+//
+// @param node The node the elements came from. Only used for source location information.
+// @param elements The Prism key/value pairs to be translated
+// @param isUsedForKeywordArguments True if this hash represents keyword arguments to a function,
+//                                  false if it represents a Hash literal.
+std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list_t elements,
+                                                        bool isUsedForKeywordArguments) {
+    pm_location_t *loc = &node->location;
+
+    auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
+
+    parser::NodeVec sorbetElements{};
+    sorbetElements.reserve(prismElements.size());
+
+    for (auto &pair : prismElements) {
+        unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+        sorbetElements.emplace_back(std::move(sorbetKVPair));
+    }
+
+    return make_unique<parser::Hash>(parser.translateLocation(loc), isUsedForKeywordArguments,
+                                     std::move(sorbetElements));
 }
 
 }; // namespace sorbet::parser::Prism
