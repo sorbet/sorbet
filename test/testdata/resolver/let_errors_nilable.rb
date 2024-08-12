@@ -31,7 +31,7 @@ end
 class D
   sig {void}
   def self.foo
-    @foo = T.let(0, Integer) # error: The singleton instance variable `@foo` must be declared inside the class body or declared nilable
+    @foo = T.let(0, Integer) # error: The singleton class instance variable `@foo` must be declared inside the class body or declared nilable
   end
 end
 
