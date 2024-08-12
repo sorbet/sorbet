@@ -1482,7 +1482,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
-                        e.setHeader("Value returned from method is `{}`", "T.untyped");
+                        e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx), "T.untyped");
                         core::TypeErrorDiagnostics::explainUntyped(ctx, e, what, typeAndOrigin, ownerLoc);
                     }
                 }
