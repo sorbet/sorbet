@@ -9,6 +9,15 @@ namespace sorbet::parser::Prism {
 
 std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_ASSOC_NODE: {
+            auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
+            pm_location_t *loc = &assocNode->base.location;
+
+            auto key = translate(assocNode->key);
+            auto value = translate(assocNode->value);
+
+            return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
+        }
         case PM_BLOCK_PARAMETER_NODE: {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
@@ -84,6 +93,22 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &floatNode->base.location;
 
             return make_unique<parser::Float>(parser.translateLocation(loc), std::to_string(floatNode->value));
+        }
+        case PM_HASH_NODE: {
+            auto hashNode = reinterpret_cast<pm_hash_node *>(node);
+            pm_location_t *loc = &hashNode->base.location;
+
+            parser::NodeVec sorbetHashKVPairs{};
+
+            auto keywordPairs = absl::MakeSpan(hashNode->elements.nodes, hashNode->elements.size);
+
+            for (auto &pair : keywordPairs) {
+                unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+                sorbetHashKVPairs.emplace_back(std::move(sorbetKVPair));
+            }
+
+            return make_unique<parser::Hash>(parser.translateLocation(loc), /*kwargs*/ false,
+                                             std::move(sorbetHashKVPairs));
         }
         case PM_IF_NODE: {
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
@@ -266,6 +291,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // TODO: handle different string encodings
             return make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
         }
+        case PM_SYMBOL_NODE: {
+            auto symNode = reinterpret_cast<pm_string_node *>(node);
+            pm_location_t *loc = &symNode->base.location;
+
+            auto unescaped = &symNode->unescaped;
+
+            auto source =
+                std::string(reinterpret_cast<const char *>(pm_string_source(unescaped)), pm_string_length(unescaped));
+
+            // TODO: can these have different encodings?
+            return make_unique<parser::Symbol>(parser.translateLocation(loc), gs.enterNameUTF8(source));
+        }
         case PM_TRUE_NODE: {
             auto trueNode = reinterpret_cast<pm_true_node *>(node);
             pm_location_t *loc = &trueNode->base.location;
@@ -280,7 +317,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARGUMENTS_NODE:
         case PM_ARRAY_NODE:
         case PM_ARRAY_PATTERN_NODE:
-        case PM_ASSOC_NODE:
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BEGIN_NODE:
@@ -330,7 +366,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_GLOBAL_VARIABLE_READ_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:
         case PM_GLOBAL_VARIABLE_WRITE_NODE:
-        case PM_HASH_NODE:
         case PM_HASH_PATTERN_NODE:
         case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
@@ -394,7 +429,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_LINE_NODE:
         case PM_SPLAT_NODE:
         case PM_SUPER_NODE:
-        case PM_SYMBOL_NODE:
         case PM_UNDEF_NODE:
         case PM_UNLESS_NODE:
         case PM_UNTIL_NODE:

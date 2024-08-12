@@ -1,0 +1,22 @@
+Begin {
+  stmts = [
+    Symbol {
+      val = <U basic_symbol>
+    }
+    Symbol {
+      val = <U quoted symbol>
+    }
+    Symbol {
+      val = <U symbol in pipes>
+    }
+    Symbol {
+      val = <U symbol in curly braces>
+    }
+    Symbol {
+      val = <U symbol in square brackets>
+    }
+    Symbol {
+      val = <U symbol in angle brackets>
+    }
+  ]
+}
