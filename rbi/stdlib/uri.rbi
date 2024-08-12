@@ -1464,6 +1464,10 @@ class URI::Generic < Object
   sig {params(user: T.untyped, password: T.untyped).returns(T.untyped)}
   def set_userinfo(user, password = nil); end
 
+  # Alias of `#to_s`
+  sig {returns(String)}
+  def to_str; end
+
   # Returns the user component.
   sig {returns(T.nilable(String))}
   def user; end
