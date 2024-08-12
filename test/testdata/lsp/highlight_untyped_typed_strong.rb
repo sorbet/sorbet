@@ -8,7 +8,7 @@ sig { returns(Integer) }
 def foo
   my_map = T.let({ foo: 1, bar: 'baz' }, T::Hash[Symbol, T.untyped])
   my_map[:foo]
-# ^^^^^^^^^^^^ error: Value returned from method is `T.untyped`
+# ^^^^^^^^^^^^ error: Value returned from method `foo` is `T.untyped`
 end
 
 sig { params(x: Integer, y: String).returns(Integer) }
