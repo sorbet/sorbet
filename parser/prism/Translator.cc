@@ -182,6 +182,21 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(parser.translateLocation(loc), std::to_string(intNode->value.value));
         }
+        case PM_KEYWORD_HASH_NODE: {
+            auto keywordsNode = reinterpret_cast<pm_keyword_hash_node *>(node);
+            pm_location_t *loc = &keywordsNode->base.location;
+
+            parser::NodeVec sorbetKVPairs{};
+
+            auto keywordPairs = absl::MakeSpan(keywordsNode->elements.nodes, keywordsNode->elements.size);
+
+            for (auto &pair : keywordPairs) {
+                unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+                sorbetKVPairs.emplace_back(std::move(sorbetKVPair));
+            }
+
+            return make_unique<parser::Hash>(parser.translateLocation(loc), /*kwargs*/ true, std::move(sorbetKVPairs));
+        }
         case PM_KEYWORD_REST_PARAMETER_NODE: {
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
             pm_location_t *loc = &keywordRestParamNode->base.location;
@@ -430,7 +445,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_INTERPOLATED_X_STRING_NODE:
         case PM_IT_PARAMETERS_NODE:
-        case PM_KEYWORD_HASH_NODE:
         case PM_LAMBDA_NODE:
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
