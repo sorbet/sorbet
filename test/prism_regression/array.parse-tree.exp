@@ -69,5 +69,24 @@ Begin {
         }
       ]
     }
+    Array {
+      elts = [
+        Integer {
+          val = "1"
+        }
+        Integer {
+          val = "2"
+        }
+        Splat {
+          var = Const {
+            scope = NULL
+            name = <C <U SPLATTED>>
+          }
+        }
+        Integer {
+          val = "3"
+        }
+      ]
+    }
   ]
 }

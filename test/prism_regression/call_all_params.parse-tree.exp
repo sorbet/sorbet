@@ -15,8 +15,14 @@ Begin {
         Integer {
           val = "2"
         }
-        Integer {
-          val = "3"
+        Splat {
+          var = Array {
+            elts = [
+              Integer {
+                val = "3"
+              }
+            ]
+          }
         }
         Hash {
           kwargs = true
@@ -73,8 +79,14 @@ Begin {
           Integer {
             val = "2"
           }
-          Integer {
-            val = "3"
+          Splat {
+            var = Array {
+              elts = [
+                Integer {
+                  val = "3"
+                }
+              ]
+            }
           }
           Hash {
             kwargs = true
@@ -152,8 +164,14 @@ Begin {
           Integer {
             val = "2"
           }
-          Integer {
-            val = "3"
+          Splat {
+            var = Array {
+              elts = [
+                Integer {
+                  val = "3"
+                }
+              ]
+            }
           }
           Hash {
             kwargs = true

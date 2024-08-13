@@ -464,6 +464,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::SClass>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                std::move(expr), std::move(body));
         }
+        case PM_SPLAT_NODE: {
+            auto splatNode = reinterpret_cast<pm_splat_node *>(node);
+            pm_location_t *loc = &splatNode->base.location;
+
+            auto expr = translate(splatNode->expression);
+
+            return make_unique<parser::Splat>(parser.translateLocation(loc), std::move(expr));
+        }
         case PM_STATEMENTS_NODE: {
             auto inlineIfSingle = true;
             return translateStatements(reinterpret_cast<pm_statements_node *>(node), inlineIfSingle);
@@ -631,7 +639,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_ENCODING_NODE:
         case PM_SOURCE_FILE_NODE:
         case PM_SOURCE_LINE_NODE:
-        case PM_SPLAT_NODE:
         case PM_UNDEF_NODE:
         case PM_WHEN_NODE:
         case PM_WHILE_NODE:

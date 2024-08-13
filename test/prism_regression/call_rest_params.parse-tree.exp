@@ -1,0 +1,32 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Splat {
+          var = Send {
+            receiver = NULL
+            method = <U a>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Splat {
+          var = Send {
+            receiver = NULL
+            method = <U a>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
