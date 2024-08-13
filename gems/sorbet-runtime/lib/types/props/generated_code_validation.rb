@@ -218,6 +218,10 @@ module T::Props
       when :const
         # This is ok, because we'll have validated what method has been called
         # if applicable
+      when :or
+        lhs, rhs = node.children
+        validate_lack_of_side_effects(lhs, whitelisted_methods_by_receiver_type) &&
+          validate_lack_of_side_effects(rhs, whitelisted_methods_by_receiver_type)
       when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :self # rubocop:disable Lint/BooleanSymbol
         # Primitives & self are ok
       when :lvar, :arg, :ivar
@@ -225,7 +229,7 @@ module T::Props
         unless node.children.all? {|c| c.is_a?(Symbol)}
           raise ValidationError.new("Unexpected child for #{node.type}: #{node.inspect}")
         end
-      when :args, :mlhs, :block, :begin, :if
+      when :args, :mlhs, :block, :begin, :if, :or, :case, :when
         # Blocks etc are read-only if their contents are read-only
         node.children.each {|c| validate_lack_of_side_effects(c, whitelisted_methods_by_receiver_type) if c}
       when :send
@@ -270,7 +274,7 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        const: %i[deserialize from_hash deep_clone_object],
+        const: %i[deserialize try_deserialize from_hash deep_clone_object],
       }
     end
   end
