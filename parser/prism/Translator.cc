@@ -7,8 +7,25 @@ using std::unique_ptr;
 
 namespace sorbet::parser::Prism {
 
+// Indicates that a particular code path should never be reached, with an explanation of why.
+// Throws a `sorbet::SorbetException` in debug mode, and is undefined behaviour otherwise.
+template <typename... TArgs>
+[[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
+    if constexpr (sorbet::debug_mode) {
+        Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
+    } else {
+        // Basically a backport of C++23's `std::unreachable()`:
+        // > `ABSL_UNREACHABLE()` is an unreachable statement.  A program which reaches
+        // > one has undefined behavior, and the compiler may optimize accordingly.
+        ABSL_UNREACHABLE();
+    }
+}
+
 std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_ARGUMENTS_NODE: { // The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`
+            unreachable("PM_ARGUMENTS_NODE has special handling in the PM_CALL_NODE case.");
+        }
         case PM_ASSOC_NODE: {
             auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
             pm_location_t *loc = &assocNode->base.location;
@@ -38,7 +55,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 receiver = translate(prismReceiver);
             }
 
+            absl::Span<pm_node_t *> prismArgs;
+            if (auto argsNode = callNode->arguments; argsNode != nullptr) {
+                prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
+            }
+
             parser::NodeVec args;
+            args.reserve(prismArgs.size());
+
+            for (auto &prismArg : prismArgs) {
+                unique_ptr<parser::Node> sorbetArg = translate(prismArg);
+                args.emplace_back(std::move(sorbetArg));
+            }
 
             return make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
                                              parser.translateLocation(messageLoc), std::move(args));
@@ -331,7 +359,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_AND_NODE:
-        case PM_ARGUMENTS_NODE:
         case PM_ARRAY_NODE:
         case PM_ARRAY_PATTERN_NODE:
         case PM_ASSOC_SPLAT_NODE:
