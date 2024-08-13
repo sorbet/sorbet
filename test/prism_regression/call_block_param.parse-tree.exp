@@ -1,0 +1,48 @@
+Begin {
+  stmts = [
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U inline block>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U do-end block>
+      }
+    }
+  ]
+}

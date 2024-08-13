@@ -35,6 +35,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
+        case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end
+            unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
+        }
         case PM_BLOCK_PARAMETER_NODE: {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
@@ -68,8 +71,22 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 args.emplace_back(std::move(sorbetArg));
             }
 
-            return make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
-                                             parser.translateLocation(messageLoc), std::move(args));
+            auto prismBlock = callNode->block;
+
+            auto sendNode =
+                make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
+                                          parser.translateLocation(messageLoc), std::move(args));
+
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                // The legacy parser inverts this , with a parent "Block" with a child
+                // "Send".
+                return translateCallWithBlock(reinterpret_cast<pm_block_node *>(prismBlock), std::move(sendNode));
+            } else {
+                return sendNode;
+            }
         }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
@@ -358,7 +375,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BEGIN_NODE:
         case PM_BLOCK_ARGUMENT_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_BLOCK_NODE:
         case PM_BLOCK_PARAMETERS_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
@@ -515,6 +531,26 @@ std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node
 
     return make_unique<parser::Hash>(parser.translateLocation(loc), isUsedForKeywordArguments,
                                      std::move(sorbetElements));
+}
+
+// Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
+// Sorbet's legacy parser models this the other way around, as a parent `Block` with a child `Send`.
+//
+// This function translates between the two, creating a `Block` node for the given `pm_block_node *`,
+// and wrapping it around the given `Send` node.
+std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
+                                                                 std::unique_ptr<parser::Send> sendNode) {
+    std::unique_ptr<parser::Args> blockParametersNode;
+
+    std::unique_ptr<parser::Node> body;
+    if (prismBlockNode->body != nullptr) {
+        body = translate(prismBlockNode->body);
+    }
+
+    // TODO: what's the correct location to use for the Block?
+    // TODO: do we have to adjust the location for the Send node?
+    return make_unique<parser::Block>(sendNode->loc, std::move(sendNode), std::move(blockParametersNode),
+                                      std::move(body));
 }
 
 }; // namespace sorbet::parser::Prism
