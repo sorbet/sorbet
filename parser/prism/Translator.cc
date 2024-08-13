@@ -26,6 +26,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_CALL_NODE: {
+            auto callNode = reinterpret_cast<pm_call_node *>(node);
+            pm_location_t *loc = &callNode->base.location;
+            pm_location_t *messageLoc = &callNode->message_loc;
+
+            auto name = parser.resolveConstant(callNode->name);
+            std::unique_ptr<parser::Node> receiver;
+            parser::NodeVec args;
+
+            return make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
+                                             parser.translateLocation(messageLoc), std::move(args));
+        }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
             auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
@@ -326,7 +338,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_PARAMETERS_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
-        case PM_CALL_NODE:
         case PM_CALL_OPERATOR_WRITE_NODE:
         case PM_CALL_OR_WRITE_NODE:
         case PM_CALL_TARGET_NODE:
