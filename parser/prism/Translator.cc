@@ -32,7 +32,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *messageLoc = &callNode->message_loc;
 
             auto name = parser.resolveConstant(callNode->name);
+
             std::unique_ptr<parser::Node> receiver;
+            if (auto prismReceiver = callNode->receiver; prismReceiver != nullptr) {
+                receiver = translate(prismReceiver);
+            }
+
             parser::NodeVec args;
 
             return make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
