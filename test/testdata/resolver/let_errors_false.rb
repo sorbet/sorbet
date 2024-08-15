@@ -5,6 +5,6 @@ class LetErrorsFalse
   end
 
   def not_initialize
-    @a = T.let(0, Integer) # error: The singleton class instance variable `@a` must be declared inside `initialize`
+    @a = T.let(0, Integer) # error: The instance variable `@a` must be declared inside `initialize`
   end
 end

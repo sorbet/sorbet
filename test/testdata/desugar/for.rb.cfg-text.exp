@@ -63,10 +63,10 @@ bb0[rubyRegionId=0, firstDead=10]():
     <self>: T.class_of(E) = cast(<self>: NilClass, T.class_of(E));
     e: T.untyped = load_arg(e)
     <cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$7: String("instance") = "instance"
+    <statTemp>$7: String("singleton class instance") = "singleton class instance"
     <statTemp>$8: String("e=") = "e="
     <statTemp>$9: Symbol(:@e) = :@e
-    @e$3: T.untyped = <cfgAlias>$5: T.class_of(<Magic>).<suggest-field-type>(e: T.untyped, <statTemp>$7: String("instance"), <statTemp>$8: String("e="), <statTemp>$9: Symbol(:@e))
+    @e$3: T.untyped = <cfgAlias>$5: T.class_of(<Magic>).<suggest-field-type>(e: T.untyped, <statTemp>$7: String("singleton class instance"), <statTemp>$8: String("e="), <statTemp>$9: Symbol(:@e))
     <returnMethodTemp>$2: T.untyped = @e$3
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -295,10 +295,10 @@ bb21[rubyRegionId=5, firstDead=40](<self>: T.class_of(Main), <block-pre-call-tem
     <cfgAlias>$106: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$109: Integer(0) = 0
     <statTemp>$107: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$109: Integer(0))
-    <statTemp>$110: String("instance") = "instance"
+    <statTemp>$110: String("singleton class instance") = "singleton class instance"
     <statTemp>$111: String("main") = "main"
     <statTemp>$112: Symbol(:@a) = :@a
-    @a$104: NilClass = <cfgAlias>$106: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$107: NilClass, <statTemp>$110: String("instance"), <statTemp>$111: String("main"), <statTemp>$112: Symbol(:@a))
+    @a$104: NilClass = <cfgAlias>$106: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$107: NilClass, <statTemp>$110: String("singleton class instance"), <statTemp>$111: String("main"), <statTemp>$112: Symbol(:@a))
     <cfgAlias>$116: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$119: Integer(1) = 1
     <statTemp>$117: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$119: Integer(1))
@@ -359,10 +359,10 @@ bb25[rubyRegionId=6, firstDead=44](<self>: T.class_of(Main), @a$104: T.untyped, 
     <cfgAlias>$177: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$180: Integer(0) = 0
     <statTemp>$178: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$180: Integer(0))
-    <statTemp>$181: String("instance") = "instance"
+    <statTemp>$181: String("singleton class instance") = "singleton class instance"
     <statTemp>$182: String("main") = "main"
     <statTemp>$183: Symbol(:@a) = :@a
-    @a$104: T.untyped = <cfgAlias>$177: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$178: T.untyped, <statTemp>$181: String("instance"), <statTemp>$182: String("main"), <statTemp>$183: Symbol(:@a))
+    @a$104: T.untyped = <cfgAlias>$177: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$178: T.untyped, <statTemp>$181: String("singleton class instance"), <statTemp>$182: String("main"), <statTemp>$183: Symbol(:@a))
     <cfgAlias>$186: T.class_of(<Magic>) = alias <C <Magic>>
     <statTemp>$189: Integer(1) = 1
     <statTemp>$187: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$189: Integer(1))
