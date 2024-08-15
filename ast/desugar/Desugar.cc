@@ -482,8 +482,10 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
     }
 
     if (!didSplat) {
+        // Passes down the lhs->loc via the second argument, because that argument should never
+        // appear in error messages (it's always correctly an integer by construction).
         stats.emplace_back(MK::Send2(loc, MK::Magic(loc), core::Names::mlhsUseAll(), loc.copyWithZeroLength(),
-                                     MK::Local(loc, tempRhs), MK::Int(loc, before)));
+                                     MK::Local(loc, tempRhs), MK::Int(lhs->loc, before)));
     }
 
     auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), loc.copyWithZeroLength(),

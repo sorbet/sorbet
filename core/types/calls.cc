@@ -1,4 +1,5 @@
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
@@ -2400,6 +2401,14 @@ public:
                 auto plural = got == 1 ? "" : "s";
                 e.setHeader("Attempted to unpack {}-tuple into {} target{}", expected, got, plural);
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                auto lhsLoc = args.argLoc(1);
+                if (got < expected && lhsLoc.exists() && !lhsLoc.empty()) {
+                    auto replaceLoc = lhsLoc.copyEndWithZeroLength();
+                    auto underscores = vector<string>{expected - got, "_"};
+                    // The mlhs LHS loc doesn't include any trailing comma in the loc, which works in our favor
+                    e.replaceWith("Insert variables for unused args", replaceLoc, ", {}",
+                                  absl::StrJoin(underscores, ", "));
+                }
             }
         }
     }
