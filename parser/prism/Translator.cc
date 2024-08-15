@@ -35,6 +35,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
+        case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
+            auto blockArg = reinterpret_cast<pm_block_argument_node *>(node);
+            auto loc = &blockArg->base.location;
+
+            auto expr = translate(blockArg->expression);
+
+            return make_unique<parser::BlockPass>(parser.translateLocation(loc), std::move(expr));
+        }
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end
             unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
         }
@@ -67,15 +75,23 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
             }
 
+            pm_node_t *prismBlock = callNode->block;
+            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+            // but not an explicit block with `{ ... }` or `do ... end`
+            auto hasBlockArgument = prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE);
+
             parser::NodeVec args;
-            args.reserve(prismArgs.size());
+            args.reserve(prismArgs.size() + (hasBlockArgument ? 0 : 1));
 
             for (auto &prismArg : prismArgs) {
                 unique_ptr<parser::Node> sorbetArg = translate(prismArg);
                 args.emplace_back(std::move(sorbetArg));
             }
 
-            auto prismBlock = callNode->block;
+            if (hasBlockArgument) {
+                auto blockPassNode = translate(prismBlock);
+                args.emplace_back(std::move(blockPassNode));
+            }
 
             auto sendNode =
                 make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
@@ -377,7 +393,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BEGIN_NODE:
-        case PM_BLOCK_ARGUMENT_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:

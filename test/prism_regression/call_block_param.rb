@@ -22,3 +22,7 @@
 #^^^ error: Method `foo` does not exist on `T.class_of(<root>)`
    "inline block with params"
  end
+
+ foo(&forwarded_block)
+#     ^^^^^^^^^^^^^^^ error: Method `forwarded_block` does not exist on `T.class_of(<root>)`
+#^^^^^^^^^^^^^^^^^^^^ error: Method `foo` does not exist on `T.class_of(<root>)`
