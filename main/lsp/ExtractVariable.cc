@@ -483,7 +483,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
             break;
         }
     }
-    ENFORCE(scopeToInsertIn);
+    ENFORCE(scopeToInsertIn, "the LCA scope stack should always have a ClassDef or MethodDef");
 
     fast_sort(matches, [](auto a, auto b) { return a.beginPos() < b.beginPos(); });
     auto firstMatch = matches[0];
