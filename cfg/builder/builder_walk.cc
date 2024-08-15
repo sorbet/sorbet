@@ -465,8 +465,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (foundError && shouldReportErrorOn) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
-                        auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
-                                                                                          : core::Names::instance();
+                        core::NameRef fieldKind;
+                        if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
+                            fieldKind = core::Names::class_();
+                        } else {
+                            ENFORCE(cctx.ctx.owner.isMethod());
+                            auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
+                            if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
+                                fieldKind = core::Names::singletonClassInstance();
+                            } else {
+                                fieldKind = core::Names::instance();
+                            }
+                        }
+
                         // Mutate a.rhs before walking.
                         a.rhs =
                             ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,

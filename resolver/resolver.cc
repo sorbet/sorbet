@@ -2268,7 +2268,7 @@ class ResolveTypeMembersAndFieldsWalk {
                        !core::Types::isSubType(ctx, core::Types::nilClass(), castType)) {
                 // Declaring a class instance variable in a static method
                 if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
+                    e.setHeader("The singleton class instance variable `{}` must be declared inside the class body or "
                                 "declared nilable",
                                 uid->name.show(ctx));
                 }

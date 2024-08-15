@@ -296,6 +296,7 @@ NameDef names[] = {
     {"Concern", "Concern", true},
 
     {"instance"},
+    {"singletonClassInstance", "singleton class instance"},
     {"normal"},
     {"genericPropGetter"},
 
