@@ -7,8 +7,25 @@ using std::unique_ptr;
 
 namespace sorbet::parser::Prism {
 
+// Indicates that a particular code path should never be reached, with an explanation of why.
+// Throws a `sorbet::SorbetException` in debug mode, and is undefined behaviour otherwise.
+template <typename... TArgs>
+[[noreturn]] void unreachable(fmt::format_string<TArgs...> reason_format_str, TArgs &&...args) {
+    if constexpr (sorbet::debug_mode) {
+        Exception::raise(reason_format_str, std::forward<TArgs>(args)...);
+    } else {
+        // Basically a backport of C++23's `std::unreachable()`:
+        // > `ABSL_UNREACHABLE()` is an unreachable statement.  A program which reaches
+        // > one has undefined behavior, and the compiler may optimize accordingly.
+        ABSL_UNREACHABLE();
+    }
+}
+
 std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
+        case PM_ARGUMENTS_NODE: { // The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`
+            unreachable("PM_ARGUMENTS_NODE has special handling in the PM_CALL_NODE case.");
+        }
         case PM_ASSOC_NODE: {
             auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
             pm_location_t *loc = &assocNode->base.location;
@@ -18,13 +35,78 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
-        case PM_BLOCK_PARAMETER_NODE: {
+        case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
+            auto blockArg = reinterpret_cast<pm_block_argument_node *>(node);
+            auto loc = &blockArg->base.location;
+
+            auto expr = translate(blockArg->expression);
+
+            return make_unique<parser::BlockPass>(parser.translateLocation(loc), std::move(expr));
+        }
+        case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end
+            unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
+        }
+        case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
 
             std::string_view name = parser.resolveConstant(blockParamNode->name);
 
             return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
+        case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
+            auto paramsNode = reinterpret_cast<pm_block_parameters_node *>(node);
+            return translate(reinterpret_cast<pm_node *>(paramsNode->parameters));
+        }
+        case PM_CALL_NODE: {
+            auto callNode = reinterpret_cast<pm_call_node *>(node);
+            pm_location_t *loc = &callNode->base.location;
+            pm_location_t *messageLoc = &callNode->message_loc;
+
+            auto name = parser.resolveConstant(callNode->name);
+
+            std::unique_ptr<parser::Node> receiver;
+            if (auto prismReceiver = callNode->receiver; prismReceiver != nullptr) {
+                receiver = translate(prismReceiver);
+            }
+
+            absl::Span<pm_node_t *> prismArgs;
+            if (auto argsNode = callNode->arguments; argsNode != nullptr) {
+                prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
+            }
+
+            pm_node_t *prismBlock = callNode->block;
+            // PM_BLOCK_ARGUMENT_NODE models the `&b` in `a.map(&b)`,
+            // but not an explicit block with `{ ... }` or `do ... end`
+            auto hasBlockArgument = prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE);
+
+            parser::NodeVec args;
+            args.reserve(prismArgs.size() + (hasBlockArgument ? 0 : 1));
+
+            for (auto &prismArg : prismArgs) {
+                unique_ptr<parser::Node> sorbetArg = translate(prismArg);
+                args.emplace_back(std::move(sorbetArg));
+            }
+
+            if (hasBlockArgument) {
+                auto blockPassNode = translate(prismBlock);
+                args.emplace_back(std::move(blockPassNode));
+            }
+
+            auto sendNode =
+                make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
+                                          parser.translateLocation(messageLoc), std::move(args));
+
+            if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
+                // PM_BLOCK_NODE models an explicit block arg with `{ ... }` or
+                // `do ... end`, but not a forwarded block like the `&b` in `a.map(&b)`.
+                // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
+                // The legacy parser inverts this , with a parent "Block" with a child
+                // "Send".
+                return translateCallWithBlock(reinterpret_cast<pm_block_node *>(prismBlock), std::move(sendNode));
+            } else {
+                return sendNode;
+            }
         }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
@@ -95,20 +177,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Float>(parser.translateLocation(loc), std::to_string(floatNode->value));
         }
         case PM_HASH_NODE: {
-            auto hashNode = reinterpret_cast<pm_hash_node *>(node);
-            pm_location_t *loc = &hashNode->base.location;
-
-            parser::NodeVec sorbetHashKVPairs{};
-
-            auto keywordPairs = absl::MakeSpan(hashNode->elements.nodes, hashNode->elements.size);
-
-            for (auto &pair : keywordPairs) {
-                unique_ptr<parser::Node> sorbetKVPair = translate(pair);
-                sorbetHashKVPairs.emplace_back(std::move(sorbetKVPair));
-            }
-
-            return make_unique<parser::Hash>(parser.translateLocation(loc), /*kwargs*/ false,
-                                             std::move(sorbetHashKVPairs));
+            auto usedForKeywordArgs = false;
+            return translateHash(node, reinterpret_cast<pm_hash_node *>(node)->elements, usedForKeywordArgs);
         }
         case PM_IF_NODE: {
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
@@ -136,6 +206,10 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(parser.translateLocation(loc), std::to_string(intNode->value.value));
+        }
+        case PM_KEYWORD_HASH_NODE: {
+            auto usedForKeywordArgs = true;
+            return translateHash(node, reinterpret_cast<pm_keyword_hash_node *>(node)->elements, usedForKeywordArgs);
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: {
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
@@ -167,7 +241,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                parser.translateLocation(nameLoc), std::move(value));
         }
-        case PM_PARAMETERS_NODE: {
+        case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
             pm_location_t *loc = &paramsNode->base.location;
 
@@ -314,19 +388,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_AND_NODE:
-        case PM_ARGUMENTS_NODE:
         case PM_ARRAY_NODE:
         case PM_ARRAY_PATTERN_NODE:
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BEGIN_NODE:
-        case PM_BLOCK_ARGUMENT_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_BLOCK_NODE:
-        case PM_BLOCK_PARAMETERS_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
-        case PM_CALL_NODE:
         case PM_CALL_OPERATOR_WRITE_NODE:
         case PM_CALL_OR_WRITE_NODE:
         case PM_CALL_TARGET_NODE:
@@ -387,7 +456,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_INTERPOLATED_X_STRING_NODE:
         case PM_IT_PARAMETERS_NODE:
-        case PM_KEYWORD_HASH_NODE:
         case PM_LAMBDA_NODE:
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
@@ -452,6 +520,58 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
 std::unique_ptr<parser::Node> Translator::translate(const Node &node) {
     return translate(node.get_raw_node_pointer());
+}
+
+// Translates the given Prism elements into a `parser::Hash`.
+// The elements are are usually key/value pairs, but can also be Hash splats (`**`).
+//
+// This method is used by:
+//   * PM_HASH_NODE (Hash literals)
+//   * PM_KEYWORD_HASH_NODE (keyword arguments to a method call)
+//
+// @param node The node the elements came from. Only used for source location information.
+// @param elements The Prism key/value pairs to be translated
+// @param isUsedForKeywordArguments True if this hash represents keyword arguments to a function,
+//                                  false if it represents a Hash literal.
+std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list_t elements,
+                                                        bool isUsedForKeywordArguments) {
+    pm_location_t *loc = &node->location;
+
+    auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
+
+    parser::NodeVec sorbetElements{};
+    sorbetElements.reserve(prismElements.size());
+
+    for (auto &pair : prismElements) {
+        unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+        sorbetElements.emplace_back(std::move(sorbetKVPair));
+    }
+
+    return make_unique<parser::Hash>(parser.translateLocation(loc), isUsedForKeywordArguments,
+                                     std::move(sorbetElements));
+}
+
+// Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
+// Sorbet's legacy parser models this the other way around, as a parent `Block` with a child `Send`.
+//
+// This function translates between the two, creating a `Block` node for the given `pm_block_node *`,
+// and wrapping it around the given `Send` node.
+std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
+                                                                 std::unique_ptr<parser::Send> sendNode) {
+    std::unique_ptr<parser::Node> blockParametersNode;
+    if (prismBlockNode->parameters != nullptr) {
+        blockParametersNode = translate(prismBlockNode->parameters);
+    }
+
+    std::unique_ptr<parser::Node> body;
+    if (prismBlockNode->body != nullptr) {
+        body = translate(prismBlockNode->body);
+    }
+
+    // TODO: what's the correct location to use for the Block?
+    // TODO: do we have to adjust the location for the Send node?
+    return make_unique<parser::Block>(sendNode->loc, std::move(sendNode), std::move(blockParametersNode),
+                                      std::move(body));
 }
 
 }; // namespace sorbet::parser::Prism

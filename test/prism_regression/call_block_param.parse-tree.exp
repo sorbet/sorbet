@@ -1,0 +1,110 @@
+Begin {
+  stmts = [
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U inline block>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = NULL
+      body = String {
+        val = <U do-end block>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Kwarg {
+            name = <U kwarg>
+          }
+          Blockarg {
+            name = <U block>
+          }
+        ]
+      }
+      body = String {
+        val = <U inline block with params>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Kwarg {
+            name = <U kwarg>
+          }
+          Blockarg {
+            name = <U block>
+          }
+        ]
+      }
+      body = String {
+        val = <U inline block with params>
+      }
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        BlockPass {
+          block = Send {
+            receiver = NULL
+            method = <U forwarded_block>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
