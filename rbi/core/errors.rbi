@@ -542,14 +542,18 @@ class SystemCallError < StandardError
   # object. The error number is subsequently available via the
   # [`errno`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html#method-i-errno)
   # method.
-  def self.new(*_); end
+  sig { params(arg0: T.any(String, T.nilable(Integer))).returns(SystemCallError) }
+  sig { params(arg0: String, errno: T.nilable(Integer), func: T.nilable(Object)).returns(SystemCallError) }
+  def self.new(arg0, errno = nil, func = nil); end
 
   # Return this SystemCallError's error number.
+  sig { returns(T.nilable(Integer)) }
   def errno; end
 
   # Return `true` if the receiver is a generic `SystemCallError`, or if the
   # error numbers `self` and *other* are the same.
-  def self.===(_); end
+  sig { params(other: BasicObject).returns(T::Boolean) }
+  def self.===(other); end
 end
 
 # Raised by `exit` to initiate the termination of the script.
