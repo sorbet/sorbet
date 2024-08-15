@@ -92,5 +92,19 @@ Begin {
         val = <U inline block with params>
       }
     }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        BlockPass {
+          block = Send {
+            receiver = NULL
+            method = <U forwarded_block>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
   ]
 }
