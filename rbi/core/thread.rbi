@@ -522,8 +522,8 @@ class Thread < Object
   # See
   # [`::pending_interrupt?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-pending_interrupt-3F)
   # for more information.
-  sig {params(args: T.untyped).returns(T::Boolean)}
-  def pending_interrupt?(*args); end
+  sig {params(error: T::Class[T.anything]).returns(T::Boolean)}
+  def pending_interrupt?(error = nil); end
 
   # Returns the priority of *thr*. Default is inherited from the current thread
   # which creating the new thread, or zero for the initial main thread;
@@ -583,7 +583,22 @@ class Thread < Object
   #  from prog.rb:2:in `new'
   #  from prog.rb:2
   # ```
-  def raise(*_); end
+  sig {void}
+  sig do
+    params(
+      arg0: T.any(T::Class[Exception], Exception, String),
+    )
+    .void
+  end
+  sig do
+    params(
+      arg0: T.any(T::Class[Exception], Exception),
+      arg1: T.untyped,
+      arg2: T.nilable(T::Array[String]),
+    )
+    .void
+  end
+  def raise(arg0=nil, arg1=nil, arg2=nil); end
 
   # Returns the status of the thread-local "report on exception" condition for
   # this `thr`.
@@ -1015,7 +1030,13 @@ class Thread < Object
   #   # all exceptions inherited from Exception are prohibited.
   # }
   # ```
-  sig {params(hash: T.untyped, block: T.proc.returns(T.untyped)).returns(T.untyped)}
+  sig do
+    type_parameters(:U).params(
+      hash: T::Hash[T.class_of(Exception), Symbol],
+      block: T.proc.returns(T.type_parameter(:U))
+    )
+    .returns(T.type_parameter(:U))
+  end
   def self.handle_interrupt(hash, &block); end
 
   # Causes the given `thread` to exit, see also
@@ -1118,8 +1139,8 @@ class Thread < Object
   # ...
   # flag = false # stop thread
   # ```
-  sig {params(args: T.untyped).returns(T::Boolean)}
-  def self.pending_interrupt?(*args); end
+  sig {params(error: T.class_of(Exception)).returns(T::Boolean)}
+  def self.pending_interrupt?(error); end
 
   # Returns the status of the global "report on exception" condition.
   #
