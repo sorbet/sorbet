@@ -125,6 +125,11 @@ module SorbetBenchmarks
         integer_param(1)
       end
 
+      time_block("sig {params(x: Integer).void} (module_eval)") do
+        integer_param_module_eval(0)
+        integer_param_module_eval(1)
+      end
+
       my_proc = proc {}
       time_block("sig {params(x: Integer, blk: T.proc.void)} -- block literal") do
         integer_param_and_block(0) {}
@@ -191,6 +196,11 @@ module SorbetBenchmarks
         arg_plus_kwargs(:bar, x: 1)
       end
 
+      time_block("sig {params(s: Symbol, x: Integer, y: Integer).void} (with kwargs, module_eval)") do
+        arg_plus_kwargs_module_eval(:foo, x: 1, y: 2)
+        arg_plus_kwargs_module_eval(:bar, x: 1)
+      end
+
       time_block("direct call Object#class") do
         example.class
         example.class
@@ -218,7 +228,35 @@ module SorbetBenchmarks
     def self.unchecked_param(x); end
 
     sig {params(x: Integer).void}
-    def self.integer_param(x); end
+    def self.integer_param(x)
+    end
+
+    def self.integer_param_module_eval(x)
+    end
+
+    module_eval(<<~RUBY)
+      class << self
+        alias_method :"integer_param_module_eval (original)", :integer_param_module_eval
+        def integer_param_module_eval(arg0)
+          unless arg0.is_a?(Integer)
+            method_sig = T::Utils.signature_for_method(method(:integer_param))
+            CallValidation.report_error(
+              method_sig,
+              method_sig.arg_types[0][1].error_message_for_obj(arg0),
+              'Parameter',
+              method_sig.arg_types[0][0],
+              Integer,
+              arg0,
+              caller_offset: 0
+            )
+          end
+
+          send(:"integer_param_module_eval (original)", arg0)
+
+          T::Private::Types::Void::VOID
+        end
+      end
+    RUBY
 
     sig {params(x: Integer, blk: T.proc.void).void}
     def self.integer_param_and_block(x, &blk); end
@@ -243,5 +281,60 @@ module SorbetBenchmarks
 
     sig {params(s: Symbol, x: Integer, y: Integer).void}
     def self.arg_plus_kwargs(s, x:, y: 0); end
+
+    def self.arg_plus_kwargs_module_eval(s, x:, y: 0)
+    end
+
+    module_eval(<<~RUBY)
+      class << self
+        alias_method :"arg_plus_kwargs_module_eval (original)", :arg_plus_kwargs_module_eval
+        # Can't actually do this easily, because can't get default args with reflection
+        # Attempts to show limit of this technique.
+        def arg_plus_kwargs_module_eval(s, x:, y: 0)
+          unless s.is_a?(Symbol)
+            method_sig = T::Utils.signature_for_method(method(:arg_plus_kwargs))
+            CallValidation.report_error(
+              method_sig,
+              method_sig.arg_types[1][1].error_message_for_obj(s),
+              'Parameter',
+              method_sig.arg_types[1][0],
+              Symbol,
+              s,
+              caller_offset: 0
+            )
+          end
+
+          unless x.is_a?(Integer)
+            method_sig = T::Utils.signature_for_method(method(:arg_plus_kwargs))
+            CallValidation.report_error(
+              method_sig,
+              method_sig.arg_types[1][1].error_message_for_obj(x),
+              'Parameter',
+              method_sig.arg_types[1][0],
+              Integer,
+              x,
+              caller_offset: 0
+            )
+          end
+
+          unless y.is_a?(Integer)
+            method_sig = T::Utils.signature_for_method(method(:arg_plus_kwargs))
+            CallValidation.report_error(
+              method_sig,
+              method_sig.arg_types[2][1].error_message_for_obj(y),
+              'Parameter',
+              method_sig.arg_types[2][0],
+              Integer,
+              y,
+              caller_offset: 0
+            )
+          end
+
+          send(:"arg_plus_kwargs_module_eval (original)", s, x:, y:)
+
+          T::Private::Types::Void::VOID
+        end
+      end
+    RUBY
   end
 end
