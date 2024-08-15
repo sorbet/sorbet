@@ -38,13 +38,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end
             unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
         }
-        case PM_BLOCK_PARAMETER_NODE: {
+        case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
 
             std::string_view name = parser.resolveConstant(blockParamNode->name);
 
             return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
+        case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
+            auto paramsNode = reinterpret_cast<pm_block_parameters_node *>(node);
+            return translate(reinterpret_cast<pm_node *>(paramsNode->parameters));
         }
         case PM_CALL_NODE: {
             auto callNode = reinterpret_cast<pm_call_node *>(node);
@@ -221,7 +225,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                parser.translateLocation(nameLoc), std::move(value));
         }
-        case PM_PARAMETERS_NODE: {
+        case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
             pm_location_t *loc = &paramsNode->base.location;
 
@@ -375,7 +379,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BEGIN_NODE:
         case PM_BLOCK_ARGUMENT_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_BLOCK_PARAMETERS_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
         case PM_CALL_OPERATOR_WRITE_NODE:
@@ -540,7 +543,10 @@ std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node
 // and wrapping it around the given `Send` node.
 std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
                                                                  std::unique_ptr<parser::Send> sendNode) {
-    std::unique_ptr<parser::Args> blockParametersNode;
+    std::unique_ptr<parser::Node> blockParametersNode;
+    if (prismBlockNode->parameters != nullptr) {
+        blockParametersNode = translate(prismBlockNode->parameters);
+    }
 
     std::unique_ptr<parser::Node> body;
     if (prismBlockNode->body != nullptr) {
