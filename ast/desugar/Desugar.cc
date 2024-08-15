@@ -481,6 +481,11 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
         }
     }
 
+    if (!didSplat) {
+        stats.emplace_back(MK::Send2(loc, MK::Magic(loc), core::Names::mlhsUseAll(), loc.copyWithZeroLength(),
+                                     MK::Local(loc, tempRhs), MK::Int(loc, before)));
+    }
+
     auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), loc.copyWithZeroLength(),
                               MK::Local(loc, tempRhs), MK::Int(loc, before), MK::Int(loc, after));
     stats.insert(stats.begin(), MK::Assign(loc, tempExpanded, std::move(expanded)));

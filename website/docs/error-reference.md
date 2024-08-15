@@ -4508,6 +4508,19 @@ result =
 T.reveal_type(result) # => T::Boolean
 ```
 
+## 7052
+
+When using multiple assignment to unpack the elements of a
+[tuple type](tuples.md), Sorbet checks that all the elements of the tuple have
+been accounted for.
+
+To explicitly ignore certain elements of the tuple, assign them to an unused
+variable. By convention, these variables start with `_`.
+
+```ruby
+x, y, _z = returns_3_tuple()
+```
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues

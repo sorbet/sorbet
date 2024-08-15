@@ -376,6 +376,7 @@ NameDef names[] = {
     {"toHashNoDup", "<to-hash-nodup>"},
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
+    {"mlhsUseAll", "<mlhs use all>"},
     {"suggestConstantType", "<suggest-constant-type>"},
     {"suggestFieldType", "<suggest-field-type>"},
     {"checkMatchArray", "<check-match-array>"},

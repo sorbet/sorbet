@@ -84,6 +84,12 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &topArg(NameRef name) {
+        auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
+        arg.type = Types::top();
+        return *this;
+    }
+
     MethodBuilder &defaultKeywordArg(NameRef name) {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, name);
         arg.flags.isDefault = true;
@@ -739,6 +745,11 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
+                 .buildWithResultUntyped();
+    // Synthesize <Magic>.<mlhs use all>(arg0: T.anything, arg1: Integer) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mlhsUseAll())
+                 .topArg(Names::arg0())
+                 .typedArg(Names::arg1(), Types::Integer())
                  .buildWithResultUntyped();
     // Synthesize <Magic>.<call-with-splat>(args: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplat())
