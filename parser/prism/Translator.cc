@@ -22,6 +22,9 @@ template <typename... TArgs>
 }
 
 std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
+    if (node == nullptr)
+        return nullptr;
+
     switch (PM_NODE_TYPE(node)) {
         case PM_ARGUMENTS_NODE: { // The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`
             unreachable("PM_ARGUMENTS_NODE has special handling in the PM_CALL_NODE case.");
@@ -64,11 +67,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *messageLoc = &callNode->message_loc;
 
             auto name = parser.resolveConstant(callNode->name);
-
-            std::unique_ptr<parser::Node> receiver;
-            if (auto prismReceiver = callNode->receiver; prismReceiver != nullptr) {
-                receiver = translate(prismReceiver);
-            }
+            auto receiver = translate(callNode->receiver);
 
             absl::Span<pm_node_t *> prismArgs;
             if (auto argsNode = callNode->arguments; argsNode != nullptr) {
@@ -141,27 +140,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *declLoc = &defNode->def_keyword_loc;
 
             std::string_view name = parser.resolveConstant(defNode->name);
-
-            unique_ptr<parser::Node> params;
-            unique_ptr<parser::Node> body;
-
-            if (defNode->body != nullptr) {
-                body = translate(defNode->body);
-            }
-
-            if (defNode->parameters != nullptr) {
-                params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
-            }
+            auto params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
+            auto body = translate(defNode->body);
 
             return make_unique<parser::DefMethod>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                   gs.enterNameUTF8(name), std::move(params), std::move(body));
         }
         case PM_ELSE_NODE: {
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
-
-            if (elseNode->statements == nullptr)
-                return nullptr;
-
             return translate(reinterpret_cast<pm_node *>(elseNode->statements));
         }
         case PM_FALSE_NODE: {
@@ -185,17 +171,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto *loc = &ifNode->base.location;
 
             auto predicate = translate(ifNode->predicate);
-
-            std::unique_ptr<parser::Node> ifTrue;
-            std::unique_ptr<parser::Node> ifFalse;
-
-            if (ifNode->statements != nullptr) {
-                ifTrue = translate(reinterpret_cast<pm_node *>(ifNode->statements));
-            }
-
-            if (ifNode->consequent != nullptr) {
-                ifFalse = translate(ifNode->consequent);
-            }
+            auto ifTrue = translate(reinterpret_cast<pm_node *>(ifNode->statements));
+            auto ifFalse = translate(ifNode->consequent);
 
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
@@ -558,15 +535,8 @@ std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node
 // and wrapping it around the given `Send` node.
 std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
                                                                  std::unique_ptr<parser::Send> sendNode) {
-    std::unique_ptr<parser::Node> blockParametersNode;
-    if (prismBlockNode->parameters != nullptr) {
-        blockParametersNode = translate(prismBlockNode->parameters);
-    }
-
-    std::unique_ptr<parser::Node> body;
-    if (prismBlockNode->body != nullptr) {
-        body = translate(prismBlockNode->body);
-    }
+    auto blockParametersNode = translate(prismBlockNode->parameters);
+    auto body = translate(prismBlockNode->body);
 
     // TODO: what's the correct location to use for the Block?
     // TODO: do we have to adjust the location for the Send node?
