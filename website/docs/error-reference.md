@@ -4521,6 +4521,38 @@ variable. By convention, these variables start with `_`.
 x, y, _z = returns_3_tuple()
 ```
 
+Sometimes fixing errors in this way can introduce pinning errors:
+
+```ruby
+x, _ = returns_str_and_int()
+2.times do
+  y, _ = returns_float_and_symbol()
+  #  ^ error: Changing the type of a variable is not permitted in loops
+end
+```
+
+The easiest solution here is to choose a different variable name (`_` is not
+special here: it's just a Ruby variable with the name of `_`). For example, `__`
+or `_sym` are two choices for the variable name in the multiple assignment
+inside the block.
+
+Another option: project out only the fields you care about directly:
+
+```ruby
+  result = returns_float_and_symbol()
+  y = result[0]
+```
+
+And another option: slice the result before assigning to avoid needing to ignore
+certain values of the result:
+
+```ruby
+  y, = returns_float_and_symbol()[..0]
+```
+
+The downside of these last two options is that it essentially opts the code out
+of tuple size checking if it grows or shrinks in size in the future.
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
