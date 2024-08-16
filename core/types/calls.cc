@@ -2394,8 +2394,8 @@ public:
         }
 
         const auto &intLiteral = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
-        auto expected = tuple->elems.size();
-        auto got = intLiteral.value;
+        size_t expected = tuple->elems.size();
+        size_t got = intLiteral.value;
         if (expected != got) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::TupleMismatchError)) {
                 auto plural = got == 1 ? "" : "s";
