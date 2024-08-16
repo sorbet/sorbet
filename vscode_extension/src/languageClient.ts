@@ -298,7 +298,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     this.context.log.debug(` > ${command} ${args.join(" ")}`);
     this.sorbetProcess = spawn(command, args, {
       cwd: workspace.rootPath,
-      env: activeConfig?.env ?? process.env,
+      env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
     // So, we need to handle both events. ¯\_(ツ)_/¯

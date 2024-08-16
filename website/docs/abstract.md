@@ -122,6 +122,152 @@ As the example shows, there are two main steps:
 Note: if you want to provide functionality in an abstract class or module that
 **must not** be possible to override in a child, use a [final method](final.md).
 
+## Letting abstract methods be implemented via inheritance
+
+Sorbet allows abstract methods in modules to be implemented by an **ancestor**
+of the class or module they're eventually mixed into. Consider this example:
+
+```ruby
+class Parent
+  sig { void }
+  def foo = puts 'Hello!'
+end
+
+module IFoo
+  extend T::Helpers
+  abstract!
+
+  sig { abstract.void }
+  def foo; end
+end
+
+class Child < Parent # ✅ okay
+  include IFoo
+end
+
+class NotAParent # ❌ Missing definition for `foo`
+  include IFoo
+end
+```
+
+Breaking down this example:
+
+- The `IFoo` module declares a single, abstract `foo` method. All classes that
+  include this module must either be marked abstract or define this method.
+
+- The `Parent` method does **not** depend on `IFoo`, **but** does happen to
+  define a method called `foo`.
+
+- Both `Child` and `NotAParent` have `include IFoo`, but neither define a `foo`
+  method.
+
+- Despite this: only `NotAParent` has an error saying that a concrete
+  implementation of `foo` is missing. Sorbet allows the `foo` method to be
+  implemented in `Child` because it inherits a `foo` method from `Parent`.
+
+### Approximating duck types
+
+This technique is particularly useful as a way to approximate "duck typing,"
+where you depend on "anything type, so long as it has this method."
+
+For example:
+
+```ruby
+module ShortName
+  extend T::Helpers
+  abstract!
+  sig { abstract.returns(T.nilable(String)) }
+  def name; end
+
+  sig { returns(T.nilable(String)) }
+  def short_name
+    self.name&.split('::')&.last
+  end
+end
+```
+
+This module provides a `short_name` method (which computes the "short name" of a
+something like a `Module` by splitting the full name into `::`-delimited tokens
+and returning the last one. Like `C` for `module A::B::C`).
+
+The module's implementation depends on the `name` method existing. If we don't
+declare it as an `abstract` method, Sorbet reports an error saying "Method
+`name` does not exist," which is true--there's no guarantee someone mixes this
+module into a context where `name` is defined.
+
+But by declaring `name` as an abstract method, Sorbet will check this property.
+In particular, this has the effect of catching someone who accidentally uses
+`include` instead of `extend` when mixing this module into a class:
+
+```ruby
+class A
+  include ShortName # ❌ error: Must define abstract method `name`
+end
+
+class B
+  extend ShortName # ✅
+end
+```
+
+This technique is particularly effective when it's not possible to refactor some
+upstream dependency's code to expose an explicit interface. The `Module` class
+in the Ruby stdlib doesn't have some sort of public `INameable` interface with
+the `name` method. A handful of database model classes in an application might
+share a set of related fields, without explicitly implementing some interface.
+And yet, using this technique Sorbet allows writing modules which depend on
+those implicit interfaces.
+
+This technique is also quite flexible: the `ShortName` module can be used in
+**any** context where a `name` method is available. So for example, if you had
+some `T::Struct` that stores a `name`, this `ShortName` mixin could also be
+used:
+
+```ruby
+class C < T::Struct
+  include ShortName
+  prop :name, String
+end
+
+C.new(name: "Some::Long::Namespace").short_name # => "Namespace"
+```
+
+### Consequences for runtime signature checking
+
+Letting abstract methods be implemented by inherited methods relies on the fact
+that method signatures are [checked at runtime](runtime.md). To explain why this
+feature requires runtime support, let's look at the resolved ancestors of
+`Child`:
+
+```
+irb> Child.ancestors
+=> [Child, IFoo, Parent, <...>]
+```
+
+This shows that Ruby resolves a call like `child.foo` by first checking whether
+`Child` defines `foo`, then whether `IFoo` defines `foo`, and then finally
+whether `Parent` does. Since it looks in `IFoo` **before** `Parent`, Ruby
+actually calls the `IFoo#foo` method. But this method would normally have an
+empty method body—it's abstract!
+
+So at runtime, the `sig` method replaces the implementation of `foo` with a
+method that does something like this:
+
+```ruby
+def foo
+  if defined?(super)
+    super
+  else
+    raise NotImplementedError.new("Call to unimplemented abstract method")
+  end
+end
+```
+
+This allows `IFoo#foo` to dispatch up the ancestor chain, letting `child.foo`
+result in a call to `Parent#foo`.
+
+If runtime signature checking is disabled, a call like `child.foo` will silently
+produce `nil` instead of calling the appropriate method.
+
 ## Abstract singleton methods
 
 `abstract` singleton methods on a module are not allowed, as there's no way to
@@ -140,6 +286,53 @@ end
 
 M.foo # error: `M.foo` can never be implemented
 ```
+
+Abstract singleton methods on a class **are** allowed, but are unsound (i.e.,
+they can lead to runtime, type-related exceptions like `TypeError` and
+`NameError` even when there is no `T.untyped` involved):
+
+```ruby
+class AbstractParent
+  abstract!
+  sig { abstract.void } # ❌ BAD: abstract singleton class method!
+  def self.foo; end
+end
+
+class ConcreteChild < AbstractParent
+  sig { override.void }
+  def self.foo = puts("hello!")
+end
+
+sig { params(klass: T.class_of(AbstractParent)).void }
+def example(klass)
+  klass.foo
+end
+
+example(ConcreteChild)  # ✅ okay
+example(AbstractParent) # static:  ✅ no errors
+                        # runtime: 💥 call to abstract method foo
+```
+
+For more information, see this blog post:
+
+[Abstract singleton class methods are an abomination →](https://blog.jez.io/abstract-singleton-methods)
+
+The blog post above discusses the problem and three alternatives to avoid using
+abstract singleton class methods. To summarize:
+
+1.  Declare an interface or abstract module with abstract instance methods, and
+    `extend` that module onto a class.
+
+1.  Use the above approach, but with
+    [`mixes_in_class_methods`](#interfaces-and-the-included-hook), discussed
+    below.
+
+1.  Make the method `overridable` instead of `abstract`, effectively giving the
+    method a default implementation.
+
+There are also some runtime escape hatches to work around this problem. See
+[Runtime reflection on abstract classes](#runtime-reflection-on-abstract-classes)
+below.
 
 ## Interfaces and the `included` hook
 
@@ -220,6 +413,11 @@ modules that mixin in their own class modules. In these cases, you will need to
 declare multiple modules in the `mixes_in_class_methods` call or make multiple
 `mixes_in_class_methods` calls.
 
+For a more comprehensive resource on how `mixes_in_class_methods` builds on
+existing Ruby inheritance features, see this blog post:
+
+[Inheritance in Ruby, in pictures →](https://blog.jez.io/inheritance-in-ruby)
+
 ## Runtime reflection on abstract classes
 
 From time to time, it's useful to be able to ask whether a class or module
@@ -241,8 +439,9 @@ end
 Note that in general, having to ask whether a module is abstract is a **code
 smell**. There is usually a way to reorganize the code such that calling
 `abstract_module?` isn't needed. In particular, this happens most frequently
-from the use of modules with abstract singleton class methods (abstract `self.`
-methods), and the fix is to stop using abstract singleton class methods.
+from the use of modules with
+[abstract singleton class methods](#abstract-singleton-methods) (abstract
+`self.` methods), and the fix is to stop using abstract singleton class methods.
 
 Here's an example:
 

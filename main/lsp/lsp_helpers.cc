@@ -44,6 +44,11 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
+
+    if (name == core::Names::requiredAncestorsLin()) {
+        return true;
+    }
+
     return false;
 }
 
@@ -172,7 +177,27 @@ vector<core::ClassOrModuleRef> getSubclassesSlow(const core::GlobalState &gs, co
 }
 
 unique_ptr<core::lsp::QueryResponse>
-skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+skipLiteralIfPunnedKeywordArg(const core::GlobalState &gs,
+                              vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    auto &resp = queryResponses[0];
+    auto *litResp = resp->isLiteral();
+    if (litResp == nullptr || queryResponses.size() <= 1) {
+        return nullptr;
+    }
+    auto identResp = queryResponses[1]->isIdent();
+    if (identResp == nullptr || identResp->termLoc.adjust(gs, 0, -1) != litResp->termLoc) {
+        return nullptr;
+    }
+
+    return move(queryResponses[1]);
+}
+
+unique_ptr<core::lsp::QueryResponse>
+skipLiteralIfMethodDef(const core::GlobalState &gs, vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+    if (auto punnedKwarg = skipLiteralIfPunnedKeywordArg(gs, queryResponses)) {
+        return punnedKwarg;
+    }
+
     for (auto &r : queryResponses) {
         if (r->isMethodDef()) {
             return move(r);
@@ -185,12 +210,13 @@ skipLiteralIfMethodDef(vector<unique_ptr<core::lsp::QueryResponse>> &queryRespon
 }
 
 unique_ptr<core::lsp::QueryResponse>
-getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
+getQueryResponseForFindAllReferences(const core::GlobalState &gs,
+                                     vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) {
     // Find all references might show an Ident last if its a `prop`, and the Ident will be the
     // synthetic local variable name of the method argument.
     auto firstResp = queryResponses[0]->isIdent();
     if (firstResp == nullptr) {
-        return skipLiteralIfMethodDef(queryResponses);
+        return skipLiteralIfMethodDef(gs, queryResponses);
     }
 
     for (auto resp = queryResponses.begin() + 1; resp != queryResponses.end(); ++resp) {
@@ -210,11 +236,11 @@ getQueryResponseForFindAllReferences(vector<unique_ptr<core::lsp::QueryResponse>
         if ((*resp)->isMethodDef()) {
             return move(*resp);
         } else {
-            return skipLiteralIfMethodDef(queryResponses);
+            return skipLiteralIfMethodDef(gs, queryResponses);
         }
     }
 
-    return skipLiteralIfMethodDef(queryResponses);
+    return skipLiteralIfMethodDef(gs, queryResponses);
 }
 
 /**

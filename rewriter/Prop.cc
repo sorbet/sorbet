@@ -97,7 +97,6 @@ bool wantTypedInitialize(SyntacticSuperClass syntacticSuperClass) {
 struct PropContext {
     SyntacticSuperClass syntacticSuperClass = SyntacticSuperClass::Unknown;
     ast::ClassDef::Kind classDefKind;
-    bool needsRealPropBodies;
 };
 
 struct PropInfo {
@@ -110,6 +109,7 @@ struct PropInfo {
     ast::ExpressionPtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
+    ast::ExpressionPtr foreignKwLit;
     ast::ExpressionPtr foreign;
     ast::ExpressionPtr enum_;
     ast::ExpressionPtr ifunset;
@@ -312,6 +312,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
         if (foreignTree != nullptr) {
             ret.foreign = move(foreignTree);
+            ret.foreignKwLit = move(fk);
             if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
@@ -389,13 +390,9 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
         auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
-    } else if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
-        // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
     } else if (ret.ifunset == nullptr) {
         if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
             ast::MethodDef::Flags flags;
-            flags.isAttrReader = true;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), flags));
             } else {
@@ -404,27 +401,6 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                               ast::MK::Symbol(nameLoc, ivarName));
                 nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
             }
-        } else if (propContext.needsRealPropBodies) {
-            ast::MethodDef::Flags flags;
-            flags.genericPropGetter = true;
-
-            // Models have a custom decorator, which means we have to forward the prop get to it.
-            // If this is actually a T::InexactStruct or Chalk::ODM::Base::Document sub-sub-class,
-            // this implementation is correct but does extra work.
-
-            auto arg2 = ast::MK::Local(loc, core::Names::arg2());
-
-            auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
-                                          ast::MK::Symbol(nameLoc, ivarName));
-            auto assign = ast::MK::Assign(loc, arg2.deepCopy(), std::move(ivarGet));
-
-            auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_(), locZero);
-            auto decorator = ast::MK::Send0(loc, std::move(class_), core::Names::decorator(), locZero);
-            auto propGetLogic = ast::MK::Send3(loc, std::move(decorator), core::Names::propGetLogic(), locZero,
-                                               ast::MK::Self(loc), ast::MK::Symbol(nameLoc, name), std::move(arg2));
-
-            auto insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(propGetLogic));
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq), flags));
         } else {
             nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
         }
@@ -442,10 +418,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         sigArgs.emplace_back(ASTUtil::dupType(setType));
         nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
 
-        if (propContext.needsRealPropBodies && propContext.classDefKind == ast::ClassDef::Kind::Module) {
-            // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
-        } else if (ret.enum_ == nullptr) {
+        if (ret.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
                     auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
@@ -458,18 +431,6 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
                     nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
                 }
-            } else if (propContext.needsRealPropBodies) {
-                // need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                auto ivarSet =
-                    ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
-                                   ast::MK::Symbol(nameLoc, ivarName), ast::MK::Local(nameLoc, core::Names::arg0()));
-                auto tConfig = ast::MK::Constant(loc, core::Symbols::T_Configuration());
-                auto propFreezeHandler =
-                    ast::MK::Send0(loc, std::move(tConfig), core::Names::propFreezeHandler(), locZero);
-                auto propFreezeLogic = ast::MK::Send2(loc, std::move(propFreezeHandler), core::Names::call(), locZero,
-                                                      ast::MK::Self(loc), ast::MK::Symbol(loc, name));
-                auto insSeq = ast::MK::InsSeq1(loc, std::move(propFreezeLogic), std::move(ivarSet));
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(insSeq)));
             } else {
                 nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
             }
@@ -504,7 +465,15 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
-        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg),
+
+        core::LocOffsets methodLoc;
+        if (ret.foreignKwLit != nullptr) {
+            methodLoc = ret.foreignKwLit.loc();
+        } else {
+            methodLoc = loc;
+        }
+
+        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethod, std::move(arg),
                                                      ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
         nodes.emplace_back(std::move(fkMethodDef));
 
@@ -590,19 +559,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    // Normally we wouldn't need to call super here: the compiler will use the types
-    // in the sig to typecheck everything, just like sorbet-runtime, and we've
-    // generated a body to set all the appropriate instance variables, just like
-    // sorbet-runtime.  (deprecated) enum props, however, are not typechecked
-    // properly by the compiler, so we need to use super to call into sorbet-runtime
-    // to get the correct handling.
-    ast::ExpressionPtr maybeSuper;
-    if (absl::c_any_of(props, [](const auto &prop) { return prop.enum_ != nullptr; })) {
-        maybeSuper = ast::MK::ZSuper(klassDeclLoc, core::Names::untypedSuper());
-    } else {
-        maybeSuper = ast::MK::Nil(klassDeclLoc);
-    }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), std::move(maybeSuper));
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::Nil(klassDeclLoc));
 
     vector<ast::ExpressionPtr> result;
     result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
@@ -625,14 +582,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
             syntacticSuperClass = SyntacticSuperClass::TImmutableStruct;
         }
     }
-    // The compiler is going to turn the bodies of rewritten prop methods into actual
-    // code, so they need to be faithful replications of runtime behavior.  If we're
-    // not compiling the file, however, then the static checker only really cares about
-    // the sigs and we can put some smaller untyped representation in the methods.
-    //
-    // This change saves ~2% memory on large codebases with many props.
-    const bool needsRealPropBodies = ctx.file.data(ctx.state).compiledLevel == core::CompiledLevel::True;
-    auto propContext = PropContext{syntacticSuperClass, klass->kind, needsRealPropBodies};
+    auto propContext = PropContext{syntacticSuperClass, klass->kind};
     UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;

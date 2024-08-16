@@ -1,0 +1,21 @@
+diff --git emscripten_toolchain/emscripten_config emscripten_toolchain/emscripten_config
+index 648a8fe..0b7688f 100644
+--- emscripten_toolchain/emscripten_config
++++ emscripten_toolchain/emscripten_config
+@@ -9,7 +9,15 @@ FROZEN_CACHE = True
+ 
+ system = platform.system()
+ 
+-machine = "arm64" if platform.machine() in ('arm64', 'aarch64') else "amd64"
++# TODO(jez) We can remove this hack when we use the arm64 version of Bazel on
++# macOS to drive our build (right now we always use the x86_64 version of Bazel
++# to drive the macOS build).
++if system == "Darwin":
++  machine = "arm64"
++elif platform.machine() in ('arm64', 'aarch64'):
++  machine = "arm64"
++else:
++  machine = "amd64"
+ nodejs_binary = "bin/nodejs/node.exe" if(system =="Windows") else "bin/node"
+ NODE_JS = ROOT_DIR + "/external/nodejs_{}_{}/{}".format(system.lower(), machine, nodejs_binary)
+ 

@@ -747,4 +747,82 @@ module SecureRandom
     returns(String)
   end
   def self.uuid; end
+
+  sig do
+    returns(String)
+  end
+  def self.uuid_v4; end
+
+  # Generate a random v7 UUID (Universally Unique IDentifier).
+  #
+  #   require 'random/formatter'
+  #
+  #   Random.uuid_v7 # => "0188d4c3-1311-7f96-85c7-242a7aa58f1e"
+  #   Random.uuid_v7 # => "0188d4c3-16fe-744f-86af-38fa04c62bb5"
+  #   Random.uuid_v7 # => "0188d4c3-1af8-764f-b049-c204ce0afa23"
+  #   Random.uuid_v7 # => "0188d4c3-1e74-7085-b14f-ef6415dc6f31"
+  #   #                    |<--sorted-->| |<----- random ---->|
+  #
+  #   # or
+  #   prng = Random.new
+  #   prng.uuid_v7 # => "0188ca51-5e72-7950-a11d-def7ff977c98"
+  #
+  # The version 7 UUID starts with the least significant 48 bits of a 64 bit
+  # Unix timestamp (milliseconds since the epoch) and fills the remaining bits
+  # with random data, excluding the version and variant bits.
+  #
+  # This allows version 7 UUIDs to be sorted by creation time.  Time ordered
+  # UUIDs can be used for better database index locality of newly inserted
+  # records, which may have a significant performance benefit compared to random
+  # data inserts.
+  #
+  # The result contains 74 random bits (9.25 random bytes).
+  #
+  # Note that this method cannot be made reproducable because its output
+  # includes not only random bits but also timestamp.
+  #
+  # See draft-ietf-uuidrev-rfc4122bis[https://datatracker.ietf.org/doc/draft-ietf-uuidrev-rfc4122bis/]
+  # for details of UUIDv7.
+  #
+  # ==== Monotonicity
+  #
+  # UUIDv7 has millisecond precision by default, so multiple UUIDs created
+  # within the same millisecond are not issued in monotonically increasing
+  # order.  To create UUIDs that are time-ordered with sub-millisecond
+  # precision, up to 12 bits of additional timestamp may added with
+  # +extra_timestamp_bits+.  The extra timestamp precision comes at the expense
+  # of random bits.  Setting <tt>extra_timestamp_bits: 12</tt> provides ~244ns
+  # of precision, but only 62 random bits (7.75 random bytes).
+  #
+  #   prng = Random.new
+  #   Array.new(4) { prng.uuid_v7(extra_timestamp_bits: 12) }
+  #   # =>
+  #   ["0188d4c7-13da-74f9-8b53-22a786ffdd5a",
+  #    "0188d4c7-13da-753b-83a5-7fb9b2afaeea",
+  #    "0188d4c7-13da-754a-88ea-ac0baeedd8db",
+  #    "0188d4c7-13da-7557-83e1-7cad9cda0d8d"]
+  #   # |<--- sorted --->| |<-- random --->|
+  #
+  #   Array.new(4) { prng.uuid_v7(extra_timestamp_bits: 8) }
+  #   # =>
+  #   ["0188d4c7-3333-7a95-850a-de6edb858f7e",
+  #    "0188d4c7-3333-7ae8-842e-bc3a8b7d0cf9",  # <- out of order
+  #    "0188d4c7-3333-7ae2-995a-9f135dc44ead",  # <- out of order
+  #    "0188d4c7-3333-7af9-87c3-8f612edac82e"]
+  #   # |<--- sorted -->||<---- random --->|
+  #
+  # Any rollbacks of the system clock will break monotonicity.  UUIDv7 is based
+  # on UTC, which excludes leap seconds and can rollback the clock.  To avoid
+  # this, the system clock can synchronize with an NTP server configured to use
+  # a "leap smear" approach.  NTP or PTP will also be needed to synchronize
+  # across distributed nodes.
+  #
+  # Counters and other mechanisms for stronger guarantees of monotonicity are
+  # not implemented.  Applications with stricter requirements should follow
+  # {Section 6.2}[https://www.ietf.org/archive/id/draft-ietf-uuidrev-rfc4122bis-07.html#monotonicity_counters]
+  # of the specification.
+  sig do
+    params(extra_timestamp_bits: T.nilable(Integer)).returns(String)
+  end
+  def self.uuid_v7(extra_timestamp_bits:); end
 end

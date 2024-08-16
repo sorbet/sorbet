@@ -389,6 +389,11 @@ public:
                 }
                 if (!original.hasPosArgs()) {
                     ENFORCE(!methodVisiStack.empty());
+
+                    if (!original.recv.isSelfReference()) {
+                        break;
+                    }
+
                     methodVisiStack.back() = optional<core::FoundModifier>{core::FoundModifier{
                         core::FoundModifier::Kind::Method,
                         getOwner(),
@@ -509,24 +514,18 @@ public:
     }
 
     void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
-        auto target = core::NameRef::noName();
-        if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
-            if (sym->isSymbol()) {
-                target = sym->asSymbol();
-            } else if (sym->isString()) {
-                target = sym->asString();
-            }
+        auto sym = ast::cast_tree<ast::Literal>(arg);
+        if (sym == nullptr || !sym->isName()) {
+            return;
         }
 
-        if (target.exists()) {
-            foundDefs->addModifier(core::FoundModifier{
-                core::FoundModifier::Kind::ClassOrStaticField,
-                getOwner(),
-                arg.loc(),
-                /*name*/ modifierName,
-                target,
-            });
-        }
+        foundDefs->addModifier(core::FoundModifier{
+            core::FoundModifier::Kind::ClassOrStaticField,
+            getOwner(),
+            arg.loc(),
+            /*name*/ modifierName,
+            sym->asName(),
+        });
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
@@ -629,12 +628,23 @@ public:
         return foundDefs->addTypeMember(move(found));
     }
 
+    bool sendRecvIsT(const ast::Send &s) {
+        bool result = false;
+
+        typecase(
+            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
+            [&](const ast::ConstantLit &c) { result = c.symbol == core::Symbols::T(); },
+            [&](const ast::ExpressionPtr &_default) { result = false; });
+
+        return result;
+    }
+
     core::FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == core::FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = send.fun == core::Names::typeAlias();
+        staticField.isTypeAlias = sendRecvIsT(send) && send.fun == core::Names::typeAlias();
         return foundRef;
     }
 

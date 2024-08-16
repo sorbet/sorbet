@@ -49,11 +49,14 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
     if (queryResponses.empty()) {
-        auto fref = config.uri2FileRef(gs, params->textDocument->uri);
-        ENFORCE(fref.exists());
         auto level = fref.data(gs).strictLevel;
         if (level < core::StrictLevel::True) {
             auto text = level == core::StrictLevel::Ignore
@@ -69,17 +72,34 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
+    auto resp = skipLiteralIfMethodDef(gs, queryResponses);
     auto options = core::ShowOptions();
     vector<core::Loc> documentationLocations;
     string typeString;
 
     if (auto s = resp->isSend()) {
-        auto start = s->dispatchResult.get();
-        if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
-            auto loc = start->main.method.data(gs)->loc();
-            if (loc.exists()) {
-                documentationLocations.emplace_back(loc);
+        // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+        if (s->funLoc().exists() && s->funLoc().contains(queryLoc)) {
+            auto start = s->dispatchResult.get();
+            if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                auto loc = start->main.method.data(gs)->loc();
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+
+            auto retType = s->dispatchResult->returnType;
+            auto &constraint = s->dispatchResult->main.constr;
+            if (constraint) {
+                retType = core::Types::instantiate(gs, retType, *constraint);
+            }
+            if (s->dispatchResult->main.method.exists() &&
+                s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
+                // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
+                // the result type.
+                typeString = retType.showWithMoreInfo(gs);
+            } else {
+                typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
@@ -96,12 +116,17 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 }
             }
         }
+
+        typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
     } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {
                 documentationLocations.emplace_back(loc);
             }
         }
+
+        typeString =
+            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, nullptr, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
@@ -109,29 +134,15 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 documentationLocations.emplace_back(loc);
             }
         }
-    }
 
-    if (auto sendResp = resp->isSend()) {
-        auto retType = sendResp->dispatchResult->returnType;
-        auto &constraint = sendResp->dispatchResult->main.constr;
-        if (constraint) {
-            retType = core::Types::instantiate(gs, retType, *constraint);
+        auto retType = resp->getRetType();
+        // Some untyped arguments have null types.
+        if (!retType) {
+            retType = core::Types::untypedUntracked();
         }
-        if (sendResp->dispatchResult->main.method.exists() &&
-            sendResp->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
-            // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
-            // the result type.
-            typeString = retType.showWithMoreInfo(gs);
-        } else {
-            typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint, options);
-        }
-    } else if (auto defResp = resp->isMethodDef()) {
-        typeString = core::source_generator::prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type,
-                                                                 nullptr, options);
-    } else if (auto constResp = resp->isConstant()) {
-        typeString = prettyTypeForConstant(gs, constResp->symbolBeforeDealias);
+        typeString = retType.showWithMoreInfo(gs);
     } else {
-        core::TypePtr retType = resp->getRetType();
+        auto retType = resp->getRetType();
         // Some untyped arguments have null types.
         if (!retType) {
             retType = core::Types::untypedUntracked();

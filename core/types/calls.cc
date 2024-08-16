@@ -358,8 +358,6 @@ struct GuessOverloadCandidate {
     shared_ptr<TypeConstraint> constr;
 };
 
-// Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
-// arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, uint16_t numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
@@ -645,7 +643,7 @@ void handleBlockType(const GlobalState &gs, DispatchComponent &component, TypePt
 DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
     auto errLoc = args.errLoc();
-    if (symbol == core::Symbols::untyped()) {
+    if (symbol == core::Symbols::untyped() && args.name != core::Names::methodNameMissing()) {
         auto what = core::errors::Infer::errorClassForUntyped(gs, args.locs.file, args.thisType);
         if (auto e = gs.beginError(errLoc, what)) {
             e.setHeader("Call to method `{}` on `{}`", args.name.show(gs), "T.untyped");
@@ -1941,9 +1939,11 @@ public:
         }
         auto ret = Types::dropNil(gs, args.args[0]->type);
         if (ret == args.args[0]->type) {
-            auto code = args.args[0]->type.isUntyped() ? errors::Infer::MustOnUntyped : errors::Infer::InvalidCast;
+            auto isRedundant =
+                args.args[0]->type.isUntyped() || ret.isTop() || ret == Types::Object() || ret == Types::BasicObject();
+            auto code = isRedundant ? errors::Infer::RedundantMust : errors::Infer::InvalidCast;
             if (auto e = gs.beginError(args.argLoc(0), code)) {
-                if (code == errors::Infer::MustOnUntyped) {
+                if (code == errors::Infer::RedundantMust) {
                     e.setHeader("`{}` called on `{}`, which is redundant", methodName, args.args[0]->type.show(gs));
                 } else {
                     e.setHeader("`{}` called on `{}`, which is never `{}`", methodName, args.args[0]->type.show(gs),
@@ -2101,7 +2101,7 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
-        auto tClassSelfType = Types::tClass(args.selfType);
+        auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
         if (self.data(gs)->isModule()) {
             ENFORCE(gs.requiresAncestorEnabled, "Congrats, you've found a test case. Please add it, then delete this.");
             // This normally can't happen, because `Object` is not an ancestor of any module
@@ -2274,16 +2274,6 @@ public:
         applySig(gs, args, res, 0);
     }
 } SorbetPrivateStatic_sig;
-
-class SorbetPrivateStaticResolvedSig_sig : public IntrinsicMethod {
-public:
-    // Forward Sorbet::Private::Static::ResolvedSig.sig(recv, ..., <self-method>, <method-name>) {...} to recv.sig(...)
-    // {...}
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        const size_t selfAndMethodSymbol = 2;
-        applySig(gs, args, res, selfAndMethodSymbol);
-    }
-} SorbetPrivateStaticResolvedSig_sig;
 
 class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
@@ -2661,19 +2651,16 @@ private:
         }
 
         {
+            auto nonNilPassedInBlockType = Types::dropNil(gs, passedInBlockType);
+            auto passedInBlockReturnType = Types::getProcReturnType(gs, nonNilPassedInBlockType);
             auto it = &dispatched;
             while (it != nullptr) {
                 if (it->main.method.exists()) {
-                    const auto &methodArgs = it->main.method.data(gs)->arguments;
-                    ENFORCE(!methodArgs.empty());
-                    const auto &bspec = methodArgs.back();
-                    ENFORCE(bspec.flags.isBlock);
-
-                    auto bspecType = bspec.type;
-                    if (bspecType) {
+                    const auto &blockReturnType = it->main.blockReturnType;
+                    if (blockReturnType) {
                         // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
-                        Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, bspecType,
+                        Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockReturnType, blockReturnType,
                                                         UntypedMode::AlwaysCompatible, ErrorSection::Collector::NO_OP);
                     }
                 }
@@ -3723,6 +3710,80 @@ class Magic_mergeHashValues : public IntrinsicMethod {
     }
 } Magic_mergeHashValues;
 
+// Returns true if the type is exactly the class of a specific enum value. For example, given:
+//
+//   class C < T::Enum
+//     enums do
+//       X = new
+//       Y = new
+//     end
+//   end
+//
+//  class TotallyUnrelatedThing ; end
+//
+// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
+static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
+    bool must_exist = false;
+    auto unwrapped = unwrapSymbol(gs, type, must_exist);
+
+    if (!unwrapped.exists()) {
+        return false;
+    }
+
+    return unwrapped.data(gs)->name.isTEnumName(gs);
+}
+
+class Magic_checkMatchArray : public IntrinsicMethod {
+    vector<NameRef> dispatchesTo() const override {
+        return {core::Names::tripleEq()};
+    }
+
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto tupleType = core::cast_type<core::TupleType>(args.args[1]->type);
+        if (tupleType == nullptr) {
+            return;
+        }
+
+        auto testedType = args.args[0]->type;
+        if (testedType.isUntyped()) {
+            return;
+        }
+
+        auto testedSym = Symbols::noClassOrModule();
+        if (isa_type<ClassType>(testedType)) {
+            testedSym = cast_type_nonnull<ClassType>(testedType).symbol;
+        } else if (auto *app = cast_type<AppliedType>(testedType)) {
+            testedSym = app->klass;
+        }
+        if (testedSym.exists() && testedSym.data(gs)->flags.isSealed) {
+            testedType = testedSym.data(gs)->sealedSubclassesToUnion(gs);
+        }
+
+        auto typeTestType = core::Types::bottom();
+        for (const auto &klassType : tupleType->elems) {
+            auto klass = core::Types::getRepresentedClass(gs, klassType);
+            if (klass.exists()) {
+                auto ty = klass.data(gs)->externalType();
+                if (ty.isUntyped()) {
+                    return;
+                }
+
+                typeTestType = core::Types::any(gs, move(typeTestType), move(ty));
+            } else if (isEnumValueClass(gs, klassType)) {
+                typeTestType = core::Types::any(gs, move(typeTestType), klassType);
+            } else {
+                return;
+            }
+        }
+
+        if (Types::isSubType(gs, testedType, typeTestType)) {
+            res.returnType = Types::trueClass();
+        } else if (Types::glb(gs, testedType, typeTestType).isBottom()) {
+            res.returnType = Types::falseClass();
+        }
+    }
+} Magic_checkMatchArray;
+
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -4149,8 +4210,12 @@ public:
         }
         auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
         vector<core::TypePtr> targs(*numberOfPositionalBlockParams + 1, untypedWithBlame);
+        auto isLambda = res.main.method == Symbols::Kernel_lambda();
+        targs[0] = isLambda ? make_type<TypeVar>(Symbols::Kernel_lambda_returnType())
+                            : make_type<TypeVar>(Symbols::Kernel_proc_returnType());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.returnType = make_type<core::AppliedType>(procClass, move(targs));
+        handleBlockType(gs, res.main, res.returnType);
     }
 } Kernel_proc;
 
@@ -4340,30 +4405,6 @@ public:
         res.returnType = Types::Boolean();
     }
 } Module_tripleEq;
-
-// Returns true if the type is exactly the class of a specific enum value. For example, given:
-//
-//   class C < T::Enum
-//     enums do
-//       X = new
-//       Y = new
-//     end
-//   end
-//
-//  class TotallyUnrelatedThing ; end
-//
-// returns true for "X" and "Y", but false for "C", "T::Enum", and "TotallyUnrelatedThing".
-static bool isEnumValueClass(const GlobalState &gs, const TypePtr &type) {
-    bool must_exist = false;
-    auto unwrapped = unwrapSymbol(gs, type, must_exist);
-
-    if (!unwrapped.exists()) {
-        return false;
-    }
-
-    return unwrapped.data(gs)->name.isTEnumName(gs);
-}
-
 class T_Enum_tripleEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4472,8 +4513,6 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Class(), Intrinsic::Kind::Instance, Names::subclasses(), &Class_subclasses},
 
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
-    {Symbols::Sorbet_Private_Static_ResolvedSig(), Intrinsic::Kind::Singleton, Names::sig(),
-     &SorbetPrivateStaticResolvedSig_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
@@ -4491,6 +4530,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::toHashNoDup(), &Magic_toHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHash(), &Magic_mergeHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHashValues(), &Magic_mergeHashValues},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkMatchArray(), &Magic_checkMatchArray},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},

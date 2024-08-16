@@ -114,6 +114,20 @@ bool sendRecvIsT(ast::Send &s) {
     }
 }
 
+bool isKernelLambda(ast::Send &s) {
+    if (s.fun != core::Names::lambda()) {
+        return false;
+    }
+
+    // Only handle `-> () {}` and `Kernel.lambda` lambdas for now, because there's nothing stopping
+    // someone from defining a method called `lambda` on their own that behaves differently.
+    //
+    // We could revisit this in the future but for now let's be conservative.
+
+    auto *cnst = ast::cast_tree<ast::ConstantLit>(s.recv);
+    return cnst != nullptr && cnst->symbol == core::Symbols::Kernel();
+}
+
 InstructionPtr maybeMakeTypeParameterAlias(CFGContext &cctx, ast::Send &s) {
     const auto &ctx = cctx.ctx;
     auto method = cctx.inWhat.symbol;
@@ -228,6 +242,29 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     return current;
 }
 
+BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+                                        BasicBlock *current) {
+    LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
+    auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
+    if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
+        LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
+        ENFORCE(cctx.link.get() != nullptr);
+        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(cctx.link, exprSym));
+    }
+
+    if (cctx.nextScope == nullptr) {
+        if (auto e = cctx.ctx.beginError(loc, core::errors::CFG::NoNextScope)) {
+            e.setHeader("No `{}` block around `{}`", "do", "next");
+        }
+        // I guess just keep going into deadcode?
+        unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, loc);
+    } else {
+        unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, loc);
+    }
+
+    return cctx.inWhat.deadBlock();
+}
+
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
     auto *join = cctx.inWhat.freshBlock(cctx.loops, a);
     unconditionalJump(a, join, cctx.inWhat, core::LocOffsets::none());
@@ -329,6 +366,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                  */
             },
             [&](ast::Return &a) {
+                if (cctx.isInsideLambda) {
+                    ret = walkBlockReturn(cctx, a.loc, a.expr, current);
+                    return;
+                }
+
                 LocalRef retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a.expr, current);
                 cont->exprs.emplace_back(cctx.target, a.loc, make_insn<Return>(retSym, a.expr.loc())); // dead assign.
@@ -423,8 +465,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     if (foundError && shouldReportErrorOn) {
                         auto zeroLoc = a.loc.copyWithZeroLength();
                         auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
-                        auto fieldKind = ident->kind == ast::UnresolvedIdent::Kind::Class ? core::Names::class_()
-                                                                                          : core::Names::instance();
+                        core::NameRef fieldKind;
+                        if (ident->kind == ast::UnresolvedIdent::Kind::Class) {
+                            fieldKind = core::Names::class_();
+                        } else {
+                            ENFORCE(cctx.ctx.owner.isMethod());
+                            auto owner = cctx.ctx.owner.owner(cctx.ctx).asClassOrModuleRef();
+                            if (owner.data(cctx.ctx)->isSingletonClass(cctx.ctx)) {
+                                fieldKind = core::Names::singletonClassInstance();
+                            } else {
+                                fieldKind = core::Names::instance();
+                            }
+                        }
+
                         // Mutate a.rhs before walking.
                         a.rhs =
                             ast::MK::Send4(a.lhs.loc(), move(magic), core::Names::suggestFieldType(), zeroLoc,
@@ -621,11 +674,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                     unconditionalJump(current, headerBlock, cctx.inWhat, s.loc);
 
                     LocalRef blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
-                    auto blockLast = walk(cctx.withTarget(blockrv)
-                                              .withBlockBreakTarget(cctx.target)
-                                              .withLoopScope(headerBlock, postBlock, true)
-                                              .withSendAndBlockLink(link),
-                                          s.block()->body, argBlock);
+                    BasicBlock *blockLast;
+                    {
+                        auto newCctx = cctx.withTarget(blockrv)
+                                           .withBlockBreakTarget(cctx.target)
+                                           .withLoopScope(headerBlock, postBlock, true)
+                                           .withSendAndBlockLink(link);
+                        if (isKernelLambda(s)) {
+                            newCctx.isInsideLambda = true;
+                        }
+                        blockLast = walk(newCctx, s.block()->body, argBlock);
+                    }
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         LocalRef dead = cctx.newTemporary(core::Names::blockReturnTemp());
 
@@ -684,27 +743,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
             [&](const ast::Block &a) { Exception::raise("should never encounter a bare Block"); },
 
-            [&](ast::Next &a) {
-                LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
-                auto afterNext = walk(cctx.withTarget(exprSym), a.expr, current);
-                if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
-                    LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
-                    ENFORCE(cctx.link.get() != nullptr);
-                    afterNext->exprs.emplace_back(dead, a.loc, make_insn<BlockReturn>(cctx.link, exprSym));
-                }
-
-                if (cctx.nextScope == nullptr) {
-                    if (auto e = cctx.ctx.beginError(a.loc, core::errors::CFG::NoNextScope)) {
-                        e.setHeader("No `{}` block around `{}`", "do", "next");
-                    }
-                    // I guess just keep going into deadcode?
-                    unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a.loc);
-                } else {
-                    unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, a.loc);
-                }
-
-                ret = cctx.inWhat.deadBlock();
-            },
+            [&](ast::Next &a) { ret = walkBlockReturn(cctx, a.loc, a.expr, current); },
 
             [&](ast::Break &a) {
                 LocalRef exprSym = cctx.newTemporary(core::Names::returnTemp());

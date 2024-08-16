@@ -1,6 +1,7 @@
 #include "main/lsp/requests/type_definition.h"
 #include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
+#include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/json_types.h"
 
@@ -98,12 +99,16 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     vector<unique_ptr<Location>> locations;
     if (!queryResponses.empty()) {
-        const bool fileIsTyped =
-            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = move(queryResponses[0]);
+        const bool fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
+        auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
         // Only support go-to-type-definition on constants and fields in untyped files.
         if (resp->isConstant() || resp->isField() || (fileIsTyped && (resp->isIdent() || resp->isLiteral()))) {
@@ -112,8 +117,11 @@ unique_ptr<ResponseMessage> TypeDefinitionTask::runRequest(LSPTypecheckerDelegat
             }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
-            for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
-                addLocIfExists(gs, locations, loc);
+            // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+            if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
+                for (auto loc : locsForType(gs, sendResp->dispatchResult->returnType)) {
+                    addLocIfExists(gs, locations, loc);
+                }
             }
         }
     }

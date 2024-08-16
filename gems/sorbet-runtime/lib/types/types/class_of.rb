@@ -21,7 +21,7 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      obj.is_a?(Module) && obj <= @type
+      obj.is_a?(Module) && (obj <= @type || false)
     end
 
     # overrides Base
@@ -32,7 +32,7 @@ module T::Types
       when Simple
         @type.is_a?(other.raw_type)
       when TypedClass
-        true
+        @type.is_a?(other.underlying_class)
       else
         false
       end

@@ -95,17 +95,24 @@ string fileKey(const core::File &file) {
 
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    if (kvstore && fref.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(file);
-        auto maybeCached = kvstore->read(fileHashKey);
-        if (maybeCached.data != nullptr) {
-            prodCounterInc("types.input.files.kvstore.hit");
-            return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
-        } else {
-            prodCounterInc("types.input.files.kvstore.miss");
-        }
+    if (kvstore == nullptr) {
+        return nullptr;
     }
-    return nullptr;
+
+    if (fref.id() >= gs.filesUsed()) {
+        prodCounterInc("types.input.files.kvstore.unindexed");
+        return nullptr;
+    }
+
+    string fileHashKey = fileKey(file);
+    auto maybeCached = kvstore->read(fileHashKey);
+    if (maybeCached.data == nullptr) {
+        prodCounterInc("types.input.files.kvstore.miss");
+        return nullptr;
+    }
+
+    prodCounterInc("types.input.files.kvstore.hit");
+    return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
 }
 
 unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
@@ -1307,7 +1314,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
         }
     });
 
-    bool written = false;
+    size_t written = 0;
     {
         vector<pair<string, vector<uint8_t>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
@@ -1316,12 +1323,13 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     kvstore->write(move(a.first), move(a.second));
-                    written = true;
+                    written++;
                 }
             }
         }
     }
-    return written;
+    prodCounterAdd("types.input.files.kvstore.write", written);
+    return written != 0;
 }
 
 vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,

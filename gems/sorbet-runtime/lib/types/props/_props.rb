@@ -110,7 +110,7 @@ module T::Props
     #
     # @return [void]
     sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
-    def prop(name, cls, rules={})
+    def prop(name, cls, **rules)
       cls = T::Utils.coerce(cls) if !cls.is_a?(Module)
       decorator.prop_defined(name, cls, rules)
     end
@@ -132,16 +132,16 @@ module T::Props
     end
 
     # Shorthand helper to define a `prop` with `immutable => true`
-    sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
-    def const(name, cls_or_args, args={})
+    sig {params(name: Symbol, cls_or_args: T.untyped, args: T.untyped).void}
+    def const(name, cls_or_args, **args)
       if (cls_or_args.is_a?(Hash) && cls_or_args.key?(:immutable)) || args.key?(:immutable)
         Kernel.raise ArgumentError.new("Cannot pass 'immutable' argument when using 'const' keyword to define a prop")
       end
 
       if cls_or_args.is_a?(Hash)
-        self.prop(name, cls_or_args.merge(immutable: true))
+        self.prop(name, **cls_or_args.merge(immutable: true))
       else
-        self.prop(name, cls_or_args, args.merge(immutable: true))
+        self.prop(name, cls_or_args, **args.merge(immutable: true))
       end
     end
 

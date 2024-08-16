@@ -1335,13 +1335,16 @@ string Literal::nodeName() const {
 
 core::NameRef Literal::asString() const {
     ENFORCE(isString());
-    auto t = core::cast_type_nonnull<core::NamedLiteralType>(value);
-    core::NameRef res = t.asName();
-    return res;
+    return asName();
 }
 
 core::NameRef Literal::asSymbol() const {
     ENFORCE(isSymbol());
+    return asName();
+}
+
+core::NameRef Literal::asName() const {
+    ENFORCE(isName());
     auto t = core::cast_type_nonnull<core::NamedLiteralType>(value);
     core::NameRef res = t.asName();
     return res;
@@ -1361,6 +1364,10 @@ bool Literal::isString() const {
     return core::isa_type<core::NamedLiteralType>(value) &&
            core::cast_type_nonnull<core::NamedLiteralType>(value).literalKind ==
                core::NamedLiteralType::LiteralTypeKind::String;
+}
+
+bool Literal::isName() const {
+    return isString() || isSymbol();
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {

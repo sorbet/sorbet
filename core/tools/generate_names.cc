@@ -51,7 +51,6 @@ NameDef names[] = {
     {"tripleEq", "==="},
     {"orOp", "|"},
     {"backtick", "`"},
-    {"slice"},
     {"defined_p", "defined?"},
     {"undef"},
     {"each"},
@@ -297,6 +296,7 @@ NameDef names[] = {
     {"Concern", "Concern", true},
 
     {"instance"},
+    {"singletonClassInstance", "singleton class instance"},
     {"normal"},
     {"genericPropGetter"},
 
@@ -358,6 +358,7 @@ NameDef names[] = {
 
     {"lambda"},
     {"lambdaTLet", "<lambda T.let>"},
+    {"returnType", "return_type"},
     {"nil_p", "nil?"},
     {"blank_p", "blank?"},
     {"present_p", "present?"},

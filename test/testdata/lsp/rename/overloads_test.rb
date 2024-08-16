@@ -8,7 +8,7 @@ class A
   extend T::Sig
   sig {params(x: I).void}
   sig {params(x: S).void}
-  def my_method(x)
+  def my_method(x) # error: against an overloaded signature
     #           ^ apply-rename: [A] newName: target placeholderText: x
     puts(x)
   end

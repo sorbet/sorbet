@@ -1,0 +1,28 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/type_alias_not_on_T.rb:2
+      argument <blk><block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=??? end=???}
+  module ::A < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/namer/type_alias_not_on_T.rb:2
+    static-field ::A::NotActuallyATypeAlias -> <todo sym> @ test/testdata/namer/type_alias_not_on_T.rb:9
+    module ::A::NotT < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/namer/type_alias_not_on_T.rb:3
+    class ::A::<Class:NotT> < ::Module () @ test/testdata/namer/type_alias_not_on_T.rb:3
+      method ::A::<Class:NotT>#<static-init> (<blk>) @ test/testdata/namer/type_alias_not_on_T.rb:3
+        argument <blk><block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=??? end=???}
+      method ::A::<Class:NotT>#type_alias (blk) @ test/testdata/namer/type_alias_not_on_T.rb:4
+        argument blk<block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=4:26 end=4:29}
+    static-field-type-alias ::A::ValidTypeAlias -> Object @ test/testdata/namer/type_alias_not_on_T.rb:7
+  class ::<Class:A> < ::Module () @ test/testdata/namer/type_alias_not_on_T.rb:2
+    method ::<Class:A>#<static-init> (<blk>) @ test/testdata/namer/type_alias_not_on_T.rb:2
+      argument <blk><block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=??? end=???}
+  module ::KnownLimitation < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/namer/type_alias_not_on_T.rb:12
+    static-field-type-alias ::KnownLimitation::StillATypeAlias -> Object @ test/testdata/namer/type_alias_not_on_T.rb:19
+    module ::KnownLimitation::T < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/namer/type_alias_not_on_T.rb:13
+    class ::KnownLimitation::<Class:T> < ::Module () @ test/testdata/namer/type_alias_not_on_T.rb:13
+      method ::KnownLimitation::<Class:T>#<static-init> (<blk>) @ test/testdata/namer/type_alias_not_on_T.rb:13
+        argument <blk><block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=??? end=???}
+      method ::KnownLimitation::<Class:T>#type_alias (blk) @ test/testdata/namer/type_alias_not_on_T.rb:14
+        argument blk<block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=14:26 end=14:29}
+  class ::<Class:KnownLimitation> < ::Module () @ test/testdata/namer/type_alias_not_on_T.rb:12
+    method ::<Class:KnownLimitation>#<static-init> (<blk>) @ test/testdata/namer/type_alias_not_on_T.rb:12
+      argument <blk><block> @ Loc {file=test/testdata/namer/type_alias_not_on_T.rb start=??? end=???}
+

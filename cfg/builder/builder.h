@@ -27,6 +27,8 @@ private:
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InstructionPtr inst);
     static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
+    static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, ast::ExpressionPtr &expr,
+                                       BasicBlock *current);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,
                 ast::ExpressionPtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);
@@ -41,6 +43,7 @@ public:
     LocalRef blockBreakTarget;
     int loops;
     bool isInsideRubyBlock;
+    bool isInsideLambda;
     bool breakIsJump;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
@@ -64,8 +67,8 @@ private:
     CFGContext(core::Context ctx, CFG &inWhat, LocalRef target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), breakIsJump(false),
-          nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), isInsideLambda(false),
+          breakIsJump(false), nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
           discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
 };
 } // namespace sorbet::cfg

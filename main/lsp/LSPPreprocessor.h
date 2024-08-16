@@ -20,13 +20,13 @@ class CancelParams;
 class TaskQueue final {
     absl::Mutex stateMutex;
 
-    std::deque<std::unique_ptr<LSPTask>> pendingTasks GUARDED_BY(stateMutex);
-    bool terminated GUARDED_BY(stateMutex) = false;
-    bool paused GUARDED_BY(stateMutex) = false;
-    int errorCode GUARDED_BY(stateMutex) = 0;
+    std::deque<std::unique_ptr<LSPTask>> pendingTasks ABSL_GUARDED_BY(stateMutex);
+    bool terminated ABSL_GUARDED_BY(stateMutex) = false;
+    bool paused ABSL_GUARDED_BY(stateMutex) = false;
+    int errorCode ABSL_GUARDED_BY(stateMutex) = 0;
 
     // Counters collected from preprocessor thread
-    CounterState counters GUARDED_BY(stateMutex);
+    CounterState counters ABSL_GUARDED_BY(stateMutex);
 
 public:
     TaskQueue() = default;
@@ -86,7 +86,7 @@ class LSPPreprocessor final {
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}
      */
-    void mergeFileChanges() EXCLUSIVE_LOCKS_REQUIRED(taskQueue->getMutex());
+    void mergeFileChanges() ABSL_EXCLUSIVE_LOCKS_REQUIRED(taskQueue->getMutex());
 
     /* The following methods convert edits into SorbetWorkspaceEditParams. */
 

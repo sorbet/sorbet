@@ -7,7 +7,7 @@
 #include "proto/Symbol.pb.h"
 #include "proto/Type.pb.h"
 #include "proto/pay-server/SourceMetrics.pb.h"
-#include <google/protobuf/util/json_util.h>
+#include <google/protobuf/json/json.h>
 
 #include "core/core.h"
 #include <fstream>

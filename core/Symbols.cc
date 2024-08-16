@@ -23,10 +23,10 @@ namespace sorbet::core {
 using namespace std;
 
 const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 215;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 54;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 56;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
-const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 72;
+const int Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 6;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 71;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -811,7 +811,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
     // via fuzzing (e.g. https://github.com/sorbet/sorbet/issues/128).
-    if (fuzz_mode) {
+    if constexpr (fuzz_mode) {
         return res;
     }
 
@@ -2259,7 +2259,7 @@ int ClassOrModule::typeArity(const GlobalState &gs) const {
 }
 
 void ClassOrModule::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     ClassOrModuleRef current = this->ref(gs);
@@ -2276,7 +2276,7 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
 }
 
 void Method::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     MethodRef current = this->ref(gs);
@@ -2305,7 +2305,7 @@ void Method::sanityCheck(const GlobalState &gs) const {
 }
 
 void Field::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     FieldRef current = this->ref(gs);
@@ -2322,7 +2322,7 @@ void Field::sanityCheck(const GlobalState &gs) const {
 }
 
 void TypeParameter::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
     SymbolRef current = this->ref(gs);

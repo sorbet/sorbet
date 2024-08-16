@@ -103,6 +103,39 @@ Note that the `yield` itself in the method body doesn't need to change at all.
 Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the `yield` call to the `blk` parameter automatically.
 
+## Methods that do not take blocks
+
+It's hard for Sorbet to know whether a method takes a block or not. Technically,
+Ruby allows passing a block at runtime to **all methods**, regardless of whether
+that method declares an explicit `&blk` parameter or uses the `yield` keyword.
+
+This means that Sorbet can only catch "Method does not take a block" errors when
+the method definition:
+
+- has a signature
+- does not mention a `&blk` parameter
+- is defined in a `# typed: strict` file
+
+Absent all three conditions, Sorbet allows passing a block to a method that
+might not actually accept a block.
+
+### Why `# typed: strict` files?
+
+To ease the adoption in pre-existing Ruby codebases, Sorbet allows methods to
+use `yield` but not declare a `&blk` parameter in `# typed: true` files. We may
+reconsider this decision in the future, but for now, Sorbet can only be sure
+that a method does not take a block if the method is defined in a
+`# typed: strict` file.
+
+Note that this applies to RBI files too: if a method is defined with a
+signature, that does not mention a `&blk` parameter, in a `# typed: strict` RBI
+file, Sorbet will error for attempts to pass a block to the method.
+
+For RBI authors, it's important to ensure that `# typed: strict` RBIs correctly
+declare whether a method takes a block or not, or else use `# typed: true` for
+that RBI file to opt the methods defined in that RBI out of "Method does not
+take a block" errors.
+
 ## Prefer blocks to procs or lambdas
 
 Sorbet's type inference gives substantial preference to Ruby blocks
@@ -132,9 +165,11 @@ T.reveal_type(f) # => T.proc.params(arg0: T.untyped).returns(T.untyped) ‼️
 takes_lambda(f)
 ```
 
-Sorbet does not do type inference for procs and lambdas. For blocks, it doesn't
-have to do type inference: Sorbet simply reads the type of the block argument
-from the associated method.
+For lambdas and procs, sorbet only does return-type inference (not argument type
+inference).
+
+For blocks, Sorbet doesn't have to do type inference: it simply reads the type
+of the block from the associated method.
 
 By contrast, Sorbet computes a type for all non-block arguments (including procs
 and lambdas) **before** type checking a call to a method. That means that even
@@ -205,6 +240,13 @@ but it comes down to a combination of performance and simplicity.
   f = T.let(lambda { 0 },        T.proc.returns(Integer)) ❌
   f = T.let(proc { 0 },          T.proc.returns(Integer)) ❌
   ```
+
+- For lambdas, use `-> () { ... }` or `Kernel.lambda { ... }` syntax instead of
+  `lambda { ... }` syntax.
+
+  This will ensure that Sorbet treats `return` inside the lambda as returning
+  from the lambda, not from the enclosing method (which is one main difference
+  that sets lambdas apart from procs/blocks in Ruby).
 
 ## Annotating the self type with `T.proc.bind`
 

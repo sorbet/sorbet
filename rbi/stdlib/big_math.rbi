@@ -40,7 +40,7 @@ module BigMath
   sig do
     params(
         x: T.any(Integer, BigDecimal, Float),
-        prec: T.any(Integer),
+        prec: Integer,
     )
     .returns(BigDecimal)
   end

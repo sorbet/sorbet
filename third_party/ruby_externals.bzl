@@ -65,17 +65,18 @@ def register_ruby_dependencies():
 
     http_archive(
         name = "sorbet_ruby_3_3",
-        url = "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.1.tar.gz",
-        sha256 = "8dc2af2802cc700cd182d5430726388ccf885b3f0a14fcd6a0f21ff249c9aa99",
-        strip_prefix = "ruby-3.3.1",
+        url = "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.3.tar.gz",
+        sha256 = "83c05b2177ee9c335b631b29b8c077b4770166d02fa527f3a9f6a40d13f3cce2",
+        strip_prefix = "ruby-3.3.3",
         build_file = ruby_3_3_build,
         patch_tool = "patch",
         patch_args = ["-p1"],
         patches = [
             "@com_stripe_ruby_typer//third_party/ruby:ldflags.patch",
-            "@com_stripe_ruby_typer//third_party/ruby:fix_grapheme_clusters_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10151_no_hash_allocate_static_kwargs_3_3_only.patch",
             "@com_stripe_ruby_typer//third_party/ruby:10306_no_hash_allocate_static_kwargs_3_3_only.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:reinit_native_sched_lock.patch",
+            "@com_stripe_ruby_typer//third_party/ruby:10899-avoid-unnecessary-writes-in-gc-marking.patch",
         ],
     )
 

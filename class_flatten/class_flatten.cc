@@ -75,7 +75,6 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::MethodRef sym;
-        ast::ExpressionPtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -84,19 +83,8 @@ public:
             // pay-server bans that behavior, this should be OK here.
             sym = ctx.state.lookupStaticInitForFile(ctx.file);
 
-            // Skip emitting a place-holder for the root object.
-            replacement = ast::MK::EmptyTree();
         } else {
             sym = ctx.state.lookupStaticInitForClass(classDef->symbol);
-
-            // We only need a representation of the runtime definition of the class in the
-            // containing static-init if the file is compiled; such a definition is just
-            // noise otherwise.
-            if (ctx.file.data(ctx).compiledLevel == core::CompiledLevel::True) {
-                replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
-            } else {
-                replacement = ast::MK::EmptyTree();
-            }
         }
         ENFORCE(!sym.data(ctx)->arguments.empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.show(ctx));
@@ -122,7 +110,7 @@ public:
         classes[classStack.back()] = std::move(tree);
         classStack.pop_back();
 
-        tree = std::move(replacement);
+        tree = ast::MK::EmptyTree();
     };
 
     ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {

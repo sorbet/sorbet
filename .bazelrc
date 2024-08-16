@@ -10,9 +10,16 @@ common:build --define absl=1
 common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 
 ##
-##  Custom toolchain.
+##  Custom toolchain (bazel-contrib/toolchains_llvm).
 ##
-build --crosstool_top=@llvm_toolchain_15_0_7//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+# Not needed after https://github.com/bazelbuild/bazel/issues/7260 is closed
+build --incompatible_enable_cc_toolchain_resolution
+# For macOS only, needed for Bazel versions before 7.
+# Without this, one can use `--linkopt='-undefined dynamic_lookup'`.
+# This feature is intentionally not supported on macOS.
+build --features=-supports_dynamic_linker
+# Not needed after https://github.com/grailbio/bazel-toolchain/pull/229.
+build --features=-libtool
 
 ##
 ##  Common build options across all build configurations
@@ -35,21 +42,7 @@ build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
 
-# This is to break a circular dependency. The version of absl we're using
-# suffers from some compiler builtins that have been deprecated. Upstream absl
-# includes patches that avoid those warnings, but upstream absl also requires a
-# version of emscripten that is newer than what we currently build with.
-# Because emscsripten is powered by clang, then upgrading emscripten amounts to
-# upgrading clang and we have a cycle.
-#
-# Rather than upgrade clang AND emscripten at once, I'm choosing to silence
-# these warnings for the time being. This should not affect Sorbet's code,
-# because we don't actually use compiler builtins and I can't see that changing
-# in the near future.
-# TODO(jez) Remove this when we upgrade absl to a more recent version
-build --copt=-Wno-deprecated-builtins
-build --cxxopt=-Wno-deprecated-builtins
-build --host_cxxopt=-Wno-deprecated-builtins
+build --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG
@@ -141,6 +134,7 @@ build:release-linux-aarch64 --define mimalloc=true
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor), as of 2018.
 build:release-linux           --copt=-march=sandybridge
 build:release-sanitized-linux --copt=-march=sandybridge
+build:release-linux-aarch64   --copt=-march=armv8.1a
 
 build:release-mac --config=release-common --platforms=@//tools/platforms:darwin_x86_64
 
@@ -237,10 +231,13 @@ build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefine
 build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
-# Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux --linkopt=external/llvm_toolchain_15_0_7/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
+# TODO(jez) It's not clear whether we still need these tricks to get sanitizers to work,
+# because we're using the toolchain's lld linker now.
+# We could consider replacing this with something more typical.
+# Original motivation: Bazel links C++ files with $CC, not $CXX, this breaks UBSan
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
+build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -278,21 +275,13 @@ build:fuzz --copt=-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 ##
 ## Webasm config. Please use either of those depending on your platform
 ##
-build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
-build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
-
-# common webasm config
-# Use --cpu as a differentiator.
-build:webasm --cpu=webasm --spawn_strategy=local --genrule_strategy=local --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
+build:webasm --copt=-Oz --linkopt=-Oz --copt=-DMDB_USE_ROBUST=0
 build:webasm --define release=true
 build:webasm --compilation_mode=opt
-# Some of our options are only available in newer versions of clang.
-# TODO(jez) Remove this when we upgrade emscripten to the same version of our clang toolchain
-build:webasm --copt=-Wno-unknown-warning-option
-build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
-build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
-# Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain_15_0_7//:toolchain
+# https://emscripten.org/docs/porting/exceptions.html#webassembly-exception-handling-based-support
+build:webasm --features=exceptions --cxxopt=-fwasm-exceptions --linkopt=-fwasm-exceptions
+# Blocked on https://github.com/emscripten-core/emscripten/issues/9780
+build:webasm --copt=-fno-stack-protector
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist

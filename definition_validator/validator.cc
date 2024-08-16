@@ -431,17 +431,7 @@ void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMe
         // make sure the return types are compatible
 
         auto superReturn = superMethod.data(ctx)->resultType;
-        if (superReturn == core::Types::void_()) {
-            // Mimics how `.void` methods are handled in cfg::Return case of environment.cc
-            superReturn = core::Types::top();
-        }
-
         auto &methodReturn = method.data(ctx)->resultType;
-        // Don't have to do the void -> top trick, because if parent is top, the child method return
-        // type can be whatever. And if parent is not top, then neither void nor T.anything in the
-        // child return will be compatible with the parent, so we may as well keep it as `void` for
-        // the sake of showing an error message in the terms that the user wrote ("where did this
-        // T.anything come from? I wrote .void").
 
         core::ErrorSection::Collector errorDetailsCollector;
         if (!checkSubtype(ctx, *constr, methodReturn, method, superReturn, superMethod, core::Polarity::Positive,
@@ -1035,10 +1025,10 @@ private:
         }
 
         if (missingAbstractMethods.size() > 1) {
-            errorBuilder.setHeader("Missing definitions for abstract methods");
+            errorBuilder.setHeader("Missing definitions for abstract methods in `{}`", sym.show(ctx));
         } else {
-            errorBuilder.setHeader("Missing definition for abstract method `{}`",
-                                   missingAbstractMethods.front().show(ctx));
+            errorBuilder.setHeader("Missing definition for abstract method `{}` in `{}`",
+                                   missingAbstractMethods.front().show(ctx), sym.show(ctx));
         }
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);

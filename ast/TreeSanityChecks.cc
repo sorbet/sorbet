@@ -107,6 +107,17 @@ void EmptyTree::_sanityCheck() {}
 
 void Literal::_sanityCheck() {
     ENFORCE(value != nullptr);
+
+    auto tag = value.tag();
+    switch (tag) {
+        case core::TypePtr::Tag::IntegerLiteralType:
+        case core::TypePtr::Tag::FloatLiteralType:
+        case core::TypePtr::Tag::NamedLiteralType:
+        case core::TypePtr::Tag::ClassType:
+            break;
+        default:
+            ENFORCE(false, "unexpected TypePtr::Tag: {}", tag);
+    }
 }
 
 void Hash::_sanityCheck() {

@@ -59,9 +59,9 @@ class Examples
 
       while true
         if (cond)
-          b = 1 # error: Changing the type of a variable in a loop is not permitted
+          b = 1 # error: Changing the type of a variable is not permitted in loops and blocks
         else
-          b = 2 # error: Changing the type of a variable in a loop is not permitted
+          b = 2 # error: Changing the type of a variable is not permitted in loops and blocks
         end
       end
 
@@ -72,9 +72,9 @@ class Examples
     def variables_loop_if(cond)
       while true
         if (cond)
-          b = 1 # error: Changing the type of a variable in a loop is not permitted
+          b = 1 # error: Changing the type of a variable is not permitted in loops and blocks
         else
-          b = 2 # error: Changing the type of a variable in a loop is not permitted
+          b = 2 # error: Changing the type of a variable is not permitted in loops and blocks
         end
       end
 

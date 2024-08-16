@@ -21,9 +21,10 @@ method signature type inference.
 Similarly, Sorbet only attempts to do type inference for constants when the type
 of the constant is knowable without needing to do type inference.
 
-This means that simple constants like `X = ""` or `Y = 1` do not need type
-annotations—Sorbet can syntactically see that the type of these constants are
-`String` and `Integer` respectively.
+This means that simple constants like `X = ""`, `Y = 1`, or `Z = [1, ""]` do not
+need type annotations—Sorbet can syntactically see that the type of these
+constants are `String`, `Integer`, and `T::Array[T.any(Integer, String)]`
+respectively.
 
 However, to know the type of constant assignments like `A = MyClass.new` or
 `B = 1 + 1`, Sorbet needs to know the result type of the `new` and `+` methods,
@@ -33,10 +34,22 @@ annotations (which would be a cycle). Keep in mind that Sorbet respects
 overloaded and redefined methods, so even simple expressions like these do not
 always have well-known result types.
 
-(**Note**: Newer versions of Sorbet will attempt to assume that the type of
+Newer versions of Sorbet will attempt to assume that the type of
 `A = MyClass.new` is in fact `MyClass`, and require an explicit annotation
 _only_ when that assumption turns out to be incorrect, for example due to an
-override.)
+override.
+
+Also, for **frozen** array literals assigned to constants, Sorbet assumes a
+[tuple type](tuples.md) instead of an [array type](stdlib-generics.md), because
+it knows that the array cannot be re-assigned or mutated.
+
+```ruby
+MutableArray = [1, 2]
+T.reveal_type(MutableArray) # => `T::Array[Integer]`
+
+FrozenArray = [1, 2].freeze
+T.reveal_type(FrozenArray) # => `[Integer, Integer] (2-tuple)`
+```
 
 ## ... for instance variables?
 
@@ -127,10 +140,10 @@ If Sorbet blindly assumed that `false` and `true` literals had type
 `TrueClass` or `FalseClass`, and be unable to maintain these knowledge sets.
 Real-world code depends on patterns like this surprisingly frequently.
 
-We have decided that the error message for changing a variable in a loop is very
-clear, has an autocorrect, and the resulting `T.let`'d code is very obvious. But
-if we did it the other way, sometimes requiring people to explicitly annotate
-`T.let(true, TrueClass)`:
+We have decided that the error message for changing a variable in a loop or
+block is very clear, has an autocorrect, and the resulting `T.let`'d code is
+very obvious. But if we did it the other way, sometimes requiring people to
+explicitly annotate `T.let(true, TrueClass)`:
 
 1. this pattern would look odd ("of course `true` has type `TrueClass`, isn't
    this annotation useless?"), and also

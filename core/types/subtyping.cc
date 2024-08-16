@@ -171,6 +171,12 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
     } else if (Types::isSubType(gs, n2, n1)) {
         categoryCounterInc("glbDistributeAnd.outcome", "ZZZn2");
         return n2;
+    } else if (!isa_type<AndType>(n1)) {
+        categoryCounterInc("glbDistributeAnd.outcome", "n1a1r");
+        return AndType::make_shared(n1, a1->right);
+    } else if (!isa_type<AndType>(n2)) {
+        categoryCounterInc("glbDistributeAnd.outcome", "a1ln2");
+        return AndType::make_shared(a1->left, n2);
     }
 
     categoryCounterInc("glbDistributeAnd.outcome", "worst");
@@ -246,7 +252,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (auto *o2 = cast_type<OrType>(t2)) { // 3, 5, 6
+    if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
@@ -1070,7 +1076,7 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
     } else if (auto *t = cast_type<AndType>(ty)) {
         compareToUntyped(gs, constr, t->left, blame);
         compareToUntyped(gs, constr, t->right, blame);
-    } else if (auto *t = cast_type<TypeVar>(ty)) {
+    } else if (isa_type<TypeVar>(ty)) {
         constr.rememberIsSubtype(gs, ty, blame);
         constr.rememberIsSubtype(gs, blame, ty);
     }
@@ -1112,7 +1118,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (mayBeSpecial1.symbol == Symbols::top()) {
             if (isa_type<ClassType>(t2)) {
                 auto mayBeSpecial2 = cast_type_nonnull<ClassType>(t2);
-                return mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::untyped();
+                return mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_() ||
+                       mayBeSpecial2.symbol == Symbols::untyped();
             } else {
                 return false;
             }
@@ -1130,7 +1137,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (mayBeSpecial2.symbol == Symbols::bottom()) {
             return false; // (bot, bot) is handled above.
         }
-        if (mayBeSpecial2.symbol == Symbols::top()) {
+        if (mayBeSpecial2.symbol == Symbols::top() || mayBeSpecial2.symbol == Symbols::void_()) {
             return true;
         }
     }
@@ -1258,29 +1265,32 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             if (!doesMemberMatch) {
                 result = false;
                 if constexpr (shouldAddErrorDetails) {
-                    string variance;
-                    string joiningText;
-                    switch (idxTypeMember.data(gs)->variance()) {
-                        case Variance::CoVariant: {
-                            variance = "covariant";
-                            joiningText = "a subtype of";
-                            break;
+                    if (!(a2->klass == Symbols::Hash() &&
+                          idxTypeMember.data(gs)->name == core::Names::Constants::Elem())) {
+                        string variance;
+                        string joiningText;
+                        switch (idxTypeMember.data(gs)->variance()) {
+                            case Variance::CoVariant: {
+                                variance = "covariant";
+                                joiningText = "a subtype of";
+                                break;
+                            }
+                            case Variance::Invariant: {
+                                variance = "invariant";
+                                joiningText = "equivalent to";
+                                break;
+                            }
+                            case Variance::ContraVariant: {
+                                variance = "contravariant";
+                                joiningText = "a supertype of";
+                                break;
+                            }
                         }
-                        case Variance::Invariant: {
-                            variance = "invariant";
-                            joiningText = "equivalent to";
-                            break;
-                        }
-                        case Variance::ContraVariant: {
-                            variance = "contravariant";
-                            joiningText = "a supertype of";
-                            break;
-                        }
+                        auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
+                                                           joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
+                        subCollector.message = message;
+                        errorDetailsCollector.addErrorDetails(std::move(subCollector));
                     }
-                    auto message = ErrorColors::format("`{}` is not {} `{}` for {} type member `{}`", a1i.show(gs),
-                                                       joiningText, a2j.show(gs), variance, idxTypeMember.show(gs));
-                    subCollector.message = message;
-                    errorDetailsCollector.addErrorDetails(std::move(subCollector));
                 } else {
                     break;
                 }
@@ -1290,10 +1300,28 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         // alight type params.
         return result;
     }
-    if (isa_type<AppliedType>(t2)) {
+    if (auto *a2 = cast_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
             return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode, errorDetailsCollector);
         }
+
+        if constexpr (shouldAddErrorDetails) {
+            if (a2->klass != Symbols::Class() || !isa_type<ClassType>(t1)) {
+                return false;
+            }
+            const auto &c1 = cast_type_nonnull<ClassType>(t1);
+            auto maybeAttachedClass = c1.symbol.data(gs)->attachedClass(gs);
+            if (!maybeAttachedClass.exists() || !maybeAttachedClass.data(gs)->isModule()) {
+                return false;
+            }
+
+            auto subCollector = errorDetailsCollector.newCollector();
+            subCollector.message = ErrorColors::format(
+                "`{}` represents a module singleton class type, which is a `{}`, not a `{}`. See the `{}` docs.",
+                t1.show(gs), "Module", "Class", "T.class_of");
+            errorDetailsCollector.addErrorDetails(move(subCollector));
+        }
+
         return false;
     }
 

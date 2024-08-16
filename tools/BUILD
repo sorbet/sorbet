@@ -6,8 +6,6 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
-clang_tool("opt")
-
 compilation_database(
     name = "compdb",
     testonly = True,
@@ -49,7 +47,8 @@ compilation_database(
         "//core/sig_finder:sig_finder",
         "//core/source_generator:source_generator",
         "//definition_validator:definition_validator",
-        "//emscripten:main",
+        "//emscripten:sorbet-wasm",
+        "//emscripten:sorbet-wasm.d",
         "//gems/sorbet-runtime:generate_call_validation",
         "//hashing:hashing",
         "//hashing:hashing-orig",
@@ -98,8 +97,6 @@ compilation_database(
         "//payload/text:generate_payload",
         "//payload/text:some",
         "//payload/text:text",
-        "//proto:proto",
-        "//proto/pay-server:pay-server",
         "//rbi:generate_procs",
         "//resolver:resolver",
         "//resolver/type_syntax:type_syntax",
@@ -119,7 +116,6 @@ compilation_database(
         "//test/fuzz:fuzz_dash_e_impl",
         "//test/fuzz:fuzz_doc_symbols",
         "//test/fuzz:fuzz_hover",
-        "//test/fuzz:proto",
         "//test/helpers:helpers",
         "//test/lsp:cache_protocol_test_corpus",
         "//test/lsp:multithreaded_protocol_test_corpus",

@@ -447,6 +447,7 @@ module T::Utils
   def self.run_all_sig_blocks(force_type_init: true); end
   def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
+  sig { params(type: T.anything).returns(T.nilable(T::Types::Base)) }
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
   def self.check_type_recursive!(value, type); end
@@ -465,7 +466,22 @@ end
 
 module T::Utils::Nilable
   def self.get_type_info(prop_type); end
+
+  # If prop_type can accept `nil`, returns a type representing the non-nil version.
+  # Otherwise, returns the input.
+  #
+  # If this method is about to return a `T::Types::Simple` type (e.g., a normal
+  # class type), returns that type's `raw_type`, e.g. a Module
+  sig { params(prop_type: T.any(Module, T::Types::Base)).returns(T.any(Module, T::Types::Base)) }
   def self.get_underlying_type(prop_type); end
+
+  # If prop_type can accept `nil`, returns a type representing the non-nil version.
+  # Otherwise, returns the input.
+  sig {
+    type_parameters(:Type)
+      .params(prop_type: T.all(T.type_parameter(:Type), T.any(T::Types::Base, Module)))
+      .returns(T.any(T::Types::Base, T.type_parameter(:Type)))
+  }
   def self.get_underlying_type_object(prop_type); end
 end
 

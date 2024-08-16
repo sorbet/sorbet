@@ -18,3 +18,5 @@ sig {returns(Module)}
 def uri_regexp
   URI::REGEXP
 end
+
+URI::Generic.new(nil,nil,nil,nil,nil,nil,nil,nil,nil).to_str

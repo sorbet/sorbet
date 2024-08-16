@@ -260,7 +260,7 @@ uint32_t ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
 }
 
 void ErrorReporter::sanityCheck() const {
-    if (!debug_mode) {
+    if constexpr (!debug_mode) {
         return;
     }
 

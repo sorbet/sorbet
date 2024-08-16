@@ -21,10 +21,10 @@ module T::Props
 end
 
 module T::Props::ClassMethods
-  sig {params(name: Symbol, cls_or_args: T.untyped, args: T::Hash[Symbol, T.untyped]).void}
-  def const(name, cls_or_args, args={}); end
+  sig {params(name: Symbol, cls_or_args: T.untyped, args: T.untyped).void}
+  def const(name, cls_or_args, **args); end
   sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
-  def prop(name, cls, rules = nil); end
+  def prop(name, cls, **rules); end
   def decorator; end
   def decorator_class; end
   def plugin(mod); end

@@ -143,6 +143,7 @@ module URI
   REL_PATH = T.let(T.unsafe(nil), Regexp)
   REL_URI = T.let(T.unsafe(nil), Regexp)
   REL_URI_REF = T.let(T.unsafe(nil), Regexp)
+  RFC2396_PARSER = T.let(T.unsafe(nil), URI::RFC2396_Parser)
   RFC3986_PARSER = T.let(T.unsafe(nil), URI::RFC3986_Parser)
   SCHEME = T.let(T.unsafe(nil), Regexp)
   TBLDECWWWCOMP_ = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
@@ -1463,6 +1464,10 @@ class URI::Generic < Object
   # [`URI::Generic.userinfo=`](https://docs.ruby-lang.org/en/2.7.0/URI/Generic.html#method-i-userinfo-3D).
   sig {params(user: T.untyped, password: T.untyped).returns(T.untyped)}
   def set_userinfo(user, password = nil); end
+
+  # Alias of `#to_s`
+  sig {returns(String)}
+  def to_str; end
 
   # Returns the user component.
   sig {returns(T.nilable(String))}

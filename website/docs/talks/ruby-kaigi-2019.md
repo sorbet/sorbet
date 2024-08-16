@@ -4,6 +4,9 @@ title: State of Sorbet: A type checker for Ruby
 sidebar_label: RubyKaigi 2019
 ---
 
+**Date**: April 19, 2019\
+**Speakers**: Paul Tarjan, Jake Zimmerman
+
 - [→ Talk page](https://rubykaigi.org/2019/presentations/jez.html#apr19)
 - [→ Video](https://www.youtube.com/watch?v=odmlf_ezsBo)
 - [→ Slides](https://sorbet.run/talks/RubyKaigi2019/#/)

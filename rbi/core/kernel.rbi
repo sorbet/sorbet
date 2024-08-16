@@ -536,7 +536,7 @@ module Kernel
 
   sig do
     params(
-        arg0: T.any(Module),
+        arg0: Module,
     )
     .returns(T::Boolean)
   end
@@ -635,7 +635,7 @@ module Kernel
   # When the method name parameter is given as a string, the string is converted to a symbol.
   #
   # See respond_to?, and the example of BasicObject.
-  sig {params(method_name: Symbol, include_private: T::Boolean).returns(T::Boolean)}
+  sig {params(method_name: T.any(Symbol, String), include_private: T::Boolean).returns(T::Boolean)}
   private def respond_to_missing?(method_name, include_private = false); end
 
   sig do
@@ -1875,7 +1875,8 @@ module Kernel
   # Equivalent to
   # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
   sig do
-    params(
+    type_parameters(:return_type) # Used by Kernel#proc intrinsic in calls.cc
+    .params(
         blk: T.untyped,
     )
     .returns(Proc)
@@ -1887,7 +1888,8 @@ module Kernel
   # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)
   # objects check the number of parameters passed when called.
   sig do
-    params(
+    type_parameters(:return_type) # Used by Kernel#lambda intrinsic in calls.cc
+    .params(
         blk: T.untyped,
     )
     .returns(Proc)
@@ -3018,8 +3020,15 @@ module Kernel
   # exec "echo", "*"    # echoes an asterisk
   # # never get here
   # ```
-  sig { params(args: String).returns(T.noreturn) }
-  def exec(*args); end
+  sig do
+    params(
+      env: T.any(String, [String, String], T::Hash[String, T.nilable(String)]),
+      argv0: T.any(String, [String, String]),
+      args: String,
+      options: T.untyped,
+    ).returns(T.noreturn)
+  end
+  def exec(env, argv0 = T.unsafe(nil), *args, **options); end
 
   # Executes *command...* in a subshell. *command...* is one of following forms.
   #

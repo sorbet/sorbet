@@ -94,14 +94,14 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
     if (auto *oargs = parser::cast_node<parser::Args>(argnode.get())) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
-            if (auto *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
+            if (parser::isa_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
                 args.emplace_back(MK::Local(arg->loc, temporary));
                 unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
                 unique_ptr<parser::Node> destructure =
                     make_unique<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, std::move(destructure)));
-            } else if (auto *lhs = parser::cast_node<parser::Kwnilarg>(arg.get())) {
+            } else if (parser::isa_node<parser::Kwnilarg>(arg.get())) {
                 // TODO implement logic for `**nil` args
             } else if (auto *fargs = parser::cast_node<parser::ForwardArg>(arg.get())) {
                 // we desugar (m, n, ...) into (m, n, *<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
@@ -406,6 +406,23 @@ ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
     return MK::EmptyTree();
 }
 
+// Desugar multiple left hand side assignments into a sequence of assignments
+//
+// Considering this example:
+// ```rb
+// arr = [1, 2, 3]
+// a, *b = arr
+// ```
+//
+// We desugar the assignment `a, *b = arr` into:
+// ```rb
+// tmp = ::<Magic>.expandSplat(arr, 1, 0)
+// a = tmp[0]
+// b = tmp.to_ary
+// ```
+//
+// While calling `to_ary` doesn't return the correct value if we were to execute this code,
+// it returns the correct type from a static point of view.
 ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
     InsSeq::STATS_store stats;
 
@@ -426,18 +443,15 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
             int left = i;
             int right = lhs->exprs.size() - left - 1;
             if (!isa_tree<EmptyTree>(lh)) {
-                auto exclusive = MK::True(lh.loc());
                 if (right == 0) {
                     right = 1;
-                    exclusive = MK::False(lh.loc());
                 }
                 auto lhloc = lh.loc();
                 auto zlhloc = lhloc.copyWithZeroLength();
-                auto index = MK::Send3(lhloc, MK::Constant(lhloc, core::Symbols::Range()), core::Names::new_(), zlhloc,
-                                       MK::Int(lhloc, left), MK::Int(lhloc, -right), std::move(exclusive));
-                stats.emplace_back(MK::Assign(
-                    lhloc, std::move(lh),
-                    MK::Send1(loc, MK::Local(loc, tempExpanded), core::Names::slice(), zlhloc, std::move(index))));
+                // Calling `to_ary` is not faithful to the runtime behavior,
+                // but that it is faithful to the expected static type-checking behavior.
+                auto ary = MK::Send0(loc, MK::Local(loc, tempExpanded), core::Names::toAry(), zlhloc);
+                stats.emplace_back(MK::Assign(lhloc, std::move(lh), std::move(ary)));
             }
             i = -right;
         } else {
@@ -642,17 +656,10 @@ public:
         }
 
         auto isSymbol = lit->isSymbol();
-        core::NameRef nameRef;
-        if (!lit) {
+        if (!lit || !lit->isName()) {
             return;
         }
-        if (isSymbol) {
-            nameRef = lit->asSymbol();
-        } else if (lit->isString()) {
-            nameRef = lit->asString();
-        } else {
-            return;
-        }
+        auto nameRef = lit->asName();
 
         if (isSymbol && !hashKeySymbols.contains(nameRef)) {
             hashKeySymbols[nameRef] = key.loc();
@@ -1262,7 +1269,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
-                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
+                } else if (isa_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }
@@ -1352,7 +1359,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     }
                     auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result = std::move(iff);
-                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
+                } else if (isa_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }
@@ -1414,7 +1421,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto send = MK::Send1(loc, std::move(recv), opAsgn->op, opAsgn->opLoc, std::move(rhs));
                     auto res = MK::Assign(loc, std::move(lhs), std::move(send));
                     result = std::move(res);
-                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
+                } else if (isa_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
                     }

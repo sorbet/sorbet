@@ -211,6 +211,21 @@ shapes.rb:22: Expected `{a: Integer, b: String}` but found `{a: String(""), c: I
   Detailed explanation:
     `String("")` is not a subtype of `Integer` for key `Symbol(:a)`
 
+hash.rb:10: Expected `T.nilable(T::Hash[String, Integer])` but found `T.nilable(T::Hash[Symbol, Integer])` for argument `string_hash` https://srb.help/7002
+    10 |  takes_string_hash(symbol_hash)
+                            ^^^^^^^^^^^
+  Expected `T.nilable(T::Hash[String, Integer])` for argument `string_hash` of method `Object#takes_string_hash`:
+    hash.rb:4:
+     4 |sig { params(string_hash: T.nilable(T::Hash[String, Integer])).void }
+                     ^^^^^^^^^^^
+  Got `T.nilable(T::Hash[Symbol, Integer])` originating from:
+    hash.rb:9:
+     9 |def takes_symbol_hash(symbol_hash)
+                              ^^^^^^^^^^^
+  Detailed explanation:
+    `Symbol` is not a subtype of `String` for covariant type member `Hash::K`
+    `Hash` does not derive from `NilClass`
+
 tuples.rb:10: Expected `[Integer, String]` but found `[]` for argument `x` https://srb.help/7002
     10 |takes_tuple([])
                     ^^
@@ -275,4 +290,18 @@ tuples.rb:18: Expected `[Integer, String]` but found `[String("")]` for argument
     tuples.rb:18:
     18 |takes_tuple([''])
                     ^^^^
-Errors: 23
+
+class_of.rb:10: Expected `T::Class[IFoo]` but found `T.class_of(IFoo)` for argument `klass` https://srb.help/7002
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Expected `T::Class[IFoo]` for argument `klass` of method `Object#takes_t_class_ifoo`:
+    class_of.rb:6:
+     6 |sig { params(klass: T::Class[IFoo]).void }
+                     ^^^^^
+  Got `T.class_of(IFoo)` originating from:
+    class_of.rb:10:
+    10 |takes_t_class_ifoo(IFoo)
+                           ^^^^
+  Detailed explanation:
+    `T.class_of(IFoo)` represents a module singleton class type, which is a `Module`, not a `Class`. See the `T.class_of` docs.
+Errors: 25

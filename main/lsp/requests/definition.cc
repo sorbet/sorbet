@@ -62,12 +62,16 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
         return response;
     }
 
+    auto uri = params->textDocument->uri;
+    auto fref = config.uri2FileRef(gs, uri);
+    // LSPQuery::byLoc reports an error if the file or loc don't exist
+    auto queryLoc = params->position->toLoc(gs, fref).value();
+
     auto &queryResponses = result.responses;
     vector<unique_ptr<Location>> locations;
     if (!queryResponses.empty()) {
-        const bool fileIsTyped =
-            config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
-        auto resp = skipLiteralIfMethodDef(queryResponses);
+        const bool fileIsTyped = fref.data(gs).strictLevel >= core::StrictLevel::True;
+        auto resp = skipLiteralIfMethodDef(gs, queryResponses);
 
         // Only support go-to-definition on constants and fields in untyped files.
         if (auto c = resp->isConstant()) {
@@ -104,25 +108,28 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
             }
         } else if (fileIsTyped && resp->isSend()) {
             auto sendResp = resp->isSend();
-            auto start = sendResp->dispatchResult.get();
-            while (start != nullptr) {
-                if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                    auto loc = start->main.method.data(gs)->loc();
-                    if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
-                        auto nextMethod = firstMethodAfterQuery(typechecker, sendResp->termLoc());
-                        if (nextMethod.exists()) {
-                            auto parentMethod = findParentMethod(gs, nextMethod);
-                            if (parentMethod.exists()) {
-                                // actually, jump to the definition of the abstract method, instead of
-                                // the definition of `override` in builder.rbi
-                                loc = parentMethod.data(gs)->loc();
+            // Don't want to show hover results if we're hovering over, e.g., the arguments, and there's nothing there.
+            if (sendResp->funLoc().exists() && sendResp->funLoc().contains(queryLoc)) {
+                auto start = sendResp->dispatchResult.get();
+                while (start != nullptr) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
+                        auto loc = start->main.method.data(gs)->loc();
+                        if (start->main.method == core::Symbols::T_Private_Methods_DeclBuilder_override()) {
+                            auto nextMethod = firstMethodAfterQuery(typechecker, sendResp->termLoc());
+                            if (nextMethod.exists()) {
+                                auto parentMethod = findParentMethod(gs, nextMethod);
+                                if (parentMethod.exists()) {
+                                    // actually, jump to the definition of the abstract method, instead of
+                                    // the definition of `override` in builder.rbi
+                                    loc = parentMethod.data(gs)->loc();
+                                }
                             }
                         }
-                    }
 
-                    addLocIfExists(gs, locations, loc);
+                        addLocIfExists(gs, locations, loc);
+                    }
+                    start = start->secondary.get();
                 }
-                start = start->secondary.get();
             }
         }
     }

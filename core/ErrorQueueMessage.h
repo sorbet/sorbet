@@ -8,7 +8,7 @@ namespace sorbet::core {
 class Error;
 
 struct ErrorQueueMessage {
-    enum class Kind { Error, Flush, QueryResponse };
+    enum class Kind { Error, QueryResponse };
     Kind kind;
     core::FileRef whatFile;
     // The text of the error. Is a `nullopt` if the error is silenced.

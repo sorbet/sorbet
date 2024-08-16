@@ -1596,6 +1596,21 @@ instead of instance methods (`def foo`).
 
 For more information, see the docs for [Generics](generics.md).
 
+<a class="anchor" aria-hidden="true" id="redeclare-fixed"></a>
+
+**Why does this apply even to `fixed` types?** Sorbet requires redeclaring even
+`fixed` type members and templates. This differs from many other typed,
+object-oriented languages that support generic classes. This choice is an
+implementation detail which simplifies some logic inside Sorbet, specifically
+around responding incrementally to file edits in an editor. It's _not_
+fundamental to Ruby or the type system semantics Sorbet chooses to implement,
+which means that one day we could consider changing Sorbet to support this
+(which would require adjusting Sorbet's algorithm for handling incremental
+updates).
+
+For a more technical explanation, see
+[the Sorbet source code](https://github.com/sorbet/sorbet/blob/233b47bb46fcedb60982fd7f70148f07a147468f/resolver/GlobalPass.cc#L54-L63).
+
 ## 5015
 
 [Variance](<https://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)>)
@@ -3122,6 +3137,15 @@ class PossiblyEmptyBox
 end
 ```
 
+## 5076
+
+`T.nilable` expects exactly one argument. A common typo is `T.nilable(X, Y)` to
+mean `T.nilable(T.any(X, Y))` (which would also be the same as
+`T.any(NilClass, X, Y)`).
+
+See [Nilable Types](nilable-types.md) and [Union Types](union-types.md) for more
+information.
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside
@@ -3242,7 +3266,7 @@ found_valid = false
 
 list.each do |elem|
   # Might change the type of `found_valid` to `TrueClass`
-  found_valid = true if valid?(elem) # error: Changing the type of a variable in a loop
+  found_valid = true if valid?(elem) # error: Changing the type of a variable is not permitted
 end
 ```
 
@@ -4140,7 +4164,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ❌ error!
 end
 ```
 
@@ -4171,7 +4195,7 @@ sig do
     .void
 end
 def example(x)
-  x.foo # error!
+  x.foo # ✅ no error
 end
 ```
 
@@ -4397,17 +4421,28 @@ See also:
 
 ## 7049
 
-See [Methods with Overloaded Signatures](overloads.md) for complete docs on.
+See [Methods with Overloaded Signatures](overloads.md) for complete docs on how
+to declare overloaded methods correctly.
 
 ## 7050
 
-Calling `T.must` with an untyped object is an indication that code that was
-considered typed (and `T.must` was ensuring that the value was not `nil`) is not
-typed anymore.
+Calling `T.must` when the argument is `T.untyped`, `T.anything`, `Object`, or
+`BasicObject` is redundant. This indicates that either:
 
-This was separated from [7015](#7015) to maintain this error in
-`# typed: strict` and above, but allow for [7015](#7015) to be enforced at lower
-strictness levels.
+- a previously-typed argument became untyped, indicating a regression in type
+  safety somewhere, or
+- the code does not benefit from `T.must`, because the type before and after the
+  call is the same.
+
+If raising an exception for `nil` values is the desired runtime behavior, do so
+explicitly:
+
+```ruby
+raise if x == nil
+```
+
+This was separated from [7015](#7015) allow it to be autocorrected independently
+from invalid usages of `T.let` and `T.cast`.
 
 ## 7051
 

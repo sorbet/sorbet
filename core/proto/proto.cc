@@ -1,7 +1,7 @@
 // have to be included first as they violate our poisons
 #include "core/proto/proto.h"
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/util/type_resolver_util.h>
+#include "src/google/protobuf/io/zero_copy_stream_impl.h"
+#include "src/google/protobuf/util/type_resolver_util.h"
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
@@ -379,17 +379,6 @@ com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict
     }
 }
 
-com::stripe::rubytyper::File::CompiledLevel compiledToProto(core::CompiledLevel compiled) {
-    switch (compiled) {
-        case core::CompiledLevel::None:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledNone;
-        case core::CompiledLevel::False:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledFalse;
-        case core::CompiledLevel::True:
-            return com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledTrue;
-    }
-}
-
 com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
                                                       const UnorderedMap<long, long> &untypedUsages, bool showFull) {
     com::stripe::rubytyper::FileTable files;
@@ -413,7 +402,7 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
         entry->set_sigil(strictToProto(file.data(gs).originalSigil));
         entry->set_strict(strictToProto(file.data(gs).strictLevel));
         entry->set_min_error_level(strictToProto(file.data(gs).minErrorLevel()));
-        entry->set_compiled(compiledToProto(file.data(gs).compiledLevel));
+        entry->set_compiled(com::stripe::rubytyper::File::CompiledLevel::File_CompiledLevel_CompiledNone);
 
         auto frefIdIt = untypedUsages.find(i);
         if (frefIdIt != untypedUsages.end()) {
@@ -432,13 +421,14 @@ com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs,
 
 string Proto::toJSON(const google::protobuf::Message &message) {
     string jsonString;
-    google::protobuf::util::JsonPrintOptions options;
+    google::protobuf::json::PrintOptions options;
     options.add_whitespace = true;
-    // Enabling this option caused proto to consume ~10G of RAM keeping track of which fields it has
-    // and has not emitted.
-    options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
-    google::protobuf::util::MessageToJsonString(message, &jsonString, options);
+    auto status = google::protobuf::json::MessageToJsonString(message, &jsonString, options);
+    if (!status.ok()) {
+        cerr << "error converting to proto json: " << status.message() << '\n';
+        abort();
+    }
     return jsonString;
 }
 
@@ -451,11 +441,8 @@ void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
     google::protobuf::io::ArrayInputStream istream(binaryProto.data(), binaryProto.size());
     google::protobuf::io::OstreamOutputStream ostream(&out);
 
-    google::protobuf::util::JsonPrintOptions options;
+    google::protobuf::json::PrintOptions options;
     options.add_whitespace = true;
-    // Enabling this option caused proto to consume ~10G of RAM keeping track of which fields it has
-    // and has not emitted.
-    options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
 
     const google::protobuf::DescriptorPool *pool = message.GetDescriptor()->file()->pool();
@@ -463,9 +450,9 @@ void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
         google::protobuf::util::NewTypeResolverForDescriptorPool(kTypeUrlPrefix, pool));
 
     string url = absl::StrCat(kTypeUrlPrefix, "/", message.GetDescriptor()->full_name());
-    auto status = google::protobuf::util::BinaryToJsonStream(resolver.get(), url, &istream, &ostream, options);
+    auto status = google::protobuf::json::BinaryToJsonStream(resolver.get(), url, &istream, &ostream, options);
     if (!status.ok()) {
-        cerr << "error converting to proto json: " << status.error_message() << '\n';
+        cerr << "error converting to proto json: " << status.message() << '\n';
         abort();
     }
 }

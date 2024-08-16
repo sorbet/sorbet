@@ -45,7 +45,7 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
+a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
     12 |  result
           ^^^^^^
   Got `T.untyped` originating from:
@@ -145,7 +145,7 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
+a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
     12 |  result
           ^^^^^^
   Got `T.untyped` originating from:
@@ -243,7 +243,7 @@ a.rb:9: Argument passed to parameter `arg0` is `T.untyped` https://srb.help/7018
   Note:
     Support for `typed: strong` is minimal. Consider using `typed: strict` instead.
 
-a.rb:12: Value returned from method is `T.untyped` https://srb.help/7018
+a.rb:12: Value returned from method `example_untyped` is `T.untyped` https://srb.help/7018
     12 |  result
           ^^^^^^
   Got `T.untyped` originating from:

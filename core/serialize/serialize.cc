@@ -54,8 +54,7 @@ public:
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
     static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &);
-    static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
-    static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
+    static NameRef unpickleNameRef(UnPickler &p);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
 
     SerializerImpl() = delete;
@@ -133,7 +132,7 @@ void Pickler::putU1(uint8_t u) {
 }
 
 uint8_t UnPickler::getU1() {
-    ENFORCE(zeroCounter == 0);
+    ENFORCE_NO_TIMER(zeroCounter == 0);
     auto res = data[pos++];
     return res;
 }
@@ -478,7 +477,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::ShapeType: {
             auto &hash = cast_type_nonnull<ShapeType>(what);
             p.putU4(hash.keys.size());
-            ENFORCE(hash.keys.size() == hash.values.size());
+            ENFORCE_NO_TIMER(hash.keys.size() == hash.values.size());
             for (auto &el : hash.keys) {
                 pickle(p, el);
             }
@@ -754,8 +753,8 @@ ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalSt
         auto sym = SymbolRef::fromRaw(p.getU4());
         if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
             result.name != core::Names::noMethod()) {
-            ENFORCE(name.exists());
-            ENFORCE(sym.exists());
+            ENFORCE_NO_TIMER(name.exists());
+            ENFORCE_NO_TIMER(sym.exists());
         }
         result.members()[name] = sym;
     }
@@ -952,19 +951,19 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "readNames");
 
         int namesSize = p.getU4();
-        ENFORCE(namesSize > 0);
+        ENFORCE_NO_TIMER(namesSize > 0);
         utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             utf8Names.emplace_back(unpickleUTF8Name(p, result));
         }
         namesSize = p.getU4();
-        ENFORCE(namesSize > 0);
+        ENFORCE_NO_TIMER(namesSize > 0);
         constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             constantNames.emplace_back(unpickleConstantName(p, result));
         }
         namesSize = p.getU4();
-        ENFORCE(namesSize > 0);
+        ENFORCE_NO_TIMER(namesSize > 0);
         uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             uniqueNames.emplace_back(unpickleUniqueName(p, result));
@@ -975,35 +974,35 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "readSymbols");
 
         int classAndModuleSize = p.getU4();
-        ENFORCE(classAndModuleSize > 0);
+        ENFORCE_NO_TIMER(classAndModuleSize > 0);
         classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
             classAndModules.emplace_back(unpickleClassOrModule(p, &result));
         }
 
         int methodSize = p.getU4();
-        ENFORCE(methodSize > 0);
+        ENFORCE_NO_TIMER(methodSize > 0);
         methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
             methods.emplace_back(unpickleMethod(p, &result));
         }
 
         int fieldSize = p.getU4();
-        ENFORCE(fieldSize > 0);
+        ENFORCE_NO_TIMER(fieldSize > 0);
         fields.reserve(nextPowerOfTwo(fieldSize));
         for (int i = 0; i < fieldSize; i++) {
             fields.emplace_back(unpickleField(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
-        ENFORCE(typeArgumentSize > 0);
+        ENFORCE_NO_TIMER(typeArgumentSize > 0);
         typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
             typeArguments.emplace_back(unpickleTypeParameter(p, &result));
         }
 
         int typeMemberSize = p.getU4();
-        ENFORCE(typeMemberSize > 0);
+        ENFORCE_NO_TIMER(typeMemberSize > 0);
         typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
             typeMembers.emplace_back(unpickleTypeParameter(p, &result));
@@ -1081,8 +1080,8 @@ std::vector<uint8_t> Serializer::storePayloadAndNameTable(const GlobalState &gs)
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
-    ENFORCE(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
-            "Can't load into a non-empty state");
+    ENFORCE_NO_TIMER(gs.files.empty() && gs.namesUsedTotal() == 0 && gs.symbolsUsedTotal() == 0,
+                     "Can't load into a non-empty state");
     UnPickler p(data, gs.tracer());
     SerializerImpl::unpickleGS(p, gs);
 }
@@ -1253,7 +1252,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::Hash: {
             auto &h = ast::cast_tree_nonnull<ast::Hash>(what);
             pickle(p, h.loc);
-            ENFORCE(h.values.size() == h.keys.size());
+            ENFORCE_NO_TIMER(h.values.size() == h.keys.size());
             p.putU4(h.values.size());
             for (auto &v : h.values) {
                 pickle(p, v);
@@ -1434,7 +1433,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     switch (static_cast<ast::Tag>(kind)) {
         case ast::Tag::Send: {
             auto loc = unpickleLocOffsets(p);
-            NameRef fun = unpickleNameRef(p, gs);
+            NameRef fun = unpickleNameRef(p);
             auto funLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
             ast::Send::Flags flags;
@@ -1485,13 +1484,13 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::UnresolvedConstantLit: {
             auto loc = unpickleLocOffsets(p);
-            NameRef cnst = unpickleNameRef(p, gs);
+            NameRef cnst = unpickleNameRef(p);
             auto scope = unpickleExpr(p, gs);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
         case ast::Tag::Local: {
             auto loc = unpickleLocOffsets(p);
-            NameRef nm = unpickleNameRef(p, gs);
+            NameRef nm = unpickleNameRef(p);
             auto unique = p.getU4();
             LocalVariable lv(nm, unique);
             return ast::make_expression<ast::Local>(loc, lv);
@@ -1597,7 +1596,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();
             auto rhs = unpickleExpr(p, gs);
@@ -1605,7 +1604,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs);
             }
-            auto ret = ast::MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
+            auto ret = ast::MK::Method(loc, declLoc, name, std::move(args), std::move(rhs));
 
             {
                 auto &method = ast::cast_tree_nonnull<ast::MethodDef>(ret);
@@ -1671,7 +1670,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::UnresolvedIdent: {
             auto loc = unpickleLocOffsets(p);
             auto kind = (ast::UnresolvedIdent::Kind)p.getU1();
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             return ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
         }
         case ast::Tag::ConstantLit: {
@@ -1682,7 +1681,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);
-            NameRef name = unpickleNameRef(p, gs);
+            NameRef name = unpickleNameRef(p);
             auto isSelfMethod = p.getU1();
             return ast::make_expression<ast::RuntimeMethodDefinition>(loc, name, isSelfMethod);
         }
@@ -1691,9 +1690,21 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     Exception::raise("Not handled {}", kind);
 }
 
-NameRef SerializerImpl::unpickleNameRef(UnPickler &p, const GlobalState &gs) {
+NameRef SerializerImpl::unpickleNameRef(UnPickler &p) {
     NameRef name = NameRef::fromRawUnchecked(p.getU4());
-    name.sanityCheck(gs);
+
+    // We don't call NameRef::sanityCheck here because basically the only thing that method is going
+    // to do is attempt to const_cast (!!) the GlobalState and re-enter the NameRef, in an attempt
+    // to ENFORCE that re-entering the thing with the given name produces the same result.
+    //
+    // For unpickled NameRefs, that might not be the case: the GlobalState we're unpickling a tree
+    // that contains NameRef with might be a tree created by `GlobalState::copyForIndex`, which
+    // doesn't have a complete name table (it will only have the names created by generate_names.cc)
+    // which normally isn't important because mergeIndexResults skips ast::Substitute::run for trees
+    // which came out of the cache (e.g., it assumes those trees are getting merged into a
+    // GlobalState which was already fetched from the cache and thus already had the name table
+    // loaded via Serializer::loadGlobalState).
+
     return name;
 }
 

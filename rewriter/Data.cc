@@ -78,10 +78,10 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
 
     for (int i = 0; i < send->numPosArgs(); i++) {
         auto *sym = ast::cast_tree<ast::Literal>(send->getPosArg(i));
-        if (!sym || (!sym->isSymbol() && !sym->isString())) {
+        if (!sym || !sym->isName()) {
             return empty;
         }
-        core::NameRef name = sym->asSymbol();
+        core::NameRef name = sym->asName();
         auto symLoc = sym->loc;
         auto strname = name.shortName(ctx);
         if (!strname.empty() && strname.back() == '=') {

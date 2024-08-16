@@ -7545,6 +7545,9 @@ module OpenSSL::SSL
   # 1.1.0.
   OP_TLS_D5_BUG = ::T.let(nil, ::T.untyped)
   OP_TLS_ROLLBACK_BUG = ::T.let(nil, ::T.untyped)
+  TLS1_1_VERSION = ::T.let(nil, ::T.untyped)
+  TLS1_2_VERSION = ::T.let(nil, ::T.untyped)
+  TLS1_3_VERSION = ::T.let(nil, ::T.untyped)
   VERIFY_CLIENT_ONCE = ::T.let(nil, ::T.untyped)
   VERIFY_FAIL_IF_NO_PEER_CERT = ::T.let(nil, ::T.untyped)
   VERIFY_NONE = ::T.let(nil, ::T.untyped)

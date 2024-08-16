@@ -4,6 +4,9 @@ title: Compiling Ruby to Native Code with Sorbet and LLVM
 sidebar_label: RubyConf 2021
 ---
 
+**Date**: November 10, 2021\
+**Speakers**: Jake Zimmerman, Trevor Elliott
+
 - [→ Talk page](https://rubyconf.org/program/sessions#session-1171)
 - [→ Video](https://www.youtube.com/watch?v=BH8S1htcHXY)
 - [→ Slides](https://sorbet.run/talks/RubyConf2021/#/)

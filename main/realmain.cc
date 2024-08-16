@@ -282,7 +282,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             Timer timeit(logger, "autogenDependencyDBPrint");
             if (opts.print.AutogenMsgPack.enabled) {
                 opts.print.AutogenMsgPack.print(
-                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size()));
+                    autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg));
             }
             for (auto &elem : merged) {
                 if (opts.print.Autogen.enabled) {
@@ -390,9 +390,6 @@ int realmain(int argc, char *argv[]) {
     vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
     options::Options opts;
     options::readOptions(opts, extensions, argc, argv, extensionProviders, logger);
-    while (opts.waitForDebugger && !stopInDebugger()) {
-        // spin
-    }
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
@@ -735,8 +732,10 @@ int realmain(int argc, char *argv[]) {
 
                 // Cache these before any pipeline::package rewrites, so that the cache is still
                 // usable regardless of whether `--stripe-packages` was passed.
-                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
-                                                     indexed);
+                // Want to keep the kvstore around so we can still write to it later.
+                kvstore = cache::ownIfUnchanged(
+                    *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs,
+                                                              *workers, indexed));
 
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
@@ -797,8 +796,9 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(*gs, move(indexed), *workers);
             }
 
-            autogen::AutogenConfig autogenCfg = {.behaviorAllowedInRBIsPaths =
-                                                     std::move(opts.autogenBehaviorAllowedInRBIFilesPaths)};
+            autogen::AutogenConfig autogenCfg = {
+                .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
+                .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata)};
 
             runAutogen(*gs, opts, autogenCfg, *workers, indexed, opts.autogenConstantCacheConfig.changedFiles);
 #endif

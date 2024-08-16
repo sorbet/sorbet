@@ -4,6 +4,9 @@ title: Fast typechecking for Ruby
 sidebar_label: JVM Language Summit 2019
 ---
 
+**Date**: July 31, 2019\
+**Speaker**: Dmitry Petrashko
+
 - [→ Video](https://www.youtube.com/watch?v=Gdx6by6tcvw)
 - [→ Slides](https://sorbet.run/talks/JVMLS2019/#/)
 

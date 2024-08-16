@@ -44,5 +44,5 @@ for further information.
 
 ## Developing on this Extension
 
-See [docs/internals/lsp-dev-guide.md](../docs/internals/lsp-dev-guide.md) for
+See [docs/lsp-dev-guide.md](../docs/lsp-dev-guide.md) for
 information on how to get started with LSP and VS Code extension development.

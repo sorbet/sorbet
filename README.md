@@ -480,14 +480,14 @@ different version number, and also marked `default-arg-value`:
 This is due to the translation of defaults into the CFG: there is a synthetic conditional that chooses either to
 initialize the variable from the argument passed at the send, or to the default value when no value is present.
 
-Finding all references works differently in package specification (__package.rb) files. Consider the following:
+Finding all references works differently in package specification (`__package.rb`) files. Consider the following:
 
 ```ruby
 class Foo < PackageSpec
   import Bar
 ```
 
-Calling "find all references" on `Bar` in this file will return only references to `Bar` in the `Foo` package. LSP tests 
+Calling "find all references" on `Bar` in this file will return only references to `Bar` in the `Foo` package. LSP tests
 have access to `import` and `importusage` assertions that you can use to test this functionality.
 
 ```ruby
@@ -505,7 +505,7 @@ class Foo < PackageSpec
 
 With these annotations, the LSP test will check if "find all references" on `Bar` in `import Bar` statement returns the `Bar.new` usage.
 
-Note that an `import` assertion is dissimilar to a `def` assertion, in that it is in fact a subclass of a `usage` assertion. 
+Note that an `import` assertion is dissimilar to a `def` assertion, in that it is in fact a subclass of a `usage` assertion.
 In this case, the `def` corresponding to an `import` is the PackageSpec declaration of the imported package. Calling "find all references"
 on a PackageSpec declaration will return all imports of the package.
 
@@ -938,15 +938,11 @@ using [Docusaurus](https://docusaurus.io/).
 ### Bazel
 
 Bazel supports having a persistent cache of previous build results so that
-rebuilds for the same input files are fast. To enable this feature, run these
-commands to create a `./.bazelrc.local` and cache folder:
+rebuilds for the same input files are fast. To enable this feature, run this
+script to create a `./.bazelrc.local` and cache folder:
 
 ```shell
-# The .bazelrc.local will live in the sorbet repo so it doesn't interfere with
-# other bazel-based repos you have.
-echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
-echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc.local
-mkdir -p "$HOME/.cache/sorbet/bazel-cache"
+tools/create_local_bazelrc.sh
 ```
 
 ### Multiple git worktrees
