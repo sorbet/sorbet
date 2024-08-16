@@ -313,7 +313,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
-vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
