@@ -20,7 +20,7 @@ x, y, _ = returns_3_tuple # error: Attempted to unpack 3-tuple into 2 targets
 x, y, _, = returns_3_tuple # error: Attempted to unpack 3-tuple into 2 targets
 
 xs = T::Array[[Integer, String, Symbol]].new
-xs.each do |(x, y), _|
+xs.each do |(x, y, _)|
   #         ^^^^^^ error: Attempted to unpack 3-tuple into 2 targets
 end
 # ------------------------------
