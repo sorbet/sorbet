@@ -111,9 +111,9 @@ bb1[rubyRegionId=0, firstDead=-1]():
 method ::<Class:Main>#main {
 
 bb0[rubyRegionId=0, firstDead=-1]():
-    @a$104: T.untyped = alias <C <undeclared-field-stub>> (@a)
-    @@b$114: T.untyped = alias <C <undeclared-field-stub>> (@@b)
-    $c$124: T.untyped = alias <C <undeclared-field-stub>> ($c)
+    @a$114: T.untyped = alias <C <undeclared-field-stub>> (@a)
+    @@b$124: T.untyped = alias <C <undeclared-field-stub>> (@@b)
+    $c$134: T.untyped = alias <C <undeclared-field-stub>> ($c)
     <self>: T.class_of(Main) = cast(<self>: NilClass, T.class_of(Main));
     <cfgAlias>$5: T.class_of(A) = alias <C A>
     <block-pre-call-temp>$6: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(A).each()
@@ -128,13 +128,13 @@ bb1[rubyRegionId=0, firstDead=-1]():
 # backedges
 # - bb0(rubyRegionId=0)
 # - bb5(rubyRegionId=1)
-bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb2[rubyRegionId=1, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     <statTemp>$3: T.untyped = Solve<<block-pre-call-temp>$6, each>
     <self>: T.class_of(Main) = <selfRestore>$7
     <cfgAlias>$16: T.class_of(A) = alias <C A>
@@ -144,7 +144,7 @@ bb3[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$6: Sorbet::Private::Stat
 
 # backedges
 # - bb2(rubyRegionId=1)
-bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$8: T.untyped = load_yield_params(each)
@@ -157,23 +157,23 @@ bb5[rubyRegionId=1, firstDead=6](<self>: T.class_of(Main), <block-pre-call-temp>
 # backedges
 # - bb3(rubyRegionId=0)
 # - bb9(rubyRegionId=2)
-bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb6[rubyRegionId=2, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb7[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     <statTemp>$14: T.untyped = Solve<<block-pre-call-temp>$17, each>
     <self>: T.class_of(Main) = <selfRestore>$18
-    <cfgAlias>$41: T.class_of(A) = alias <C A>
-    <block-pre-call-temp>$42: Sorbet::Private::Static::Void = <cfgAlias>$41: T.class_of(A).each()
-    <selfRestore>$43: T.class_of(Main) = <self>
+    <cfgAlias>$46: T.class_of(A) = alias <C A>
+    <block-pre-call-temp>$47: Sorbet::Private::Static::Void = <cfgAlias>$46: T.class_of(A).each()
+    <selfRestore>$48: T.class_of(Main) = <self>
     <unconditional> -> bb10
 
 # backedges
 # - bb6(rubyRegionId=2)
-bb9[rubyRegionId=2, firstDead=14](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb9[rubyRegionId=2, firstDead=17](<self>: T.class_of(Main), <block-pre-call-temp>$17: Sorbet::Private::Static::Void, <selfRestore>$18: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
     <blk>$19: T.untyped = load_yield_params(each)
@@ -186,211 +186,223 @@ bb9[rubyRegionId=2, firstDead=14](<self>: T.class_of(Main), <block-pre-call-temp
     <assignTemp>$3$2: T.untyped = <cfgAlias>$28: T.class_of(<Magic>).<expand-splat>(<assignTemp>$2$2: T.untyped, <statTemp>$30: Integer(1), <statTemp>$31: Integer(0))
     <statTemp>$34: Integer(0) = 0
     a$2: T.untyped = <assignTemp>$3$2: T.untyped.[](<statTemp>$34: Integer(0))
-    <statTemp>$36: T.untyped = a$2: T.untyped.inspect()
-    <blockReturnTemp>$20: NilClass = <self>: T.class_of(Main).puts(<statTemp>$36: T.untyped)
-    <blockReturnTemp>$38: T.noreturn = blockreturn<each> <blockReturnTemp>$20: NilClass
+    <cfgAlias>$37: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$39: Integer(1) = 1
+    <statTemp>$35: T.untyped = <cfgAlias>$37: T.class_of(<Magic>).<mlhs use all>(<assignTemp>$2$2: T.untyped, <statTemp>$39: Integer(1))
+    <statTemp>$41: T.untyped = a$2: T.untyped.inspect()
+    <blockReturnTemp>$20: NilClass = <self>: T.class_of(Main).puts(<statTemp>$41: T.untyped)
+    <blockReturnTemp>$43: T.noreturn = blockreturn<each> <blockReturnTemp>$20: NilClass
     <unconditional> -> bb6
 
 # backedges
 # - bb7(rubyRegionId=0)
 # - bb13(rubyRegionId=3)
-bb10[rubyRegionId=3, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$42: Sorbet::Private::Static::Void, <selfRestore>$43: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb10[rubyRegionId=3, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb13 : bb11)
 
 # backedges
 # - bb10(rubyRegionId=3)
-bb11[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$42: Sorbet::Private::Static::Void, <selfRestore>$43: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
-    <statTemp>$39: T.untyped = Solve<<block-pre-call-temp>$42, each>
-    <self>: T.class_of(Main) = <selfRestore>$43
-    <cfgAlias>$56: T.class_of(A) = alias <C A>
-    <block-pre-call-temp>$57: Sorbet::Private::Static::Void = <cfgAlias>$56: T.class_of(A).each()
-    <selfRestore>$58: T.class_of(Main) = <self>
+bb11[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
+    <statTemp>$44: T.untyped = Solve<<block-pre-call-temp>$47, each>
+    <self>: T.class_of(Main) = <selfRestore>$48
+    <cfgAlias>$61: T.class_of(A) = alias <C A>
+    <block-pre-call-temp>$62: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(A).each()
+    <selfRestore>$63: T.class_of(Main) = <self>
     <unconditional> -> bb14
 
 # backedges
 # - bb10(rubyRegionId=3)
-bb13[rubyRegionId=3, firstDead=9](<self>: T.class_of(Main), <block-pre-call-temp>$42: Sorbet::Private::Static::Void, <selfRestore>$43: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb13[rubyRegionId=3, firstDead=9](<self>: T.class_of(Main), <block-pre-call-temp>$47: Sorbet::Private::Static::Void, <selfRestore>$48: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
-    <blk>$44: T.untyped = load_yield_params(each)
-    a$3: T.untyped = yield_load_arg(0, <blk>$44: T.untyped)
-    b$3: T.untyped = yield_load_arg(1, <blk>$44: T.untyped)
-    <statTemp>$48: T.untyped = a$3: T.untyped.inspect()
-    <statTemp>$46: NilClass = <self>: T.class_of(Main).puts(<statTemp>$48: T.untyped)
-    <statTemp>$51: T.untyped = b$3: T.untyped.inspect()
-    <blockReturnTemp>$45: NilClass = <self>: T.class_of(Main).puts(<statTemp>$51: T.untyped)
-    <blockReturnTemp>$53: T.noreturn = blockreturn<each> <blockReturnTemp>$45: NilClass
+    <blk>$49: T.untyped = load_yield_params(each)
+    a$3: T.untyped = yield_load_arg(0, <blk>$49: T.untyped)
+    b$3: T.untyped = yield_load_arg(1, <blk>$49: T.untyped)
+    <statTemp>$53: T.untyped = a$3: T.untyped.inspect()
+    <statTemp>$51: NilClass = <self>: T.class_of(Main).puts(<statTemp>$53: T.untyped)
+    <statTemp>$56: T.untyped = b$3: T.untyped.inspect()
+    <blockReturnTemp>$50: NilClass = <self>: T.class_of(Main).puts(<statTemp>$56: T.untyped)
+    <blockReturnTemp>$58: T.noreturn = blockreturn<each> <blockReturnTemp>$50: NilClass
     <unconditional> -> bb10
 
 # backedges
 # - bb11(rubyRegionId=0)
 # - bb17(rubyRegionId=4)
-bb14[rubyRegionId=4, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb14[rubyRegionId=4, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb17 : bb15)
 
 # backedges
 # - bb14(rubyRegionId=4)
-bb15[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
-    <statTemp>$54: T.untyped = Solve<<block-pre-call-temp>$57, each>
-    <self>: T.class_of(Main) = <selfRestore>$58
-    <statTemp>$88: String("main") = "main"
-    <statTemp>$86: NilClass = <self>: T.class_of(Main).puts(<statTemp>$88: String("main"))
-    <cfgAlias>$91: T.class_of(A) = alias <C A>
-    <block-pre-call-temp>$92: Sorbet::Private::Static::Void = <cfgAlias>$91: T.class_of(A).each()
-    <selfRestore>$93: T.class_of(Main) = <self>
+bb15[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
+    <statTemp>$59: T.untyped = Solve<<block-pre-call-temp>$62, each>
+    <self>: T.class_of(Main) = <selfRestore>$63
+    <statTemp>$98: String("main") = "main"
+    <statTemp>$96: NilClass = <self>: T.class_of(Main).puts(<statTemp>$98: String("main"))
+    <cfgAlias>$101: T.class_of(A) = alias <C A>
+    <block-pre-call-temp>$102: Sorbet::Private::Static::Void = <cfgAlias>$101: T.class_of(A).each()
+    <selfRestore>$103: T.class_of(Main) = <self>
     <unconditional> -> bb18
 
 # backedges
 # - bb14(rubyRegionId=4)
-bb17[rubyRegionId=4, firstDead=18](<self>: T.class_of(Main), <block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb17[rubyRegionId=4, firstDead=21](<self>: T.class_of(Main), <block-pre-call-temp>$62: Sorbet::Private::Static::Void, <selfRestore>$63: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
-    <blk>$59: T.untyped = load_yield_params(each)
-    forTemp$4: T.untyped = yield_load_arg(0, <blk>$59: T.untyped)
-    <cfgAlias>$64: T.class_of(<Magic>) = alias <C <Magic>>
-    <assignTemp>$4$4: T.untyped = <cfgAlias>$64: T.class_of(<Magic>).<splat>(forTemp$4: T.untyped)
-    <cfgAlias>$68: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$70: Integer(2) = 2
-    <statTemp>$71: Integer(0) = 0
-    <assignTemp>$5$4: T.untyped = <cfgAlias>$68: T.class_of(<Magic>).<expand-splat>(<assignTemp>$4$4: T.untyped, <statTemp>$70: Integer(2), <statTemp>$71: Integer(0))
-    <statTemp>$74: Integer(0) = 0
-    a$4: T.untyped = <assignTemp>$5$4: T.untyped.[](<statTemp>$74: Integer(0))
-    <statTemp>$77: Integer(1) = 1
-    b$4: T.untyped = <assignTemp>$5$4: T.untyped.[](<statTemp>$77: Integer(1))
-    <statTemp>$80: T.untyped = a$4: T.untyped.inspect()
-    <statTemp>$78: NilClass = <self>: T.class_of(Main).puts(<statTemp>$80: T.untyped)
-    <statTemp>$83: T.untyped = b$4: T.untyped.inspect()
-    <blockReturnTemp>$60: NilClass = <self>: T.class_of(Main).puts(<statTemp>$83: T.untyped)
-    <blockReturnTemp>$85: T.noreturn = blockreturn<each> <blockReturnTemp>$60: NilClass
+    <blk>$64: T.untyped = load_yield_params(each)
+    forTemp$4: T.untyped = yield_load_arg(0, <blk>$64: T.untyped)
+    <cfgAlias>$69: T.class_of(<Magic>) = alias <C <Magic>>
+    <assignTemp>$4$4: T.untyped = <cfgAlias>$69: T.class_of(<Magic>).<splat>(forTemp$4: T.untyped)
+    <cfgAlias>$73: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$75: Integer(2) = 2
+    <statTemp>$76: Integer(0) = 0
+    <assignTemp>$5$4: T.untyped = <cfgAlias>$73: T.class_of(<Magic>).<expand-splat>(<assignTemp>$4$4: T.untyped, <statTemp>$75: Integer(2), <statTemp>$76: Integer(0))
+    <statTemp>$79: Integer(0) = 0
+    a$4: T.untyped = <assignTemp>$5$4: T.untyped.[](<statTemp>$79: Integer(0))
+    <statTemp>$82: Integer(1) = 1
+    b$4: T.untyped = <assignTemp>$5$4: T.untyped.[](<statTemp>$82: Integer(1))
+    <cfgAlias>$85: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$87: Integer(2) = 2
+    <statTemp>$83: T.untyped = <cfgAlias>$85: T.class_of(<Magic>).<mlhs use all>(<assignTemp>$4$4: T.untyped, <statTemp>$87: Integer(2))
+    <statTemp>$90: T.untyped = a$4: T.untyped.inspect()
+    <statTemp>$88: NilClass = <self>: T.class_of(Main).puts(<statTemp>$90: T.untyped)
+    <statTemp>$93: T.untyped = b$4: T.untyped.inspect()
+    <blockReturnTemp>$65: NilClass = <self>: T.class_of(Main).puts(<statTemp>$93: T.untyped)
+    <blockReturnTemp>$95: T.noreturn = blockreturn<each> <blockReturnTemp>$65: NilClass
     <unconditional> -> bb14
 
 # backedges
 # - bb15(rubyRegionId=0)
 # - bb21(rubyRegionId=5)
-bb18[rubyRegionId=5, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$92: Sorbet::Private::Static::Void, <selfRestore>$93: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb18[rubyRegionId=5, firstDead=-1](<self>: T.class_of(Main), <block-pre-call-temp>$102: Sorbet::Private::Static::Void, <selfRestore>$103: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb21 : bb19)
 
 # backedges
 # - bb18(rubyRegionId=5)
-bb19[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$92: Sorbet::Private::Static::Void, <selfRestore>$93: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
-    <statTemp>$89: T.untyped = Solve<<block-pre-call-temp>$92, each>
-    <self>: T.class_of(Main) = <selfRestore>$93
-    <cfgAlias>$159: T.class_of(A) = alias <C A>
-    <block-pre-call-temp>$160: Sorbet::Private::Static::Void = <cfgAlias>$159: T.class_of(A).each()
-    <selfRestore>$161: T.class_of(Main) = <self>
+bb19[rubyRegionId=0, firstDead=-1](<block-pre-call-temp>$102: Sorbet::Private::Static::Void, <selfRestore>$103: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
+    <statTemp>$99: T.untyped = Solve<<block-pre-call-temp>$102, each>
+    <self>: T.class_of(Main) = <selfRestore>$103
+    <cfgAlias>$174: T.class_of(A) = alias <C A>
+    <block-pre-call-temp>$175: Sorbet::Private::Static::Void = <cfgAlias>$174: T.class_of(A).each()
+    <selfRestore>$176: T.class_of(Main) = <self>
     <unconditional> -> bb22
 
 # backedges
 # - bb18(rubyRegionId=5)
-bb21[rubyRegionId=5, firstDead=40](<self>: T.class_of(Main), <block-pre-call-temp>$92: Sorbet::Private::Static::Void, <selfRestore>$93: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped):
+bb21[rubyRegionId=5, firstDead=43](<self>: T.class_of(Main), <block-pre-call-temp>$102: Sorbet::Private::Static::Void, <selfRestore>$103: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
-    <cfgAlias>$99: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$101: Integer(5) = 5
-    <statTemp>$102: Integer(0) = 0
-    <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass] = <cfgAlias>$99: T.class_of(<Magic>).<expand-splat>(forTemp$6$5: NilClass, <statTemp>$101: Integer(5), <statTemp>$102: Integer(0))
-    <cfgAlias>$106: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$109: Integer(0) = 0
-    <statTemp>$107: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$109: Integer(0))
-    <statTemp>$110: String("singleton class instance") = "singleton class instance"
-    <statTemp>$111: String("main") = "main"
-    <statTemp>$112: Symbol(:@a) = :@a
-    @a$104: NilClass = <cfgAlias>$106: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$107: NilClass, <statTemp>$110: String("singleton class instance"), <statTemp>$111: String("main"), <statTemp>$112: Symbol(:@a))
+    <cfgAlias>$109: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$111: Integer(5) = 5
+    <statTemp>$112: Integer(0) = 0
+    <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass] = <cfgAlias>$109: T.class_of(<Magic>).<expand-splat>(forTemp$6$5: NilClass, <statTemp>$111: Integer(5), <statTemp>$112: Integer(0))
     <cfgAlias>$116: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$119: Integer(1) = 1
-    <statTemp>$117: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$119: Integer(1))
-    <statTemp>$120: String("class") = "class"
+    <statTemp>$119: Integer(0) = 0
+    <statTemp>$117: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$119: Integer(0))
+    <statTemp>$120: String("singleton class instance") = "singleton class instance"
     <statTemp>$121: String("main") = "main"
-    <statTemp>$122: Symbol(:@@b) = :@@b
-    @@b$114: NilClass = <cfgAlias>$116: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$117: NilClass, <statTemp>$120: String("class"), <statTemp>$121: String("main"), <statTemp>$122: Symbol(:@@b))
-    <statTemp>$126: Integer(2) = 2
-    $c$124: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$126: Integer(2))
-    <statTemp>$129: Integer(3) = 3
-    d$5: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$129: Integer(3))
-    <cfgAlias>$132: T.class_of(E) = alias <C E>
-    <statTemp>$135: Integer(4) = 4
-    <statTemp>$133: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$135: Integer(4))
-    <statTemp>$130: NilClass = <cfgAlias>$132: T.class_of(E).e=(<statTemp>$133: NilClass)
-    <statTemp>$138: T.untyped = @a$104: NilClass.inspect()
-    <statTemp>$136: NilClass = <self>: T.class_of(Main).puts(<statTemp>$138: T.untyped)
-    <statTemp>$142: T.untyped = @@b$114: NilClass.inspect()
-    <statTemp>$140: NilClass = <self>: T.class_of(Main).puts(<statTemp>$142: T.untyped)
-    <statTemp>$146: T.untyped = $c$124: NilClass.inspect()
-    <statTemp>$144: NilClass = <self>: T.class_of(Main).puts(<statTemp>$146: T.untyped)
-    <statTemp>$150: T.untyped = d$5: NilClass.inspect()
-    <statTemp>$148: NilClass = <self>: T.class_of(Main).puts(<statTemp>$150: T.untyped)
-    <cfgAlias>$156: T.class_of(E) = alias <C E>
-    <statTemp>$154: T.untyped = <cfgAlias>$156: T.class_of(E).e()
-    <statTemp>$153: T.untyped = <statTemp>$154: T.untyped.inspect()
-    <blockReturnTemp>$94: NilClass = <self>: T.class_of(Main).puts(<statTemp>$153: T.untyped)
-    <blockReturnTemp>$157: T.noreturn = blockreturn<each> <blockReturnTemp>$94: NilClass
+    <statTemp>$122: Symbol(:@a) = :@a
+    @a$114: NilClass = <cfgAlias>$116: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$117: NilClass, <statTemp>$120: String("singleton class instance"), <statTemp>$121: String("main"), <statTemp>$122: Symbol(:@a))
+    <cfgAlias>$126: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$129: Integer(1) = 1
+    <statTemp>$127: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$129: Integer(1))
+    <statTemp>$130: String("class") = "class"
+    <statTemp>$131: String("main") = "main"
+    <statTemp>$132: Symbol(:@@b) = :@@b
+    @@b$124: NilClass = <cfgAlias>$126: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$127: NilClass, <statTemp>$130: String("class"), <statTemp>$131: String("main"), <statTemp>$132: Symbol(:@@b))
+    <statTemp>$136: Integer(2) = 2
+    $c$134: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$136: Integer(2))
+    <statTemp>$139: Integer(3) = 3
+    d$5: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$139: Integer(3))
+    <cfgAlias>$142: T.class_of(E) = alias <C E>
+    <statTemp>$145: Integer(4) = 4
+    <statTemp>$143: NilClass = <assignTemp>$8$5: [NilClass, NilClass, NilClass, NilClass, NilClass].[](<statTemp>$145: Integer(4))
+    <statTemp>$140: NilClass = <cfgAlias>$142: T.class_of(E).e=(<statTemp>$143: NilClass)
+    <cfgAlias>$148: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$150: Integer(5) = 5
+    <statTemp>$146: T.untyped = <cfgAlias>$148: T.class_of(<Magic>).<mlhs use all>(forTemp$6$5: NilClass, <statTemp>$150: Integer(5))
+    <statTemp>$153: T.untyped = @a$114: NilClass.inspect()
+    <statTemp>$151: NilClass = <self>: T.class_of(Main).puts(<statTemp>$153: T.untyped)
+    <statTemp>$157: T.untyped = @@b$124: NilClass.inspect()
+    <statTemp>$155: NilClass = <self>: T.class_of(Main).puts(<statTemp>$157: T.untyped)
+    <statTemp>$161: T.untyped = $c$134: NilClass.inspect()
+    <statTemp>$159: NilClass = <self>: T.class_of(Main).puts(<statTemp>$161: T.untyped)
+    <statTemp>$165: T.untyped = d$5: NilClass.inspect()
+    <statTemp>$163: NilClass = <self>: T.class_of(Main).puts(<statTemp>$165: T.untyped)
+    <cfgAlias>$171: T.class_of(E) = alias <C E>
+    <statTemp>$169: T.untyped = <cfgAlias>$171: T.class_of(E).e()
+    <statTemp>$168: T.untyped = <statTemp>$169: T.untyped.inspect()
+    <blockReturnTemp>$104: NilClass = <self>: T.class_of(Main).puts(<statTemp>$168: T.untyped)
+    <blockReturnTemp>$172: T.noreturn = blockreturn<each> <blockReturnTemp>$104: NilClass
     <unconditional> -> bb18
 
 # backedges
 # - bb19(rubyRegionId=0)
 # - bb25(rubyRegionId=6)
-bb22[rubyRegionId=6, firstDead=-1](<self>: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped, <block-pre-call-temp>$160: Sorbet::Private::Static::Void, <selfRestore>$161: T.class_of(Main)):
+bb22[rubyRegionId=6, firstDead=-1](<self>: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped, <block-pre-call-temp>$175: Sorbet::Private::Static::Void, <selfRestore>$176: T.class_of(Main)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb25 : bb23)
 
 # backedges
 # - bb22(rubyRegionId=6)
-bb23[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$160: Sorbet::Private::Static::Void, <selfRestore>$161: T.class_of(Main)):
-    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$160, each>
+bb23[rubyRegionId=0, firstDead=2](<block-pre-call-temp>$175: Sorbet::Private::Static::Void, <selfRestore>$176: T.class_of(Main)):
+    <returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$175, each>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
 # backedges
 # - bb22(rubyRegionId=6)
-bb25[rubyRegionId=6, firstDead=44](<self>: T.class_of(Main), @a$104: T.untyped, @@b$114: T.untyped, $c$124: T.untyped, <block-pre-call-temp>$160: Sorbet::Private::Static::Void, <selfRestore>$161: T.class_of(Main)):
+bb25[rubyRegionId=6, firstDead=47](<self>: T.class_of(Main), @a$114: T.untyped, @@b$124: T.untyped, $c$134: T.untyped, <block-pre-call-temp>$175: Sorbet::Private::Static::Void, <selfRestore>$176: T.class_of(Main)):
     # outerLoops: 1
     <self>: T.class_of(Main) = loadSelf(each)
-    <blk>$162: T.untyped = load_yield_params(each)
-    forTemp$6: T.untyped = yield_load_arg(0, <blk>$162: T.untyped)
-    <cfgAlias>$167: T.class_of(<Magic>) = alias <C <Magic>>
-    <assignTemp>$9$6: T.untyped = <cfgAlias>$167: T.class_of(<Magic>).<splat>(forTemp$6: T.untyped)
-    <cfgAlias>$171: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$173: Integer(5) = 5
-    <statTemp>$174: Integer(0) = 0
-    <assignTemp>$10$6: T.untyped = <cfgAlias>$171: T.class_of(<Magic>).<expand-splat>(<assignTemp>$9$6: T.untyped, <statTemp>$173: Integer(5), <statTemp>$174: Integer(0))
-    <cfgAlias>$177: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$180: Integer(0) = 0
-    <statTemp>$178: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$180: Integer(0))
-    <statTemp>$181: String("singleton class instance") = "singleton class instance"
-    <statTemp>$182: String("main") = "main"
-    <statTemp>$183: Symbol(:@a) = :@a
-    @a$104: T.untyped = <cfgAlias>$177: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$178: T.untyped, <statTemp>$181: String("singleton class instance"), <statTemp>$182: String("main"), <statTemp>$183: Symbol(:@a))
+    <blk>$177: T.untyped = load_yield_params(each)
+    forTemp$6: T.untyped = yield_load_arg(0, <blk>$177: T.untyped)
+    <cfgAlias>$182: T.class_of(<Magic>) = alias <C <Magic>>
+    <assignTemp>$9$6: T.untyped = <cfgAlias>$182: T.class_of(<Magic>).<splat>(forTemp$6: T.untyped)
     <cfgAlias>$186: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$189: Integer(1) = 1
-    <statTemp>$187: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$189: Integer(1))
-    <statTemp>$190: String("class") = "class"
-    <statTemp>$191: String("main") = "main"
-    <statTemp>$192: Symbol(:@@b) = :@@b
-    @@b$114: T.untyped = <cfgAlias>$186: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$187: T.untyped, <statTemp>$190: String("class"), <statTemp>$191: String("main"), <statTemp>$192: Symbol(:@@b))
-    <statTemp>$195: Integer(2) = 2
-    $c$124: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$195: Integer(2))
-    <statTemp>$198: Integer(3) = 3
-    d$6: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$198: Integer(3))
-    <cfgAlias>$201: T.class_of(E) = alias <C E>
-    <statTemp>$204: Integer(4) = 4
-    <statTemp>$202: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$204: Integer(4))
-    <statTemp>$199: T.untyped = <cfgAlias>$201: T.class_of(E).e=(<statTemp>$202: T.untyped)
-    <statTemp>$207: T.untyped = @a$104: T.untyped.inspect()
-    <statTemp>$205: NilClass = <self>: T.class_of(Main).puts(<statTemp>$207: T.untyped)
-    <statTemp>$211: T.untyped = @@b$114: T.untyped.inspect()
-    <statTemp>$209: NilClass = <self>: T.class_of(Main).puts(<statTemp>$211: T.untyped)
-    <statTemp>$215: T.untyped = $c$124: T.untyped.inspect()
-    <statTemp>$213: NilClass = <self>: T.class_of(Main).puts(<statTemp>$215: T.untyped)
-    <statTemp>$219: T.untyped = d$6: T.untyped.inspect()
-    <statTemp>$217: NilClass = <self>: T.class_of(Main).puts(<statTemp>$219: T.untyped)
-    <cfgAlias>$225: T.class_of(E) = alias <C E>
-    <statTemp>$223: T.untyped = <cfgAlias>$225: T.class_of(E).e()
-    <statTemp>$222: T.untyped = <statTemp>$223: T.untyped.inspect()
-    <blockReturnTemp>$163: NilClass = <self>: T.class_of(Main).puts(<statTemp>$222: T.untyped)
-    <blockReturnTemp>$226: T.noreturn = blockreturn<each> <blockReturnTemp>$163: NilClass
+    <statTemp>$188: Integer(5) = 5
+    <statTemp>$189: Integer(0) = 0
+    <assignTemp>$10$6: T.untyped = <cfgAlias>$186: T.class_of(<Magic>).<expand-splat>(<assignTemp>$9$6: T.untyped, <statTemp>$188: Integer(5), <statTemp>$189: Integer(0))
+    <cfgAlias>$192: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$195: Integer(0) = 0
+    <statTemp>$193: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$195: Integer(0))
+    <statTemp>$196: String("singleton class instance") = "singleton class instance"
+    <statTemp>$197: String("main") = "main"
+    <statTemp>$198: Symbol(:@a) = :@a
+    @a$114: T.untyped = <cfgAlias>$192: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$193: T.untyped, <statTemp>$196: String("singleton class instance"), <statTemp>$197: String("main"), <statTemp>$198: Symbol(:@a))
+    <cfgAlias>$201: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$204: Integer(1) = 1
+    <statTemp>$202: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$204: Integer(1))
+    <statTemp>$205: String("class") = "class"
+    <statTemp>$206: String("main") = "main"
+    <statTemp>$207: Symbol(:@@b) = :@@b
+    @@b$124: T.untyped = <cfgAlias>$201: T.class_of(<Magic>).<suggest-field-type>(<statTemp>$202: T.untyped, <statTemp>$205: String("class"), <statTemp>$206: String("main"), <statTemp>$207: Symbol(:@@b))
+    <statTemp>$210: Integer(2) = 2
+    $c$134: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$210: Integer(2))
+    <statTemp>$213: Integer(3) = 3
+    d$6: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$213: Integer(3))
+    <cfgAlias>$216: T.class_of(E) = alias <C E>
+    <statTemp>$219: Integer(4) = 4
+    <statTemp>$217: T.untyped = <assignTemp>$10$6: T.untyped.[](<statTemp>$219: Integer(4))
+    <statTemp>$214: T.untyped = <cfgAlias>$216: T.class_of(E).e=(<statTemp>$217: T.untyped)
+    <cfgAlias>$222: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$224: Integer(5) = 5
+    <statTemp>$220: T.untyped = <cfgAlias>$222: T.class_of(<Magic>).<mlhs use all>(<assignTemp>$9$6: T.untyped, <statTemp>$224: Integer(5))
+    <statTemp>$227: T.untyped = @a$114: T.untyped.inspect()
+    <statTemp>$225: NilClass = <self>: T.class_of(Main).puts(<statTemp>$227: T.untyped)
+    <statTemp>$231: T.untyped = @@b$124: T.untyped.inspect()
+    <statTemp>$229: NilClass = <self>: T.class_of(Main).puts(<statTemp>$231: T.untyped)
+    <statTemp>$235: T.untyped = $c$134: T.untyped.inspect()
+    <statTemp>$233: NilClass = <self>: T.class_of(Main).puts(<statTemp>$235: T.untyped)
+    <statTemp>$239: T.untyped = d$6: T.untyped.inspect()
+    <statTemp>$237: NilClass = <self>: T.class_of(Main).puts(<statTemp>$239: T.untyped)
+    <cfgAlias>$245: T.class_of(E) = alias <C E>
+    <statTemp>$243: T.untyped = <cfgAlias>$245: T.class_of(E).e()
+    <statTemp>$242: T.untyped = <statTemp>$243: T.untyped.inspect()
+    <blockReturnTemp>$178: NilClass = <self>: T.class_of(Main).puts(<statTemp>$242: T.untyped)
+    <blockReturnTemp>$246: T.noreturn = blockreturn<each> <blockReturnTemp>$178: NilClass
     <unconditional> -> bb22
 
 }

@@ -15,6 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <assignTemp>$3 = <destructure>$2
         <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 1, 0)
         args = <assignTemp>$4.[](0)
+        ::<Magic>.<mlhs use all>(<assignTemp>$3, 1)
         <assignTemp>$3
       end
       <emptyTree>::<C T>.reveal_type(args)

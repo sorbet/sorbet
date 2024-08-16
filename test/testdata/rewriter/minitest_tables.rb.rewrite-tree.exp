@@ -153,6 +153,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
             k = <assignTemp>$6.[](0)
             v = <assignTemp>$6.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$5, 2)
             <assignTemp>$5
           end
           begin
@@ -175,6 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$6 = ::<Magic>.<expand-splat>(<assignTemp>$5, 2, 0)
             k = <assignTemp>$6.[](0)
             v = <assignTemp>$6.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$5, 2)
             <assignTemp>$5
           end
           begin
@@ -197,6 +199,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
             s = <assignTemp>$9.[](0)
             b = <assignTemp>$9.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$8, 2)
             <assignTemp>$8
           end
           begin
@@ -204,6 +207,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
             x = <assignTemp>$12.[](0)
             y = <assignTemp>$12.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$11, 2)
             <assignTemp>$11
           end
           begin
@@ -229,6 +233,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
             s = <assignTemp>$9.[](0)
             b = <assignTemp>$9.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$8, 2)
             <assignTemp>$8
           end
           begin
@@ -236,6 +241,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 2, 0)
             x = <assignTemp>$12.[](0)
             y = <assignTemp>$12.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$11, 2)
             <assignTemp>$11
           end
           begin
@@ -272,6 +278,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$15 = ::<Magic>.<expand-splat>(<assignTemp>$14, 2, 0)
             i = <assignTemp>$15.[](0)
             s = <assignTemp>$15.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$14, 2)
             <assignTemp>$14
           end
           begin
@@ -307,6 +314,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$18 = ::<Magic>.<expand-splat>(<assignTemp>$17, 2, 0)
             i = <assignTemp>$18.[](0)
             s = <assignTemp>$18.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$17, 2)
             <assignTemp>$17
           end
           begin
@@ -342,6 +350,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$21 = ::<Magic>.<expand-splat>(<assignTemp>$20, 2, 0)
             i = <assignTemp>$21.[](0)
             s = <assignTemp>$21.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$20, 2)
             <assignTemp>$20
           end
           begin
@@ -377,6 +386,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$26 = ::<Magic>.<expand-splat>(<assignTemp>$25, 2, 0)
             color = <assignTemp>$26.[](0)
             ns = <assignTemp>$26.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$25, 2)
             <assignTemp>$25
           end
           begin
@@ -525,6 +535,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$23 = ::<Magic>.<expand-splat>(<assignTemp>$22, 2, 0)
           i = <assignTemp>$23.[](0)
           s = <assignTemp>$23.[](1)
+          ::<Magic>.<mlhs use all>(<assignTemp>$22, 2)
           <assignTemp>$22
         end
         <runtime method definition of <it 'rejects manual destructuring of the list argument'>>
