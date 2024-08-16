@@ -152,7 +152,7 @@ public:
         return basicBlocks[0].get();
     }
 
-    BasicBlock *deadBlock() {
+    BasicBlock *deadBlock() const {
         return basicBlocks[1].get();
     };
 

@@ -15,7 +15,7 @@ private:
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
     static void sanityCheck(core::Context ctx, CFG &cfg);
-    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg);
     static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
                                   const std::vector<UIntSet> &blockArgs);
