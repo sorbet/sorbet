@@ -44,7 +44,7 @@ suggest_t_must.rb:25: Method `split` does not exist on `NilClass` component of `
   Got `T.nilable(String)` originating from:
     suggest_t_must.rb:24:
     24 |x, y = [1, T.let('', T.nilable(String))]
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^
   Autocorrect: Done
     suggest_t_must.rb:25: Replaced with `T.must(y)`
     25 |y.split
