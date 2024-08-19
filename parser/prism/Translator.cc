@@ -326,6 +326,24 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Restarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                 parser.translateLocation(nameLoc));
         }
+        case PM_RETURN_NODE: {
+            auto returnNode = reinterpret_cast<pm_return_node *>(node);
+            pm_location_t *loc = &returnNode->base.location;
+
+            absl::Span<pm_node_t *> prismReturnValues;
+            if (auto returnValues = returnNode->arguments; returnValues != nullptr) {
+                prismReturnValues = absl::MakeSpan(returnValues->arguments.nodes,returnValues->arguments.size);
+            }
+
+
+            NodeVec returnValues;
+            for (auto &prismReturnValue : prismReturnValues) {
+                unique_ptr<parser::Node> sorbetReturnValue = translate(prismReturnValue);
+                returnValues.emplace_back(std::move(sorbetReturnValue));
+            }
+
+            return make_unique<parser::Return>(parser.translateLocation(loc), std::move(returnValues));
+        }
         case PM_STATEMENTS_NODE: {
             pm_statements_node *stmts_node = reinterpret_cast<pm_statements_node *>(node);
 
@@ -481,7 +499,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_RETRY_NODE:
-        case PM_RETURN_NODE:
         case PM_SELF_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SINGLETON_CLASS_NODE:
