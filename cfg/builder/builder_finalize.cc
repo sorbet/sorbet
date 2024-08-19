@@ -313,6 +313,25 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
+void CFGBuilder::pinUnreadVariables(core::Context ctx, CFG &cfg) {
+    auto readsAndWritesAfterSimplification = cfg.findAllReadsAndWrites(ctx);
+    UIntSet wasEverRead(cfg.numLocalVariables());
+    for (const auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+
+        readsAndWritesAfterSimplification.reads[bb->id].forEach(
+            [&wasEverRead](uint32_t local) { wasEverRead.add(local); });
+    }
+
+    for (size_t local = 0; local < cfg.numLocalVariables(); ++local) {
+        if (!wasEverRead.contains(local)) {
+            cfg.minLoops[local] = CFG::MIN_LOOP_NEVER_READ;
+        }
+    }
+}
+
 vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.

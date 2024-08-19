@@ -144,6 +144,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     simplify(ctx, *res);
     histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);
+    pinUnreadVariables(ctx, *res);
     sanityCheck(ctx, *res);
     res->sanityCheck(ctx);
     histogramInc("cfgbuilder.numLocalVariables", res->numLocalVariables());
