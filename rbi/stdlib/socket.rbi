@@ -4771,6 +4771,10 @@ end
 class SocketError < StandardError
 end
 
+# [`Socket::ResolutionError`](https://docs.ruby-lang.org/en/master/Socket/ResolutionError.html)
+# is the error class for socket name resolution.
+class Socket::ResolutionError < SocketError    
+end
 
 # UDP/IP address information used by
 # [`Socket.udp_server_loop`](https://docs.ruby-lang.org/en/2.7.0/Socket.html#method-c-udp_server_loop).
