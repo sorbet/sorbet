@@ -227,6 +227,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
                                                parser.translateLocation(nameLoc), std::move(value));
         }
+        case PM_OR_NODE: { // operator `||` and `or`
+            auto orNode = reinterpret_cast<pm_or_node *>(node);
+            auto *loc = &orNode->base.location;
+
+            auto left = translate(orNode->left);
+            auto right = translate(orNode->right);
+
+            return make_unique<parser::Or>(parser.translateLocation(loc), std::move(left), std::move(right));
+        }
         case PM_PARAMETERS_NODE: { // The parameters declared at the top of a PM_DEF_NODE
             auto paramsNode = reinterpret_cast<pm_parameters_node *>(node);
             pm_location_t *loc = &paramsNode->base.location;
@@ -461,7 +470,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
-        case PM_OR_NODE:
         case PM_PARENTHESES_NODE:
         case PM_PINNED_EXPRESSION_NODE:
         case PM_PINNED_VARIABLE_NODE:
