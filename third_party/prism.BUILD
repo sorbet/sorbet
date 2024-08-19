@@ -13,9 +13,21 @@ GENERATED_HDRS = [
 
 genrule(
   name = "generate_templates",
-  srcs = ["templates/template.rb"],
+  srcs = [
+    "templates/template.rb",
+    "prism.gemspec",
+    "Gemfile",
+    "Gemfile.lock",
+    "config.yml", # Contains the data to populate the ERB templates.
+  ] + \
+  ["templates/{c_file}.erb".format(c_file = c_file) for c_file in GENERATED_SRCS] + \
+  ["templates/{h_file}.erb".format(h_file = h_file) for h_file in GENERATED_HDRS],
   outs = GENERATED_HDRS + GENERATED_SRCS,
   cmd = """
+    # set -o xtrace # Uncomment this to debug the execution of this script.
+    # echo "PWD: $$PWD"
+    # echo "RULEDIR: $(RULEDIR)"
+
     # This is a workaround; without guidance, Bazel will try to use the system Ruby,
     # which is too old to install gems and run this script.
     #
@@ -23,15 +35,20 @@ genrule(
     # ./bazel build //main:sorbet --config=dbg --define RUBY_PATH=/path/to/ruby
     export PATH="$(RUBY_PATH)/bin:$$PATH"
 
-    cd external/prism
+    gemfile="$(location Gemfile)"
+    script="$(location templates/template.rb)"
 
-    bundle install
-    bundle exec ruby templates/template.rb
+    bundle install --gemfile="$$gemfile"
 
-    cd ../..
-  """ + " && ".join([
-    "cp $$PWD/external/prism/{f} $(RULEDIR)/{f}".format(f=f) for f in GENERATED_HDRS + GENERATED_SRCS
-  ]),
+    {template_render_commands}
+
+  """.format(
+    template_render_commands = "\n    ".join([
+      """
+        bundle exec --gemfile="$$gemfile" ruby "$$script" {f} "$(location {f})"
+      """.format(f=f) for f in (GENERATED_SRCS + GENERATED_HDRS)
+    ])
+  ),
 )
 
 cc_library(
