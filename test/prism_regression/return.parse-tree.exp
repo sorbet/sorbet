@@ -1,0 +1,25 @@
+Begin {
+  stmts = [
+    Return {
+      exprs = [
+      ]
+    }
+    Return {
+      exprs = [
+        Integer {
+          val = "123"
+        }
+      ]
+    }
+    Return {
+      exprs = [
+        String {
+          val = <U multiple>
+        }
+        String {
+          val = <U values>
+        }
+      ]
+    }
+  ]
+}
