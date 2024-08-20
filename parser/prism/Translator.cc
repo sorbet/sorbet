@@ -244,6 +244,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_NIL_NODE: {
+            auto nilNode = reinterpret_cast<pm_nil_node *>(node);
+            pm_location_t *loc = &nilNode->base.location;
+
+            return make_unique<parser::Nil>(parser.translateLocation(loc));
+        }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: {
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
             pm_location_t *loc = &optionalKeywordParamNode->base.location;
@@ -499,7 +505,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MULTI_TARGET_NODE:
         case PM_MULTI_WRITE_NODE:
         case PM_NEXT_NODE:
-        case PM_NIL_NODE:
         case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
