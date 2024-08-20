@@ -1,0 +1,73 @@
+Begin {
+  stmts = [
+    Array {
+      elts = [
+      ]
+    }
+    Array {
+      elts = [
+        Integer {
+          val = "1"
+        }
+        Integer {
+          val = "2"
+        }
+        Integer {
+          val = "3"
+        }
+      ]
+    }
+    Array {
+      elts = [
+        Symbol {
+          val = <U symbol1>
+        }
+        Symbol {
+          val = <U symbol2>
+        }
+        Symbol {
+          val = <U symbol3>
+        }
+      ]
+    }
+    Array {
+      elts = [
+        Symbol {
+          val = <U symbol4>
+        }
+        Symbol {
+          val = <U symbol5>
+        }
+        Symbol {
+          val = <U symbol6>
+        }
+      ]
+    }
+    Array {
+      elts = [
+        String {
+          val = <U string4>
+        }
+        String {
+          val = <U string5>
+        }
+        String {
+          val = <U string6>
+        }
+      ]
+    }
+    Array {
+      elts = [
+        String {
+          val = <U string7>
+        }
+        String {
+          val = <U string8>
+        }
+        String {
+          val = <U string9>
+        }
+      ]
+    }
+  ]
+}

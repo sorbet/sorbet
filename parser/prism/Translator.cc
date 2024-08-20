@@ -41,6 +41,22 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // 3. The arguments to a `yield` call, e.g. the `1, 2, 3` in `yield 1, 2, 3`.
             unreachable("PM_ARGUMENTS_NODE is handled separately in `Translator::translateArguments()`.");
         }
+        case PM_ARRAY_NODE: {
+            auto arrayNode = reinterpret_cast<pm_array_node *>(node);
+            pm_location_t *loc = &arrayNode->base.location;
+
+            auto prismElements = absl::MakeSpan(arrayNode->elements.nodes, arrayNode->elements.size);
+
+            parser::NodeVec sorbetElements{};
+            sorbetElements.reserve(prismElements.size());
+
+            for (auto &prismElement : prismElements) {
+                unique_ptr<parser::Node> sorbetElement = translate(prismElement);
+                sorbetElements.emplace_back(std::move(sorbetElement));
+            }
+
+            return make_unique<parser::Array>(parser.translateLocation(loc), std::move(sorbetElements));
+        }
         case PM_ASSOC_NODE: {
             auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
             pm_location_t *loc = &assocNode->base.location;
@@ -390,7 +406,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
-        case PM_ARRAY_NODE:
         case PM_ARRAY_PATTERN_NODE:
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
