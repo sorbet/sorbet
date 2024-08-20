@@ -135,4 +135,18 @@ whether there still are any such errors.)
 
 This code action simply changes `T.unsafe(expr)` to `expr`.
 
-<!-- TODO(neil) Document Extract Variable eventually -->
+### [Experimental] Extract to Variable
+
+> **Trigger**: Select TODO
+
+This action is only suggested if Sorbet is started with the `--enable-experimental-lsp-extract-to-variable` flag.
+
+This consists of 2 code actions: "Extract Variable (this occurrence only)", and "Extract Variable (all N occurrences)"
+
+The first extracts the selected expression into a new variable, and then replaces the selection with the new variable.
+
+![](/img/lsp/extract_variable_this_occurrence.gif)
+
+The second is similar, but instead of just extracting the selection, it also find all the instances of the selection in the method, and also replaces those with the new expression.
+
+![](/img/lsp/extract_variable_all_occurrences.gif)
