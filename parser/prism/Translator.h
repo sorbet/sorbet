@@ -32,6 +32,7 @@ public:
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
+    NodeVec translateArguments(pm_arguments_node *node, size_t extraCapacity = 0);
     std::unique_ptr<parser::Hash> translateHash(pm_node_t *node, pm_node_list_t elements,
                                                 bool isUsedForKeywordArguments);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
