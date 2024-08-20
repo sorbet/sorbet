@@ -167,6 +167,27 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
             return translate(reinterpret_cast<pm_node *>(elseNode->statements));
         }
+        case PM_EMBEDDED_STATEMENTS_NODE: { // Statements interpolated into a string.
+            // e.g. the `#{bar}` in `"foo #{bar} baz"`
+            // Can be multiple statements separated by `;`.
+
+            auto embeddedStmtsNode = reinterpret_cast<pm_embedded_statements_node *>(node);
+
+            auto stmts_node = embeddedStmtsNode->statements;
+            auto stmts = absl::MakeSpan(stmts_node->body.nodes, stmts_node->body.size);
+
+            parser::NodeVec sorbetStmts;
+            sorbetStmts.reserve(stmts.size());
+
+            for (auto &node : stmts) {
+                unique_ptr<parser::Node> convertedStmt = translate(node);
+                sorbetStmts.emplace_back(std::move(convertedStmt));
+            }
+
+            auto *loc = &stmts_node->base.location;
+
+            return make_unique<parser::Begin>(parser.translateLocation(loc), std::move(sorbetStmts));
+        }
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
             pm_location_t *loc = &falseNode->base.location;
@@ -200,6 +221,22 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(parser.translateLocation(loc), std::to_string(intNode->value.value));
+        }
+        case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
+            auto interpolatedStringNode = reinterpret_cast<pm_interpolated_string_node *>(node);
+            pm_location_t *loc = &interpolatedStringNode->base.location;
+
+            auto prismStringParts = absl::MakeSpan(interpolatedStringNode->parts.nodes, interpolatedStringNode->parts.size);
+
+            NodeVec sorbetParts{};
+            sorbetParts.reserve(prismStringParts.size());
+
+            for (auto &prismPart : prismStringParts) {
+                unique_ptr<parser::Node> sorbetPart = translate(prismPart);
+                sorbetParts.emplace_back(std::move(sorbetPart));
+            }
+
+            return make_unique<parser::DString>(parser.translateLocation(loc), std::move(sorbetParts));
         }
         case PM_KEYWORD_HASH_NODE: {
             auto usedForKeywordArgs = true;
@@ -437,7 +474,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_TARGET_NODE:
         case PM_CONSTANT_WRITE_NODE:
         case PM_DEFINED_NODE:
-        case PM_EMBEDDED_STATEMENTS_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
         case PM_FIND_PATTERN_NODE:
@@ -469,7 +505,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INSTANCE_VARIABLE_WRITE_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
-        case PM_INTERPOLATED_STRING_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_INTERPOLATED_X_STRING_NODE:
         case PM_IT_PARAMETERS_NODE:

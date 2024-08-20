@@ -1,0 +1,14 @@
+DString {
+  nodes = [
+    String {
+      val = <U Interpolated expression: >
+    }
+    Begin {
+      stmts = [
+        Integer {
+          val = "123"
+        }
+      ]
+    }
+  ]
+}
