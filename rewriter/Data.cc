@@ -35,7 +35,7 @@ const ast::Send *findParams(ast::ExpressionPtr *send) {
     return bodyBlock;
 }
 
-optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::GlobalState &gs, ast::Send *send) {
+optional<const ast::Send *> getInitialize(const core::GlobalState &gs, ast::Send *send) {
     if (!send->hasBlock()) {
         return nullopt;
     }
@@ -49,7 +49,7 @@ optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::Gl
 
             if (methodDef && methodDef->name == core::Names::initialize()) {
                 const ast::Send *sig = findParams(prevStat);
-                return {{methodDef, sig}};
+                return sig;
             }
 
             prevStat = &stat;
@@ -59,7 +59,7 @@ optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::Gl
         auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
         if (methodDef && methodDef->name == core::Names::initialize()) {
             const ast::Send *sig = findParams(prevStat);
-            return {{methodDef, sig}};
+            return sig;
         }
     }
 
@@ -119,7 +119,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     auto initialize = getInitialize(ctx, send);
     const ast::Send *initializeSigParams = nullptr;
     if (initialize.has_value()) {
-        initializeSigParams = initialize.value().second;
+        initializeSigParams = initialize.value();
     }
 
     for (int i = 0; i < send->numPosArgs(); i++) {
