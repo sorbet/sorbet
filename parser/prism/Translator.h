@@ -37,6 +37,7 @@ private:
                                                 bool isUsedForKeywordArguments);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
                                                          std::unique_ptr<parser::Send> sendNode);
+    std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
 };
 
 } // namespace sorbet::parser::Prism

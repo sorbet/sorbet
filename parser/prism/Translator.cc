@@ -173,20 +173,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto embeddedStmtsNode = reinterpret_cast<pm_embedded_statements_node *>(node);
 
-            auto stmts_node = embeddedStmtsNode->statements;
-            auto stmts = absl::MakeSpan(stmts_node->body.nodes, stmts_node->body.size);
-
-            parser::NodeVec sorbetStmts;
-            sorbetStmts.reserve(stmts.size());
-
-            for (auto &node : stmts) {
-                unique_ptr<parser::Node> convertedStmt = translate(node);
-                sorbetStmts.emplace_back(std::move(convertedStmt));
-            }
-
-            auto *loc = &stmts_node->base.location;
-
-            return make_unique<parser::Begin>(parser.translateLocation(loc), std::move(sorbetStmts));
+            auto inlineIfSingle = false;
+            return translateStatements(embeddedStmtsNode->statements, inlineIfSingle);
         }
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);
@@ -226,7 +214,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto interpolatedStringNode = reinterpret_cast<pm_interpolated_string_node *>(node);
             pm_location_t *loc = &interpolatedStringNode->base.location;
 
-            auto prismStringParts = absl::MakeSpan(interpolatedStringNode->parts.nodes, interpolatedStringNode->parts.size);
+            auto prismStringParts =
+                absl::MakeSpan(interpolatedStringNode->parts.nodes, interpolatedStringNode->parts.size);
 
             NodeVec sorbetParts{};
             sorbetParts.reserve(prismStringParts.size());
@@ -380,27 +369,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Return>(parser.translateLocation(loc), std::move(returnValues));
         }
         case PM_STATEMENTS_NODE: {
-            pm_statements_node *stmts_node = reinterpret_cast<pm_statements_node *>(node);
-
-            auto stmts = absl::MakeSpan(stmts_node->body.nodes, stmts_node->body.size);
-
-            // For a single statement, do not create a Begin node and just return the statement
-            if (stmts.size() == 1) {
-                return translate((pm_node *)stmts.front());
-            }
-
-            // For multiple statements, convert each statement and add them to the body of a Begin node
-            parser::NodeVec sorbetStmts;
-            sorbetStmts.reserve(stmts.size());
-
-            for (auto &node : stmts) {
-                unique_ptr<parser::Node> convertedStmt = translate(node);
-                sorbetStmts.emplace_back(std::move(convertedStmt));
-            }
-
-            auto *loc = &stmts_node->base.location;
-
-            return make_unique<parser::Begin>(parser.translateLocation(loc), std::move(sorbetStmts));
+            auto inlineIfSingle = true;
+            return translateStatements(reinterpret_cast<pm_statements_node *>(node), inlineIfSingle);
         }
         case PM_STRING_NODE: {
             auto strNode = reinterpret_cast<pm_string_node *>(node);
@@ -635,6 +605,28 @@ std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *
     // TODO: do we have to adjust the location for the Send node?
     return make_unique<parser::Block>(sendNode->loc, std::move(sendNode), std::move(blockParametersNode),
                                       std::move(body));
+}
+
+// Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
+// @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
+std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
+    auto prismStmts = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
+
+    // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
+    if (inlineIfSingle && prismStmts.size() == 1) {
+        return translate(reinterpret_cast<pm_node_t *>(prismStmts.front()));
+    }
+
+    // For multiple statements, convert each statement and add them to the body of a Begin node
+    parser::NodeVec sorbetStmts;
+    sorbetStmts.reserve(prismStmts.size());
+
+    for (auto &statement : prismStmts) {
+        unique_ptr<parser::Node> sorbetStmt = translate(statement);
+        sorbetStmts.emplace_back(std::move(sorbetStmt));
+    }
+
+    return make_unique<parser::Begin>(parser.translateLocation(&stmtsNode->base.location), std::move(sorbetStmts));
 }
 
 }; // namespace sorbet::parser::Prism
