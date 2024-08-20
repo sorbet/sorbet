@@ -3,3 +3,10 @@
 1..2 # Include end
 
 3...4 # Exclude end
+
+# Endless ranges need to be parenthesized
+("Has no end.."..)
+("Has no end..."...)
+
+.."..Has no begin"
+..."...Has no begin"

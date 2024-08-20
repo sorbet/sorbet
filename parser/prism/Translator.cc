@@ -384,7 +384,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return translate(reinterpret_cast<pm_node *>(programNode->statements));
         }
-        case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a...b`
+        case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
             auto rangeNode = reinterpret_cast<pm_range_node *>(node);
             pm_location_t *loc = &rangeNode->base.location;
 

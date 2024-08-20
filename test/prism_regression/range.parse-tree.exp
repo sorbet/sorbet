@@ -16,5 +16,29 @@ Begin {
         val = "4"
       }
     }
+    IRange {
+      from = String {
+        val = <U Has no end..>
+      }
+      to = NULL
+    }
+    ERange {
+      from = String {
+        val = <U Has no end...>
+      }
+      to = NULL
+    }
+    IRange {
+      from = NULL
+      to = String {
+        val = <U ..Has no begin>
+      }
+    }
+    ERange {
+      from = NULL
+      to = String {
+        val = <U ...Has no begin>
+      }
+    }
   ]
 }
