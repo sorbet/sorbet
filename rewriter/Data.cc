@@ -66,7 +66,7 @@ optional<const ast::Send *> getInitialize(const core::GlobalState &gs, const ast
 
 ast::ExpressionPtr getMemberType(core::MutableContext ctx, const ast::Send *params, core::NameRef name,
                                  core::LocOffsets loc) {
-    if (params) {
+    if (params != nullptr) {
         for (int i = 0; i < params->numKwArgs(); i++) {
             auto key = ast::cast_tree<ast::Literal>(params->getKwKey(i))->asName();
 
