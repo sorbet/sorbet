@@ -38,6 +38,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARGUMENTS_NODE: { // A list of arguments in one of several places:
             // 1. The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`.
             // 2. The value(s) returned from a return statement, e.g. the `1, 2, 3` in `return 1, 2, 3`.
+            // 3. The arguments to a `yield` call, e.g. the `1, 2, 3` in `yield 1, 2, 3`.
             unreachable("PM_ARGUMENTS_NODE is handled separately in `Translator::translateArguments()`.");
         }
         case PM_ASSOC_NODE: {
@@ -377,6 +378,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::True>(parser.translateLocation(loc));
         }
+        case PM_YIELD_NODE: {
+            auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
+            pm_location_t *loc = &yieldNode->base.location;
+
+            auto yieldArgs = translateArguments(yieldNode->arguments);
+
+            return make_unique<parser::Yield>(parser.translateLocation(loc), std::move(yieldArgs));
+        }
 
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALIAS_METHOD_NODE:
@@ -494,7 +503,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_WHEN_NODE:
         case PM_WHILE_NODE:
         case PM_X_STRING_NODE:
-        case PM_YIELD_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);

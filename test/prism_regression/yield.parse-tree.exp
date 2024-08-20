@@ -1,0 +1,25 @@
+Begin {
+  stmts = [
+    Yield {
+      exprs = [
+      ]
+    }
+    Yield {
+      exprs = [
+        Integer {
+          val = "123"
+        }
+      ]
+    }
+    Yield {
+      exprs = [
+        String {
+          val = <U multiple>
+        }
+        String {
+          val = <U values>
+        }
+      ]
+    }
+  ]
+}
