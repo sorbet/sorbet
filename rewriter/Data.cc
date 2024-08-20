@@ -48,8 +48,7 @@ optional<const ast::Send *> getInitialize(const core::GlobalState &gs, ast::Send
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat);
 
             if (methodDef && methodDef->name == core::Names::initialize()) {
-                const ast::Send *sig = findParams(prevStat);
-                return sig;
+                return findParams(prevStat);
             }
 
             prevStat = &stat;
@@ -58,8 +57,7 @@ optional<const ast::Send *> getInitialize(const core::GlobalState &gs, ast::Send
         // the last expression of the block is stored separately as expr
         auto methodDef = ast::cast_tree<ast::MethodDef>(insSeq->expr);
         if (methodDef && methodDef->name == core::Names::initialize()) {
-            const ast::Send *sig = findParams(prevStat);
-            return sig;
+            return findParams(prevStat);
         }
     }
 
