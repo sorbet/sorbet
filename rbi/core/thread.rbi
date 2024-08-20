@@ -1140,7 +1140,7 @@ class Thread < Object
   # flag = false # stop thread
   # ```
   sig {params(error: T.class_of(Exception)).returns(T::Boolean)}
-  def self.pending_interrupt?(error); end
+  def self.pending_interrupt?(error = nil); end
 
   # Returns the status of the global "report on exception" condition.
   #
