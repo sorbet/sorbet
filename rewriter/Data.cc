@@ -37,7 +37,7 @@ const ast::Send *findParams(ast::ExpressionPtr *send) {
 
 optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::GlobalState &gs, ast::Send *send) {
     if (!send->hasBlock()) {
-        return {};
+        return nullopt;
     }
 
     auto block = send->block();
@@ -63,7 +63,7 @@ optional<pair<ast::MethodDef *, const ast::Send *>> getInitialize(const core::Gl
         }
     }
 
-    return {};
+    return nullopt;
 }
 
 ast::ExpressionPtr getMemberType(core::MutableContext ctx, const ast::Send *params, core::NameRef name,
