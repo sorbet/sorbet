@@ -15,8 +15,8 @@ namespace sorbet::rewriter {
 
 namespace {
 
-const ast::Send *findParams(ast::ExpressionPtr *send) {
-    ast::Send *sig = ASTUtil::castSig(*send);
+const ast::Send *findParams(const ast::ExpressionPtr *send) {
+    auto *sig = ASTUtil::castSig(*send);
     if (sig == nullptr) {
         return nullptr;
     }
@@ -35,7 +35,7 @@ const ast::Send *findParams(ast::ExpressionPtr *send) {
     return bodyBlock;
 }
 
-optional<const ast::Send *> getInitialize(const core::GlobalState &gs, ast::Send *send) {
+optional<const ast::Send *> getInitialize(const core::GlobalState &gs, const ast::Send *send) {
     if (!send->hasBlock()) {
         return nullopt;
     }
@@ -43,7 +43,7 @@ optional<const ast::Send *> getInitialize(const core::GlobalState &gs, ast::Send
     auto block = send->block();
 
     if (auto *insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
-        ast::ExpressionPtr *prevStat = nullptr;
+        const ast::ExpressionPtr *prevStat = nullptr;
         for (auto &&stat : insSeq->stats) {
             auto methodDef = ast::cast_tree<ast::MethodDef>(stat);
 
