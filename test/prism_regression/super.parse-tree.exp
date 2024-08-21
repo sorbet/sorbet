@@ -1,0 +1,6 @@
+DefMethod {
+  name = <U m>
+  args = NULL
+  body = ZSuper {
+  }
+}
