@@ -216,6 +216,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::IVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_INSTANCE_VARIABLE_WRITE_NODE: {
+            auto instanceVarNode = reinterpret_cast<pm_instance_variable_write_node *>(node);
+            pm_location_t *loc = &instanceVarNode->base.location;
+
+            std::string_view ivarName = parser.resolveConstant(instanceVarNode->name);
+            auto lhs = make_unique<parser::IVarLhs>(parser.translateLocation(&instanceVarNode->name_loc),
+                                                    gs.enterNameUTF8(ivarName));
+            auto rhs = translate(instanceVarNode->value);
+
+            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+        }
         case PM_INTEGER_NODE: {
             auto intNode = reinterpret_cast<pm_integer_node *>(node);
             pm_location_t *loc = &intNode->base.location;
@@ -490,7 +501,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_INSTANCE_VARIABLE_OR_WRITE_NODE:
         case PM_INSTANCE_VARIABLE_TARGET_NODE:
-        case PM_INSTANCE_VARIABLE_WRITE_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:

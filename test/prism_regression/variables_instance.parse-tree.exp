@@ -1,3 +1,15 @@
-IVar {
-  name = <U @instance_variable>
+Begin {
+  stmts = [
+    Assign {
+      lhs = IVarLhs {
+        name = <U @instance_variable>
+      }
+      rhs = String {
+        val = <U value>
+      }
+    }
+    IVar {
+      name = <U @instance_variable>
+    }
+  ]
 }
