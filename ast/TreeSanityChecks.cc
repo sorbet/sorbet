@@ -101,6 +101,7 @@ void UnresolvedConstantLit::_sanityCheck() {
 
 void ConstantLit::_sanityCheck() {
     ENFORCE(resolutionScopes == nullptr || !resolutionScopes->empty());
+    ENFORCE(original);
 }
 
 void EmptyTree::_sanityCheck() {}
