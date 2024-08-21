@@ -99,7 +99,7 @@ public:
 
     static ExpressionPtr Constant(core::LocOffsets loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
-        return make_expression<ConstantLit>(loc, symbol, nullptr);
+        return make_expression<ConstantLit>(loc, symbol, EmptyTree());
     }
 
     static ExpressionPtr Local(core::LocOffsets loc, core::NameRef name) {
