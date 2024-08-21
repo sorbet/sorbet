@@ -275,7 +275,16 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            return a->symbol == b->symbol && structurallyEqual(avoid, a->original, b->original);
+            if (a->symbol != b->symbol) {
+                return false;
+            }
+            if (a->original && b->original) {
+                return structurallyEqual(avoid, a->original, b->original);
+            } else if (!a->original && !b->original) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         case Tag::ZSuperArgs: {
