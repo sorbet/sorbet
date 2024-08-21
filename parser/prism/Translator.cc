@@ -374,6 +374,20 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return translate(reinterpret_cast<pm_node *>(programNode->statements));
         }
+        case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a...b`
+            auto rangeNode = reinterpret_cast<pm_range_node *>(node);
+            pm_location_t *loc = &rangeNode->base.location;
+
+            auto flags = static_cast<pm_range_flags>(rangeNode->base.flags);
+            auto left = translate(rangeNode->left);
+            auto right = translate(rangeNode->right);
+
+            if (flags & PM_RANGE_FLAGS_EXCLUDE_END) { // `...`
+                return make_unique<parser::ERange>(parser.translateLocation(loc), std::move(left), std::move(right));
+            } else { // `..`
+                return make_unique<parser::IRange>(parser.translateLocation(loc), std::move(left), std::move(right));
+            }
+        }
         case PM_RATIONAL_NODE: {
             auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
             pm_location_t *loc = &rationalNode->base.location;
@@ -599,7 +613,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PINNED_VARIABLE_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_RANGE_NODE:
         case PM_REDO_NODE:
         case PM_REGULAR_EXPRESSION_NODE:
         case PM_RESCUE_MODIFIER_NODE:

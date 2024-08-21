@@ -1,0 +1,20 @@
+Begin {
+  stmts = [
+    IRange {
+      from = Integer {
+        val = "1"
+      }
+      to = Integer {
+        val = "2"
+      }
+    }
+    ERange {
+      from = Integer {
+        val = "3"
+      }
+      to = Integer {
+        val = "4"
+      }
+    }
+  ]
+}
