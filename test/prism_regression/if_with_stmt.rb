@@ -1,4 +1,4 @@
-# typed: static
+# typed: false
 
 if false
   5

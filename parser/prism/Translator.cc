@@ -445,6 +445,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::True>(parser.translateLocation(loc));
         }
+        case PM_UNLESS_NODE: { // An `unless` branch, either in a statement or modifier form.
+            auto unlessNode = reinterpret_cast<pm_if_node *>(node);
+            auto *loc = &unlessNode->base.location;
+
+            auto predicate = translate(unlessNode->predicate);
+            // These are flipped relative to `PM_IF_NODE`
+            auto ifFalse = translate(reinterpret_cast<pm_node *>(unlessNode->statements));
+            auto ifTrue = translate(unlessNode->consequent);
+
+            return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
+                                           std::move(ifFalse));
+        }
         case PM_YIELD_NODE: {
             auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
             pm_location_t *loc = &yieldNode->base.location;
@@ -557,7 +569,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_LINE_NODE:
         case PM_SPLAT_NODE:
         case PM_UNDEF_NODE:
-        case PM_UNLESS_NODE:
         case PM_UNTIL_NODE:
         case PM_WHEN_NODE:
         case PM_WHILE_NODE:
