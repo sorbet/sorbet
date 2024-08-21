@@ -1,6 +1,27 @@
 DefMethod {
   name = <U m>
   args = NULL
-  body = ZSuper {
+  body = Begin {
+    stmts = [
+      ZSuper {
+      }
+      Super {
+        args = [
+        ]
+      }
+      Super {
+        args = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
+    ]
   }
 }
