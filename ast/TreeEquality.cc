@@ -1,3 +1,4 @@
+#include "absl/strings/escaping.h"
 #include "ast/ast.h"
 #include <type_traits>
 
@@ -319,8 +320,19 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
 bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
                        const ExpressionPtr &other, const std::shared_ptr<spdlog::logger> logger,
                        const core::Loc selectionLoc, bool root) {
-    ENFORCE(tree != nullptr);
-    ENFORCE(other != nullptr);
+    ENFORCE(tree);
+    ENFORCE(other);
+    if (!tree) {
+        logger->error("msg=\"ExtractToVariable: tree is null in structurallyEqual\" selectionLoc=\"{}\"",
+                      selectionLoc.showRaw(gs));
+    }
+    if (!other) {
+        logger->error("msg=\"ExtractToVariable: other is null in structurallyEqual\" selectionLoc=\"{}\"",
+                      selectionLoc.showRaw(gs));
+    }
+    if (!tree || !other) {
+        logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+    }
     if (tree.tag() != other.tag()) {
         return false;
     }
