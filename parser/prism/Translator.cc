@@ -173,8 +173,13 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto embeddedStmtsNode = reinterpret_cast<pm_embedded_statements_node *>(node);
 
-            auto inlineIfSingle = false;
-            return translateStatements(embeddedStmtsNode->statements, inlineIfSingle);
+            if (auto stmtsNode = embeddedStmtsNode->statements; stmtsNode != nullptr) {
+                auto inlineIfSingle = false;
+                return translateStatements(stmtsNode, inlineIfSingle);
+            } else {
+                return make_unique<parser::Begin>(parser.translateLocation(&embeddedStmtsNode->base.location),
+                                                  NodeVec{});
+            }
         }
         case PM_FALSE_NODE: {
             auto falseNode = reinterpret_cast<pm_false_node *>(node);

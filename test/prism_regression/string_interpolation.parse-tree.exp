@@ -1,12 +1,27 @@
-DString {
-  nodes = [
-    String {
-      val = <U Interpolated expression: >
+Begin {
+  stmts = [
+    DString {
+      nodes = [
+        String {
+          val = <U Empty interpolation: >
+        }
+        Begin {
+          stmts = [
+          ]
+        }
+      ]
     }
-    Begin {
-      stmts = [
-        Integer {
-          val = "123"
+    DString {
+      nodes = [
+        String {
+          val = <U Interpolated expression: >
+        }
+        Begin {
+          stmts = [
+            Integer {
+              val = "123"
+            }
+          ]
         }
       ]
     }
