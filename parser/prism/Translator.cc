@@ -457,6 +457,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
         }
+        case PM_UNTIL_NODE: {
+            auto untilNode = reinterpret_cast<pm_until_node *>(node);
+            auto *loc = &untilNode->base.location;
+
+            auto predicate = translate(untilNode->predicate);
+            auto body = translate(reinterpret_cast<pm_node *>(untilNode->statements));
+
+            return make_unique<parser::Until>(parser.translateLocation(loc), std::move(predicate), std::move(body));
+        }
         case PM_YIELD_NODE: {
             auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
             pm_location_t *loc = &yieldNode->base.location;
@@ -569,7 +578,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_LINE_NODE:
         case PM_SPLAT_NODE:
         case PM_UNDEF_NODE:
-        case PM_UNTIL_NODE:
         case PM_WHEN_NODE:
         case PM_WHILE_NODE:
         case PM_X_STRING_NODE:
