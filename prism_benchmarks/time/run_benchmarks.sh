@@ -34,7 +34,7 @@ echo "#### Benchmark 1: yjit-bench, parser only"
 # These benchmarks compare the performance of the Prism parser with the Sorbet parser without
 # any other parts of the type checker enabled.
 hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/data/parser/yjit-bench/$file_name" --parameter-list parser sorbet,prism \
+  --warmup=10 --export-json="prism_benchmarks/time/data/parser/yjit-bench/$file_name" --parameter-list parser sorbet,prism \
   "bazel-bin/main/sorbet --parser={parser} --stop-after=parser ../yjit-bench/benchmarks"
 
 echo "#### Benchmark 2: sorbet-test, parser only"
@@ -42,7 +42,7 @@ echo "#### Benchmark 2: sorbet-test, parser only"
 # Benchmark against sorbet tests to capture performance around parser errors
 # Pass the --ignore-failure flag to prevent hyperfine from exiting on parser errors
 hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/data/parser/sorbet-tests/$file_name" --parameter-list parser sorbet,prism \
+  --warmup=10 --export-json="prism_benchmarks/time/data/parser/sorbet-tests/$file_name" --parameter-list parser sorbet,prism \
   "bazel-bin/main/sorbet --parser={parser} --stop-after=parser test/testdata" --ignore-failure
 
 echo "#### Benchmark 3: prism regression tests, whole pipeline"
@@ -52,5 +52,5 @@ echo "#### Benchmark 3: prism regression tests, whole pipeline"
 # the Prism parser enabled and the Sorbet parser enabled. These benchmarks must be run on a
 # smaller set of files that only contain nodes supported by the Prism --> Sorbet translation layer.
 hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/data/pipeline/$file_name" --parameter-list parser sorbet,prism \
+  --warmup=10 --export-json="prism_benchmarks/time/data/pipeline/$file_name" --parameter-list parser sorbet,prism \
   "bazel-bin/main/sorbet --parser={parser} test/prism_regression"
