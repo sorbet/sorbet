@@ -306,6 +306,8 @@ class ExpressionPtrSearchWalk {
     ast::ExpressionPtr *targetNode;
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
     std::vector<core::LocOffsets> skippedLocs;
+    const std::shared_ptr<spdlog::logger> logger;
+    const core::Loc selectionLoc;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
     bool shouldSkipLoc(core::LocOffsets loc) {
@@ -371,8 +373,9 @@ class ExpressionPtrSearchWalk {
 public:
     vector<const ast::ExpressionPtr *> LCAScopeStack;
     vector<core::LocOffsets> matches;
-    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs)
-        : targetNode(matchingNode), skippedLocs(skippedLocs) {}
+    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs,
+                            const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
+        : targetNode(matchingNode), skippedLocs(skippedLocs), logger(logger), selectionLoc(selectionLoc) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (!tree.loc().exists()) {
@@ -383,14 +386,7 @@ public:
             return;
         }
 
-        // This is probably going to be slow and we'll probably need to come up with some tricks
-        // to make it faster. On the other hand, because this walk is scoped to only the enclosing
-        // method, it might not be too bad.
-        // TODO: think about whether tree.deepEqual(targetNode) would be faster
-        // TODO: see how slow a pathological case is (a long chain of the same nodes with just the deepest
-        // node being different) Ex.
-        //   a(a(a(a(a(a(b)))))).deepEqual(a(a(a(a(a(a(a(a(a(a(a(b))))))))))))
-        if (targetNode->structurallyEqual(tree)) {
+        if (targetNode->structurallyEqual(ctx, tree, logger, selectionLoc)) {
             matches.emplace_back(tree.loc());
             computeLCA(tree.loc());
         }
@@ -461,7 +457,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocs);
+    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocs, config.logger, selectionLoc);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
 

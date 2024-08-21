@@ -217,7 +217,8 @@ public:
     }
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string nodeName() const;
 
@@ -377,7 +378,8 @@ public:
              ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -407,7 +409,8 @@ public:
               ARGS_store args, ExpressionPtr rhs, Flags flags);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -428,7 +431,8 @@ public:
     If(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr thenp, ExpressionPtr elsep);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -448,7 +452,8 @@ public:
     While(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -467,7 +472,8 @@ public:
     Break(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -484,7 +490,8 @@ public:
     Retry(core::LocOffsets loc);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -503,7 +510,8 @@ public:
     Next(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -522,7 +530,8 @@ public:
     Return(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -549,7 +558,8 @@ public:
     RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, ExpressionPtr var, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -575,7 +585,8 @@ public:
            ExpressionPtr ensure);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -594,7 +605,8 @@ public:
     Local(core::LocOffsets loc, core::LocalVariable localVariable1);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -620,7 +632,8 @@ public:
     UnresolvedIdent(core::LocOffsets loc, Kind kind, core::NameRef name);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -639,7 +652,8 @@ public:
     RestArg(core::LocOffsets loc, ExpressionPtr arg);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -658,7 +672,8 @@ public:
     KeywordArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -678,7 +693,8 @@ public:
     OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -697,7 +713,8 @@ public:
     BlockArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -716,7 +733,8 @@ public:
     ShadowArg(core::LocOffsets loc, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -736,7 +754,8 @@ public:
     Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -810,7 +829,8 @@ public:
          ARGS_store args, Flags flags = {});
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     // Returns nullptr if no block present.
     const ast::Block *block() const;
@@ -996,7 +1016,8 @@ public:
     Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast, ExpressionPtr typeExpr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1019,7 +1040,8 @@ public:
     Hash(core::LocOffsets loc, ENTRY_store keys, ENTRY_store values);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1041,7 +1063,8 @@ public:
     Array(core::LocOffsets loc, ENTRY_store elems);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1060,7 +1083,8 @@ public:
     Literal(core::LocOffsets loc, const core::TypePtr &value);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1089,7 +1113,8 @@ public:
     UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1114,7 +1139,8 @@ public:
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1133,7 +1159,8 @@ public:
     ZSuperArgs(core::LocOffsets loc);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1153,7 +1180,8 @@ public:
     Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1177,7 +1205,8 @@ public:
     InsSeq(core::LocOffsets locOffsets, STATS_store stats, ExpressionPtr expr);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1198,7 +1227,8 @@ public:
     RuntimeMethodDefinition(core::LocOffsets loc, core::NameRef name, bool isSelfMethod);
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1215,7 +1245,8 @@ public:
     EmptyTree();
 
     ExpressionPtr deepCopy() const;
-    bool structurallyEqual(const ExpressionPtr &other) const;
+    bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
+                           const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc) const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
