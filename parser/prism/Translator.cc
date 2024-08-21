@@ -284,6 +284,16 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
+            auto moduleNode = reinterpret_cast<pm_module_node *>(node);
+            pm_location_t *loc = &moduleNode->base.location;
+            pm_location_t *declLoc = &moduleNode->module_keyword_loc;
+
+            auto name = translate(moduleNode->constant_path);
+
+            return make_unique<parser::Module>(parser.translateLocation(loc), parser.translateLocation(declLoc),
+                                               std::move(name), nullptr);
+        }
         case PM_NIL_NODE: {
             auto nilNode = reinterpret_cast<pm_nil_node *>(node);
             pm_location_t *loc = &nilNode->base.location;
@@ -619,7 +629,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
-        case PM_MODULE_NODE:
         case PM_MULTI_TARGET_NODE:
         case PM_MULTI_WRITE_NODE:
         case PM_NEXT_NODE:
