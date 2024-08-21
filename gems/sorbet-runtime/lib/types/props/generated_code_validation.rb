@@ -218,10 +218,6 @@ module T::Props
       when :const
         # This is ok, because we'll have validated what method has been called
         # if applicable
-      when :or
-        lhs, rhs = node.children
-        validate_lack_of_side_effects(lhs, whitelisted_methods_by_receiver_type) &&
-          validate_lack_of_side_effects(rhs, whitelisted_methods_by_receiver_type)
       when :hash, :array, :str, :sym, :int, :float, :true, :false, :nil, :self # rubocop:disable Lint/BooleanSymbol
         # Primitives & self are ok
       when :lvar, :arg, :ivar
