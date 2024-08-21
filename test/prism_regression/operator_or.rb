@@ -2,4 +2,4 @@
 
 true || false
 
-true or false
+false or true
