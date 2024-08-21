@@ -16,29 +16,45 @@ Begin {
         val = "4"
       }
     }
-    IRange {
-      from = String {
-        val = <U Has no end..>
-      }
-      to = NULL
+    Begin {
+      stmts = [
+        IRange {
+          from = String {
+            val = <U Has no end..>
+          }
+          to = NULL
+        }
+      ]
     }
-    ERange {
-      from = String {
-        val = <U Has no end...>
-      }
-      to = NULL
+    Begin {
+      stmts = [
+        ERange {
+          from = String {
+            val = <U Has no end...>
+          }
+          to = NULL
+        }
+      ]
     }
-    IRange {
-      from = NULL
-      to = String {
-        val = <U ..Has no begin>
-      }
+    Begin {
+      stmts = [
+        IRange {
+          from = NULL
+          to = String {
+            val = <U ..Has no begin>
+          }
+        }
+      ]
     }
-    ERange {
-      from = NULL
-      to = String {
-        val = <U ...Has no begin>
-      }
+    Begin {
+      stmts = [
+        ERange {
+          from = NULL
+          to = String {
+            val = <U ...Has no begin>
+          }
+        }
+      ]
     }
   ]
 }

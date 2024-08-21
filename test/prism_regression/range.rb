@@ -8,5 +8,6 @@
 ("Has no end.."..)
 ("Has no end..."...)
 
-.."..Has no begin"
-..."...Has no begin"
+# Sorbet's parser can't handle these without parentheses, so we use them for parity
+(.."..Has no begin")
+(..."...Has no begin")
