@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [proj-parsing-w-prism-in-sorbet]
+    branches: [prism]
   pull_request:
-    branches: [proj-parsing-w-prism-in-sorbet]
+    branches: [prism]
 
 jobs:
   tests:
