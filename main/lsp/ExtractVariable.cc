@@ -78,7 +78,7 @@ class LocSearchWalk {
     // the current top of the stack as the "deepest" class/method
     vector<ast::ExpressionPtr *> enclosingClassStack;
     vector<ast::ExpressionPtr *> enclosingMethodStack;
-    bool inCsend = false;
+    int inCsend = 0;
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -161,7 +161,7 @@ public:
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
         if (isCsend(insSeq)) {
-            inCsend = true;
+            inCsend++;
             return;
         }
         updateEnclosingScope(tree, insSeq.loc);
@@ -170,7 +170,7 @@ public:
     void postTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
         if (isCsend(insSeq)) {
-            inCsend = false;
+            inCsend--;
         }
     }
 
