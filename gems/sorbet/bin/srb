@@ -106,7 +106,7 @@ typecheck() {
     fi
 
     # shellcheck disable=SC2086
-    "${sorbet}" "${args[@]}"
+    exec "${sorbet}" "${args[@]}"
   fi
 }
 
