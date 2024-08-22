@@ -60,6 +60,7 @@
       "autocompletion",
       "code-actions",
       "outline",
+      "doc-comments",
       "sig-suggestion",
       "highlight-untyped",
       "sorbet-uris"
