@@ -16,11 +16,11 @@ foo(b&.foo) do
   c&.foo
 # ^ apply-code-action: [C] Extract Variable (this occurrence only)
   d = T.unsafe(1)
-  newVariable = (d&.foo)
-  d_ = newVariable&.bar
+  d_ = (d&.foo)&.bar
 #      ^^^^^^^^ apply-code-action: [D] Extract Variable (this occurrence only)
   e = T.unsafe(1)
-  e_ = (e&.foo)&.bar
+  newVariable = e
+  e_ = (newVariable&.foo)&.bar
 #       ^ apply-code-action: [E] Extract Variable (this occurrence only)
   T.unsafe(if T.unsafe(1) then 2 else 3 end)&.bar
 #                              ^ apply-code-action: [F] Extract Variable (this occurrence only)
