@@ -1,7 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor.extract
 # enable-experimental-lsp-extract-to-variable: true
-#
 
 a = T.let(1, T.nilable(Integer))
 
