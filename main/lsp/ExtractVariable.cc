@@ -93,6 +93,12 @@ class LocSearchWalk {
     // the current top of the stack as the "deepest" class/method
     vector<ast::ExpressionPtr *> enclosingClassStack;
     vector<ast::ExpressionPtr *> enclosingMethodStack;
+    int inSend = 0;
+    int inBlock = 0;
+
+    bool inSendArgs() {
+        return inSend > inBlock;
+    }
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -162,6 +168,9 @@ public:
     }
 
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
+        if (inSendArgs()) {
+            return;
+        }
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
         updateEnclosingScope(tree, insSeq.loc);
     }
@@ -197,11 +206,16 @@ public:
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
+        inBlock++;
         auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
         if (!block.args.empty()) {
             skipLoc(block.args.front().loc().join(block.args.back().loc()));
         }
         updateEnclosingScope(tree, block.body.loc());
+    }
+
+    void postTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
+        inBlock--;
     }
 
     void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -210,6 +224,9 @@ public:
     }
 
     void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
+        if (inSendArgs()) {
+            return;
+        }
         auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
         updateEnclosingScope(tree, if_.thenp.loc());
         updateEnclosingScope(tree, if_.elsep.loc());
@@ -234,6 +251,14 @@ public:
     void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
         updateEnclosingScope(tree, while_.body.loc());
+    }
+
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        inSend++;
+    }
+
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        inSend--;
     }
 };
 
