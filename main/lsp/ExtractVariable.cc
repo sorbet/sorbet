@@ -14,20 +14,15 @@ void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::Glob
 }
 
 core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::LocOffsets target) {
-    // The ENFORCE(!ast::isa_tree<ast::InsSeq>(...)) are there check that the enclosingScope returned
-    // by the TreeWalk doesn't contain a further InsSeq, because the preTransformInsSeq should have
-    // matched on that (if it contains the selectionLoc).
     core::LocOffsets whereToInsert = core::LocOffsets::none();
     if (auto insSeq = ast::cast_tree<ast::InsSeq>(scope)) {
         for (auto &stat : insSeq->stats) {
             if (stat.loc().contains(target)) {
-                ENFORCE(!ast::isa_tree<ast::InsSeq>(stat));
                 whereToInsert = stat.loc();
                 break;
             }
         }
         if (insSeq->expr.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(insSeq->expr));
             whereToInsert = insSeq->expr.loc();
         }
     } else if (auto classDef = ast::cast_tree<ast::ClassDef>(scope)) {
@@ -36,46 +31,36 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
         } else {
             for (auto &stat : classDef->rhs) {
                 if (stat.loc().contains(target)) {
-                    ENFORCE(!ast::isa_tree<ast::InsSeq>(stat));
                     whereToInsert = stat.loc();
                     break;
                 }
             }
         }
     } else if (auto block = ast::cast_tree<ast::Block>(scope)) {
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(block->body));
         whereToInsert = block->body.loc();
     } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(scope)) {
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(methodDef->rhs));
         whereToInsert = methodDef->rhs.loc();
     } else if (auto if_ = ast::cast_tree<ast::If>(scope)) {
         if (if_->thenp.loc().exists() && if_->thenp.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->thenp));
             whereToInsert = if_->thenp.loc();
         } else if (if_->elsep.loc().exists() && if_->elsep.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(if_->elsep));
             whereToInsert = if_->elsep.loc();
         } else {
             ENFORCE(false);
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(scope)) {
         if (rescue->body.loc().exists() && rescue->body.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->body));
             whereToInsert = rescue->body.loc();
         } else if (rescue->else_.loc().exists() && rescue->else_.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->else_));
             whereToInsert = rescue->else_.loc();
         } else if (rescue->ensure.loc().exists() && rescue->ensure.loc().contains(target)) {
-            ENFORCE(!ast::isa_tree<ast::InsSeq>(rescue->ensure));
             whereToInsert = rescue->ensure.loc();
         } else {
             ENFORCE(false)
         }
     } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(scope)) {
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(rescueCase->body));
         whereToInsert = rescueCase->body.loc();
     } else if (auto while_ = ast::cast_tree<ast::While>(scope)) {
-        ENFORCE(!ast::isa_tree<ast::InsSeq>(while_->body));
         whereToInsert = while_->body.loc();
     } else {
         ENFORCE(false);
