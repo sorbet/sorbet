@@ -386,7 +386,7 @@ public:
             return;
         }
 
-        if (targetNode->structurallyEqual(ctx, tree, selectionLoc)) {
+        if (targetNode->structurallyEqual(ctx, tree, selectionLoc.file())) {
             matches.emplace_back(tree.loc());
             computeLCA(tree.loc());
         }

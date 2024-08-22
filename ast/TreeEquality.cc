@@ -9,16 +9,16 @@ namespace sorbet::ast {
 namespace {
 
 bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
-                       const ExpressionPtr &other, const core::Loc selectionLoc, bool root = false);
+                       const ExpressionPtr &other, const core::FileRef file, bool root = false);
 
 template <unsigned long N>
 bool structurallyEqualVec(const core::GlobalState &gs, const void *avoid, const InlinedVector<ExpressionPtr, N> &a,
-                          const InlinedVector<ExpressionPtr, N> &b, const core::Loc selectionLoc) {
+                          const InlinedVector<ExpressionPtr, N> &b, const core::FileRef file) {
     if (a.size() != b.size()) {
         return false;
     }
     for (int i = 0; i < a.size(); i++) {
-        if (!structurallyEqual(gs, avoid, a[i], b[i], selectionLoc)) {
+        if (!structurallyEqual(gs, avoid, a[i], b[i], file)) {
             return false;
         }
     }
@@ -28,7 +28,7 @@ bool structurallyEqualVec(const core::GlobalState &gs, const void *avoid, const 
 class StructurallyEqualError {};
 
 bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag tag, const void *tree,
-                       const void *other, const core::Loc selectionLoc, bool root) {
+                       const void *other, const core::FileRef file, bool root) {
     if (!root && tree == avoid) {
         throw StructurallyEqualError();
     }
@@ -52,11 +52,11 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
                 return false;
             }
 
-            if (!structurallyEqual(gs, avoid, a->recv, b->recv, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->recv, b->recv, file)) {
                 return false;
             }
 
-            return structurallyEqualVec(gs, avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse(), selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->rawArgsDoNotUse(), b->rawArgsDoNotUse(), file);
         }
 
         case Tag::ClassDef: {
@@ -68,16 +68,16 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->kind != b->kind) {
                 return false;
             }
-            if (!structurallyEqual(gs, avoid, a->name, b->name, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->name, b->name, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->ancestors, b->ancestors, selectionLoc)) {
+            if (!structurallyEqualVec(gs, avoid, a->ancestors, b->ancestors, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->singletonAncestors, b->singletonAncestors, selectionLoc)) {
+            if (!structurallyEqualVec(gs, avoid, a->singletonAncestors, b->singletonAncestors, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->rhs, b->rhs, selectionLoc)) {
+            if (!structurallyEqualVec(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
             return true;
@@ -95,10 +95,10 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->flags != b->flags) {
                 return false;
             }
-            if (!structurallyEqual(gs, avoid, a->rhs, b->rhs, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->rhs, b->rhs, file)) {
                 return false;
             }
-            if (!structurallyEqualVec(gs, avoid, a->args, b->args, selectionLoc)) {
+            if (!structurallyEqualVec(gs, avoid, a->args, b->args, file)) {
                 return false;
             }
             return true;
@@ -107,22 +107,22 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::If: {
             auto *a = reinterpret_cast<const If *>(tree);
             auto *b = reinterpret_cast<const If *>(other);
-            return structurallyEqual(gs, avoid, a->cond, b->cond, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->thenp, b->thenp, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->elsep, b->elsep, selectionLoc);
+            return structurallyEqual(gs, avoid, a->cond, b->cond, file) &&
+                   structurallyEqual(gs, avoid, a->thenp, b->thenp, file) &&
+                   structurallyEqual(gs, avoid, a->elsep, b->elsep, file);
         }
 
         case Tag::While: {
             auto *a = reinterpret_cast<const While *>(tree);
             auto *b = reinterpret_cast<const While *>(other);
-            return structurallyEqual(gs, avoid, a->cond, b->cond, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->body, b->body, selectionLoc);
+            return structurallyEqual(gs, avoid, a->cond, b->cond, file) &&
+                   structurallyEqual(gs, avoid, a->body, b->body, file);
         }
 
         case Tag::Break: {
             auto *a = reinterpret_cast<const Break *>(tree);
             auto *b = reinterpret_cast<const Break *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::Retry: {
@@ -132,40 +132,40 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Next: {
             auto *a = reinterpret_cast<const Next *>(tree);
             auto *b = reinterpret_cast<const Next *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::Return: {
             auto *a = reinterpret_cast<const Return *>(tree);
             auto *b = reinterpret_cast<const Return *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::RescueCase: {
             auto *a = reinterpret_cast<const RescueCase *>(tree);
             auto *b = reinterpret_cast<const RescueCase *>(other);
-            if (!structurallyEqual(gs, avoid, a->var, b->var, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->var, b->var, file)) {
                 return false;
             }
-            if (!structurallyEqual(gs, avoid, a->body, b->body, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->body, b->body, file)) {
                 return false;
             }
-            return structurallyEqualVec(gs, avoid, a->exceptions, b->exceptions, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->exceptions, b->exceptions, file);
         }
 
         case Tag::Rescue: {
             auto *a = reinterpret_cast<const Rescue *>(tree);
             auto *b = reinterpret_cast<const Rescue *>(other);
-            if (!structurallyEqual(gs, avoid, a->body, b->body, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->body, b->body, file)) {
                 return false;
             }
-            if (!structurallyEqual(gs, avoid, a->else_, b->else_, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->else_, b->else_, file)) {
                 return false;
             }
-            if (!structurallyEqual(gs, avoid, a->ensure, b->ensure, selectionLoc)) {
+            if (!structurallyEqual(gs, avoid, a->ensure, b->ensure, file)) {
                 return false;
             }
-            return structurallyEqualVec(gs, avoid, a->rescueCases, b->rescueCases, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->rescueCases, b->rescueCases, file);
         }
 
         case Tag::Local: {
@@ -183,39 +183,39 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::RestArg: {
             auto *a = reinterpret_cast<const RestArg *>(tree);
             auto *b = reinterpret_cast<const RestArg *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::KeywordArg: {
             auto *a = reinterpret_cast<const KeywordArg *>(tree);
             auto *b = reinterpret_cast<const KeywordArg *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::OptionalArg: {
             auto *a = reinterpret_cast<const OptionalArg *>(tree);
             auto *b = reinterpret_cast<const OptionalArg *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->default_, b->default_, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file) &&
+                   structurallyEqual(gs, avoid, a->default_, b->default_, file);
         }
 
         case Tag::BlockArg: {
             auto *a = reinterpret_cast<const BlockArg *>(tree);
             auto *b = reinterpret_cast<const BlockArg *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::ShadowArg: {
             auto *a = reinterpret_cast<const ShadowArg *>(tree);
             auto *b = reinterpret_cast<const ShadowArg *>(other);
-            return structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::Assign: {
             auto *a = reinterpret_cast<const Assign *>(tree);
             auto *b = reinterpret_cast<const Assign *>(other);
-            return structurallyEqual(gs, avoid, a->lhs, b->lhs, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->rhs, b->rhs, selectionLoc);
+            return structurallyEqual(gs, avoid, a->lhs, b->lhs, file) &&
+                   structurallyEqual(gs, avoid, a->rhs, b->rhs, file);
         }
 
         case Tag::Cast: {
@@ -227,20 +227,20 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->cast != b->cast) {
                 return false;
             }
-            return structurallyEqual(gs, avoid, a->arg, b->arg, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->typeExpr, b->typeExpr, selectionLoc);
+            return structurallyEqual(gs, avoid, a->arg, b->arg, file) &&
+                   structurallyEqual(gs, avoid, a->typeExpr, b->typeExpr, file);
         }
 
         case Tag::Hash: {
             auto *a = reinterpret_cast<const Hash *>(tree);
             auto *b = reinterpret_cast<const Hash *>(other);
-            return structurallyEqualVec(gs, avoid, a->keys, b->keys, selectionLoc) &&
-                   structurallyEqualVec(gs, avoid, a->values, b->values, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->keys, b->keys, file) &&
+                   structurallyEqualVec(gs, avoid, a->values, b->values, file);
         }
         case Tag::Array: {
             auto *a = reinterpret_cast<const Array *>(tree);
             auto *b = reinterpret_cast<const Array *>(other);
-            return structurallyEqualVec(gs, avoid, a->elems, b->elems, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->elems, b->elems, file);
         }
 
         case Tag::Literal: {
@@ -278,13 +278,13 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
             if (a->cnst != b->cnst) {
                 return false;
             }
-            return structurallyEqual(gs, avoid, a->scope, b->scope, selectionLoc);
+            return structurallyEqual(gs, avoid, a->scope, b->scope, file);
         }
 
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            return a->symbol == b->symbol && structurallyEqual(gs, avoid, a->original, b->original, selectionLoc);
+            return a->symbol == b->symbol && structurallyEqual(gs, avoid, a->original, b->original, file);
         }
 
         case Tag::ZSuperArgs: {
@@ -294,15 +294,15 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::Block: {
             auto *a = reinterpret_cast<const Block *>(tree);
             auto *b = reinterpret_cast<const Block *>(other);
-            return structurallyEqualVec(gs, avoid, a->args, b->args, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->body, b->body, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->args, b->args, file) &&
+                   structurallyEqual(gs, avoid, a->body, b->body, file);
         }
 
         case Tag::InsSeq: {
             auto *a = reinterpret_cast<const InsSeq *>(tree);
             auto *b = reinterpret_cast<const InsSeq *>(other);
-            return structurallyEqualVec(gs, avoid, a->stats, b->stats, selectionLoc) &&
-                   structurallyEqual(gs, avoid, a->expr, b->expr, selectionLoc);
+            return structurallyEqualVec(gs, avoid, a->stats, b->stats, file) &&
+                   structurallyEqual(gs, avoid, a->expr, b->expr, file);
         }
 
         case Tag::RuntimeMethodDefinition: {
@@ -314,54 +314,53 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
 }
 
 bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const ExpressionPtr &tree,
-                       const ExpressionPtr &other, const core::Loc selectionLoc, bool root) {
+                       const ExpressionPtr &other, const core::FileRef file, bool root) {
     ENFORCE(tree);
     ENFORCE(other);
     if (!tree) {
-        fatalLogger->error("msg=\"ExtractToVariable: tree is null in structurallyEqual\" selectionLoc=\"{}\"",
-                           selectionLoc.showRaw(gs));
+        fatalLogger->error("msg=\"ExtractToVariable: tree is null in structurallyEqual\"");
     }
     if (!other) {
-        fatalLogger->error("msg=\"ExtractToVariable: other is null in structurallyEqual\" selectionLoc=\"{}\"",
-                           selectionLoc.showRaw(gs));
+        fatalLogger->error("msg=\"ExtractToVariable: other is null in structurallyEqual\"");
     }
     if (!tree || !other) {
-        fatalLogger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+        fatalLogger->error("filename=\"{}\" source=\"{}\"", file.data(gs).path(),
+                           absl::CEscape(file.data(gs).source()));
         return false;
     }
     if (tree.tag() != other.tag()) {
         return false;
     }
 
-    return structurallyEqual(gs, avoid, tree.tag(), tree.get(), other.get(), selectionLoc, root);
+    return structurallyEqual(gs, avoid, tree.tag(), tree.get(), other.get(), file, root);
 }
 
 } // namespace
 
 bool ExpressionPtr::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,
-                                      const core::Loc selectionLoc) const {
+                                      const core::FileRef file) const {
     if (tag() != other.tag()) {
         return false;
     }
     try {
-        return sorbet::ast::structurallyEqual(gs, get(), tag(), get(), other.get(), selectionLoc, true);
+        return sorbet::ast::structurallyEqual(gs, get(), tag(), get(), other.get(), file, true);
     } catch (StructurallyEqualError &e) {
         return false;
     }
 }
 
-#define EQUAL_IMPL(name)                                                                                     \
-    bool name::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other,                    \
-                                 const core::Loc selectionLoc) const {                                       \
-        if (ExpressionToTag<name>::value != other.tag()) {                                                   \
-            return false;                                                                                    \
-        }                                                                                                    \
-        try {                                                                                                \
-            return sorbet::ast::structurallyEqual(gs, this, ExpressionToTag<name>::value, this, other.get(), \
-                                                  selectionLoc, true);                                       \
-        } catch (StructurallyEqualError & e) {                                                               \
-            return false;                                                                                    \
-        }                                                                                                    \
+#define EQUAL_IMPL(name)                                                                                            \
+    bool name::structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) \
+        const {                                                                                                     \
+        if (ExpressionToTag<name>::value != other.tag()) {                                                          \
+            return false;                                                                                           \
+        }                                                                                                           \
+        try {                                                                                                       \
+            return sorbet::ast::structurallyEqual(gs, this, ExpressionToTag<name>::value, this, other.get(), file,  \
+                                                  true);                                                            \
+        } catch (StructurallyEqualError & e) {                                                                      \
+            return false;                                                                                           \
+        }                                                                                                           \
     }
 
 EQUAL_IMPL(EmptyTree);
