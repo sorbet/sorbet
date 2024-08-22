@@ -281,6 +281,8 @@ bool structurallyEqual(const void *avoid, const Tag tag, const void *tree, const
             if (a->original && b->original) {
                 return structurallyEqual(avoid, a->original, b->original);
             } else if (!a->original && !b->original) {
+                // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
+                // (original points to the UnresolvedConstantLit that created this ConstantLit)
                 return true;
             } else {
                 return false;
