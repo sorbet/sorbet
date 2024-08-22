@@ -218,10 +218,12 @@ public:
     }
 
     void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
-        if (inCsend) {
-            return;
-        }
         auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
+        if (auto thenp = ast::cast_tree<ast::Send>(if_.thenp)) {
+            if (thenp->fun == core::Names::nilForSafeNavigation()) {
+                return;
+            }
+        }
         updateEnclosingScope(tree, if_.thenp.loc());
         updateEnclosingScope(tree, if_.elsep.loc());
     }
