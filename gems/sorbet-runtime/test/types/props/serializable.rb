@@ -1281,6 +1281,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :nilable_deprecated_enum, T.nilable(Symbol), enum: %i[foo_one foo_two]
     prop :default_deprecated_enum, Symbol, enum: %i[foo_one foo_two], default: :foo_one
     prop :int_or_enum, T.any(MyEnum, Integer)
+    prop :int_or_str_or_enum, T.any(MyEnum, Integer, String)
   end
 
   it 'can serialize a complex object' do
@@ -1303,6 +1304,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       enum: MyEnum::FOO,
       deprecated_enum: :foo_one,
       int_or_enum: MyEnum::FOO,
+      int_or_str_or_enum: MyEnum::FOO,
     }
 
     assert_equal(
@@ -1336,6 +1338,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         "deprecated_enum" => :foo_one,
         "default_deprecated_enum" => :foo_one,
         "int_or_enum" => "foo",
+        "int_or_str_or_enum" => "foo",
       }, ComplexStruct.new(attributes).serialize(false)
     )
   end
@@ -1360,6 +1363,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       'enum' => 'foo',
       'deprecated_enum' => :foo_one,
       'int_or_enum' => 'foo',
+      'int_or_str_or_enum' => 'foo',
     }
 
     assert_equal(
@@ -1393,6 +1397,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         "deprecated_enum" => :foo_one,
         "default_deprecated_enum" => :foo_one,
         "int_or_enum" => "foo",
+        "int_or_str_or_enum" => "foo",
       }, ComplexStruct.from_hash(attributes).serialize(false)
     )
   end
