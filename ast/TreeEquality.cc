@@ -327,6 +327,7 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Exp
     }
     if (!tree || !other) {
         fatalLogger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+        return false;
     }
     if (tree.tag() != other.tag()) {
         return false;
