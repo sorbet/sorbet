@@ -284,7 +284,18 @@ bool structurallyEqual(const core::GlobalState &gs, const void *avoid, const Tag
         case Tag::ConstantLit: {
             auto *a = reinterpret_cast<const ConstantLit *>(tree);
             auto *b = reinterpret_cast<const ConstantLit *>(other);
-            return a->symbol == b->symbol && structurallyEqual(gs, avoid, a->original, b->original, file);
+            if (a->symbol != b->symbol) {
+                return false;
+            }
+            if (a->original && b->original) {
+                return structurallyEqual(gs, avoid, a->original, b->original, file);
+            } else if (!a->original && !b->original) {
+                // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
+                // (original points to the UnresolvedConstantLit that created this ConstantLit)
+                return true;
+            } else {
+                return false;
+            }
         }
 
         case Tag::ZSuperArgs: {
