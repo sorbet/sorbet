@@ -135,9 +135,10 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (classNode->superclass != nullptr) {
                 superclass = translate(reinterpret_cast<pm_node *>(classNode->superclass));
             }
+            auto body = translate(classNode->body);
 
             return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                              std::move(name), std::move(superclass), nullptr);
+                                              std::move(name), std::move(superclass), std::move(body));
         }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
@@ -290,9 +291,10 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *declLoc = &moduleNode->module_keyword_loc;
 
             auto name = translate(moduleNode->constant_path);
+            auto body = translate(moduleNode->body);
 
             return make_unique<parser::Module>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                               std::move(name), nullptr);
+                                               std::move(name), std::move(body));
         }
         case PM_NIL_NODE: {
             auto nilNode = reinterpret_cast<pm_nil_node *>(node);

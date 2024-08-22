@@ -1,3 +1,7 @@
 # typed: strict
 
-module M; end
+module M
+  1
+  2
+  3
+end
