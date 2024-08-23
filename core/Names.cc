@@ -78,6 +78,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::Packager:
                     kind = "G";
                     break;
+                case UniqueNameKind::DesugarCsend:
+                    kind = "&";
+                    break;
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -103,6 +106,8 @@ string NameRef::toString(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", unique->original.show(gs));
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
+            } else if (unique->uniqueNameKind == UniqueNameKind::DesugarCsend) {
+                return fmt::format("desugar_csend_{}${}", unique->original.show(gs), unique->num);
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -201,6 +206,9 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
                     return false;
+                case UniqueNameKind::DesugarCsend:
+                    ENFORCE(false, "UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+                    return false;
             }
         case NameKind::CONSTANT:
             ENFORCE_NO_TIMER(dataCnst(gs)->original.isValidConstantName(gs));
@@ -237,6 +245,9 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::TypeVarName:
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
+                    return false;
+                case UniqueNameKind::DesugarCsend:
+                    ENFORCE(false, "UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
                     return false;
             }
         case NameKind::CONSTANT:

@@ -1472,6 +1472,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what, 
                 }
             },
             [&](parser::CSend *csend) {
+                if (calledFromExtractToVariable) {
+                    auto newName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, csend->method, 1);
+                    auto sendNode = make_unique<parser::Send>(loc, std::move(csend->receiver), newName,
+                                                              csend->methodLoc, std::move(csend->args));
+                    auto send = node2TreeImpl(dctx, std::move(sendNode), calledFromExtractToVariable);
+                    result = std::move(send);
+                    return;
+                }
                 core::NameRef tempRecv = dctx.freshNameUnique(core::Names::assignTemp());
                 auto recvLoc = csend->receiver->loc;
                 // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text

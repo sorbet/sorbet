@@ -34,6 +34,7 @@ enum class UniqueNameKind : uint8_t {
     TEnum,
     Struct,
     Packager,
+    DesugarCsend,
 };
 
 struct UniqueName final {

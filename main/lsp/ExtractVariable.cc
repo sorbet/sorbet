@@ -78,7 +78,6 @@ class LocSearchWalk {
     // the current top of the stack as the "deepest" class/method
     vector<ast::ExpressionPtr *> enclosingClassStack;
     vector<ast::ExpressionPtr *> enclosingMethodStack;
-    int inCsend = 0;
 
     void updateEnclosingScope(const ast::ExpressionPtr &node, core::LocOffsets nodeLoc) {
         if (!nodeLoc.exists() || !nodeLoc.contains(targetLoc.offsets())) {
@@ -160,18 +159,7 @@ public:
 
     void preTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
-        if (isCsend(insSeq)) {
-            inCsend++;
-            return;
-        }
         updateEnclosingScope(tree, insSeq.loc);
-    }
-
-    void postTransformInsSeq(core::Context ctx, const ast::ExpressionPtr &tree) {
-        auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
-        if (isCsend(insSeq)) {
-            inCsend--;
-        }
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -219,11 +207,6 @@ public:
 
     void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
-        if (auto thenp = ast::cast_tree<ast::Send>(if_.thenp)) {
-            if (thenp->fun == core::Names::nilForSafeNavigation()) {
-                return;
-            }
-        }
         updateEnclosingScope(tree, if_.thenp.loc());
         updateEnclosingScope(tree, if_.elsep.loc());
     }
