@@ -142,6 +142,26 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return sendNode;
             }
         }
+        case PM_CASE_NODE: {
+            auto caseNode = reinterpret_cast<pm_case_node *>(node);
+            pm_location_t *loc = &caseNode->base.location;
+
+            auto predicate = translate(caseNode->predicate);
+
+            auto prismConditions = absl::MakeSpan(caseNode->conditions.nodes, caseNode->conditions.size);
+
+            parser::NodeVec sorbetConditions{};
+            sorbetConditions.reserve(prismConditions.size());
+
+            for (auto &prismCondition : prismConditions) {
+                sorbetConditions.emplace_back(translate(prismCondition));
+            }
+
+            auto consequent = translate(reinterpret_cast<pm_node_t *>(caseNode->consequent));
+
+            return make_unique<Case>(parser.translateLocation(loc), std::move(predicate), std::move(sorbetConditions),
+                                     std::move(consequent));
+        }
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = reinterpret_cast<pm_class_node *>(node);
             pm_location_t *loc = &classNode->base.location;
@@ -581,6 +601,25 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Until>(parser.translateLocation(loc), std::move(predicate), std::move(body));
         }
+        case PM_WHEN_NODE: {
+            auto whenNode = reinterpret_cast<pm_when_node *>(node);
+            auto *loc = &whenNode->base.location;
+
+            auto prismConditions = absl::MakeSpan(whenNode->conditions.nodes, whenNode->conditions.size);
+
+            parser::NodeVec sorbetConditions{};
+            sorbetConditions.reserve(prismConditions.size());
+
+            for (auto &prismCondition : prismConditions) {
+                sorbetConditions.emplace_back(translate(prismCondition));
+            }
+
+            auto inlineIfSingle = true;
+            auto statements = translateStatements(whenNode->statements, inlineIfSingle);
+
+            return make_unique<parser::When>(parser.translateLocation(loc), std::move(sorbetConditions),
+                                             std::move(statements));
+        }
         case PM_YIELD_NODE: {
             auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
             pm_location_t *loc = &yieldNode->base.location;
@@ -604,7 +643,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CASE_MATCH_NODE:
-        case PM_CASE_NODE:
         case PM_CLASS_VARIABLE_AND_WRITE_NODE:
         case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_CLASS_VARIABLE_OR_WRITE_NODE:
@@ -684,7 +722,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_FILE_NODE:
         case PM_SOURCE_LINE_NODE:
         case PM_UNDEF_NODE:
-        case PM_WHEN_NODE:
         case PM_WHILE_NODE:
         case PM_X_STRING_NODE:
         case PM_SCOPE_NODE:
