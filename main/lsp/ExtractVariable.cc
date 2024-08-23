@@ -399,7 +399,7 @@ public:
             return;
         }
 
-        if (std::find(matches.begin(), matches.end(), tree.loc()) != matches.end()) {
+        if (absl::c_find(matches, tree.loc()) != matches.end()) {
             // We've already seen a node with the exact same loc before, so this is likely constructed by
             // desugar. Skip it.
             return;
