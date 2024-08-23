@@ -66,6 +66,24 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
+        case PM_BEGIN_NODE: {
+            auto beginNode = reinterpret_cast<pm_begin_node *>(node);
+            auto loc = &beginNode->base.location;
+
+            NodeVec statements;
+
+            if (beginNode->statements != nullptr) {
+                auto body = beginNode->statements->body;
+                auto prismStmts = absl::MakeSpan(body.nodes, body.size);
+                statements.reserve(prismStmts.size());
+
+                for (auto &prismStmt : prismStmts) {
+                    statements.emplace_back(translate(prismStmt));
+                }
+            }
+
+            return make_unique<parser::Kwbegin>(parser.translateLocation(loc), std::move(statements));
+        }
         case PM_BLOCK_ARGUMENT_NODE: { // A block arg passed into a method call, e.g. the `&b` in `a.map(&b)`
             auto blockArg = reinterpret_cast<pm_block_argument_node *>(node);
             auto loc = &blockArg->base.location;
@@ -577,7 +595,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARRAY_PATTERN_NODE:
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
-        case PM_BEGIN_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
