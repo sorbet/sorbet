@@ -3,7 +3,7 @@ id: doc-comments
 title: Documentation Comments
 ---
 
-Sorbet language server has rudimentary support for displaying documentation
+Sorbet's language server has rudimentary support for displaying documentation
 comments in various parts of the editor experience.
 
 For example, hovering over things shows documentation associated with the
