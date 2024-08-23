@@ -1282,6 +1282,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :default_deprecated_enum, Symbol, enum: %i[foo_one foo_two], default: :foo_one
     prop :int_or_enum, T.any(MyEnum, Integer)
     prop :int_or_str_or_enum, T.any(MyEnum, Integer, String)
+    prop :nilable_int_or_enum, T.nilable(T.any(MyEnum, Integer))
   end
 
   it 'can serialize a complex object' do
