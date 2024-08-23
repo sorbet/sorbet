@@ -687,7 +687,7 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
 }
 
 ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
-    auto afterDesugar = pipeline::desugarOne(config->opts, *gs, fref);
+    auto afterDesugar = pipeline::desugarOne(config->opts, *gs, fref, true);
     return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
