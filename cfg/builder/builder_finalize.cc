@@ -122,10 +122,8 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
         if (bb.get() != cfg.entry()) {
             ENFORCE(bb->flags.wasJumpDestination, "block {} was never linked into cfg", bb->id);
         }
-        auto thenFnd = absl::c_find(bb->bexit.thenb->backEdges, bb.get());
-        auto elseFnd = absl::c_find(bb->bexit.elseb->backEdges, bb.get());
-        ENFORCE(thenFnd != bb->bexit.thenb->backEdges.end(), "backedge unset for thenb");
-        ENFORCE(elseFnd != bb->bexit.elseb->backEdges.end(), "backedge unset for elseb");
+        ENFORCE(absl::c_contains(bb->bexit.thenb->backEdges, bb.get()), "backedge unset for thenb");
+        ENFORCE(absl::c_contains(bb->bexit.elseb->backEdges, bb.get()), "backedge unset for elseb");
     }
 }
 

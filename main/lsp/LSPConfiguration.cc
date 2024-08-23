@@ -35,7 +35,7 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
 }
 
 MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
-    if (absl::c_find(formats, MarkupKind::Markdown) != formats.end()) {
+    if (absl::c_contains(formats, MarkupKind::Markdown)) {
         return MarkupKind::Markdown;
     } else {
         return MarkupKind::Plaintext;
