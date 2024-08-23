@@ -17,7 +17,9 @@ public:
                                                                               core::NameRef name);
 
     static ast::Send *castSig(ast::ExpressionPtr &expr);
+    static const ast::Send *castSig(const ast::ExpressionPtr &expr);
     static ast::Send *castSig(ast::Send *expr);
+    static const ast::Send *castSig(const ast::Send *expr);
 
     static ast::ExpressionPtr mkKwArgsHash(const ast::Send *send);
 

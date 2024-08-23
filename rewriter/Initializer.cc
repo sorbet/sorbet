@@ -146,7 +146,7 @@ void checkSigReturnType(core::MutableContext ctx, const ast::Send *send) {
 
 } // namespace
 
-void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
+void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, const ast::ExpressionPtr *prevStat) {
     // this should only run in an `initialize` that has a sig
     if (methodDef->name != core::Names::initialize() || methodDef->flags.isSelfMethod) {
         return;
