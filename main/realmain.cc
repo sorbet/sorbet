@@ -188,6 +188,20 @@ core::Loc findTyped(unique_ptr<core::GlobalState> &gs, core::FileRef file) {
     return core::Loc(file, start, end);
 }
 
+void addInlineInput(const string &input, const string &filename, vector<core::FileRef> &inputFiles,
+                    core::GlobalState &gs) {
+    prodCounterAdd("types.input.bytes", input.size());
+    prodCounterInc("types.input.lines");
+    prodCounterInc("types.input.files");
+    auto modifiedInput = input;
+    if (core::File::fileStrictSigil(input) == core::StrictLevel::None) {
+        // put it at the end so as to not upset line numbers
+        modifiedInput += "\n# typed: true";
+    }
+    auto file = gs.enterFile(filename, modifiedInput);
+    inputFiles.emplace_back(file);
+}
+
 #ifndef SORBET_REALMAIN_MIN
 struct AutogenResult {
     struct Serialized {
@@ -701,16 +715,10 @@ int realmain(int argc, char *argv[]) {
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
-                prodCounterAdd("types.input.bytes", opts.inlineInput.size());
-                prodCounterInc("types.input.lines");
-                prodCounterInc("types.input.files");
-                auto input = opts.inlineInput;
-                if (core::File::fileStrictSigil(opts.inlineInput) == core::StrictLevel::None) {
-                    // put it at the end so as to not upset line numbers
-                    input += "\n# typed: true";
-                }
-                auto file = gs->enterFile(string("-e"), input);
-                inputFiles.emplace_back(file);
+                addInlineInput(opts.inlineInput, "-e", inputFiles, *gs);
+            }
+            if (!opts.inlineRBIInput.empty()) {
+                addInlineInput(opts.inlineRBIInput, "--e-rbi.rbi", inputFiles, *gs);
             }
         }
 
