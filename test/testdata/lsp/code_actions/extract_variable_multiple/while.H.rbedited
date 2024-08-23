@@ -24,8 +24,7 @@ end
 
 def while_3(x)
   while x + 1
-    newVariable = x + 1
-    newVariable
+    x + 1
 #   ^^^^^ apply-code-action: [E] Extract Variable (this occurrence only)
 #   ^^^^^ apply-code-action: [F] Extract Variable (all 3 occurrences)
     x + 1
@@ -33,7 +32,8 @@ def while_3(x)
 end
 
 def while_4(x)
-  while x + x
+  newVariable = x
+  while newVariable + newVariable
 #       ^ apply-code-action: [G] Extract Variable (this occurrence only)
 #       ^ apply-code-action: [H] Extract Variable (all 2 occurrences)
     1 + 1

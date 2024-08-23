@@ -30,3 +30,13 @@ def while_3(x)
     x + 1
   end
 end
+
+def while_4(x)
+  while x + x
+#       ^ apply-code-action: [G] Extract Variable (this occurrence only)
+#       ^ apply-code-action: [H] Extract Variable (all 2 occurrences)
+    1 + 1
+#       ^ apply-code-action: [I] Extract Variable (this occurrence only)
+#       ^ apply-code-action: [J] Extract Variable (all 2 occurrences)
+  end
+end

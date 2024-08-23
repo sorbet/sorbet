@@ -482,7 +482,17 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
 
-    const ast::ExpressionPtr *scopeToInsertIn = walk.LCAScopeStack.back();
+    const ast::ExpressionPtr *scopeToInsertIn = nullptr;
+    for (auto scope = walk.LCAScopeStack.rbegin(); scope != walk.LCAScopeStack.rend(); ++scope) {
+        if (ast::isa_tree<ast::InsSeq>(**scope) || ast::isa_tree<ast::ClassDef>(**scope) ||
+            ast::isa_tree<ast::Block>(**scope) || ast::isa_tree<ast::MethodDef>(**scope) ||
+            ast::isa_tree<ast::If>(**scope) || ast::isa_tree<ast::Rescue>(**scope) ||
+            ast::isa_tree<ast::RescueCase>(**scope) || ast::isa_tree<ast::While>(**scope)) {
+            scopeToInsertIn = *scope;
+            break;
+        }
+    }
+    ENFORCE(scopeToInsertIn, "the LCA scope stack should always have a ClassDef or MethodDef");
 
     fast_sort(matches, [](auto a, auto b) { return a.beginPos() < b.beginPos(); });
     auto firstMatch = matches[0];
