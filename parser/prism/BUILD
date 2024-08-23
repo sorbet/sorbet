@@ -16,5 +16,6 @@ cc_library(
     deps = [
         "//core",
         "//parser", # Legacy parser, needed for translating to its nodes defined in `parser/Node_gen.h`
+        "@prism",
     ],
 )
