@@ -295,7 +295,6 @@
           },
           "default": [
             "**/sorbet/config",
-            "**/Gemfile",
             "**/Gemfile.lock"
           ]
         }
