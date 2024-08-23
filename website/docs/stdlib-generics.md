@@ -199,6 +199,82 @@ TypeScript uses the same approach. This decision was largely motivated by
 getting as much Ruby code to typecheck when initially developing and rolling out
 Sorbet on large, existing codebases.
 
+## Implementing the `Enumerable` interface
+
+Here's how to implement an enumerable class in Ruby with Sorbet:
+
+```ruby
+class CountTo3
+  include Enumerable
+
+  # Must declare Elem type
+  extend T::Generic
+  Elem = type_member(:out) { {fixed: Integer} }
+
+  # Must implement abstract `Enumerable#each` method
+  sig do
+    override
+      .params(
+        blk: T.proc.params(arg0: Elem).returns(T.anything)
+      )
+      .void
+  end
+  def each(&blk)
+    yield 1
+    yield 2
+    yield 3
+  end
+end
+
+counter = CountTo3.new
+total = counter.sum # calls Enumerable#sum
+```
+
+Sorbet treats the `Enumerable` module in the standard library as an
+[abstract module](abstract.md) and as a [generic module](generics.md). That
+means that putting `include Enumerable` inside a class requires defining two
+things:
+
+1.  An `each` method which overrides the abstract `Enumerable#each` method.
+
+    The `each` method is what powers all the other methods that the `Enumerable`
+    module provides, like `map`, `include?`, `all?`, etc. Sorbet requires that
+    implementations of abstract methods must have use
+    [the `override` modifier](abstract.md#implementing-an-abstract-method) in
+    the signature.
+
+    Sorbet includes an autocorrect to automatically generate empty
+    implementations of any missing abstract methods—this is the easiest way to
+    get started implementing an `each` method with the correct signature.
+
+    For legacy reasons, the return type of the `Enumerable#each` method is
+    `T.untyped` and the return type of the block is `BasicObject`. In new code,
+    we recommend using `.void` and `T.anything` respectively (making this change
+    in `Enumerable#each` would be a breaking change, which we might consider
+    making one day).
+
+1.  A generic `type_member` called `Elem` declaring what kinds of elements this
+    class will enumerate. The class will need to `extend T::Generic` to make the
+    `type_member` method available.
+
+    If the class will always enumerate values of a type which is known ahead of
+    time, declare the elem
+    [using a `fixed` bound](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower).
+    The `CountTo3` example above uses a `fixed` bound because it always yields
+    `Integer` values.
+
+    Otherwise, leave the bound unspecified. This approach is more suitable for
+    implementing generic containers, like how `Array` and `Set` are generic
+    containers.
+
+    Be sure to declare `Elem` as a covariant type member,
+    [using `type_member(:out)`](generics.md#covariance-out) unless there's a
+    strong reason to do otherwise.
+
+    For ease of migration in legacy codebases and gems which already have many
+    custom `Enumerable` subclasses, Sorbet only requires declaring the `Elem`
+    `type_member` at `# typed: strict`.
+
 ## What's next?
 
 - [Class Types](class-types.md)
