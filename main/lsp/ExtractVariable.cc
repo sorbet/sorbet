@@ -399,6 +399,12 @@ public:
             return;
         }
 
+        if (std::find(matches.begin(), matches.end(), tree.loc()) != matches.end()) {
+            // We've already seen a node with the exact same loc before, so this is likely constructed by
+            // desugar. Skip it.
+            return;
+        }
+
         if (targetNode->structurallyEqual(ctx, tree, selectionLoc.file())) {
             matches.emplace_back(tree.loc());
             computeLCA(tree.loc());
