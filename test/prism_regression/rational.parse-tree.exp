@@ -1,3 +1,10 @@
-Rational {
-  val = "42.0"
+Begin {
+  stmts = [
+    Rational {
+      val = "42.0"
+    }
+    Rational {
+      val = "42.00000"
+    }
+  ]
 }

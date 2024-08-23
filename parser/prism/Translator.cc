@@ -448,10 +448,11 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto *rationalNode = reinterpret_cast<pm_rational_node *>(node);
             pm_location_t *loc = &rationalNode->base.location;
 
-            const uint8_t *start = rationalNode->numeric->location.start;
-            const uint8_t *end = rationalNode->numeric->location.end;
+            const uint8_t *start = loc->start;
+            const uint8_t *end = loc->end;
 
-            std::string value = std::string(reinterpret_cast<const char *>(start), end - start);
+            // TODO: drop one char to remove the "r" at the end of the value
+            auto value = std::string_view(reinterpret_cast<const char *>(start), end - start - 1);
 
             return make_unique<parser::Rational>(parser.translateLocation(loc), value);
         }
@@ -651,6 +652,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_INTERPOLATED_X_STRING_NODE:
+        case PM_IT_LOCAL_VARIABLE_READ_NODE:
         case PM_IT_PARAMETERS_NODE:
         case PM_LAMBDA_NODE:
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
