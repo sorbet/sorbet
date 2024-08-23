@@ -1280,9 +1280,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :deprecated_enum, Symbol, enum: %i[foo_one foo_two]
     prop :nilable_deprecated_enum, T.nilable(Symbol), enum: %i[foo_one foo_two]
     prop :default_deprecated_enum, Symbol, enum: %i[foo_one foo_two], default: :foo_one
-    prop :int_or_enum, T.any(MyEnum, Integer)
-    prop :int_or_str_or_enum, T.any(MyEnum, Integer, String)
-    prop :nilable_int_or_enum, T.nilable(T.any(MyEnum, Integer))
   end
 
   it 'can serialize a complex object' do
@@ -1304,8 +1301,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       defaulted_unidentified_type: {3 => 4},
       enum: MyEnum::FOO,
       deprecated_enum: :foo_one,
-      int_or_enum: MyEnum::FOO,
-      int_or_str_or_enum: MyEnum::FOO,
     }
 
     assert_equal(
@@ -1338,8 +1333,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         "default_enum" => "foo",
         "deprecated_enum" => :foo_one,
         "default_deprecated_enum" => :foo_one,
-        "int_or_enum" => "foo",
-        "int_or_str_or_enum" => "foo",
       }, ComplexStruct.new(attributes).serialize(false)
     )
   end
@@ -1363,8 +1356,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       'defaulted_unidentified_type' => {3 => 4},
       'enum' => 'foo',
       'deprecated_enum' => :foo_one,
-      'int_or_enum' => 'foo',
-      'int_or_str_or_enum' => 'foo',
     }
 
     assert_equal(
@@ -1397,8 +1388,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
         "default_enum" => "foo",
         "deprecated_enum" => :foo_one,
         "default_deprecated_enum" => :foo_one,
-        "int_or_enum" => "foo",
-        "int_or_str_or_enum" => "foo",
       }, ComplexStruct.from_hash(attributes).serialize(false)
     )
   end
@@ -1544,6 +1533,64 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       x = x.with(still_required_prop: 6)
       assert_nil(x.required_at_some_point)
     end
+  end
+
+  class EnumUnionStruct < T::Struct
+    prop :int_or_enum, T.any(MyEnum, Integer)
+    prop :int_or_str_or_enum, T.any(MyEnum, Integer, String)
+    prop :nilable_int_or_enum, T.nilable(T.any(MyEnum, Integer))
+  end
+
+  it 'can serialize a struct with enum union types' do
+    struct = EnumUnionStruct.new(
+      int_or_enum: MyEnum::FOO,
+      int_or_str_or_enum: MyEnum::FOO,
+    )
+    assert_equal(
+      {
+        "int_or_enum" => "foo",
+        "int_or_str_or_enum" => "foo",
+      },
+      struct.serialize(false)
+    )
+
+    struct = EnumUnionStruct.new(
+      int_or_enum: 0,
+      int_or_str_or_enum: 'not an enum',
+    )
+    assert_equal(
+      {
+        "int_or_enum" => 0,
+        "int_or_str_or_enum" => "not an enum",
+      },
+      struct.serialize(false)
+    )
+  end
+
+  it 'can deserialize a struct with enum union types' do
+    struct = EnumUnionStruct.from_hash({
+      'int_or_enum' => 0,
+      'int_or_str_or_enum' => 'not an enum',
+    })
+
+    assert_equal(
+      {
+        "int_or_enum" => 0,
+        "int_or_str_or_enum" => 'not an enum',
+      },
+      struct.serialize(false)
+    )
+  end
+
+  it 'fails to round trip if string overlaps with serialized form' do
+    struct = EnumUnionStruct.new(
+      int_or_enum: MyEnum::FOO,
+      int_or_str_or_enum: 'foo',
+    )
+    round_tripped = EnumUnionStruct.from_hash(struct.serialize)
+    # gets converted to an enum after deserializing, even though it started as a string
+    refute_equal(struct.int_or_str_or_enum, round_tripped.int_or_str_or_enum)
+    assert_equal(round_tripped.int_or_str_or_enum, MyEnum::FOO)
   end
 
   class MuckAboutWithPropInternals
