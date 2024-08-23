@@ -130,5 +130,5 @@ class A; end
 
 **Note**: For performance, Sorbet only stores one location of a definition per
 file. If something is defined multiple times within the same file, the last
-location generally wins (which might prevent Sorbet from finding the
-documentation for that definition).
+location generally wins (and thus, only the last location of a definition within
+a file will be searched for a documentation comment).
