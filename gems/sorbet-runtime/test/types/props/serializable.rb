@@ -1593,6 +1593,30 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     assert_equal(round_tripped.int_or_str_or_enum, MyEnum::FOO)
   end
 
+  class MySymbolEnum < T::Enum
+    enums do
+      X = new(:x)
+      Y = new(:y)
+    end
+  end
+
+  class SymbolValuedEnum < T::Struct
+    prop :int_or_sym, T.any(MySymbolEnum, Integer)
+  end
+
+  it 'round trips via symbols' do
+    struct = SymbolValuedEnum.new(int_or_sym: MySymbolEnum::X)
+    serialized = struct.serialize
+    assert_equal(
+      {
+        "int_or_sym" => :x,
+      },
+      serialized
+    )
+    round_tripped = SymbolValuedEnum.from_hash(serialized)
+    assert_equal(struct.int_or_sym, round_tripped.int_or_sym)
+  end
+
   class MuckAboutWithPropInternals
     include T::Props::Serializable
     include T::Props::WeakConstructor
