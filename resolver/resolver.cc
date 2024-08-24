@@ -476,7 +476,7 @@ private:
         // Check that the candidate name is one of the top-level exported names from a parent package.
         bool exportsSymbol(bool inTestNamespace, core::NameRef candidate) const {
             auto &exportList = inTestNamespace ? this->testExports : this->exports;
-            return absl::c_find(exportList, candidate) != exportList.end();
+            return absl::c_contains(exportList, candidate);
         }
     };
 
@@ -534,7 +534,7 @@ private:
 
     static void ensureTGenericMixin(core::GlobalState &gs, core::ClassOrModuleRef klass) {
         auto &mixins = klass.data(gs)->mixins();
-        if (absl::c_find(mixins, core::Symbols::T_Generic()) == mixins.end()) {
+        if (!absl::c_contains(mixins, core::Symbols::T_Generic())) {
             mixins.emplace_back(core::Symbols::T_Generic());
         }
     }
@@ -1189,7 +1189,7 @@ private:
             auto type = core::make_type<core::ClassType>(idSymbol);
             auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
             // Make sure we are not adding existing symbols to our tuple
-            if (absl::c_find(elems, type) == elems.end()) {
+            if (!absl::c_contains(elems, type)) {
                 elems.emplace_back(type);
             }
         }

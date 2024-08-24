@@ -508,7 +508,7 @@ bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, std::o
         //   checking the linearization bit.
 
         // Ignore superclass (as in GlobalPass.cc's `computeClassLinearization`)
-        if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
+        if (sym != superClass() && !absl::c_contains(mixins_, sym)) {
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
             if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
@@ -2058,7 +2058,7 @@ vector<ClassOrModule::RequiredAncestor> ClassOrModule::requiredAncestors(const G
 // All required ancestors by this class or module
 std::vector<ClassOrModule::RequiredAncestor>
 ClassOrModule::requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<ClassOrModuleRef> &seen) {
-    if (absl::c_find(seen, this->ref(gs)) != seen.end()) {
+    if (absl::c_contains(seen, this->ref(gs))) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
     seen.emplace_back(this->ref(gs));

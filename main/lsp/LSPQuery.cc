@@ -121,7 +121,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         const auto &usedSymbolNameHashes = hash.usages.nameHashes;
 
         const bool fileIsValid = ref.exists() && ref.data(gs).sourceType == core::File::Type::Normal;
-        if (fileIsValid && (absl::c_find(usedSymbolNameHashes, symShortNameHash) != usedSymbolNameHashes.end())) {
+        if (fileIsValid && absl::c_contains(usedSymbolNameHashes, symShortNameHash)) {
             frefs.emplace_back(ref);
         }
     }

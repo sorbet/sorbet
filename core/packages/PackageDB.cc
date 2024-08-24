@@ -226,7 +226,7 @@ const std::string_view PackageDB::errorHint() const {
 }
 
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
-    return absl::c_find(allowRelaxedPackagerChecksFor_, mangledName) != allowRelaxedPackagerChecksFor_.end();
+    return absl::c_contains(allowRelaxedPackagerChecksFor_, mangledName);
 }
 
 PackageDB PackageDB::deepCopy() const {
