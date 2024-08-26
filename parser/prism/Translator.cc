@@ -107,6 +107,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto paramsNode = reinterpret_cast<pm_block_parameters_node *>(node);
             return translate(reinterpret_cast<pm_node *>(paramsNode->parameters));
         }
+        case PM_BREAK_NODE: {
+            auto breakNode = reinterpret_cast<pm_break_node *>(node);
+            pm_location_t *loc = &breakNode->base.location;
+
+            auto arguments = translateArguments(breakNode->arguments);
+
+            return make_unique<parser::Break>(parser.translateLocation(loc), std::move(arguments));
+        }
         case PM_CALL_NODE: {
             auto callNode = reinterpret_cast<pm_call_node *>(node);
             pm_location_t *loc = &callNode->base.location;
@@ -682,7 +690,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_BREAK_NODE:
         case PM_CALL_AND_WRITE_NODE:
         case PM_CALL_OPERATOR_WRITE_NODE:
         case PM_CALL_OR_WRITE_NODE:
