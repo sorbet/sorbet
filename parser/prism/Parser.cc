@@ -24,4 +24,13 @@ std::string_view Parser::resolveConstant(pm_constant_id_t constant_id) {
     return std::string_view(reinterpret_cast<const char *>(constant->start), constant->length);
 }
 
+std::string_view Parser::extractString(pm_string_t *string) {
+    if (string->type != pm_string_t::PM_STRING_CONSTANT && string->type != pm_string_t::PM_STRING_SHARED) {
+        Exception::raise(
+            "This string needs to be freed eventually with `pm_string_free`, but that isn't implemented yet");
+    }
+
+    return std::string_view(reinterpret_cast<const char *>(pm_string_source(string)), pm_string_length(string));
+}
+
 }; // namespace sorbet::parser::Prism

@@ -554,8 +554,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &strNode->base.location;
 
             auto unescaped = &strNode->unescaped;
-            auto source =
-                std::string(reinterpret_cast<const char *>(pm_string_source(unescaped)), pm_string_length(unescaped));
+            auto source = parser.extractString(unescaped);
 
             // TODO: handle different string encodings
             return make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
@@ -574,8 +573,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto unescaped = &symNode->unescaped;
 
-            auto source =
-                std::string(reinterpret_cast<const char *>(pm_string_source(unescaped)), pm_string_length(unescaped));
+            auto source = parser.extractString(unescaped);
 
             // TODO: can these have different encodings?
             return make_unique<parser::Symbol>(parser.translateLocation(loc), gs.enterNameUTF8(source));

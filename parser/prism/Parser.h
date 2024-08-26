@@ -37,6 +37,7 @@ public:
     Node parse_root();
     core::LocOffsets translateLocation(pm_location_t *location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
+    std::string_view extractString(pm_string_t *string);
 
 private:
     pm_parser_t *get_raw_parser_pointer();
