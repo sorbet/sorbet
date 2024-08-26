@@ -1469,15 +1469,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::CSend *csend) {
                 if (dctx.calledFromExtractToVariable) {
-                    // Desugaring to a InsSeq + If causes problem for Extract to Variable; the fake If will be the where
+                    // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
                     // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
                     // insertion happens in the correct place (what the csend is inside);
 
-                    // Replace the original method with a new special one that conveys that this is a CSend, so that
-                    // a&.foo is treated as different from a.foo when checking for structural equality.
-                    auto newName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, csend->method, 1);
-                    auto sendNode = make_unique<parser::Send>(loc, std::move(csend->receiver), newName,
-                                                              csend->methodLoc, std::move(csend->args));
+                    // Replace the original method name with a new special one that conveys that this is a CSend, so
+                    // that a&.foo is treated as different from a.foo when checking for structural equality.
+                    auto newFun = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, csend->method, 1);
+                    auto sendNode = make_unique<parser::Send>(loc, std::move(csend->receiver), newFun, csend->methodLoc,
+                                                              std::move(csend->args));
                     auto send = node2TreeImpl(dctx, std::move(sendNode));
                     result = std::move(send);
                     return;
