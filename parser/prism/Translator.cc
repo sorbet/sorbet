@@ -626,6 +626,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::When>(parser.translateLocation(loc), std::move(sorbetConditions),
                                              std::move(statements));
         }
+        case PM_WHILE_NODE: {
+            auto whileNode = reinterpret_cast<pm_while_node *>(node);
+            auto *loc = &whileNode->base.location;
+
+            auto inlineIfSingle = true;
+            auto predicate = translate(whileNode->predicate);
+
+            auto statements = translateStatements(whileNode->statements, inlineIfSingle);
+
+            return make_unique<parser::While>(parser.translateLocation(loc), std::move(predicate),
+                                              std::move(statements));
+        }
         case PM_YIELD_NODE: {
             auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
             pm_location_t *loc = &yieldNode->base.location;
@@ -727,7 +739,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_ENCODING_NODE:
         case PM_SOURCE_LINE_NODE:
         case PM_UNDEF_NODE:
-        case PM_WHILE_NODE:
         case PM_X_STRING_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
@@ -816,6 +827,10 @@ std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
+    if (stmtsNode == nullptr) {
+        return nullptr;
+    }
+
     auto prismStmts = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
 
     // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
