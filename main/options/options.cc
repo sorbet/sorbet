@@ -369,7 +369,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "Enable experimental `requires_ancestor` annotation");
 
     options.add_options("advanced")("enable-experimental-lsp-extract-to-variable",
-                                    "Enable beta LSP feature: Extract To Variable");
+                                    "Enable experimental LSP feature: Extract To Variable");
 
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
