@@ -476,6 +476,36 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Rational>(parser.translateLocation(loc), value);
         }
+        case PM_REGULAR_EXPRESSION_NODE: {
+            auto regularExpressionNode = reinterpret_cast<pm_regular_expression_node *>(node);
+            pm_location_t *loc = &regularExpressionNode->base.location;
+            pm_location_t *closingLoc = &regularExpressionNode->closing_loc;
+
+            // Sorbet represents the regex content as a vector of string nodes
+            parser::NodeVec parts;
+
+            auto source = parser.extractString(&regularExpressionNode->unescaped);
+            if (!source.empty()) {
+                auto sourceStringNode =
+                    make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
+                parts.emplace_back(std::move(sourceStringNode));
+            }
+
+            std::string_view optString;
+
+            auto optStart = closingLoc->start + 1; // one character after the closing `/`
+            auto optEnd = closingLoc->end;
+            auto optLength = optEnd - optStart;
+
+            // Some regexps have options, e.g. `/foo/i`
+            if (optLength > 0) {
+                optString = std::string_view(reinterpret_cast<const char *>(optStart), optLength);
+            }
+
+            auto opt = make_unique<parser::Regopt>(parser.translateLocation(closingLoc), optString);
+
+            return make_unique<parser::Regexp>(parser.translateLocation(loc), std::move(parts), std::move(opt));
+        }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: {
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
             pm_location_t *loc = &requiredKeywordParamNode->base.location;
@@ -729,7 +759,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
         case PM_REDO_NODE:
-        case PM_REGULAR_EXPRESSION_NODE:
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_RETRY_NODE:
