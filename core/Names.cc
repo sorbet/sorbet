@@ -207,7 +207,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::MangledKeywordArg:
                     return false;
                 case UniqueNameKind::DesugarCsend:
-                    ENFORCE(false, "UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+                    Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
                     return false;
             }
         case NameKind::CONSTANT:
@@ -247,7 +247,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::MangledKeywordArg:
                     return false;
                 case UniqueNameKind::DesugarCsend:
-                    ENFORCE(false, "UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+                    Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
                     return false;
             }
         case NameKind::CONSTANT:
