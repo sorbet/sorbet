@@ -26,14 +26,14 @@ struct DesugarContext final {
     core::NameRef enclosingMethodName;
     bool inAnyBlock;
     bool inModule;
-    bool calledFromExtractToVariable;
+    bool preserveConcreteSyntax;
 
     DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockArg,
                    core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName, bool inAnyBlock,
-                   bool inModule, bool calledFromExtractToVariable)
+                   bool inModule, bool preserveConcreteSyntax)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock),
-          inModule(inModule), calledFromExtractToVariable(calledFromExtractToVariable){};
+          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax){};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -177,7 +177,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     auto [args, destructures] = desugarArgs(dctx, loc, blockArgs);
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                         dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.calledFromExtractToVariable);
+                         dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, loc, blockBody, std::move(destructures));
 
     // TODO the send->block's loc is too big and includes the whole send
@@ -362,7 +362,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     uint32_t uniqueCounter = 1;
     auto inModule = dctx.inModule && !isSelf;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, declLoc, name, dctx.inAnyBlock, inModule,
-                         dctx.calledFromExtractToVariable);
+                         dctx.preserveConcreteSyntax);
     auto [args, destructures] = desugarArgs(dctx1, loc, argnode);
 
     if (args.empty() || !isa_tree<BlockArg>(args.back())) {
@@ -375,7 +375,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto enclosingBlockArg = blockArg2Name(dctx, *blkArg);
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockArg, declLoc, name, dctx.inAnyBlock, inModule,
-                         dctx.calledFromExtractToVariable);
+                         dctx.preserveConcreteSyntax);
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, std::move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
@@ -552,7 +552,7 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     // Blocks never persist across a class/module boundary
     auto inAnyBlock = false;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                         dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.calledFromExtractToVariable);
+                         dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
@@ -1468,7 +1468,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::CSend *csend) {
-                if (dctx.calledFromExtractToVariable) {
+                if (dctx.preserveConcreteSyntax) {
                     // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
                     // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
                     // insertion happens in the correct place (what the csend is inside);
@@ -1550,7 +1550,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                                     dctx.enclosingMethodName, dctx.inAnyBlock, true, dctx.calledFromExtractToVariable);
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, true, dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 ExpressionPtr res =
@@ -1560,8 +1560,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Class *klass) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                                     dctx.enclosingMethodName, dctx.inAnyBlock, false,
-                                     dctx.calledFromExtractToVariable);
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, false, dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (klass->superclass == nullptr) {
@@ -1644,8 +1643,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
 
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                                     dctx.enclosingMethodName, dctx.inAnyBlock, false,
-                                     dctx.calledFromExtractToVariable);
+                                     dctx.enclosingMethodName, dctx.inAnyBlock, false, dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 ExpressionPtr res =
@@ -1657,7 +1655,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::NumBlock *block) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
-                                     dctx.enclosingMethodName, true, dctx.inModule, dctx.calledFromExtractToVariable);
+                                     dctx.enclosingMethodName, true, dctx.inModule, dctx.preserveConcreteSyntax);
                 result = desugarBlock(dctx1, loc, block->loc, block->send, block->args, block->body);
             },
             [&](parser::While *wl) {
@@ -2419,12 +2417,12 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
 }
 } // namespace
 
-ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what, bool calledFromExtractToVariable) {
+ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what, bool preserveConcreteSyntax) {
     try {
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
         DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
-                            core::NameRef::noName(), false, false, calledFromExtractToVariable);
+                            core::NameRef::noName(), false, false, preserveConcreteSyntax);
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
         result = liftTopLevel(dctx, loc, std::move(result));

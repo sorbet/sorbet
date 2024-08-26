@@ -8,7 +8,7 @@
 namespace sorbet::ast::desugar {
 
 ExpressionPtr node2Tree(core::MutableContext ctx, std::unique_ptr<parser::Node> what,
-                        bool calledFromExtractToVariable = false);
+                        bool preserveConcreteSyntax = false);
 } // namespace sorbet::ast::desugar
 
 #endif // SORBET_DESUGAR_H

@@ -18,7 +18,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
 // Primarily exposed for LSP—outside of LSP, you probably want `indexOne`.
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
-                              bool calledFromExtractToVariable);
+                              bool preserveConcreteSyntax);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 

@@ -141,13 +141,13 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                              const options::Printers &print, bool calledFromExtractToVariable = false) {
+                              const options::Printers &print, bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = ast::desugar::node2Tree(ctx, move(parseTree), calledFromExtractToVariable);
+        ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
@@ -176,7 +176,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
 }
 
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
-                              bool calledFromExtractToVariable) {
+                              bool preserveConcreteSyntax) {
     auto &print = opts.print;
 
     Timer timeit(gs.tracer(), "desugarOne", {{"file", string(file.data(gs).path())}});
@@ -185,7 +185,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
             return ast::MK::EmptyTree();
         }
         auto parseTree = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
-        return runDesugar(gs, file, move(parseTree), print, calledFromExtractToVariable);
+        return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
