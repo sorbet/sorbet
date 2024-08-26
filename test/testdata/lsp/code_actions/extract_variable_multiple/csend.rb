@@ -13,3 +13,10 @@ b = T.unsafe(1)
 
   1.times do b&.foo end
 # ^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Variable (this occurrence only)
+  c = T.unsafe(1)
+  c.to_s
+  c&.foo
+  c&.to_s
+  c&.to_s
+# ^^^^^^^ apply-code-action: [D] Extract Variable (this occurrence only)
+# ^^^^^^^ apply-code-action: [E] Extract Variable (all 2 occurrences)
