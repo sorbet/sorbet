@@ -34,7 +34,7 @@ enum class UniqueNameKind : uint8_t {
     TEnum,
     Struct,
     Packager,
-    DesugarCsend,
+    DesugarCsend, // Used for Extract to Variable; see the CSend case in desugar.cc for more details
 };
 
 struct UniqueName final {
