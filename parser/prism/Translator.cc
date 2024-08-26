@@ -531,6 +531,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::SClass>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                std::move(expr), std::move(body));
         }
+        case PM_SOURCE_FILE_NODE: {
+            auto sourceFileNode = reinterpret_cast<pm_source_file_node *>(node);
+            pm_location_t *loc = &sourceFileNode->base.location;
+
+            return make_unique<parser::FileLiteral>(parser.translateLocation(loc));
+        }
         case PM_SPLAT_NODE: {
             auto splatNode = reinterpret_cast<pm_splat_node *>(node);
             pm_location_t *loc = &splatNode->base.location;
@@ -719,7 +725,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RETRY_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SOURCE_ENCODING_NODE:
-        case PM_SOURCE_FILE_NODE:
         case PM_SOURCE_LINE_NODE:
         case PM_UNDEF_NODE:
         case PM_WHILE_NODE:
