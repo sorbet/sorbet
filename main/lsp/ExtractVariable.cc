@@ -385,6 +385,8 @@ public:
         if (absl::c_find(matches, tree.loc()) != matches.end()) {
             // We've already seen a node with the exact same loc before, so this is likely constructed by
             // desugar. Skip it.
+            // If this ENFORCE occurs, we should update desugar to not do this when preserveConcreteSyntax is true
+            ENFORCE(false, "found another node with a loc we've already seen");
             return;
         }
 

@@ -5,7 +5,8 @@
 def and
   a = T.unsafe(1)
   b = T.unsafe(1)
-  a && newVariable = b; newVariable
+  newVariable = b
+  a && newVariable
 # ^ apply-code-action: [A] Extract Variable (this occurrence only)
 #      ^ apply-code-action: [B] Extract Variable (this occurrence only)
 end

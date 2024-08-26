@@ -1185,6 +1185,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(dctx, std::move(and_->left));
                 auto rhs = node2TreeImpl(dctx, std::move(and_->right));
+                if (dctx.preserveConcreteSyntax) {
+                    auto andAndLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::andAnd(), andAndLoc, std::move(lhs),
+                                       std::move(rhs));
+                    return;
+                }
                 if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
                     // Note that this case doesn't currently get the same "always truthy" dead code
@@ -1230,6 +1236,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Or *or_) {
                 auto lhs = node2TreeImpl(dctx, std::move(or_->left));
                 auto rhs = node2TreeImpl(dctx, std::move(or_->right));
+                if (dctx.preserveConcreteSyntax) {
+                    auto andAndLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::orOr(), andAndLoc, std::move(lhs),
+                                       std::move(rhs));
+                    return;
+                }
                 if (isa_reference(lhs)) {
                     auto cond = MK::cpRef(lhs);
                     auto iff = MK::If(loc, std::move(cond), std::move(lhs), std::move(rhs));
