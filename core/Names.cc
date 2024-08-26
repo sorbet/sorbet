@@ -107,7 +107,7 @@ string NameRef::toString(const GlobalState &gs) const {
             } else if (unique->uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(unique->original.show(gs), " (overload.", unique->num, ")");
             } else if (unique->uniqueNameKind == UniqueNameKind::DesugarCsend) {
-                return fmt::format("desugar_csend_{}${}", unique->original.show(gs), unique->num);
+                return fmt::format("<&{}>", unique->original.show(gs));
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
