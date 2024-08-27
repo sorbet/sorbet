@@ -751,11 +751,11 @@ void readOptions(Options &opts,
 
         bool enableAllLSPFeatures = raw["enable-all-experimental-lsp-features"].as<bool>();
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
+        opts.lspExtractToVariableEnabled =
+            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-extract-to-variable"].as<bool>();
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
-        opts.lspExtractToVariableEnabled =
-            enableAllLSPFeatures || raw["enable-experimental-lsp-extract-to-variable"].as<bool>();
         opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
         if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
             if (!FileOps::exists(opts.rubyfmtPath)) {
