@@ -13,7 +13,8 @@ end
 def or
   a = T.unsafe(1)
   b = T.unsafe(1)
-  a || newVariable = b; newVariable
+  newVariable = b
+  a || newVariable
 # ^ apply-code-action: [C] Extract Variable (this occurrence only)
 #      ^ apply-code-action: [D] Extract Variable (this occurrence only)
 end
