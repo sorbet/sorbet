@@ -950,9 +950,11 @@ error mentions that there is a call to method <code>foo</code> on an unconstrain
 generic type parameter. <code>T.type_parameter(:U)</code> alone means &quot;for all types&quot;,
 but not all types have a <code>foo</code> method.</p></li>
 <li><p>In the <code>example</code> method, the method’s signature changes to ascribe the type
-<code>T.all(T.type_parameter(:U), A)</code> to <code>x</code>. This in essence allows Sorbet to
-assume that there is an upper bound of <code>A</code> on the type of
-<code>T.type_parameter(:U)</code>.</p></li>
+<code>T.all(T.type_parameter(:U), A)</code> to <code>x</code>. Think of this as placing an upper
+bound of <code>A</code> on the generic <code>T.type_parameter(:U)</code>. The <code>example</code> method can
+be called with more narrow types (e.g. if there were any subclasses of <code>A</code>),
+but not wider types, like <code>Object</code>, so the intersection type acts like an
+upper bound.</p></li>
 <li><p>In the method body, the <code>T.all</code> is sufficient to allow the call to
 <code>x.foo.even?</code> to type check (and to have the type of <code>T::Boolean</code> statically).</p></li>
 <li><p>The first <code>return</code> in the method works without error: <code>x</code> has type
