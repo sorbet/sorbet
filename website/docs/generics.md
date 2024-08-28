@@ -1069,9 +1069,11 @@ There are a couple of things worth pointing out here:
   but not all types have a `foo` method.
 
 - In the `example` method, the method's signature changes to ascribe the type
-  `T.all(T.type_parameter(:U), A)` to `x`. This in essence allows Sorbet to
-  assume that there is an upper bound of `A` on the type of
-  `T.type_parameter(:U)`.
+  `T.all(T.type_parameter(:U), A)` to `x`. Think of this as placing an upper
+  bound of `A` on the generic `T.type_parameter(:U)`. The `example` method can
+  be called with more narrow types (e.g. if there were any subclasses of `A`),
+  but not wider types, like `Object`, so the intersection type acts like an
+  upper bound.
 
 - In the method body, the `T.all` is sufficient to allow the call to
   `x.foo.even?` to type check (and to have the type of `T::Boolean` statically).
