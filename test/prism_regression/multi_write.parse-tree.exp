@@ -1,0 +1,208 @@
+Begin {
+  stmts = [
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
+          }
+          LVarLhs {
+            name = <U b>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
+          }
+          LVarLhs {
+            name = <U b>
+          }
+          SplatLhs {
+            var = LVarLhs {
+              name = <U c>
+            }
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+          Integer {
+            val = "4"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
+          }
+          SplatLhs {
+            var = NULL
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+          Integer {
+            val = "4"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
+          }
+          LVarLhs {
+            name = <U b>
+          }
+          LVarLhs {
+            name = <U c>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U a>
+          }
+          SplatLhs {
+            var = LVarLhs {
+              name = <U b>
+            }
+          }
+          LVarLhs {
+            name = <U c>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+          Integer {
+            val = "4"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          SplatLhs {
+            var = LVarLhs {
+              name = <U a>
+            }
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+          Integer {
+            val = "4"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          SplatLhs {
+            var = LVarLhs {
+              name = <U a>
+            }
+          }
+          LVarLhs {
+            name = <U b>
+          }
+          LVarLhs {
+            name = <U c>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+          Integer {
+            val = "4"
+          }
+        ]
+      }
+    }
+  ]
+}

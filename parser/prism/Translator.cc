@@ -336,6 +336,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::LVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // Left-hand side of an multi-assignment
+            auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
+            pm_location_t *loc = &localVarTargetNode->base.location;
+
+            std::string_view name = parser.resolveConstant(localVarTargetNode->name);
+
+            return make_unique<parser::LVarLhs>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
             auto localVarWriteNode = reinterpret_cast<pm_local_variable_write_node *>(node);
             pm_location_t *loc = &localVarWriteNode->base.location;
@@ -357,6 +365,46 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Module>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                std::move(name), std::move(body));
+        }
+        case PM_MULTI_WRITE_NODE: {
+            auto multiWriteNode = reinterpret_cast<pm_multi_write_node *>(node);
+            pm_location_t *loc = &multiWriteNode->base.location;
+
+            // Left-hand side of the assignment
+            auto prismLefts = absl::MakeSpan(multiWriteNode->lefts.nodes, multiWriteNode->lefts.size);
+            auto prismRights = absl::MakeSpan(multiWriteNode->rights.nodes, multiWriteNode->rights.size);
+            auto prismSplat = multiWriteNode->rest;
+
+            NodeVec sorbetLhs{};
+            sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
+
+            for (auto &prismLeft : prismLefts) {
+                unique_ptr<parser::Node> sorbetLeft = translate(prismLeft);
+                sorbetLhs.emplace_back(std::move(sorbetLeft));
+            }
+
+            if (prismSplat != nullptr) {
+                // This requires separate handling from the `PM_SPLAT_NODE` because it
+                // has a different Sorbet node type, `parser::SplatLhs`
+                auto splatNode = reinterpret_cast<pm_splat_node *>(prismSplat);
+                pm_location_t *loc = &splatNode->base.location;
+
+                auto expr = translate(splatNode->expression);
+
+                sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(parser.translateLocation(loc), std::move(expr)));
+            }
+
+            for (auto &prismRight : prismRights) {
+                unique_ptr<parser::Node> sorbetRight = translate(prismRight);
+                sorbetLhs.emplace_back(std::move(sorbetRight));
+            }
+
+            auto mlhs = make_unique<parser::Mlhs>(parser.translateLocation(loc), std::move(sorbetLhs));
+
+            // Right-hand side of the assignment
+            auto value = translate(multiWriteNode->value);
+
+            return make_unique<parser::Masgn>(parser.translateLocation(loc), std::move(mlhs), std::move(value));
         }
         case PM_NEXT_NODE: {
             auto nextNode = reinterpret_cast<pm_next_node *>(node);
@@ -757,14 +805,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE:
-        case PM_LOCAL_VARIABLE_TARGET_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
         case PM_MULTI_TARGET_NODE:
-        case PM_MULTI_WRITE_NODE:
         case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
