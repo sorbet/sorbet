@@ -2227,8 +2227,8 @@ class ResolveTypeMembersAndFieldsWalk {
         if (cast->type == core::Types::todo()) {
             if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                 e.setHeader("Unable to resolve declared type for `{}`", uidName.show(ctx));
-                e.addErrorNote("One possible cause is attempting to declare the type of a field using `{}`.",
-                               "\n    Type parameters are only valid within the scope of a method, while fields are in "
+                e.addErrorNote("One possible cause is attempting to declare the type of a field using `{}`.\n"
+                               "    Type parameters are only valid within the scope of a method, while fields are in "
                                "class scope.",
                                "T.type_parameter");
             }
