@@ -358,6 +358,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Module>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                std::move(name), std::move(body));
         }
+        case PM_NEXT_NODE: {
+            auto nextNode = reinterpret_cast<pm_next_node *>(node);
+            pm_location_t *loc = &nextNode->base.location;
+
+            auto arguments = translateArguments(nextNode->arguments);
+
+            return make_unique<parser::Next>(parser.translateLocation(loc), std::move(arguments));
+        }
         case PM_NIL_NODE: {
             auto nilNode = reinterpret_cast<pm_nil_node *>(node);
             pm_location_t *loc = &nilNode->base.location;
@@ -757,7 +765,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MISSING_NODE:
         case PM_MULTI_TARGET_NODE:
         case PM_MULTI_WRITE_NODE:
-        case PM_NEXT_NODE:
         case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
