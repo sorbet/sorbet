@@ -84,6 +84,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
+        case PM_ASSOC_SPLAT_NODE: {
+            auto assocSplatNode = reinterpret_cast<pm_assoc_splat_node *>(node);
+            pm_location_t *loc = &assocSplatNode->base.location;
+
+            auto value = translate(assocSplatNode->value);
+
+            return make_unique<parser::Kwsplat>(parser.translateLocation(loc), std::move(value));
+        }
         case PM_BEGIN_NODE: {
             auto beginNode = reinterpret_cast<pm_begin_node *>(node);
             auto loc = &beginNode->base.location;
@@ -767,7 +775,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_ARRAY_PATTERN_NODE:
-        case PM_ASSOC_SPLAT_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_CALL_AND_WRITE_NODE:
