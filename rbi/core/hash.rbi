@@ -1312,6 +1312,11 @@ class Hash < Object
   def to_s(); end
 
   # Returns a new hash with the results of running the block once for every key.
+  #
+  # An optional hash argument can be provided to map keys to new keys. Any key
+  # not given will be mapped using the provided block, or remain the same if no
+  # block is given.
+  #
   # This method does not change the values.
   #
   # ```ruby
@@ -1320,23 +1325,35 @@ class Hash < Object
   # h.transform_keys(&:to_s)        #=> { "a" => 1, "b" => 2, "c" => 3 }
   # h.transform_keys.with_index {|k, i| "#{k}.#{i}" }
   #                                 #=> { "a.0" => 1, "b.1" => 2, "c.2" => 3 }
+  # h.transform_keys({ a: "a", b: "b" }) #=> { "a" => 1, "b" => 2, c: 3 }
   # ```
   #
   # If no block is given, an enumerator is returned instead.
   sig do
     type_parameters(:A).params(
+      hash2: T.nilable(T::Hash[T.type_parameter(:A), V]),
       blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
     )
-                       .returns(T::Hash[T.type_parameter(:A), V])
+    .returns(T::Hash[T.type_parameter(:A), V])
+  end
+  sig do
+    type_parameters(:A).params(
+      hash2: T::Hash[T.type_parameter(:A), V],
+    )
+    .returns(T::Hash[T.type_parameter(:A), V])
   end
   sig do
     returns(T::Enumerator[K])
   end
-  def transform_keys(&blk); end
+  def transform_keys(hash2=nil, &blk); end
 
   # Invokes the given block once for each key in *hsh*, replacing it with the
   # new key returned by the block, and then returns *hsh*. This method does not
   # change the values.
+  #
+  # An optional hash argument can be provided to map keys to new keys. Any key
+  # not given will be mapped using the provided block, or remain the same if no
+  # block is given.
   #
   # ```ruby
   # h = { a: 1, b: 2, c: 3 }
@@ -1344,19 +1361,27 @@ class Hash < Object
   # h.transform_keys!(&:to_sym)      #=> { a: 1, b: 2, c: 3 }
   # h.transform_keys!.with_index {|k, i| "#{k}.#{i}" }
   #                                  #=> { "a.0" => 1, "b.1" => 2, "c.2" => 3 }
+  # h.transform_keys!({ a: "a", b: "b" }) #=> { "a" => 1, "b" => 2, c: 3 }
   # ```
   #
   # If no block is given, an enumerator is returned instead.
   sig do
     type_parameters(:A).params(
+      hash2: T.nilable(T::Hash[T.type_parameter(:A), V]),
       blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
     )
-                       .returns(T::Hash[T.type_parameter(:A), V])
+    .returns(T::Hash[T.type_parameter(:A), V])
+  end
+  sig do
+    type_parameters(:A).params(
+      hash2: T::Hash[T.type_parameter(:A), V],
+    )
+    .returns(T::Hash[T.type_parameter(:A), V])
   end
   sig do
     returns(T::Enumerator[K])
   end
-  def transform_keys!(&blk); end
+  def transform_keys!(hash2=nil, &blk); end
 
   # Returns a new hash with the results of running the block once for every
   # value. This method does not change the keys.
