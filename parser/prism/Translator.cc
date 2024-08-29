@@ -152,7 +152,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &classNode->base.location;
             pm_location_t *declLoc = &classNode->class_keyword_loc;
 
-            auto name = translate(reinterpret_cast<pm_node *>(classNode->constant_path));
+            auto name = translate(classNode->constant_path);
             auto superclass = translate(classNode->superclass);
 
             auto body = translate(classNode->body);
@@ -346,10 +346,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             NodeVec sorbetLhs{};
             sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
 
-            for (auto &prismLeft : prismLefts) {
-                unique_ptr<parser::Node> sorbetLeft = translate(prismLeft);
-                sorbetLhs.emplace_back(std::move(sorbetLeft));
-            }
+            translateMultiInto(sorbetLhs, prismLefts);
 
             if (prismSplat != nullptr) {
                 // This requires separate handling from the `PM_SPLAT_NODE` because it
@@ -362,10 +359,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(parser.translateLocation(loc), std::move(expr)));
             }
 
-            for (auto &prismRight : prismRights) {
-                unique_ptr<parser::Node> sorbetRight = translate(prismRight);
-                sorbetLhs.emplace_back(std::move(sorbetRight));
-            }
+            translateMultiInto(sorbetLhs, prismRights);
 
             auto mlhs = make_unique<parser::Mlhs>(parser.translateLocation(loc), std::move(sorbetLhs));
 
@@ -435,35 +429,19 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             params.reserve(requireds.size() + optionals.size() + restSize + keywords.size() + kwrestSize + blockSize);
 
-            for (auto &param : requireds) {
-                unique_ptr<parser::Node> sorbetParam = translate(param);
-                params.emplace_back(std::move(sorbetParam));
-            }
+            translateMultiInto(params, requireds);
+            translateMultiInto(params, optionals);
 
-            for (auto &param : optionals) {
-                unique_ptr<parser::Node> sorbetParam = translate(param);
-                params.emplace_back(std::move(sorbetParam));
-            }
+            if (paramsNode->rest != nullptr)
+                params.emplace_back(translate(paramsNode->rest));
 
-            if (paramsNode->rest != nullptr) {
-                unique_ptr<parser::Node> rest = translate(paramsNode->rest);
-                params.emplace_back(std::move(rest));
-            }
+            translateMultiInto(params, keywords);
 
-            for (auto &param : keywords) {
-                unique_ptr<parser::Node> sorbetParam = translate(param);
-                params.emplace_back(std::move(sorbetParam));
-            }
+            if (paramsNode->keyword_rest != nullptr)
+                params.emplace_back(translate(paramsNode->keyword_rest));
 
-            if (paramsNode->keyword_rest != nullptr) {
-                unique_ptr<parser::Node> keywordRest = translate(paramsNode->keyword_rest);
-                params.emplace_back(std::move(keywordRest));
-            }
-
-            if (paramsNode->block != nullptr) {
-                unique_ptr<parser::Node> block = translate(reinterpret_cast<pm_node *>(paramsNode->block));
-                params.emplace_back(std::move(block));
-            }
+            if (paramsNode->block != nullptr)
+                params.emplace_back(translate(reinterpret_cast<pm_node *>(paramsNode->block)));
 
             return make_unique<parser::Args>(parser.translateLocation(loc), std::move(params));
         }
@@ -819,12 +797,17 @@ parser::NodeVec Translator::translateMulti(absl::Span<pm_node_t *> prismNodes) {
     // Pre-allocate the exactly capacity we're going to need, to prevent growth reallocations.
     result.reserve(std::distance(prismNodes.begin(), prismNodes.end()));
 
-    for (auto &prismNode : prismNodes) {
-        unique_ptr<parser::Node> sorbetNode = translate(prismNode);
-        result.emplace_back(std::move(sorbetNode));
-    }
+    translateMultiInto(result, prismNodes);
 
     return result;
+}
+
+// Translates the given Prism elements, and appends them to the given `NodeVec` of Sorbet nodes.
+void Translator::translateMultiInto(NodeVec &outSorbetNodes, absl::Span<pm_node_t *> prismNodes) {
+    for (auto &prismNode : prismNodes) {
+        unique_ptr<parser::Node> sorbetNode = translate(prismNode);
+        outSorbetNodes.emplace_back(std::move(sorbetNode));
+    }
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
@@ -840,10 +823,7 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, size_t extra
     auto prismArgs = absl::MakeSpan(argsNode->arguments.nodes, argsNode->arguments.size);
     results.reserve(prismArgs.size() + extraCapacity);
 
-    for (auto &prismArg : prismArgs) {
-        unique_ptr<parser::Node> sorbetArg = translate(prismArg);
-        results.emplace_back(std::move(sorbetArg));
-    }
+    translateMultiInto(results, prismArgs);
 
     return results;
 }
