@@ -32,9 +32,7 @@ public:
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
-
     parser::NodeVec translateMulti(pm_node_list prismNodes);
-    parser::NodeVec translateMulti(absl::Span<pm_node_t *> prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
     NodeVec translateArguments(pm_arguments_node *node, size_t extraCapacity = 0);

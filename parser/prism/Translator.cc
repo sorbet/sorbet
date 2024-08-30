@@ -785,13 +785,9 @@ std::unique_ptr<parser::Node> Translator::translate(const Node &node) {
 }
 
 // Translates a Prism node list into a new `NodeVec` of legacy parser nodes.
-parser::NodeVec Translator::translateMulti(pm_node_list prismNodes) {
-    auto span = absl::MakeSpan(prismNodes.nodes, prismNodes.size);
-    return translateMulti(span);
-}
+parser::NodeVec Translator::translateMulti(pm_node_list nodeList) {
+    auto prismNodes = absl::MakeSpan(nodeList.nodes, nodeList.size);
 
-// Translates a Span of Prism nodes into a new `NodeVec` of legacy parser nodes.
-parser::NodeVec Translator::translateMulti(absl::Span<pm_node_t *> prismNodes) {
     parser::NodeVec result;
 
     // Pre-allocate the exactly capacity we're going to need, to prevent growth reallocations.
@@ -868,19 +864,16 @@ std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
-    if (stmtsNode == nullptr) {
+    if (stmtsNode == nullptr)
         return nullptr;
-    }
-
-    auto prismStmts = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
 
     // For a single statement, do not create a `Begin` node and just return the statement, if that's enabled.
-    if (inlineIfSingle && prismStmts.size() == 1) {
-        return translate(reinterpret_cast<pm_node_t *>(prismStmts.front()));
+    if (inlineIfSingle && stmtsNode->body.size == 1) {
+        return translate(stmtsNode->body.nodes[0]);
     }
 
     // For multiple statements, convert each statement and add them to the body of a Begin node
-    parser::NodeVec sorbetStmts = translateMulti(prismStmts);
+    parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
     return make_unique<parser::Begin>(parser.translateLocation(&stmtsNode->base.location), std::move(sorbetStmts));
 }
