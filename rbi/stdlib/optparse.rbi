@@ -796,6 +796,7 @@ class OptionParser
   # for an explanation of parameters.
   sig do
     params(
+      short: String,
       type: T.any(T.class_of(TrueClass), T.class_of(FalseClass)),
       opts: T.untyped,
       block: T.nilable(T.proc.params(arg0: T::Boolean).void)
@@ -804,6 +805,7 @@ class OptionParser
   end
   sig do
     params(
+      short: String,
       type: T.any(T.class_of(Shellwords), T.class_of(Array)),
       opts: T.untyped,
       block: T.nilable(T.proc.params(arg0: T::Array[String]).void)
@@ -813,6 +815,38 @@ class OptionParser
   sig do
     type_parameters(:Type)
       .params(
+        short: String,
+        type: T::Class[T.type_parameter(:Type)],
+        opts: T.untyped,
+        block: T.nilable(T.proc.params(arg0: T.type_parameter(:Type)).void)
+      )
+      .returns(T.untyped)
+  end
+  sig do
+    params(
+      short: String,
+      long: String,
+      type: T.any(T.class_of(TrueClass), T.class_of(FalseClass)),
+      opts: T.untyped,
+      block: T.nilable(T.proc.params(arg0: T::Boolean).void)
+    )
+      .returns(T.untyped)
+  end
+  sig do
+    params(
+      short: String,
+      long: String,
+      type: T.any(T.class_of(Shellwords), T.class_of(Array)),
+      opts: T.untyped,
+      block: T.nilable(T.proc.params(arg0: T::Array[String]).void)
+    )
+      .returns(T.untyped)
+  end
+  sig do
+    type_parameters(:Type)
+      .params(
+        short: String,
+        long: String,
         type: T::Class[T.type_parameter(:Type)],
         opts: T.untyped,
         block: T.nilable(T.proc.params(arg0: T.type_parameter(:Type)).void)
@@ -820,7 +854,7 @@ class OptionParser
       .returns(T.untyped)
   end
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
-  def on(type=T.unsafe(nil), *opts, &block); end
+  def on(short=T.unsafe(nil), long=T.unsafe(nil), type=T.unsafe(nil), *opts, &block); end
 
   # Also aliased as:
   # [`def_head_option`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-def_head_option)
