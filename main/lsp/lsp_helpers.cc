@@ -281,6 +281,41 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
         }
 
         // Handle multi-line sig block
+        else if (absl::StartsWith(line, "}")) {
+            // ASSUMPTION: We either hit the start of file or a `sig {`.
+            //
+            // Note that this will not properly handle brace blocks where the
+            // closing brace is not on its own line, such as
+            // ```
+            // sig { params(foo: Foo)
+            //       .returns(Bar) }
+            // ```
+            it++;
+            while (
+                // SOF
+                it != all_lines.rend()
+                // Start of sig block
+                && !(absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig {") ||
+                     absl::StartsWith(absl::StripAsciiWhitespace(*it), "sig(:final) {"))
+                // Invalid closing brace
+                && !absl::StartsWith(absl::StripAsciiWhitespace(*it), "}")) {
+                it++;
+            };
+
+            // We have either
+            // 1) Reached the start of the file
+            // 2) Found a `sig {`
+            // 3) Found an invalid closing brace
+            if (it == all_lines.rend() || absl::StartsWith(absl::StripAsciiWhitespace(*it), "}")) {
+                break;
+            }
+
+            // Reached a sig block.
+            line = absl::StripAsciiWhitespace(*it);
+            ENFORCE(absl::StartsWith(line, "sig {") || absl::StartsWith(line, "sig(:final) {"));
+        }
+
+        // Handle multi-line sig block
         else if (absl::StartsWith(line, "end")) {
             // ASSUMPTION: We either hit the start of file, a `sig do`/`sig(:final) do` or an `end`
             it++;
