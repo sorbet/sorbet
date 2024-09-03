@@ -551,7 +551,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Return>(parser.translateLocation(loc), std::move(returnValues));
         }
         case PM_SELF_NODE: {
-            auto selfNode = reinterpret_cast<pm_singleton_class_node *>(node);
+            auto selfNode = reinterpret_cast<pm_self_node *>(node);
             pm_location_t *loc = &selfNode->base.location;
 
             return make_unique<parser::Self>(parser.translateLocation(loc));
