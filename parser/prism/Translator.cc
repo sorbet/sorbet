@@ -550,6 +550,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Return>(parser.translateLocation(loc), std::move(returnValues));
         }
+        case PM_RETRY_NODE: { // The `retry` keyword
+            return translateSimpleKeyword<pm_retry_node, parser::Retry>(node);
+        }
         case PM_SELF_NODE: { // The `self` keyword
             auto selfNode = reinterpret_cast<pm_self_node *>(node);
             pm_location_t *loc = &selfNode->base.location;
@@ -751,7 +754,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PRE_EXECUTION_NODE:
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
-        case PM_RETRY_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SOURCE_ENCODING_NODE:
         case PM_SOURCE_LINE_NODE:
