@@ -483,6 +483,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Rational>(parser.translateLocation(loc), value);
         }
+        case PM_REDO_NODE: { // The `redo` keyword
+            return translateSimpleKeyword<pm_redo_node, parser::Redo>(node);
+        }
         case PM_REGULAR_EXPRESSION_NODE: {
             auto regularExpressionNode = reinterpret_cast<pm_regular_expression_node *>(node);
             pm_location_t *loc = &regularExpressionNode->base.location;
@@ -746,7 +749,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PINNED_VARIABLE_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_REDO_NODE:
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_RETRY_NODE:
