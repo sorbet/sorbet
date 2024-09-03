@@ -574,6 +574,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::SClass>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                std::move(expr), std::move(body));
         }
+        case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
+            return translateSimpleKeyword<pm_source_encoding_node, parser::EncodingLiteral>(node);
+        }
         case PM_SOURCE_FILE_NODE: { // The `__FILE__` keyword
             return translateSimpleKeyword<pm_source_file_node, parser::FileLiteral>(node);
         }
@@ -755,7 +758,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
-        case PM_SOURCE_ENCODING_NODE:
         case PM_SOURCE_LINE_NODE:
         case PM_UNDEF_NODE:
         case PM_X_STRING_NODE:
