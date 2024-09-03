@@ -289,6 +289,25 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
             return translateSimpleKeyword<pm_forwarding_super_node, parser::ZSuper>(node);
         }
+        case PM_GLOBAL_VARIABLE_READ_NODE: {
+            auto globalVarReadNode = reinterpret_cast<pm_global_variable_read_node *>(node);
+            pm_location_t *loc = &globalVarReadNode->base.location;
+
+            std::string_view name = parser.resolveConstant(globalVarReadNode->name);
+
+            return make_unique<parser::GVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
+        case PM_GLOBAL_VARIABLE_WRITE_NODE: {
+            auto globalVarWriteNode = reinterpret_cast<pm_global_variable_write_node *>(node);
+            pm_location_t *loc = &globalVarWriteNode->base.location;
+
+            std::string_view gvarName = parser.resolveConstant(globalVarWriteNode->name);
+            auto lhs = make_unique<parser::GVarLhs>(parser.translateLocation(&globalVarWriteNode->name_loc),
+                                                    gs.enterNameUTF8(gvarName));
+            auto rhs = translate(globalVarWriteNode->value);
+
+            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+        }
         case PM_HASH_NODE: {
             auto usedForKeywordArgs = false;
             return translateHash(node, reinterpret_cast<pm_hash_node *>(node)->elements, usedForKeywordArgs);
@@ -768,9 +787,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE:
         case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_GLOBAL_VARIABLE_OR_WRITE_NODE:
-        case PM_GLOBAL_VARIABLE_READ_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:
-        case PM_GLOBAL_VARIABLE_WRITE_NODE:
         case PM_HASH_PATTERN_NODE:
         case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
