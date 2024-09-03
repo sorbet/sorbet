@@ -1,10 +1,12 @@
-autocorrect-strict.rb:8: Unsupported literal in type syntax https://srb.help/5003
+autocorrect-strict.rb:8: Unsupported literal in type syntax https://srb.help/5077
      8 |  sig {returns(nil)}
                        ^^^
   Autocorrect: Done
     autocorrect-strict.rb:8: Replaced with `NilClass`
      8 |  sig {returns(nil)}
                        ^^^
+  Note:
+    Sorbet does not allow literal values in types. Consider defining a `T::Enum` instead.
 
 autocorrect-strict.rb:13: Use `T::Array[...]`, not `Array[...]` to declare a typed `Array` https://srb.help/5026
     13 |  sig {returns(Array[Integer])}
