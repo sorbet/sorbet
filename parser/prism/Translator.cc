@@ -226,6 +226,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Float>(parser.translateLocation(loc), std::to_string(floatNode->value));
         }
+        case PM_FORWARDING_PARAMETER_NODE: { // The `...` in `def foo(...)`
+            return translateSimpleKeyword<pm_forwarding_parameter_node, parser::ForwardArg>(node);
+        }
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
             return translateSimpleKeyword<pm_forwarding_super_node, parser::ZSuper>(node);
         }
@@ -699,7 +702,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
         case PM_FORWARDING_ARGUMENTS_NODE:
-        case PM_FORWARDING_PARAMETER_NODE:
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE:
         case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_GLOBAL_VARIABLE_OR_WRITE_NODE:
