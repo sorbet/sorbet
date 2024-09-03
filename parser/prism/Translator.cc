@@ -21,6 +21,32 @@ template <typename... TArgs>
     }
 }
 
+template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
+std::unique_ptr<SorbetAssignmentNode> Translator::translateAssignment(pm_node_t *untypedNode) {
+    static_assert(
+        std::is_same_v<SorbetAssignmentNode, parser::OpAsgn> || std::is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
+            std::is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
+        "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
+
+    auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
+    auto *loc = &node->base.location;
+    auto *nameLoc = &node->name_loc;
+
+    auto name = parser.resolveConstant(node->name);
+    auto lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), gs.enterNameUTF8(name));
+    auto rhs = translate(node->value);
+
+    if constexpr (std::is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
+        auto *opLoc = &node->binary_operator_loc;
+        auto op = parser.resolveConstant(node->binary_operator);
+
+        return make_unique<parser::OpAsgn>(parser.translateLocation(loc), std::move(lhs), gs.enterNameUTF8(op),
+                                           parser.translateLocation(opLoc), std::move(rhs));
+    } else {
+        return make_unique<SorbetAssignmentNode>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+    }
+}
+
 std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
