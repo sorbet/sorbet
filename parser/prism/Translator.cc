@@ -186,6 +186,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                               std::move(name), std::move(superclass), std::move(body));
         }
+        case PM_CLASS_VARIABLE_AND_WRITE_NODE: {
+            return translateAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
+        }
+        case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE: {
+            return translateAssignment<pm_class_variable_operator_write_node, parser::OpAsgn, parser::CVarLhs>(node);
+        }
+        case PM_CLASS_VARIABLE_OR_WRITE_NODE: {
+            return translateAssignment<pm_class_variable_or_write_node, parser::OrAsgn, parser::CVarLhs>(node);
+        }
         case PM_CLASS_VARIABLE_READ_NODE: {
             auto classVarNode = reinterpret_cast<pm_class_variable_read_node *>(node);
             pm_location_t *loc = &classVarNode->base.location;
@@ -739,9 +748,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CASE_MATCH_NODE:
-        case PM_CLASS_VARIABLE_AND_WRITE_NODE:
-        case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE:
-        case PM_CLASS_VARIABLE_OR_WRITE_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
         case PM_CONSTANT_AND_WRITE_NODE:
         case PM_CONSTANT_OPERATOR_WRITE_NODE:
