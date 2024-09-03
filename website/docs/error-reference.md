@@ -3146,6 +3146,55 @@ mean `T.nilable(T.any(X, Y))` (which would also be the same as
 See [Nilable Types](nilable-types.md) and [Union Types](union-types.md) for more
 information.
 
+## 5077
+
+Sorbet does not allow value literals in type syntax. None of these are allowed:
+
+```ruby
+# ❌NOT SUPPORTED ❌
+T.any(:left, :right)
+T.any(1, 2, 3)
+T.any('foo', 'bar')
+```
+
+There are two options:
+
+- Widen the type to whatever type underlies the literal, like `Symbol` or
+  `Integer` or `String`, and check the values at runtime (not statically in the
+  type system).
+
+  ```ruby
+  sig { params(direction: Symbol).void }
+  def move(direction)
+    if ![:left, :right].include?(direction)
+      raise ArgumentError.new("Bad direction: #{direction}")
+    end
+    # ...
+  end
+  ```
+
+- Define a [`T::Enum`](tenum.md) and use that instead, which requires converting
+  to and from the literal type when calling the method:
+
+  ```ruby
+  class Direction < T::Enum
+    enums do
+      Left = new(:left)
+      Right = new(:right)
+    end
+  end
+
+  sig { params(direction: Direction).void }
+  def move(direction)
+    # ...
+    direction_symbol = direction.serialize
+  end
+
+  direction_symbol = # ...
+  direction = Direction.deserialize(direction_symbol)
+  move(direction)
+  ```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside

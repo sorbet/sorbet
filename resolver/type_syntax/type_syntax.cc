@@ -1510,9 +1510,11 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
         } else {
             underlying = lit.value;
         }
-        if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
+        if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::UnsupportedLiteralType)) {
             e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
             e.replaceWith("Replace with underlying type", ctx.locAt(lit.loc), "{}", underlying.show(ctx));
+            e.addErrorNote("Sorbet does not allow literal values in types. Consider defining a `{}` instead.",
+                           "T::Enum");
         }
         result.type = underlying;
     } else {
