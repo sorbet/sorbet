@@ -186,6 +186,25 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                               std::move(name), std::move(superclass), std::move(body));
         }
+        case PM_CLASS_VARIABLE_READ_NODE: {
+            auto classVarNode = reinterpret_cast<pm_class_variable_read_node *>(node);
+            pm_location_t *loc = &classVarNode->base.location;
+
+            std::string_view name = parser.resolveConstant(classVarNode->name);
+
+            return make_unique<parser::CVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+        }
+        case PM_CLASS_VARIABLE_WRITE_NODE: {
+            auto classVarNode = reinterpret_cast<pm_class_variable_write_node *>(node);
+            pm_location_t *loc = &classVarNode->base.location;
+
+            std::string_view cvarName = parser.resolveConstant(classVarNode->name);
+            auto lhs = make_unique<parser::CVarLhs>(parser.translateLocation(&classVarNode->name_loc),
+                                                    gs.enterNameUTF8(cvarName));
+            auto rhs = translate(classVarNode->value);
+
+            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+        }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
             auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
@@ -723,9 +742,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CLASS_VARIABLE_AND_WRITE_NODE:
         case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE:
         case PM_CLASS_VARIABLE_OR_WRITE_NODE:
-        case PM_CLASS_VARIABLE_READ_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
-        case PM_CLASS_VARIABLE_WRITE_NODE:
         case PM_CONSTANT_AND_WRITE_NODE:
         case PM_CONSTANT_OPERATOR_WRITE_NODE:
         case PM_CONSTANT_OR_WRITE_NODE:
