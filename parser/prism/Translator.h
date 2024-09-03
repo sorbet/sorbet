@@ -41,6 +41,9 @@ private:
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
                                                          std::unique_ptr<parser::Send> sendNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
+
+    template <typename PrismNode, typename SorbetNode>
+    std::unique_ptr<SorbetNode> translateSimpleKeyword(pm_node_t *untypedNode);
 };
 
 } // namespace sorbet::parser::Prism
