@@ -580,6 +580,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_FILE_NODE: { // The `__FILE__` keyword
             return translateSimpleKeyword<pm_source_file_node, parser::FileLiteral>(node);
         }
+        case PM_SOURCE_LINE_NODE: { // The `__LINE__` keyword
+            return translateSimpleKeyword<pm_source_line_node, parser::LineLiteral>(node);
+        }
         case PM_SPLAT_NODE: {
             auto splatNode = reinterpret_cast<pm_splat_node *>(node);
             pm_location_t *loc = &splatNode->base.location;
@@ -758,7 +761,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
-        case PM_SOURCE_LINE_NODE:
         case PM_UNDEF_NODE:
         case PM_X_STRING_NODE:
         case PM_SCOPE_NODE:
