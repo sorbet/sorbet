@@ -289,6 +289,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
             return translateSimpleKeyword<pm_forwarding_super_node, parser::ZSuper>(node);
         }
+        case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: {
+            return translateAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
+        }
+        case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE: {
+            return translateAssignment<pm_global_variable_operator_write_node, parser::OpAsgn, parser::GVarLhs>(node);
+        }
+        case PM_GLOBAL_VARIABLE_OR_WRITE_NODE: {
+            return translateAssignment<pm_global_variable_or_write_node, parser::OrAsgn, parser::GVarLhs>(node);
+        }
         case PM_GLOBAL_VARIABLE_READ_NODE: {
             auto globalVarReadNode = reinterpret_cast<pm_global_variable_read_node *>(node);
             pm_location_t *loc = &globalVarReadNode->base.location;
@@ -784,9 +793,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FIND_PATTERN_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
-        case PM_GLOBAL_VARIABLE_AND_WRITE_NODE:
-        case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE:
-        case PM_GLOBAL_VARIABLE_OR_WRITE_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:
         case PM_HASH_PATTERN_NODE:
         case PM_IMAGINARY_NODE:

@@ -1,0 +1,118 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = GVarLhs {
+        name = <U $regular>
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $bitwise_and>
+      }
+      op = <U &>
+      right = Integer {
+        val = "2"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $bitwise_xor>
+      }
+      op = <U ^>
+      right = Integer {
+        val = "4"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $shift_right>
+      }
+      op = <U >>>
+      right = Integer {
+        val = "5"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $shift_left>
+      }
+      op = <U <<>
+      right = Integer {
+        val = "6"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $subtract_assign>
+      }
+      op = <U ->
+      right = Integer {
+        val = "7"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $module_assign>
+      }
+      op = <U %>
+      right = Integer {
+        val = "8"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $bitwise_or>
+      }
+      op = <U |>
+      right = Integer {
+        val = "9"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $divide_assign>
+      }
+      op = <U />
+      right = Integer {
+        val = "10"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $multiply_assign>
+      }
+      op = <U *>
+      right = Integer {
+        val = "11"
+      }
+    }
+    OpAsgn {
+      left = GVarLhs {
+        name = <U $exponentiate_assign>
+      }
+      op = <U **>
+      right = Integer {
+        val = "12"
+      }
+    }
+    AndAsgn {
+      left = GVarLhs {
+        name = <U $lazy_and_assign>
+      }
+      right = Integer {
+        val = "13"
+      }
+    }
+    OrAsgn {
+      left = GVarLhs {
+        name = <U $lazy_or_assgin>
+      }
+      right = Integer {
+        val = "14"
+      }
+    }
+  ]
+}
