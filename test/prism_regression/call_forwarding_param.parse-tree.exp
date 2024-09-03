@@ -1,0 +1,17 @@
+DefMethod {
+  name = <U foo>
+  args = Args {
+    args = [
+      ForwardArg {
+      }
+    ]
+  }
+  body = Send {
+    receiver = NULL
+    method = <U bar>
+    args = [
+      ForwardedArgs {
+      }
+    ]
+  }
+}
