@@ -340,6 +340,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
         }
+        case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: {
+            return translateAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
+        }
+        case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE: {
+            return translateAssignment<pm_instance_variable_operator_write_node, parser::OpAsgn, parser::IVarLhs>(node);
+        }
+        case PM_INSTANCE_VARIABLE_OR_WRITE_NODE: {
+            return translateAssignment<pm_instance_variable_or_write_node, parser::OrAsgn, parser::IVarLhs>(node);
+        }
         case PM_INSTANCE_VARIABLE_READ_NODE: {
             auto instanceVarNode = reinterpret_cast<pm_instance_variable_read_node *>(node);
             pm_location_t *loc = &instanceVarNode->base.location;
@@ -810,9 +819,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INDEX_OPERATOR_WRITE_NODE:
         case PM_INDEX_OR_WRITE_NODE:
         case PM_INDEX_TARGET_NODE:
-        case PM_INSTANCE_VARIABLE_AND_WRITE_NODE:
-        case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE:
-        case PM_INSTANCE_VARIABLE_OR_WRITE_NODE:
         case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
