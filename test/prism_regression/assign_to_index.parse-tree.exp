@@ -1,0 +1,259 @@
+Begin {
+  stmts = [
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U regular>
+        args = [
+        ]
+      }
+      method = <U []=>
+      args = [
+        Integer {
+          val = "0"
+        }
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_and>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U &>
+      right = Integer {
+        val = "2"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_xor>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U ^>
+      right = Integer {
+        val = "4"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_right>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U >>>
+      right = Integer {
+        val = "5"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U shift_left>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U <<>
+      right = Integer {
+        val = "6"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U subtract_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U ->
+      right = Integer {
+        val = "7"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U module_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U %>
+      right = Integer {
+        val = "8"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U bitwise_or>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U |>
+      right = Integer {
+        val = "9"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U divide_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U />
+      right = Integer {
+        val = "10"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U multiply_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U *>
+      right = Integer {
+        val = "11"
+      }
+    }
+    OpAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U exponentiate_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      op = <U **>
+      right = Integer {
+        val = "12"
+      }
+    }
+    AndAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U lazy_and_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      right = Integer {
+        val = "13"
+      }
+    }
+    OrAsgn {
+      left = Send {
+        receiver = Send {
+          receiver = NULL
+          method = <U lazy_or_assign>
+          args = [
+          ]
+        }
+        method = <U []>
+        args = [
+          Integer {
+            val = "0"
+          }
+        ]
+      }
+      right = Integer {
+        val = "14"
+      }
+    }
+  ]
+}

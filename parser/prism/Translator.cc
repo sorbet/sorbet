@@ -30,11 +30,24 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateAssignment(pm_node_t 
 
     auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
     auto *loc = &node->base.location;
-    auto *nameLoc = &node->name_loc;
 
-    auto name = parser.resolveConstant(node->name);
-    auto lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), gs.enterNameUTF8(name));
+    unique_ptr<parser::Node> lhs;
     auto rhs = translate(node->value);
+
+    if constexpr (std::is_same_v<PrismAssignmentNode, pm_index_operator_write_node> ||
+                  std::is_same_v<PrismAssignmentNode, pm_index_and_write_node> ||
+                  std::is_same_v<PrismAssignmentNode, pm_index_or_write_node>) {
+        auto *openingLoc = &node->opening_loc;
+        auto receiver = translate(node->receiver);
+        auto args = translateArguments(node->arguments);
+        lhs =
+            make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), core::Names::squareBrackets(),
+                                      parser.translateLocation(openingLoc), std::move(args));
+    } else {
+        auto *nameLoc = &node->name_loc;
+        auto name = parser.resolveConstant(node->name);
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), gs.enterNameUTF8(name));
+    }
 
     if constexpr (std::is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
         auto *opLoc = &node->binary_operator_loc;
@@ -339,6 +352,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
+        }
+        case PM_INDEX_AND_WRITE_NODE: {
+            return translateAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
+        }
+        case PM_INDEX_OPERATOR_WRITE_NODE: {
+            return translateAssignment<pm_index_operator_write_node, parser::OpAsgn, void>(node);
+        }
+        case PM_INDEX_OR_WRITE_NODE: {
+            return translateAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: {
             return translateAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
@@ -824,9 +846,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_IN_NODE:
-        case PM_INDEX_AND_WRITE_NODE:
-        case PM_INDEX_OPERATOR_WRITE_NODE:
-        case PM_INDEX_OR_WRITE_NODE:
         case PM_INDEX_TARGET_NODE:
         case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
