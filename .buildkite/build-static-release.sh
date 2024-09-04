@@ -35,23 +35,24 @@ echo will run with $CONFIG_OPTS
 case "$platform" in
   darwin-x86_64|darwin-arm64)
     TARGET_PLATFORM=darwin-x86_64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
-    mv bazel-bin/main/sorbet sorbet_x86_64
+    cp bazel-bin/main/sorbet sorbet_x86_64
 
     ./bazel clean --expunge
 
     TARGET_PLATFORM=darwin-arm64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
-    mv bazel-bin/main/sorbet sorbet_arm64
+    cp bazel-bin/main/sorbet sorbet_arm64
 
-    lipo -create -output bazel-bin/main/sorbet sorbet_x86_64 sorbet_arm64
+    lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
     rm sorbet_x86_64 sorbet_arm64
     ;;
   *)
     ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    cp bazel-bin/main/sorbet sorbet_bin
     ;;
 esac
 
 mkdir gems/sorbet-static/libexec/
-cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
+cp sorbet_bin gems/sorbet-static/libexec/sorbet
 
 rbenv install --skip-existing
 
