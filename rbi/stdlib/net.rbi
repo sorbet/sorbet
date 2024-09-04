@@ -2254,6 +2254,7 @@ class Net::HTTP < Net::Protocol
   # The default port to use for
   # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests;
   # defaults to 80.
+  sig { returns(Integer) }
   def self.default_port(); end
 
   # Sends a GET request to the target and returns the
@@ -2270,7 +2271,10 @@ class Net::HTTP < Net::Protocol
   # ```ruby
   # print Net::HTTP.get('www.example.com', '/index.html')
   # ```
-  def self.get(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil)); end
+  sig { params(uri_or_host: URI::Generic).returns(T.nilable(String)) }
+  sig { params(uri_or_host: URI::Generic, path_or_header: T.nilable(T::Hash[T.any(String, Symbol), String])).returns(T.nilable(String)) }
+  sig { params(uri_or_host: String, path_or_header: String, port: T.nilable(Integer)).returns(T.nilable(String)) }
+  def self.get(uri_or_host, path_or_header, port=nil); end
 
   # Gets the body text from the target and outputs it to $stdout. The target can
   # either be specified as (`uri`), or as (`host`, `path`, `port` = 80); so:
@@ -2284,7 +2288,10 @@ class Net::HTTP < Net::Protocol
   # ```ruby
   # Net::HTTP.get_print 'www.example.com', '/index.html'
   # ```
-  def self.get_print(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil)); end
+  sig { params(uri_or_host: URI::Generic).void }
+  sig { params(uri_or_host: URI::Generic, path_or_header: T.nilable(T::Hash[T.any(String, Symbol), String])).void }
+  sig { params(uri_or_host: String, path_or_header: String, port: T.nilable(Integer)).void }
+  def self.get_print(uri_or_host, path_or_header, port=nil); end
 
   # Sends a GET request to the target and returns the
   # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) response as a
@@ -2303,14 +2310,19 @@ class Net::HTTP < Net::Protocol
   # res = Net::HTTP.get_response('www.example.com', '/index.html')
   # print res.body
   # ```
-  def self.get_response(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil), &block); end
+  sig { params(uri_or_host: URI::Generic).returns(Net::HTTPResponse) }
+  sig { params(uri_or_host: URI::Generic, path_or_header: T.nilable(T::Hash[T.any(String, Symbol), String])).returns(Net::HTTPResponse) }
+  sig { params(uri_or_host: String, path_or_header: String, port: T.nilable(Integer)).returns(Net::HTTPResponse) }
+  def self.get_response(uri_or_host, path_or_header, port=nil, &block); end
 
   # The default port to use for
   # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests;
   # defaults to 80.
+  sig { returns(Integer) }
   def self.http_default_port(); end
 
   # The default port to use for HTTPS requests; defaults to 443.
+  sig { returns(Integer) }
   def self.https_default_port(); end
 
   def self.is_version_1_1?(); end
@@ -3253,6 +3265,7 @@ class Net::HTTPResponse
   #
   # Also aliased as:
   # [`entity`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html#method-i-entity)
+  sig { returns(T.nilable(String)) }
   def body(); end
 
   # Because it may be necessary to modify the body, Eg, decompression this
