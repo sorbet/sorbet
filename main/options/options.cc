@@ -3,6 +3,8 @@
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
 
+#include "absl/algorithm/container.h"
+#include "absl/strings/numbers.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/concurrency/WorkerPool.h"
@@ -15,12 +17,72 @@
 #include "main/options/options.h"
 #include "options.h"
 #include "sorbet_version/sorbet_version.h"
-#include "sys/stat.h"
 #include "third_party/licenses/licenses.h"
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
 namespace sorbet::realmain::options {
+
+enum class Group {
+    INPUT,
+    OUTPUT,
+    AUTOCORRECT,
+    ERROR,
+    METRIC,
+    LSP,
+    LSP_FEATURE,
+    PERFORMANCE,
+    STRIPE_PACKAGES_MODE,
+    STRIPE_AUTOGEN,
+    DEBUGGING,
+    INTERNAL,
+    OTHER,
+};
+
+string groupToString(Group group) {
+    switch (group) {
+        case Group::INPUT:
+            return "INPUT";
+        case Group::OUTPUT:
+            return "OUTPUT";
+        case Group::AUTOCORRECT:
+            return "AUTOCORRECT";
+        case Group::ERROR:
+            return "ERROR";
+        case Group::METRIC:
+            return "METRIC";
+        case Group::LSP:
+            return "LSP";
+        case Group::LSP_FEATURE:
+            return "LSP FEATURE";
+        case Group::PERFORMANCE:
+            return "PERFORMANCE";
+        case Group::STRIPE_PACKAGES_MODE:
+            return "STRIPE PACKAGES MODE";
+        case Group::STRIPE_AUTOGEN:
+            return "STRIPE AUTOGEN";
+        case Group::DEBUGGING:
+            return "DEBUGGING";
+        case Group::INTERNAL:
+            return "INTERNAL";
+        case Group::OTHER:
+            return "OTHER";
+    }
+}
+
+// All sections, in order.
+// Otherwise, in the help output cxxopts will sort the sections by name.
+const vector<string> groupSections{
+    groupToString(Group::INPUT),          groupToString(Group::OUTPUT),      groupToString(Group::AUTOCORRECT),
+    groupToString(Group::ERROR),          groupToString(Group::METRIC),      groupToString(Group::LSP),
+    groupToString(Group::LSP_FEATURE),    groupToString(Group::PERFORMANCE), groupToString(Group::STRIPE_PACKAGES_MODE),
+    groupToString(Group::STRIPE_AUTOGEN), groupToString(Group::DEBUGGING),   groupToString(Group::INTERNAL),
+    groupToString(Group::OTHER),
+};
+
 struct PrintOptions {
     string option;
     PrinterConfig Printers::*config;
@@ -32,6 +94,9 @@ struct PrintOptions {
     // If false, printer is responsible for flushing its own output.
     // Otherwise, just using opts.print.MyPrinter.print(...) with a string will be enough.
     bool supportsFlush = true;
+
+    // Whether users can consider this output stable, or whether it's for internal-use only.
+    bool stable = false;
 };
 
 const vector<PrintOptions> print_options({
@@ -66,20 +131,20 @@ const vector<PrintOptions> print_options({
     {"symbol-table-full-json", &Printers::SymbolTableFullJson},
     {"symbol-table-full-proto", &Printers::SymbolTableFullProto},
     {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
-    {"file-table-json", &Printers::FileTableJson},
-    {"file-table-proto", &Printers::FileTableProto},
-    {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
-    {"file-table-full-json", &Printers::FileTableFullJson},
-    {"file-table-full-proto", &Printers::FileTableFullProto},
-    {"file-table-full-messagepack", &Printers::FileTableFullMessagePack, true, false},
-    {"missing-constants", &Printers::MissingConstants},
+    {"file-table-json", &Printers::FileTableJson, true, true, true},
+    {"file-table-proto", &Printers::FileTableProto, true, true, true},
+    {"file-table-messagepack", &Printers::FileTableMessagePack, true, false, true},
+    {"file-table-full-json", &Printers::FileTableFullJson, true, true, true},
+    {"file-table-full-proto", &Printers::FileTableFullProto, true, true, true},
+    {"file-table-full-messagepack", &Printers::FileTableFullMessagePack, true, false, true},
+    {"missing-constants", &Printers::MissingConstants, true, true, true},
     {"autogen", &Printers::Autogen},
     {"autogen-msgpack", &Printers::AutogenMsgPack},
     {"autogen-subclasses", &Printers::AutogenSubclasses},
     {"package-tree", &Printers::Packager, false},
     {"minimized-rbi", &Printers::MinimizeRBI},
-    {"payload-sources", &Printers::PayloadSources},
-    {"untyped-blame", &Printers::UntypedBlame},
+    {"payload-sources", &Printers::PayloadSources, true, true, true},
+    {"untyped-blame", &Printers::UntypedBlame, true, true, true},
 });
 
 PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
@@ -255,16 +320,16 @@ UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileNa
     return result;
 }
 
-void buildAutogenCacheOptions(cxxopts::Options &options) {
-    options.add_options("advanced")("autogen-constant-cache-file",
-                                    "Location of the cache file used to determine if it's safe to skip autogen. If "
-                                    "this is not provided, autogen will always run.",
-                                    cxxopts::value<string>()->default_value(""));
-    options.add_options("advanced")("autogen-changed-files",
-                                    "List of files which have changed since the last autogen run. If a cache file is "
-                                    "also provided, autogen may exit early if it determines that these files could "
-                                    "not have affected the output of autogen.",
-                                    cxxopts::value<vector<string>>());
+void buildAutogenCacheOptions(cxxopts::Options &options, const string &section) {
+    options.add_options(section)("autogen-constant-cache-file",
+                                 "Location of the cache file used to determine if it's safe to skip autogen. If "
+                                 "this is not provided, autogen will always run.",
+                                 cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("autogen-changed-files",
+                                 "List of files which have changed since the last autogen run. If a cache file is "
+                                 "also provided, autogen may exit early if it determines that these files could "
+                                 "not have affected the output of autogen.",
+                                 cxxopts::value<vector<string>>());
 }
 
 cxxopts::Options
@@ -272,291 +337,402 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // Used to populate default options.
     Options empty;
 
-    cxxopts::Options options("sorbet", "Typechecker for Ruby");
+    cxxopts::Options options("sorbet", "Sorbet: A fast, powerful typechecker designed for Ruby");
+    string section;
 
-    // Common user options in order of use
-    options.add_options()("e", "Parse an inline ruby string",
-                          cxxopts::value<string>()->default_value(empty.inlineInput), "string");
-    options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
-    options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("v,verbose", "Verbosity level [0-3]");
-    options.add_options()("h", "Show short help");
-    options.add_options()("help", "Show long help");
-    options.add_options()("version", "Show version");
+    struct winsize w;
+    unsigned short defaultCols = 100;
+    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &w) != -1) {
+        defaultCols = std::min(defaultCols, w.ws_col);
+    }
+    options.set_width(defaultCols);
 
-    fmt::memory_buffer all_prints;
+    // ----- INPUT -------------------------------------------------------- {{{
+    section = groupToString(Group::INPUT);
+    options.add_options(section)("files", "Input files", cxxopts::value<vector<string>>());
+    options.parse_positional("files");
+    options.custom_help("[options]");
+    options.positional_help("[[--] <path>...]");
+
+    options.add_options(section)("e",
+                                 "Treat <string> as if it were the contents of a Ruby file passed on the command line",
+                                 cxxopts::value<string>()->default_value(empty.inlineInput), "<string>");
+    options.add_options(section)("e-rbi", "Like `-e`, but treat <string> as an RBI file",
+                                 cxxopts::value<string>()->default_value(empty.inlineRBIInput), "<string>");
+    options.add_options(section)("file",
+                                 "Run over the contents of <path>\n"
+                                 "(Equivalent to passing <path> as a positional argument)",
+                                 cxxopts::value<vector<string>>(), "<path>");
+    options.add_options(section)("dir",
+                                 "Run over all Ruby and RBI files in <path>, recursively\n"
+                                 "(Equivalent to passing <path> as a positional argument)",
+                                 cxxopts::value<vector<string>>(), "<path>");
+    options.add_options(section)(
+        "allowed-extension",
+        "Use these extensions to determine which file types Sorbet should discover inside directories.",
+        cxxopts::value<vector<string>>()->default_value(".rb,.rbi"), "<ext>[,<ext>...]");
+    options.add_options(section)(
+        "ignore",
+        "Ignores input files that contain <pattern> in their paths (relative to the input path passed to Sorbet).\n"
+        "When <pattern> starts with `/` it matches against the prefix of these relative paths; others match anywhere.\n"
+        "Matches must be against whole path segments, so `foo` matches `foo/bar.rb` and `bar/foo/baz.rb` but not "
+        "`foo.rb` or `foo2/bar.rb`.",
+        cxxopts::value<vector<string>>(), "<pattern>");
+    options.add_options(section)("no-config",
+                                 "Do not load the content of the `sorbet/config` file.\n"
+                                 "Otherwise, Sorbet reads the `sorbet/config` file and treats each line as if it were "
+                                 "passed on the command line, unless the line starts with `#`.\n"
+                                 "To load a <file> as if it were a config file, pass `@<file>` as a positional arg");
+    options.add_options(section)(
+        "typed",
+        "Force all code to specified strictness level, disregarding all `# typed:` sigils. For `auto`, "
+        "uses the `# typed:` sigil in the file or `false` for files without a sigil.",
+        cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
+    options.add_options(section)("typed-override",
+                                 "Read <filepath.yaml> to override the strictness of individual files.\n"
+                                 "Contents must be a map of `<strictness>: ['path1.rb', ...]` pairs.\n"
+                                 "Can be used to enable type checking for certain files temporarily without having "
+                                 "to add a comment to every file.",
+                                 cxxopts::value<string>()->default_value(""), "<filepath.yaml>");
+    // }}}
+
+    // ----- OUTPUT ------------------------------------------------------- {{{
+    section = groupToString(Group::OUTPUT);
+    // TODO(jez) What is critical error? How does this affect the exit code?
+    options.add_options(section)("q,quiet", "Silence all non-critical errors");
+    options.add_options(section)("P,progress", "Draw progressbar");
+    options.add_options(section)("color", "Use color output. For `auto`: use color if stderr is a tty",
+                                 cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
+    options.add_options(section)("no-error-count", "Do not print the `Errors: <N>` summary line");
+    options.add_options(section)(
+        "no-error-sections", "Only print the first line of every error message (suppress any additional information "
+                             "below an error). Can provide substantial speedups when dealing with many errors");
+    options.add_options(section)(
+        "error-url-base",
+        "Every error message includes a link created by prefixing that error's code with <url-base>. Can be used to "
+        "maintain docs on Sorbet error codes which are more relevant to a specific project or company.",
+        cxxopts::value<string>()->default_value(empty.errorUrlBase), "<url-base>");
+    options.add_options(section)("remove-path-prefix",
+                                 "Remove the provided <prefix> from all printed paths. Defaults to the input "
+                                 "directory passed to Sorbet, if any.",
+                                 cxxopts::value<string>()->default_value(empty.pathPrefix), "<prefix>");
+    // }}}
+
+    // ----- AUTOCORRECTS ------------------------------------------------- {{{
+    section = groupToString(Group::AUTOCORRECT);
+    options.add_options(section)(
+        "a,autocorrect", "Auto-correct source files with suggested fixes.\n"
+                         "Use the `--{isolate,suppress}-error-code` options to control which corrections to apply");
+    options.add_options(section)(
+        "suggest-unsafe",
+        "Include 'unsafe' autocorrects, e.g. those which can be fixed by wrapping code in `T.unsafe` or using "
+        "`T.untyped`. Provide a custom <method> to wrap with `<method>(...)` instead of `T.unsafe(...)`. This "
+        "supersedes certain autocorrects, especially T.must.",
+        cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
+    options.add_options(section)("did-you-mean",
+                                 "Whether to include 'Did you mean' suggestions in autocorrects. For large codemods, "
+                                 "it's usually better to avoid spurious changes by setting this to false",
+                                 cxxopts::value<bool>()->default_value("true"), "{[true],false}");
+    options.add_options(section)("suggest-typed",
+                                 "Emit autocorrects to set the `# typed:` sigil in every file to the highest possible "
+                                 "level where no errors would be reported in that file. Will downgrade the `# typed:` "
+                                 "sigil for any files with errors.");
+    // }}}
+
+    // ----- ERRORS ------------------------------------------------------- {{{
+    section = groupToString(Group::ERROR);
+    options.add_options(section)("typed-super", "Enable typechecking of `super` calls when possible",
+                                 cxxopts::value<bool>()->default_value("true"));
+    options.add_options(section)("check-out-of-order-constant-references",
+                                 "Detect when a constant is referenced early in a file, but defined later in that "
+                                 "file. Does not detect out-of-order references across file boundaries.");
+    options.add_options(section)("isolate-error-code",
+                                 "Which error(s) to include in reporting. This option can be passed multiple times. "
+                                 "All errors not mentioned will be silenced.",
+                                 cxxopts::value<vector<int>>(), "<error-code>");
+    options.add_options(section)("suppress-error-code",
+                                 "Which error(s) to exclude from reporting. This option can be passed multiple times.",
+                                 cxxopts::value<vector<int>>(), "<error-code>");
+    options.add_options(section)("suppress-payload-superclass-redefinition-for",
+                                 "Explicitly suppress the superclass redefinition error for the specified class "
+                                 "defined in Sorbet's payload. May be repeated.",
+                                 cxxopts::value<vector<string>>(), "Fully::Qualified::ClassName");
+    options.add_options(section)("experimental-ruby3-keyword-args",
+                                 "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("enable-experimental-requires-ancestor",
+                                 "Enable experimental `requires_ancestor` annotation");
+    options.add_options(section)("stripe-mode",
+                                 "Ensure that every class and module only defines 'behavior' in one file. Ensures "
+                                 "that every class or module can be autoloaded by loading exactly one file.",
+                                 cxxopts::value<bool>());
     fmt::memory_buffer all_stop_after;
+    fmt::format_to(
+        std::back_inserter(all_stop_after),
+        "Stop after completing <phase>. Can be useful for debugging. Also useful when overwhelmed with errors, because "
+        "errors from earlier phases (like resolver) can cause errors downstream (in inferencer).\n"
+        "Phases: [{}]",
+        fmt::map_join(stop_after_options, ", ", [](const auto &pr) { return pr.option; }));
+    options.add_options(section)("stop-after", to_string(all_stop_after),
+                                 cxxopts::value<string>()->default_value("inferencer"), "<phase>");
+    // }}}
 
-    fmt::format_to(std::back_inserter(all_prints), "Print: [{}]",
-                   fmt::map_join(
-                       print_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
-    fmt::format_to(std::back_inserter(all_stop_after), "Stop After: [{}]",
-                   fmt::map_join(
-                       stop_after_options, ", ", [](const auto &pr) -> auto{ return pr.option; }));
+    // ----- METRICS ------------------------------------------------------ {{{
+    section = groupToString(Group::METRIC);
+    options.add_options(section)("counters", "Print all internal counters");
+    options.add_options(section)("counter", "Print internal counter for <counter> (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<counter>");
+    options.add_options(section)(
+        "track-untyped",
+        "Include a per-file counter of untyped usages in the `--print=file-table-<format>` output. "
+        "This is in addition to the codebase-wide `types.input.untyped.usages` counter.",
+        cxxopts::value<string>()->implicit_value("everywhere"), "{[nowhere],everywhere,everywhere-but-tests}");
+    options.add_options(section)("metrics-file", "Report counters and some timers to <file>, in JSON format.",
+                                 cxxopts::value<string>()->default_value(empty.metricsFile), "<file>");
+    options.add_options(section)("metrics-prefix", "String to prefix all metrics with, e.g. `my_org.my_repo`.",
+                                 cxxopts::value<string>()->default_value(empty.metricsPrefix), "<string>");
+    options.add_options(section)("metrics-branch", "Branch to report in metrics export.",
+                                 cxxopts::value<string>()->default_value(empty.metricsBranch), "<branch>");
+    options.add_options(section)("metrics-sha", "Set the `sha` field to <sha> in the `--metrics-file` output.",
+                                 cxxopts::value<string>()->default_value(empty.metricsSha), "<sha>");
+    options.add_options(section)("metrics-repo", "Set the `repo` field to <repo> in the `--metrics-file` output.",
+                                 cxxopts::value<string>()->default_value(empty.metricsRepo), "<repo>");
+    options.add_options(section)("statsd-host", "StatsD sever hostname",
+                                 cxxopts::value<string>()->default_value(empty.statsdHost), "<host>");
+    options.add_options(section)("statsd-prefix", "StatsD prefix",
+                                 cxxopts::value<string>()->default_value(empty.statsdPrefix), "<prefix>");
+    options.add_options(section)("statsd-port", "StatsD server port",
+                                 cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "<port>");
+    options.add_options(section)("metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated.",
+                                 cxxopts::value<string>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    // }}}
 
-    // Advanced options
-    options.add_options("advanced")("e-rbi", "Parse an inline RBI string",
-                                    cxxopts::value<string>()->default_value(empty.inlineRBIInput), "string");
-    options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
-    options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
-    options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
-    options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
-                                    cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
-    options.add_options("advanced")("debug-log-file", "Path to debug log file",
-                                    cxxopts::value<string>()->default_value(empty.debugLogFile), "file");
-    options.add_options("advanced")(
-        "reserve-class-table-capacity", "Preallocate the specified number of entries in the class and modules table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveClassTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-method-table-capacity", "Preallocate the specified number of entries in the method table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveMethodTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-field-table-capacity", "Preallocate the specified number of entries in the field table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-type-argument-table-capacity",
-        "Preallocate the specified number of entries in the type argument table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-type-member-table-capacity", "Preallocate the specified number of entries in the type member table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-utf8-name-table-capacity", "Preallocate the specified number of entries in the UTF8 name table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUtf8NameTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-constant-name-table-capacity",
-        "Preallocate the specified number of entries in the constant name table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveConstantNameTableCapacity)));
-    options.add_options("advanced")(
-        "reserve-unique-name-table-capacity", "Preallocate the specified number of entries in the unique name table",
-        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUniqueNameTableCapacity)));
-    options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
-    options.add_options("advanced")("remove-path-prefix",
-                                    "Remove the provided path prefix from all printed paths. Defaults to the input "
-                                    "directory passed to Sorbet, if any.",
-                                    cxxopts::value<string>()->default_value(empty.pathPrefix), "prefix");
-    options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
-    options.add_options("advanced")("did-you-mean", "Whether to include 'Did you mean' suggestions in autocorrects",
-                                    cxxopts::value<bool>()->default_value("true"));
-    options.add_options("advanced")("P,progress", "Draw progressbar");
-    options.add_options("advanced")("license", "Show license");
-    options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
-                                    "{always,never,[auto]}");
-    options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
-    options.add_options("advanced")("no-config", "Do not load the content of the `sorbet/config` file");
-    options.add_options("advanced")("disable-watchman",
-                                    "When in language-server-protocol mode, disable file watching via Watchman");
-    options.add_options("advanced")("watchman-path",
-                                    "Path to watchman executable. Defaults to using `watchman` on your PATH.",
-                                    cxxopts::value<string>()->default_value(empty.watchmanPath));
-    options.add_options("advanced")("watchman-pause-state-name",
-                                    "Name of watchman state that halts processing for its duration",
-                                    cxxopts::value<string>()->default_value(empty.watchmanPauseStateName));
+    // ----- LSP ---------------------------------------------------------- {{{
+    section = groupToString(Group::LSP);
+    options.add_options(section)("lsp", "Start in language server protocol mode (LSP mode)");
+    options.add_options(section)(
+        "lsp-error-cap",
+        "Reports no more than <cap> diagnostics (e.g. errors and informations) to the language client, like VS Code. "
+        "Can prevent slowdown triggered by large diagnostic lists. A <cap> of 0 means no limit.",
+        cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "<cap>");
+    options.add_options(section)("disable-watchman", "When in LSP mode, disable file watching via Watchman");
+    options.add_options(section)("watchman-path",
+                                 "Path to watchman executable. Will search on `PATH` if <path> contains no slashes.",
+                                 cxxopts::value<string>()->default_value(empty.watchmanPath), "<path>");
+    options.add_options(section)("watchman-pause-state-name",
+                                 "Name of watchman state that halts processing for its duration",
+                                 cxxopts::value<string>()->default_value(empty.watchmanPauseStateName), "<state>");
+    options.add_options(section)(
+        "lsp-directories-missing-from-client",
+        "Directory prefixes that only exist where the LSP server is running, not on the client. "
+        "Useful when running Sorbet via an `ssh` connection to a remote server, where the remote server has generated "
+        "files that do not exist on the client. References to files in these directories will be sent "
+        "as `sorbet:` URIs to clients that understand them.",
+        cxxopts::value<vector<string>>(), "<path>");
+    // }}}
 
-    options.add_options("advanced")("enable-experimental-lsp-document-symbol",
-                                    "Enable experimental LSP feature: Document Symbol");
-    options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
-                                    "Enable experimental LSP feature: Document Formatting with Rubyfmt");
-    options.add_options("advanced")(
-        "rubyfmt-path",
-        "Path to the rubyfmt executable used for document formatting. Defaults to using `rubyfmt` on your PATH.",
-        cxxopts::value<string>()->default_value(empty.rubyfmtPath));
-    options.add_options("advanced")("enable-experimental-lsp-document-highlight",
-                                    "Enable experimental LSP feature: Document Highlight");
-    options.add_options("advanced")("enable-experimental-lsp-signature-help",
-                                    "Enable experimental LSP feature: Signature Help");
-    options.add_options("advanced")("enable-experimental-requires-ancestor",
-                                    "Enable experimental `requires_ancestor` annotation");
+    // ----- LSP FEATURES ------------------------------------------------- {{{
+    section = groupToString(Group::LSP_FEATURE);
+    options.add_options(section)("enable-experimental-lsp-document-formatting-rubyfmt",
+                                 "Enable experimental LSP feature: Document Formatting with Rubyfmt");
+    options.add_options(section)("rubyfmt-path",
+                                 "Path to the rubyfmt executable used for document formatting. Will search on `PATH` "
+                                 "if <path> contains no slashes.",
+                                 cxxopts::value<string>()->default_value(empty.rubyfmtPath), "<path>");
+    options.add_options(section)("enable-experimental-lsp-document-highlight",
+                                 "Enable experimental LSP feature: Document Highlight");
+    options.add_options(section)("enable-experimental-lsp-signature-help",
+                                 "Enable experimental LSP feature: Signature Help");
 
-    options.add_options("advanced")("enable-experimental-lsp-extract-to-variable",
-                                    "Enable experimental LSP feature: Extract To Variable");
-
-    options.add_options("advanced")(
+    options.add_options(section)("enable-experimental-lsp-extract-to-variable",
+                                 "Enable experimental LSP feature: Extract To Variable");
+    options.add_options(section)(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
-    options.add_options("advanced")("enable-all-beta-lsp-features",
-                                    "Enable (expected-to-be-non-crashy) early-access LSP features.");
-    options.add_options("advanced")("lsp-error-cap",
-                                    "Caps the maximum number of errors that LSP reports to the editor. Can prevent "
-                                    "editor slowdown triggered by large error lists. A cap of 0 means 'no cap'.",
-                                    cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "cap");
-    options.add_options("advanced")(
-        "ignore",
-        "Ignores input files that contain the given string in their paths (relative to the input path passed to "
-        "Sorbet). Strings beginning with / match against the prefix of these relative paths; others are substring "
-        "matches. Matches must be against whole folder and file names, so `foo` matches `/foo/bar.rb` and "
-        "`/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.",
-        cxxopts::value<vector<string>>(), "string");
-    options.add_options("advanced")(
-        "lsp-directories-missing-from-client",
-        "Directory prefixes that are not accessible editor-side. References to files in these directories will be sent "
-        "as sorbet: URIs to clients that understand them.",
-        cxxopts::value<vector<string>>(), "string");
-    options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
-    options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
-    options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
-                                    cxxopts::value<bool>());
-    options.add_options("advanced")("stripe-packages-hint-message",
-                                    "Optional hint message to add to packaging related errors",
-                                    cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")("extra-package-files-directory-prefix-underscore",
-                               "Extra parent directories which contain package files. These paths use an underscore "
-                               "package-munging convention, i.e. 'Project_Foo'."
-                               "This option must be used in conjunction with --stripe-packages",
-                               cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("extra-package-files-directory-prefix-slash",
-                               "Extra parent directories which contain package files. These paths use an underscore "
-                               "package-munging convention, i.e. 'project/foo'."
-                               "This option must be used in conjunction with --stripe-packages",
-                               cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("allow-relaxed-packager-checks-for",
-                               "Packages which are allowed to ignore the restrictions set by `visible_to` "
-                               "and `export` directives."
-                               "This option must be used in conjunction with --stripe-packages",
-                               cxxopts::value<vector<string>>(), "string");
-    buildAutogenCacheOptions(options);
+    options.add_options(section)("enable-all-beta-lsp-features",
+                                 "Enable (expected-to-be-non-crashy) early-access LSP features.");
+    // }}}
 
-    options.add_options("advanced")("error-url-base",
-                                    "Error URL base string. If set, error URLs are generated by prefixing the "
-                                    "error code with this string.",
-                                    cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
-    options.add_options("advanced")("experimental-ruby3-keyword-args",
-                                    "Enforce use of new (Ruby 3.0-style) keyword arguments", cxxopts::value<bool>());
-    options.add_options("advanced")("typed-super", "Enable typechecking of `super` calls when possible",
-                                    cxxopts::value<bool>()->default_value("true"));
-    options.add_options("advanced")("check-out-of-order-constant-references",
-                                    "Enable out-of-order constant reference checks (error 5027)");
-    options.add_options("advanced")("track-untyped", "Track untyped usage statistics in the file-table output",
-                                    cxxopts::value<string>()->implicit_value("everywhere"),
-                                    "{[nowhere],everywhere,everywhere-but-tests}");
-    options.add_options("advanced")("suppress-payload-superclass-redefinition-for",
-                                    "Explicitly suppress the superclass redefinition error for the specified class "
-                                    "defined in Sorbet's payload. May be repeated.",
-                                    cxxopts::value<vector<string>>(), "Fully::Qualified::ClassName");
-
-    // Developer options
-    options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
-    options.add_options("dev")("trace-lexer", "Emit the lexer's token stream in a debug format");
-    options.add_options("dev")("trace-parser", "Enable bison's parser trace functionality");
-    options.add_options("dev")("autogen-subclasses-parent",
-                               "Parent classes for which generate a list of subclasses. "
-                               "This option must be used in conjunction with -p autogen-subclasses",
-                               cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("autogen-subclasses-ignore",
-                               "Like --ignore, but it only affects `-p autogen-subclasses`.",
-                               cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("autogen-behavior-allowed-in-rbi-files-paths",
-                               "RBI files defined in these paths can be considered by autogen as behavior-defining.",
-                               cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("autogen-msgpack-skip-reference-metadata",
-                               "Skip serializing extra metadata on references when printing msgpack in autogen",
-                               cxxopts::value<bool>());
-    options.add_options("dev")("stop-after", to_string(all_stop_after),
-                               cxxopts::value<string>()->default_value("inferencer"), "phase");
-    options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("minimize-to-rbi",
-                               "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
-                               "codebase and the definitions present in this file",
-                               cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
-    options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
-    options.add_options("dev")("stress-incremental-resolver",
-                               "Force incremental updates to discover resolver & namer bugs");
-    options.add_options("dev")("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down",
-                               cxxopts::value<int>()->implicit_value("3"));
-    options.add_options("dev")("simulate-crash", "Crash on start");
-    options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
-    options.add_options("dev")("censor-for-snapshot-tests",
-                               "When printing raw location information, don't show line numbers");
-    options.add_options("dev")("isolate-error-code",
-                               "Error code to include in reporting. "
-                               "Errors not mentioned will be silenced. "
-                               "This option can be passed multiple times.",
-                               cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("single-package", "Run in single-package mode",
-                               cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")("package-rbi-generation", "Enable rbi generation for stripe packages",
-                               cxxopts::value<bool>());
-    options.add_options("dev")("package-rbi-dir", "The location of generated package rbis",
-                               cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")(
-        "package-skip-rbi-export-enforcement",
-        "Constants defined in RBIs in these directories can be exported (otherwise, this behavior is disallowed)."
-        "This option can only be used in conjunction with --stripe-packages",
-        cxxopts::value<vector<string>>(), "string");
-    options.add_options("dev")("dump-package-info", "Dump package info in JSON form to the given file.",
-                               cxxopts::value<string>()->default_value(""));
-    options.add_options("dev")("suppress-error-code",
-                               "Error code to exclude from reporting. "
-                               "Errors mentioned will be silenced. "
-                               "This option can be passed multiple times.",
-                               cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("error-white-list",
-                               "(DEPRECATED) Alias for --isolate-error-code. Will be removed in a later release.",
-                               cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("error-black-list",
-                               "(DEPRECATED) Alias for --suppress-error-code. Will be removed in a later release.",
-                               cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("no-error-sections", "Do not print error sections.");
-    options.add_options("dev")("typed", "Force all code to specified strictness level",
-                               cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
-    options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
-                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
-    options.add_options("dev")("store-state", "Store state into file",
-                               cxxopts::value<string>()->default_value(empty.storeState), "file");
-    options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
-                               cxxopts::value<string>()->default_value(empty.cacheDir), "dir");
-    options.add_options("dev")("max-cache-size-bytes",
-                               "Must be a multiple of OS page size. Subject to restrictions on mdb_env_set_mapsize "
-                               "function in LMDB API docs.",
-                               cxxopts::value<size_t>()->default_value(to_string(empty.maxCacheSizeBytes)), "dir");
-    options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
-
+    // ----- PERFORMANCE -------------------------------------------------- {{{
+    section = groupToString(Group::PERFORMANCE);
+    options.add_options(section)("web-trace-file",
+                                 "Generate a trace into <file> in the Trace Event Format (used by chrome://tracing)",
+                                 cxxopts::value<string>()->default_value(empty.webTraceFile), "<file>");
+    options.add_options(section)("cache-dir", "Use <dir> to cache certain data. Will create <dir> if it does not exist",
+                                 cxxopts::value<string>()->default_value(empty.cacheDir), "<dir>");
+    options.add_options(section)("max-cache-size-bytes",
+                                 "Must be a multiple of OS page size (usually 4096). Subject to restrictions on "
+                                 "mdb_env_set_mapsize function in LMDB API docs.",
+                                 cxxopts::value<size_t>()->default_value(to_string(empty.maxCacheSizeBytes)),
+                                 "<bytes>");
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
         defaultThreads = 2;
     }
+    options.add_options(section)("max-threads",
+                                 "Set number of threads to use for fork/join worker pools. LSP will <n> threads plus "
+                                 "some extra threads to manage the connection with the client, watchman, etc.",
+                                 cxxopts::value<int>()->default_value(to_string(defaultThreads)), "<n>");
+    options.add_options(section)(
+        "reserve-class-table-capacity", "Preallocate <n> slots in the class and modules table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveClassTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-method-table-capacity", "Preallocate <n> slots in the method table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveMethodTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-field-table-capacity", "Preallocate <n> slots in the field table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveFieldTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-type-argument-table-capacity", "Preallocate <n> slots in the type argument table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeArgumentTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-type-member-table-capacity", "Preallocate <n> slots in the type member table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-utf8-name-table-capacity", "Preallocate <n> slots in the UTF8 name table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUtf8NameTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-constant-name-table-capacity", "Preallocate <n> slots in the constant name table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveConstantNameTableCapacity)), "<n>");
+    options.add_options(section)(
+        "reserve-unique-name-table-capacity", "Preallocate <n> slots in the unique name table",
+        cxxopts::value<uint32_t>()->default_value(fmt::format("{}", empty.reserveUniqueNameTableCapacity)), "<n>");
+    // }}}
 
-    options.add_options("dev")("max-threads", "Set number of threads",
-                               cxxopts::value<int>()->default_value(to_string(defaultThreads)), "int");
-    options.add_options("dev")("counter", "Print internal counter", cxxopts::value<vector<string>>(), "counter");
-    options.add_options("dev")("statsd-host", "StatsD sever hostname",
-                               cxxopts::value<string>()->default_value(empty.statsdHost), "host");
-    options.add_options("dev")("counters", "Print all internal counters");
+    // ----- STRIPE PACKAGES ---------------------------------------------- {{{
+    section = groupToString(Group::STRIPE_PACKAGES_MODE);
+    options.add_options(section)("stripe-packages", "Enable support for Stripe's internal Ruby package system",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("stripe-packages-hint-message",
+                                 "Optional hint message to add to packaging related errors",
+                                 cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("extra-package-files-directory-prefix-underscore",
+                                 "Extra parent directories which contain package files. These paths use an underscore "
+                                 "package-munging convention, i.e. 'Project_Foo'",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("extra-package-files-directory-prefix-slash",
+                                 "Extra parent directories which contain package files. These paths use a slash "
+                                 "package-munging convention, i.e. 'project/foo'",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("allow-relaxed-packager-checks-for",
+                                 "Packages which are allowed to ignore the restrictions set by `visible_to` "
+                                 "and `export` directives",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("package-skip-rbi-export-enforcement",
+                                 "Constants defined in RBIs in these directories (and no others) can be exported",
+                                 cxxopts::value<vector<string>>(), "string");
+    // }}}
 
-    options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
-    options.add_options("dev")("suggest-unsafe",
-                               "In as many errors as possible, suggest autocorrects to wrap problem code with "
-                               "<method>. Omit the =<method> to default to wrapping with T.unsafe. "
-                               "This supersedes certain autocorrects, especially T.must.",
-                               cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
-    options.add_options("dev")("statsd-prefix", "StatsD prefix",
-                               cxxopts::value<string>()->default_value(empty.statsdPrefix), "prefix");
-    options.add_options("dev")("statsd-port", "StatsD server port",
-                               cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "port");
-    options.add_options("dev")("metrics-file", "File to export metrics to",
-                               cxxopts::value<string>()->default_value(empty.metricsFile), "file");
-    options.add_options("dev")("metrics-prefix", "Prefix to use in metrics",
-                               cxxopts::value<string>()->default_value(empty.metricsPrefix), "file");
-    options.add_options("dev")("metrics-branch", "Branch to report in metrics export",
-                               cxxopts::value<string>()->default_value(empty.metricsBranch), "branch");
-    options.add_options("dev")("metrics-sha", "Sha1 to report in metrics export",
-                               cxxopts::value<string>()->default_value(empty.metricsSha), "sha1");
-    options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
-                               cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
-    options.add_options("dev")("metrics-extra-tags", "Extra tags to report, comma separated",
-                               cxxopts::value<string>()->default_value(""), "key1=value1,key2=value2");
-    options.add_options("dev")(
-        "force-hashing", "Forces Sorbet to calculate file hashes when run from CLI. Useful for profiling purposes.");
+    // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
+    section = groupToString(Group::STRIPE_AUTOGEN);
+    options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>());
+    buildAutogenCacheOptions(options, section);
+    options.add_options(section)("autogen-subclasses-parent",
+                                 "Parent classes for which generate a list of subclasses. "
+                                 "This option must be used in conjunction with -p autogen-subclasses",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("autogen-subclasses-ignore",
+                                 "Like --ignore, but it only affects `-p autogen-subclasses`.",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("autogen-behavior-allowed-in-rbi-files-paths",
+                                 "RBI files defined in these paths can be considered by autogen as behavior-defining.",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("autogen-msgpack-skip-reference-metadata",
+                                 "Skip serializing extra metadata on references when printing msgpack in autogen",
+                                 cxxopts::value<bool>());
+    // }}}
+
+    // ----- DEBUGGING ---------------------------------------------------- {{{
+    section = groupToString(Group::DEBUGGING);
+    options.add_options(section)("v,verbose", "Verbosity level [0-3]");
+    options.add_options(section)("debug-log-file", "Path to debug log file",
+                                 cxxopts::value<string>()->default_value(empty.debugLogFile), "<file>");
+    options.add_options(section)("wait-for-dbg", "Wait for debugger to attach after starting. Especially useful to "
+                                                 "attach to a Sorbet process launched by a language client");
+    options.add_options(section)("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down",
+                                 cxxopts::value<int>()->implicit_value("3"));
+    options.add_options(section)("stress-incremental-resolver",
+                                 "Simulate updates which tend to expose namer and resolver bugs");
+    options.add_options(section)("simulate-crash", "Raise an uncaught C++ exception on startup to simulate a crash");
+    options.add_options(section)("force-hashing",
+                                 "Force Sorbet to calculate file hashes, even from the CLI. Useful for profiling.");
+    options.add_options(section)("trace-lexer", "Emit the lexer's token stream in a debug format");
+    options.add_options(section)("trace-parser", "Enable bison's parser trace functionality");
+    options.add_options(section)("dump-package-info", "Dump package info in JSON form to the given file.",
+                                 cxxopts::value<string>()->default_value(""));
+    auto partitioned_print_options = print_options;
+    auto stableEnd = absl::c_stable_partition(partitioned_print_options, [](const auto &po) { return po.stable; });
+    fmt::memory_buffer print_help;
+    fmt::format_to(std::back_inserter(print_help),
+                   "Print various internal data structures.\n"
+                   "By default, the output is to stdout. To send the data to a file, use\n"
+                   "--print=<format>:<file>\n"
+                   "Most of these formats are unstable, for internal-use only.\n\n"
+                   "Stable: [");
+    auto first = true;
+    for (auto it = partitioned_print_options.begin(); it != stableEnd; it++) {
+        if (first) {
+            first = false;
+        } else {
+            fmt::format_to(std::back_inserter(print_help), ", ");
+        }
+        fmt::format_to(std::back_inserter(print_help), it->option);
+    }
+    fmt::format_to(std::back_inserter(print_help), "]\n\n"
+                                                   "Unstable: [");
+    first = true;
+    for (auto it = stableEnd; it != partitioned_print_options.end(); it++) {
+        if (first) {
+            first = false;
+        } else {
+            fmt::format_to(std::back_inserter(print_help), ", ");
+        }
+        fmt::format_to(std::back_inserter(print_help), it->option);
+    }
+    options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(), "<format>");
+    // }}}
+
+    // ----- INTERNAL ----------------------------------------------------- {{{
+    section = groupToString(Group::INTERNAL);
+    // TODO(jez) I'm pretty sure that `--quiet` and `--suppress-non-critical` are the same?
+    options.add_options(section)("suppress-non-critical",
+                                 "Exit 0 unless there was a critical error (i.e., an uncaught exception)");
+    options.add_options(section)("no-stdlib",
+                                 "Do not load Sorbet's payload which defines RBI files for the Ruby standard library");
+    options.add_options(section)("store-state", "Store state into file",
+                                 cxxopts::value<string>()->default_value(empty.storeState), "file");
+    options.add_options(section)("silence-dev-message", "Silence \"You are running a development build\" message");
+    options.add_options(section)("censor-for-snapshot-tests",
+                                 "When printing raw location information, don't show line numbers");
+    // }}}
+
+    // ----- OTHER -------------------------------------------------------- {{{
+    section = groupToString(Group::OTHER);
+    options.add_options(section)("version", "Show Sorbet's version");
+    options.add_options(section)("license", "Show Sorbet's license, and licenses of its dependencies");
+    options.add_options(section)("stdout-hup-hack",
+                                 "Monitor STDERR for HUP and exit on hangup to work around OpenSSH bug");
+    options.add_options(section)("minimize-to-rbi",
+                                 "[experimental] Output a minimal RBI containing the diff between Sorbet's view of a "
+                                 "codebase and the definitions present in this file",
+                                 cxxopts::value<std::string>()->default_value(""), "<file.rbi>");
+    options.add_options(section)("single-package", "Run in single-package mode",
+                                 cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("package-rbi-generation", "Enable rbi generation for stripe packages",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("package-rbi-dir", "The location of generated package rbis",
+                                 cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("h,help",
+                                 "Show help. Can pass an optional SECTION to show help for only one section instead of "
+                                 "the default of all sections",
+                                 cxxopts::value<vector<string>>()->implicit_value("all"), "SECTION");
+    // }}}
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
     }
 
-    // Positional params
-    options.parse_positional("files");
-    options.positional_help("<path 1> <path 2> ...");
     return options;
 }
 
@@ -899,12 +1075,12 @@ void readOptions(Options &opts,
                            ? raw["max-threads"].as<int>()
                            : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
-        if (raw["h"].as<bool>()) {
-            logger->info("{}", options.help({""}));
-            throw EarlyReturnWithCode(0);
-        }
-        if (raw["help"].as<bool>()) {
-            logger->info("{}", options.help(options.groups()));
+        if (raw.count("h") > 0) {
+            auto helpSections = raw["h"].as<vector<string>>();
+            if (helpSections.size() == 1 && helpSections[0] == "all") {
+                helpSections = groupSections;
+            }
+            logger->info("{}", options.help(helpSections));
             throw EarlyReturnWithCode(0);
         }
         if (raw["license"].as<bool>()) {
@@ -1095,7 +1271,7 @@ void readOptions(Options &opts,
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
             opts.storeState.empty() && !opts.print.PayloadSources.enabled) {
             logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
-                          options.help({""}));
+                          options.help({groupToString(Group::INPUT)}));
             throw EarlyReturnWithCode(1);
         }
 
@@ -1172,7 +1348,7 @@ bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const 
                                   shared_ptr<spdlog::logger> logger) noexcept(false) { // throw(EarlyReturnWithCode)
     cxxopts::Options options("sorbet", "Typechecker for Ruby");
     options.allow_unrecognised_options(); // Don't raise error on other options
-    buildAutogenCacheOptions(options);
+    buildAutogenCacheOptions(options, " === Stripe autogen");
 
     try {
         cxxopts::ParseResult raw = options.parse(argc, argv);
@@ -1184,3 +1360,4 @@ bool readAutogenConstCacheOptions(AutogenConstCacheConfig &cfg, int argc, const 
 }
 
 } // namespace sorbet::realmain::options
+// vim:fdm=marker

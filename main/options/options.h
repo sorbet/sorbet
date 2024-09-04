@@ -205,7 +205,7 @@ struct Options {
 
     std::string metricsFile;
     std::string metricsRepo = "none";
-    std::string metricsPrefix = "ruby_typer.unknown.";
+    std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
