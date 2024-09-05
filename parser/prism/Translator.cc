@@ -119,9 +119,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
 
-            std::string_view name = parser.resolveConstant(blockParamNode->name);
+            core::NameRef sorbetName;
+            if (auto prismName = blockParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                // A named block parameter, like `def foo(&block)`
+                auto name = parser.resolveConstant(prismName);
+                sorbetName = gs.enterNameUTF8(name);
+            } else { // An anonymous block parameter, like `def foo(&)`
+                sorbetName =
+                    gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter);
+            }
 
-            return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+            return make_unique<parser::Blockarg>(parser.translateLocation(loc), sorbetName);
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = reinterpret_cast<pm_block_parameters_node *>(node);
