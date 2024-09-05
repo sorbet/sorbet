@@ -19,6 +19,7 @@ class Translator final {
     // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
     // escape that scope, which is why Translator objects can't be copied, or even moved.
     core::GlobalState &gs;
+    uint16_t uniqueCounter = 1;
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor

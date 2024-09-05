@@ -645,9 +645,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &restParamNode->base.location;
             pm_location_t *nameLoc = &restParamNode->name_loc;
 
-            std::string_view name = parser.resolveConstant(restParamNode->name);
+            core::NameRef sorbetName;
+            if (auto prismName = restParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                // A named rest parameter, like `def foo(*rest)`
+                auto name = parser.resolveConstant(prismName);
+                sorbetName = gs.enterNameUTF8(name);
+            } else { // An anonymous rest parameter, like `def foo(*)`
+                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter);
+                nameLoc = loc;
+            }
 
-            return make_unique<parser::Restarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
+            return make_unique<parser::Restarg>(parser.translateLocation(loc), sorbetName,
                                                 parser.translateLocation(nameLoc));
         }
         case PM_RETURN_NODE: {
