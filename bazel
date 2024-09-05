@@ -34,28 +34,70 @@ export BAZEL_VERSION
 bazel_bin_loc="${bazel_bin_loc:-$HOME/.bazel_binaries}"
 bazel_exec_path="$bazel_bin_loc/$BAZEL_VERSION/bin/bazel-real"
 
+if [ "${TARGET_PLATFORM:-}" != "" ]; then
+  bazel_installer_platform="${TARGET_PLATFORM}"
+else
+  kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+  processor_name="$(uname -m)"
+  bazel_installer_platform="${kernel_name}-${processor_name}"
+fi
+
+if [ -f "$bazel_exec_path" ]; then
+  # If we already have a cached bazel binary, check if it's the right platform
+  bazel_type=$(file -b "$bazel_exec_path")
+
+  case "$bazel_type" in
+    *ELF*)
+      bazel_kernel="linux"
+      ;;
+    *Mach-O*)
+      bazel_kernel="darwin"
+      ;;
+    *)
+      bazel_kernel="unknown"
+      ;;
+  esac
+
+  case "$bazel_type" in
+    *x86-64* | *x86_64*)
+      bazel_proc="x86_64"
+      ;;
+    *arm64*)
+      bazel_proc="arm64"
+      ;;
+    *aarch64*)
+      bazel_proc="aarch64"
+      ;;
+    *)
+      bazel_proc="unknown"
+      ;;
+  esac
+
+  bazel_platform="${bazel_kernel}-${bazel_proc}"
+  echo >&2 "Found cached Bazel binary for ${bazel_platform}..."
+
+  if [[ $bazel_platform != $bazel_installer_platform ]]; then
+    echo >&2 "Bazel binary platform mismatch: expected $bazel_installer_platform, got $bazel_platform"
+    echo >&2 "Removing cached binary..."
+    rm -f "$bazel_exec_path"
+  fi
+fi
+
 if [ -f "$bazel_exec_path" ]; then
   exec "$bazel_exec_path" "$@"
 fi
 
 # ----- slow path -----
 
-echo >&2 "No cached Bazel v$BAZEL_VERSION found, installing..."
+echo >&2 "No cached Bazel v$BAZEL_VERSION found, installing for $bazel_installer_platform..."
 
-kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
-processor_name="$(uname -m)"
-
-bazel_installer_platform="${kernel_name}-${processor_name}"
 case "$bazel_installer_platform" in
   linux-x86_64) ;;
   linux-aarch64)
     bazel_installer_platform="linux-arm64"
     ;;
   darwin-x86_64) ;;
-  darwin-arm64)
-    # Pseudo Apple Silicon support by forcing x86_64 (Rosetta) for now
-    bazel_installer_platform="darwin-x86_64"
-    ;;
+  darwin-arm64) ;;
   *)
     echo >&2 "Building on $bazel_installer_platform is not implemented"
     exit 1
@@ -124,4 +166,5 @@ mkdir -p "$BUILD_DIR"
 )
 rm -rf "$BUILD_DIR"
 
+"$bazel_exec_path" clean --expunge
 exec "$bazel_exec_path" "$@"
