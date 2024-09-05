@@ -137,12 +137,6 @@ build:release-sanitized-linux --copt=-march=sandybridge
 build:release-linux-aarch64   --copt=-march=armv8.1a
 
 build:release-mac --config=release-common --platforms=@//tools/platforms:darwin_x86_64
-build:release-mac-arm64 --platforms=@//tools/platforms:darwin_arm64
-build:release-mac-arm64 --define release=true
-build:release-mac-arm64 --compilation_mode=opt
-build:release-mac-arm64 --config=backtracesymbols
-build:release-mac-arm64 --config=shared-libs
-build:release-mac-arm64 --config=versioned
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
