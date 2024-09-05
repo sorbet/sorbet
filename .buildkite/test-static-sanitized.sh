@@ -19,6 +19,7 @@ test_args=()
 if [[ "linux" == "$platform" ]]; then
   test_args+=("--config=buildfarm-sanitized-linux")
 elif [[ "mac" == "$platform" ]]; then
+  rm -rf $HOME/.bazel_binaries
   test_args+=("--config=buildfarm-sanitized-mac")
 fi
 
