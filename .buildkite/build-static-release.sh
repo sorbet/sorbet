@@ -3,12 +3,22 @@
 set -euo pipefail
 
 export JOB_NAME=build-static-release
-source .buildkite/tools/setup-bazel.sh
 
 kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
 processor_name="$(uname -m)"
 
 platform="${kernel_name}-${processor_name}"
+case "$platform" in
+  darwin*)
+    # Flush the bazel download cache temporarily.
+    rm -rf $HOME/.bazel_binaries
+    ;;
+  *)
+    ;;
+esac
+
+source .buildkite/tools/setup-bazel.sh
+
 case "$platform" in
   linux-x86_64)
     CONFIG_OPTS="--config=release-linux"
@@ -18,8 +28,6 @@ case "$platform" in
     ;;
   darwin-x86_64|darwin-arm64)
     CONFIG_OPTS="--config=release-mac"
-    # Flush the bazel download cache temporarily.
-    rm -rf $HOME/.bazel_binaries
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   *)
