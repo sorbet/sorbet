@@ -18,6 +18,8 @@ case "$platform" in
     ;;
   darwin-x86_64|darwin-arm64)
     CONFIG_OPTS="--config=release-mac"
+    # Flush the bazel download cache temporarily.
+    rm -rf $HOME/.bazel_binaries
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   *)
