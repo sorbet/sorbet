@@ -69,10 +69,10 @@ steps:
 
   - label: ":mac: build-static-release.sh (master only)"
     command: .buildkite/build-static-release.sh
-    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
+      arch: arm64
     # TODO(jez) We should only retry for specific error.
     # The one we were trying to fix was `'foo.h': file not found`
     retry:
