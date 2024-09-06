@@ -2,7 +2,8 @@
 class Bopus::Parent
  class Bopus::Child child.rb
  class Bopus::ChildAgain child_again.rb
- class Bopus::ChildOfChild child_of_child.rb
+ class Bopus::ChildOfChild1 child_of_child.rb
+ class Bopus::ChildOfChild2 child_of_child.rb
 module MyMixin
  class MyClass a.rb
 module Opus::Mixin
