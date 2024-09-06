@@ -262,6 +262,22 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Const>(parser.translateLocation(loc), nullptr, gs.enterNameConstant(name));
         }
+        case PM_CONSTANT_WRITE_NODE: {
+            auto constantWriteNode = reinterpret_cast<pm_constant_write_node *>(node);
+            auto *loc = &constantWriteNode->base.location;
+            auto *nameLoc = &constantWriteNode->name_loc;
+
+            auto nameRef = gs.enterNameConstant(parser.resolveConstant(constantWriteNode->name));
+
+            // Second argument is the scope, which is null for top-level constants
+            auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
+
+            auto lhs =
+                make_unique<parser::ConstLhs>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
+            auto rhs = translate(constantWriteNode->value);
+
+            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+        }
         case PM_DEF_NODE: {
             auto defNode = reinterpret_cast<pm_def_node *>(node);
             pm_location_t *loc = &defNode->base.location;
@@ -833,7 +849,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_TARGET_NODE:
         case PM_CONSTANT_PATH_WRITE_NODE:
         case PM_CONSTANT_TARGET_NODE:
-        case PM_CONSTANT_WRITE_NODE:
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:

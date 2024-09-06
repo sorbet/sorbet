@@ -1,0 +1,9 @@
+Assign {
+  lhs = ConstLhs {
+    scope = NULL
+    name = <C <U REGULAR>>
+  }
+  rhs = Integer {
+    val = "1"
+  }
+}
