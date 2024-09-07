@@ -132,9 +132,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto blockParamNode = reinterpret_cast<pm_block_parameter_node *>(node);
             pm_location_t *loc = &blockParamNode->base.location;
 
-            std::string_view name = parser.resolveConstant(blockParamNode->name);
+            core::NameRef sorbetName;
+            if (auto prismName = blockParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                // A named block parameter, like `def foo(&block)`
+                auto name = parser.resolveConstant(prismName);
+                sorbetName = gs.enterNameUTF8(name);
+            } else { // An anonymous block parameter, like `def foo(&)`
+                sorbetName =
+                    gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter);
+            }
 
-            return make_unique<parser::Blockarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+            return make_unique<parser::Blockarg>(parser.translateLocation(loc), sorbetName);
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             auto paramsNode = reinterpret_cast<pm_block_parameters_node *>(node);
@@ -413,9 +421,16 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
             pm_location_t *loc = &keywordRestParamNode->base.location;
 
-            std::string_view name = parser.resolveConstant(keywordRestParamNode->name);
+            core::NameRef sorbetName;
+            if (auto prismName = keywordRestParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                // A named keyword rest parameter, like `def foo(**kwargs)`
+                auto name = parser.resolveConstant(prismName);
+                sorbetName = gs.enterNameUTF8(name);
+            } else { // An anonymous keyword rest parameter, like `def foo(**)`
+                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter);
+            }
 
-            return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
+            return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), sorbetName);
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
             return translateAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
@@ -667,9 +682,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &restParamNode->base.location;
             pm_location_t *nameLoc = &restParamNode->name_loc;
 
-            std::string_view name = parser.resolveConstant(restParamNode->name);
+            core::NameRef sorbetName;
+            if (auto prismName = restParamNode->name; prismName != PM_CONSTANT_ID_UNSET) {
+                // A named rest parameter, like `def foo(*rest)`
+                auto name = parser.resolveConstant(prismName);
+                sorbetName = gs.enterNameUTF8(name);
+            } else { // An anonymous rest parameter, like `def foo(*)`
+                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter);
+                nameLoc = loc;
+            }
 
-            return make_unique<parser::Restarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
+            return make_unique<parser::Restarg>(parser.translateLocation(loc), sorbetName,
                                                 parser.translateLocation(nameLoc));
         }
         case PM_RETURN_NODE: {

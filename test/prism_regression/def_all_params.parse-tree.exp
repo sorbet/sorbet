@@ -1,35 +1,56 @@
-DefMethod {
-  name = <U foo>
-  args = Args {
-    args = [
-      Arg {
-        name = <U a>
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Arg {
+            name = <U a>
+          }
+          Optarg {
+            name = <U b>
+            default_ = Integer {
+              val = "2"
+            }
+          }
+          Restarg {
+            name = <U c>
+          }
+          Kwarg {
+            name = <U d>
+          }
+          Kwoptarg {
+            name = <U e>
+            default_ = Integer {
+              val = "5"
+            }
+          }
+          Kwrestarg {
+            name = <U f>
+          }
+          Blockarg {
+            name = <U blk>
+          }
+        ]
       }
-      Optarg {
-        name = <U b>
-        default_ = Integer {
-          val = "2"
-        }
+      body = NULL
+    }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Restarg {
+            name = <P <U *> $2>
+          }
+          Kwrestarg {
+            name = <P <U **> $3>
+          }
+          Blockarg {
+            name = <P <U &> $4>
+          }
+        ]
       }
-      Restarg {
-        name = <U c>
-      }
-      Kwarg {
-        name = <U d>
-      }
-      Kwoptarg {
-        name = <U e>
-        default_ = Integer {
-          val = "5"
-        }
-      }
-      Kwrestarg {
-        name = <U f>
-      }
-      Blockarg {
-        name = <U blk>
-      }
-    ]
-  }
-  body = NULL
+      body = NULL
+    }
+  ]
 }
