@@ -1,12 +1,29 @@
 # typed: true
 require 'csv'
 
-T.assert_type!(CSV.foreach('source.csv', headers: true), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
-T.assert_type!(CSV.foreach('source.csv', 'r:bom|utf-8'), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
-T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T.nilable(T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)]))
+T.assert_type!(CSV.foreach('source.csv', headers: true), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
+T.assert_type!(CSV.foreach('source.csv', 'r:bom|utf-8'), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
+T.assert_type!(CSV.foreach('source.csv', headers: true, col_sep: ','), T::Enumerator[T.any(T::Array[T.nilable(BasicObject)], CSV::Row)])
 CSV.foreach('source.csv') do |row|
   T.assert_type!(row, T.any(T::Array[T.untyped], CSV::Row))
 end
+
+T.assert_type!(CSV.open('source.csv', headers: true), CSV)
+CSV.open('source.csv', headers: true) do |csv|
+  T.assert_type!(csv, CSV)
+end
+
+csv = CSV.open('source.csv', headers: true)
+T.assert_type!(csv.header_row?, T::Boolean)
+T.assert_type!(csv.shift, T.nilable(T.any(T::Array[T.untyped], CSV::Row)))
+T.assert_type!(csv.line, T.nilable(String))
+T.assert_type!(csv.headers, T.nilable(T.any(TrueClass, T::Array[T.untyped])))
+T.assert_type!(csv.lineno, Integer)
+
+csv.each do |entry|
+  T.assert_type!(entry, T.any(CSV::Row, T::Array[T.nilable(BasicObject)]))
+end
+T.assert_type!(csv.each, T::Enumerator[T.any(CSV::Row, T::Array[T.nilable(BasicObject)])])
 
 csv = CSV::Table.new([CSV::Row.new(['1', '2'], [1, 2]), CSV::Row.new(['1', '2'], [2, 3])])
 T.assert_type!(csv, CSV::Table)

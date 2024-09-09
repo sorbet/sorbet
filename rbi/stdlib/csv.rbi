@@ -268,12 +268,20 @@ class CSV < Object
   # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) parses it.
   sig do
     params(
-        path: T.any(String, ::Sorbet::Private::Static::IOLike),
-        mode: String,
-        options: BasicObject,
-        blk: T.nilable(T.proc.params(arg0: T.any(T::Array[T.untyped], CSV::Row)).void),
+      path: T.any(String, ::Sorbet::Private::Static::IOLike),
+      mode: String,
+      options: T.untyped,
+      blk: T.proc.params(arg0: T.any(T::Array[T.untyped], CSV::Row)).void,
     )
-    .returns(T.nilable(T::Enumerator[T.any(T::Array[T.untyped], CSV::Row)]))
+    .void
+  end
+  sig do
+    params(
+      path: T.any(String, ::Sorbet::Private::Static::IOLike),
+      mode: String,
+      options: T.untyped,
+    )
+    .returns(T::Enumerator[T.any(T::Array[T.untyped], CSV::Row)])
   end
   def self.foreach(path, mode="r", **options, &blk); end
 
@@ -528,7 +536,7 @@ class CSV < Object
 
   # Alias for:
   # [`shift`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-shift)
-  sig {returns(T.nilable(T::Array[T.nilable(String)]))}
+  sig { returns(T.nilable(T.any(T::Array[T.untyped], CSV::Row))) }
   def readline; end
 
   # Use to slurp a [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) file
@@ -731,6 +739,23 @@ class CSV < Object
   # *   [`to_io`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-to_io)()
   # *   truncate()
   # *   tty?()
+  sig do
+    params(
+      filename: T.any(String, ::Sorbet::Private::Static::IOLike),
+      mode: String,
+      options: T.untyped,
+      blk: T.proc.params(arg0: CSV).void,
+    )
+    .void
+  end
+  sig do
+    params(
+      filename: T.any(String, ::Sorbet::Private::Static::IOLike),
+      mode: String,
+      options: T.untyped,
+    )
+    .returns(CSV)
+  end
   def self.open(filename, mode = _, **options, &blk); end
 
   # Alias for
@@ -780,6 +805,8 @@ class CSV < Object
   # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html).
   #
   # The data source must be open for reading.
+  sig { params(blk: T.proc.params(arg0: T.any(T::Array[T.untyped], CSV::Row)).void).void }
+  sig { returns(T::Enumerator[T.any(T::Array[T.untyped], CSV::Row)]) }
   def each(&blk); end
 
   # The [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
@@ -813,6 +840,7 @@ class CSV < Object
 
   # Alias for:
   # [`shift`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-shift)
+  sig { returns(T.nilable(T.any(T::Array[T.untyped], CSV::Row))) }
   def gets; end
 
   # Identical to
@@ -830,12 +858,14 @@ class CSV < Object
   def header_converters; end
 
   # Returns `true` if the next row read will be a header row.
+  sig { returns(T::Boolean) }
   def header_row?; end
 
   # Returns `nil` if headers will not be used, `true` if they will but have not
   # yet been read, or the actual headers after they have been read. See
   # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
+  sig { returns(T.nilable(T.any(TrueClass, T::Array[T.untyped]))) }
   def headers; end
 
   # Returns a simplified description of the key
@@ -851,10 +881,12 @@ class CSV < Object
   def liberal_parsing?; end
 
   # The last row read from this file.
+  sig { returns(T.nilable(String)) }
   def line; end
 
   # The line number of the last row read from this file. Fields with nested
   # line-end characters will not affect this count.
+  sig { returns(Integer) }
   def lineno; end
 
   def path(*args, &block); end
@@ -898,6 +930,7 @@ class CSV < Object
   # Also aliased as:
   # [`gets`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-gets),
   # [`readline`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-readline)
+  sig { returns(T.nilable(T.any(T::Array[T.untyped], CSV::Row))) }
   def shift; end
 
   # Returns `true` blank lines are skipped by the parser. See
