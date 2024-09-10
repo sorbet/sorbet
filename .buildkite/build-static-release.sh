@@ -34,12 +34,10 @@ echo will run with $CONFIG_OPTS
 
 case "$platform" in
   darwin-x86_64|darwin-arm64)
-    TARGET_PLATFORM=darwin-x86_64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
     cp bazel-bin/main/sorbet sorbet_x86_64
 
-    ./bazel clean --expunge
-
-    TARGET_PLATFORM=darwin-arm64 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS --config=release-mac-arm64-cross
     cp bazel-bin/main/sorbet sorbet_arm64
 
     lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
