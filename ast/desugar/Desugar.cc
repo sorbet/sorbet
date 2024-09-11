@@ -2197,6 +2197,22 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Case *case_) {
+                if (dctx.preserveConcreteSyntax) {
+                    Send::ARGS_store args;
+                    args.emplace_back(node2TreeImpl(dctx, std::move(case_->condition)));
+                    for (auto it = case_->whens.begin(); it != case_->whens.end(); ++it) {
+                        auto when = parser::cast_node<parser::When>(it->get());
+                        ENFORCE(when != nullptr, "case without a when?");
+                        for (auto &cnode : when->patterns) {
+                            args.emplace_back(node2TreeImpl(dctx, std::move(cnode)));
+                        }
+                        args.emplace_back(node2TreeImpl(dctx, std::move(when->body)));
+                    }
+                    args.emplace_back(node2TreeImpl(dctx, std::move(case_->else_)));
+                    result = MK::Send(loc, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
+                                      std::move(args));
+                    return;
+                }
                 ExpressionPtr assign;
                 auto temp = core::NameRef::noName();
                 core::LocOffsets cloc;
