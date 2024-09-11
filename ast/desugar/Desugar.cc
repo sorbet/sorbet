@@ -1237,8 +1237,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 auto lhs = node2TreeImpl(dctx, std::move(or_->left));
                 auto rhs = node2TreeImpl(dctx, std::move(or_->right));
                 if (dctx.preserveConcreteSyntax) {
-                    auto andAndLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
-                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::orOr(), andAndLoc, std::move(lhs),
+                    auto orOrLoc = core::LocOffsets{lhs.loc().endPos(), rhs.loc().beginPos()};
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::orOr(), orOrLoc, std::move(lhs),
                                        std::move(rhs));
                     return;
                 }
