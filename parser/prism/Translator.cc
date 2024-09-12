@@ -730,8 +730,11 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &splatNode->base.location;
 
             auto expr = translate(splatNode->expression);
-
-            return make_unique<parser::Splat>(parser.translateLocation(loc), std::move(expr));
+            if (expr == nullptr) { // An anonymous splat like `f(*)`
+                return make_unique<parser::ForwardedRestArg>(parser.translateLocation(loc));
+            } else { // Splatting an expression like `f(*a)`
+                return make_unique<parser::Splat>(parser.translateLocation(loc), std::move(expr));
+            }
         }
         case PM_STATEMENTS_NODE: {
             auto inlineIfSingle = true;

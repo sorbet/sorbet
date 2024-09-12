@@ -69,24 +69,47 @@ Begin {
         }
       ]
     }
-    Array {
-      elts = [
-        Integer {
-          val = "1"
-        }
-        Integer {
-          val = "2"
-        }
-        Splat {
-          var = Const {
-            scope = NULL
-            name = <C <U SPLATTED>>
+    DefMethod {
+      name = <U has_named_rest_args>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
           }
-        }
-        Integer {
-          val = "3"
-        }
-      ]
+        ]
+      }
+      body = Array {
+        elts = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Splat {
+            var = Send {
+              receiver = NULL
+              method = <U rest>
+              args = [
+              ]
+            }
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U has_anonymous_rest_args>
+      args = Args {
+        args = [
+          Restarg {
+            name = <P <U *> $2>
+          }
+        ]
+      }
+      body = NULL
     }
   ]
 }

@@ -1,4 +1,4 @@
-# typed: true
+# typed: false
 
 []
 
@@ -12,5 +12,12 @@
 
 %W[string7 string8 string9]
 
-[1, 2, *SPLATTED, 3]
-#       ^^^^^^^^ error: Unable to resolve constant `SPLATTED`
+def has_named_rest_args(*args)
+  [1, 2, *rest, 3]
+end
+
+def has_anonymous_rest_args(*)
+  # Crashes Sorbet, even with the legacy parser.
+  # https://github.com/sorbet/sorbet/issues/8166
+  # [1, 2, *, 3]
+end
