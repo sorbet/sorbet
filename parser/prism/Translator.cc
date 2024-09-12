@@ -26,19 +26,23 @@ std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untyp
     auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
     auto *loc = &node->base.location;
 
-    auto name = parser.resolveConstant(node->name);
     auto rhs = translate(node->value);
-    unique_ptr<SorbetLHSNode> lhs;
+    unique_ptr<parser::Node> lhs;
 
     if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_write_node>) {
         auto nameLoc = &node->name_loc;
+        auto name = parser.resolveConstant(node->name);
         auto nameRef = gs.enterNameConstant(name);
 
         // Second argument is the scope, which is null for top-level constants
         auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
 
         lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
+    } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
+        auto isAssignment = true;
+        lhs = translateConstantPath(node->target, isAssignment);
     } else {
+        auto name = parser.resolveConstant(node->name);
         lhs = make_unique<SorbetLHSNode>(parser.translateLocation(&node->name_loc), gs.enterNameUTF8(name));
     }
 
@@ -262,22 +266,11 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
             auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
-            pm_location_t *loc = &constantPathNode->base.location;
-
-            std::string_view name = parser.resolveConstant(constantPathNode->name);
-
-            std::unique_ptr<parser::Node> parent;
-            if (constantPathNode->parent) {
-                // This constant reference is chained onto another constant reference.
-                // E.g. if `node` is pointing to `B`, then then `A` is the `parent` in `A::B::C`.
-                parent = translate(constantPathNode->parent);
-            } else { // This is a fully qualified constant reference, like `::A`.
-                pm_location_t *delimiterLoc = &constantPathNode->delimiter_loc; // The location of the `::`
-                parent = make_unique<parser::Cbase>(parser.translateLocation(delimiterLoc));
-            }
-
-            return make_unique<parser::Const>(parser.translateLocation(loc), std::move(parent),
-                                              gs.enterNameConstant(name));
+            auto isAssignment = false;
+            return translateConstantPath(constantPathNode, isAssignment);
+        }
+        case PM_CONSTANT_PATH_WRITE_NODE: {
+            return translateAssignment<pm_constant_path_write_node, void>(node);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like "Foo"
             auto constantReadNode = reinterpret_cast<pm_constant_read_node *>(node);
@@ -850,7 +843,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE:
         case PM_CONSTANT_PATH_OR_WRITE_NODE:
         case PM_CONSTANT_PATH_TARGET_NODE:
-        case PM_CONSTANT_PATH_WRITE_NODE:
         case PM_CONSTANT_TARGET_NODE:
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
@@ -1001,6 +993,29 @@ std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node
     parser::NodeVec sorbetStmts = translateMulti(stmtsNode->body);
 
     return make_unique<parser::Begin>(parser.translateLocation(&stmtsNode->base.location), std::move(sorbetStmts));
+}
+
+std::unique_ptr<parser::Node> Translator::translateConstantPath(pm_constant_path_node *node, bool isAssignment) {
+    pm_location_t *loc = &node->base.location;
+
+    std::string_view name = parser.resolveConstant(node->name);
+
+    std::unique_ptr<parser::Node> parent;
+    if (node->parent) {
+        // This constant reference is chained onto another constant reference.
+        // E.g. if `node` is pointing to `B`, then then `A` is the `parent` in `A::B::C`.
+        parent = translate(node->parent);
+    } else {                                                // This is a fully qualified constant reference, like `::A`.
+        pm_location_t *delimiterLoc = &node->delimiter_loc; // The location of the `::`
+        parent = make_unique<parser::Cbase>(parser.translateLocation(delimiterLoc));
+    }
+
+    if (isAssignment) {
+        return make_unique<parser::ConstLhs>(parser.translateLocation(loc), std::move(parent),
+                                             gs.enterNameConstant(name));
+    } else {
+        return make_unique<parser::Const>(parser.translateLocation(loc), std::move(parent), gs.enterNameConstant(name));
+    }
 }
 
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
