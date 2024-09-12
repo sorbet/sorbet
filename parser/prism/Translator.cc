@@ -21,8 +21,32 @@ template <typename... TArgs>
     }
 }
 
+template <typename PrismAssignmentNode, typename SorbetLHSNode>
+std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
+    auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
+    auto *loc = &node->base.location;
+
+    auto name = parser.resolveConstant(node->name);
+    auto rhs = translate(node->value);
+    unique_ptr<SorbetLHSNode> lhs;
+
+    if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_write_node>) {
+        auto nameLoc = &node->name_loc;
+        auto nameRef = gs.enterNameConstant(name);
+
+        // Second argument is the scope, which is null for top-level constants
+        auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
+
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
+    } else {
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(&node->name_loc), gs.enterNameUTF8(name));
+    }
+
+    return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+}
+
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-std::unique_ptr<SorbetAssignmentNode> Translator::translateAssignment(pm_node_t *untypedNode) {
+std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *untypedNode) {
     static_assert(
         std::is_same_v<SorbetAssignmentNode, parser::OpAsgn> || std::is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
             std::is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
@@ -216,13 +240,13 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                               std::move(name), std::move(superclass), std::move(body));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: {
-            return translateAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
+            return translateOpAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
         }
         case PM_CLASS_VARIABLE_OPERATOR_WRITE_NODE: {
-            return translateAssignment<pm_class_variable_operator_write_node, parser::OpAsgn, parser::CVarLhs>(node);
+            return translateOpAssignment<pm_class_variable_operator_write_node, parser::OpAsgn, parser::CVarLhs>(node);
         }
         case PM_CLASS_VARIABLE_OR_WRITE_NODE: {
-            return translateAssignment<pm_class_variable_or_write_node, parser::OrAsgn, parser::CVarLhs>(node);
+            return translateOpAssignment<pm_class_variable_or_write_node, parser::OrAsgn, parser::CVarLhs>(node);
         }
         case PM_CLASS_VARIABLE_READ_NODE: {
             auto classVarNode = reinterpret_cast<pm_class_variable_read_node *>(node);
@@ -233,15 +257,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::CVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_CLASS_VARIABLE_WRITE_NODE: {
-            auto classVarNode = reinterpret_cast<pm_class_variable_write_node *>(node);
-            pm_location_t *loc = &classVarNode->base.location;
-
-            std::string_view cvarName = parser.resolveConstant(classVarNode->name);
-            auto lhs = make_unique<parser::CVarLhs>(parser.translateLocation(&classVarNode->name_loc),
-                                                    gs.enterNameUTF8(cvarName));
-            auto rhs = translate(classVarNode->value);
-
-            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+            return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
         }
         case PM_CONSTANT_PATH_NODE: {
             // Part of a constant path, like the `A` in `A::B`. `B` is a `PM_CONSTANT_READ_NODE`
@@ -269,6 +285,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             std::string_view name = parser.resolveConstant(constantReadNode->name);
 
             return make_unique<parser::Const>(parser.translateLocation(loc), nullptr, gs.enterNameConstant(name));
+        }
+        case PM_CONSTANT_WRITE_NODE: {
+            return translateAssignment<pm_constant_write_node, parser::ConstLhs>(node);
         }
         case PM_DEF_NODE: {
             auto defNode = reinterpret_cast<pm_def_node *>(node);
@@ -319,13 +338,13 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<pm_forwarding_super_node, parser::ZSuper>(node);
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: {
-            return translateAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
+            return translateOpAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
         }
         case PM_GLOBAL_VARIABLE_OPERATOR_WRITE_NODE: {
-            return translateAssignment<pm_global_variable_operator_write_node, parser::OpAsgn, parser::GVarLhs>(node);
+            return translateOpAssignment<pm_global_variable_operator_write_node, parser::OpAsgn, parser::GVarLhs>(node);
         }
         case PM_GLOBAL_VARIABLE_OR_WRITE_NODE: {
-            return translateAssignment<pm_global_variable_or_write_node, parser::OrAsgn, parser::GVarLhs>(node);
+            return translateOpAssignment<pm_global_variable_or_write_node, parser::OrAsgn, parser::GVarLhs>(node);
         }
         case PM_GLOBAL_VARIABLE_READ_NODE: {
             auto globalVarReadNode = reinterpret_cast<pm_global_variable_read_node *>(node);
@@ -336,15 +355,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::GVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_GLOBAL_VARIABLE_WRITE_NODE: {
-            auto globalVarWriteNode = reinterpret_cast<pm_global_variable_write_node *>(node);
-            pm_location_t *loc = &globalVarWriteNode->base.location;
-
-            std::string_view gvarName = parser.resolveConstant(globalVarWriteNode->name);
-            auto lhs = make_unique<parser::GVarLhs>(parser.translateLocation(&globalVarWriteNode->name_loc),
-                                                    gs.enterNameUTF8(gvarName));
-            auto rhs = translate(globalVarWriteNode->value);
-
-            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+            return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
         }
         case PM_HASH_NODE: {
             auto usedForKeywordArgs = false;
@@ -362,22 +373,23 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                                            std::move(ifFalse));
         }
         case PM_INDEX_AND_WRITE_NODE: {
-            return translateAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
+            return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
         }
         case PM_INDEX_OPERATOR_WRITE_NODE: {
-            return translateAssignment<pm_index_operator_write_node, parser::OpAsgn, void>(node);
+            return translateOpAssignment<pm_index_operator_write_node, parser::OpAsgn, void>(node);
         }
         case PM_INDEX_OR_WRITE_NODE: {
-            return translateAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
+            return translateOpAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: {
-            return translateAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
+            return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
         }
         case PM_INSTANCE_VARIABLE_OPERATOR_WRITE_NODE: {
-            return translateAssignment<pm_instance_variable_operator_write_node, parser::OpAsgn, parser::IVarLhs>(node);
+            return translateOpAssignment<pm_instance_variable_operator_write_node, parser::OpAsgn, parser::IVarLhs>(
+                node);
         }
         case PM_INSTANCE_VARIABLE_OR_WRITE_NODE: {
-            return translateAssignment<pm_instance_variable_or_write_node, parser::OrAsgn, parser::IVarLhs>(node);
+            return translateOpAssignment<pm_instance_variable_or_write_node, parser::OrAsgn, parser::IVarLhs>(node);
         }
         case PM_INSTANCE_VARIABLE_READ_NODE: {
             auto instanceVarNode = reinterpret_cast<pm_instance_variable_read_node *>(node);
@@ -388,15 +400,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::IVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_INSTANCE_VARIABLE_WRITE_NODE: {
-            auto instanceVarNode = reinterpret_cast<pm_instance_variable_write_node *>(node);
-            pm_location_t *loc = &instanceVarNode->base.location;
-
-            std::string_view ivarName = parser.resolveConstant(instanceVarNode->name);
-            auto lhs = make_unique<parser::IVarLhs>(parser.translateLocation(&instanceVarNode->name_loc),
-                                                    gs.enterNameUTF8(ivarName));
-            auto rhs = translate(instanceVarNode->value);
-
-            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+            return translateAssignment<pm_instance_variable_write_node, parser::IVarLhs>(node);
         }
         case PM_INTEGER_NODE: {
             auto intNode = reinterpret_cast<pm_integer_node *>(node);
@@ -433,13 +437,13 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Kwrestarg>(parser.translateLocation(loc), sorbetName);
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
-            return translateAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
+            return translateOpAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
         }
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: {
-            return translateAssignment<pm_local_variable_operator_write_node, parser::OpAsgn, parser::LVarLhs>(node);
+            return translateOpAssignment<pm_local_variable_operator_write_node, parser::OpAsgn, parser::LVarLhs>(node);
         }
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE: {
-            return translateAssignment<pm_local_variable_or_write_node, parser::OrAsgn, parser::LVarLhs>(node);
+            return translateOpAssignment<pm_local_variable_or_write_node, parser::OrAsgn, parser::LVarLhs>(node);
         }
         case PM_LOCAL_VARIABLE_READ_NODE: {
             auto localVarReadNode = reinterpret_cast<pm_local_variable_read_node *>(node);
@@ -458,15 +462,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::LVarLhs>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
-            auto localVarWriteNode = reinterpret_cast<pm_local_variable_write_node *>(node);
-            pm_location_t *loc = &localVarWriteNode->base.location;
-            pm_location_t *nameLoc = &localVarWriteNode->name_loc;
-
-            auto name = parser.resolveConstant(localVarWriteNode->name);
-            auto lhs = make_unique<parser::LVarLhs>(parser.translateLocation(nameLoc), gs.enterNameUTF8(name));
-            auto rhs = translate(localVarWriteNode->value);
-
-            return make_unique<parser::Assign>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
+            return translateAssignment<pm_local_variable_write_node, parser::LVarLhs>(node);
         }
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = reinterpret_cast<pm_module_node *>(node);
@@ -856,7 +852,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_TARGET_NODE:
         case PM_CONSTANT_PATH_WRITE_NODE:
         case PM_CONSTANT_TARGET_NODE:
-        case PM_CONSTANT_WRITE_NODE:
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
