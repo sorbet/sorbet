@@ -907,7 +907,7 @@ parser::NodeVec Translator::translateMulti(pm_node_list nodeList) {
     parser::NodeVec result;
 
     // Pre-allocate the exactly capacity we're going to need, to prevent growth reallocations.
-    result.reserve(std::distance(prismNodes.begin(), prismNodes.end()));
+    result.reserve(prismNodes.size());
 
     translateMultiInto(result, prismNodes);
 
