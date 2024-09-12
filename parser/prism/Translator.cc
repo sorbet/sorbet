@@ -126,12 +126,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
         case PM_ASSOC_SPLAT_NODE: {
-            auto assocSplatNode = reinterpret_cast<pm_assoc_splat_node *>(node);
-            pm_location_t *loc = &assocSplatNode->base.location;
-
-            auto value = translate(assocSplatNode->value);
-
-            return make_unique<parser::Kwsplat>(parser.translateLocation(loc), std::move(value));
+            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateHash()`, because its "
+                        "translation depends on whether its used in a hash or in a method call");
         }
         case PM_BEGIN_NODE: {
             auto beginNode = reinterpret_cast<pm_begin_node *>(node);
@@ -959,7 +955,31 @@ std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node
                                                         bool isUsedForKeywordArguments) {
     pm_location_t *loc = &node->location;
 
-    auto sorbetElements = translateMulti(elements);
+    auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
+
+    parser::NodeVec sorbetElements{};
+    sorbetElements.reserve(prismElements.size());
+
+    for (auto &pair : prismElements) {
+        if (PM_NODE_TYPE_P(pair, PM_ASSOC_SPLAT_NODE)) {
+            auto prismSplatNode = reinterpret_cast<pm_assoc_splat_node *>(pair);
+            pm_location_t *loc = &prismSplatNode->base.location;
+            auto value = translate(prismSplatNode->value);
+
+            std::unique_ptr<parser::Node> sorbetSplatNode;
+            if (value == nullptr) { // An anonymous splat like `f(**)`
+                sorbetSplatNode = make_unique<parser::ForwardedKwrestArg>(parser.translateLocation(loc));
+            } else { // Splatting an expression like `f(**h)`
+                sorbetSplatNode = make_unique<parser::Kwsplat>(parser.translateLocation(loc), std::move(value));
+            }
+
+            sorbetElements.emplace_back(std::move(sorbetSplatNode));
+        } else {
+            ENFORCE(PM_NODE_TYPE_P(pair, PM_ASSOC_NODE))
+            unique_ptr<parser::Node> sorbetKVPair = translate(pair);
+            sorbetElements.emplace_back(std::move(sorbetKVPair));
+        }
+    }
 
     return make_unique<parser::Hash>(parser.translateLocation(loc), isUsedForKeywordArguments,
                                      std::move(sorbetElements));

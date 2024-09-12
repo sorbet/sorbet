@@ -1,5 +1,9 @@
 # typed: false
 
-foo(**kwargs)
+def has_named_kwargs(**kwargs)
+  delegate(**kwargs)
+end
 
-foo **kwargs
+def has_anonymous_kwargs(**)
+  delegate(**)
+end

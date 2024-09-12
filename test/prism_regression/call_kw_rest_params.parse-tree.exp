@@ -1,42 +1,53 @@
 Begin {
   stmts = [
-    Send {
-      receiver = NULL
-      method = <U foo>
-      args = [
-        Hash {
-          kwargs = true
-          pairs = [
-            Kwsplat {
-              expr = Send {
-                receiver = NULL
-                method = <U kwargs>
-                args = [
-                ]
+    DefMethod {
+      name = <U has_named_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <U kwargs>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          Hash {
+            kwargs = true
+            pairs = [
+              Kwsplat {
+                expr = LVar {
+                  name = <U kwargs>
+                }
               }
-            }
-          ]
-        }
-      ]
+            ]
+          }
+        ]
+      }
     }
-    Send {
-      receiver = NULL
-      method = <U foo>
-      args = [
-        Hash {
-          kwargs = true
-          pairs = [
-            Kwsplat {
-              expr = Send {
-                receiver = NULL
-                method = <U kwargs>
-                args = [
-                ]
+    DefMethod {
+      name = <U has_anonymous_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <P <U **> $2>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          Hash {
+            kwargs = true
+            pairs = [
+              ForwardedKwrestArg {
               }
-            }
-          ]
-        }
-      ]
+            ]
+          }
+        ]
+      }
     }
   ]
 }
