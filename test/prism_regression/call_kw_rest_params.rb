@@ -1,3 +1,5 @@
-# typed: true
+# typed: false
 
-def foo(**a); end
+foo(**kwargs)
+
+foo **kwargs

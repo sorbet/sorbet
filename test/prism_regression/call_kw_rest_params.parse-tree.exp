@@ -1,11 +1,42 @@
-DefMethod {
-  name = <U foo>
-  args = Args {
-    args = [
-      Kwrestarg {
-        name = <U a>
-      }
-    ]
-  }
-  body = NULL
+Begin {
+  stmts = [
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Kwsplat {
+              expr = Send {
+                receiver = NULL
+                method = <U kwargs>
+                args = [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      receiver = NULL
+      method = <U foo>
+      args = [
+        Hash {
+          kwargs = true
+          pairs = [
+            Kwsplat {
+              expr = Send {
+                receiver = NULL
+                method = <U kwargs>
+                args = [
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
