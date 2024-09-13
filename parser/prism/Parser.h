@@ -14,22 +14,34 @@ namespace sorbet::parser::Prism {
 
 class Node;
 
+// A backing implemenation detail of `Parser`, which stores a Prism parser and its options in a single allocation.
+struct ParserStorage {
+    pm_parser_t parser;
+    pm_options_t options;
+
+    ParserStorage(std::string_view source_code) : parser{}, options{} {
+        pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source_code.data()), source_code.size(), &options);
+    }
+
+    ~ParserStorage() {
+        pm_parser_free(&parser);
+        pm_options_free(&options);
+    }
+
+    ParserStorage(const ParserStorage &) = delete;
+    ParserStorage &operator=(const ParserStorage &) = delete;
+    ParserStorage(ParserStorage &&) = delete;
+    ParserStorage &operator=(ParserStorage &&) = delete;
+};
+
 class Parser final {
     friend class Node;
     friend struct NodeDeleter;
 
-    std::shared_ptr<pm_parser_t> parser;
+    std::shared_ptr<ParserStorage> storage;
 
 public:
-    Parser(std::string_view source_code)
-        : parser(new pm_parser_t, [](auto p) {
-              pm_parser_free(p);
-              delete (p);
-          }) {
-        const pm_options_t *options = nullptr;
-        pm_parser_init(parser.get(), reinterpret_cast<const uint8_t *>(source_code.data()), source_code.size(),
-                       options);
-    }
+    Parser(std::string_view source_code) : storage(std::make_shared<ParserStorage>(source_code)) {}
 
     Parser(const Parser &) = default;
     Parser &operator=(const Parser &) = default;
