@@ -16,10 +16,14 @@ class Node;
 
 // A backing implemenation detail of `Parser`, which stores a Prism parser and its options in a single allocation.
 struct ParserStorage {
+    // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
+    static constexpr std::string_view ParsedRubyVersion = "3.3.0";
     pm_parser_t parser;
     pm_options_t options;
 
     ParserStorage(std::string_view source_code) : parser{}, options{} {
+        pm_options_version_set(&options, ParsedRubyVersion.data(), ParsedRubyVersion.size());
+
         pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(source_code.data()), source_code.size(), &options);
     }
 
