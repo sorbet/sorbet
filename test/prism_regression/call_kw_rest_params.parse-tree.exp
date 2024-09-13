@@ -1,11 +1,53 @@
-DefMethod {
-  name = <U foo>
-  args = Args {
-    args = [
-      Kwrestarg {
-        name = <U a>
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U has_named_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <U kwargs>
+          }
+        ]
       }
-    ]
-  }
-  body = NULL
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          Hash {
+            kwargs = true
+            pairs = [
+              Kwsplat {
+                expr = LVar {
+                  name = <U kwargs>
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U has_anonymous_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <P <U **> $2>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          Hash {
+            kwargs = true
+            pairs = [
+              ForwardedKwrestArg {
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

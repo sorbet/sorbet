@@ -1,6 +1,10 @@
 
 # typed: false
 
-foo(*a)
+def has_named_rest_args(*args)
+  delegate(*args)
+end
 
-foo *a
+def has_anonymous_rest_args(*)
+  delegate(*)
+end

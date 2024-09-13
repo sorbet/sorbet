@@ -39,5 +39,74 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U has_named_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <U kwargs>
+          }
+        ]
+      }
+      body = Hash {
+        kwargs = false
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U before>
+            }
+            value = String {
+              val = <U value before>
+            }
+          }
+          Kwsplat {
+            expr = LVar {
+              name = <U kwargs>
+            }
+          }
+          Pair {
+            key = Symbol {
+              val = <U after>
+            }
+            value = String {
+              val = <U value after>
+            }
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U has_anonymous_kwargs>
+      args = Args {
+        args = [
+          Kwrestarg {
+            name = <P <U **> $2>
+          }
+        ]
+      }
+      body = Hash {
+        kwargs = false
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U before>
+            }
+            value = String {
+              val = <U value before>
+            }
+          }
+          ForwardedKwrestArg {
+          }
+          Pair {
+            key = Symbol {
+              val = <U after>
+            }
+            value = String {
+              val = <U value after>
+            }
+          }
+        ]
+      }
+    }
   ]
 }

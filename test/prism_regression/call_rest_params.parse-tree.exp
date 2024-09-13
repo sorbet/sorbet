@@ -1,32 +1,43 @@
 Begin {
   stmts = [
-    Send {
-      receiver = NULL
-      method = <U foo>
-      args = [
-        Splat {
-          var = Send {
-            receiver = NULL
-            method = <U a>
-            args = [
-            ]
+    DefMethod {
+      name = <U has_named_rest_args>
+      args = Args {
+        args = [
+          Restarg {
+            name = <U args>
           }
-        }
-      ]
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          Splat {
+            var = LVar {
+              name = <U args>
+            }
+          }
+        ]
+      }
     }
-    Send {
-      receiver = NULL
-      method = <U foo>
-      args = [
-        Splat {
-          var = Send {
-            receiver = NULL
-            method = <U a>
-            args = [
-            ]
+    DefMethod {
+      name = <U has_anonymous_rest_args>
+      args = Args {
+        args = [
+          Restarg {
+            name = <P <U *> $2>
           }
-        }
-      ]
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U delegate>
+        args = [
+          ForwardedRestArg {
+          }
+        ]
+      }
     }
   ]
 }
