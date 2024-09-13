@@ -1,0 +1,49 @@
+Begin {
+  stmts = [
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Proc>>
+        }
+        method = <U new>
+        args = [
+        ]
+      }
+      args = NULL
+      body = Send {
+        receiver = NULL
+        method = <U it>
+        args = [
+        ]
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Proc>>
+        }
+        method = <U new>
+        args = [
+        ]
+      }
+      args = NULL
+      body = Begin {
+        stmts = [
+          Assign {
+            lhs = LVarLhs {
+              name = <U it>
+            }
+            rhs = Integer {
+              val = "123"
+            }
+          }
+          LVar {
+            name = <U it>
+          }
+        ]
+      }
+    }
+  ]
+}
