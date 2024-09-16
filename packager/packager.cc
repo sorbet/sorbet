@@ -1350,13 +1350,6 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
     for (auto &visibleTo : info->visibleTo_) {
         populateMangledName(gs, visibleTo.first);
-
-        if (visibleTo.first.mangledName == info->name.mangledName) {
-            if (auto e =
-                    gs.beginError(core::Loc(package.file, visibleTo.first.loc), core::errors::Packager::NoSelfImport)) {
-                e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
-            }
-        }
     }
 
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
