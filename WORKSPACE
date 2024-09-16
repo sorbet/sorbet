@@ -104,13 +104,3 @@ bazel_skylib_workspace()
 load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
 
 aspect_bazel_lib_dependencies()
-
-BAZEL_INSTALLER_VERSION_LINUX_X86_64_SHA = "c0161a346b9c0d00e6eb3d3e8f9c4dece32f6292520248c5ab2e3527265601c1"
-
-# Bazel for linux-arm64 doesn't have an installer at the moment.
-# We have a workaround in `./bazel` to download the binary directly.
-BAZEL_INSTALLER_VERSION_LINUX_ARM64_SHA = "5afe973cadc036496cac66f1414ca9be36881423f576db363d83afc9084c0c2f"
-
-BAZEL_INSTALLER_VERSION_DARWIN_X86_64_SHA = "455589bbaedf26e7bdb949288f777492ba1c53d67fd8329bfe066fb988df0e5c"
-
-BAZEL_INSTALLER_VERSION_DARWIN_ARM64_SHA = "c2b5f82dcc1561d25bc05c734a7cc7a5ff58d4e69185f3d6d21b51ddb53b488b"
