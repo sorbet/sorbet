@@ -86,6 +86,17 @@ Usage:
 
 ----- Full help output: --------------------------------------------------
 
- advanced options:
- dev options:
+ INPUT options:
+ OUTPUT options:
+ AUTOCORRECT options:
+ ERROR options:
+ METRIC options:
+ LSP options:
+ LSP FEATURE options:
+ PERFORMANCE options:
+ STRIPE PACKAGES MODE options:
+ STRIPE AUTOGEN options:
+ DEBUGGING options:
+ INTERNAL options:
+ OTHER options:
 --------------------------------------------------------------------------
