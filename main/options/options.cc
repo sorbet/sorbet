@@ -1243,21 +1243,11 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("error-white-list") > 0) {
-            logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
-            auto rawList = raw["error-white-list"].as<vector<int>>();
-            opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
-        }
         if (raw.count("isolate-error-code") > 0) {
             auto rawList = raw["isolate-error-code"].as<vector<int>>();
             opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
         }
 
-        if (raw.count("error-black-list") > 0) {
-            logger->error("`{}` is deprecated; please use `{}` instead", "--error-black-list", "--suppress-error-code");
-            auto rawList = raw["error-black-list"].as<vector<int>>();
-            opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
-        }
         if (raw.count("suppress-error-code") > 0) {
             auto rawList = raw["suppress-error-code"].as<vector<int>>();
             opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
