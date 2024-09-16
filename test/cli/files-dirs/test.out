@@ -13,16 +13,43 @@
 ------------------------------------------------------------------------
 You must pass either `-e` or at least one folder or ruby file.
 
-Typechecker for Ruby
+Sorbet: A fast, powerful typechecker designed for Ruby
 Usage:
-  sorbet [OPTION...] <path 1> <path 2> ...
+  sorbet [options] [[--] <path>...]
 
-  -e string      Parse an inline ruby string (default: "")
-  -q, --quiet    Silence all non-critical errors
-  -v, --verbose  Verbosity level [0-3]
-  -h             Show short help
-      --help     Show long help
-      --version  Show version
+ INPUT options:
+  -e <string>                   Treat <string> as if it were the contents of a Ruby file passed on 
+                                the command line (default: "")
+      --e-rbi <string>          Like `-e`, but treat <string> as an RBI file (default: "")
+      --file <path>             Run over the contents of <path>
+                                (Equivalent to passing <path> as a positional argument)
+      --dir <path>              Run over all Ruby and RBI files in <path>, recursively
+                                (Equivalent to passing <path> as a positional argument)
+      --allowed-extension <ext>[,<ext>...]
+                                Use these extensions to determine which file types Sorbet should 
+                                discover inside directories. (default: .rb,.rbi)
+      --ignore <pattern>        Ignores input files that contain <pattern> in their paths (relative 
+                                to the input path passed to Sorbet).
+                                When <pattern> starts with `/` it matches against the prefix of 
+                                these relative paths; others match anywhere.
+                                Matches must be against whole path segments, so `foo` matches 
+                                `foo/bar.rb` and `bar/foo/baz.rb` but not `foo.rb` or 
+                                `foo2/bar.rb`.
+      --no-config               Do not load the content of the `sorbet/config` file.
+                                Otherwise, Sorbet reads the `sorbet/config` file and treats each 
+                                line as if it were passed on the command line, unless the line 
+                                starts with `#`.
+                                To load a <file> as if it were a config file, pass `@<file>` as a 
+                                positional arg
+      --typed {false,true,strict,strong,[auto]}
+                                Force all code to specified strictness level, disregarding all `# 
+                                typed:` sigils. For `auto`, uses the `# typed:` sigil in the file 
+                                or `false` for files without a sigil. (default: auto)
+      --typed-override <filepath.yaml>
+                                Read <filepath.yaml> to override the strictness of individual files.
+                                Contents must be a map of `<strictness>: ['path1.rb', ...]` pairs.
+                                Can be used to enable type checking for certain files temporarily 
+                                without having to add a comment to every file. (default: "")
 
 ------------------------------------------------------------------------
 {
