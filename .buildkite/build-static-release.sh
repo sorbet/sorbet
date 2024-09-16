@@ -41,7 +41,7 @@ case "$platform" in
     cp bazel-bin/main/sorbet sorbet_arm64
 
     lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
-    rm sorbet_x86_64 sorbet_arm64
+    rm -f sorbet_x86_64 sorbet_arm64
     ;;
   *)
     ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
