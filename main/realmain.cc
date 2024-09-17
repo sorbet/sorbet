@@ -515,7 +515,7 @@ int realmain(int argc, char *argv[]) {
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
     gs->typedSuper = opts.typedSuper;
     gs->suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
-    if (!opts.stripeMode) {
+    if (!opts.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
@@ -536,7 +536,7 @@ int realmain(int argc, char *argv[]) {
     if (opts.suggestTyped) {
         gs->ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
         gs->ignoreErrorClassForSuggestTyped(core::errors::Resolver::SigInFileWithoutSigil.code);
-        if (!opts.stripeMode) {
+        if (!opts.uniquelyDefinedBehavior) {
             gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }

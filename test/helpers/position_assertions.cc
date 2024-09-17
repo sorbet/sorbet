@@ -252,7 +252,7 @@ const UnorderedMap<
         {"highlight-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
-        {"stripe-mode", BooleanPropertyAssertion::make},
+        {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
