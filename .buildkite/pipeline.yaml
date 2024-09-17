@@ -127,7 +127,7 @@ steps:
 
 # Success Phase - Allow the PR to be merged
   - label: "All tests and builds succeeded"
-    command: '.buildkite/all-succeeded.sh < /dev/null'
+    command: '.buildkite/all-succeeded.sh'
 
   - label: ":linux: publish-ruby-gems.sh (non-blocking)"
     command: '.buildkite/publish-ruby-gems.sh < /dev/null'
