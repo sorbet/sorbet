@@ -1200,7 +1200,7 @@ migrating your codebase to the new syntax.
 This error includes an autocorrect you can run to automatically migrate to the
 new syntax:
 
-```
+```bash
 srb tc --isolate-error-code=4021 --autocorrect
 ```
 
@@ -1510,7 +1510,7 @@ suppresses the superclass redefinition error for that class. For example, if the
 class `C` above were a class defined in Sorbet's payload, this would silence the
 errors:
 
-```
+```bash
 srb tc --suppress-payload-superclass-redefinition-for=C
 ```
 
@@ -1824,7 +1824,7 @@ example `Enumerable` needs a `each` method in the target class.
 Failing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 end
@@ -1836,7 +1836,7 @@ the required functionality.
 Passing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 

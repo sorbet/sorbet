@@ -238,7 +238,7 @@ that method signatures are [checked at runtime](runtime.md). To explain why this
 feature requires runtime support, let's look at the resolved ancestors of
 `Child`:
 
-```
+```plaintext
 irb> Child.ancestors
 => [Child, IFoo, Parent, <...>]
 ```

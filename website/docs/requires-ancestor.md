@@ -161,7 +161,7 @@ end
 `requires_ancestor` can also be used to require a singleton class as an
 ancestor:
 
-```
+```ruby
 module MyHelper
   extend T::Helpers
 
