@@ -3,6 +3,10 @@
 set -euo pipefail
 export JOB_NAME=linters
 
+touch foo
+chmod -w foo
+rm foo
+
 # shellcheck source=SCRIPTDIR/tools/setup-bazel.sh
 source .buildkite/tools/setup-bazel.sh
 
