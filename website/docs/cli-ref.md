@@ -256,7 +256,7 @@ Usage:
       --max-threads <n>         Set number of threads to use for fork/join worker pools.
                                 LSP will <n> threads plus some extra threads to manage
                                 the connection with the client, watchman, etc. (default:
-                                12)
+                                number of cores on the system)
       --reserve-class-table-capacity <n>
                                 Preallocate <n> slots in the class and modules table
                                 (default: 0)

@@ -45,6 +45,8 @@ script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1 | \
   sed -e $'s/\\\r$//' | \
   # Get rid of trailing spaces to make it look nice when reading the markdown
   sed -e 's/ *$//' | \
+  # CI has different number of cores, so the `--max-threads` help output changes
+  sed -e 's/^\( *\)[1-9][0-9]*)/\1number of cores on the system)/' | \
   # Convert help sections into markdown sections
   sed -e $'s/^ \\([A-Z].* options\\):/```\\\n\\\n## \\1\\\n\\\n```plaintext/'
 
