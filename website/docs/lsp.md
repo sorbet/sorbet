@@ -54,7 +54,7 @@ The best way to workaround this is to use one or more `--ignore` flags to ignore
 folders that should be excluded. For example, given a project like this, where
 you only want to typecheck `lib/` and `test/` but not `bin/`:
 
-```
+```plaintext
 .
 ├── bin/
 ├── lib/
@@ -63,14 +63,14 @@ you only want to typecheck `lib/` and `test/` but not `bin/`:
 
 Use this in your `sorbet/config` file:
 
-```
+```bash
 --dir=.
 --ignore=/bin
 ```
 
 instead of this, which will **not** work in LSP mode:
 
-```
+```bash
 # ❌ will not work ❌
 --dir=lib
 --dir=test

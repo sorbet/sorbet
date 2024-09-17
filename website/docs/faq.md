@@ -502,7 +502,7 @@ constantly, without warning.
 
 To upgrade a patch level (e.g., from 0.4.4314 to 0.4.4358):
 
-```
+```bash
 bundle update sorbet sorbet-runtime
 # also update plugins, if any
 

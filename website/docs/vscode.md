@@ -22,7 +22,7 @@ Then, add the following configuration to your workspace's `settings.json`:
 The next time you open a Ruby file in the workspace, Sorbet will automatically
 try to run via the following command:
 
-```
+```bash
 bundle exec srb typecheck --lsp
 ```
 
@@ -223,7 +223,7 @@ the restart.
 
 If you see an error that looks like this:
 
-```
+```plaintext
 [Error - 9:36:32 AM] Connection to server got closed. Server will not be restarted.
 Running Sorbet LSP with:
     bundle exec srb typecheck --lsp
