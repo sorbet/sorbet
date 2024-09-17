@@ -1,11 +1,12 @@
 ---
 id: cli
-title: Command Line Reference
+title: Command Line Quickstart
+sidebar_label: CLI Quickstart
 ---
 
 Sorbet has a wealth of command line options; we'll only be covering a subset of
-them here. For the full set of available options, check the help at the command
-line:
+them here. See the [Command Line Reference](cli-ref.md) for the full set of
+available options, or check the help at the command line:
 
 ```bash
 # to learn about available srb subcommands
