@@ -130,4 +130,4 @@ if [[ "$platform" == "linux-x86_64" ]]; then
 fi
 
 mkdir -p _out_/$platform
-cp bazel-bin/main/sorbet _out_/$platform/
+cp sorbet_bin _out_/$platform/
