@@ -13,5 +13,5 @@ class Test::Project::MainLib::LibTest
 end
 
 # Add "behavior" to this file. When enforcing `MultipleBehaviorDefs` in
-# `--stripe-mode` the top-level of <PackageTests> should be ignored.
+# `--uniquely-defined-behavior` the top-level of <PackageTests> should be ignored.
 1 + 1

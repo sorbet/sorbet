@@ -1,5 +1,5 @@
 # typed: false
-# stripe-mode: true
+# uniquely-defined-behavior: true
 # spacer for assert-fast-path
 # spacer for exclude-from-file-update
 

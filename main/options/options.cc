@@ -462,9 +462,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<bool>());
     options.add_options(section)("enable-experimental-requires-ancestor",
                                  "Enable experimental `requires_ancestor` annotation");
-    options.add_options(section)("stripe-mode",
+    options.add_options(section)("uniquely-defined-behavior",
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("stripe-mode",
+                                 "[deprecated] This option has been renamed to `--uniquely-defined-behavior`",
                                  cxxopts::value<bool>());
     fmt::memory_buffer all_stop_after;
     fmt::format_to(
@@ -1137,7 +1140,12 @@ void readOptions(Options &opts,
         opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<uint32_t>();
         opts.reserveTypeArgumentTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
-        opts.stripeMode = raw["stripe-mode"].as<bool>();
+        // Eventually: remove `--stripe-mode` and replace it with `--uniquely-defined-behavior`
+        if (raw.count("uniquely-defined-behavior") > 0) {
+            opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
+        } else {
+            opts.uniquelyDefinedBehavior = raw["stripe-mode"].as<bool>();
+        }
         opts.stripePackages = raw["stripe-packages"].as<bool>();
 
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
