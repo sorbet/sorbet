@@ -393,7 +393,7 @@ about covariance and contravariance.</p>
 the type <code>Child</code> is a subtype of the type <code>Parent</code>, then the type <code>M[Child]</code> is
 a subtype of the type <code>M[Parent]</code> if the type member of <code>M</code> is covariant. In
 symbols:</p>
-<pre><code class="hljs">Child &lt;: <span class="hljs-keyword">Parent</span>  ==&gt;  M[Child] &lt;: M[<span class="hljs-keyword">Parent</span>]
+<pre><code class="hljs css language-plaintext">Child &lt;: Parent  ==&gt;  M[Child] &lt;: M[Parent]
 </code></pre>
 <p>Note that only a Ruby <code>module</code> (not a <code>class</code>) may have a covariant
 <code>type_member</code>. (See the docs for error code <a href="/docs/error-reference#5016">5016</a> for
@@ -471,7 +471,7 @@ the child is a <code>class</code> (not a <code>module</code>), redeclaring it as
 Specifically, if the type <code>Child</code> is a subtype of the type <code>Parent</code>, then type
 <code>M[Parent]</code> is a subtype of the type <code>M[Child]</code> if the type member of <code>M</code> is
 contravariant. In symbols:</p>
-<pre><code class="hljs">Child &lt;: <span class="hljs-keyword">Parent</span>  ==&gt;  M[<span class="hljs-keyword">Parent</span>] &lt;: M[Child]
+<pre><code class="hljs css language-plaintext">Child &lt;: Parent  ==&gt;  M[Parent] &lt;: M[Child]
 </code></pre>
 <p>Contravariance is <strong>quite</strong> unintuitive for most people. Luckily, contravariance
 is not unique to Sorbet—all type systems that have both subtyping relationships

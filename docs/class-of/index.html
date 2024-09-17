@@ -203,7 +203,7 @@ instances implement <code>MyInterface</code>.” We can verify these errors are 
 the repl.</p>
 <p>First, we can explain the error on the call to <code>example2</code> by looking at
 ancestors:</p>
-<pre><code class="hljs">❯ MyClass.singleton_class.ancestors
+<pre><code class="hljs css language-plaintext">❯ MyClass.singleton_class.ancestors
 =&gt; [#&lt;Class:MyClass&gt;, MyInterface::ClassMethods,
     #&lt;Class:Object&gt;, T::Private::Methods::MethodHooks, #&lt;Class:BasicObject&gt;,
     Class, Module, T::Sig, Object, Kernel, BasicObject]
@@ -214,9 +214,9 @@ appear in this list, so Sorbet is correct to say that <code>MyClass</code> does 
 type <code>T.class_of(MyInterface)</code>. This is because neither <code>include</code> nor <code>extend</code>
 in Ruby will cause <code>#&lt;Class:MyInterface&gt;</code> to appear in any ancestors list.</p>
 <p>Next, let’s explain the other two errors:</p>
-<pre><code class="hljs">❯ MyInterface.singleton_class.ancestors
-=&gt; [#&lt;Cla<span class="hljs-symbol">ss:My</span>Interface&gt;,
-    <span class="hljs-symbol">T:</span><span class="hljs-symbol">:Pr</span>iva<span class="hljs-symbol">te:</span><span class="hljs-symbol">:Mi</span>xesInClassMethods, <span class="hljs-symbol">T:</span><span class="hljs-symbol">:He</span>lpers, Module, <span class="hljs-symbol">T:</span><span class="hljs-symbol">:Si</span>g, Object,
+<pre><code class="hljs css language-plaintext">❯ MyInterface.singleton_class.ancestors
+=&gt; [#&lt;Class:MyInterface&gt;,
+    T::Private::MixesInClassMethods, T::Helpers, Module, T::Sig, Object,
     Kernel, BasicObject]
 </code></pre>
 <p>For the <code>MyInterface</code> singleton class, we see that its only ancestor is itself

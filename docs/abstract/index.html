@@ -257,7 +257,7 @@ C.new(<span class="hljs-symbol">name:</span> <span class="hljs-string">"Some::Lo
 that method signatures are <a href="/docs/runtime">checked at runtime</a>. To explain why this
 feature requires runtime support, let’s look at the resolved ancestors of
 <code>Child</code>:</p>
-<pre><code class="hljs">irb&gt; Child.ancestors
+<pre><code class="hljs css language-plaintext">irb&gt; Child.ancestors
 =&gt; [Child, IFoo, Parent, &lt;...&gt;]
 </code></pre>
 <p>This shows that Ruby resolves a call like <code>child.foo</code> by first checking whether

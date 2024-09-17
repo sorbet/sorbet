@@ -192,7 +192,7 @@ inherited:</p>
 </code></pre>
 <p><code>requires_ancestor</code> can also be used to require a singleton class as an
 ancestor:</p>
-<pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyHelper</span></span>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">MyHelper</span></span>
   extend T::Helpers
 
   requires_ancestor { T.class_of(MyBaseClass) }

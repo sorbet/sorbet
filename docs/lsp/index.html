@@ -93,19 +93,19 @@ directory.</p>
 <p>The best way to workaround this is to use one or more <code>--ignore</code> flags to ignore
 folders that should be excluded. For example, given a project like this, where
 you only want to typecheck <code>lib/</code> and <code>test/</code> but not <code>bin/</code>:</p>
-<pre><code class="hljs">.
+<pre><code class="hljs css language-plaintext">.
 ├── bin/
-├── <span class="hljs-class"><span class="hljs-keyword">lib</span>/</span>
+├── lib/
 └── test/
 </code></pre>
 <p>Use this in your <code>sorbet/config</code> file:</p>
-<pre><code class="hljs"><span class="hljs-attr">--dir</span>=.
-<span class="hljs-attr">--ignore</span>=/bin
+<pre><code class="hljs css language-bash">--dir=.
+--ignore=/bin
 </code></pre>
 <p>instead of this, which will <strong>not</strong> work in LSP mode:</p>
-<pre><code class="hljs"><span class="hljs-comment"># ❌ will not work ❌</span>
---dir=<span class="hljs-class"><span class="hljs-keyword">lib</span></span>
---dir=test
+<pre><code class="hljs css language-bash"><span class="hljs-comment"># ❌ will not work ❌</span>
+--dir=lib
+--dir=<span class="hljs-built_in">test</span>
 </code></pre>
 <p>Using <code>--ignore</code> flags like this is imperfect and will not always work, but it’s
 the best current workaround. For more, see
