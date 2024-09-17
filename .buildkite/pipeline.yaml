@@ -7,7 +7,7 @@ steps:
 
 # Basic Phase - Run super fast things and things that commonly catch bugs
   - label: ":linux: linters.sh"
-    command: .buildkite/linters.sh
+    command: '.buildkite/linters.sh'
     <<: &elastic
       agents:
         os: linux
@@ -29,7 +29,7 @@ steps:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
   - label: ":mac: test-static-sanitized.sh (master only)"
-    command: .buildkite/test-static-sanitized.sh
+    command: '.buildkite/test-static-sanitized.sh'
     branches: "master"
     artifact_paths: _out_/profile.json
     agents:
@@ -40,12 +40,12 @@ steps:
      automatic: true
 
   - label: ":linux: test-static-sanitized.sh"
-    command: .buildkite/test-static-sanitized.sh
+    command: '.buildkite/test-static-sanitized.sh'
     artifact_paths: _out_/profile.json
     <<: *elastic
 
   - label: ":linux: test-rbi-gen.sh"
-    command: .buildkite/test-rbi-gen.sh
+    command: '.buildkite/test-rbi-gen.sh'
     artifact_paths:
       - _out_/profile.json
     <<: *elastic
@@ -58,17 +58,17 @@ steps:
 
 # Build Phase - Build all our artifacts
   - label: ":linux: build-website.sh"
-    command: .buildkite/build-website.sh
+    command: '.buildkite/build-website.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - label: ":linux: build-sorbet-runtime.sh"
-    command: .buildkite/build-sorbet-runtime.sh
+    command: '.buildkite/build-sorbet-runtime.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - label: ":mac: build-static-release.sh (master only)"
-    command: .buildkite/build-static-release.sh
+    command: '.buildkite/build-static-release.sh'
     branches: master
     artifact_paths: _out_/**/*
     agents:
@@ -79,12 +79,12 @@ steps:
      automatic: true
 
   - label: ":linux: build-static-release.sh"
-    command: .buildkite/build-static-release.sh
+    command: '.buildkite/build-static-release.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - label: ":linux: (arm64) build-static-release.sh"
-    command: .buildkite/build-static-release.sh
+    command: '.buildkite/build-static-release.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
     agents:
@@ -92,24 +92,24 @@ steps:
       queue: elastic-arm64
 
   - label: ":linux: build-sorbet-static-and-runtime.sh"
-    command: .buildkite/build-sorbet-static-and-runtime.sh
+    command: '.buildkite/build-sorbet-static-and-runtime.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - label: ":linux: build-emscripten.sh"
-    command: .buildkite/build-emscripten.sh
+    command: '.buildkite/build-emscripten.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - label: ":linux: build-vscode-extension.sh"
-    command: .buildkite/build-vscode-extension.sh
+    command: '.buildkite/build-vscode-extension.sh'
     artifact_paths: _out_/**/*
     <<: *elastic
 
   - wait: ~
 
   - label: ":linux: build-static-release-java.sh (master only)"
-    command: .buildkite/build-static-release-java.sh
+    command: '.buildkite/build-static-release-java.sh'
     # this needs to be run when both linux & mac build-static-release
     # are done. at the moment, mac is only done on master branch
     branches: master
@@ -120,17 +120,17 @@ steps:
 
 # Deploy Phase - Send the artifacts to the world
   - label: ":linux: publish.sh"
-    command: .buildkite/publish.sh
+    command: '.buildkite/publish.sh'
     agents:
       os: linux
   - wait: ~
 
 # Success Phase - Allow the PR to be merged
   - label: "All tests and builds succeeded"
-    command: .buildkite/all-succeeded.sh
+    command: '.buildkite/all-succeeded.sh'
 
   - label: ":linux: publish-ruby-gems.sh (non-blocking)"
-    command: .buildkite/publish-ruby-gems.sh
+    command: '.buildkite/publish-ruby-gems.sh'
     artifact_paths: _out_/corrupt/**/*
     <<: *elastic
 
