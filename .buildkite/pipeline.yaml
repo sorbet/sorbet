@@ -120,7 +120,7 @@ steps:
 
 # Deploy Phase - Send the artifacts to the world
   - label: ":linux: publish.sh"
-    command: '.buildkite/publish.sh < /dev/null'
+    command: '.buildkite/publish.sh'
     agents:
       os: linux
   - wait: ~
