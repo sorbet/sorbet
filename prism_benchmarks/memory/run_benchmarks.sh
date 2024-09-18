@@ -10,10 +10,12 @@
 
 YJIT_BENCH_DIR="../yjit-bench"
 SHOPIFY_DIR="../../Shopify/shopify"
+RBI_DIR="../../Shopify/rbi"
+
 export SORBET_SILENCE_DEV_MESSAGE=1
 
 # Check if required directories exist
-for dir in "$YJIT_BENCH_DIR" "$SHOPIFY_DIR"; do
+for dir in "$YJIT_BENCH_DIR" "$SHOPIFY_DIR" "$RBI_DIR"; do
     if [ ! -d "$dir" ]; then
         echo "Please clone the required directories before running this script."
         exit 1
@@ -61,4 +63,5 @@ run_benchmark() {
 
 run_benchmark "Memory Check 1: yjit-bench, parser only" "parser/yjit-bench" "--stop-after=parser $YJIT_BENCH_DIR/benchmarks"
 run_benchmark "Memory Check 2: shopify, parser only" "parser/shopify" "--stop-after=parser $SHOPIFY_DIR"
-run_benchmark "Memory Check 3: prism regression tests, whole pipeline" "pipeline" "test/prism_regression"
+run_benchmark "Memory Check 3: prism regression tests, whole pipeline" "pipeline/prism_regression" "test/prism_regression"
+run_benchmark "Memory Check 4: RBI gem, whole pipeline" "pipeline/rbi" $RBI_DIR
