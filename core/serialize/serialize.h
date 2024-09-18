@@ -19,6 +19,8 @@ public:
     // individual cached files, which can be loaded independently.
     static std::vector<uint8_t> storePayloadAndNameTable(const GlobalState &gs);
 
+    static std::string fileKey(const core::File &file);
+
     // Serializes an AST and file hash.
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);
 

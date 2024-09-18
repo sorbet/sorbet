@@ -13,7 +13,6 @@
 #include <sstream>
 #endif
 #include "ProgressIndicator.h"
-#include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
@@ -24,7 +23,6 @@
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/crypto_hashing/crypto_hashing.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
@@ -84,15 +82,6 @@ public:
     }
 };
 
-string fileKey(const core::File &file) {
-    auto path = file.path();
-    string key(path.begin(), path.end());
-    key += "//";
-    auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
-}
-
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -104,7 +93,7 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
         return nullptr;
     }
 
-    string fileHashKey = fileKey(file);
+    string fileHashKey = core::serialize::Serializer::fileKey(file);
     auto maybeCached = kvstore->read(fileHashKey);
     if (maybeCached.data == nullptr) {
         prodCounterInc("types.input.files.kvstore.miss");
