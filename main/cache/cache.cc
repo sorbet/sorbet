@@ -25,6 +25,10 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
 
 namespace {
 
+/**
+ * Returns 'true' if the given GlobalState was originally created from the current contents of
+ * kvstore (e.g., kvstore has not since been modified).
+ */
 bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const uint8_t *maybeGsBytes) {
     const bool storedUidMatches =
         maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
@@ -32,26 +36,13 @@ bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const uint8_t 
     return storedUidMatches || noPreviouslyStoredUuid;
 }
 
-} // namespace
-
 bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
     return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY).data);
 }
 
-unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
-    if (kvstore == nullptr) {
-        return nullptr;
-    }
-
-    auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    if (kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
-        return ownedKvstore;
-    }
-
-    // Some other process has written to kvstore; don't use.
-    return nullptr;
-}
-
+/**
+ * Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens.
+ */
 bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
@@ -68,6 +59,23 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
     }
     return false;
 }
+
+} // namespace
+
+unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
+    if (kvstore == nullptr) {
+        return nullptr;
+    }
+
+    auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
+    if (kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
+        return ownedKvstore;
+    }
+
+    // Some other process has written to kvstore; don't use.
+    return nullptr;
+}
+
 unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
                                                         core::GlobalState &gs, WorkerPool &workers,
                                                         const vector<ast::ParsedFile> &indexed) {
