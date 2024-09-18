@@ -29,15 +29,12 @@ namespace {
  * Returns 'true' if the given GlobalState was originally created from the current contents of
  * kvstore (e.g., kvstore has not since been modified).
  */
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const uint8_t *maybeGsBytes) {
+bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    const uint8_t *maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY).data;
     const bool storedUidMatches =
         maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
     const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;
     return storedUidMatches || noPreviouslyStoredUuid;
-}
-
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY).data);
 }
 
 /**
@@ -46,10 +43,9 @@ bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_p
 bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
-        auto maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY);
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
         // into the database.
-        if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
+        if (kvstoreUnchangedSinceGsCreation(gs, kvstore)) {
             // Generate a new UUID, since this GS has changed since it was read.
             gs.kvstoreUuid = Random::uniformU4();
             kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY,
