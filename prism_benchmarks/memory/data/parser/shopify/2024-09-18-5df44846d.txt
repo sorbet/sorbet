@@ -1,0 +1,49 @@
+	Command being timed: "bazel-bin/main/sorbet --parser=prism --stop-after=parser ../../Shopify/shopify"
+	User time (seconds): 311.65
+	System time (seconds): 30.33
+	Percent of CPU this job got: 123%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:36.99
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 877296
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 225456
+	Voluntary context switches: 89208
+	Involuntary context switches: 354071
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 16384
+	Exit status: 0
+
+Command exited with non-zero status 100
+	Command being timed: "bazel-bin/main/sorbet --parser=sorbet --stop-after=parser ../../Shopify/shopify"
+	User time (seconds): 771.97
+	System time (seconds): 27.98
+	Percent of CPU this job got: 239%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:34.40
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1349328
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 342514
+	Voluntary context switches: 20
+	Involuntary context switches: 147120
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 16384
+	Exit status: 100
+
