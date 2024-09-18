@@ -1,3 +1,4 @@
+# -- test/testdata/resolver/type_syntax_rbi.rbi --
 # typed: true
 
 sig {
@@ -14,3 +15,4 @@ sig {
     .void
 }
 def zero_args(x); end
+# ------------------------------
