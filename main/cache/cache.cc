@@ -39,8 +39,7 @@ bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_p
 /**
  * Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens.
  */
-bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
-                       const unique_ptr<OwnedKeyValueStore> &kvstore) {
+bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
         // into the database.
@@ -147,7 +146,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         return kvstore;
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    auto wroteGlobalState = retainGlobalState(gs, opts, ownedKvstore);
+    auto wroteGlobalState = retainGlobalState(gs, ownedKvstore);
     if (wroteGlobalState) {
         cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();
