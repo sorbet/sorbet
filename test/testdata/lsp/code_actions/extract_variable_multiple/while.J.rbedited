@@ -41,3 +41,13 @@ def while_4(x)
 #       ^ apply-code-action: [J] Extract Variable (all 2 occurrences)
   end
 end
+
+def while_5(x)
+  while T.unsafe(1)
+    while x + x
+#         ^ apply-code-action: [K] Extract Variable (this occurrence only)
+#         ^ apply-code-action: [L] Extract Variable (all 2 occurrences)
+      1
+    end
+  end
+end

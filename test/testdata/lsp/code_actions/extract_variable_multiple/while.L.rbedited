@@ -4,11 +4,10 @@
 
 def while_1(x)
   while T.unsafe(nil)
-    newVariable = x + 1
-    newVariable
+    x + 1
 #   ^^^^^ apply-code-action: [A] Extract Variable (this occurrence only)
 #   ^^^^^ apply-code-action: [B] Extract Variable (all 2 occurrences)
-    newVariable
+    x + 1
   end
 end
 
@@ -44,7 +43,8 @@ end
 
 def while_5(x)
   while T.unsafe(1)
-    while x + x
+    newVariable = x
+    while newVariable + newVariable
 #         ^ apply-code-action: [K] Extract Variable (this occurrence only)
 #         ^ apply-code-action: [L] Extract Variable (all 2 occurrences)
       1
