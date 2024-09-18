@@ -27,8 +27,18 @@ namespace sorbet::realmain::cache {
 std::unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(std::shared_ptr<::spdlog::logger> logger,
                                                              const options::Options &opts);
 
+/**
+ * Returns 'true' if the given GlobalState was originally created from the current contents of
+ * kvstore (e.g., kvstore has not since been modified).
+ **/
+bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const std::unique_ptr<OwnedKeyValueStore> &kvstore);
+
 // Returns an owned key value store if kvstore is unchanged since gs was created, or false otherwise.
 std::unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, std::unique_ptr<KeyValueStore> kvstore);
+
+/** Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens. */
+bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
+                       const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 // If kvstore is not null, caches global state and the given files to disk if they have changed. Can silently fail to
 // cache

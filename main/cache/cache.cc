@@ -1,5 +1,7 @@
 #include "main/cache/cache.h"
+#include "common/Random.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
@@ -21,13 +23,28 @@ unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(shared_ptr<::spdlog::log
                                                                       move(flavor), opts.maxCacheSizeBytes));
 }
 
+namespace {
+
+bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const uint8_t *maybeGsBytes) {
+    const bool storedUidMatches =
+        maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
+    const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;
+    return storedUidMatches || noPreviouslyStoredUuid;
+}
+
+} // namespace
+
+bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY).data);
+}
+
 unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
     if (kvstore == nullptr) {
         return nullptr;
     }
 
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    if (payload::kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
+    if (kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
         return ownedKvstore;
     }
 
@@ -35,6 +52,22 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
     return nullptr;
 }
 
+bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
+                       const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
+        auto maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY);
+        // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
+        // into the database.
+        if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
+            // Generate a new UUID, since this GS has changed since it was read.
+            gs.kvstoreUuid = Random::uniformU4();
+            kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY,
+                           core::serialize::Serializer::storePayloadAndNameTable(gs));
+            return true;
+        }
+    }
+    return false;
+}
 unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
                                                         core::GlobalState &gs, WorkerPool &workers,
                                                         const vector<ast::ParsedFile> &indexed) {
@@ -42,8 +75,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         return kvstore;
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    // TODO: Move these methods into this file.
-    auto wroteGlobalState = payload::retainGlobalState(gs, opts, ownedKvstore);
+    auto wroteGlobalState = retainGlobalState(gs, opts, ownedKvstore);
     if (wroteGlobalState) {
         pipeline::cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();

@@ -8,6 +8,8 @@ class Serializer {
 public:
     static const uint32_t VERSION = 6;
 
+    static constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
+
     // Serialize a global state.
     static std::vector<uint8_t> store(const GlobalState &gs);
 
