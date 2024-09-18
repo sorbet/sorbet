@@ -4,8 +4,6 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
-#include "main/pipeline/pipeline.h"
-#include "payload/payload.h"
 #include "sorbet_version/sorbet_version.h"
 
 using namespace std;
