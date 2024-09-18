@@ -14,6 +14,7 @@
       "runtime",
       "rbi",
       "cli",
+      "cli-ref",
       "tconfiguration"
     ],
     "Troubleshooting": [
