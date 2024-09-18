@@ -1,5 +1,6 @@
 #include "main/cache/cache.h"
 #include "common/Random.h"
+#include "common/concurrency/ConcurrentQueue.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
@@ -56,6 +57,75 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
     return false;
 }
 
+bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
+                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
+    if (kvstore == nullptr) {
+        return false;
+    }
+
+    Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
+
+    // Compress files in parallel.
+    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
+    for (auto &parsedFile : parsedFiles) {
+        fileq->push(&parsedFile, 1);
+    }
+
+    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
+    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
+        vector<pair<string, vector<uint8_t>>> threadResult;
+        int processedByThread = 0;
+        const ast::ParsedFile *job = nullptr;
+        unique_ptr<Timer> timeit;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+                    if (timeit == nullptr) {
+                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
+                    }
+
+                    if (!job->file.exists()) {
+                        continue;
+                    }
+
+                    auto &file = job->file.data(gs);
+                    if (!file.cached() && !file.hasParseErrors()) {
+                        threadResult.emplace_back(core::serialize::Serializer::fileKey(file),
+                                                  core::serialize::Serializer::storeTree(file, *job));
+                        // Stream out compressed files so that writes happen in parallel with processing.
+                        if (processedByThread > 100) {
+                            resultq->push(move(threadResult), processedByThread);
+                            processedByThread = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    size_t written = 0;
+    {
+        vector<pair<string, vector<uint8_t>>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    kvstore->write(move(a.first), move(a.second));
+                    written++;
+                }
+            }
+        }
+    }
+    prodCounterAdd("types.input.files.kvstore.write", written);
+    return written != 0;
+}
+
 } // namespace
 
 unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
@@ -81,7 +151,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
     auto wroteGlobalState = retainGlobalState(gs, opts, ownedKvstore);
     if (wroteGlobalState) {
-        pipeline::cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
+        cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();
         kvstore = OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
         prodCounterInc("cache.committed");
