@@ -13,7 +13,6 @@
 #include <sstream>
 #endif
 #include "ProgressIndicator.h"
-#include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
@@ -24,7 +23,6 @@
 #include "class_flatten/class_flatten.h"
 #include "common/FileOps.h"
 #include "common/concurrency/ConcurrentQueue.h"
-#include "common/crypto_hashing/crypto_hashing.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
@@ -84,15 +82,6 @@ public:
     }
 };
 
-string fileKey(const core::File &file) {
-    auto path = file.path();
-    string key(path.begin(), path.end());
-    key += "//";
-    auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
-}
-
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
@@ -104,7 +93,7 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
         return nullptr;
     }
 
-    string fileHashKey = fileKey(file);
+    string fileHashKey = core::serialize::Serializer::fileKey(file);
     auto maybeCached = kvstore->read(fileHashKey);
     if (maybeCached.data == nullptr) {
         prodCounterInc("types.input.files.kvstore.miss");
@@ -1263,74 +1252,6 @@ void printFileTable(unique_ptr<core::GlobalState> &gs, const options::Options &o
         }
     }
 #endif
-}
-
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
-                        const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore == nullptr) {
-        return false;
-    }
-
-    Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
-
-    // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
-    for (auto &parsedFile : parsedFiles) {
-        fileq->push(&parsedFile, 1);
-    }
-
-    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
-    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
-        vector<pair<string, vector<uint8_t>>> threadResult;
-        int processedByThread = 0;
-        const ast::ParsedFile *job = nullptr;
-        unique_ptr<Timer> timeit;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
-                    }
-
-                    if (!job->file.exists()) {
-                        continue;
-                    }
-
-                    auto &file = job->file.data(gs);
-                    if (!file.cached() && !file.hasParseErrors()) {
-                        threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeTree(file, *job));
-                        // Stream out compressed files so that writes happen in parallel with processing.
-                        if (processedByThread > 100) {
-                            resultq->push(move(threadResult), processedByThread);
-                            processedByThread = 0;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    size_t written = 0;
-    {
-        vector<pair<string, vector<uint8_t>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    kvstore->write(move(a.first), move(a.second));
-                    written++;
-                }
-            }
-        }
-    }
-    prodCounterAdd("types.input.files.kvstore.write", written);
-    return written != 0;
 }
 
 vector<ast::ParsedFile> autogenWriteCacheFile(const core::GlobalState &gs, const string &cachePath,

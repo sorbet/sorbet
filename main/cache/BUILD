@@ -12,12 +12,12 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common/kvstore",
+        "//core/serialize",
     ] + select({
         "@platforms//cpu:wasm32": [],
         "//conditions:default": [
+            "//common/concurrency",
             "//main/options",
-            "//main/pipeline",
-            "//payload:interface",
             "//sorbet_version",
         ],
     }),
