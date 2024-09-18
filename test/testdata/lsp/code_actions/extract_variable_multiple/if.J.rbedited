@@ -39,10 +39,10 @@ def same_cond_if(x)
 end
 
 def both_match_in_expr(x)
-  newVariable = 1
   if x + x
 #    ^ apply-code-action: [G] Extract Variable (this occurrence only)
 #    ^ apply-code-action: [H] Extract Variable (all 2 occurrences)
+    newVariable = 1
     newVariable + newVariable
 #   ^ apply-code-action: [I] Extract Variable (this occurrence only)
 #   ^ apply-code-action: [J] Extract Variable (all 2 occurrences)
