@@ -3,14 +3,25 @@
 # This script runs the benchmarks for the Prism parser in the Sorbet type checker.
 # It assumes the presence of a few directories and tools:
 # - The yjit-bench directory, which contains the benchmarks for YJIT (https://github.com/Shopify/yjit-bench)
+# - The rbi directory, which contains the RBI gem (https://github.com/Shopify/rbi)
 # - Hyperfine, a command-line benchmarking tool (https://github.com/sharkdp/hyperfine)
 
-# Check if the yjit-bench directory exists
-if [ ! -d "../yjit-bench" ]; then
-  echo "Please clone the yjit-bench directory before running this script: https://github.com/Shopify/yjit-bench"
-  exit 1
-fi
+# ----- Setup -----
 
+YJIT_BENCH_DIR="../yjit-bench"
+RBI_DIR="../rbi"
+
+export SORBET_SILENCE_DEV_MESSAGE=1
+
+# Check if required directories exist
+for dir in "$YJIT_BENCH_DIR" "$RBI_DIR"; do
+  if [ ! -d "$dir" ]; then
+    echo "Please clone the required directories before running this script."
+    exit 1
+  fi
+done
+
+# Check if hyperfine is installed
 if [! command -v hyperfine >/dev/null 2>&1 ]; then
   echo "Please install hyperfine before running this script: https://github.com/sharkdp/hyperfine"
   exit 1
@@ -26,31 +37,24 @@ for i in {1..10}; do
   cat test/testdata/**/*.rb > /dev/null
 done
 
-file_name="$(date '+%Y-%m-%d')-$(git rev-parse --short HEAD).json"
+output_file_name="$(date '+%Y-%m-%d')-$(git rev-parse --short HEAD).json"
 
-echo "#### Benchmark 1: yjit-bench, parser only"
+# ----- Run Benchmarks -----
 
-# Run the parser benchmarks
-# These benchmarks compare the performance of the Prism parser with the Sorbet parser without
-# any other parts of the type checker enabled.
-hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/time/data/parser/yjit-bench/$file_name" --parameter-list parser sorbet,prism \
-  "bazel-bin/main/sorbet --parser={parser} --stop-after=parser ../yjit-bench/benchmarks"
+run_benchmark() {
+  local title="$1"
+  local output_dir="$2"
+  local command="$3"
 
-echo "#### Benchmark 2: sorbet-test, parser only"
+  echo "#### $title ####"
+  output_file="prism_benchmarks/time/data/$output_dir/${output_file_name}"
 
-# Benchmark against sorbet tests to capture performance around parser errors
-# Pass the --ignore-failure flag to prevent hyperfine from exiting on parser errors
-hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/time/data/parser/sorbet-tests/$file_name" --parameter-list parser sorbet,prism \
-  "bazel-bin/main/sorbet --parser={parser} --stop-after=parser test/testdata" --ignore-failure
+  hyperfine \
+    --warmup=10 --export-json="$output_file" --parameter-list parser sorbet,prism \
+    "bazel-bin/main/sorbet --parser={parser} $command" --ignore-failure
+}
 
-echo "#### Benchmark 3: prism regression tests, whole pipeline"
-
-# Run the pipeline benchmarks
-# These benchmarks compare the performance of the entire Sorbet type checking pipeline with
-# the Prism parser enabled and the Sorbet parser enabled. These benchmarks must be run on a
-# smaller set of files that only contain nodes supported by the Prism --> Sorbet translation layer.
-hyperfine \
-  --warmup=10 --export-json="prism_benchmarks/time/data/pipeline/$file_name" --parameter-list parser sorbet,prism \
-  "bazel-bin/main/sorbet --parser={parser} test/prism_regression"
+run_benchmark "Benchmark 1: yjit-bench, parser only" "parser/yjit-bench" "--stop-after=parser $YJIT_BENCH_DIR/benchmarks"
+run_benchmark "Benchmark 2: sorbet-test, parser only" "parser/sorbet-tests" "--stop-after=parser test/testdata"
+run_benchmark "Benchmark 3: prism regression tests, whole pipeline" "pipeline/prism_regression" "test/prism_regression"
+run_benchmark "Benchmark 4: RBI gem, whole pipeline" "pipeline/rbi" "$RBI_DIR"
