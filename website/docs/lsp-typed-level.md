@@ -51,7 +51,6 @@ under the cursor:
 - Signature Help (`textDocument/signatureHelp`)
 - Document Highlight (`textDocument/documentHighlight`)
 
-
 These features require type inference to figure out what's under under the
 cursor **and** where that thing is referenced throughout the codebase:
 
