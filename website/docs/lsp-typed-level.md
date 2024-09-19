@@ -51,18 +51,12 @@ under the cursor:
 - Signature Help (`textDocument/signatureHelp`)
 - Document Highlight (`textDocument/documentHighlight`)
 
+
 These features require type inference to figure out what's under under the
 cursor **and** where that thing is referenced throughout the codebase:
 
 - Find All References (`textDocument/references`)
 - Rename Symbol (`textDocument/rename`)
-
-For this second set of requests, the table below indicates whether the results
-will include **usages** in `# typed: false` files (in addition to whatever was
-under the cursor initiating the request). For example, Find All References on a
-constant literal will find all usages of the constant, even references in
-`# typed: false` files. But Find All References on a method definition will only
-find calls to that method in `# typed: true` or higher files.
 
 In `# typed: false` files, whether these features will work or be degraded
 depends on what Ruby construct is under the cursor. The following table
@@ -91,6 +85,14 @@ The "Works in `# typed: false`" column describes whether to expect LSP features
 like Hover to work. For example, from the table we can infer that hovering over
 a constant literal in a `# typed: false` file will show information about that
 constant, but that hovering over a local variable will not.
+
+But for that second set of requests (e.g., Find All References and Rename
+Symbol), the "Works in `# typed: false`" column indicates whether the results
+will include **usages** in `# typed: false` files (in addition to whatever was
+under the cursor initiating the request). For example, Find All References on a
+constant literal will find all usages of the constant, even references in
+`# typed: false` files. But Find All References on a method definition will only
+find calls to that method in `# typed: true` or higher files.
 
 ## Why choose to disable certain editor features?
 
