@@ -1125,13 +1125,15 @@ Instead, they must be used inside a class or module definition.
 
 ## 4019
 
-This error is only reported when running Sorbet with the `--stripe-mode` command
-line flag.
+This error is only reported when running Sorbet with the
+`--uniquely-defined-behavior` command line flag (formerly called
+`--stripe-mode`).
 
 A class defines behavior in multiple files when at least two files would need to
 be run in order to completely load that class. A class definition that only
 serves as a namespace for inner definitions is not considered to have behavior.
-For example, in this example module `A` has behavior in two files:
+For example, in this example module `A` has behavior in two files, and thus
+produces an error in this mode:
 
 ```ruby
 # -- file1.rb --
@@ -1145,7 +1147,9 @@ module A
 end
 ```
 
-However, in this example, module `A` does not have any behavior:
+However, in this example, module `A` is defined in two files, but the second
+definition does not define any behavior (just an empty module body), and thus
+does not produce an error:
 
 ```ruby
 # -- file1.rb --
@@ -1163,8 +1167,15 @@ end
 
 The limitations around what constitutes "defining behavior" is intertwined with
 which files would have to be loaded for a class (like `A` above) to be fully
-loaded. In `--stripe-mode`, there must be at most one file to require to fully
-load a class.
+loaded. When checking `--uniquely-defined-behavior`, it must be possible to
+require at most one file to fully load a class. This property is useful to check
+in Ruby codebases which use an autoloader, like
+[Zeitwerk](https://github.com/fxn/zeitwerk).
+
+**What counts as behavior**? Basically anything with side effects (any method
+calls) and any method definitions. It's easier to describe what **doesn't**
+count: empty class or module definitions, or those class/module definitions
+which only have constant assignments and/or literals.
 
 ## 4021
 

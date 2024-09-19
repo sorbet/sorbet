@@ -548,7 +548,8 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
         opts->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
         // TODO(jez) Allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
-        opts->stripeMode = BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false);
+        opts->uniquelyDefinedBehavior =
+            BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false);
         opts->outOfOrderReferenceChecksEnabled =
             BooleanPropertyAssertion::getValue("check-out-of-order-constant-references", assertions).value_or(false);
         opts->requiresAncestorEnabled =

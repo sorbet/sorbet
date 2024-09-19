@@ -208,7 +208,7 @@ void verifySinglePackageTypechecking(string sorbet, string root, string testDire
     chDirAndSpawn(sorbet,
                   {
                       "--silence-dev-message",
-                      "--stripe-mode",
+                      "--uniquely-defined-behavior",
                       "--ignore",
                       "__package.rb",
                       testDirectory,
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
         chDirAndSpawn(sorbet,
                       {
                           "--silence-dev-message"s,
-                          "--stripe-mode"s,
+                          "--uniquely-defined-behavior"s,
                           "--stripe-packages"s,
                           "--dump-package-info"s,
                           packageInfoFilename,
@@ -270,7 +270,7 @@ int main(int argc, char **argv) {
         chDirAndSpawn(sorbet,
                       {
                           "--silence-dev-message",
-                          "--stripe-mode",
+                          "--uniquely-defined-behavior",
                           "--package-rbi-generation",
                           "--package-rbi-dir",
                           rbiPackageDir,

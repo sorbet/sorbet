@@ -344,7 +344,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
-    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
     }
 

@@ -1,5 +1,5 @@
 # typed: false
-# stripe-mode: true
+# uniquely-defined-behavior: true
 # assert-fast-path: multiple_behavior_defs_fix__2.rb
 # exclude-from-file-update: true
 
