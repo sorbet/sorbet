@@ -42,6 +42,12 @@ llvm_toolchain(
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
     llvm_version = "15.0.7",
+    # The sysroots are needed for cross-compiling
+    sysroot = {
+        "": "",
+        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    },
 )
 
 load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
