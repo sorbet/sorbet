@@ -51,9 +51,8 @@ under the cursor:
 - Signature Help (`textDocument/signatureHelp`)
 - Document Highlight (`textDocument/documentHighlight`)
 
-These features which operate on both the thing under the cursor **and**
-references to things throughout the codebase also have degraded support in
-`# typed: false` files:
+These features require type inference to figure out what's under under the
+cursor **and** where that thing is referenced throughout the codebase:
 
 - Find All References (`textDocument/references`)
 - Rename Symbol (`textDocument/rename`)
