@@ -916,12 +916,14 @@ Therefore, Sorbet does not support this pattern.</p>
 <p><code>type_member</code> and <code>type_template</code> cannot be used at the top-level of a file.
 Instead, they must be used inside a class or module definition.</p>
 <h2><a class="anchor" aria-hidden="true" id="4019"></a><a href="#4019" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4019</h2>
-<p>This error is only reported when running Sorbet with the <code>--stripe-mode</code> command
-line flag.</p>
+<p>This error is only reported when running Sorbet with the
+<code>--uniquely-defined-behavior</code> command line flag (formerly called
+<code>--stripe-mode</code>).</p>
 <p>A class defines behavior in multiple files when at least two files would need to
 be run in order to completely load that class. A class definition that only
 serves as a namespace for inner definitions is not considered to have behavior.
-For example, in this example module <code>A</code> has behavior in two files:</p>
+For example, in this example module <code>A</code> has behavior in two files, and thus
+produces an error in this mode:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- file1.rb --</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span>;</span> <span class="hljs-keyword">end</span>
@@ -932,7 +934,9 @@ For example, in this example module <code>A</code> has behavior in two files:</p
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>However, in this example, module <code>A</code> does not have any behavior:</p>
+<p>However, in this example, module <code>A</code> is defined in two files, but the second
+definition does not define any behavior (just an empty module body), and thus
+does not produce an error:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># -- file1.rb --</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A::B</span></span>
@@ -947,8 +951,14 @@ For example, in this example module <code>A</code> has behavior in two files:</p
 </code></pre>
 <p>The limitations around what constitutes “defining behavior” is intertwined with
 which files would have to be loaded for a class (like <code>A</code> above) to be fully
-loaded. In <code>--stripe-mode</code>, there must be at most one file to require to fully
-load a class.</p>
+loaded. When checking <code>--uniquely-defined-behavior</code>, it must be possible to
+require at most one file to fully load a class. This property is useful to check
+in Ruby codebases which use an autoloader, like
+<a href="https://github.com/fxn/zeitwerk">Zeitwerk</a>.</p>
+<p><strong>What counts as behavior</strong>? Basically anything with side effects (any method
+calls) and any method definitions. It’s easier to describe what <strong>doesn’t</strong>
+count: empty class or module definitions, or those class/module definitions
+which only have constant assignments and/or literals.</p>
 <h2><a class="anchor" aria-hidden="true" id="4021"></a><a href="#4021" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>4021</h2>
 <p>The syntax for specifying type bounds when using <code>type_member</code> and
 <code>type_template</code> has changed. The old syntax looked used a method call with
