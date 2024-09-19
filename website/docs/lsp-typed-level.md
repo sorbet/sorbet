@@ -33,11 +33,11 @@ at all.
 ## Support by LSP feature
 
 Most LSP features, like Hover, Go to Definition, Find All References, etc. have
-only partial support in `# typed: false` files, because they rely on type
-inference to work (see the previous section).
+only partial support in `# typed: false` files because they rely on type
+inference (see the previous section).
 
-These features have degraded support in `# typed: false` fies, because they
-require using type inference to figure out what's under the cursor:
+In particular, these features require using type inference to figure out what's
+under the cursor:
 
 <!-- TODO(jez) Should we have links to these LSP features eventually? -->
 
