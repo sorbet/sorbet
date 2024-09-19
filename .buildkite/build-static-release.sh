@@ -131,13 +131,13 @@ fi
 
 if [ "$kernel_name" = "darwin" ]; then
   mkdir -p _out_/darwin-universal
-  cp sorbet_bin _out_/darwin-universal/
+  mv sorbet_bin _out_/darwin-universal/sorbet
 
   for plat in {darwin-x86_64,darwin-arm64}; do
     mkdir -p "_out_/$plat"
-    cp "sorbet.$plat" "_out_/$plat/"
+    mv "sorbet.$plat" "_out_/$plat/sorbet"
   done
 else
   mkdir -p "_out_/$platform"
-  cp sorbet_bin "_out_/$platform/"
+  mv sorbet_bin "_out_/$platform/sorbet"
 fi
