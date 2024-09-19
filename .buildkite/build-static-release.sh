@@ -26,25 +26,26 @@ case "$platform" in
     ;;
 esac
 
-echo will run with $CONFIG_OPTS
+echo "will run with $CONFIG_OPTS"
 
-case "$platform" in
-  darwin-x86_64|darwin-arm64)
-    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
-    cp bazel-bin/main/sorbet sorbet_x86_64
+./bazel build //main:sorbet --strip=always "$CONFIG_OPTS"
 
-    # TODO: the cross-compile config needs to be changed if we change the MacOS runner architecture
-    ./bazel build //main:sorbet --strip=always --config=release-mac-arm64-cross
-    cp bazel-bin/main/sorbet sorbet_arm64
+if [ "$kernel_name" != "darwin" ]; then
+  cp bazel-bin/main/sorbet sorbet_bin
+else
+  cp bazel-bin/main/sorbet "sorbet.$platform"
 
-    lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
-    rm -f sorbet_x86_64 sorbet_arm64
-    ;;
-  *)
-    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
-    cp bazel-bin/main/sorbet sorbet_bin
-    ;;
-esac
+  # TODO(jez) building on arm64 is not tested (no arm64 mac buildkite instances)
+  case "$processor_name" in
+    x86_64) cross_target=darwin-arm64  ;;
+    arm64)  cross_target=darwin-x86_64 ;;
+  esac
+
+  ./bazel build //main:sorbet --strip=always "$CONFIG_OPTS" --config="cross-to-$cross_target"
+  cp bazel-bin/main/sorbet "sorbet.$cross_target"
+
+  lipo -create -output sorbet_bin sorbet.darwin-*
+fi
 
 mkdir gems/sorbet-static/libexec/
 cp sorbet_bin gems/sorbet-static/libexec/sorbet
@@ -126,5 +127,15 @@ if [[ "$platform" == "linux-x86_64" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 
-mkdir -p _out_/$platform
-cp sorbet_bin _out_/$platform/
+if [ "$kernel_name" = "darwin" ]; then
+  mkdir -p _out_/darwin-universal
+  cp sorbet_bin _out_/darwin-universal/
+
+  for plat in {darwin-x86_64,darwin-arm64}; do
+    mkdir -p "_out_/$plat"
+    cp "sorbet.$plat" "_out_/$plat/"
+  done
+else
+  mkdir -p "_out_/$platform"
+  cp sorbet_bin "_out_/$platform/"
+fi
