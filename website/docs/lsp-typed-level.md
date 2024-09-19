@@ -32,13 +32,45 @@ at all.
 
 ## Support by LSP feature
 
-The following table summarizes what to expect to work by Ruby language feature.
-The "Works in `# typed: false`" column describes whether to expect LSP features
-like Hover to work. For example, the table makes it clear that hovering over a
-constant literal in a `# typed: false` file will show information about that
-constant, but that hovering over a local variable will not.
+Most LSP features, like Hover, Go to Definition, Find All References, etc. have
+only partial support in `# typed: false` files, because they rely on type
+inference to work (see the previous section).
 
-| Ruby feature                                    | Works in `# typed: false` |
+These features have degraded support in `# typed: false` fies, because they
+require using type inference to figure out what's under the cursor:
+
+<!-- TODO(jez) Should we have links to these LSP features eventually? -->
+
+- Hover (`textDocument/hover`)
+- [Go to Definition](go-to-def.md) (`textDocument/definition`)
+- [Go to Type Definition](go-to-def.md#definition-vs-type-definition)
+  (`textDocument/typeDefinition`)
+- [Go to Implementation](go-to-def.md#go-to-implementations--find-all-implementations)
+  (`textDocument/implementation`)
+- [Autocompletion](autocompletion.md) (`textDocument/complete`)
+- Signature Help (`textDocument/signatureHelp`)
+- Document Highlight (`textDocument/documentHighlight`)
+
+These features which operate on both the thing under the cursor **and**
+references to things throughout the codebase also have degraded support in
+`# typed: false` files:
+
+- Find All References (`textDocument/references`)
+- Rename Symbol (`textDocument/rename`)
+
+For this second set of requests, the table below indicates whether the results
+will include **usages** in `# typed: false` files (in addition to whatever was
+under the cursor initiating the request). For example, Find All References on a
+constant literal will find all usages of the constant, even references in
+`# typed: false` files. But Find All References on a method definition will only
+find calls to that method in `# typed: true` or higher files.
+
+In `# typed: false` files, whether these features will work or be degraded
+depends on what Ruby construct is under the cursor. The following table
+summarizes what to expect to work in `# typed: false` files, by Ruby language
+feature.
+
+| Ruby feature under cursor                       | Works in `# typed: false` |
 | ----------------------------------------------- | ------------------------- |
 | `class`/`module` definition                     | ✅                        |
 | left side of constant assignment                | ✅                        |
@@ -56,33 +88,10 @@ so it's possible that there will be no results because Sorbet has silenced an
 error complaining that it could not find the definition matching an instance or
 class variable usage.
 
-The table above applies to the following LSP features, which operate on the
-thing under the cursor:
-
-<!-- TODO(jez) Should we have links to these LSP features eventually? -->
-
-- Hover (`textDocument/hover`)
-- [Go to Definition](go-to-def.md) (`textDocument/definition`)
-- [Go to Type Definition](go-to-def.md#definition-vs-type-definition)
-  (`textDocument/typeDefinition`)
-- [Go to Implementation](go-to-def.md#go-to-implementations--find-all-implementations)
-  (`textDocument/implementation`)
-- [Autocompletion](autocompletion.md) (`textDocument/complete`)
-- Signature Help (`textDocument/signatureHelp`)
-- Document Highlight (`textDocument/documentHighlight`)
-
-It also applies to these features which operate on both the thing under the
-cursor **and** references to things throughout the codebase:
-
-- Find All References (`textDocument/references`)
-- Rename Symbol (`textDocument/rename`)
-
-For this second set of requests, the table indicates whether the results will
-include usages in `# typed: false` files (in addition to whatever was under the
-cursor to initiate the request). For example, Find All References on a constant
-literal will find all usages of the constant, even references in
-`# typed: false` files. But Find All References on a method definition will only
-find calls to that method in `# typed: true` or higher files.
+The "Works in `# typed: false`" column describes whether to expect LSP features
+like Hover to work. For example, from the table we can infer that hovering over
+a constant literal in a `# typed: false` file will show information about that
+constant, but that hovering over a local variable will not.
 
 ## Why choose to disable certain editor features?
 
