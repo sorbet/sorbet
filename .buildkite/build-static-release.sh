@@ -16,8 +16,12 @@ case "$platform" in
   linux-aarch64)
     CONFIG_OPTS="--config=release-${platform}"
     ;;
-  darwin-x86_64|darwin-arm64)
+  darwin-x86_64)
     CONFIG_OPTS="--config=release-mac"
+    command -v autoconf >/dev/null 2>&1 || brew install autoconf
+    ;;
+  darwin-arm64)
+    CONFIG_OPTS="--config=release-mac-arm64"
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   *)
@@ -28,10 +32,25 @@ esac
 
 echo will run with $CONFIG_OPTS
 
-./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+case "$platform" in
+  darwin-x86_64|darwin-arm64)
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    cp bazel-bin/main/sorbet sorbet_x86_64
+
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS --config=release-mac-arm64-cross
+    cp bazel-bin/main/sorbet sorbet_arm64
+
+    lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
+    rm -f sorbet_x86_64 sorbet_arm64
+    ;;
+  *)
+    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+    cp bazel-bin/main/sorbet sorbet_bin
+    ;;
+esac
 
 mkdir gems/sorbet-static/libexec/
-cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
+cp sorbet_bin gems/sorbet-static/libexec/sorbet
 
 rbenv install --skip-existing
 
@@ -111,4 +130,4 @@ if [[ "$platform" == "linux-x86_64" ]]; then
 fi
 
 mkdir -p _out_/$platform
-cp bazel-bin/main/sorbet _out_/$platform/
+cp sorbet_bin _out_/$platform/
