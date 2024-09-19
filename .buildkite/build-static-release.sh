@@ -16,7 +16,7 @@ case "$platform" in
   linux-aarch64)
     CONFIG_OPTS="--config=release-${platform}"
     ;;
-  darwin-*)
+  darwin-x86_64|darwin-arm64)
     CONFIG_OPTS="--config=release-mac"
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
@@ -26,9 +26,9 @@ case "$platform" in
     ;;
 esac
 
-echo "will run with $CONFIG_OPTS"
+echo will run with $CONFIG_OPTS
 
-./bazel build //main:sorbet --strip=always "$CONFIG_OPTS"
+./bazel build //main:sorbet --strip=always $CONFIG_OPTS
 
 if [ "$kernel_name" != "darwin" ]; then
   cp bazel-bin/main/sorbet sorbet_bin
