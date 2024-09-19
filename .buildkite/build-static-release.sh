@@ -44,6 +44,8 @@ else
   ./bazel build //main:sorbet --strip=always "$CONFIG_OPTS" --config="cross-to-$cross_target"
   cp bazel-bin/main/sorbet "sorbet.$cross_target"
 
+  # TODO(jez) We might be able to replace this with `apple_universal_binary`?
+  # https://github.com/bazelbuild/rules_apple/blob/35a2fb854a47745deb035d3443008aa15a2c2b85/doc/rules-apple.md#apple_universal_binary
   lipo -create -output sorbet_bin sorbet.darwin-*
 fi
 
