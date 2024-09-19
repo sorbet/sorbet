@@ -46,7 +46,8 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
         } else if (if_->elsep.loc().exists() && if_->elsep.loc().contains(target)) {
             whereToInsert = if_->elsep.loc();
         } else {
-            ENFORCE(false);
+            ENFORCE(!(if_->cond.loc().exists() && if_->cond.loc().contains(target)),
+                    "shouldn't be inserting into the cond of an if");
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(scope)) {
         if (rescue->body.loc().exists() && rescue->body.loc().contains(target)) {
@@ -61,7 +62,12 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
     } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(scope)) {
         whereToInsert = rescueCase->body.loc();
     } else if (auto while_ = ast::cast_tree<ast::While>(scope)) {
-        whereToInsert = while_->body.loc();
+        if (while_->body.loc().exists() && while_->body.loc().contains(target)) {
+            whereToInsert = while_->body.loc();
+        } else {
+            ENFORCE(!(while_->cond.loc().exists() && while_->cond.loc().contains(target)),
+                    "shouldn't be inserting into the cond of a while");
+        }
     } else {
         ENFORCE(false);
     }
@@ -314,6 +320,7 @@ class ExpressionPtrSearchWalk {
         if (LCAScopeStack.empty()) {
             for (auto *scope : enclosingScopeStack) {
                 const ast::ExpressionPtr *scopeToCompare = scope;
+                const ast::ExpressionPtr *scopeToInsertIn = scope;
                 if (ast::isa_tree<ast::If>(*scope)) {
                     auto &if_ = ast::cast_tree_nonnull<ast::If>(*scope);
                     if (if_.thenp.loc().exists() && if_.thenp.loc().contains(matchLoc)) {
@@ -322,6 +329,7 @@ class ExpressionPtrSearchWalk {
                         scopeToCompare = &if_.elsep;
                     } else if (if_.cond.loc().contains(matchLoc)) {
                         scopeToCompare = &if_.cond;
+                        scopeToInsertIn = LCAScopeStack.back().second;
                     } else {
                         ENFORCE(false);
                     }
@@ -349,16 +357,17 @@ class ExpressionPtrSearchWalk {
                         scopeToCompare = &while_.body;
                     } else if (while_.cond.loc().contains(matchLoc)) {
                         scopeToCompare = &while_.cond;
+                        scopeToInsertIn = LCAScopeStack.back().second;
                     } else {
                         ENFORCE(false);
                     }
                 }
-                LCAScopeStack.push_back(scopeToCompare);
+                LCAScopeStack.push_back(make_pair(scopeToCompare->loc(), scopeToInsertIn));
             }
         } else {
             for (size_t i = 0; i < LCAScopeStack.size(); i++) {
-                auto *scopeToCompare = LCAScopeStack[i];
-                if (!scopeToCompare->loc().contains(matchLoc)) {
+                auto scopeToCompare = LCAScopeStack[i].first;
+                if (!scopeToCompare.contains(matchLoc)) {
                     LCAScopeStack.erase(LCAScopeStack.begin() + i, LCAScopeStack.end());
                     break;
                 }
@@ -367,7 +376,7 @@ class ExpressionPtrSearchWalk {
     }
 
 public:
-    vector<const ast::ExpressionPtr *> LCAScopeStack;
+    vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs,
                             const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
@@ -473,17 +482,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
         return {vector<unique_ptr<TextDocumentEdit>>(), 1};
     }
 
-    const ast::ExpressionPtr *scopeToInsertIn = nullptr;
-    for (auto scope = walk.LCAScopeStack.rbegin(); scope != walk.LCAScopeStack.rend(); ++scope) {
-        if (ast::isa_tree<ast::InsSeq>(**scope) || ast::isa_tree<ast::ClassDef>(**scope) ||
-            ast::isa_tree<ast::Block>(**scope) || ast::isa_tree<ast::MethodDef>(**scope) ||
-            ast::isa_tree<ast::If>(**scope) || ast::isa_tree<ast::Rescue>(**scope) ||
-            ast::isa_tree<ast::RescueCase>(**scope) || ast::isa_tree<ast::While>(**scope)) {
-            scopeToInsertIn = *scope;
-            break;
-        }
-    }
-    ENFORCE(scopeToInsertIn, "the LCA scope stack should always have a ClassDef or MethodDef");
+    const ast::ExpressionPtr *scopeToInsertIn = walk.LCAScopeStack.back().second;
 
     fast_sort(matches, [](auto a, auto b) { return a.beginPos() < b.beginPos(); });
     auto firstMatch = matches[0];
