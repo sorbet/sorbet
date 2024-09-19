@@ -45,10 +45,9 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
             whereToInsert = if_->thenp.loc();
         } else if (if_->elsep.loc().exists() && if_->elsep.loc().contains(target)) {
             whereToInsert = if_->elsep.loc();
-        } else if (if_->cond.loc().exists() && if_->cond.loc().contains(target)) {
-            ENFORCE(false, "shouldn't be inserting into the cond of an if");
         } else {
-            ENFORCE(false);
+            ENFORCE(!(if_->cond.loc().exists() && if_->cond.loc().contains(target)),
+                    "shouldn't be inserting into the cond of an if");
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(scope)) {
         if (rescue->body.loc().exists() && rescue->body.loc().contains(target)) {
@@ -65,8 +64,9 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
     } else if (auto while_ = ast::cast_tree<ast::While>(scope)) {
         if (while_->body.loc().exists() && while_->body.loc().contains(target)) {
             whereToInsert = while_->body.loc();
-        } else if (while_->cond.loc().exists() && while_->cond.loc().contains(target)) {
-            ENFORCE(false, "shouldn't be inserting into the cond of a while");
+        } else {
+            ENFORCE(!(while_->cond.loc().exists() && while_->cond.loc().contains(target)),
+                    "shouldn't be inserting into the cond of a while");
         }
     } else {
         ENFORCE(false);
