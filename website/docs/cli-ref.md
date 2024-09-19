@@ -154,8 +154,6 @@ Usage:
                                 Ensure that every class and module only defines
                                 'behavior' in one file. Ensures that every class or
                                 module can be autoloaded by loading exactly one file.
-      --stripe-mode             [deprecated] This option has been renamed to
-                                `--uniquely-defined-behavior`
       --stop-after <phase>      Stop after completing <phase>. Can be useful for
                                 debugging. Also useful when overwhelmed with errors,
                                 because errors from earlier phases (like resolver) can
