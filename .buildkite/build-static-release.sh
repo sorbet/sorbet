@@ -21,7 +21,7 @@ case "$platform" in
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   darwin-arm64)
-    CONFIG_OPTS="--config=release-mac-arm64"
+    CONFIG_OPTS="--config=release-mac"
     command -v autoconf >/dev/null 2>&1 || brew install autoconf
     ;;
   *)
@@ -37,7 +37,8 @@ case "$platform" in
     ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
     cp bazel-bin/main/sorbet sorbet_x86_64
 
-    ./bazel build //main:sorbet --strip=always $CONFIG_OPTS --config=release-mac-arm64-cross
+    # TODO: the cross-compile config needs to be changed if we change the MacOS runner architecture
+    ./bazel build //main:sorbet --strip=always --config=release-mac-arm64-cross
     cp bazel-bin/main/sorbet sorbet_arm64
 
     lipo -create -output sorbet_bin sorbet_x86_64 sorbet_arm64
