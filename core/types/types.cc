@@ -892,7 +892,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
                 ret = type;
             }
         },
-        [&](const TypePtr &tp) {            
+        [&](const TypePtr &tp) {
             if (type != nullptr) {
                 Exception::raise("unwrapSelfTypeParam: unhandled case type={}", type.toString(ctx));
             } else {
