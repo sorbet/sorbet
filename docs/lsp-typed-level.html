@@ -78,14 +78,36 @@ that Sorbet makes an attempt to infer types for local variables and then
 refrains from reporting those errors: it does not run inference on these files
 at all.</p>
 <h2><a class="anchor" aria-hidden="true" id="support-by-lsp-feature"></a><a href="#support-by-lsp-feature" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Support by LSP feature</h2>
-<p>The following table summarizes what to expect to work by Ruby language feature.
-The &quot;Works in <code># typed: false</code>&quot; column describes whether to expect LSP features
-like Hover to work. For example, the table makes it clear that hovering over a
-constant literal in a <code># typed: false</code> file will show information about that
-constant, but that hovering over a local variable will not.</p>
+<p>Most LSP features, like Hover, Go to Definition, Find All References, etc. have
+only partial support in <code># typed: false</code> files because they rely on type
+inference (see the previous section).</p>
+<p>In particular, these features require using type inference to figure out what’s
+under the cursor:</p>
+<!-- TODO(jez) Should we have links to these LSP features eventually? -->
+<ul>
+<li>Hover (<code>textDocument/hover</code>)</li>
+<li><a href="/docs/go-to-def">Go to Definition</a> (<code>textDocument/definition</code>)</li>
+<li><a href="/docs/go-to-def#definition-vs-type-definition">Go to Type Definition</a>
+(<code>textDocument/typeDefinition</code>)</li>
+<li><a href="/docs/go-to-def#go-to-implementations--find-all-implementations">Go to Implementation</a>
+(<code>textDocument/implementation</code>)</li>
+<li><a href="/docs/autocompletion">Autocompletion</a> (<code>textDocument/complete</code>)</li>
+<li>Signature Help (<code>textDocument/signatureHelp</code>)</li>
+<li>Document Highlight (<code>textDocument/documentHighlight</code>)</li>
+</ul>
+<p>These features require type inference to figure out what’s under under the
+cursor <strong>and</strong> where that thing is referenced throughout the codebase:</p>
+<ul>
+<li>Find All References (<code>textDocument/references</code>)</li>
+<li>Rename Symbol (<code>textDocument/rename</code>)</li>
+</ul>
+<p>In <code># typed: false</code> files, whether these features will work or be degraded
+depends on what Ruby construct is under the cursor. The following table
+summarizes what to expect to work in <code># typed: false</code> files, by Ruby language
+feature.</p>
 <table>
 <thead>
-<tr><th>Ruby feature</th><th>Works in <code># typed: false</code></th></tr>
+<tr><th>Ruby feature under cursor</th><th>Works in <code># typed: false</code></th></tr>
 </thead>
 <tbody>
 <tr><td><code>class</code>/<code>module</code> definition</td><td>✅</td></tr>
@@ -104,30 +126,15 @@ only requires these variables to be defined in <code># typed: strict</code> file
 so it’s possible that there will be no results because Sorbet has silenced an
 error complaining that it could not find the definition matching an instance or
 class variable usage.</p>
-<p>The table above applies to the following LSP features, which operate on the
-thing under the cursor:</p>
-<!-- TODO(jez) Should we have links to these LSP features eventually? -->
-<ul>
-<li>Hover (<code>textDocument/hover</code>)</li>
-<li><a href="/docs/go-to-def">Go to Definition</a> (<code>textDocument/definition</code>)</li>
-<li><a href="/docs/go-to-def#definition-vs-type-definition">Go to Type Definition</a>
-(<code>textDocument/typeDefinition</code>)</li>
-<li><a href="/docs/go-to-def#go-to-implementations--find-all-implementations">Go to Implementation</a>
-(<code>textDocument/implementation</code>)</li>
-<li><a href="/docs/autocompletion">Autocompletion</a> (<code>textDocument/complete</code>)</li>
-<li>Signature Help (<code>textDocument/signatureHelp</code>)</li>
-<li>Document Highlight (<code>textDocument/documentHighlight</code>)</li>
-</ul>
-<p>It also applies to these features which operate on both the thing under the
-cursor <strong>and</strong> references to things throughout the codebase:</p>
-<ul>
-<li>Find All References (<code>textDocument/references</code>)</li>
-<li>Rename Symbol (<code>textDocument/rename</code>)</li>
-</ul>
-<p>For this second set of requests, the table indicates whether the results will
-include usages in <code># typed: false</code> files (in addition to whatever was under the
-cursor to initiate the request). For example, Find All References on a constant
-literal will find all usages of the constant, even references in
+<p>The &quot;Works in <code># typed: false</code>&quot; column describes whether to expect LSP features
+like Hover to work. For example, from the table we can infer that hovering over
+a constant literal in a <code># typed: false</code> file will show information about that
+constant, but that hovering over a local variable will not.</p>
+<p>But for that second set of requests (e.g., Find All References and Rename
+Symbol), the &quot;Works in <code># typed: false</code>&quot; column indicates whether the results
+will include <strong>usages</strong> in <code># typed: false</code> files (in addition to whatever was
+under the cursor initiating the request). For example, Find All References on a
+constant literal will find all usages of the constant, even references in
 <code># typed: false</code> files. But Find All References on a method definition will only
 find calls to that method in <code># typed: true</code> or higher files.</p>
 <h2><a class="anchor" aria-hidden="true" id="why-choose-to-disable-certain-editor-features"></a><a href="#why-choose-to-disable-certain-editor-features" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why choose to disable certain editor features?</h2>
