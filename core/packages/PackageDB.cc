@@ -217,6 +217,10 @@ const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscoreP
     return extraPackageFilesDirectoryUnderscorePrefixes_;
 }
 
+const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
+    return extraPackageFilesDirectorySlashDeprecatedPrefixes_;
+}
+
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectorySlashPrefixes() const {
     return extraPackageFilesDirectorySlashPrefixes_;
 }
@@ -238,6 +242,8 @@ PackageDB PackageDB::deepCopy() const {
     }
     result.enabled_ = this->enabled_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
+    result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
+        this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
     result.packagesByPathPrefix = this->packagesByPathPrefix;
     result.mangledNames = this->mangledNames;

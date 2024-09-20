@@ -60,6 +60,7 @@ public:
     }
 
     const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes() const;
+    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
 
@@ -69,6 +70,7 @@ public:
 private:
     bool enabled_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
+    std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;

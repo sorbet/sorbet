@@ -204,6 +204,16 @@ for this_src in "${rb_src[@]}" DUMMY; do
           done
         fi
 
+        extra_slash_prefixes_deprecated=()
+        while IFS='' read -r prefix; do
+          extra_slash_prefixes_deprecated+=("$prefix")
+        done < <(grep '# extra-package-files-directory-prefix-slash-deprecated: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+        if [ "${#extra_slash_prefixes_deprecated[@]}" -gt 0 ]; then
+          for prefix in "${extra_slash_prefixes_deprecated[@]}"; do
+            args+=("--extra-package-files-directory-prefix-slash-deprecated" "${prefix}")
+          done
+        fi
+
         extra_slash_prefixes=()
         while IFS='' read -r prefix; do
           extra_slash_prefixes+=("$prefix")

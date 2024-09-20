@@ -293,10 +293,14 @@ Usage:
                                 Extra parent directories which contain package files.
                                 These paths use an underscore package-munging convention,
                                 i.e. 'Project_Foo'
-      --extra-package-files-directory-prefix-slash string
+      --extra-package-files-directory-prefix-slash-deprecated string
                                 Extra parent directories which contain package files.
                                 These paths use a slash package-munging convention, i.e.
                                 'project/foo'
+      --extra-package-files-directory-prefix-slash string
+                                Extra parent directories which contain package files.
+                                These paths use constant names joined by slashes, i.e.
+                                'Project/Foo'
       --allow-relaxed-packager-checks-for string
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives

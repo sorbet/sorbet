@@ -611,9 +611,13 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Extra parent directories which contain package files. These paths use an underscore "
                                  "package-munging convention, i.e. 'Project_Foo'",
                                  cxxopts::value<vector<string>>(), "string");
-    options.add_options(section)("extra-package-files-directory-prefix-slash",
+    options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
                                  "Extra parent directories which contain package files. These paths use a slash "
                                  "package-munging convention, i.e. 'project/foo'",
+                                 cxxopts::value<vector<string>>(), "string");
+    options.add_options(section)("extra-package-files-directory-prefix-slash",
+                                 "Extra parent directories which contain package files. These paths are constant names "
+                                 "joined by slashes, i.e. 'Project/Foo'",
                                  cxxopts::value<vector<string>>(), "string");
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
@@ -1148,6 +1152,19 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
+            }
+        }
+
+        if (raw.count("extra-package-files-directory-prefix-slash-deprecated")) {
+            for (const string &dirName :
+                 raw["extra-package-files-directory-prefix-slash-deprecated"].as<vector<string>>()) {
+                if (dirName.back() != '/') {
+                    logger->error(
+                        "--extra-package-files-directory-prefix-slash-deprecated directory path must have slash "
+                        "(/) at the end");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(dirName);
             }
         }
 
