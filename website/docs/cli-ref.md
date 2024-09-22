@@ -299,7 +299,7 @@ Usage:
                                 'project/foo'
       --extra-package-files-directory-prefix-slash string
                                 Extra parent directories which contain package files.
-                                These paths use constant names joined by slashes, i.e.
+                                These paths are constant names joined by slashes, i.e.
                                 'Project/Foo'
       --allow-relaxed-packager-checks-for string
                                 Packages which are allowed to ignore the restrictions set
