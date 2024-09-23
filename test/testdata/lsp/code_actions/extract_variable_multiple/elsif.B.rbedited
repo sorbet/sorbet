@@ -1,0 +1,44 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-variable: true
+
+def case_1
+  newVariable = T.unsafe(2)
+  if T.unsafe(1)
+    1
+  elsif newVariable
+#       ^^^^^^^^^^^ apply-code-action: [A] Extract Variable (this occurrence only)
+#       ^^^^^^^^^^^ apply-code-action: [B] Extract Variable (all 2 occurrences)
+    newVariable
+  else
+    3
+  end
+end
+
+def case_2
+  if T.unsafe(1)
+    1
+  elsif T.unsafe(2)
+#       ^^^^^^^^^^^ apply-code-action: [C] Extract Variable (this occurrence only)
+#       ^^^^^^^^^^^ apply-code-action: [D] Extract Variable (all 2 occurrences)
+    2
+  elsif T.unsafe(2)
+    3
+  else
+    4
+  end
+end
+
+def case_3
+  if T.unsafe(1)
+    1
+  elsif T.unsafe(2)
+    3
+  elsif T.unsafe(2)
+    3
+#   ^ apply-code-action: [E] Extract Variable (this occurrence only)
+#   ^ apply-code-action: [F] Extract Variable (all 2 occurrences)
+  else
+    4
+  end
+end
