@@ -131,7 +131,57 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.d>
   end
 end
-# -- test/testdata/packager/extra_package_paths/extra_slash/Project/Foo_bar/Z.rb --
+# -- test/testdata/packager/extra_package_paths/extra_slash/Project/FooBar/Z.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C FooBar>::<C Z><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.z<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.z>
+  end
+end
+# -- test/testdata/packager/extra_package_paths/extra_slash_deprecated/Project/Baz/Package/E.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Project>::<C Baz>::<C Package><<C <todo sym>>> < ()
+    class <emptyTree>::<C E><<C <todo sym>>> < (::<todo sym>)
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
+      def self.e<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of self.e>
+    end
+  end
+end
+# -- test/testdata/packager/extra_package_paths/extra_slash_deprecated/Project/Foo/D.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Project>::<C Foo>::<C D><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.void()
+    end
+
+    def self.d<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.d>
+  end
+end
+# -- test/testdata/packager/extra_package_paths/extra_slash_deprecated/Project/Foo_bar/Z.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Project>::<C FooBar>::<C Z><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(<self>) do ||

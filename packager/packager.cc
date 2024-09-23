@@ -1353,15 +1353,19 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     }
 
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
+        gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
-    const auto numPrefixes =
-        extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
+                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
+                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info->packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
+    const string slashDirName = absl::StrJoin(info->name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1370,7 +1374,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
     }
 
-    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+    for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
         std::stringstream ss;
         ss << prefix;
@@ -1395,6 +1399,11 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
         std::string additionalDirPath(ss.str());
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+        // Project/FooBar -- each constant name is a file or directory name
+        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
     }
 
     return info;

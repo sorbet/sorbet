@@ -565,6 +565,11 @@ TEST_CASE("LSPTest") {
             if (extraDirUnderscore.has_value()) {
                 opts->extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
             }
+            auto extraDirSlashDeprecated =
+                StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+            if (extraDirSlashDeprecated.has_value()) {
+                opts->extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
+            }
             auto extraDirSlash =
                 StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
             if (extraDirSlash.has_value()) {

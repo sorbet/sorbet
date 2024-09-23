@@ -163,6 +163,7 @@ public:
 
     const packages::PackageDB &packageDB() const;
     void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                            const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor, std::string errorHint);

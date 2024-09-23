@@ -608,20 +608,28 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Optional hint message to add to packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
     options.add_options(section)("extra-package-files-directory-prefix-underscore",
-                                 "Extra parent directories which contain package files. These paths use an underscore "
-                                 "package-munging convention, i.e. 'Project_Foo'",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using a package's namespace joined by underscores. That is, files in "
+                                 "<dir>/Project_FooBar/ belong to Project::FooBar",
+                                 cxxopts::value<vector<string>>(), "<dir>");
+    options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using slash munging conventions. That is, files in "
+                                 "<dir>/Project/Foo_bar/ belong to Project::FooBar. This is deprecated in favor of "
+                                 "--extra-package-files-directory-prefix-slash since the paths are more readable",
+                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("extra-package-files-directory-prefix-slash",
-                                 "Extra parent directories which contain package files. These paths use a slash "
-                                 "package-munging convention, i.e. 'project/foo'",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using a package's namespace join by slashes. That is, files in "
+                                 "<dir>/Project/FooBar/ belong to Project::FooBar",
+                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "and `export` directives",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<dir>");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1148,6 +1156,19 @@ void readOptions(Options &opts,
                     throw EarlyReturnWithCode(1);
                 }
                 opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
+            }
+        }
+
+        if (raw.count("extra-package-files-directory-prefix-slash-deprecated")) {
+            for (const string &dirName :
+                 raw["extra-package-files-directory-prefix-slash-deprecated"].as<vector<string>>()) {
+                if (dirName.back() != '/') {
+                    logger->error(
+                        "--extra-package-files-directory-prefix-slash-deprecated directory path must have slash "
+                        "(/) at the end");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(dirName);
             }
         }
 

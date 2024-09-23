@@ -274,6 +274,7 @@ const UnorderedMap<
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
         {"extra-package-files-directory-prefix-underscore", StringPropertyAssertion::make},
+        {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
         {"implementation", ImplementationAssertion::make},

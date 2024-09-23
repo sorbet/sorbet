@@ -258,6 +258,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 
 void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> skipRBIExportEnforcementDirs;
     vector<std::string> allowRelaxedPackagerChecksFor;
@@ -266,6 +267,12 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
     if (extraDirUnderscore.has_value()) {
         extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlashDeprecated =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+    if (extraDirSlashDeprecated.has_value()) {
+        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
     }
 
     auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
@@ -281,8 +288,9 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashPrefixes,
-                               {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+        gs->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
     }
 }
 
