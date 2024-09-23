@@ -289,22 +289,27 @@ Usage:
       --stripe-packages-hint-message arg
                                 Optional hint message to add to packaging related errors
                                 (default: "")
-      --extra-package-files-directory-prefix-underscore string
+      --extra-package-files-directory-prefix-underscore <dir>
                                 Extra parent directories which contain package files.
-                                These paths use an underscore package-munging convention,
-                                i.e. 'Project_Foo'
-      --extra-package-files-directory-prefix-slash-deprecated string
+                                Files are associated to a package using a package's
+                                namespace joined by underscores. That is, files in
+                                <dir>/Project_FooBar/ belong to Project::FooBar
+      --extra-package-files-directory-prefix-slash-deprecated <dir>
                                 Extra parent directories which contain package files.
-                                These paths use a slash package-munging convention, i.e.
-                                'project/foo'
-      --extra-package-files-directory-prefix-slash string
+                                Files are associated to a package using slash munging
+                                conventions. That is, files in <dir>/Project/Foo_bar/
+                                belong to Project::FooBar. This is deprecated in favor of
+                                --extra-package-files-directory-prefix-slash since the
+                                paths are more readable
+      --extra-package-files-directory-prefix-slash <dir>
                                 Extra parent directories which contain package files.
-                                These paths are constant names joined by slashes, i.e.
-                                'Project/Foo'
-      --allow-relaxed-packager-checks-for string
+                                Files are associated to a package using a package's
+                                namespace join by slashes. That is, files in
+                                <dir>/Project/FooBar/ belong to Project::FooBar
+      --allow-relaxed-packager-checks-for <name>
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives
-      --package-skip-rbi-export-enforcement string
+      --package-skip-rbi-export-enforcement <dir>
                                 Constants defined in RBIs in these directories (and no
                                 others) can be exported
 

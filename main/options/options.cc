@@ -608,24 +608,28 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Optional hint message to add to packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
     options.add_options(section)("extra-package-files-directory-prefix-underscore",
-                                 "Extra parent directories which contain package files. These paths use an underscore "
-                                 "package-munging convention, i.e. 'Project_Foo'",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using a package's namespace joined by underscores. That is, files in "
+                                 "<dir>/Project_FooBar/ belong to Project::FooBar",
+                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
-                                 "Extra parent directories which contain package files. These paths use a slash "
-                                 "package-munging convention, i.e. 'project/foo'",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using slash munging conventions. That is, files in "
+                                 "<dir>/Project/Foo_bar/ belong to Project::FooBar. This is deprecated in favor of "
+                                 "--extra-package-files-directory-prefix-slash since the paths are more readable",
+                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("extra-package-files-directory-prefix-slash",
-                                 "Extra parent directories which contain package files. These paths are constant names "
-                                 "joined by slashes, i.e. 'Project/Foo'",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 "Extra parent directories which contain package files. Files are associated to a "
+                                 "package using a package's namespace join by slashes. That is, files in "
+                                 "<dir>/Project/FooBar/ belong to Project::FooBar",
+                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "and `export` directives",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<dir>");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
