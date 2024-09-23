@@ -14,24 +14,23 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
-test_args=()
-
 if [[ "linux" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-linux")
+  test_config="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-mac")
+  test_config="--config=buildfarm-sanitized-mac"
 fi
 
 export JOB_NAME=test-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
-echo -- will run with "${test_args[@]}"
+echo -- will run with "${test_config}"
 
 err=0
 
 mkdir -p _out_
 
-test_args+=(
+test_args=(
+  "$test_config"
   --test_summary=terse
   "--build_tests_only"
   "//..."
