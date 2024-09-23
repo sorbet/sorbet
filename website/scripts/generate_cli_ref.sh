@@ -42,7 +42,8 @@ script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1 | \
   # I have no idea what's making this get into the output
   sed -e $'s/^\^D\x08\x08//' | \
   # It seems like when the output is to a tty, lines end with \r\n
-  sed -e $'s/\\\r$//' | \
+  # (... and sometimes more than one `\r` ??)
+  sed -e $'s/\\\r\\\r*$//' | \
   # Get rid of trailing spaces to make it look nice when reading the markdown
   sed -e 's/ *$//' | \
   # CI has different number of cores, so the `--max-threads` help output changes
