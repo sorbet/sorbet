@@ -67,5 +67,12 @@ if [ "$err" -ne 0 ]; then
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
 
+  if grep -q '//website:update_cli_ref_test' "$failing_tests"; then
+    # TODO(jez) Trying to debug why this test flakes on macOS overnight
+    bazel run "$test_config" //website:update_cli_ref || true
+    git diff website/docs/cli-ref.md || true
+    cp website/docs/cli-ref.md _out_/website-docs-cli-ref.md
+  fi
+
   exit "$err"
 fi
