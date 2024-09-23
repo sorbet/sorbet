@@ -108,17 +108,6 @@ class LocSearchWalk {
         return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
     }
 
-    bool isCsend(const ast::InsSeq &insSeq) {
-        if (auto if_ = ast::cast_tree<ast::If>(insSeq.expr)) {
-            if (auto thenp = ast::cast_tree<ast::Send>(if_->thenp)) {
-                if (thenp->fun == core::Names::nilForSafeNavigation()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 public:
     // After the walk is complete, this should point to the deepest scope that contains targetLoc
     const ast::ExpressionPtr *enclosingScope;
