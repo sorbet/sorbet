@@ -103,8 +103,6 @@ public:
         core::TypePtr type;
         core::ClassOrModuleRef rebind;
     };
-    static ResultType getResultTypeAndBind(core::Context ctx, const ast::ExpressionPtr &expr, const ParsedSig &,
-                                           TypeSyntaxArgs args);
     static core::TypePtr getResultType(core::Context ctx, const ast::ExpressionPtr &expr, const ParsedSig &,
                                        TypeSyntaxArgs args);
 
