@@ -328,6 +328,11 @@ class ExpressionPtrSearchWalk {
                     if (if_.thenp.loc().exists() && if_.thenp.loc().contains(matchLoc)) {
                         scopeToCompare = &if_.thenp;
                     } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(matchLoc)) {
+                        if (ast::isa_tree<ast::If>(if_.elsep)) {
+                            // This is to handle elsif. See LocSearchWalk#updateEnclosingScope for a
+                            // detailed explanation.
+                            continue;
+                        }
                         scopeToCompare = &if_.elsep;
                     } else if (if_.cond.loc().contains(matchLoc)) {
                         scopeToCompare = &if_.cond;
