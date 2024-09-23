@@ -32,6 +32,7 @@ err=0
 mkdir -p _out_
 
 test_args+=(
+  --test_summary=terse
   "--build_tests_only"
   "//..."
 )
@@ -39,7 +40,6 @@ test_args+=(
 ./bazel test \
   --experimental_generate_json_trace_profile \
   --profile=_out_/profile.json \
-  --test_summary=terse \
   "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
@@ -53,7 +53,7 @@ if [ "$err" -ne 0 ]; then
 
   # Take the lines that start with target labels.
   # Lines look like "//foo  FAILED in 10s"
-  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
+  { ./bazel test "${test_args[@]}" || true ; } | \
     grep '^//' | \
     sed -e 's/ .*/ \\/' | \
     sed -e 's/^/  /' >> "$failing_tests"
