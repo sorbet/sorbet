@@ -90,6 +90,18 @@ class LocSearchWalk {
             return;
         }
 
+        // If the new enclosingScope is an If node, and else branch is another if node, then this is probably an elsif
+        // that was desugared to an if inside the else. In that case, insert into the else would be invalid, so let's
+        // skip it. If there's a more specific scope, we'll insert there, and if there isn't, we'll insert outside the
+        // if.
+        if (const ast::If *if_ = ast::cast_tree<ast::If>(node)) {
+            if (const ast::If *elsif = ast::cast_tree<ast::If>(if_->elsep)) {
+                if (elsif->loc.exists() && elsif->loc.contains(targetLoc.offsets())) {
+                    return;
+                }
+            }
+        }
+
         if (!enclosingScopeLoc.exists() || enclosingScopeLoc.contains(nodeLoc)) {
             enclosingScope = &node;
             enclosingScopeLoc = nodeLoc;
@@ -116,6 +128,7 @@ public:
     // For example, the RHS of the ClassDef doesn't have an ExpressionPtr with a Loc,
     // but enclosingScopeLoc will be a Loc that represents the body of the ClassDef RHS
     // (excluding things like the class name, superclass, and class/end keywords).
+    // TODO(neil): can we get rid of enclosingScopeLoc?
     core::LocOffsets enclosingScopeLoc;
     const ast::ExpressionPtr *matchingNode;
     ast::ExpressionPtr *matchingNodeEnclosingClass;
