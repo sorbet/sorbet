@@ -9,10 +9,10 @@ end
 
 def test
   temp = T.unsafe(1)
-  newVariable = temp
   case temp
   when nil
   when A
+    newVariable = temp
     newVariable
 #   ^^^^ apply-code-action: [A] Extract Variable (this occurrence only)
 #   ^^^^ apply-code-action: [B] Extract Variable (all 3 occurrences)

@@ -23,9 +23,9 @@ def extract_from_when_pattern
 end
 
 def extract_from_when_body
-  newVariable = 2
   case T.unsafe(1)
   when Integer
+    newVariable = 2
     newVariable
 #   ^ apply-code-action: [C] Extract Variable (this occurrence only)
   else

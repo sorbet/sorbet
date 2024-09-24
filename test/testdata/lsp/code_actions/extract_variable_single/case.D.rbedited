@@ -33,11 +33,11 @@ def extract_from_when_body
 end
 
 def extract_from_else_body
-  newVariable = ""
   case T.unsafe(1)
   when Integer
     2
   else
+    newVariable = ""
     newVariable
 #   ^^ apply-code-action: [D] Extract Variable (this occurrence only)
   end
