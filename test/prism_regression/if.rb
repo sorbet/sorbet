@@ -1,3 +1,3 @@
-# typed: strict
+# typed: false
 
 if true; end

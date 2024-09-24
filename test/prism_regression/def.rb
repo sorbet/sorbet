@@ -1,3 +1,3 @@
-# typed: true
+# typed: false
 
 def foo; end

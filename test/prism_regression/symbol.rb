@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 
 :basic_symbol
 

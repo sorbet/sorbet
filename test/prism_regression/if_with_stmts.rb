@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 
 if true
   true

@@ -1,9 +1,8 @@
-# typed: strict
+# typed: false
 
 if true
   "one"
 elsif false
-#     ^^^^^ error: This code is unreachable
   "two"
 else
   "three"

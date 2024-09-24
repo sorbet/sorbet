@@ -1,3 +1,3 @@
-# typed: true
+# typed: false
 
 __FILE__

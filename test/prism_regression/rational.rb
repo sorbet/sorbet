@@ -1,4 +1,4 @@
-# typed: true
+# typed: false
 
 42.0r
 

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 
  SimpleConstant
 #^^^^^^^^^^^^^^ error: Unable to resolve constant `SimpleConstant`

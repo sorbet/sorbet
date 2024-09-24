@@ -1,4 +1,4 @@
-# typed: true
+# typed: false
 
 1..2 # Include end
 

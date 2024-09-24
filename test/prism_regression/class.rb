@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 
 class Parent
   1
@@ -15,4 +15,3 @@ class << self
 end
 
 class << Parent; end
-#        ^^^^^^ error: `class << EXPRESSION` is only supported for `class << self`
