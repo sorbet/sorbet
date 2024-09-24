@@ -2198,21 +2198,34 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Case *case_) {
                 if (dctx.preserveConcreteSyntax) {
+                    // Desugar to:
+                    //   Magic.caseWhen(condition, numPatterns, <pattern 1>, ..., <pattern N>, <body 1>, ..., <body M>)
+                    // Putting all the patterns at the start so that we can skip them when checking which body to insert
+                    // into.
                     Send::ARGS_store args;
                     args.emplace_back(node2TreeImpl(dctx, std::move(case_->condition)));
+
+                    Send::ARGS_store patterns;
+                    Send::ARGS_store bodies;
                     for (auto it = case_->whens.begin(); it != case_->whens.end(); ++it) {
                         auto when = parser::cast_node<parser::When>(it->get());
                         ENFORCE(when != nullptr, "case without a when?");
                         for (auto &cnode : when->patterns) {
-                            args.emplace_back(node2TreeImpl(dctx, std::move(cnode)));
+                            patterns.emplace_back(node2TreeImpl(dctx, std::move(cnode)));
                         }
-                        args.emplace_back(node2TreeImpl(dctx, std::move(when->body)));
+                        bodies.emplace_back(node2TreeImpl(dctx, std::move(when->body)));
                     }
-                    args.emplace_back(node2TreeImpl(dctx, std::move(case_->else_)));
+                    bodies.emplace_back(node2TreeImpl(dctx, std::move(case_->else_)));
+
+                    args.emplace_back(MK::Int(locZeroLen, patterns.size()));
+                    std::move(patterns.begin(), patterns.end(), std::back_inserter(args));
+                    std::move(bodies.begin(), bodies.end(), std::back_inserter(args));
+
                     result = MK::Send(loc, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
                                       std::move(args));
                     return;
                 }
+
                 ExpressionPtr assign;
                 auto temp = core::NameRef::noName();
                 core::LocOffsets cloc;
