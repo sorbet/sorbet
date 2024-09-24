@@ -1259,6 +1259,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::AndAsgn *andAsgn) {
+                if (dctx.preserveConcreteSyntax) {
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::andAsgn(), locZeroLen,
+                                       node2TreeImpl(dctx, std::move(andAsgn->left)),
+                                       node2TreeImpl(dctx, std::move(andAsgn->right)));
+                    return;
+                }
                 auto recv = node2TreeImpl(dctx, std::move(andAsgn->left));
                 auto arg = node2TreeImpl(dctx, std::move(andAsgn->right));
                 if (auto s = cast_tree<Send>(recv)) {
@@ -1324,6 +1330,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::OrAsgn *orAsgn) {
+                if (dctx.preserveConcreteSyntax) {
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::orAsgn(), locZeroLen,
+                                       node2TreeImpl(dctx, std::move(orAsgn->left)),
+                                       node2TreeImpl(dctx, std::move(orAsgn->right)));
+                    return;
+                }
                 auto recvIsIvarLhs = parser::isa_node<parser::IVarLhs>(orAsgn->left.get());
                 auto recvIsCvarLhs = parser::isa_node<parser::CVarLhs>(orAsgn->left.get());
                 auto recv = node2TreeImpl(dctx, std::move(orAsgn->left));
@@ -1415,6 +1427,12 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::OpAsgn *opAsgn) {
+                if (dctx.preserveConcreteSyntax) {
+                    result = MK::Send2(loc, MK::Magic(locZeroLen), core::Names::opAsgn(), locZeroLen,
+                                       node2TreeImpl(dctx, std::move(opAsgn->left)),
+                                       node2TreeImpl(dctx, std::move(opAsgn->right)));
+                    return;
+                }
                 auto recv = node2TreeImpl(dctx, std::move(opAsgn->left));
                 auto rhs = node2TreeImpl(dctx, std::move(opAsgn->right));
                 if (auto s = cast_tree<Send>(recv)) {
