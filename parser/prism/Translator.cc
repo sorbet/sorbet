@@ -215,6 +215,20 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 args.emplace_back(std::move(blockPassNode));
             }
 
+            // Handle safe navigation operator
+            auto callOperatorLoc = &callNode->call_operator_loc;
+            std::string_view callOperator;
+            if (callOperatorLoc != nullptr) {
+                callOperator = std::string_view(reinterpret_cast<const char *>(callOperatorLoc->start),
+                                                callOperatorLoc->end - callOperatorLoc->start);
+            }
+
+            if (callOperator == "&.") {
+                return make_unique<parser::CSend>(parser.translateLocation(loc), std::move(receiver),
+                                                  gs.enterNameUTF8(name), parser.translateLocation(messageLoc),
+                                                  std::move(args));
+            }
+
             auto sendNode =
                 make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
                                           parser.translateLocation(messageLoc), std::move(args));

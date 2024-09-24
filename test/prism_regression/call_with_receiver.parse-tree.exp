@@ -22,5 +22,27 @@ Begin {
       args = [
       ]
     }
+    CSend {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U foo>
+      args = [
+      ]
+    }
+    CSend {
+      receiver = Send {
+        receiver = NULL
+        method = <U receiver>
+        args = [
+        ]
+      }
+      method = <U foo>
+      args = [
+      ]
+    }
   ]
 }
