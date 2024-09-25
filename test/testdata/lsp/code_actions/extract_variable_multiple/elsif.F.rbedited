@@ -42,3 +42,15 @@ def case_3
     4
   end
 end
+
+def case_4_bug
+  if T.unsafe(1)
+    1
+  else
+    if T.unsafe(2)
+#      ^^^^^^^^^^^ apply-code-action: [G] Extract Variable (this occurrence only)
+#      ^^^^^^^^^^^ apply-code-action: [H] Extract Variable (all 2 occurrences)
+      T.unsafe(2)
+    end
+  end
+end
