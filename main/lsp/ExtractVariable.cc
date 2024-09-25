@@ -20,9 +20,9 @@ optional<core::LocOffsets> detectCase(const ast::ExpressionPtr *whereToInsert, c
                                   ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(1)).value)
                                   .value;
             for (int i = numPatterns + 2; i < send->numPosArgs(); i++) {
-                auto *body = &send->getPosArg(i);
-                if (body->loc().exists() && body->loc().contains(target)) {
-                    return body->loc();
+                const auto &body = send->getPosArg(i);
+                if (body.loc().exists() && body.loc().contains(target)) {
+                    return body.loc();
                 }
             }
         }
@@ -32,7 +32,7 @@ optional<core::LocOffsets> detectCase(const ast::ExpressionPtr *whereToInsert, c
 }
 
 core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::LocOffsets target) {
-    const ast::ExpressionPtr *whereToInsert = new ast::ExpressionPtr();
+    const ast::ExpressionPtr *whereToInsert = nullptr;
     if (auto insSeq = ast::cast_tree<ast::InsSeq>(scope)) {
         for (auto &stat : insSeq->stats) {
             if (stat.loc().contains(target)) {
@@ -91,7 +91,12 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
     } else {
         ENFORCE(false);
     }
+
     ENFORCE(whereToInsert);
+    if (!whereToInsert) {
+        return core::LocOffsets::none();
+    }
+
     if (auto caseBodyLoc = detectCase(whereToInsert, target)) {
         return *caseBodyLoc;
     }
