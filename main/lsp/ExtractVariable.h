@@ -16,7 +16,8 @@ class VariableExtractor {
     const core::Loc selectionLoc;
     ast::ExpressionPtr matchingNode;
     ast::ExpressionPtr enclosingClassOrMethod;
-    std::vector<core::LocOffsets> skippedLocs;
+    std::vector<core::LocOffsets> skippedLocsRange;
+    std::vector<core::LocOffsets> skippedLocsExact;
 
 public:
     VariableExtractor(const core::Loc selectionLoc)
