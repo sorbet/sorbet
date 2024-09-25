@@ -237,6 +237,14 @@ public:
         auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
         updateEnclosingScope(tree, while_.body.loc());
     }
+
+    void preTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.fun == core::Names::orAsgn() || send.fun == core::Names::andAsgn() ||
+            send.fun == core::Names::opAsgn()) {
+            skipLoc(send.getPosArg(0).loc());
+        }
+    }
 };
 
 vector<unique_ptr<TextDocumentEdit>>
