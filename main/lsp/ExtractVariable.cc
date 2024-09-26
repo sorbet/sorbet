@@ -90,6 +90,18 @@ class LocSearchWalk {
             return;
         }
 
+        // If the new enclosingScope is an If node, and else branch is another if node, then this is probably an elsif
+        // that was desugared to an if inside the else. In that case, insert into the else would be invalid, so let's
+        // skip it. If there's a more specific scope, we'll insert there, and if there isn't, we'll insert outside the
+        // if.
+        if (const ast::If *if_ = ast::cast_tree<ast::If>(node)) {
+            if (const ast::If *elsif = ast::cast_tree<ast::If>(if_->elsep)) {
+                if (elsif->loc.exists() && elsif->loc.contains(targetLoc.offsets())) {
+                    return;
+                }
+            }
+        }
+
         if (!enclosingScopeLoc.exists() || enclosingScopeLoc.contains(nodeLoc)) {
             enclosingScope = &node;
             enclosingScopeLoc = nodeLoc;
@@ -108,17 +120,6 @@ class LocSearchWalk {
         return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
     }
 
-    bool isCsend(const ast::InsSeq &insSeq) {
-        if (auto if_ = ast::cast_tree<ast::If>(insSeq.expr)) {
-            if (auto thenp = ast::cast_tree<ast::Send>(if_->thenp)) {
-                if (thenp->fun == core::Names::nilForSafeNavigation()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
 public:
     // After the walk is complete, this should point to the deepest scope that contains targetLoc
     const ast::ExpressionPtr *enclosingScope;
@@ -127,6 +128,7 @@ public:
     // For example, the RHS of the ClassDef doesn't have an ExpressionPtr with a Loc,
     // but enclosingScopeLoc will be a Loc that represents the body of the ClassDef RHS
     // (excluding things like the class name, superclass, and class/end keywords).
+    // TODO(neil): can we get rid of enclosingScopeLoc?
     core::LocOffsets enclosingScopeLoc;
     const ast::ExpressionPtr *matchingNode;
     ast::ExpressionPtr *matchingNodeEnclosingClass;
@@ -326,6 +328,11 @@ class ExpressionPtrSearchWalk {
                     if (if_.thenp.loc().exists() && if_.thenp.loc().contains(matchLoc)) {
                         scopeToCompare = &if_.thenp;
                     } else if (if_.elsep.loc().exists() && if_.elsep.loc().contains(matchLoc)) {
+                        if (ast::isa_tree<ast::If>(if_.elsep)) {
+                            // This is to handle elsif. See LocSearchWalk#updateEnclosingScope for a
+                            // detailed explanation.
+                            continue;
+                        }
                         scopeToCompare = &if_.elsep;
                     } else if (if_.cond.loc().contains(matchLoc)) {
                         scopeToCompare = &if_.cond;
