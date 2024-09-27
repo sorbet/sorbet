@@ -263,6 +263,10 @@ things:
     The `CountTo3` example above uses a `fixed` bound because it always yields
     `Integer` values.
 
+    > **Note**: to reiterate, simply including `Enumerable` in a class
+    > automatically makes that class generic, even if that class would not
+    > otherwise seem "generic."
+
     Otherwise, leave the bound unspecified. This approach is more suitable for
     implementing generic containers, like how `Array` and `Set` are generic
     containers.
