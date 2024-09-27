@@ -7,8 +7,7 @@ class A
   end
 end
 
-A.example(A.new, x: (0))
+A.example(A.new, x: (0)
 
 A.example(A.new, x: begin
-       0
-  end)
+       0)
