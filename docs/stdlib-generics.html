@@ -271,6 +271,12 @@ time, declare the elem
 <a href="/docs/generics#bounds-on-type_members-and-type_templates-fixed-upper-lower">using a <code>fixed</code> bound</a>.
 The <code>CountTo3</code> example above uses a <code>fixed</code> bound because it always yields
 <code>Integer</code> values.</p>
+<blockquote>
+<p><strong>Note</strong>: to reiterate, simply including <code>Enumerable</code> in a class
+automatically makes that class generic, even if that class would not
+otherwise seem “generic.” Use the <code>fixed</code> annotation seen above in these
+cases.</p>
+</blockquote>
 <p>Otherwise, leave the bound unspecified. This approach is more suitable for
 implementing generic containers, like how <code>Array</code> and <code>Set</code> are generic
 containers.</p>
