@@ -217,11 +217,11 @@ rescue <emptyTree>::<C E> => x
       <emptyTree>
     end)
 
-  def sfoo<<todo method>>(**$2, &<blk>)
+  def sfoo<<todo method>>(*<fwd-args>, &<blk>)
     <emptyTree>
   end
 
-  def ssfoo<<todo method>>(***$3:, &<blk>)
+  def ssfoo<<todo method>>(***$2:, &<blk>)
     <emptyTree>
   end
 

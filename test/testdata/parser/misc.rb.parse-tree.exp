@@ -627,7 +627,7 @@ Begin {
       args = Args {
         args = [
           Restarg {
-            name = <P <U *> $2>
+            name = <U <fwd-args>>
           }
         ]
       }
@@ -638,7 +638,7 @@ Begin {
       args = Args {
         args = [
           Kwrestarg {
-            name = <P <U **> $3>
+            name = <P <U **> $2>
           }
         ]
       }

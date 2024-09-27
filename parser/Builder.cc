@@ -1488,7 +1488,7 @@ public:
             checkReservedForNumberedParameters(name->view(), nameLoc);
         } else {
             // case like 'def m(*); end'
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
+            nm = core::Names::Uniques::restArg();
         }
 
         return make_unique<Restarg>(loc, nm, nameLoc);
