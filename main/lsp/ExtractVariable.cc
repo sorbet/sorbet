@@ -13,17 +13,35 @@ void logDebugInfo(const std::shared_ptr<spdlog::logger> logger, const core::Glob
     logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }
 
+optional<core::LocOffsets> detectCase(const ast::ExpressionPtr *whereToInsert, const core::LocOffsets target) {
+    if (auto send = ast::cast_tree<ast::Send>(*whereToInsert)) {
+        if (send->fun == core::Names::caseWhen()) {
+            int numPatterns = core::cast_type_nonnull<core::IntegerLiteralType>(
+                                  ast::cast_tree_nonnull<ast::Literal>(send->getPosArg(1)).value)
+                                  .value;
+            for (int i = numPatterns + 2; i < send->numPosArgs(); i++) {
+                const auto &body = send->getPosArg(i);
+                if (body.loc().exists() && body.loc().contains(target)) {
+                    return body.loc();
+                }
+            }
+        }
+    }
+
+    return nullopt;
+}
+
 core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::LocOffsets target) {
-    core::LocOffsets whereToInsert = core::LocOffsets::none();
+    const ast::ExpressionPtr *whereToInsert = nullptr;
     if (auto insSeq = ast::cast_tree<ast::InsSeq>(scope)) {
         for (auto &stat : insSeq->stats) {
             if (stat.loc().contains(target)) {
-                whereToInsert = stat.loc();
+                whereToInsert = &stat;
                 break;
             }
         }
         if (insSeq->expr.loc().contains(target)) {
-            whereToInsert = insSeq->expr.loc();
+            whereToInsert = &insSeq->expr;
         }
     } else if (auto classDef = ast::cast_tree<ast::ClassDef>(scope)) {
         if (classDef->rhs.size() == 0) {
@@ -31,48 +49,58 @@ core::LocOffsets findWhereToInsert(const ast::ExpressionPtr &scope, const core::
         } else {
             for (auto &stat : classDef->rhs) {
                 if (stat.loc().contains(target)) {
-                    whereToInsert = stat.loc();
+                    whereToInsert = &stat;
                     break;
                 }
             }
         }
     } else if (auto block = ast::cast_tree<ast::Block>(scope)) {
-        whereToInsert = block->body.loc();
+        whereToInsert = &block->body;
     } else if (auto methodDef = ast::cast_tree<ast::MethodDef>(scope)) {
-        whereToInsert = methodDef->rhs.loc();
+        whereToInsert = &methodDef->rhs;
     } else if (auto if_ = ast::cast_tree<ast::If>(scope)) {
         if (if_->thenp.loc().exists() && if_->thenp.loc().contains(target)) {
-            whereToInsert = if_->thenp.loc();
+            whereToInsert = &if_->thenp;
         } else if (if_->elsep.loc().exists() && if_->elsep.loc().contains(target)) {
-            whereToInsert = if_->elsep.loc();
+            whereToInsert = &if_->elsep;
         } else {
             ENFORCE(!(if_->cond.loc().exists() && if_->cond.loc().contains(target)),
                     "shouldn't be inserting into the cond of an if");
+            ENFORCE(false, "none of the if sub-parts contain the target");
         }
     } else if (auto rescue = ast::cast_tree<ast::Rescue>(scope)) {
         if (rescue->body.loc().exists() && rescue->body.loc().contains(target)) {
-            whereToInsert = rescue->body.loc();
+            whereToInsert = &rescue->body;
         } else if (rescue->else_.loc().exists() && rescue->else_.loc().contains(target)) {
-            whereToInsert = rescue->else_.loc();
+            whereToInsert = &rescue->else_;
         } else if (rescue->ensure.loc().exists() && rescue->ensure.loc().contains(target)) {
-            whereToInsert = rescue->ensure.loc();
+            whereToInsert = &rescue->ensure;
         } else {
             ENFORCE(false)
         }
     } else if (auto rescueCase = ast::cast_tree<ast::RescueCase>(scope)) {
-        whereToInsert = rescueCase->body.loc();
+        whereToInsert = &rescueCase->body;
     } else if (auto while_ = ast::cast_tree<ast::While>(scope)) {
         if (while_->body.loc().exists() && while_->body.loc().contains(target)) {
-            whereToInsert = while_->body.loc();
+            whereToInsert = &while_->body;
         } else {
             ENFORCE(!(while_->cond.loc().exists() && while_->cond.loc().contains(target)),
                     "shouldn't be inserting into the cond of a while");
+            ENFORCE(false, "none of the while sub-parts contain the target");
         }
     } else {
         ENFORCE(false);
     }
-    ENFORCE(whereToInsert.exists());
-    return whereToInsert;
+
+    ENFORCE(whereToInsert);
+    if (!whereToInsert) {
+        return core::LocOffsets::none();
+    }
+
+    if (auto caseBodyLoc = detectCase(whereToInsert, target)) {
+        return *caseBodyLoc;
+    }
+    return whereToInsert->loc();
 }
 
 // This tree walk takes a Loc and looks for nodes that have that Loc exactly
