@@ -265,7 +265,8 @@ things:
 
     > **Note**: to reiterate, simply including `Enumerable` in a class
     > automatically makes that class generic, even if that class would not
-    > otherwise seem "generic."
+    > otherwise seem "generic." Use the `fixed` annotation seen above in these
+    > cases.
 
     Otherwise, leave the bound unspecified. This approach is more suitable for
     implementing generic containers, like how `Array` and `Set` are generic
