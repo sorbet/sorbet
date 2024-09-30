@@ -31,10 +31,10 @@ enum class UniqueNameKind : uint8_t {
     MangledKeywordArg,    // only used when we have duplicated keyword arguments
     ResolverMissingClass, // used by resolver when we want to enter a stub class into a static field. see
                           // test/resolver/stub_missing_class_alias.rb
-    TEnum,
-    Struct,
-    Packager,
-    DesugarCsend, // Used for Extract to Variable; see the CSend case in desugar.cc for more details
+    TEnum,                // So that classes backing T::Enum values show like normal names but can be detected
+    Struct,               // For use in the ::Struct rewriter (so that `super` works)
+    Packager,             // For package mangled names
+    DesugarCsend,         // Used for Extract to Variable; see the CSend case in desugar.cc for more details
 };
 
 struct UniqueName final {
