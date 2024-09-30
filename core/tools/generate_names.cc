@@ -8,20 +8,26 @@
 
 using namespace std;
 
+enum class NameKind : uint8_t {
+    UTF8 = 1,
+    UNIQUE = 2,
+    CONSTANT = 3,
+};
+
 struct NameDef {
     int id;
     string srcName;
     string val;
-    bool isConstant;
+    NameKind kind;
 
-    NameDef(string_view srcName, string_view val, bool isConstant)
-        : srcName(string(srcName)), val(string(val)), isConstant(isConstant) {}
-    NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)), isConstant(false) {
+    NameDef(string_view srcName, string_view val, NameKind kind)
+        : srcName(string(srcName)), val(string(val)), kind(kind) {}
+    NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)), kind(NameKind::UTF8) {
         if (srcName == val) {
             throw std::logic_error("Only pass one arg for '" + string(val) + "'");
         }
     }
-    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false){};
+    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), kind(NameKind::UTF8){};
 };
 
 NameDef names[] = {
@@ -63,8 +69,8 @@ NameDef names[] = {
     {"methodDefNameMissing", "<method-def-name-missing>"},
     {"ivarNameMissing", "@<ivar-name-missing>"},
     {"cvarNameMissing", "@@<cvar-name-missing>"},
-    {"ConstantNameMissing", "<ConstantNameMissing>", true},
-    {"ErrorNode", "<ErrorNode>", true},
+    {"ConstantNameMissing", "<ConstantNameMissing>", NameKind::CONSTANT},
+    {"ErrorNode", "<ErrorNode>", NameKind::CONSTANT},
     {"dynamicConstAssign", "<dynamic-const-assign>"},
 
     // used in CFG for temporaries
@@ -122,7 +128,7 @@ NameDef names[] = {
     {"packagePrivate", "package_private"},
     {"packagePrivateClassMethod", "package_private_class_method"},
     {"void_", "void"},
-    {"VOID", "VOID", true},
+    {"VOID", "VOID", NameKind::CONSTANT},
     {"checked"},
     {"never"},
     {"onFailure", "on_failure"},
@@ -235,12 +241,12 @@ NameDef names[] = {
     {"propFreezeHandler", "prop_freeze_handler"},
     {"computedBy", "computed_by"},
     {"factory"},
-    {"InexactStruct", "InexactStruct", true},
-    {"ImmutableStruct", "ImmutableStruct", true},
-    {"Private", "Private", true},
-    {"Types", "Types", true},
-    {"Methods", "Methods", true},
-    {"DeclBuilder", "DeclBuilder", true},
+    {"InexactStruct", "InexactStruct", NameKind::CONSTANT},
+    {"ImmutableStruct", "ImmutableStruct", NameKind::CONSTANT},
+    {"Private", "Private", NameKind::CONSTANT},
+    {"Types", "Types", NameKind::CONSTANT},
+    {"Methods", "Methods", NameKind::CONSTANT},
+    {"DeclBuilder", "DeclBuilder", NameKind::CONSTANT},
 
     {"prefix"},
     {"to"},
@@ -282,19 +288,19 @@ NameDef names[] = {
 
     {"keywordInit", "keyword_init"},
 
-    {"DB", "DB", true},
-    {"Model", "Model", true},
-    {"Mixins", "Mixins", true},
-    {"Encryptable", "Encryptable", true},
-    {"EncryptedValue", "EncryptedValue", true},
-    {"Command", "Command", true},
-    {"Enum", "Enum", true},
+    {"DB", "DB", NameKind::CONSTANT},
+    {"Model", "Model", NameKind::CONSTANT},
+    {"Mixins", "Mixins", NameKind::CONSTANT},
+    {"Encryptable", "Encryptable", NameKind::CONSTANT},
+    {"EncryptedValue", "EncryptedValue", NameKind::CONSTANT},
+    {"Command", "Command", NameKind::CONSTANT},
+    {"Enum", "Enum", NameKind::CONSTANT},
 
-    {"ActiveRecord", "ActiveRecord", true},
-    {"Migration", "Migration", true},
-    {"Compatibility", "Compatibility", true},
-    {"ActiveSupport", "ActiveSupport", true},
-    {"Concern", "Concern", true},
+    {"ActiveRecord", "ActiveRecord", NameKind::CONSTANT},
+    {"Migration", "Migration", NameKind::CONSTANT},
+    {"Compatibility", "Compatibility", NameKind::CONSTANT},
+    {"ActiveSupport", "ActiveSupport", NameKind::CONSTANT},
+    {"Concern", "Concern", NameKind::CONSTANT},
 
     {"instance"},
     {"singletonClassInstance", "singleton class instance"},
@@ -334,7 +340,7 @@ NameDef names[] = {
     // Used to store arguments to a "mixes_in_class_methods()" call
     {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
-    {"ClassMethods", "ClassMethods", true},
+    {"ClassMethods", "ClassMethods", NameKind::CONSTANT},
     {"classMethods", "class_methods"},
 
     {"blockTemp", "<block>"},
@@ -388,7 +394,7 @@ NameDef names[] = {
     {"arg3"},
     {"opts"},
     {"args"},
-    {"Elem", "Elem", true},
+    {"Elem", "Elem", NameKind::CONSTANT},
     {"keepForIde", "keep_for_ide"},
     {"keepDef", "keep_def"},
     {"keepSelfDef", "keep_self_def"},
@@ -459,133 +465,144 @@ NameDef names[] = {
     {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
-    {"PackageSpec", "PackageSpec", true},
-    {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
+    {"PackageSpec", "PackageSpec", NameKind::CONSTANT},
+    {"PackageSpecRegistry", "<PackageSpecRegistry>", NameKind::CONSTANT},
 
     // GlobalState initEmpty()
-    {"Top", "T.anything", true},
-    {"Bottom", "T.noreturn", true},
-    {"Untyped", "T.untyped", true},
-    {"Root", "<root>", true},
-    {"Object", "Object", true},
-    {"String", "String", true},
-    {"Integer", "Integer", true},
-    {"Float", "Float", true},
-    {"Numeric", "Numeric", true},
-    {"Symbol", "Symbol", true},
-    {"Array", "Array", true},
-    {"Hash", "Hash", true},
-    {"Proc", "Proc", true},
-    {"TrueClass", "TrueClass", true},
-    {"FalseClass", "FalseClass", true},
-    {"Boolean", "Boolean", true},
-    {"NilClass", "NilClass", true},
-    {"Class", "Class", true},
-    {"Module", "Module", true},
-    {"Time", "Time", true},
-    {"Todo", "<todo sym>", true},
-    {"TodoMethod", "<todo method>", false},
-    {"TodoTypeArgument", "<todo typeargument>", true},
-    {"NoSymbol", "<none>", true},
-    {"noFieldOrStaticField", "<no-field-or-static-field>", false},
-    {"noMethod", "<no-method>", false},
-    {"NoTypeArgument", "<no-type-argument>", true},
-    {"NoTypeMember", "<no-type-member>", true},
-    {"Opus", "Opus", true},
-    {"T", "T", true},
-    {"BasicObject", "BasicObject", true},
-    {"Kernel", "Kernel", true},
-    {"Range", "Range", true},
-    {"Regexp", "Regexp", true},
-    {"Exception", "Exception", true},
-    {"StandardError", "StandardError", true},
-    {"Complex", "Complex", true},
-    {"Rational", "Rational", true},
+    {"Top", "T.anything", NameKind::CONSTANT},
+    {"Bottom", "T.noreturn", NameKind::CONSTANT},
+    {"Untyped", "T.untyped", NameKind::CONSTANT},
+    {"Root", "<root>", NameKind::CONSTANT},
+    {"Object", "Object", NameKind::CONSTANT},
+    {"String", "String", NameKind::CONSTANT},
+    {"Integer", "Integer", NameKind::CONSTANT},
+    {"Float", "Float", NameKind::CONSTANT},
+    {"Numeric", "Numeric", NameKind::CONSTANT},
+    {"Symbol", "Symbol", NameKind::CONSTANT},
+    {"Array", "Array", NameKind::CONSTANT},
+    {"Hash", "Hash", NameKind::CONSTANT},
+    {"Proc", "Proc", NameKind::CONSTANT},
+    {"TrueClass", "TrueClass", NameKind::CONSTANT},
+    {"FalseClass", "FalseClass", NameKind::CONSTANT},
+    {"Boolean", "Boolean", NameKind::CONSTANT},
+    {"NilClass", "NilClass", NameKind::CONSTANT},
+    {"Class", "Class", NameKind::CONSTANT},
+    {"Module", "Module", NameKind::CONSTANT},
+    {"Time", "Time", NameKind::CONSTANT},
+    {"Todo", "<todo sym>", NameKind::CONSTANT},
+    {"TodoMethod", "<todo method>", NameKind::UTF8},
+    {"TodoTypeArgument", "<todo typeargument>", NameKind::CONSTANT},
+    {"NoSymbol", "<none>", NameKind::CONSTANT},
+    {"noFieldOrStaticField", "<no-field-or-static-field>", NameKind::UTF8},
+    {"noMethod", "<no-method>", NameKind::UTF8},
+    {"NoTypeArgument", "<no-type-argument>", NameKind::CONSTANT},
+    {"NoTypeMember", "<no-type-member>", NameKind::CONSTANT},
+    {"Opus", "Opus", NameKind::CONSTANT},
+    {"T", "T", NameKind::CONSTANT},
+    {"BasicObject", "BasicObject", NameKind::CONSTANT},
+    {"Kernel", "Kernel", NameKind::CONSTANT},
+    {"Range", "Range", NameKind::CONSTANT},
+    {"Regexp", "Regexp", NameKind::CONSTANT},
+    {"Exception", "Exception", NameKind::CONSTANT},
+    {"StandardError", "StandardError", NameKind::CONSTANT},
+    {"Complex", "Complex", NameKind::CONSTANT},
+    {"Rational", "Rational", NameKind::CONSTANT},
     // A magic non user-creatable class with methods to keep state between passes
-    {"Magic", "<Magic>", true},
+    {"Magic", "<Magic>", NameKind::CONSTANT},
     // A magic non user-creatable class to attach symbols for blaming untyped to
-    {"UntypedSource", "<UntypedSource>", true},
-    {"tupleUnderlying", "<tupleUnderlying>", true},
-    {"shapeUnderlying", "<shapeUnderlying>", true},
-    {"tupleLub", "<tupleLub>", true},
-    {"shapeLub", "<shapeLub>", true},
-    {"YieldLoadArg", "<YieldLoadArg>", true},
-    {"GetCurrentException", "<GetCurrentException>", true},
-    {"LoadYieldParams", "<LoadYieldParams>", true},
-    {"shapeSquareBracketsEq", "<shapeSquareBracketsEq>", true},
+    {"UntypedSource", "<UntypedSource>", NameKind::CONSTANT},
+    {"tupleUnderlying", "<tupleUnderlying>", NameKind::CONSTANT},
+    {"shapeUnderlying", "<shapeUnderlying>", NameKind::CONSTANT},
+    {"tupleLub", "<tupleLub>", NameKind::CONSTANT},
+    {"shapeLub", "<shapeLub>", NameKind::CONSTANT},
+    {"YieldLoadArg", "<YieldLoadArg>", NameKind::CONSTANT},
+    {"GetCurrentException", "<GetCurrentException>", NameKind::CONSTANT},
+    {"LoadYieldParams", "<LoadYieldParams>", NameKind::CONSTANT},
+    {"shapeSquareBracketsEq", "<shapeSquareBracketsEq>", NameKind::CONSTANT},
     // A magic non user-creatable class for binding procs to attached_class
-    {"BindToAttachedClass", "<BindToAttachedClass>", true},
+    {"BindToAttachedClass", "<BindToAttachedClass>", NameKind::CONSTANT},
     // A magic non user-creatable class for binding procs to self_type
-    {"BindToSelfType", "<BindToSelfType>", true},
+    {"BindToSelfType", "<BindToSelfType>", NameKind::CONSTANT},
     // A magic non user-creatable class for mimicking the decl builder during cfg
     // construction
-    {"DeclBuilderForProcs", "<DeclBuilderForProcs>", true},
-    {"Enumerable", "Enumerable", true},
-    {"Enumerator", "Enumerator", true},
-    {"Lazy", "Lazy", true},
-    {"Chain", "Chain", true},
-    {"Set", "Set", true},
-    {"Struct", "Struct", true},
-    {"Data", "Data", true},
-    {"File", "File", true},
-    {"Encoding", "Encoding", true},
+    {"DeclBuilderForProcs", "<DeclBuilderForProcs>", NameKind::CONSTANT},
+    {"Enumerable", "Enumerable", NameKind::CONSTANT},
+    {"Enumerator", "Enumerator", NameKind::CONSTANT},
+    {"Lazy", "Lazy", NameKind::CONSTANT},
+    {"Chain", "Chain", NameKind::CONSTANT},
+    {"Set", "Set", NameKind::CONSTANT},
+    {"Struct", "Struct", NameKind::CONSTANT},
+    {"Data", "Data", NameKind::CONSTANT},
+    {"File", "File", NameKind::CONSTANT},
+    {"Encoding", "Encoding", NameKind::CONSTANT},
     {"getEncoding", "<get-encoding>"},
-    {"Static", "Static", true},
-    {"StubModule", "<StubModule>", true},
-    {"StubSuperClass", "<StubSuperClass>", true},
-    {"StubMixin", "<StubMixin>", true},
-    {"PlaceholderMixin", "<PlaceholderMixin>", true},
-    {"Base", "Base", true},
-    {"Void", "Void", true},
-    {"TypeAlias", "<TypeAlias>", true},
-    {"Generic", "Generic", true},
-    {"Tuple", "Tuple", true},
-    {"Shape", "Shape", true},
-    {"Subclasses", "SUBCLASSES", true},
-    {"Sorbet", "Sorbet", true},
-    {"ReturnTypeInference", "ReturnTypeInference", true},
-    {"ResolvedSig", "ResolvedSig", true},
-    {"InferredReturnType", "INFERRED_RETURN_TYPE", true},
-    {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", true},
-    {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", true},
+    {"Static", "Static", NameKind::CONSTANT},
+    {"StubModule", "<StubModule>", NameKind::CONSTANT},
+    {"StubSuperClass", "<StubSuperClass>", NameKind::CONSTANT},
+    {"StubMixin", "<StubMixin>", NameKind::CONSTANT},
+    {"PlaceholderMixin", "<PlaceholderMixin>", NameKind::CONSTANT},
+    {"Base", "Base", NameKind::CONSTANT},
+    {"Void", "Void", NameKind::CONSTANT},
+    {"TypeAlias", "<TypeAlias>", NameKind::CONSTANT},
+    {"Generic", "Generic", NameKind::CONSTANT},
+    {"Tuple", "Tuple", NameKind::CONSTANT},
+    {"Shape", "Shape", NameKind::CONSTANT},
+    {"Subclasses", "SUBCLASSES", NameKind::CONSTANT},
+    {"Sorbet", "Sorbet", NameKind::CONSTANT},
+    {"ReturnTypeInference", "ReturnTypeInference", NameKind::CONSTANT},
+    {"ResolvedSig", "ResolvedSig", NameKind::CONSTANT},
+    {"InferredReturnType", "INFERRED_RETURN_TYPE", NameKind::CONSTANT},
+    {"InferredArgumentType", "INFERRED_ARGUMENT_TYPE", NameKind::CONSTANT},
+    {"ImplicitModuleSuperclass", "ImplicitModuleSuperclass", NameKind::CONSTANT},
     {"guessedTypeTypeParameterHolder", "guessed_type_type_parameter_holder"},
-    {"Builder", "Builder", true},
-    {"Sig", "Sig", true},
-    {"Utils", "Utils", true},
-    {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
+    {"Builder", "Builder", NameKind::CONSTANT},
+    {"Sig", "Sig", NameKind::CONSTANT},
+    {"Utils", "Utils", NameKind::CONSTANT},
+    {"UndeclaredFieldStub", "<undeclared-field-stub>", NameKind::CONSTANT},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
-    {"Helpers", "Helpers", true},
-    {"Net", "Net", true},
-    {"IMAP", "IMAP", true},
-    {"Protocol", "Protocol", true},
-    {"WithoutRuntime", "WithoutRuntime", true},
-    {"Singleton", "Singleton", true},
-    {"AttachedClass", "<AttachedClass>", true},
-    {"NonForcingConstants", "NonForcingConstants", true},
-    {"VERSION", "VERSION", true},
-    {"Thread", "Thread", true},
-    {"Configuration", "Configuration", true},
-    {"Test", "Test", true},
-    {"Autogen", "Autogen", true},
-    {"Tokens", "Tokens", true},
-    {"AccountModelMerchant", "AccountModelMerchant", true},
-    {"Token", "Token", true},
-    {"Account", "Account", true},
-    {"Merchant", "Merchant", true},
+    {"Helpers", "Helpers", NameKind::CONSTANT},
+    {"Net", "Net", NameKind::CONSTANT},
+    {"IMAP", "IMAP", NameKind::CONSTANT},
+    {"Protocol", "Protocol", NameKind::CONSTANT},
+    {"WithoutRuntime", "WithoutRuntime", NameKind::CONSTANT},
+    {"Singleton", "Singleton", NameKind::CONSTANT},
+    {"AttachedClass", "<AttachedClass>", NameKind::CONSTANT},
+    {"NonForcingConstants", "NonForcingConstants", NameKind::CONSTANT},
+    {"VERSION", "VERSION", NameKind::CONSTANT},
+    {"Thread", "Thread", NameKind::CONSTANT},
+    {"Configuration", "Configuration", NameKind::CONSTANT},
+    {"Test", "Test", NameKind::CONSTANT},
+    {"Autogen", "Autogen", NameKind::CONSTANT},
+    {"Tokens", "Tokens", NameKind::CONSTANT},
+    {"AccountModelMerchant", "AccountModelMerchant", NameKind::CONSTANT},
+    {"Token", "Token", NameKind::CONSTANT},
+    {"Account", "Account", NameKind::CONSTANT},
+    {"Merchant", "Merchant", NameKind::CONSTANT},
 
     // Typos
-    {"Int", "Int", true},
-    {"Timestamp", "Timestamp", true},
-    {"Bool", "Bool", true},
+    {"Int", "Int", NameKind::CONSTANT},
+    {"Timestamp", "Timestamp", NameKind::CONSTANT},
+    {"Bool", "Bool", NameKind::CONSTANT},
 };
+
+string_view kindToString(NameKind kind) {
+    switch (kind) {
+        case NameKind::UTF8:
+            return "UTF8"sv;
+        case NameKind::UNIQUE:
+            return "UNIQUE"sv;
+        case NameKind::CONSTANT:
+            return "CONSTANT"sv;
+    }
+}
 
 void emit_name_header(ostream &out, NameDef &name) {
     out << "#ifndef NAME_" << name.srcName << '\n';
     out << "#define NAME_" << name.srcName << '\n';
     out << "    // \"" << name.val << "\"" << '\n';
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << '\n';
-    out << "        return NameRef(NameRef::WellKnown{}, NameKind::" << (name.isConstant ? "CONSTANT" : "UTF8") << ", "
-        << name.id << ");" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, NameKind::" << (kindToString(name.kind)) << ", " << name.id
+        << ");" << '\n';
     out << "    }" << '\n';
     out << "#endif" << '\n';
     out << '\n';
@@ -600,16 +617,38 @@ void emit_name_string(ostream &out, NameDef &name) {
     out << '\n';
 }
 
+string_view kindToEnterMethod(NameKind kind) {
+    switch (kind) {
+        case NameKind::UTF8:
+            return "enterNameUTF8"sv;
+        case NameKind::CONSTANT:
+            return "enterNameConstant"sv;
+        case NameKind::UNIQUE:
+            throw new runtime_error("unimplemented!");
+    }
+}
+
+string_view kindToIndexMethod(NameKind kind) {
+    switch (kind) {
+        case NameKind::UTF8:
+            return "utf8Index"sv;
+        case NameKind::CONSTANT:
+            return "constantIndex"sv;
+        case NameKind::UNIQUE:
+            throw new runtime_error("unimplemented");
+    }
+}
+
 void emit_register(ostream &out) {
     out << "void registerNames(GlobalState &gs) {" << '\n';
     for (auto &name : names) {
-        auto fun = name.isConstant ? "enterNameConstant" : "enterNameUTF8";
+        auto fun = kindToEnterMethod(name.kind);
         out << "    NameRef " << name.srcName << "_id = gs." << fun << "(" << name.srcName << "_DESC);" << '\n';
     }
     out << '\n';
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id." << (name.isConstant ? "constantIndex" : "utf8Index")
-            << "() == " << name.id << "); /* " << name.srcName << "() */" << '\n';
+        out << "    ENFORCE(" << name.srcName << "_id." << kindToIndexMethod(name.kind) << "() == " << name.id
+            << "); /* " << name.srcName << "() */" << '\n';
     }
     out << '\n';
     out << "}" << '\n';
@@ -619,11 +658,16 @@ int main(int argc, char **argv) {
     int constantI = 0;
     int utf8I = 0;
     for (auto &name : names) {
-        if (name.isConstant) {
-            utf8I++;
-            name.id = constantI++;
-        } else {
-            name.id = utf8I++;
+        switch (name.kind) {
+            case NameKind::UTF8:
+                name.id = utf8I++;
+                break;
+            case NameKind::UNIQUE:
+                break;
+            case NameKind::CONSTANT:
+                utf8I++;
+                name.id = constantI++;
+                break;
         }
     }
     int lastConstantId = constantI;
@@ -643,14 +687,14 @@ int main(int argc, char **argv) {
         header << "namespace Names {" << '\n';
 
         for (auto &name : names) {
-            if (!name.isConstant) {
+            if (name.kind == NameKind::UTF8) {
                 emit_name_header(header, name);
             }
         }
 
         header << "namespace Constants {" << '\n';
         for (auto &name : names) {
-            if (name.isConstant) {
+            if (name.kind == NameKind::CONSTANT) {
                 emit_name_header(header, name);
             }
         }
