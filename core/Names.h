@@ -35,6 +35,8 @@ enum class UniqueNameKind : uint8_t {
     Struct,               // For use in the ::Struct rewriter (so that `super` works)
     Packager,             // For package mangled names
     DesugarCsend,         // Used for Extract to Variable; see the CSend case in desugar.cc for more details
+    WellKnown,            // For use in generate_names, where the name must `.show()` like a UTF8
+                          // name, but not collide with the actual UTF8 name that it shows to.
 };
 
 struct UniqueName final {

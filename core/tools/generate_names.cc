@@ -624,7 +624,7 @@ string_view kindToEnterMethod(NameKind kind) {
         case NameKind::CONSTANT:
             return "enterNameConstant"sv;
         case NameKind::UNIQUE:
-            throw new runtime_error("unimplemented!");
+            return "freshNameUnique"sv;
     }
 }
 
@@ -635,7 +635,7 @@ string_view kindToIndexMethod(NameKind kind) {
         case NameKind::CONSTANT:
             return "constantIndex"sv;
         case NameKind::UNIQUE:
-            throw new runtime_error("unimplemented");
+            return "uniqueIndex"sv;
     }
 }
 
@@ -643,7 +643,11 @@ void emit_register(ostream &out) {
     out << "void registerNames(GlobalState &gs) {" << '\n';
     for (auto &name : names) {
         auto fun = kindToEnterMethod(name.kind);
-        out << "    NameRef " << name.srcName << "_id = gs." << fun << "(" << name.srcName << "_DESC);" << '\n';
+        out << "    NameRef " << name.srcName << "_id = gs." << fun << "(" << name.srcName << "_DESC";
+        if (name.kind == NameKind::UNIQUE) {
+            out << ", UniqueNameKind::WellKnown, 1);";
+        }
+        out << ");" << '\n';
     }
     out << '\n';
     for (auto &name : names) {
@@ -657,12 +661,15 @@ void emit_register(ostream &out) {
 int main(int argc, char **argv) {
     int constantI = 0;
     int utf8I = 0;
+    int uniqueI = 0;
     for (auto &name : names) {
         switch (name.kind) {
             case NameKind::UTF8:
                 name.id = utf8I++;
                 break;
             case NameKind::UNIQUE:
+                // Does not increment utf8I. Unique names must pre-declare the utf8 name backing them.
+                name.id = uniqueI++;
                 break;
             case NameKind::CONSTANT:
                 utf8I++;
@@ -672,6 +679,7 @@ int main(int argc, char **argv) {
     }
     int lastConstantId = constantI;
     int lastUtf8Id = utf8I;
+    int lastUniqueId = uniqueI;
 
     // emit header file
     {
@@ -700,6 +708,14 @@ int main(int argc, char **argv) {
         }
         header << "}" << '\n';
 
+        header << "namespace Uniques {" << '\n';
+        for (auto &name : names) {
+            if (name.kind == NameKind::UNIQUE) {
+                emit_name_header(header, name);
+            }
+        }
+        header << "}" << '\n';
+
         header << "#ifndef NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
         header << "#define NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
         header << "constexpr int LAST_WELL_KNOWN_CONSTANT_NAME = " << lastConstantId << ";" << '\n';
@@ -708,6 +724,11 @@ int main(int argc, char **argv) {
         header << "#ifndef NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
         header << "#define NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
         header << "constexpr int LAST_WELL_KNOWN_UTF8_NAME = " << lastUtf8Id << ";" << '\n';
+        header << "#endif" << '\n';
+
+        header << "#ifndef NAME_LAST_WELL_KNOWN_UNIQUE_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_UNIQUE_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_UNIQUE_NAME = " << lastUniqueId << ";" << '\n';
         header << "#endif" << '\n';
 
         header << "    void registerNames(GlobalState &gs);" << '\n';

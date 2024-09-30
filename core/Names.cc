@@ -81,6 +81,9 @@ string NameRef::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::DesugarCsend:
                     kind = "&";
                     break;
+                case UniqueNameKind::WellKnown:
+                    kind = "W";
+                    break;
             }
             if (gs.censorForSnapshotTests && unique->uniqueNameKind == UniqueNameKind::Namer &&
                 unique->original == core::Names::staticInit()) {
@@ -195,6 +198,7 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                 case UniqueNameKind::MangleRenameOverload:
                 case UniqueNameKind::TEnum:
                 case UniqueNameKind::Struct:
+                case UniqueNameKind::WellKnown:
                     return dataUnique(gs)->original.isClassName(gs);
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::Packager:
@@ -245,6 +249,7 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::TypeVarName:
                 case UniqueNameKind::PositionalArg:
                 case UniqueNameKind::MangledKeywordArg:
+                case UniqueNameKind::WellKnown:
                     return false;
                 case UniqueNameKind::DesugarCsend:
                     Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
