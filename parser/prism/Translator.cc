@@ -406,6 +406,14 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::DString>(parser.translateLocation(loc), std::move(sorbetParts));
         }
+        case PM_IT_LOCAL_VARIABLE_READ_NODE: {
+            // See Prism::ParserStorage::ParsedRubyVersion
+            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
+        }
+        case PM_IT_PARAMETERS_NODE: {
+            // See Prism::ParserStorage::ParsedRubyVersion
+            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
+        }
         case PM_KEYWORD_HASH_NODE: {
             auto usedForKeywordArgs = true;
             return translateHash(node, reinterpret_cast<pm_keyword_hash_node *>(node)->elements, usedForKeywordArgs);
@@ -861,14 +869,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_INTERPOLATED_X_STRING_NODE:
-        case PM_IT_LOCAL_VARIABLE_READ_NODE: {
-            // See Prism::ParserStorage::ParsedRubyVersion
-            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
-        }
-        case PM_IT_PARAMETERS_NODE: {
-            // See Prism::ParserStorage::ParsedRubyVersion
-            unreachable("The `it` keyword was introduced in Ruby 3.4, which isn't supported by Sorbet yet.");
-        }
         case PM_LAMBDA_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
