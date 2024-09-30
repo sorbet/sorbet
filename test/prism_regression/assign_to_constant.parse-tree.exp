@@ -9,6 +9,124 @@ Begin {
         val = "1"
       }
     }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U BITWISE_AND>>
+      }
+      op = <U &>
+      right = Integer {
+        val = "2"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U BITWISE_XOR>>
+      }
+      op = <U ^>
+      right = Integer {
+        val = "4"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U SHIFT_RIGHT>>
+      }
+      op = <U >>>
+      right = Integer {
+        val = "5"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U SHIFT_LEFT>>
+      }
+      op = <U <<>
+      right = Integer {
+        val = "6"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U SUBTRACT_ASSIGN>>
+      }
+      op = <U ->
+      right = Integer {
+        val = "7"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U MODULE_ASSIGN>>
+      }
+      op = <U %>
+      right = Integer {
+        val = "8"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U BITWISE_OR>>
+      }
+      op = <U |>
+      right = Integer {
+        val = "9"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U DIVIDE_ASSIGN>>
+      }
+      op = <U />
+      right = Integer {
+        val = "10"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U MULTIPLY_ASSIGN>>
+      }
+      op = <U *>
+      right = Integer {
+        val = "11"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U EXPONENTIATE_ASSIGN>>
+      }
+      op = <U **>
+      right = Integer {
+        val = "12"
+      }
+    }
+    AndAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U LAZY_AND_ASSIGN>>
+      }
+      right = Integer {
+        val = "13"
+      }
+    }
+    OrAsgn {
+      left = ConstLhs {
+        scope = NULL
+        name = <C <U LAZY_OR_ASSGIN>>
+      }
+      right = Integer {
+        val = "14"
+      }
+    }
     Assign {
       lhs = ConstLhs {
         scope = Const {
@@ -18,7 +136,7 @@ Begin {
         name = <C <U REGULAR>>
       }
       rhs = Integer {
-        val = "1"
+        val = "15"
       }
     }
     Assign {
@@ -34,7 +152,7 @@ Begin {
         name = <C <U REGULAR>>
       }
       rhs = Integer {
-        val = "2"
+        val = "16"
       }
     }
   ]

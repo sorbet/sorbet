@@ -71,6 +71,17 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
         lhs =
             make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), core::Names::squareBrackets(),
                                       parser.translateLocation(openingLoc), std::move(args));
+    } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
+                         std::is_same_v<PrismAssignmentNode, pm_constant_and_write_node> ||
+                         std::is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
+        auto *nameLoc = &node->name_loc;
+        auto name = parser.resolveConstant(node->name);
+        auto nameRef = gs.enterNameConstant(name);
+
+        // Second argument is the scope, which is null for top-level constants
+        auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
+
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
     } else {
         auto *nameLoc = &node->name_loc;
         auto name = parser.resolveConstant(node->name);
@@ -267,6 +278,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CONSTANT_PATH_WRITE_NODE: {
             return translateAssignment<pm_constant_path_write_node, void>(node);
+        }
+        case PM_CONSTANT_AND_WRITE_NODE: {
+            return translateOpAssignment<pm_constant_and_write_node, parser::AndAsgn, parser::ConstLhs>(node);
+        }
+        case PM_CONSTANT_OPERATOR_WRITE_NODE: {
+            return translateOpAssignment<pm_constant_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
+        }
+        case PM_CONSTANT_OR_WRITE_NODE: {
+            return translateOpAssignment<pm_constant_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like "Foo"
             auto constantReadNode = reinterpret_cast<pm_constant_read_node *>(node);
@@ -842,9 +862,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CASE_MATCH_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
-        case PM_CONSTANT_AND_WRITE_NODE:
-        case PM_CONSTANT_OPERATOR_WRITE_NODE:
-        case PM_CONSTANT_OR_WRITE_NODE:
         case PM_CONSTANT_PATH_AND_WRITE_NODE:
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE:
         case PM_CONSTANT_PATH_OR_WRITE_NODE:
