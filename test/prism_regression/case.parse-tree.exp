@@ -1,10 +1,5 @@
 Begin {
   stmts = [
-    DefMethod {
-      name = <U foo>
-      args = NULL
-      body = NULL
-    }
     Case {
       condition = Send {
         receiver = NULL

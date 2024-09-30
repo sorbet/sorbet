@@ -1,7 +1,5 @@
 # typed: false
 
-def foo; end
-
 case foo
 when 1
   puts "one!"
