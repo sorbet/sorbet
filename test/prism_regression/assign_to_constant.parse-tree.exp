@@ -155,5 +155,159 @@ Begin {
         val = "16"
       }
     }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_AND>>
+      }
+      op = <U &>
+      right = Integer {
+        val = "17"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_XOR>>
+      }
+      op = <U ^>
+      right = Integer {
+        val = "18"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_RIGHT>>
+      }
+      op = <U >>>
+      right = Integer {
+        val = "19"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SHIFT_LEFT>>
+      }
+      op = <U <<>
+      right = Integer {
+        val = "20"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U SUBTRACT_ASSIGN>>
+      }
+      op = <U ->
+      right = Integer {
+        val = "21"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U MODULE_ASSIGN>>
+      }
+      op = <U %>
+      right = Integer {
+        val = "22"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U BITWISE_OR>>
+      }
+      op = <U |>
+      right = Integer {
+        val = "23"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U DIVIDE_ASSIGN>>
+      }
+      op = <U />
+      right = Integer {
+        val = "24"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U MULTIPLY_ASSIGN>>
+      }
+      op = <U *>
+      right = Integer {
+        val = "25"
+      }
+    }
+    OpAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U EXPONENTIATE_ASSIGN>>
+      }
+      op = <U **>
+      right = Integer {
+        val = "26"
+      }
+    }
+    AndAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U LAZY_AND_ASSIGN>>
+      }
+      right = Integer {
+        val = "27"
+      }
+    }
+    OrAsgn {
+      left = ConstLhs {
+        scope = Const {
+          scope = NULL
+          name = <C <U ConstantPath>>
+        }
+        name = <C <U LAZY_OR_ASSGIN>>
+      }
+      right = Integer {
+        val = "28"
+      }
+    }
   ]
 }

@@ -24,3 +24,19 @@ LAZY_OR_ASSGIN ||= 14
 # Regular assignment
 ConstantPath::REGULAR = 15
 ::FullyQualified::ConstantPath::REGULAR = 16
+
+# # Compound assignment operators
+ConstantPath::BITWISE_AND &= 17
+ConstantPath::BITWISE_XOR ^= 18
+ConstantPath::SHIFT_RIGHT >>= 19
+ConstantPath::SHIFT_LEFT <<= 20
+ConstantPath::SUBTRACT_ASSIGN -= 21
+ConstantPath::MODULE_ASSIGN %= 22
+ConstantPath::BITWISE_OR |= 23
+ConstantPath::DIVIDE_ASSIGN /= 24
+ConstantPath::MULTIPLY_ASSIGN *= 25
+ConstantPath::EXPONENTIATE_ASSIGN **= 26
+
+# Special cases
+ConstantPath::LAZY_AND_ASSIGN &&= 27
+ConstantPath::LAZY_OR_ASSGIN ||= 28
