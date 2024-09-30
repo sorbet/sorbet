@@ -77,6 +77,12 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
                          std::is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
         auto isAssignment = true;
         lhs = translateConstantPath(node->target, isAssignment);
+    } else if constexpr (std::is_same_v<SorbetLHSNode, parser::Send>) {
+        auto name = parser.resolveConstant(node->read_name);
+        auto receiver = translate(node->receiver);
+        auto *message_loc = &node->message_loc;
+        lhs = make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
+                                        parser.translateLocation(message_loc), NodeVec{});
     } else {
         auto *nameLoc = &node->name_loc;
         auto name = parser.resolveConstant(node->name);
@@ -186,6 +192,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Break>(parser.translateLocation(loc), std::move(arguments));
         }
+        case PM_CALL_AND_WRITE_NODE: {
+            return translateOpAssignment<pm_call_and_write_node, parser::AndAsgn, parser::Send>(node);
+        }
         case PM_CALL_NODE: {
             auto callNode = reinterpret_cast<pm_call_node *>(node);
             pm_location_t *loc = &callNode->base.location;
@@ -220,6 +229,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             } else {
                 return sendNode;
             }
+        }
+        case PM_CALL_OPERATOR_WRITE_NODE: {
+            return translateOpAssignment<pm_call_operator_write_node, parser::OpAsgn, parser::Send>(node);
+        }
+        case PM_CALL_OR_WRITE_NODE: {
+            return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
         case PM_CASE_NODE: {
             auto caseNode = reinterpret_cast<pm_case_node *>(node);
@@ -859,9 +874,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARRAY_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_CALL_AND_WRITE_NODE:
-        case PM_CALL_OPERATOR_WRITE_NODE:
-        case PM_CALL_OR_WRITE_NODE:
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CASE_MATCH_NODE:
