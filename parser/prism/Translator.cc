@@ -64,11 +64,13 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
                   is_same_v<PrismAssignmentNode, pm_index_and_write_node> ||
                   is_same_v<PrismAssignmentNode, pm_index_or_write_node>) {
         // Handle operator assignment to an indexed expression, like `a[0] += 1`
-        auto *openingLoc = &node->opening_loc;
+        auto openingLoc = parser.translateLocation(&node->opening_loc);
+        auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
+
         auto receiver = translate(node->receiver);
         auto args = translateArguments(node->arguments);
         lhs = make_unique<parser::Send>(parser.translateLocation(loc), move(receiver), core::Names::squareBrackets(),
-                                        parser.translateLocation(openingLoc), move(args));
+                                        lBracketLoc, move(args));
     } else if constexpr (is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
                          is_same_v<PrismAssignmentNode, pm_constant_and_write_node> ||
                          is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
@@ -231,8 +233,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CALL_NODE: { // A method call like `a.b()` or `a&.b()`
             auto callNode = reinterpret_cast<pm_call_node *>(node);
-            pm_location_t *loc = &callNode->base.location;
-            pm_location_t *messageLoc = &callNode->message_loc;
+
+            auto loc = parser.translateLocation(&callNode->base.location);
+            auto messageLoc = parser.translateLocation(&callNode->message_loc);
 
             auto name = parser.resolveConstant(callNode->name);
             auto receiver = translate(callNode->receiver);
@@ -249,18 +252,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 args.emplace_back(move(blockPassNode));
             }
 
+            if (name == "[]=") {
+                messageLoc.endLoc += 2; // The message includes the closing bracket and equals sign
+            } else if (name.back() == '=') {
+                messageLoc.endLoc = args.front()->loc.beginPos() - 1; // The message ends right before the equals sign
+            }
+
             auto flags = static_cast<pm_call_node_flags>(callNode->base.flags);
 
             unique_ptr<parser::Node> sendNode;
 
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) { // Handle conditional send, e.g. `a&.b`
                 sendNode =
-                    make_unique<parser::CSend>(parser.translateLocation(loc), move(receiver), gs.enterNameUTF8(name),
-                                               parser.translateLocation(messageLoc), move(args));
+                    make_unique<parser::CSend>(loc, move(receiver), gs.enterNameUTF8(name), messageLoc, move(args));
             } else { // Regular send, e.g. `a.b`
                 sendNode =
-                    make_unique<parser::Send>(parser.translateLocation(loc), move(receiver), gs.enterNameUTF8(name),
-                                              parser.translateLocation(messageLoc), move(args));
+                    make_unique<parser::Send>(loc, move(receiver), gs.enterNameUTF8(name), messageLoc, move(args));
             }
 
             if (prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_NODE)) {
@@ -305,15 +312,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = reinterpret_cast<pm_class_node *>(node);
             pm_location_t *loc = &classNode->base.location;
-            pm_location_t *declLoc = &classNode->class_keyword_loc;
+
+            auto declLoc = parser.translateLocation(&classNode->class_keyword_loc);
 
             auto name = translate(classNode->constant_path);
+            declLoc = declLoc.join(name->loc);
+
             auto superclass = translate(classNode->superclass);
+
+            if (superclass != nullptr) {
+                declLoc = declLoc.join(superclass->loc);
+            }
 
             auto body = translate(classNode->body);
 
-            return make_unique<parser::Class>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                              move(name), move(superclass), move(body));
+            return make_unique<parser::Class>(parser.translateLocation(loc), declLoc, move(name), move(superclass),
+                                              move(body));
         }
         case PM_CLASS_VARIABLE_AND_WRITE_NODE: { // And-assignment to a class variable, e.g. `@@a &&= 1`
             return translateOpAssignment<pm_class_variable_and_write_node, parser::AndAsgn, parser::CVarLhs>(node);
@@ -382,15 +396,24 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_DEF_NODE: { // Method definitions, like `def m; ...; end` and `def m = 123`
             auto defNode = reinterpret_cast<pm_def_node *>(node);
-            pm_location_t *loc = &defNode->base.location;
-            pm_location_t *declLoc = &defNode->def_keyword_loc;
+
+            auto loc = parser.translateLocation(&defNode->base.location);
+            loc.join(parser.translateLocation(&defNode->end_keyword_loc));
+
+            auto declLoc = parser.translateLocation(&defNode->def_keyword_loc);
+            declLoc = declLoc.join(parser.translateLocation(&defNode->name_loc));
+
+            auto rparenLoc = &defNode->rparen_loc;
+
+            if (rparenLoc->start != nullptr && rparenLoc->end != nullptr) {
+                declLoc = declLoc.join(parser.translateLocation(&defNode->rparen_loc));
+            }
 
             auto name = parser.resolveConstant(defNode->name);
             auto params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
             auto body = translate(defNode->body);
 
-            return make_unique<parser::DefMethod>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                                  gs.enterNameUTF8(name), move(params), move(body));
+            return make_unique<parser::DefMethod>(loc, declLoc, gs.enterNameUTF8(name), move(params), move(body));
         }
         case PM_DEFINED_NODE: {
             auto definedNode = reinterpret_cast<pm_defined_node *>(node);
@@ -646,13 +669,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = reinterpret_cast<pm_module_node *>(node);
             pm_location_t *loc = &moduleNode->base.location;
-            pm_location_t *declLoc = &moduleNode->module_keyword_loc;
+
+            auto declLoc = parser.translateLocation(&moduleNode->module_keyword_loc);
 
             auto name = translate(moduleNode->constant_path);
+            declLoc = declLoc.join(name->loc);
+
             auto body = translate(moduleNode->body);
 
-            return make_unique<parser::Module>(parser.translateLocation(loc), parser.translateLocation(declLoc),
-                                               move(name), move(body));
+            return make_unique<parser::Module>(parser.translateLocation(loc), declLoc, move(name), move(body));
         }
         case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = reinterpret_cast<pm_multi_write_node *>(node);
