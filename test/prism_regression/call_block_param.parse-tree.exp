@@ -106,5 +106,20 @@ Begin {
         }
       ]
     }
+    Block {
+      send = CSend {
+        receiver = Send {
+          receiver = NULL
+          method = <U foo>
+          args = [
+          ]
+        }
+        method = <U bar>
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
   ]
 }

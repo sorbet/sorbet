@@ -40,7 +40,7 @@ private:
     std::unique_ptr<parser::Hash> translateHash(pm_node_t *node, pm_node_list_t elements,
                                                 bool isUsedForKeywordArguments);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
-                                                         std::unique_ptr<parser::Send> sendNode);
+                                                         std::unique_ptr<parser::Node> sendNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
     std::unique_ptr<parser::Node> translateConstantPath(pm_constant_path_node *node, bool isAssignment);
     template <typename PrismNode, typename SorbetNode>

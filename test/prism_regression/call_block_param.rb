@@ -18,3 +18,5 @@
  end
 
  foo(&forwarded_block)
+
+ foo&.bar {}
