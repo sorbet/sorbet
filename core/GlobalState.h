@@ -147,6 +147,7 @@ public:
 
     NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num);
+    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, std::string_view original, uint32_t num);
 
     NameRef enterNameConstant(NameRef original);
     NameRef enterNameConstant(std::string_view original);

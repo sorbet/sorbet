@@ -1750,6 +1750,10 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return name;
 }
 
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, string_view original, uint32_t num) {
+    return freshNameUnique(uniqueNameKind, enterNameUTF8(original), num);
+}
+
 FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 

@@ -429,6 +429,7 @@ NameDef names[] = {
     {"fwdArgs", "<fwd-args>"},
     {"fwdKwargs", "<fwd-kwargs>"},
     {"fwdBlock", "<fwd-block>"},
+    {"restArg", "*", NameKind::UNIQUE},
 
     // Enumerable#flat_map has special-case logic in Infer
     {"flatMap", "flat_map"},
@@ -643,9 +644,13 @@ void emit_register(ostream &out) {
     out << "void registerNames(GlobalState &gs) {" << '\n';
     for (auto &name : names) {
         auto fun = kindToEnterMethod(name.kind);
-        out << "    NameRef " << name.srcName << "_id = gs." << fun << "(" << name.srcName << "_DESC";
+        out << "    NameRef " << name.srcName << "_id = gs." << fun << "(";
         if (name.kind == NameKind::UNIQUE) {
-            out << ", UniqueNameKind::WellKnown, 1);";
+            out << "UniqueNameKind::WellKnown, ";
+        }
+        out << name.srcName << "_DESC";
+        if (name.kind == NameKind::UNIQUE) {
+            out << ", 1";
         }
         out << ");" << '\n';
     }
