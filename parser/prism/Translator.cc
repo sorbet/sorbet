@@ -32,12 +32,7 @@ std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untyp
     if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_write_node>) {
         auto nameLoc = &node->name_loc;
         auto name = parser.resolveConstant(node->name);
-        auto nameRef = gs.enterNameConstant(name);
-
-        // Second argument is the scope, which is null for top-level constants
-        auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
-
-        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), nullptr, gs.enterNameConstant(name));
     } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
         auto isAssignment = true;
         lhs = translateConstantPath(node->target, isAssignment);
@@ -76,12 +71,7 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
                          std::is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
         auto *nameLoc = &node->name_loc;
         auto name = parser.resolveConstant(node->name);
-        auto nameRef = gs.enterNameConstant(name);
-
-        // Second argument is the scope, which is null for top-level constants
-        auto constNode = make_unique<parser::Const>(parser.translateLocation(loc), nullptr, nameRef);
-
-        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), std::move(constNode->scope), nameRef);
+        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), nullptr, gs.enterNameConstant(name));
     } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_path_operator_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_path_and_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
