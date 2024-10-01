@@ -649,6 +649,10 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export_all());
 
+    method =
+        enterMethod(*this, Symbols::PackageSpecSingleton(), Names::strictDependencies()).arg(Names::arg0()).build();
+    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_strict_dependencies());
+
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());

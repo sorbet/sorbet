@@ -209,6 +209,8 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
+    optional<core::packages::StrictDependenciesLevel> strictDependenciesLevel = nullopt;
+
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
@@ -1101,6 +1103,32 @@ struct PackageSpecBodyWalk {
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
+
+        if (send.fun == core::Names::strictDependencies()) {
+            if (send.numPosArgs() == 1) {
+                if (info.strictDependenciesLevel) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                        e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                    }
+                    return;
+                }
+
+                auto value = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+                if (value && value->isString() && isValidStrictDependenciesOption(value->asString())) {
+                    info.strictDependenciesLevel = optionToEnum(value->asString());
+                } else {
+                    if (auto e = ctx.beginError(value->loc, core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}` or `{}`", send.fun.show(ctx),
+                                    "'false'", "'layered'", "'layered_dag'", "'dag'");
+                    }
+                    info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
+                    return;
+                }
+            } else {
+                info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1231,6 +1259,27 @@ struct PackageSpecBodyWalk {
 
         illegalNode(ctx, original);
     }
+
+private:
+    bool isValidStrictDependenciesOption(core::NameRef value) {
+        return value == core::Names::false_() || value == core::Names::layered() ||
+               value == core::Names::layeredDag() || value == core::Names::dag();
+    }
+
+    core::packages::StrictDependenciesLevel optionToEnum(core::NameRef value) {
+        if (value == core::Names::false_()) {
+            return core::packages::StrictDependenciesLevel::False;
+        } else if (value == core::Names::layered()) {
+            return core::packages::StrictDependenciesLevel::Layered;
+        } else if (value == core::Names::layeredDag()) {
+            return core::packages::StrictDependenciesLevel::LayeredDag;
+        } else if (value == core::Names::dag()) {
+            return core::packages::StrictDependenciesLevel::Dag;
+        } else {
+            ENFORCE(false, "invalid strict_dependencies option");
+            return core::packages::StrictDependenciesLevel::False;
+        }
+    }
 };
 
 unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
@@ -1317,6 +1366,9 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+    if (!info.strictDependenciesLevel) {
+        info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
+    }
     bodyWalk.finalize(ctx);
 }
 

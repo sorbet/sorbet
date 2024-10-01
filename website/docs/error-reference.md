@@ -862,6 +862,10 @@ you're sure that it should be okay to import this package, then you can add an
 additional `visible_to` directive in order to allow the import you're trying to
 add.
 
+## 3724
+
+> **TODO** This error code is not yet documented.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
