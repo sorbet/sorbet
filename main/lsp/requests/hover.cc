@@ -29,6 +29,17 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
         start = start->secondary.get();
     }
 
+    // contents being empty implies that there were no components that existed, which means that
+    // there was an error. We don't show any hover results, so that the only thing that's shown on
+    // hover is any relevant diagnostics (e.g., we could show `result type: T.untyped` but for
+    // errors that would just be misleading--people might think the problem is _caused_ by untyped,
+    // but the untyped is an artifact of how we recover from errors).
+    if (!contents.empty()) {
+        // Reads from returnType on the overall DispatchResult, which will have aggregated all the
+        // components (e.g., unions and intersections)
+        contents = absl::StrCat(move(contents), "\n\n# result type:\n", dispatchResult.returnType.showWithMoreInfo(gs));
+    }
+
     return contents;
 }
 
