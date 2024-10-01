@@ -37,9 +37,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         return "";
     }
 
-    if (!retType) {
-        retType = getResultType(gs, method.data(gs)->resultType, method, receiver);
-    }
+    auto retType = getResultType(gs, method.data(gs)->resultType, method, receiver);
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
     vector<string> typeAndArgNames;
