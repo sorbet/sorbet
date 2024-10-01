@@ -15,6 +15,15 @@ class Foo
     a
   end
 
+  sig {
+    type_parameters(:U)
+      .params(blk: T.proc.returns(T.type_parameter(:U)))
+      .returns(T.type_parameter(:U))
+  }
+  def self.block_id(&blk)
+    #      ^ def: block_id
+    yield
+  end
 end
 
 def main
@@ -35,4 +44,10 @@ def main
 # ^ hover: String
          # ^ hover: sig { params(a: String).returns(String) }
          # ^ usage: staticid
+
+  v5 = Foo.block_id do
+    #       ^ hover: sig { params(blk: T.proc.returns(String)).returns(String) }
+    #       ^ usage: block_id
+    "1"
+  end
 end
