@@ -994,7 +994,7 @@ private:
         }
         auto resultType = abstractMethodRef.data(gs)->resultType;
         auto methodDefinition = core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType,
-                                                                            nullptr, showOptions);
+                                                                            showOptions);
 
         vector<string> indentedLines;
         absl::c_transform(

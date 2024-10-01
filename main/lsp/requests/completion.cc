@@ -1072,7 +1072,7 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForMethod(LSPTypeche
         documentation = findDocumentation(whatFile.data(gs).source(), what.data(gs)->loc().beginPos());
     }
 
-    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr, constraint,
+    auto prettyType = core::source_generator::prettyTypeForMethod(gs, maybeAlias, receiverType, nullptr,
                                                                   core::ShowOptions().withUseValidSyntax());
     item->documentation = formatRubyMarkup(markupKind, prettyType, documentation);
 
