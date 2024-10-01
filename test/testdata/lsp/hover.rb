@@ -146,10 +146,10 @@ def main
       # ^^^^^^ hover: The docs for BigFoo
 
   foo = BigFoo.new
-  #            ^^^ hover: sig { returns(BigFoo) }
+  #            ^^^ hover: sig { void }
   #            ^^^ hover: private def initialize; end
   hoo = BigFoo::LittleFoo1.new
-                         # ^^^ hover: sig { returns(BigFoo::LittleFoo1) }
+  #                        ^^^ hover: sig { returns(T.untyped) }
   raise "error message"
   # ^ hover-line: 4     arg0: T.any(T::Class[T.anything], Exception, String)
 end
