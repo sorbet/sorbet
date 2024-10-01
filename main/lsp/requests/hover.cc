@@ -89,17 +89,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
 
             auto retType = s->dispatchResult->returnType;
-            auto &constraint = s->dispatchResult->main.constr;
-            if (constraint) {
-                retType = core::Types::instantiate(gs, retType, *constraint);
-            }
             if (s->dispatchResult->main.method.exists() &&
                 s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
                 // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
                 // the result type.
                 typeString = retType.showWithMoreInfo(gs);
             } else {
-                typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
+                typeString = methodInfoString(gs, retType, *s->dispatchResult, s->dispatchResult->main.constr, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
