@@ -29,7 +29,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 constexpr int MAX_PRETTY_WIDTH = 80;
 
 string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                          core::TypePtr retType, const ShowOptions options) {
+                          const ShowOptions options) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealiasMethod(gs) == method);
     // handle this case anyways so that we don't crash in prod when this method is misused
@@ -180,8 +180,8 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
 }
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                           const core::TypePtr &retType, const ShowOptions options) {
-    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, options),
+                           const ShowOptions options) {
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, options),
                        prettyDefForMethod(gs, method, options));
 }
 
