@@ -17,14 +17,14 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
                         const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method,
+            contents = absl::StrCat(move(contents), core::source_generator::prettyTypeForMethod(gs, component.method,
                                                                                           component.receiver, retType,
                                                                                           constraint.get(), options));
         }
