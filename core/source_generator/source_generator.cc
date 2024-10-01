@@ -20,12 +20,6 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
                                                        applied->targs);
     }
-    if (receiver) {
-        resultType = core::Types::replaceSelfType(gs, resultType, receiver); // instantiate self types
-    }
-    if (constr) {
-        resultType = core::Types::instantiate(gs, resultType, *constr); // instantiate generic methods
-    }
     return resultType;
 }
 
