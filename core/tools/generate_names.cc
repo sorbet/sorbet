@@ -459,6 +459,11 @@ NameDef names[] = {
     {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
+    {"strictDependencies", "strict_dependencies"},
+    {"false_", "false"},
+    {"layered"},
+    {"layeredDag", "layered_dag"},
+    {"dag"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 

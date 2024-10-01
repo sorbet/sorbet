@@ -585,6 +585,8 @@ not exist.
 > This error is specific to Stripe's custom `--stripe-packages` mode. If you are
 > at Stripe, please see [go/modularity](http://go/modularity) for more.
 
+<!-- TODO: update this (and maybe split up 3706 into seperate errors?) -->
+
 All `import` and `export` lines in a `__package.rb` file must have constant
 literals as their argument. Doing arbitrary computation of imports and exports
 is not allowed in `__package.rb` files.

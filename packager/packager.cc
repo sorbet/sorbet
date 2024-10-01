@@ -1101,6 +1101,17 @@ struct PackageSpecBodyWalk {
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
+
+        if (send.fun == core::Names::strictDependencies() && send.numPosArgs() == 1) {
+            auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+            if (target && target->isString() && isValidStrictDependenciesOption(target->asString())) {
+            } else {
+                if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                    e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}` or `{}`", send.fun.show(ctx), "'false'", "'layered'", "'layered_dag'", "'dag'");
+                }
+                return;
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1230,6 +1241,10 @@ struct PackageSpecBodyWalk {
         }
 
         illegalNode(ctx, original);
+    }
+private:
+    bool isValidStrictDependenciesOption(core::NameRef value) {
+        return value == core::Names::false_() || value == core::Names::layered() || value == core::Names::layeredDag() || value == core::Names::dag();
     }
 };
 
