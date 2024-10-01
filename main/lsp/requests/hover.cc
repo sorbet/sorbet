@@ -24,9 +24,9 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(move(contents), core::source_generator::prettyTypeForMethod(gs, component.method,
-                                                                                          component.receiver, retType,
-                                                                                          constraint.get(), options));
+            contents = absl::StrCat(
+                move(contents), core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver,
+                                                                            retType, constraint.get(), options));
         }
         start = start->secondary.get();
     }
