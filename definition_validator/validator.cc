@@ -992,9 +992,8 @@ private:
         if (sym.data(gs)->attachedClass(gs).exists()) {
             showOptions = showOptions.withForceSelfPrefix();
         }
-        auto resultType = abstractMethodRef.data(gs)->resultType;
         auto methodDefinition =
-            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, resultType, showOptions);
+            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
 
         vector<string> indentedLines;
         absl::c_transform(
