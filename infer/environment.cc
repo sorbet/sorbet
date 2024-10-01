@@ -1180,6 +1180,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             fun = lit.asName();
                         }
                     }
+                    // TODO(jez) If there is a send and block link, should we defer sending this
+                    // until we get to the SolveConstraint? Is something like that even possible?
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx,
                         core::lsp::SendResponse(retainedResult, send.argLocs, fun, ctx.owner.asMethodRef(),
