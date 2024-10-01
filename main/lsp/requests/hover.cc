@@ -13,8 +13,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult,
-                        const core::ShowOptions options) {
+                        const core::DispatchResult &dispatchResult, const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
 
@@ -24,9 +23,8 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(
-                move(contents), core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver,
-                                                                            retType, options));
+            contents = absl::StrCat(move(contents), core::source_generator::prettyTypeForMethod(
+                                                        gs, component.method, component.receiver, retType, options));
         }
         start = start->secondary.get();
     }
@@ -121,8 +119,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString =
-            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, options);
+        typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {

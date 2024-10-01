@@ -182,11 +182,9 @@ string prettyDefForMethod(const core::GlobalState &gs, core::MethodRef method, c
 }
 
 string prettyTypeForMethod(const core::GlobalState &gs, core::MethodRef method, const core::TypePtr &receiver,
-                           const core::TypePtr &retType,
-                           const ShowOptions options) {
-    return fmt::format(
-        "{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, options),
-        prettyDefForMethod(gs, method, options));
+                           const core::TypePtr &retType, const ShowOptions options) {
+    return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealiasMethod(gs), receiver, retType, options),
+                       prettyDefForMethod(gs, method, options));
 }
 
 } // namespace sorbet::core::source_generator
