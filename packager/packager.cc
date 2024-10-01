@@ -1102,6 +1102,18 @@ struct PackageSpecBodyWalk {
             }
         }
 
+        if (send.fun == core::Names::layer() && send.numPosArgs() == 1) {
+            auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+            if (target && target->isString() && true /* TODO: check that it's a valid layer */) {
+            } else {
+                if (auto e = ctx.beginError(target->loc, core::errors::Packager::InvalidConfiguration)) {
+                    // TODO: list out all the valid layers
+                    e.setHeader("Argument to `{}` must be a string literal", send.fun.show(ctx));
+                }
+                return;
+            }
+        }
+
         if (send.fun == core::Names::strictDependencies() && send.numPosArgs() == 1) {
             auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0));
             if (target && target->isString() && isValidStrictDependenciesOption(target->asString())) {
