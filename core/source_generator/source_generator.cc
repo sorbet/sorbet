@@ -64,9 +64,8 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     for (auto &argSym : method.data(gs)->arguments) {
         // Don't display synthetic arguments (like blk).
         if (!argSym.isSyntheticBlockArgument()) {
-            typeAndArgNames.emplace_back(
-                absl::StrCat(argSym.argumentName(gs), ": ",
-                             getResultType(gs, argSym.type, method, receiver).show(gs, options)));
+            typeAndArgNames.emplace_back(absl::StrCat(
+                argSym.argumentName(gs), ": ", getResultType(gs, argSym.type, method, receiver).show(gs, options)));
         }
     }
 
