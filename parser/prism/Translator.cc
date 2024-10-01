@@ -133,11 +133,19 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &arrayPatternNode->base.location;
 
             auto prismPrefixNodes = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
+            auto prismSplatNode = reinterpret_cast<pm_splat_node *>(arrayPatternNode->rest);
 
             NodeVec sorbetElements{};
-            sorbetElements.reserve(prismPrefixNodes.size());
+            sorbetElements.reserve(prismPrefixNodes.size() + (prismSplatNode != nullptr ? 1 : 0));
 
             translateMultiInto(sorbetElements, prismPrefixNodes);
+
+            if (prismSplatNode != nullptr) {
+                auto expr = translate(prismSplatNode->expression);
+                auto splatLoc = &prismSplatNode->base.location;
+                sorbetElements.emplace_back(
+                    make_unique<MatchRest>(parser.translateLocation(splatLoc), std::move(expr)));
+            }
 
             return make_unique<parser::ArrayPattern>(parser.translateLocation(loc), std::move(sorbetElements));
         }

@@ -16,6 +16,8 @@ in [1, 2]
   puts "one and two!"
 in 3, 4 # An array pattern without [], but otherwise similar to the one above
   puts "three and four!"
+in [5, *]
+  puts "starts with five!"
 end
 
 # no else

@@ -117,6 +117,28 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              Integer {
+                val = "5"
+              }
+              MatchRest {
+                var = NULL
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U starts with five!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }
