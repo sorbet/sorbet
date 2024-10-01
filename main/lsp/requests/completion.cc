@@ -299,7 +299,7 @@ vector<core::NameRef> allSimilarLocalNames(const core::GlobalState &gs, const ve
 }
 
 string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::MethodRef maybeAlias,
-                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, uint16_t totalArgs,
+                     const core::TypePtr &receiverType, uint16_t totalArgs,
                      core::Loc queryLoc) {
     fmt::memory_buffer result;
     auto shortName = maybeAlias.data(gs)->name.shortName(gs);
@@ -354,7 +354,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
         }
         if (argSym.type) {
             auto resultType =
-                core::source_generator::getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
+                core::source_generator::getResultType(gs, argSym.type, method, receiverType).show(gs);
             fmt::format_to(std::back_inserter(argBuf), "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(std::back_inserter(argBuf), "${{{}}}", nextTabstop++);
@@ -380,7 +380,7 @@ string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatch
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
                                           auto resultType = core::source_generator::getResultType(
-                                              gs, targ, method, receiverType, constraint);
+                                              gs, targ, method, receiverType);
                                           return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
@@ -1025,7 +1025,7 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
 unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
                                            core::MethodRef maybeAlias, const core::TypePtr &receiverType,
-                                           const core::TypeConstraint *constraint, core::Loc queryLoc,
+                                           core::Loc queryLoc,
                                            string_view prefix, size_t sortIdx, uint16_t totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
@@ -1055,7 +1055,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, constraint, totalArgs, queryLoc);
+        replacementText = methodSnippet(gs, dispatchResult, maybeAlias, receiverType, totalArgs, queryLoc);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
@@ -1206,18 +1206,9 @@ vector<unique_ptr<CompletionItem>> CompletionTask::getCompletionItems(LSPTypeche
             items.push_back(getCompletionItemForUntyped(gs, params.queryLoc, items.size(), "(call site is T.untyped)"));
         } else {
             for (auto &similarMethod : dedupedSimilarMethods) {
-                // Even though we might have one or more TypeConstraints on the DispatchResult that triggered this
-                // completion request, those constraints are the result of solving the current method. These new methods
-                // we're about to suggest are their own methods with their own type variables, so it doesn't make sense
-                // to use the old constraint for the new methods.
-                //
-                // What this means in practice is that the prettified `sig` in the completion documentation will show
-                // `T.type_parameter(:U)` instead of a solved type.
-                auto constr = nullptr;
-
                 items.push_back(getCompletionItemForMethod(
                     typechecker, *params.forMethods->dispatchResult, similarMethod.method, similarMethod.receiverType,
-                    constr, params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
+                    params.queryLoc, params.prefix, items.size(), params.forMethods->totalArgs));
             }
         }
     }

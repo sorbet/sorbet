@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet::core::source_generator {
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
-                            core::TypePtr receiver, const core::TypeConstraint *constr) {
+                            core::TypePtr receiver) {
     if (type == nullptr) {
         return core::Types::untypedUntracked();
     }
@@ -38,7 +38,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
     }
 
     if (!retType) {
-        retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
+        retType = getResultType(gs, method.data(gs)->resultType, method, receiver);
     }
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs, options), ")");
@@ -66,7 +66,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::MethodRef method, c
         if (!argSym.isSyntheticBlockArgument()) {
             typeAndArgNames.emplace_back(
                 absl::StrCat(argSym.argumentName(gs), ": ",
-                             getResultType(gs, argSym.type, method, receiver, constraint).show(gs, options)));
+                             getResultType(gs, argSym.type, method, receiver).show(gs, options)));
         }
     }
 
