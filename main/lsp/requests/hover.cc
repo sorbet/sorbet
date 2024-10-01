@@ -23,8 +23,9 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(move(contents), core::source_generator::prettyTypeForMethod(
-                                                        gs, component.method, component.receiver, options));
+            contents = absl::StrCat(
+                move(contents), "# ", component.method.show(gs), ":\n",
+                core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver, options));
         }
         start = start->secondary.get();
     }
