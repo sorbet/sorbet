@@ -29,6 +29,8 @@ string methodInfoString(const core::GlobalState &gs, const core::DispatchResult 
         start = start->secondary.get();
     }
 
+    contents = absl::StrCat(move(contents), "\n\n# result type:\n", dispatchResult.returnType.showWithMoreInfo(gs));
+
     return contents;
 }
 
