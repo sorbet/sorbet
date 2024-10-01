@@ -148,6 +148,8 @@ def main
   foo = BigFoo.new
   #            ^^^ hover: sig { void }
   #            ^^^ hover: private def initialize; end
+  BigFoo.new.itself
+  #            ^ hover: sig { returns(T.self_type) }
   hoo = BigFoo::LittleFoo1.new
   #                        ^^^ hover: sig { returns(T.untyped) }
   raise "error message"
