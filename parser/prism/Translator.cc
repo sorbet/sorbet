@@ -215,21 +215,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 args.emplace_back(std::move(blockPassNode));
             }
 
-            // Handle safe navigation operator
-            auto callOperatorLoc = &callNode->call_operator_loc;
-            std::string_view callOperator;
-            if (callOperatorLoc != nullptr) {
-                callOperator = std::string_view(reinterpret_cast<const char *>(callOperatorLoc->start),
-                                                callOperatorLoc->end - callOperatorLoc->start);
-            }
+            auto flags = static_cast<pm_call_node_flags>(callNode->base.flags);
 
             unique_ptr<parser::Node> sendNode;
 
-            if (callOperator == "&.") {
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) { // Handle conditional send, e.g. `a&.b`
                 sendNode = make_unique<parser::CSend>(parser.translateLocation(loc), std::move(receiver),
                                                       gs.enterNameUTF8(name), parser.translateLocation(messageLoc),
                                                       std::move(args));
-            } else {
+            } else { // Regular send, e.g. `a.b`
                 sendNode = make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver),
                                                      gs.enterNameUTF8(name), parser.translateLocation(messageLoc),
                                                      std::move(args));
