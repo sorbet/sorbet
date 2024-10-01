@@ -13,7 +13,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult, const unique_ptr<core::TypeConstraint> &constraint,
+                        const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
@@ -26,7 +26,7 @@ string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retTyp
             }
             contents = absl::StrCat(
                 move(contents), core::source_generator::prettyTypeForMethod(gs, component.method, component.receiver,
-                                                                            retType, constraint.get(), options));
+                                                                            retType, options));
         }
         start = start->secondary.get();
     }
@@ -95,7 +95,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 // the result type.
                 typeString = retType.showWithMoreInfo(gs);
             } else {
-                typeString = methodInfoString(gs, retType, *s->dispatchResult, s->dispatchResult->main.constr, options);
+                typeString = methodInfoString(gs, retType, *s->dispatchResult, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
@@ -122,7 +122,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
 
         typeString =
-            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, nullptr, options);
+            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
