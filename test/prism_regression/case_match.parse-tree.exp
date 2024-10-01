@@ -139,6 +139,28 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              MatchRest {
+                var = NULL
+              }
+              Integer {
+                val = "6"
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U ends with six!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }

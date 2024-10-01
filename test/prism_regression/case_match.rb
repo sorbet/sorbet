@@ -18,6 +18,8 @@ in 3, 4 # An array pattern without [], but otherwise similar to the one above
   puts "three and four!"
 in [5, *]
   puts "starts with five!"
+in [*, 6]
+  puts "ends with six!"
 end
 
 # no else
