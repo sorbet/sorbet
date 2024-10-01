@@ -30,23 +30,28 @@ def main
   foo = Foo.new
   v1 = foo.id(1)
 # ^ hover: Integer
-         # ^ hover: sig { params(a: Integer).returns(Integer) }
-         # ^ usage: id
+  #        ^ hover: sig { params(a: T.type_parameter(:A)).returns(T.type_parameter(:A)) }
+  #        ^ usage: id
   v2 = foo.id("1")
 # ^ hover: String
-         # ^ hover: sig { params(a: String).returns(String) }
-         # ^ usage: id
+  #        ^ hover: sig { params(a: T.type_parameter(:A)).returns(T.type_parameter(:A)) }
+  #        ^ usage: id
   v3 = Foo.id(1)
 # ^ hover: Integer
-         # ^ hover: sig { params(a: Integer).returns(Integer) }
-         # ^ usage: staticid
+  #        ^ hover: sig { params(a: T.type_parameter(:A)).returns(T.type_parameter(:A)) }
+  #        ^ usage: staticid
   v4 = Foo.id("1")
 # ^ hover: String
-         # ^ hover: sig { params(a: String).returns(String) }
-         # ^ usage: staticid
+  #        ^ hover: sig { params(a: T.type_parameter(:A)).returns(T.type_parameter(:A)) }
+  #        ^ usage: staticid
 
   v5 = Foo.block_id do
-    #       ^ hover: sig { params(blk: T.proc.returns(String)).returns(String) }
+    #       ^ hover-line: 2 sig do
+    #       ^ hover-line: 3   params(
+    #       ^ hover-line: 4     blk: T.proc.returns(T.type_parameter(:U))
+    #       ^ hover-line: 5   )
+    #       ^ hover-line: 6   .returns(T.type_parameter(:U))
+    #       ^ hover-line: 7 end
     #       ^ usage: block_id
     "1"
   end
