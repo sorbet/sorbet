@@ -999,7 +999,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
 core::TypePtr
 Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
                             int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            core::TypePtr &methodReturnType,
+                            const core::TypePtr &methodReturnType,
                             const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
     try {
         core::TypeAndOrigins tp;
@@ -1455,32 +1455,32 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
 
+                auto expectedType = methodReturnType;
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 if (methodReturnType == core::Types::void_()) {
-                    methodReturnType = core::Types::top();
+                    expectedType = core::Types::top();
                 }
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType,
+                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, expectedType,
                                                            core::UntypedMode::AlwaysCompatible,
                                                            errorDetailsCollector)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto owner = ctx.owner;
-                        e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
+                        e.setHeader("Expected `{}` but found `{}` for method result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
                         auto for_ = core::ErrorColors::format("result type of method `{}`", owner.name(ctx).show(ctx));
                         e.addErrorSection(
-                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, owner.loc(ctx), for_));
+                            core::TypeAndOrigins::explainExpected(ctx, expectedType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, methodReturnType,
+                        core::TypeErrorDiagnostics::explainTypeMismatch(ctx, e, errorDetailsCollector, expectedType,
                                                                         typeAndOrigin.type);
                         if (i.whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
-                            core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
+                            core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, expectedType,
                                                                          typeAndOrigin.type);
                         }
                     }
-                } else if (!methodReturnType.isUntyped() && !methodReturnType.isTop() &&
-                           typeAndOrigin.type.isUntyped()) {
+                } else if (!expectedType.isUntyped() && !expectedType.isTop() && typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
