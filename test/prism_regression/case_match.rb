@@ -31,6 +31,8 @@ in { a: 1, b: 2 }
   puts "contains a and b, and maybe other stuff!"
 in { c: 3, ** }
   puts "has c, and maybe other stuff!"
+in { d: 4, **nil }
+  puts "has d and nothing else!"
 end
 
 # no else

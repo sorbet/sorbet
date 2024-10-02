@@ -487,7 +487,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         break;
                     }
                     default:
-                        unreachable("Unexpected rest node type in Hash pattern.");
+                        sorbetElements.emplace_back(translate(prismRestNode));
                 }
             }
 
@@ -670,6 +670,12 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_NIL_NODE: { // The `nil` keyword
             return translateSimpleKeyword<pm_nil_node, parser::Nil>(node);
+        }
+        case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`, such as in `def foo(**nil)` or `h in { k: v, **nil}`
+            auto noKeywordsParamNode = reinterpret_cast<pm_no_keywords_parameter_node *>(node);
+            pm_location_t *loc = &noKeywordsParamNode->base.location;
+
+            return make_unique<parser::MatchNilPattern>(parser.translateLocation(loc));
         }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: { // An optional keyword parameter, like `def foo(a: 1)`
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
@@ -1018,7 +1024,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
         case PM_MULTI_TARGET_NODE:
-        case PM_NO_KEYWORDS_PARAMETER_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_PINNED_EXPRESSION_NODE:

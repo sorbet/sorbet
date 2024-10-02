@@ -272,6 +272,32 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+              Pair {
+                key = Symbol {
+                  val = <U d>
+                }
+                value = Integer {
+                  val = "4"
+                }
+              }
+              MatchNilPattern {
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U has d and nothing else!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }
