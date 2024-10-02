@@ -22,5 +22,15 @@ Begin {
       }
       body = NULL
     }
+    DefMethod {
+      name = <U foo>
+      args = Args {
+        args = [
+          Kwnilarg {
+          }
+        ]
+      }
+      body = NULL
+    }
   ]
 }

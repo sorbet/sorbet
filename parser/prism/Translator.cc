@@ -480,10 +480,15 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             translateMultiInto(sorbetElements, prismElements);
             if (prismRestNode != nullptr) {
+                auto loc = parser.translateLocation(&prismRestNode->location);
+
                 switch (PM_NODE_TYPE(prismRestNode)) {
                     case PM_ASSOC_SPLAT_NODE: {
-                        sorbetElements.emplace_back(make_unique<parser::MatchRest>(
-                            parser.translateLocation(&prismRestNode->location), nullptr));
+                        sorbetElements.emplace_back(make_unique<parser::MatchRest>(loc, nullptr));
+                        break;
+                    }
+                    case PM_NO_KEYWORDS_PARAMETER_NODE: {
+                        sorbetElements.emplace_back(make_unique<parser::MatchNilPattern>(loc));
                         break;
                     }
                     default:
@@ -573,6 +578,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateHash(node, reinterpret_cast<pm_keyword_hash_node *>(node)->elements, usedForKeywordArgs);
         }
         case PM_KEYWORD_REST_PARAMETER_NODE: { // A keyword rest parameter, like `def foo(**kwargs)`
+            // This doesn't include `**nil`, which is a `PM_NO_KEYWORDS_PARAMETER_NODE`.
+
             auto keywordRestParamNode = reinterpret_cast<pm_keyword_rest_parameter_node *>(node);
             pm_location_t *loc = &keywordRestParamNode->base.location;
 
@@ -672,10 +679,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<pm_nil_node, parser::Nil>(node);
         }
         case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`, such as in `def foo(**nil)` or `h in { k: v, **nil}`
-            auto noKeywordsParamNode = reinterpret_cast<pm_no_keywords_parameter_node *>(node);
-            pm_location_t *loc = &noKeywordsParamNode->base.location;
-
-            return make_unique<parser::MatchNilPattern>(parser.translateLocation(loc));
+            unreachable("PM_NO_KEYWORDS_PARAMETER_NODE is handled separately in `PM_HASH_PATTERN_NODE` and "
+                        "`PM_PARAMETERS_NODE`.");
         }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: { // An optional keyword parameter, like `def foo(a: 1)`
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
@@ -732,8 +737,25 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             translateMultiInto(params, keywords);
 
-            if (paramsNode->keyword_rest != nullptr)
-                params.emplace_back(translate(paramsNode->keyword_rest));
+            if (auto prismKwRestNode = paramsNode->keyword_rest; prismKwRestNode != nullptr) {
+                switch (PM_NODE_TYPE(prismKwRestNode)) {
+                    case PM_KEYWORD_REST_PARAMETER_NODE: // `**kwargs`
+                        [[fallthrough]];
+                    case PM_FORWARDING_PARAMETER_NODE: { // `**`
+                        params.emplace_back(translate(prismKwRestNode));
+                        break;
+                    }
+                    case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`
+                        auto noKeywordsParamNode = reinterpret_cast<pm_no_keywords_parameter_node *>(prismKwRestNode);
+                        pm_location_t *loc = &noKeywordsParamNode->base.location;
+
+                        params.emplace_back(make_unique<parser::Kwnilarg>(parser.translateLocation(loc)));
+                        break;
+                    }
+                    default:
+                        unreachable("Unexpected keyword_rest node type in Hash pattern.");
+                }
+            }
 
             if (paramsNode->block != nullptr)
                 params.emplace_back(translate(reinterpret_cast<pm_node *>(paramsNode->block)));
