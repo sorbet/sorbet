@@ -1573,7 +1573,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (args.block != nullptr) {
-        component.sendTp = resultType;
+        component.returnTypeBeforeSolve = resultType;
     }
     return result;
 }
@@ -1734,7 +1734,14 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
-            original.main.sendTp = wrapped;
+            // We want this to behave as if MetaType::dispatchCall were an Intrinsic--in an
+            // intrinsic, all you have to do is set `returnType` and it will be used used for the
+            // `returnTypeBeforeSolve` too.
+            //
+            // This technically only matters if the method call site has a block and the
+            // `initialize` method we dispatch to has a `T.type_parameter` in its `.returns`, which
+            // can't happen but we handle it anyways for robustness.
+            original.main.returnTypeBeforeSolve = wrapped;
             return original;
         }
         case Names::squareBrackets().rawId(): {
@@ -2212,8 +2219,6 @@ public:
             }
             res.main = move(dispatched.main);
         }
-
-        res.main.sendTp = instanceTy;
     }
 } Class_new;
 
@@ -2611,6 +2616,7 @@ private:
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
+        // TODO(jez) This only looks at the main component!
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
@@ -2656,6 +2662,7 @@ private:
             auto it = &dispatched;
             while (it != nullptr) {
                 if (it->main.method.exists()) {
+                    // TODO(jez) This only looks at the main component!
                     const auto &blockReturnType = it->main.blockReturnType;
                     if (blockReturnType) {
                         // TODO(jez) How should this interact with highlight untyped?

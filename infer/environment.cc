@@ -1148,12 +1148,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 if (send.link) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
+                        // TODO(jez) This only looks at the main component!
                         retainedResult->main.blockReturnType = core::Types::untyped(retainedResult->main.method);
                     }
                     if (!retainedResult->main.blockPreType) {
+                        // TODO(jez) This only looks at the main component!
                         retainedResult->main.blockPreType = core::Types::untyped(retainedResult->main.method);
                     }
-                    ENFORCE(retainedResult->main.sendTp);
+                    ENFORCE(retainedResult->main.returnTypeBeforeSolve);
                 }
 
                 // For `case x; when X ...`, desugar produces `X.===(x)`, but with
@@ -1284,7 +1286,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                         type = core::Types::untypedUntracked();
                     } else {
-                        type = core::Types::instantiate(ctx, main.sendTp, *main.constr);
+                        type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
                     }
                 } else {
                     type = i.link->result->returnType;
