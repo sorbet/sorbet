@@ -1,0 +1,6 @@
+Defined {
+  value = Const {
+    scope = NULL
+    name = <C <U Foo>>
+  }
+}

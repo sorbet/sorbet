@@ -392,6 +392,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::DefMethod>(parser.translateLocation(loc), parser.translateLocation(declLoc),
                                                   gs.enterNameUTF8(name), move(params), move(body));
         }
+        case PM_DEFINED_NODE: {
+            auto definedNode = reinterpret_cast<pm_defined_node *>(node);
+            pm_location_t *loc = &definedNode->base.location;
+
+            auto arg = translate(definedNode->value);
+
+            return make_unique<parser::Defined>(parser.translateLocation(loc).join(arg->loc), std::move(arg));
+        }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
             return translate(reinterpret_cast<pm_node *>(elseNode->statements));
@@ -1032,7 +1040,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
-        case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
