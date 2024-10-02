@@ -1458,6 +1458,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 auto expectedType = methodReturnType;
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i.what);
                 if (methodReturnType == core::Types::void_()) {
+                    if (i.whatLoc.exists() && !i.whatLoc.empty() && i.whatLoc != bind.loc) {
+                        if (auto e = ctx.beginError(i.whatLoc, core::errors::Infer::ExplicitReturnFromVoid)) {
+                            e.setHeader("Explicitly returning a value from a `{}` method", "void");
+                            e.replaceWith("Delete the returned value", ctx.locAt(i.whatLoc), "");
+                            if (loopCount > 0) {
+                                e.addErrorNote(
+                                    "Ruby's `{}` keyword inside a block or a proc (not a lambda) returns "
+                                    "from the enclosing method.\n"
+                                    "    To return control to the caller of the block, not of the method, use `{}`.",
+                                    "return", "next");
+                            }
+                        }
+                    }
                     expectedType = core::Types::top();
                 }
                 core::ErrorSection::Collector errorDetailsCollector;

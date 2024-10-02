@@ -4568,6 +4568,65 @@ result =
 T.reveal_type(result) # => T::Boolean
 ```
 
+## 7052
+
+Methods annotated with `.void` instead of a return method do not have a
+meaningful return. At runtime, any returned value will be replaced with a
+meaningless value. See
+[`returns` and `void`: Annotating return types](sigs.md#returns--void-annotating-return-types).
+
+To catch mistakes, Sorbet reports an error when using `return` with an explicit
+value in a `.void` method:
+
+```ruby
+sig { void }
+def foo
+  return 42 # ❌
+end
+```
+
+This error will **not** fire for implicit returns in `void` methods, so this is
+fine:
+
+```ruby
+sig { void }
+def foo
+  42
+end
+```
+
+Note that Ruby's `return` keyword returns control to the caller of the current
+method when inside a block or proc:
+
+```ruby
+def find_active_rules(rules)
+  enabled_rules = rules.select do |rule|
+    if !rule.enabled
+      return false # returns from `find_active_rules`!
+    end
+
+    rule.active
+  end
+end
+```
+
+To return control to the caller of a block or proc, use `next`:
+
+```ruby
+def find_active_rules(rules)
+  enabled_rules = rules.select do |rule|
+    if !rule.enabled
+      next false # returns to the next call of the block within `select`
+    end
+
+    rule.active
+  end
+end
+```
+
+This behavior of `return` does not apply within `lambda {...}` closures
+(`-> (...) {...}` is another syntax to define a lambda).
+
 <!-- -->
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
