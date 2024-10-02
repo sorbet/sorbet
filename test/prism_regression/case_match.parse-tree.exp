@@ -52,6 +52,77 @@ Begin {
     CaseMatch {
       expr = Send {
         receiver = NULL
+        method = <U array_like_thing>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U empty!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U one and two!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              Integer {
+                val = "3"
+              }
+              Integer {
+                val = "4"
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U three and four!>
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = NULL
+    }
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
         method = <U foo>
         args = [
         ]

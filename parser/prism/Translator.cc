@@ -128,6 +128,19 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Array>(parser.translateLocation(loc), std::move(sorbetElements));
         }
+        case PM_ARRAY_PATTERN_NODE: { // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
+            auto arrayPatternNode = reinterpret_cast<pm_array_pattern_node *>(node);
+            pm_location_t *loc = &arrayPatternNode->base.location;
+
+            auto prismPrefixNodes = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
+
+            NodeVec sorbetElements{};
+            sorbetElements.reserve(prismPrefixNodes.size());
+
+            translateMultiInto(sorbetElements, prismPrefixNodes);
+
+            return make_unique<parser::ArrayPattern>(parser.translateLocation(loc), std::move(sorbetElements));
+        }
         case PM_ASSOC_NODE: { // A key-value pair in a Hash literal, e.g. the `a: 1` in `{ a: 1 }
             auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
             pm_location_t *loc = &assocNode->base.location;
@@ -906,7 +919,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
-        case PM_ARRAY_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_CALL_TARGET_NODE:
