@@ -2212,8 +2212,6 @@ public:
             }
             res.main = move(dispatched.main);
         }
-
-        res.main.sendTp = instanceTy;
     }
 } Class_new;
 
