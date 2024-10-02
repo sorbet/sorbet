@@ -245,6 +245,33 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+              Pair {
+                key = Symbol {
+                  val = <U c>
+                }
+                value = Integer {
+                  val = "3"
+                }
+              }
+              MatchRest {
+                var = NULL
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U has c, and maybe other stuff!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }

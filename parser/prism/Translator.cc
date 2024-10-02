@@ -163,8 +163,9 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Pair>(parser.translateLocation(loc), std::move(key), std::move(value));
         }
         case PM_ASSOC_SPLAT_NODE: { // A Hash splat, e.g. `**h` in `f(a: 1, **h)` and `{ k: v, **h }`
-            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateHash()`, because its "
-                        "translation depends on whether its used in a hash or in a method call");
+            unreachable("PM_ASSOC_SPLAT_NODE is handled separately in `Translator::translateHash()` and "
+                        "`PM_HASH_PATTERN_NODE`, because its translation depends on whether its used in a "
+                        "Hash literal, Hash pattern, or method call.");
         }
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = reinterpret_cast<pm_begin_node *>(node);
@@ -472,11 +473,23 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &hashPatternNode->base.location;
 
             auto prismElements = absl::MakeSpan(hashPatternNode->elements.nodes, hashPatternNode->elements.size);
+            auto prismRestNode = hashPatternNode->rest;
 
             NodeVec sorbetElements{};
-            sorbetElements.reserve(prismElements.size());
+            sorbetElements.reserve(prismElements.size() + (prismRestNode != nullptr ? 1 : 0));
 
             translateMultiInto(sorbetElements, prismElements);
+            if (prismRestNode != nullptr) {
+                switch (PM_NODE_TYPE(prismRestNode)) {
+                    case PM_ASSOC_SPLAT_NODE: {
+                        sorbetElements.emplace_back(make_unique<parser::MatchRest>(
+                            parser.translateLocation(&prismRestNode->location), nullptr));
+                        break;
+                    }
+                    default:
+                        unreachable("Unexpected rest node type in Hash pattern.");
+                }
+            }
 
             return make_unique<parser::HashPattern>(parser.translateLocation(loc), std::move(sorbetElements));
         }
