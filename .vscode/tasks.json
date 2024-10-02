@@ -1,0 +1,69 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build with Prism",
+            "type": "shell",
+            "command": "./bazel build //main:sorbet --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run all Prism tests",
+            "type": "shell",
+            "command": "./bazel test //test:prism --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism tests",
+            "type": "shell",
+            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Typecheck with Prism",
+            "type": "shell",
+            "command": "bazel-bin/main/sorbet --parser=prism ${input:file_path}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": ["Build with Prism"],
+            "presentation": {
+                "reveal": "always"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "test_name",
+            "type": "promptString",
+            "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
+        },
+        {
+            "id": "file_path",
+            "type": "promptString",
+            "default": "test.rb",
+            "description": "Enter the file path to typecheck, e.g. test.rb",
+        }
+    ]
+}
