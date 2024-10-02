@@ -161,6 +161,31 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = FindPattern {
+            elements = [
+              MatchRest {
+                var = NULL
+              }
+              Integer {
+                val = "7"
+              }
+              MatchRest {
+                var = NULL
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U contains a seven!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }

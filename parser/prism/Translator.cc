@@ -396,6 +396,38 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FALSE_NODE: { // The `false` keyword
             return translateSimpleKeyword<pm_false_node, parser::False>(node);
         }
+        case PM_FIND_PATTERN_NODE: { // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
+            auto findPatternNode = reinterpret_cast<pm_find_pattern_node *>(node);
+            pm_location_t *loc = &findPatternNode->base.location;
+
+            auto prismLeadingSplat = findPatternNode->left;
+            auto prismMiddleNodes = absl::MakeSpan(findPatternNode->requireds.nodes, findPatternNode->requireds.size);
+            auto prismTrailingSplat = findPatternNode->right;
+
+            NodeVec sorbetElements{};
+            sorbetElements.reserve(1 + prismMiddleNodes.size() + (prismTrailingSplat != nullptr ? 1 : 0));
+
+            if (prismLeadingSplat != nullptr && PM_NODE_TYPE_P(prismLeadingSplat, PM_SPLAT_NODE)) {
+                auto prismSplatNode = reinterpret_cast<pm_splat_node *>(prismLeadingSplat);
+                auto expr = translate(prismSplatNode->expression);
+                auto splatLoc = &prismSplatNode->base.location;
+                sorbetElements.emplace_back(
+                    make_unique<MatchRest>(parser.translateLocation(splatLoc), std::move(expr)));
+            }
+
+            translateMultiInto(sorbetElements, prismMiddleNodes);
+
+            if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
+                // TODO: handle PM_NODE_TYPE_P(prismTrailingSplat, PM_MISSING_NODE)
+                auto prismSplatNode = reinterpret_cast<pm_splat_node *>(prismTrailingSplat);
+                auto expr = translate(prismSplatNode->expression);
+                auto splatLoc = &prismSplatNode->base.location;
+                sorbetElements.emplace_back(
+                    make_unique<MatchRest>(parser.translateLocation(splatLoc), std::move(expr)));
+            }
+
+            return make_unique<parser::FindPattern>(parser.translateLocation(loc), std::move(sorbetElements));
+        }
         case PM_FLOAT_NODE: { // A floating point number literal, e.g. `1.23`
             auto floatNode = reinterpret_cast<pm_float_node *>(node);
             pm_location_t *loc = &floatNode->base.location;
@@ -941,7 +973,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
-        case PM_FIND_PATTERN_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:

@@ -20,6 +20,8 @@ in [5, *]
   puts "starts with five!"
 in [*, 6]
   puts "ends with six!"
+in [*, 7, *] # A "find pattern"
+  puts "contains a seven!"
 end
 
 # no else
