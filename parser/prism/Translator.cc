@@ -246,6 +246,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
             return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
+        case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
+            auto caseMatchNode = reinterpret_cast<pm_case_match_node *>(node);
+            pm_location_t *loc = &caseMatchNode->base.location;
+
+            auto predicate = translate(caseMatchNode->predicate);
+            auto sorbetConditions = translateMulti(caseMatchNode->conditions);
+            auto consequent = translate(reinterpret_cast<pm_node_t *>(caseMatchNode->consequent));
+
+            return make_unique<parser::CaseMatch>(parser.translateLocation(loc), std::move(predicate),
+                                                  std::move(sorbetConditions), std::move(consequent));
+        }
         case PM_CASE_NODE: { // A classic `case` statement that only uses `when` (and not pattern matching with `in`)
             auto caseNode = reinterpret_cast<pm_case_node *>(node);
             pm_location_t *loc = &caseNode->base.location;
@@ -409,6 +420,18 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::If>(parser.translateLocation(loc), std::move(predicate), std::move(ifTrue),
                                            std::move(ifFalse));
+        }
+        case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
+            auto inNode = reinterpret_cast<pm_in_node *>(node);
+            auto *loc = &inNode->base.location;
+
+            auto sorbetPattern = translate(inNode->pattern);
+
+            auto inlineIfSingle = true;
+            auto statements = translateStatements(inNode->statements, inlineIfSingle);
+
+            return make_unique<parser::InPattern>(parser.translateLocation(loc), std::move(sorbetPattern), nullptr,
+                                                  std::move(statements));
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
@@ -888,7 +911,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
-        case PM_CASE_MATCH_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
         case PM_CONSTANT_PATH_TARGET_NODE:
         case PM_CONSTANT_TARGET_NODE:
@@ -903,7 +925,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
-        case PM_IN_NODE:
         case PM_INDEX_TARGET_NODE:
         case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:

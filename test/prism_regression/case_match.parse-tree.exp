@@ -1,0 +1,86 @@
+Begin {
+  stmts = [
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = Integer {
+            val = "1"
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U one!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = Integer {
+            val = "2"
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U two!>
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = Send {
+        receiver = NULL
+        method = <U puts>
+        args = [
+          String {
+            val = <U Who knows!>
+          }
+        ]
+      }
+    }
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = Integer {
+            val = "1"
+          }
+          guard = NULL
+          body = Begin {
+            stmts = [
+              String {
+                val = <U one!>
+              }
+              Send {
+                receiver = NULL
+                method = <U puts>
+                args = [
+                  String {
+                    val = <U surprise, multi-line!>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = NULL
+    }
+  ]
+}
