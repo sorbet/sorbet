@@ -137,15 +137,24 @@ class LocSearchWalk {
         }
     }
 
-    void skipLoc(core::LocOffsets loc) {
+    // Skip any node whose loc is contained by this loc
+    void skipLocRange(core::LocOffsets loc) {
         if (loc.exists()) {
-            skippedLocs.push_back(loc);
+            skippedLocsRange.push_back(loc);
+        }
+    }
+    //
+    // Skip any loc whose loc exactly matches this loc
+    void skipLocExact(core::LocOffsets loc) {
+        if (loc.exists()) {
+            skippedLocsExact.push_back(loc);
         }
     }
 
     // NOTE: Might want to profile and switch to UnorderedSet.
     bool shouldSkipLoc(core::LocOffsets loc) {
-        return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
+        return absl::c_find_if(skippedLocsRange, [loc](auto l) { return l.contains(loc); }) != skippedLocsRange.end() ||
+               absl::c_find(skippedLocsExact, loc) != skippedLocsExact.end();
     }
 
 public:
@@ -167,7 +176,8 @@ public:
     // - an endless method
     // - the var for a rescueCase
     // This vector stores the locs for those nodes, so that in preTransformExpression, we can skip them.
-    std::vector<core::LocOffsets> skippedLocs;
+    std::vector<core::LocOffsets> skippedLocsRange;
+    std::vector<core::LocOffsets> skippedLocsExact;
 
     LocSearchWalk(core::Loc targetLoc)
         : targetLoc(targetLoc), enclosingScopeLoc(core::LocOffsets::none()), matchingNode(nullptr),
@@ -212,13 +222,13 @@ public:
         enclosingMethodStack.push_back(&tree);
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (!methodDef.args.empty()) {
-            skipLoc(methodDef.args.front().loc().join(methodDef.args.back().loc()));
+            skipLocRange(methodDef.args.front().loc().join(methodDef.args.back().loc()));
         }
         if (methodDef.loc.endPos() == methodDef.rhs.loc().endPos()) {
             // methodDef.loc.endPos() represent the location right after the `end`,
             // while methodDef.rhs.loc().endPos() is the location right before the `end`.
             // If both are the same, that means that this is an endless method.
-            skipLoc(methodDef.rhs.loc());
+            skipLocRange(methodDef.rhs.loc());
         } else {
             updateEnclosingScope(tree, methodDef.rhs.loc());
         }
@@ -231,14 +241,14 @@ public:
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
         if (!block.args.empty()) {
-            skipLoc(block.args.front().loc().join(block.args.back().loc()));
+            skipLocRange(block.args.front().loc().join(block.args.back().loc()));
         }
         updateEnclosingScope(tree, block.body.loc());
     }
 
     void preTransformAssign(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
-        skipLoc(assign.lhs.loc());
+        skipLocRange(assign.lhs.loc());
     }
 
     void preTransformIf(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -257,15 +267,23 @@ public:
     void preTransformRescueCase(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(tree);
         updateEnclosingScope(tree, rescueCase.body.loc());
-        skipLoc(rescueCase.var.loc());
+        skipLocRange(rescueCase.var.loc());
         for (auto &exception : rescueCase.exceptions) {
-            skipLoc(exception.loc());
+            skipLocRange(exception.loc());
         }
     }
 
     void preTransformWhile(core::Context ctx, const ast::ExpressionPtr &tree) {
         auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
         updateEnclosingScope(tree, while_.body.loc());
+    }
+
+    void preTransformSend(core::Context ctx, const ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.fun == core::Names::orAsgn() || send.fun == core::Names::andAsgn() ||
+            send.fun == core::Names::opAsgn()) {
+            skipLocExact(send.getPosArg(0).loc());
+        }
     }
 };
 
@@ -298,7 +316,8 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     } else {
         enclosingClassOrMethod = std::move(*walk.matchingNodeEnclosingClass);
     }
-    skippedLocs = walk.skippedLocs;
+    skippedLocsRange = walk.skippedLocsRange;
+    skippedLocsExact = walk.skippedLocsExact;
 
     auto whereToInsertLoc = core::Loc(file, whereToInsert.copyWithZeroLength());
     auto [startOfLine, numSpaces] = whereToInsertLoc.findStartOfLine(gs);
@@ -337,13 +356,15 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
 class ExpressionPtrSearchWalk {
     ast::ExpressionPtr *targetNode;
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
-    std::vector<core::LocOffsets> skippedLocs;
+    std::vector<core::LocOffsets> skippedLocsRange;
+    std::vector<core::LocOffsets> skippedLocsExact;
     const std::shared_ptr<spdlog::logger> logger;
     const core::Loc selectionLoc;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
     bool shouldSkipLoc(core::LocOffsets loc) {
-        return absl::c_find_if(skippedLocs, [loc](auto l) { return l.contains(loc); }) != skippedLocs.end();
+        return absl::c_find_if(skippedLocsRange, [loc](auto l) { return l.contains(loc); }) != skippedLocsRange.end() ||
+               absl::c_find(skippedLocsExact, loc) != skippedLocsExact.end();
     }
 
     void computeLCA(const core::LocOffsets matchLoc) {
@@ -413,9 +434,11 @@ class ExpressionPtrSearchWalk {
 public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
-    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocs,
+    ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, std::vector<core::LocOffsets> skippedLocsRange,
+                            std::vector<core::LocOffsets> skippedLocsExact,
                             const std::shared_ptr<spdlog::logger> logger, const core::Loc selectionLoc)
-        : targetNode(matchingNode), skippedLocs(skippedLocs), logger(logger), selectionLoc(selectionLoc) {}
+        : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
+          logger(logger), selectionLoc(selectionLoc) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (!tree.loc().exists()) {
@@ -505,7 +528,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocs, config.logger, selectionLoc);
+    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocsRange, skippedLocsExact, config.logger, selectionLoc);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
 
