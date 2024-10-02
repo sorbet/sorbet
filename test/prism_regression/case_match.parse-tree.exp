@@ -192,6 +192,65 @@ Begin {
     CaseMatch {
       expr = Send {
         receiver = NULL
+        method = <U hash_like_thing>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U empty!>
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = HashPattern {
+            pairs = [
+              Pair {
+                key = Symbol {
+                  val = <U a>
+                }
+                value = Integer {
+                  val = "1"
+                }
+              }
+              Pair {
+                key = Symbol {
+                  val = <U b>
+                }
+                value = Integer {
+                  val = "2"
+                }
+              }
+            ]
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U contains a and b, and maybe other stuff!>
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = NULL
+    }
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
         method = <U foo>
         args = [
         ]

@@ -24,6 +24,13 @@ in [*, 7, *] # A "find pattern"
   puts "contains a seven!"
 end
 
+case hash_like_thing
+in {}
+  puts "empty!"
+in { a: 1, b: 2 }
+  puts "contains a and b, and maybe other stuff!"
+end
+
 # no else
 case foo
 in 1

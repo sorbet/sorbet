@@ -467,6 +467,19 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto usedForKeywordArgs = false;
             return translateHash(node, reinterpret_cast<pm_hash_node *>(node)->elements, usedForKeywordArgs);
         }
+        case PM_HASH_PATTERN_NODE: { // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
+            auto hashPatternNode = reinterpret_cast<pm_hash_pattern_node *>(node);
+            pm_location_t *loc = &hashPatternNode->base.location;
+
+            auto prismElements = absl::MakeSpan(hashPatternNode->elements.nodes, hashPatternNode->elements.size);
+
+            NodeVec sorbetElements{};
+            sorbetElements.reserve(prismElements.size());
+
+            translateMultiInto(sorbetElements, prismElements);
+
+            return make_unique<parser::HashPattern>(parser.translateLocation(loc), std::move(sorbetElements));
+        }
         case PM_IF_NODE: { // An `if` statement or modifier, like `if cond; ...; end` or `a.b if cond`
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
             auto *loc = &ifNode->base.location;
@@ -976,7 +989,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:
-        case PM_HASH_PATTERN_NODE:
         case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
