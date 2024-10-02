@@ -1734,6 +1734,13 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
+            // We want this to behave as if MetaType::dispatchCall were an Intrinsic--in an
+            // intrinsic, all you have to do is set `returnType` and it will be used used for the
+            // `sendTp` too.
+            //
+            // This technically only matters if the method call site has a block and the
+            // `initialize` method we dispatch to has a `T.type_parameter` in its `.returns`, which
+            // can't happen but we handle it anyways for robustness.
             original.main.sendTp = wrapped;
             return original;
         }
