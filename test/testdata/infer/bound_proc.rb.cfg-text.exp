@@ -763,15 +763,10 @@ bb4[firstDead=-1](<self>: String, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$9: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: String, <returnMethodTemp>$2: String, <exceptionValue>$3: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: String, <returnMethodTemp>$2: T.nilable(String), <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$22: T.nilable(TrueClass)):
@@ -840,15 +835,10 @@ bb4[firstDead=-1](<self>: Float, <magic>$11: T.class_of(<Magic>)):
     <cfgAlias>$9: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$9: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: String, <returnMethodTemp>$2: String, <exceptionValue>$3: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: T.any(Float, String, Integer), <returnMethodTemp>$2: T.nilable(T.any(String, Integer)), <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$26: T.nilable(TrueClass)):
@@ -904,6 +894,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -927,19 +919,12 @@ bb4[firstDead=-1](<self>: String, <magic>$15: T.class_of(<Magic>)):
     <cfgAlias>$13: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$13: T.class_of(T).reveal_type(<self>: String)
     <exceptionValue>$7: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$7 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$7 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: String):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.nilable(String), <gotoDeadTemp>$23: T.nilable(TrueClass)):
-    <gotoDeadTemp>$23 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: String, <gotoDeadTemp>$23: NilClass):
+    <gotoDeadTemp>$23 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -948,16 +933,18 @@ bb7[firstDead=-1](<self>: String, <exceptionValue>$7: StandardError, <magic>$15:
     <keepForCfgTemp>$16: Sorbet::Private::Static::Void = <magic>$15: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$7: NilClass)
     <cfgAlias>$21: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: String = <cfgAlias>$21: T.class_of(T).reveal_type(<self>: String)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$23 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.nilable(String)):
     <gotoDeadTemp>$23: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$23 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: String):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: String
     <unconditional> -> bb1
@@ -975,6 +962,8 @@ bb0[firstDead=-1]():
 # backedges
 # - bb3
 # - bb10
+# - bb11
+# - bb12
 bb1[firstDead=-1]():
     <unconditional> -> bb1
 
@@ -1023,21 +1012,13 @@ bb8[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Sta
     <cfgAlias>$15: T.class_of(T) = alias <C T>
     <blockReturnTemp>$8: Integer = <cfgAlias>$15: T.class_of(T).reveal_type(<self>: Integer)
     <exceptionValue>$9: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb9)
+    <exceptionValue>$9 -> (T.nilable(Exception) ? bb7 : bb10)
 
 # backedges
 # - bb8
-bb9[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: Integer, <gotoDeadTemp>$25: NilClass):
+bb10[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: Integer, <gotoDeadTemp>$25: NilClass):
     # outerLoops: 1
-    <unconditional> -> bb10
-
-# backedges
-# - bb9
-# - bb11
-# - bb12
-bb10[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$25: T.nilable(TrueClass)):
-    # outerLoops: 1
-    <gotoDeadTemp>$25 -> (T.nilable(TrueClass) ? bb1 : bb13)
+    <gotoDeadTemp>$25 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
@@ -1047,17 +1028,19 @@ bb11[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::St
     <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$9: NilClass)
     <cfgAlias>$23: T.class_of(T) = alias <C T>
     <blockReturnTemp>$8: Integer = <cfgAlias>$23: T.class_of(T).reveal_type(<self>: Integer)
-    <unconditional> -> bb10
+    <gotoDeadTemp>$25 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
 bb12[firstDead=-1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: T.nilable(Integer), <castTemp>$13: T.nilable(Integer)):
     # outerLoops: 1
     <gotoDeadTemp>$25: TrueClass = true
-    <unconditional> -> bb10
+    <gotoDeadTemp>$25 -> (TrueClass ? bb1 : bb13)
 
 # backedges
 # - bb10
+# - bb11
+# - bb12
 bb13[firstDead=1](<self>: Integer, <block-pre-call-temp>$6: Sorbet::Private::Static::Void, <selfRestore>$7: T.class_of(Rescues), <blockReturnTemp>$8: Integer, <castTemp>$13: T.nilable(Integer), <gotoDeadTemp>$25: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$27: T.noreturn = blockreturn<takes_block> <blockReturnTemp>$8: Integer

@@ -8,6 +8,7 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb9
+# - bb11
 # - bb12
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -49,18 +50,12 @@ bb5[firstDead=5](<self>: Object, try: Integer(0), <magic>$13: T.class_of(<Magic>
 # - bb5
 bb7[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$13: T.class_of(<Magic>)):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb8)
+    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb9)
 
 # backedges
 # - bb7
-bb8[firstDead=-1](<returnMethodTemp>$2: NilClass):
-    <unconditional> -> bb9
-
-# backedges
-# - bb8
-# - bb11
-bb9[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$24: T.nilable(TrueClass)):
-    <gotoDeadTemp>$24 -> (T.nilable(TrueClass) ? bb1 : bb12)
+bb9[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$24: NilClass):
+    <gotoDeadTemp>$24 -> (NilClass ? bb1 : bb12)
 
 # backedges
 # - bb3
@@ -77,10 +72,11 @@ bb10[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 # - bb3
 bb11[firstDead=-1](<returnMethodTemp>$2: NilClass):
     <gotoDeadTemp>$24: TrueClass = true
-    <unconditional> -> bb9
+    <gotoDeadTemp>$24 -> (TrueClass ? bb1 : bb12)
 
 # backedges
 # - bb9
+# - bb11
 bb12[firstDead=1](<returnMethodTemp>$2: NilClass):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1

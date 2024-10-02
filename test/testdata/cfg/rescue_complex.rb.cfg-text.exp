@@ -172,6 +172,9 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
+# - bb10
 # - bb11
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -189,20 +192,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb9
-# - bb10
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: T.nilable(TrueClass)):
-    <gotoDeadTemp>$16 -> (T.nilable(TrueClass) ? bb1 : bb11)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb3
@@ -210,7 +205,7 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.baz()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb3
@@ -225,16 +220,19 @@ bb9[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$11: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb11)
 
 # backedges
 # - bb8
 bb10[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$16: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb11)
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
+# - bb10
 bb11[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -251,6 +249,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
 # - bb10
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -268,19 +268,12 @@ bb3[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb9
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: T.nilable(TrueClass)):
-    <gotoDeadTemp>$13 -> (T.nilable(TrueClass) ? bb1 : bb10)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: NilClass):
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
@@ -290,7 +283,7 @@ bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>))
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: Exception = baz
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
@@ -303,10 +296,12 @@ bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped, <exceptionValue>$3: Exception
 # - bb8
 bb9[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$13: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb10)
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
 bb10[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -323,6 +318,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
 # - bb10
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -340,19 +337,12 @@ bb3[firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>))
 bb4[firstDead=-1](<self>: TestRescue, <magic>$6: T.class_of(<Magic>)):
     <statTemp>$3: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1]():
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb9
-bb6[firstDead=-1](baz: T.nilable(T.any(LoadError, SocketError)), <gotoDeadTemp>$14: T.nilable(TrueClass)):
-    <gotoDeadTemp>$14 -> (T.nilable(TrueClass) ? bb1 : bb10)
+bb6[firstDead=-1](baz: NilClass, <gotoDeadTemp>$14: NilClass):
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
@@ -361,7 +351,7 @@ bb7[firstDead=-1](<exceptionValue>$4: T.any(LoadError, SocketError), <magic>$6: 
     baz: T.any(LoadError, SocketError) = <exceptionValue>$4
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb10)
 
 # backedges
 # - bb3
@@ -374,10 +364,12 @@ bb8[firstDead=-1](<exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>))
 # - bb8
 bb9[firstDead=-1]():
     <gotoDeadTemp>$14: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb10)
 
 # backedges
 # - bb6
+# - bb7
+# - bb9
 bb10[firstDead=3](baz: T.nilable(T.any(LoadError, SocketError))):
     <cfgAlias>$17: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: T.nilable(T.any(LoadError, SocketError)) = <cfgAlias>$17: T.class_of(T).reveal_type(baz: T.nilable(T.any(LoadError, SocketError)))
@@ -403,6 +395,8 @@ bb0[firstDead=-1]():
 # backedges
 # - bb3
 # - bb10
+# - bb11
+# - bb12
 bb1[firstDead=-1]():
     <unconditional> -> bb1
 
@@ -445,21 +439,13 @@ bb8[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: So
     # outerLoops: 1
     <blockReturnTemp>$13: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$15: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$15 -> (T.nilable(Exception) ? bb7 : bb9)
+    <exceptionValue>$15 -> (T.nilable(Exception) ? bb7 : bb10)
 
 # backedges
 # - bb8
-bb9[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: NilClass):
+bb10[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: NilClass):
     # outerLoops: 1
-    <unconditional> -> bb10
-
-# backedges
-# - bb9
-# - bb11
-# - bb12
-bb10[firstDead=-1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: T.nilable(TrueClass)):
-    # outerLoops: 1
-    <gotoDeadTemp>$22 -> (T.nilable(TrueClass) ? bb1 : bb13)
+    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
@@ -468,17 +454,19 @@ bb11[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: S
     ex: StandardError = <exceptionValue>$15
     <exceptionValue>$15: NilClass = nil
     <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$15: NilClass)
-    <unconditional> -> bb10
+    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
 bb12[firstDead=-1](<self>: TestRescue, ex: NilClass, <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped):
     # outerLoops: 1
     <gotoDeadTemp>$22: TrueClass = true
-    <unconditional> -> bb10
+    <gotoDeadTemp>$22 -> (TrueClass ? bb1 : bb13)
 
 # backedges
 # - bb10
+# - bb11
+# - bb12
 bb13[firstDead=1](<self>: TestRescue, ex: T.nilable(StandardError), <block-pre-call-temp>$11: Sorbet::Private::Static::Void, <selfRestore>$12: TestRescue, <blockReturnTemp>$13: T.untyped, <gotoDeadTemp>$22: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$24: T.noreturn = blockreturn<loop> <blockReturnTemp>$13: T.untyped
@@ -496,6 +484,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -515,19 +505,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: T.nilable(TrueClass)):
-    <gotoDeadTemp>$16 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -537,16 +520,18 @@ bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>))
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$14: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$16: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -563,6 +548,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -582,19 +569,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: T.nilable(TrueClass)):
-    <gotoDeadTemp>$16 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -604,16 +584,18 @@ bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>))
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$14: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$16: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -630,6 +612,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -649,19 +633,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: T.nilable(TrueClass)):
-    <gotoDeadTemp>$16 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$16: NilClass):
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -671,16 +648,18 @@ bb7[firstDead=-1](<exceptionValue>$3: Exception, <magic>$5: T.class_of(<Magic>))
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <cfgAlias>$14: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: Exception = <cfgAlias>$14: T.class_of(T).reveal_type(e: Exception)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$16: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$16 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -714,15 +693,10 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$14: T.nilable(TrueClass)):
@@ -763,6 +737,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -779,35 +755,30 @@ bb3[firstDead=-1](<exceptionValue>$3: Exception, <magic>$4: T.class_of(<Magic>))
 # - bb0
 bb4[firstDead=-1](<magic>$4: T.class_of(<Magic>)):
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1]():
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<gotoDeadTemp>$9: T.nilable(TrueClass)):
-    <gotoDeadTemp>$9 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<gotoDeadTemp>$9: NilClass):
+    <gotoDeadTemp>$9 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb7[firstDead=-1](<exceptionValue>$3: LoadError, <magic>$4: T.class_of(<Magic>)):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: Sorbet::Private::Static::Void = <magic>$4: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
-    <unconditional> -> bb6
+    <gotoDeadTemp>$9 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1]():
     <gotoDeadTemp>$9: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$9 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1]():
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
@@ -824,6 +795,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -841,19 +814,12 @@ bb3[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <exceptionValue>$
 bb4[firstDead=-1](<self>: TestRescue, <magic>$7: T.class_of(<Magic>)):
     <statTemp>$4: T.untyped = <self>: TestRescue.bar()
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: T.nilable(TrueClass)):
-    <gotoDeadTemp>$12 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped, <gotoDeadTemp>$12: NilClass):
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -861,16 +827,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$5: StandardError, <magic>
     <exceptionValue>$5: NilClass = nil
     <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
     <statTemp>$4: NilClass = nil
-    <unconditional> -> bb6
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<self>: TestRescue, <statTemp>$4: T.untyped):
     <gotoDeadTemp>$12: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=2](<self>: TestRescue, <statTemp>$4: T.untyped):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
@@ -888,6 +856,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -905,19 +875,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -925,16 +888,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$11: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -951,6 +916,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -968,19 +935,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -988,16 +948,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: Exception, <magic>$5: 
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$11: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -1081,6 +1043,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1098,19 +1062,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1118,16 +1075,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.foo()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$11: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -1144,6 +1103,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1161,19 +1122,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$11: NilClass):
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1181,16 +1135,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$11: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -1208,6 +1164,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1225,19 +1183,12 @@ bb3[firstDead=-1](<self>: TestRescue, <returnMethodTemp>$2: T.untyped, <exceptio
 bb4[firstDead=-1](<self>: TestRescue, <magic>$5: T.class_of(<Magic>), @ex$11: T.nilable(StandardError)):
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: T.nilable(TrueClass)):
-    <gotoDeadTemp>$13 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$13: NilClass):
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1247,16 +1198,18 @@ bb7[firstDead=-1](<self>: TestRescue, <exceptionValue>$3: StandardError, <magic>
     <keepForCfgTemp>$6: Sorbet::Private::Static::Void = <magic>$5: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     @ex$11: StandardError = <rescueTemp>$2
     <returnMethodTemp>$2: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<returnMethodTemp>$2: T.untyped):
     <gotoDeadTemp>$13: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=1](<returnMethodTemp>$2: T.untyped):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -1274,6 +1227,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1291,19 +1246,12 @@ bb3[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <statTemp>$4: T.un
 bb4[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <magic>$7: T.class_of(<Magic>)):
     <statTemp>$4: T.untyped = <self>: TestRescue.meth()
     <exceptionValue>$5: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$5 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$13: T.nilable(TrueClass)):
-    <gotoDeadTemp>$13 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped, <gotoDeadTemp>$13: NilClass):
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1311,16 +1259,18 @@ bb7[firstDead=-1](<self>: TestRescue, <statTemp>$3: NilClass, <exceptionValue>$5
     <exceptionValue>$5: NilClass = nil
     <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
     <statTemp>$4: T.untyped = <self>: TestRescue.bar()
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: T.untyped):
     <gotoDeadTemp>$13: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=3](<statTemp>$3: NilClass, <statTemp>$4: T.untyped):
     foo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: T.untyped)
     <returnMethodTemp>$2: T.untyped = foo
@@ -1339,6 +1289,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1357,19 +1309,12 @@ bb4[firstDead=2](<self>: TestRescue, <magic>$7: T.class_of(<Magic>)):
     <statTemp>$5: T.untyped = <self>: TestRescue.bar()
     foo: T.noreturn = <self>: TestRescue.raise(<statTemp>$5: T.untyped)
     <exceptionValue>$3 = <get-current-exception>
-    <exceptionValue>$3 -> (<nullptr> ? bb3 : bb5)
+    <exceptionValue>$3 -> (<nullptr> ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=0](foo: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](foo: NilClass, <gotoDeadTemp>$12: T.nilable(TrueClass)):
-    <gotoDeadTemp>$12 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=0](foo: NilClass, <gotoDeadTemp>$12: NilClass):
+    <gotoDeadTemp>$12 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1377,16 +1322,18 @@ bb7[firstDead=-1](<exceptionValue>$3: StandardError, <magic>$7: T.class_of(<Magi
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$8: Sorbet::Private::Static::Void = <magic>$7: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$3: NilClass)
     foo: NilClass = nil
-    <unconditional> -> bb6
+    <gotoDeadTemp>$12 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](foo: NilClass):
     <gotoDeadTemp>$12: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=2](foo: NilClass):
     <returnMethodTemp>$2: NilClass = foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
@@ -1405,6 +1352,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1423,19 +1372,12 @@ bb4[firstDead=2](<self>: TestRescue, <statTemp>$3: NilClass, <magic>$9: T.class_
     <statTemp>$7: T.untyped = <self>: TestRescue.bar()
     <statTemp>$4: T.noreturn = <self>: TestRescue.raise(<statTemp>$7: T.untyped)
     <exceptionValue>$5 = <get-current-exception>
-    <exceptionValue>$5 -> (<nullptr> ? bb3 : bb5)
+    <exceptionValue>$5 -> (<nullptr> ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$14: T.nilable(TrueClass)):
-    <gotoDeadTemp>$14 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass, <gotoDeadTemp>$14: NilClass):
+    <gotoDeadTemp>$14 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1443,16 +1385,18 @@ bb7[firstDead=-1](<statTemp>$3: NilClass, <exceptionValue>$5: StandardError, <ma
     <exceptionValue>$5: NilClass = nil
     <keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$5: NilClass)
     <statTemp>$4: NilClass = nil
-    <unconditional> -> bb6
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1](<statTemp>$3: NilClass, <statTemp>$4: NilClass):
     <gotoDeadTemp>$14: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=3](<statTemp>$3: NilClass, <statTemp>$4: NilClass):
     foo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: NilClass)
     <returnMethodTemp>$2: T.untyped = foo
@@ -1474,6 +1418,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -1492,19 +1438,12 @@ bb4[firstDead=2](<self>: TestRescue, []$3: T.untyped, []$4: Integer(0), <statTem
     <statTemp>$15: T.untyped = <self>: TestRescue.bar()
     <statTemp>$12: T.noreturn = <self>: TestRescue.raise(<statTemp>$15: T.untyped)
     <exceptionValue>$13 = <get-current-exception>
-    <exceptionValue>$13 -> (<nullptr> ? bb3 : bb5)
+    <exceptionValue>$13 -> (<nullptr> ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=0]([]$3: NilClass, []$4: NilClass, <statTemp>$9: NilClass, <statTemp>$12: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
-# - bb7
-# - bb8
-bb6[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass, <gotoDeadTemp>$22: T.nilable(TrueClass)):
-    <gotoDeadTemp>$22 -> (T.nilable(TrueClass) ? bb1 : bb9)
+bb6[firstDead=0]([]$3: NilClass, []$4: NilClass, <statTemp>$9: NilClass, <statTemp>$12: NilClass, <gotoDeadTemp>$22: NilClass):
+    <gotoDeadTemp>$22 -> (<nullptr> ? bb1 : bb9)
 
 # backedges
 # - bb3
@@ -1512,16 +1451,18 @@ bb7[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <e
     <exceptionValue>$13: NilClass = nil
     <keepForCfgTemp>$18: Sorbet::Private::Static::Void = <magic>$17: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$13: NilClass)
     <statTemp>$12: NilClass = nil
-    <unconditional> -> bb6
+    <gotoDeadTemp>$22 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass):
     <gotoDeadTemp>$22: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$22 -> (TrueClass ? bb1 : bb9)
 
 # backedges
 # - bb6
+# - bb7
+# - bb8
 bb9[firstDead=3]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass):
     <statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)
     <returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: Integer(0), <statTemp>$8: T.untyped)

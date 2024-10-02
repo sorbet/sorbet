@@ -34,15 +34,10 @@ bb4[firstDead=-1](<self>: T.class_of(<root>), <magic>$14: T.class_of(<Magic>)):
     <statTemp>$13: TrueClass = true
     <returnMethodTemp>$2: T.untyped = <statTemp>$4: A.f(<statTemp>$7: {z: Integer(3), w: String("string")}, <statTemp>$13: TrueClass)
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb4
-bb5[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: NilClass):
-    <unconditional> -> bb6
-
-# backedges
-# - bb5
 # - bb7
 # - bb8
 bb6[firstDead=-1](<self>: T.class_of(<root>), <returnMethodTemp>$2: T.untyped, <exceptionValue>$3: T.nilable(Exception), <gotoDeadTemp>$24: T.nilable(TrueClass)):

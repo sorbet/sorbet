@@ -8,7 +8,8 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb4
-# - bb6
+# - bb7
+# - bb8
 # - bb9
 bb1[firstDead=-1]():
     <exceptionValue>$4 = <get-current-exception>
@@ -29,27 +30,22 @@ bb4[firstDead=2]():
     <unconditional> -> bb1
 
 # backedges
-# - bb7
-# - bb8
-bb6[firstDead=-1](a: T.nilable(Integer), <gotoDeadTemp>$11: T.nilable(TrueClass)):
-    <gotoDeadTemp>$11 -> (T.nilable(TrueClass) ? bb1 : bb9)
-
-# backedges
 # - bb3
 bb7[firstDead=-1](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
     a: Integer(2) = 2
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (NilClass ? bb1 : bb9)
 
 # backedges
 # - bb3
 bb8[firstDead=-1]():
     <gotoDeadTemp>$11: TrueClass = true
-    <unconditional> -> bb6
+    <gotoDeadTemp>$11 -> (TrueClass ? bb1 : bb9)
 
 # backedges
-# - bb6
+# - bb7
+# - bb8
 bb9[firstDead=3](a: Integer(2)):
     <statTemp>$14: Integer(3) = 3
     <returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$14: Integer(3))

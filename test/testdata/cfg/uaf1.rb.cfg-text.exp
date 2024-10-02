@@ -24,6 +24,8 @@ bb0[firstDead=-1]():
 # backedges
 # - bb3
 # - bb10
+# - bb11
+# - bb12
 bb1[firstDead=-1]():
     <unconditional> -> bb1
 
@@ -65,21 +67,13 @@ bb8[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::V
     # outerLoops: 1
     <blockReturnTemp>$7: Integer(1) = 1
     <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$8 -> (T.nilable(Exception) ? bb7 : bb9)
+    <exceptionValue>$8 -> (T.nilable(Exception) ? bb7 : bb10)
 
 # backedges
 # - bb8
-bb9[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: Integer(1), <gotoDeadTemp>$14: NilClass):
+bb10[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: Integer(1), <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
-    <unconditional> -> bb10
-
-# backedges
-# - bb9
-# - bb11
-# - bb12
-bb10[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer), <gotoDeadTemp>$14: T.nilable(TrueClass)):
-    # outerLoops: 1
-    <gotoDeadTemp>$14 -> (T.nilable(TrueClass) ? bb1 : bb13)
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
@@ -88,17 +82,19 @@ bb11[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::
     <exceptionValue>$8: NilClass = nil
     <keepForCfgTemp>$10: Sorbet::Private::Static::Void = <magic>$9: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$8: NilClass)
     <blockReturnTemp>$7: Integer(2) = 2
-    <unconditional> -> bb10
+    <gotoDeadTemp>$14 -> (NilClass ? bb1 : bb13)
 
 # backedges
 # - bb7
 bb12[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer)):
     # outerLoops: 1
     <gotoDeadTemp>$14: TrueClass = true
-    <unconditional> -> bb10
+    <gotoDeadTemp>$14 -> (TrueClass ? bb1 : bb13)
 
 # backedges
 # - bb10
+# - bb11
+# - bb12
 bb13[firstDead=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: Integer, <gotoDeadTemp>$14: NilClass):
     # outerLoops: 1
     <blockReturnTemp>$16: T.noreturn = blockreturn<map> <blockReturnTemp>$7: Integer

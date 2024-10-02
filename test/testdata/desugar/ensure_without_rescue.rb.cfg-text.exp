@@ -24,16 +24,11 @@ bb3[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped):
 bb4[firstDead=-1](<self>: Object):
     <returnMethodTemp>$2: T.untyped = <self>: Object.a()
     <exceptionValue>$3: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb5)
-
-# backedges
-# - bb4
-bb5[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped):
-    <unconditional> -> bb6
+    <exceptionValue>$3 -> (T.nilable(Exception) ? bb3 : bb6)
 
 # backedges
 # - bb3
-# - bb5
+# - bb4
 bb6[firstDead=-1](<self>: Object, <returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$6: T.nilable(TrueClass)):
     <throwAwayTemp>$7: T.untyped = <self>: Object.b()
     <gotoDeadTemp>$6 -> (T.nilable(TrueClass) ? bb1 : bb7)

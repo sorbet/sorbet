@@ -8,7 +8,9 @@ bb0[firstDead=-1]():
 
 # backedges
 # - bb15
+# - bb17
 # - bb20
+# - bb22
 # - bb23
 bb1[firstDead=-1]():
     <unconditional> -> bb1
@@ -93,18 +95,12 @@ bb10[firstDead=6](<self>: Object, try: Integer(0), <magic>$29: T.class_of(<Magic
 # - bb10
 bb13[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$29: T.class_of(<Magic>), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <exceptionValue>$8: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$8 -> (T.nilable(Exception) ? bb6 : bb14)
+    <exceptionValue>$8 -> (T.nilable(Exception) ? bb6 : bb15)
 
 # backedges
 # - bb13
-bb14[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
-    <unconditional> -> bb15
-
-# backedges
-# - bb14
-# - bb17
-bb15[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$40: T.nilable(TrueClass), <magic>$42: T.class_of(<Magic>)):
-    <gotoDeadTemp>$40 -> (T.nilable(TrueClass) ? bb1 : bb18)
+bb15[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
+    <gotoDeadTemp>$40 -> (NilClass ? bb1 : bb18)
 
 # backedges
 # - bb6
@@ -121,24 +117,19 @@ bb16[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 # - bb6
 bb17[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <magic>$42: T.class_of(<Magic>)):
     <gotoDeadTemp>$40: TrueClass = true
-    <unconditional> -> bb15
+    <gotoDeadTemp>$40 -> (TrueClass ? bb1 : bb18)
 
 # backedges
 # - bb15
+# - bb17
 bb18[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(0), <gotoDeadTemp>$40: NilClass, <magic>$42: T.class_of(<Magic>)):
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
-    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb19)
+    <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb20)
 
 # backedges
 # - bb18
-bb19[firstDead=-1](<returnMethodTemp>$2: NilClass):
-    <unconditional> -> bb20
-
-# backedges
-# - bb19
-# - bb22
-bb20[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$53: T.nilable(TrueClass)):
-    <gotoDeadTemp>$53 -> (T.nilable(TrueClass) ? bb1 : bb23)
+bb20[firstDead=-1](<returnMethodTemp>$2: NilClass, <gotoDeadTemp>$53: NilClass):
+    <gotoDeadTemp>$53 -> (NilClass ? bb1 : bb23)
 
 # backedges
 # - bb3
@@ -155,10 +146,11 @@ bb21[firstDead=-1](<self>: Object, <returnMethodTemp>$2: NilClass, try: Integer(
 # - bb3
 bb22[firstDead=-1](<returnMethodTemp>$2: NilClass):
     <gotoDeadTemp>$53: TrueClass = true
-    <unconditional> -> bb20
+    <gotoDeadTemp>$53 -> (TrueClass ? bb1 : bb23)
 
 # backedges
 # - bb20
+# - bb22
 bb23[firstDead=1](<returnMethodTemp>$2: NilClass):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
