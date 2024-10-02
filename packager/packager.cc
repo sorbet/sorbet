@@ -1366,7 +1366,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
-    if (!info.strictDependenciesLevel) {
+    if (!info.strictDependenciesLevel.has_value()) {
         info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
     }
     bodyWalk.finalize(ctx);
