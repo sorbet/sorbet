@@ -992,6 +992,7 @@ bool solveAndInstantiateDispatchResult(const core::Context &ctx, core::DispatchR
         return true;
     }
 
+    // TODO(jez) This suffers from the bug described in DispatchResult::merge w.r.t. secondaryKind 😡
     switch (result.secondaryKind) {
         case core::DispatchResult::Combinator::OR:
             result.returnType = core::Types::any(ctx, instantiated, result.secondary->returnType);
@@ -1370,6 +1371,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
                         auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        // TODO(jez) This is an interesting candidate to try to get the bug to show up.
                         switch (insn.link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
