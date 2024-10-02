@@ -1856,12 +1856,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 elems.reserve(array->elts.size());
                 ExpressionPtr lastMerge;
                 for (auto &stat : array->elts) {
-                    if (auto splat = parser::cast_node<parser::Splat>(stat.get())) {
+                    if (parser::isa_node<parser::Splat>(stat.get()) ||
+                        parser::isa_node<parser::ForwardedRestArg>(stat.get())) {
+                        // The parser::Send case makes a fake parser::Array with locZeroLen to hide callWithSplat
+                        // methods from hover. Using the array's loc means that we will get a zero-length loc for
+                        // the Splat in that case, and non-zero if there was a real Array literal.
+                        stat->loc = loc;
                         // Desguar
-                        //   [a, *x, remaining}
+                        //   [a, *x, remaining]
                         // into
                         //   a.concat(<splat>(x)).concat(remaining)
-                        auto var = MK::Splat(loc, node2TreeImpl(dctx, std::move(splat->var)));
+                        auto var = node2TreeImpl(dctx, std::move(stat));
                         if (elems.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), locZeroLen,
@@ -2276,6 +2281,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::Splat *splat) {
                 auto res = MK::Splat(loc, node2TreeImpl(dctx, std::move(splat->var)));
                 result = std::move(res);
+            },
+            [&](parser::ForwardedRestArg *fra) {
+                auto var = ast::MK::Local(loc, core::Names::star());
+                result = MK::Splat(loc, std::move(var));
             },
             [&](parser::Alias *alias) {
                 auto res =
