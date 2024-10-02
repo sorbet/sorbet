@@ -253,8 +253,7 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(std::back_inserter(buf), "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyRegionId={})\n", backEdge->id,
-                               backEdge->rubyRegionId);
+                fmt::format_to(std::back_inserter(buf), "# - bb{}\n", backEdge->id);
             }
         }
 
@@ -359,7 +358,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
 
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
+    fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
                    fmt::map_join(
                        this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
@@ -375,8 +374,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
-                   this->firstDeadInstructionIdx,
+    fmt::format_to(std::back_inserter(buf), "bb{}[firstDead={}]({}):\n", this->id, this->firstDeadInstructionIdx,
                    fmt::map_join(
                        this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
