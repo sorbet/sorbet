@@ -2396,7 +2396,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                                     std::string errorHint) {
+                                     const std::vector<std::string> &packagerLayers, std::string errorHint) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2404,6 +2404,8 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
+    absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
+                      [this](string layer) { return enterNameUTF8(layer); });
 
     std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {
