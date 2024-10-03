@@ -42,13 +42,14 @@ private:
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
                                                          std::unique_ptr<parser::Node> sendNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
-    std::unique_ptr<parser::Node> translateConstantPath(pm_constant_path_node *node, bool isAssignment);
     template <typename PrismNode, typename SorbetNode>
     std::unique_ptr<SorbetNode> translateSimpleKeyword(pm_node_t *untypedNode);
     template <typename PrismAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Assign> translateAssignment(pm_node_t *node);
     template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
+    template <typename PrismLhsNode, typename SorbetLHSNode>
+    std::unique_ptr<SorbetLHSNode> translateConst(PrismLhsNode *untypedNode);
 };
 
 } // namespace sorbet::parser::Prism

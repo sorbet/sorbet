@@ -30,13 +30,13 @@ std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untyp
     unique_ptr<parser::Node> lhs;
 
     if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_write_node>) {
-        auto nameLoc = &node->name_loc;
-        auto name = parser.resolveConstant(node->name);
-        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), nullptr, gs.enterNameConstant(name));
+        // Handle regular assignment to a "plain" constant, like `A = 1`
+        lhs = translateConst<pm_constant_write_node, parser::ConstLhs>(node);
     } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_path_write_node>) {
-        auto isAssignment = true;
-        lhs = translateConstantPath(node->target, isAssignment);
+        // Handle regular assignment to a constant path, like `A::B::C = 1` or `::C = 1`
+        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target);
     } else {
+        // Handle regular assignment to any other kind of LHS.
         auto name = parser.resolveConstant(node->name);
         lhs = make_unique<SorbetLHSNode>(parser.translateLocation(&node->name_loc), gs.enterNameUTF8(name));
     }
@@ -57,9 +57,11 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
     unique_ptr<parser::Node> lhs;
     auto rhs = translate(node->value);
 
+    // Various node types need special handling to construct their corresponding Sorbet LHS nodes.
     if constexpr (std::is_same_v<PrismAssignmentNode, pm_index_operator_write_node> ||
                   std::is_same_v<PrismAssignmentNode, pm_index_and_write_node> ||
                   std::is_same_v<PrismAssignmentNode, pm_index_or_write_node>) {
+        // Handle operator assignment to an indexed expression, like `a[0] += 1`
         auto *openingLoc = &node->opening_loc;
         auto receiver = translate(node->receiver);
         auto args = translateArguments(node->arguments);
@@ -69,33 +71,39 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
     } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_operator_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_and_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_or_write_node>) {
-        auto *nameLoc = &node->name_loc;
-        auto name = parser.resolveConstant(node->name);
-        lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), nullptr, gs.enterNameConstant(name));
+        // Handle operator assignment to a "plain" constant, like `A += 1`
+        lhs = translateConst<PrismAssignmentNode, parser::ConstLhs>(node);
     } else if constexpr (std::is_same_v<PrismAssignmentNode, pm_constant_path_operator_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_path_and_write_node> ||
                          std::is_same_v<PrismAssignmentNode, pm_constant_path_or_write_node>) {
-        auto isAssignment = true;
-        lhs = translateConstantPath(node->target, isAssignment);
+        // Handle operator assignment to a constant path, like `A::B::C += 1` or `::C += 1`
+        lhs = translateConst<pm_constant_path_node, parser::ConstLhs>(node->target);
     } else if constexpr (std::is_same_v<SorbetLHSNode, parser::Send>) {
+        // Handle operator assignment to the result of a method call, like `a.b += 1`
         auto name = parser.resolveConstant(node->read_name);
         auto receiver = translate(node->receiver);
         auto *message_loc = &node->message_loc;
         lhs = make_unique<parser::Send>(parser.translateLocation(loc), std::move(receiver), gs.enterNameUTF8(name),
                                         parser.translateLocation(message_loc), NodeVec{});
     } else {
+        // Handle regular assignment to any other kind of LHS.
         auto *nameLoc = &node->name_loc;
         auto name = parser.resolveConstant(node->name);
         lhs = make_unique<SorbetLHSNode>(parser.translateLocation(nameLoc), gs.enterNameUTF8(name));
     }
 
     if constexpr (std::is_same_v<SorbetAssignmentNode, parser::OpAsgn>) {
+        // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
         auto *opLoc = &node->binary_operator_loc;
         auto op = parser.resolveConstant(node->binary_operator);
 
         return make_unique<parser::OpAsgn>(parser.translateLocation(loc), std::move(lhs), gs.enterNameUTF8(op),
                                            parser.translateLocation(opLoc), std::move(rhs));
     } else {
+        // `AndAsgn` and `OrAsgn` are specific to a single operator, so don't need any extra information like `OpAsgn`.
+        static_assert(std::is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
+                      std::is_same_v<SorbetAssignmentNode, parser::OrAsgn>);
+
         return make_unique<SorbetAssignmentNode>(parser.translateLocation(loc), std::move(lhs), std::move(rhs));
     }
 }
@@ -333,8 +341,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_NODE: { // Part of a constant path, like the `A::B` in `A::B::C`.
             // See`PM_CONSTANT_READ_NODE`, which handles the `::C` part
             auto constantPathNode = reinterpret_cast<pm_constant_path_node *>(node);
-            auto isAssignment = false;
-            return translateConstantPath(constantPathNode, isAssignment);
+
+            return translateConst<pm_constant_path_node, parser::Const>(constantPathNode);
         }
         case PM_CONSTANT_PATH_OPERATOR_WRITE_NODE: { // Compound assignment to a constant path, e.g. `A::B += 1`
             return translateOpAssignment<pm_constant_path_operator_write_node, parser::OpAsgn, parser::ConstLhs>(node);
@@ -345,13 +353,8 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
             // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
             auto constantPathTargetNode = reinterpret_cast<pm_constant_path_target_node *>(node);
-            pm_location_t *loc = &constantPathTargetNode->base.location;
 
-            auto name = parser.resolveConstant(constantPathTargetNode->name);
-            auto parent = translate(constantPathTargetNode->parent);
-
-            return make_unique<parser::ConstLhs>(parser.translateLocation(loc), std::move(parent),
-                                                 gs.enterNameConstant(name));
+            return translateConst<pm_constant_path_target_node, parser::ConstLhs>(constantPathTargetNode);
         }
         case PM_CONSTANT_PATH_WRITE_NODE: { // Regular assignment to a constant path, e.g. `A::B = 1`
             return translateAssignment<pm_constant_path_write_node, void>(node);
@@ -359,11 +362,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_TARGET_NODE: { // Target of an indirect write to a constant
             // ... like `TARGET1, TARGET2 = 1, 2`, `rescue => TARGET`, etc.
             auto constantTargetNode = reinterpret_cast<pm_constant_target_node *>(node);
-            pm_location_t *loc = &constantTargetNode->base.location;
-
-            auto name = parser.resolveConstant(constantTargetNode->name);
-
-            return make_unique<parser::ConstLhs>(parser.translateLocation(loc), nullptr, gs.enterNameConstant(name));
+            return translateConst<pm_constant_target_node, parser::ConstLhs>(constantTargetNode);
         }
         case PM_CONSTANT_AND_WRITE_NODE: { // And-assignment to a constant, e.g. `C &&= false`
             return translateOpAssignment<pm_constant_and_write_node, parser::AndAsgn, parser::ConstLhs>(node);
@@ -376,10 +375,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_CONSTANT_READ_NODE: { // A single, unnested, non-fully qualified constant like `Foo`
             auto constantReadNode = reinterpret_cast<pm_constant_read_node *>(node);
-            pm_location_t *loc = &constantReadNode->base.location;
-            std::string_view name = parser.resolveConstant(constantReadNode->name);
-
-            return make_unique<parser::Const>(parser.translateLocation(loc), nullptr, gs.enterNameConstant(name));
+            return translateConst<pm_constant_read_node, parser::Const>(constantReadNode);
         }
         case PM_CONSTANT_WRITE_NODE: { // Regular assignment to a constant, e.g. `Foo = 1`
             return translateAssignment<pm_constant_write_node, parser::ConstLhs>(node);
@@ -1211,27 +1207,45 @@ std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node
     return make_unique<parser::Begin>(parser.translateLocation(&stmtsNode->base.location), std::move(sorbetStmts));
 }
 
-std::unique_ptr<parser::Node> Translator::translateConstantPath(pm_constant_path_node *node, bool isAssignment) {
-    pm_location_t *loc = &node->base.location;
+// Handles any one of the Prism nodes that models any kind of assignment to a constant or constant path.
+template <typename PrismLhsNode, typename SorbetLHSNode>
+unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
+    static_assert(std::is_same_v<SorbetLHSNode, parser::Const> || std::is_same_v<SorbetLHSNode, parser::ConstLhs>,
+                  "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
-    std::string_view name = parser.resolveConstant(node->name);
+    auto constexpr isConstantPath = std::is_same_v<PrismLhsNode, pm_constant_path_target_node> ||
+                                    std::is_same_v<PrismLhsNode, pm_constant_path_write_node> ||
+                                    std::is_same_v<PrismLhsNode, pm_constant_path_node>;
 
     std::unique_ptr<parser::Node> parent;
-    if (node->parent) {
-        // This constant reference is chained onto another constant reference.
-        // E.g. if `node` is pointing to `B`, then then `A` is the `parent` in `A::B::C`.
-        parent = translate(node->parent);
-    } else {                                                // This is a fully qualified constant reference, like `::A`.
-        pm_location_t *delimiterLoc = &node->delimiter_loc; // The location of the `::`
-        parent = make_unique<parser::Cbase>(parser.translateLocation(delimiterLoc));
+    if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
+        if (auto prismParentNode = node->parent; prismParentNode != nullptr) {
+            // This constant reference is chained onto another constant reference.
+            // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the `name`.
+            //   A::B::C
+            //    /    \
+            //  A::B   ::C
+            //  /  \
+            // A   ::B
+            parent = translate(prismParentNode);
+        } else { // This is the root of a fully qualified constant reference, like `::A`.
+            pm_location_t *delimiterLoc = &node->delimiter_loc; // The location of the `::`
+            parent = make_unique<parser::Cbase>(parser.translateLocation(delimiterLoc));
+        }
+    } else { // Handle plain constants like `A`, that aren't part of a constant path.
+        static_assert(std::is_same_v<PrismLhsNode, pm_constant_and_write_node> ||
+                      std::is_same_v<PrismLhsNode, pm_constant_or_write_node> ||
+                      std::is_same_v<PrismLhsNode, pm_constant_operator_write_node> ||
+                      std::is_same_v<PrismLhsNode, pm_constant_target_node> ||
+                      std::is_same_v<PrismLhsNode, pm_constant_read_node> ||
+                      std::is_same_v<PrismLhsNode, pm_constant_write_node>);
+        parent = nullptr;
     }
 
-    if (isAssignment) {
-        return make_unique<parser::ConstLhs>(parser.translateLocation(loc), std::move(parent),
-                                             gs.enterNameConstant(name));
-    } else {
-        return make_unique<parser::Const>(parser.translateLocation(loc), std::move(parent), gs.enterNameConstant(name));
-    }
+    pm_location_t *loc = &node->base.location;
+    std::string_view name = parser.resolveConstant(node->name);
+
+    return make_unique<SorbetLHSNode>(parser.translateLocation(loc), std::move(parent), gs.enterNameConstant(name));
 }
 
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
