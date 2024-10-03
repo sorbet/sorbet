@@ -43,3 +43,7 @@ ConstantPath::EXPONENTIATE_ASSIGN **= 26
 # Special cases
 ConstantPath::LAZY_AND_ASSIGN &&= 27
 ConstantPath::LAZY_OR_ASSGIN ||= 28
+
+# Multi-target assignment
+ConstantPath::TARGET1, ConstantPath::TARGET2 = 31, 32
+::ConstantPath::TARGET1, ::ConstantPath::TARGET2 = 33, 34

@@ -333,5 +333,67 @@ Begin {
         val = "28"
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          ConstLhs {
+            scope = Const {
+              scope = NULL
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET1>>
+          }
+          ConstLhs {
+            scope = Const {
+              scope = NULL
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET2>>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "31"
+          }
+          Integer {
+            val = "32"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          ConstLhs {
+            scope = Const {
+              scope = Cbase {
+              }
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET1>>
+          }
+          ConstLhs {
+            scope = Const {
+              scope = Cbase {
+              }
+              name = <C <U ConstantPath>>
+            }
+            name = <C <U TARGET2>>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "33"
+          }
+          Integer {
+            val = "34"
+          }
+        ]
+      }
+    }
   ]
 }

@@ -342,6 +342,17 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CONSTANT_PATH_OR_WRITE_NODE: { // Or-assignment to a constant path, e.g. `A::B ||= true`
             return translateOpAssignment<pm_constant_path_or_write_node, parser::OrAsgn, parser::ConstLhs>(node);
         }
+        case PM_CONSTANT_PATH_TARGET_NODE: { // Target of an indirect write to a constant path
+            // ... like `A::TARGET1, A::TARGET2 = 1, 2`, `rescue => A::TARGET`, etc.
+            auto constantPathTargetNode = reinterpret_cast<pm_constant_path_target_node *>(node);
+            pm_location_t *loc = &constantPathTargetNode->base.location;
+
+            auto name = parser.resolveConstant(constantPathTargetNode->name);
+            auto parent = translate(constantPathTargetNode->parent);
+
+            return make_unique<parser::ConstLhs>(parser.translateLocation(loc), std::move(parent),
+                                                 gs.enterNameConstant(name));
+        }
         case PM_CONSTANT_PATH_WRITE_NODE: { // Regular assignment to a constant path, e.g. `A::B = 1`
             return translateAssignment<pm_constant_path_write_node, void>(node);
         }
@@ -1031,7 +1042,6 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_CLASS_VARIABLE_TARGET_NODE:
-        case PM_CONSTANT_PATH_TARGET_NODE:
         case PM_DEFINED_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
