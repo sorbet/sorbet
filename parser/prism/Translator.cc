@@ -24,7 +24,7 @@ template <typename... TArgs>
 }
 
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
-std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
+unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
     auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
     auto *loc = &node->base.location;
 
@@ -47,7 +47,7 @@ std::unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untyp
 }
 
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *untypedNode) {
+unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *untypedNode) {
     static_assert(
         is_same_v<SorbetAssignmentNode, parser::OpAsgn> || is_same_v<SorbetAssignmentNode, parser::AndAsgn> ||
             is_same_v<SorbetAssignmentNode, parser::OrAsgn>,
@@ -109,7 +109,7 @@ std::unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_
     }
 }
 
-std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
+unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 
@@ -1079,7 +1079,7 @@ std::unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
     }
 }
 
-std::unique_ptr<parser::Node> Translator::translate(const Node &node) {
+unique_ptr<parser::Node> Translator::translate(const Node &node) {
     return translate(node.get_raw_node_pointer());
 }
 
@@ -1134,8 +1134,8 @@ NodeVec Translator::translateArguments(pm_arguments_node *argsNode, size_t extra
 // @param elements The Prism key/value pairs to be translated
 // @param isUsedForKeywordArguments True if this hash represents keyword arguments to a function,
 //                                  false if it represents a Hash literal.
-std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list_t elements,
-                                                        bool isUsedForKeywordArguments) {
+unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list_t elements,
+                                                   bool isUsedForKeywordArguments) {
     pm_location_t *loc = &node->location;
 
     auto prismElements = absl::MakeSpan(elements.nodes, elements.size);
@@ -1172,8 +1172,8 @@ std::unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node
 //
 // This function translates between the two, creating a `Block` node for the given `pm_block_node *`,
 // and wrapping it around the given `Send` node.
-std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
-                                                                 std::unique_ptr<parser::Node> sendNode) {
+unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
+                                                            std::unique_ptr<parser::Node> sendNode) {
     auto blockParametersNode = translate(prismBlockNode->parameters);
     auto body = translate(prismBlockNode->body);
 
@@ -1184,7 +1184,7 @@ std::unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
-std::unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
+unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle) {
     if (stmtsNode == nullptr)
         return nullptr;
 
@@ -1241,7 +1241,7 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
 
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
 template <typename PrismNode, typename SorbetNode>
-std::unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *untypedNode) {
+unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *untypedNode) {
     auto node = reinterpret_cast<PrismNode *>(untypedNode);
     pm_location_t *loc = &node->base.location;
 
