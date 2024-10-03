@@ -127,6 +127,30 @@ Begin {
         val = "14"
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          ConstLhs {
+            scope = NULL
+            name = <C <U TARGET1>>
+          }
+          ConstLhs {
+            scope = NULL
+            name = <C <U TARGET2>>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "29"
+          }
+          Integer {
+            val = "30"
+          }
+        ]
+      }
+    }
     Assign {
       lhs = ConstLhs {
         scope = Const {

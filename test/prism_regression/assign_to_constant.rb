@@ -19,6 +19,9 @@ EXPONENTIATE_ASSIGN **= 12
 LAZY_AND_ASSIGN &&= 13
 LAZY_OR_ASSGIN ||= 14
 
+# Multi-target assignment
+TARGET1, TARGET2 = 29, 30
+
 ### Constant paths
 
 # Regular assignment
