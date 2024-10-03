@@ -209,7 +209,7 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
-    optional<core::packages::StrictDependenciesLevel> strictDependenciesLevel = nullopt;
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1108,15 +1108,18 @@ struct PackageSpecBodyWalk {
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
+                                   "Previous declaration found here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
-            } 
+            }
 
             if (send.numPosArgs() > 0) {
                 auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
-                info.strictDependenciesLevel = parsedValue;
-                if (!parsedValue.has_value()) {
+                if (parsedValue.has_value()) {
+                    info.strictDependenciesLevel = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}` or `{}`", send.fun.show(ctx),
                                     "'false'", "'layered'", "'layered_dag'", "'dag'");
@@ -1361,9 +1364,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
-    if (!info.strictDependenciesLevel.has_value()) {
-        info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
-    }
     bodyWalk.finalize(ctx);
 }
 
