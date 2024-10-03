@@ -925,13 +925,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
-    DispatchResult result;
-    auto &component = result.main;
-    component.receiver = args.selfType;
-    component.method = method;
+    auto component = DispatchComponent{
+        args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr,
+    };
 
     auto data = method.data(gs);
-    unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
+    unique_ptr<TypeConstraint> &maybeConstraint = component.constr;
     TypeConstraint *constr;
     if (args.block || data->flags.isGenericMethod) {
         maybeConstraint = make_unique<TypeConstraint>();
@@ -977,7 +976,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto offset = ait - args.args.begin();
         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, spec, args.selfType, targs,
                                   args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
-            result.main.errors.emplace_back(std::move(e));
+            component.errors.emplace_back(std::move(e));
         }
 
         if (!spec.flags.isRepeated) {
@@ -1113,7 +1112,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method,
                                       TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
                                       args.originForUninitialized, args.args.size() == 1)) {
-                result.main.errors.emplace_back(std::move(e));
+                component.errors.emplace_back(std::move(e));
             }
 
             if (!pit->flags.isRepeated) {
@@ -1152,7 +1151,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
                                           args.selfType, targs, kwargsLoc, args.originForUninitialized,
                                           args.args.size() == 1)) {
-                    result.main.errors.emplace_back(std::move(e));
+                    component.errors.emplace_back(std::move(e));
                 }
             } else if (hasKwParam) {
                 auto hashType = isa_type<ShapeType>(kwSplatType) ? kwSplatType.underlying(gs) : kwSplatType;
@@ -1180,7 +1179,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                        "    To ignore this and pass the splat anyways, use `{}`",
                                        "T.unsafe");
                         maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
-                        result.main.errors.emplace_back(e.build());
+                        component.errors.emplace_back(e.build());
                     }
                 } else if (!Types::isSubTypeUnderConstraint(gs, *constr, kwSplatKeyType, Types::Symbol(),
                                                             UntypedMode::AlwaysCompatible,
@@ -1195,7 +1194,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         if (gs.suggestUnsafe.has_value()) {
                             maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
                         }
-                        result.main.errors.emplace_back(e.build());
+                        component.errors.emplace_back(e.build());
                     }
                 } else {
                     for (const auto &kwParam : kwParams) {
@@ -1225,7 +1224,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 "    because Sorbet cannot see what specific keys exist in the `{}`.",
                                 "Hash", "Hash");
                             maybeSuggestUnsafeKwsplat(gs, e, kwSplatArgLoc);
-                            result.main.errors.emplace_back(e.build());
+                            component.errors.emplace_back(e.build());
                         }
 
                         break;
@@ -1256,7 +1255,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
                 }
 
-                result.main.errors.emplace_back(e.build());
+                component.errors.emplace_back(e.build());
             }
         }
     }
@@ -1304,7 +1303,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         TypeAndOrigins tpe{hash->values[offset], kwargsLoc};
                         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec,
                                                   args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
-                            result.main.errors.emplace_back(std::move(e));
+                            component.errors.emplace_back(std::move(e));
                         }
                     }
                     sawKwSplat = true;
@@ -1324,7 +1323,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
                         if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
-                            result.main.errors.emplace_back(std::move(e));
+                            component.errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
@@ -1363,7 +1362,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 TypeAndOrigins tpe{hash->values[offset], originLoc};
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, spec, args.selfType,
                                           targs, argLoc, args.originForUninitialized)) {
-                    result.main.errors.emplace_back(std::move(e));
+                    component.errors.emplace_back(std::move(e));
                 }
             }
             for (auto &keyType : hash->keys) {
@@ -1389,7 +1388,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         auto deleteLoc = expandToLeadingComma(gs, kwargErrLoc);
                         e.replaceWith("Delete unrecognized keyword argument", deleteLoc, "");
                     }
-                    result.main.errors.emplace_back(e.build());
+                    component.errors.emplace_back(e.build());
                 }
             }
         } else if (kwargs == nullptr) {
@@ -1399,7 +1398,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     continue;
                 }
                 if (auto e = missingArg(gs, args.argsLoc(), args.receiverLoc(), method, spec, symbol, targs)) {
-                    result.main.errors.emplace_back(std::move(e));
+                    component.errors.emplace_back(std::move(e));
                 }
             }
         }
@@ -1472,7 +1471,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     e.replaceWith("Delete extra args", deleteLoc, "");
                 }
             }
-            result.main.errors.emplace_back(e.build());
+            component.errors.emplace_back(e.build());
         }
     }
 
