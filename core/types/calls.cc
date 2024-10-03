@@ -1513,7 +1513,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         component.rebindLoc = bspec.loc;
     }
 
-    TypePtr &resultType = result.returnType;
+    TypePtr &resultType = component.returnTypeBeforeSolve;
 
     auto *intrinsic = methodData->getIntrinsic();
     if (intrinsic != nullptr) {
@@ -1570,9 +1570,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
-    if (args.block != nullptr) {
-        component.returnTypeBeforeSolve = resultType;
-    }
+    result.returnType = component.returnTypeBeforeSolve;
     return result;
 }
 
@@ -1731,6 +1729,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.suppressErrors,
                                           args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
+            // TODO(jez) This is a special case
             original.returnType = wrapped;
             // We want this to behave as if MetaType::dispatchCall were an Intrinsic--in an
             // intrinsic, all you have to do is set `returnType` and it will be used used for the
@@ -1855,21 +1854,21 @@ ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type, bool m
 class T_untyped : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_untyped;
 
 class T_noreturn : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = make_type<MetaType>(Types::bottom());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::bottom());
     }
 } T_noreturn;
 
 class T_anything : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = make_type<MetaType>(Types::top());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::top());
     }
 } T_anything;
 
@@ -1893,7 +1892,7 @@ public:
 
         auto classOf = classSymbol.data(gs)->lookupSingletonClass(gs);
         if (classOf.exists()) {
-            res.returnType = make_type<MetaType>(classOf.data(gs)->externalType());
+            res.main.returnTypeBeforeSolve = make_type<MetaType>(classOf.data(gs)->externalType());
         }
     }
 } T_class_of;
@@ -1901,7 +1900,7 @@ public:
 class T_self_type : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
 
@@ -1913,7 +1912,7 @@ public:
         //
         // This intrinsic remains just on the off chance that people misuse `T.attached_class` as a
         // value some other way (e.g., t = T; t.attached_class).
-        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_attached_class;
 
@@ -1923,7 +1922,7 @@ public:
         // Proper typing of this should have been in builder_walk by translating `T.type_parameter`
         // calls to `Alias` instructions. This just makes it so that e.g. sigs that use
         // `T.type_parameter(:U)` can be used at `# typed: strong`
-        res.returnType = make_type<MetaType>(Types::untypedUntracked());
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_type_parameter;
 
@@ -1963,7 +1962,7 @@ public:
                 }
             }
         }
-        res.returnType = move(ret);
+        res.main.returnTypeBeforeSolve = move(ret);
     }
 } T_must;
 
@@ -1982,7 +1981,7 @@ public:
             ret = Types::any(gs, ret, ty);
         }
 
-        res.returnType = make_type<MetaType>(move(ret));
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(move(ret));
     }
 } T_any;
 
@@ -2001,7 +2000,7 @@ public:
             ret = Types::all(gs, ret, ty);
         }
 
-        res.returnType = make_type<MetaType>(move(ret));
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(move(ret));
     }
 } T_all;
 
@@ -2016,7 +2015,7 @@ public:
             e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
             e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
         }
-        res.returnType = args.args[0]->type;
+        res.main.returnTypeBeforeSolve = args.args[0]->type;
     }
 } T_revealType;
 
@@ -2027,7 +2026,7 @@ public:
             return;
         }
 
-        res.returnType = make_type<MetaType>(
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(
             Types::any(gs, Types::unwrapType(gs, args.argLoc(0), args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
@@ -2036,7 +2035,7 @@ class T_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done during infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
+        res.main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
     }
 } T_proc;
 
@@ -2044,13 +2043,13 @@ class T_proc_params : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.numPosArgs != 0 || args.args.size() % 2 == 1) {
-            res.returnType = Types::declBuilderForProcsSingletonClass();
+            res.main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
             return;
         }
 
         auto sym = core::Symbols::Proc(args.args.size() / 2);
         if (!sym.exists()) {
-            res.returnType = Types::untypedUntracked();
+            res.main.returnTypeBeforeSolve = Types::untypedUntracked();
             return;
         }
 
@@ -2063,7 +2062,7 @@ public:
             targs.emplace_back(move(unwrappedType));
         }
 
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
 } T_proc_params;
 
@@ -2073,7 +2072,7 @@ public:
         auto sym = core::Symbols::Proc(0);
         vector<core::TypePtr> targs;
         targs.emplace_back(core::Types::void_());
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
 } T_proc_void;
 
@@ -2081,7 +2080,7 @@ class T_proc_returns : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 1) {
-            res.returnType = core::Types::untypedUntracked();
+            res.main.returnTypeBeforeSolve = core::Types::untypedUntracked();
             return;
         }
 
@@ -2089,7 +2088,7 @@ public:
         vector<core::TypePtr> targs;
         auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
         targs.emplace_back(move(unwrappedType));
-        res.returnType = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
+        res.main.returnTypeBeforeSolve = make_type<MetaType>(core::make_type<core::AppliedType>(sym, move(targs)));
     }
 } T_proc_returns;
 
@@ -2097,7 +2096,7 @@ class DeclBuilderForProcs_bind : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done in infer
-        res.returnType = Types::declBuilderForProcsSingletonClass();
+        res.main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
     }
 } DeclBuilderForProcs_bind;
 
@@ -2117,13 +2116,13 @@ public:
             // In the case where the receiver is a module, `singleton` will be `T.class_of(MyModule)`
             // which will not actually reflect how `.class` in a module instance method works at runtime.
             // (see https://sorbet.org/docs/class-of#tclass_of-and-modules)
-            res.returnType = tClassSelfType;
+            res.main.returnTypeBeforeSolve = tClassSelfType;
             return;
         }
 
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (!singleton.exists()) {
-            res.returnType = tClassSelfType;
+            res.main.returnTypeBeforeSolve = tClassSelfType;
             return;
         }
 
@@ -2137,7 +2136,7 @@ public:
         // like normal, and ends up something like
         //     T.class_of(MyClass)[T.all(TypeOfReceiver, MyClass)]
         // (This matters, btw, in case the receiver is something like a generic.)
-        res.returnType = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
+        res.main.returnTypeBeforeSolve = Types::all(gs, tClassSelfType, singleton.data(gs)->externalType());
     }
 } Object_class;
 
@@ -2223,7 +2222,7 @@ public:
 class Class_subclasses : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = Types::arrayOf(gs, args.thisType);
+        res.main.returnTypeBeforeSolve = Types::arrayOf(gs, args.thisType);
     }
 } Class_subclasses;
 
@@ -2238,7 +2237,8 @@ public:
             return;
         }
 
-        res.returnType = Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
+        res.main.returnTypeBeforeSolve =
+            Types::applyTypeArguments(gs, args.locs, args.numPosArgs, args.args, attachedClass);
     }
 } T_Generic_squareBrackets;
 
@@ -2286,7 +2286,7 @@ public:
         for (int i = 0; i < args.args.size(); i += 2) {
             if (!isa_type<NamedLiteralType>(args.args[i]->type) && !isa_type<IntegerLiteralType>(args.args[i]->type) &&
                 !isa_type<FloatLiteralType>(args.args[i]->type)) {
-                res.returnType = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
+                res.main.returnTypeBeforeSolve = Types::hashOfUntyped(Symbols::Magic_UntypedSource_buildHash());
                 return;
             }
         }
@@ -2299,7 +2299,7 @@ public:
             keys.emplace_back(args.args[i]->type);
             values.emplace_back(args.args[i + 1]->type);
         }
-        res.returnType = make_type<ShapeType>(move(keys), move(values));
+        res.main.returnTypeBeforeSolve = make_type<ShapeType>(move(keys), move(values));
     }
 } Magic_buildHashOrKeywordArgs;
 
@@ -2312,7 +2312,7 @@ public:
             elems.emplace_back(elem->type);
         }
 
-        res.returnType = make_type<TupleType>(move(elems));
+        res.main.returnTypeBeforeSolve = make_type<TupleType>(move(elems));
     }
 } Magic_buildArray;
 
@@ -2337,7 +2337,7 @@ public:
         } else if (!secondArgIsNil) {
             rangeElemType = Types::any(gs, rangeElemType, Types::dropNil(gs, other));
         }
-        res.returnType = Types::rangeOf(gs, rangeElemType);
+        res.main.returnTypeBeforeSolve = Types::rangeOf(gs, rangeElemType);
     }
 } Magic_buildRange;
 
@@ -2370,19 +2370,19 @@ class Magic_expandSplat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 3) {
-            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
+            res.main.returnTypeBeforeSolve = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto val = args.args.front()->type;
         if (!(isa_type<IntegerLiteralType>(args.args[1]->type) && isa_type<IntegerLiteralType>(args.args[2]->type))) {
-            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_expandSplat());
+            res.main.returnTypeBeforeSolve = Types::untyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
         }
         auto &beforeLit = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
         auto &afterLit = cast_type_nonnull<IntegerLiteralType>(args.args[2]->type);
         int before = (int)beforeLit.value;
         int after = (int)afterLit.value;
-        res.returnType = expandArray(gs, val, before + after);
+        res.main.returnTypeBeforeSolve = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
 
@@ -2449,7 +2449,7 @@ public:
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
             }
 
-            res.returnType = receiver->type;
+            res.main.returnTypeBeforeSolve = receiver->type;
             return;
         }
 
@@ -2464,7 +2464,7 @@ public:
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
             }
 
-            res.returnType = args.args[2]->type;
+            res.main.returnTypeBeforeSolve = args.args[2]->type;
             return;
         }
         auto *posTuple = cast_type<TupleType>(args.args[2]->type);
@@ -2677,11 +2677,11 @@ private:
                 if (auto e = gs.beginError(callLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                     e.setHeader("Could not find valid instantiation of type parameters");
                 }
-                dispatched.returnType = core::Types::untypedUntracked();
+                dispatched.main.returnTypeBeforeSolve = core::Types::untypedUntracked();
             }
 
             if (!constr->isEmpty() && constr->isSolved()) {
-                dispatched.returnType = Types::instantiate(gs, dispatched.returnType, *(constr));
+                dispatched.returnType = Types::instantiate(gs, dispatched.main.returnTypeBeforeSolve, *constr);
             }
         }
         res = std::move(dispatched);
@@ -2724,7 +2724,7 @@ public:
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *receiver, args.originForUninitialized);
             }
 
-            res.returnType = receiver->type;
+            res.main.returnTypeBeforeSolve = receiver->type;
             return;
         }
 
@@ -2817,7 +2817,7 @@ public:
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[0], args.originForUninitialized);
             }
 
-            res.returnType = receiver->type;
+            res.main.returnTypeBeforeSolve = receiver->type;
             return;
         }
 
@@ -2832,7 +2832,7 @@ public:
                 TypeErrorDiagnostics::explainUntyped(gs, e, what, *args.args[2], args.originForUninitialized);
             }
 
-            res.returnType = args.args[2]->type;
+            res.main.returnTypeBeforeSolve = args.args[2]->type;
             return;
         }
         auto *posTuple = cast_type<TupleType>(args.args[2]->type);
@@ -2916,7 +2916,7 @@ public:
                               loc.source(gs).value(), ty.show(gs));
             }
         }
-        res.returnType = move(ty);
+        res.main.returnTypeBeforeSolve = move(ty);
     }
 } Magic_suggestUntypedConstantType;
 
@@ -2924,7 +2924,7 @@ class Magic_suggestUntypedFieldType : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 4);
-        res.returnType = core::Types::widen(gs, args.args[0]->type);
+        res.main.returnTypeBeforeSolve = core::Types::widen(gs, args.args[0]->type);
 
         if (args.suppressErrors) {
             return;
@@ -2978,7 +2978,7 @@ public:
 
         auto attachedClass = selfData->findMember(gs, core::Names::Constants::AttachedClass());
         if (attachedClass.exists()) {
-            res.returnType = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
+            res.main.returnTypeBeforeSolve = make_type<MetaType>(make_type<SelfTypeParam>(attachedClass));
         } else if (self != core::Symbols::T_Private_Methods_DeclBuilder() && !args.suppressErrors) {
             if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::AttachedClassOnInstance)) {
                 auto hasAttachedClass = core::Names::declareHasAttachedClass().show(gs);
@@ -3004,7 +3004,7 @@ public:
                                    self.show(gs));
                 }
             }
-            res.returnType = core::Types::untypedUntracked();
+            res.main.returnTypeBeforeSolve = core::Types::untypedUntracked();
         }
     }
 } Magic_attachedClass;
@@ -3190,9 +3190,9 @@ public:
         if (!dispatched.main.errors.empty()) {
             // In case of an error, the splat is converted to an array with a single
             // element; be conservative in what we declare the element type to be.
-            res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
+            res.main.returnTypeBeforeSolve = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
         } else {
-            res.returnType = dispatched.returnType;
+            res.main.returnTypeBeforeSolve = dispatched.returnType;
         }
     };
 } Magic_splat;
@@ -3226,9 +3226,9 @@ public:
 
         if (args.args.size() == 1) {
             if (idx >= tupleSize) {
-                res.returnType = Types::nilClass();
+                res.main.returnTypeBeforeSolve = Types::nilClass();
             } else {
-                res.returnType = tuple->elems[idx];
+                res.main.returnTypeBeforeSolve = tuple->elems[idx];
             }
             return;
         }
@@ -3236,7 +3236,7 @@ public:
         ENFORCE(args.args.size() == 2);
 
         if (idx < 0 || idx > tupleSize) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
             return;
         }
 
@@ -3247,7 +3247,7 @@ public:
         const auto &lengthLit = cast_type_nonnull<IntegerLiteralType>(lengthType);
         auto length = lengthLit.value;
         if (length < 0) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
             return;
         }
 
@@ -3259,7 +3259,7 @@ public:
         for (long i = 0; i < length; i++) {
             newElems.emplace_back(tuple->elems[idx + i]);
         }
-        res.returnType = make_type<TupleType>(move(newElems));
+        res.main.returnTypeBeforeSolve = make_type<TupleType>(move(newElems));
     }
 } Tuple_squareBrackets;
 
@@ -3273,9 +3273,9 @@ public:
             return;
         }
         if (tuple->elems.empty()) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
         } else {
-            res.returnType = tuple->elems.back();
+            res.main.returnTypeBeforeSolve = tuple->elems.back();
         }
     }
 } Tuple_last;
@@ -3290,9 +3290,9 @@ public:
             return;
         }
         if (tuple->elems.empty()) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
         } else {
-            res.returnType = tuple->elems.front();
+            res.main.returnTypeBeforeSolve = tuple->elems.front();
         }
     }
 } Tuple_first;
@@ -3307,9 +3307,9 @@ public:
             return;
         }
         if (tuple->elems.empty()) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
         } else {
-            res.returnType = tuple->elementType(gs);
+            res.main.returnTypeBeforeSolve = tuple->elementType(gs);
         }
     }
 } Tuple_minMax;
@@ -3327,9 +3327,9 @@ public:
             return;
         }
         if (tuple->elems.empty()) {
-            res.returnType = Types::Integer();
+            res.main.returnTypeBeforeSolve = Types::Integer();
         } else {
-            res.returnType = tuple->elementType(gs);
+            res.main.returnTypeBeforeSolve = tuple->elementType(gs);
         }
     }
 } Tuple_sum;
@@ -3348,15 +3348,15 @@ public:
         }
         if (args.args.empty()) {
             if (tuple->elems.empty()) {
-                res.returnType = Types::nilClass();
+                res.main.returnTypeBeforeSolve = Types::nilClass();
             } else {
-                res.returnType = tuple->elementType(gs);
+                res.main.returnTypeBeforeSolve = tuple->elementType(gs);
             }
         } else {
             if (tuple->elems.empty()) {
-                res.returnType = make_type<TupleType>(vector<TypePtr>{});
+                res.main.returnTypeBeforeSolve = make_type<TupleType>(vector<TypePtr>{});
             } else {
-                res.returnType = Types::arrayOf(gs, tuple->elementType(gs));
+                res.main.returnTypeBeforeSolve = Types::arrayOf(gs, tuple->elementType(gs));
             }
         }
     }
@@ -3365,7 +3365,7 @@ public:
 class Tuple_to_a : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = args.selfType;
+        res.main.returnTypeBeforeSolve = args.selfType;
     }
 } Tuple_to_a;
 
@@ -3383,7 +3383,7 @@ public:
                 return;
             }
         }
-        res.returnType = make_type<TupleType>(std::move(elems));
+        res.main.returnTypeBeforeSolve = make_type<TupleType>(std::move(elems));
     }
 } Tuple_concat;
 
@@ -3496,7 +3496,7 @@ public:
             // people's codebases to it.
             //
             // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
-            res.returnType = Types::untyped(Symbols::Magic_UntypedSource_shapeSquareBracketsEq());
+            res.main.returnTypeBeforeSolve = Types::untyped(Symbols::Magic_UntypedSource_shapeSquareBracketsEq());
         }
     }
 } Shape_squareBracketsEq;
@@ -3562,13 +3562,13 @@ public:
             }
         }
 
-        res.returnType = std::move(copyTypePtr);
+        res.main.returnTypeBeforeSolve = std::move(copyTypePtr);
     }
 } Shape_merge;
 
 class Shape_to_hash : public IntrinsicMethod {
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        res.returnType = args.selfType;
+        res.main.returnTypeBeforeSolve = args.selfType;
     }
 } Shape_to_hash;
 
@@ -3782,9 +3782,9 @@ class Magic_checkMatchArray : public IntrinsicMethod {
         }
 
         if (Types::isSubType(gs, testedType, typeTestType)) {
-            res.returnType = Types::trueClass();
+            res.main.returnTypeBeforeSolve = Types::trueClass();
         } else if (Types::glb(gs, testedType, typeTestType).isBottom()) {
-            res.returnType = Types::falseClass();
+            res.main.returnTypeBeforeSolve = Types::falseClass();
         }
     }
 } Magic_checkMatchArray;
@@ -3819,7 +3819,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
     }
 
     if (args.args.size() == 1) {
-        res.returnType = move(dispatched.returnType);
+        res.main.returnTypeBeforeSolve = move(dispatched.returnType);
         return;
     }
 
@@ -3842,7 +3842,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
                 e.replaceWith("Delete extra args", replaceLoc, "");
             }
         }
-        res.returnType = move(dispatched.returnType);
+        res.main.returnTypeBeforeSolve = move(dispatched.returnType);
         return;
     }
 
@@ -3893,7 +3893,7 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
         }
     }
 
-    res.returnType = move(recursiveDispatch.returnType);
+    res.main.returnTypeBeforeSolve = move(recursiveDispatch.returnType);
 }
 
 class Hash_dig : public IntrinsicMethod {
@@ -4036,7 +4036,7 @@ public:
             return;
         }
 
-        res.returnType = Types::arrayOf(gs, recursivelyFlattenArrays(gs, args, element, depth));
+        res.main.returnTypeBeforeSolve = Types::arrayOf(gs, recursivelyFlattenArrays(gs, args, element, depth));
     }
 } Array_flatten;
 
@@ -4061,12 +4061,12 @@ public:
                 unwrappedElems.emplace_back(tuple->elementType(gs));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
-                res.returnType = Types::untypedUntracked();
+                res.main.returnTypeBeforeSolve = Types::untypedUntracked();
                 return;
             }
         }
 
-        res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+        res.main.returnTypeBeforeSolve = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
     }
 } Array_product;
 
@@ -4081,7 +4081,7 @@ public:
         element = ap->targs.front();
 
         auto ret = Types::dropNil(gs, element);
-        res.returnType = Types::arrayOf(gs, ret);
+        res.main.returnTypeBeforeSolve = Types::arrayOf(gs, ret);
     }
 } Array_compact;
 
@@ -4108,20 +4108,20 @@ public:
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to
                 // recover.
-                res.returnType = Types::untypedUntracked();
+                res.main.returnTypeBeforeSolve = Types::untypedUntracked();
                 return;
             }
         }
 
         if (args.block != nullptr) {
-            res.returnType = Types::nilClass();
+            res.main.returnTypeBeforeSolve = Types::nilClass();
 
             if (auto *blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
                 ENFORCE(blockAppliedType->targs.size() == 2, "calls.cc out of date w.r.t. array.rbi");
                 blockAppliedType->targs[1] = make_type<TupleType>(move(unwrappedElems));
             }
         } else {
-            res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+            res.main.returnTypeBeforeSolve = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
         }
     }
 } Array_zip;
@@ -4147,7 +4147,7 @@ public:
             transposed.emplace_back(Types::arrayOf(gs, elem));
         }
 
-        res.returnType = make_type<TupleType>(move(transposed));
+        res.main.returnTypeBeforeSolve = make_type<TupleType>(move(transposed));
     }
 } Array_transpose;
 
@@ -4220,7 +4220,7 @@ public:
 
         std::optional<int> numberOfPositionalBlockParams = args.block->fixedArity();
         if (!numberOfPositionalBlockParams || *numberOfPositionalBlockParams > core::Symbols::MAX_PROC_ARITY) {
-            res.returnType = core::Types::procClass();
+            res.main.returnTypeBeforeSolve = core::Types::procClass();
             return;
         }
         auto untypedWithBlame = core::Types::untyped(Symbols::Magic_UntypedSource_proc());
@@ -4229,7 +4229,7 @@ public:
         targs[0] = isLambda ? make_type<TypeVar>(Symbols::Kernel_lambda_returnType())
                             : make_type<TypeVar>(Symbols::Kernel_proc_returnType());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
-        res.returnType = make_type<core::AppliedType>(procClass, move(targs));
+        res.main.returnTypeBeforeSolve = make_type<core::AppliedType>(procClass, move(targs));
         handleBlockType(gs, res.main, res.returnType);
     }
 } Kernel_proc;
@@ -4369,7 +4369,7 @@ public:
             res.main.errors.emplace_back(std::move(err));
         }
         dispatched.main.errors.clear();
-        res.returnType = move(dispatched.returnType);
+        res.main.returnTypeBeforeSolve = move(dispatched.returnType);
     }
 } Enumerable_toH;
 
@@ -4382,7 +4382,7 @@ public:
         }
         auto rhs = args.args[0]->type;
         if (rhs.isUntyped()) {
-            res.returnType = Types::Boolean();
+            res.main.returnTypeBeforeSolve = Types::Boolean();
             return;
         }
 
@@ -4403,21 +4403,21 @@ public:
         auto rc = Types::getRepresentedClass(gs, args.thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
         if (rc == core::Symbols::noClassOrModule()) {
-            res.returnType = Types::Boolean();
+            res.main.returnTypeBeforeSolve = Types::Boolean();
             return;
         }
         auto lhs = rc.data(gs)->externalType();
         ENFORCE(!lhs.isUntyped(), "lhs of Module.=== must be typed");
         if (Types::isSubType(gs, rhs, lhs)) {
-            res.returnType = Types::trueClass();
+            res.main.returnTypeBeforeSolve = Types::trueClass();
             return;
         }
         if (Types::glb(gs, rhs, lhs).isBottom()) {
-            res.returnType = Types::falseClass();
+            res.main.returnTypeBeforeSolve = Types::falseClass();
             return;
         }
 
-        res.returnType = Types::Boolean();
+        res.main.returnTypeBeforeSolve = Types::Boolean();
     }
 } Module_tripleEq;
 class T_Enum_tripleEq : public IntrinsicMethod {
@@ -4428,7 +4428,7 @@ public:
         }
         auto rhs = args.args[0]->type;
         if (rhs.isUntyped()) {
-            res.returnType = Types::Boolean();
+            res.main.returnTypeBeforeSolve = Types::Boolean();
             return;
         }
 
@@ -4451,16 +4451,16 @@ public:
 
         // We have to allow String on the rhs, in order to support legacy_t_enum_migration_mode.
         if (Types::glb(gs, rhs, lhs).isBottom() && Types::glb(gs, rhs, Types::String()).isBottom()) {
-            res.returnType = Types::falseClass();
+            res.main.returnTypeBeforeSolve = Types::falseClass();
             return;
         }
 
         if (isEnumValueClass(gs, lhs) && Types::isSubType(gs, rhs, lhs)) {
-            res.returnType = Types::trueClass();
+            res.main.returnTypeBeforeSolve = Types::trueClass();
             return;
         }
 
-        res.returnType = Types::Boolean();
+        res.main.returnTypeBeforeSolve = Types::Boolean();
     }
 } T_Enum_tripleEq;
 
