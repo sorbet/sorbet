@@ -1121,7 +1121,7 @@ struct PackageSpecBodyWalk {
                     info.strictDependenciesLevel = make_pair(parsedValue.value(), send.getPosArg(0).loc());
                 } else {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
-                        e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}` or `{}`", send.fun.show(ctx),
+                        e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
                                     "'false'", "'layered'", "'layered_dag'", "'dag'");
                     }
                 }
