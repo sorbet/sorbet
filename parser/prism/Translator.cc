@@ -707,7 +707,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::LVar>(location, gs.enterNameUTF8(name));
         }
-        case PM_LOCAL_VARIABLE_TARGET_NODE: { // Left-hand side of an multi-assignment
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a local variable
+            // ... like `target1, target2 = 1, 2`, `rescue => target`, etc.
             auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
 
             auto name = parser.resolveConstant(localVarTargetNode->name);
