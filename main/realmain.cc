@@ -675,6 +675,7 @@ int realmain(int argc, char *argv[]) {
             auto packageFileRefs = pipeline::reserveFiles(gs, packageFiles);
             auto packages = pipeline::index(*gs, absl::Span<core::FileRef>(packageFileRefs), opts, *workers, nullptr);
             {
+                // TODO: can this be a call to pipeline::setPackagerOptions?
                 core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*gs);
                 core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
                 gs->setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,

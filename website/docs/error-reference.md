@@ -884,6 +884,10 @@ The 4 possible values are:
 - `'layered_dag'`
 - `'dag'`
 
+# 3725
+
+> **TODO** This error code is not yet documented.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
