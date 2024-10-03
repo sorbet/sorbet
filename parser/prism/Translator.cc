@@ -133,7 +133,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto arrayNode = reinterpret_cast<pm_array_node *>(node);
             pm_location_t *loc = &arrayNode->base.location;
 
-            parser::NodeVec sorbetElements = translateMulti(arrayNode->elements);
+            auto sorbetElements = translateMulti(arrayNode->elements);
 
             return make_unique<parser::Array>(parser.translateLocation(loc), move(sorbetElements));
         }
@@ -242,7 +242,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // but not an explicit block with `{ ... }` or `do ... end`
             auto hasBlockArgument = prismBlock != nullptr && PM_NODE_TYPE_P(prismBlock, PM_BLOCK_ARGUMENT_NODE);
 
-            parser::NodeVec args = translateArguments(callNode->arguments, (hasBlockArgument ? 0 : 1));
+            auto args = translateArguments(callNode->arguments, (hasBlockArgument ? 0 : 1));
 
             if (hasBlockArgument) {
                 auto blockPassNode = translate(prismBlock);
@@ -328,7 +328,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto classVarNode = reinterpret_cast<pm_class_variable_read_node *>(node);
             pm_location_t *loc = &classVarNode->base.location;
 
-            std::string_view name = parser.resolveConstant(classVarNode->name);
+            auto name = parser.resolveConstant(classVarNode->name);
 
             return make_unique<parser::CVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -385,7 +385,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &defNode->base.location;
             pm_location_t *declLoc = &defNode->def_keyword_loc;
 
-            std::string_view name = parser.resolveConstant(defNode->name);
+            auto name = parser.resolveConstant(defNode->name);
             auto params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
             auto body = translate(defNode->body);
 
@@ -471,7 +471,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto globalVarReadNode = reinterpret_cast<pm_global_variable_read_node *>(node);
             pm_location_t *loc = &globalVarReadNode->base.location;
 
-            std::string_view name = parser.resolveConstant(globalVarReadNode->name);
+            auto name = parser.resolveConstant(globalVarReadNode->name);
 
             return make_unique<parser::GVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -557,7 +557,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto instanceVarNode = reinterpret_cast<pm_instance_variable_read_node *>(node);
             pm_location_t *loc = &instanceVarNode->base.location;
 
-            std::string_view name = parser.resolveConstant(instanceVarNode->name);
+            auto name = parser.resolveConstant(instanceVarNode->name);
 
             return make_unique<parser::IVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -620,7 +620,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto localVarReadNode = reinterpret_cast<pm_local_variable_read_node *>(node);
             pm_location_t *loc = &localVarReadNode->base.location;
 
-            std::string_view name = parser.resolveConstant(localVarReadNode->name);
+            auto name = parser.resolveConstant(localVarReadNode->name);
 
             return make_unique<parser::LVar>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -628,7 +628,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
             pm_location_t *loc = &localVarTargetNode->base.location;
 
-            std::string_view name = parser.resolveConstant(localVarTargetNode->name);
+            auto name = parser.resolveConstant(localVarTargetNode->name);
 
             return make_unique<parser::LVarLhs>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -700,7 +700,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &optionalKeywordParamNode->base.location;
             pm_location_t *nameLoc = &optionalKeywordParamNode->name_loc;
 
-            std::string_view name = parser.resolveConstant(optionalKeywordParamNode->name);
+            auto name = parser.resolveConstant(optionalKeywordParamNode->name);
             unique_ptr<parser::Node> value = translate(optionalKeywordParamNode->value);
 
             return make_unique<parser::Kwoptarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
@@ -711,7 +711,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *loc = &optionalParamNode->base.location;
             pm_location_t *nameLoc = &optionalParamNode->name_loc;
 
-            std::string_view name = parser.resolveConstant(optionalParamNode->name);
+            auto name = parser.resolveConstant(optionalParamNode->name);
             auto value = translate(optionalParamNode->value);
 
             return make_unique<parser::Optarg>(parser.translateLocation(loc), gs.enterNameUTF8(name),
@@ -855,7 +855,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
             pm_location_t *loc = &requiredKeywordParamNode->base.location;
 
-            std::string_view name = parser.resolveConstant(requiredKeywordParamNode->name);
+            auto name = parser.resolveConstant(requiredKeywordParamNode->name);
 
             return make_unique<parser::Kwarg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -863,7 +863,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto requiredParamNode = reinterpret_cast<pm_required_parameter_node *>(node);
             pm_location_t *loc = &requiredParamNode->base.location;
 
-            std::string_view name = parser.resolveConstant(requiredParamNode->name);
+            auto name = parser.resolveConstant(requiredParamNode->name);
 
             return make_unique<parser::Arg>(parser.translateLocation(loc), gs.enterNameUTF8(name));
         }
@@ -1234,7 +1234,7 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
     }
 
     pm_location_t *loc = &node->base.location;
-    std::string_view name = parser.resolveConstant(node->name);
+    auto name = parser.resolveConstant(node->name);
 
     return make_unique<SorbetLHSNode>(parser.translateLocation(loc), move(parent), gs.enterNameConstant(name));
 }
