@@ -1260,11 +1260,11 @@ struct PackageSpecBodyWalk {
 
 private:
     optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
-        auto value_ = ast::cast_tree<ast::Literal>(arg);
-        if (!value_ || !value_->isString()) {
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
             return nullopt;
         }
-        auto value = value_->asString();
+        auto value = lit->asString();
 
         if (value == core::Names::false_()) {
             return core::packages::StrictDependenciesLevel::False;
