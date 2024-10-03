@@ -210,6 +210,7 @@ public:
     bool visibleToTests_ = false;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
+    optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1127,6 +1128,29 @@ struct PackageSpecBodyWalk {
                 }
             }
         }
+
+        if (send.fun == core::Names::layer()) {
+            if (info.layer.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previous declaration found here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
+                if (parsedValue.has_value()) {
+                    info.layer = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
+                        e.setHeader("Argument to `{}` must be one of: {}", send.fun.show(ctx),
+                                    buildValidLayersStr(ctx.state));
+                    }
+                }
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1259,6 +1283,19 @@ struct PackageSpecBodyWalk {
     }
 
 private:
+    string buildValidLayersStr(const core::GlobalState &gs) {
+        auto &validLayers = gs.packageDB().layers();
+        ENFORCE(validLayers.size() > 0);
+        if (validLayers.size() == 1) {
+            return string(validLayers.front().shortName(gs));
+        }
+        string result = "";
+        for (int i = 0; i < validLayers.size() - 1; i++) {
+            result += fmt::format("{}, ", validLayers[i].shortName(gs));
+        }
+        result += fmt::format("or {}", validLayers.back().shortName(gs));
+        return result;
+    }
     optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto *lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
@@ -1276,6 +1313,19 @@ private:
             return core::packages::StrictDependenciesLevel::Dag;
         }
 
+        return nullopt;
+    }
+
+    optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+        auto &validLayers = gs.packageDB().layers();
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+        if (absl::c_find(validLayers, value) != validLayers.end()) {
+            return value;
+        }
         return nullopt;
     }
 };
