@@ -1183,6 +1183,10 @@ DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Comb
         case DispatchResult::Combinator::AND:
             res.returnType = Types::all(gs, left.returnType, right.returnType);
             break;
+
+        case DispatchResult::Combinator::UNSET:
+            Exception::raise("!!!");
+            break;
     }
 
     res.main = std::move(left.main);
@@ -1202,6 +1206,7 @@ DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Comb
     }
 
     it->secondary = make_unique<DispatchResult>(std::move(right));
+    ENFORCE(it->secondaryKind != DispatchResult::Combinator::UNSET);
 
     return res;
 }

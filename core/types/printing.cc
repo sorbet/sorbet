@@ -387,7 +387,7 @@ string OrType::show(const GlobalState &gs, ShowOptions options) const {
 }
 
 string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("TypeVar({})", sym.data(gs)->name.showRaw(gs));
+    return fmt::format("TypeVar({})", sym.show(gs));
 }
 
 string TypeVar::show(const GlobalState &gs, ShowOptions options) const {

@@ -1000,6 +1000,9 @@ bool solveAndInstantiateDispatchResult(const core::Context &ctx, core::DispatchR
         case core::DispatchResult::Combinator::AND:
             result.returnType = core::Types::all(ctx, instantiated, result.secondary->returnType);
             break;
+        case core::DispatchResult::Combinator::UNSET:
+            Exception::raise("!!!");
+            break;
     }
 
     return true;
@@ -1379,6 +1382,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             case core::DispatchResult::Combinator::AND:
                                 params = core::Types::all(ctx, params, secondaryParams);
                                 break;
+                            case core::DispatchResult::Combinator::UNSET:
+                                Exception::raise("!!!");
+                                break;
                         }
                     } else {
                         // One of the components doesn't have a blockPreType. An error was already
@@ -1611,6 +1617,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             break;
                         case core::DispatchResult::Combinator::AND:
                             tpo.type = core::Types::all(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                        case core::DispatchResult::Combinator::UNSET:
+                            Exception::raise("!!!");
                             break;
                     }
                     tpo.origins.insert(tpo.origins.begin(), make_move_iterator(secondaryTpo.origins.begin()),
