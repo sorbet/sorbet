@@ -1105,28 +1105,23 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::strictDependencies()) {
-            if (send.numPosArgs() == 1) {
-                if (info.strictDependenciesLevel) {
-                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
-                        e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                        e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
-                    }
-                    return;
+            if (info.strictDependenciesLevel.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
+                return;
+            } 
 
-                auto value = ast::cast_tree<ast::Literal>(send.getPosArg(0));
-                if (value && value->isString() && isValidStrictDependenciesOption(value->asString())) {
-                    info.strictDependenciesLevel = optionToEnum(value->asString());
-                } else {
-                    if (auto e = ctx.beginError(value->loc, core::errors::Packager::InvalidStrictDependencies)) {
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+                info.strictDependenciesLevel = parsedValue;
+                if (!parsedValue.has_value()) {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}` or `{}`", send.fun.show(ctx),
                                     "'false'", "'layered'", "'layered_dag'", "'dag'");
                     }
-                    info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
-                    return;
                 }
-            } else {
-                info.strictDependenciesLevel = core::packages::StrictDependenciesLevel::False;
             }
         }
     }
@@ -1261,12 +1256,13 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    bool isValidStrictDependenciesOption(core::NameRef value) {
-        return value == core::Names::false_() || value == core::Names::layered() ||
-               value == core::Names::layeredDag() || value == core::Names::dag();
-    }
+    optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+        auto value_ = ast::cast_tree<ast::Literal>(arg);
+        if (!value_ || !value_->isString()) {
+            return nullopt;
+        }
+        auto value = value_->asString();
 
-    core::packages::StrictDependenciesLevel optionToEnum(core::NameRef value) {
         if (value == core::Names::false_()) {
             return core::packages::StrictDependenciesLevel::False;
         } else if (value == core::Names::layered()) {
@@ -1275,10 +1271,9 @@ private:
             return core::packages::StrictDependenciesLevel::LayeredDag;
         } else if (value == core::Names::dag()) {
             return core::packages::StrictDependenciesLevel::Dag;
-        } else {
-            ENFORCE(false, "invalid strict_dependencies option");
-            return core::packages::StrictDependenciesLevel::False;
         }
+
+        return nullopt;
     }
 };
 
