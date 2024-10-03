@@ -209,6 +209,8 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
+
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
@@ -1101,6 +1103,30 @@ struct PackageSpecBodyWalk {
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
+
+        if (send.fun == core::Names::strictDependencies()) {
+            if (info.strictDependenciesLevel.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
+                                   "Previous declaration found here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+                if (parsedValue.has_value()) {
+                    info.strictDependenciesLevel = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
+                                    "'false'", "'layered'", "'layered_dag'", "'dag'");
+                    }
+                }
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1230,6 +1256,27 @@ struct PackageSpecBodyWalk {
         }
 
         illegalNode(ctx, original);
+    }
+
+private:
+    optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+
+        if (value == core::Names::false_()) {
+            return core::packages::StrictDependenciesLevel::False;
+        } else if (value == core::Names::layered()) {
+            return core::packages::StrictDependenciesLevel::Layered;
+        } else if (value == core::Names::layeredDag()) {
+            return core::packages::StrictDependenciesLevel::LayeredDag;
+        } else if (value == core::Names::dag()) {
+            return core::packages::StrictDependenciesLevel::Dag;
+        }
+
+        return nullopt;
     }
 };
 

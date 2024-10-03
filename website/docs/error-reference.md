@@ -862,6 +862,28 @@ you're sure that it should be okay to import this package, then you can add an
 additional `visible_to` directive in order to allow the import you're trying to
 add.
 
+## 3724
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+All packages have a `strict_dependencies` level, which controls what
+restrictions are applied on imported packages.
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+end
+```
+
+The 4 possible values are:
+
+- `'false'`: No restrictions are placed on dependencies.
+- `'layered'`
+- `'layered_dag'`
+- `'dag'`
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
