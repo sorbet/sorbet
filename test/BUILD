@@ -121,6 +121,21 @@ sh_test(
     ],
 )
 
+# Load the macro that creates a test for every file in the prism_regression folder
+load("//test:prism_location_test.bzl", "prism_test_suite")
+
+# Run the macro
+prism_test_suite(
+    name = "prism_location_tests",
+    srcs = glob(["prism_regression/**/*.rb"]),
+)
+
+# Create a test suite to run all the location tests
+test_suite(
+    name = "prism_location_tests",
+    tags = ["prism_location_test"],
+)
+
 cc_test(
     name = "hello-test",
     size = "small",
