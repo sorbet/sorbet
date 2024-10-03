@@ -864,7 +864,25 @@ add.
 
 ## 3724
 
-> **TODO** This error code is not yet documented.
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+All packages have a `strict_dependencies` level, which controls what
+restrictions are applied on imported packages.
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+end
+```
+
+The 4 possible values are:
+
+- `'false'`: No restrictions are placed on dependencies.
+- `'layered'`
+- `'layered_dag'`
+- `'dag'`
 
 ## 4001
 
