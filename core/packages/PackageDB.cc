@@ -213,6 +213,10 @@ const std::vector<std::string> &PackageDB::skipRBIExportEnforcementDirs() const 
     return skipRBIExportEnforcementDirs_;
 }
 
+const std::vector<core::NameRef> &PackageDB::layers() const {
+    return layers_;
+}
+
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
     return extraPackageFilesDirectoryUnderscorePrefixes_;
 }

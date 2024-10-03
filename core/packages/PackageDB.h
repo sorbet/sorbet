@@ -63,6 +63,7 @@ public:
     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
+    const std::vector<core::NameRef> &layers() const;
 
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
@@ -75,6 +76,7 @@ private:
     std::string errorHint_;
     std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<MangledName> allowRelaxedPackagerChecksFor_;
+    std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by
     // `Packager::setPackageNameOnFiles`. A `FileRef` being out of bounds in this vector is treated as the file having
