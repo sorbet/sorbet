@@ -136,7 +136,8 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
-            if (res.returnType != nullptr) {
+            if (res.main.returnTypeBeforeSolve != nullptr) {
+                res.returnType = res.main.returnTypeBeforeSolve;
                 return res;
             }
         }
@@ -153,7 +154,8 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             DispatchResult res{nullptr, std::move(comp)};
             intrinsic->apply(gs, args, res);
-            if (res.returnType != nullptr) {
+            if (res.main.returnTypeBeforeSolve != nullptr) {
+                res.returnType = res.main.returnTypeBeforeSolve;
                 return res;
             }
         }
@@ -1513,8 +1515,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         component.rebindLoc = bspec.loc;
     }
 
-    TypePtr &resultType = component.returnTypeBeforeSolve;
-
     auto *intrinsic = methodData->getIntrinsic();
     if (intrinsic != nullptr) {
         intrinsic->apply(gs, args, result);
@@ -1526,6 +1526,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             constr = &core::TypeConstraint::EmptyFrozenConstraint;
         }
     }
+
+    TypePtr &resultType = component.returnTypeBeforeSolve;
 
     if (resultType == nullptr) {
         if (args.args.size() == 1 && methodData->name.isSetter(gs)) {
@@ -1570,7 +1572,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
-    result.returnType = component.returnTypeBeforeSolve;
+    if (result.returnType == nullptr) {
+        result.returnType = component.returnTypeBeforeSolve;
+    }
     return result;
 }
 
@@ -2215,6 +2219,9 @@ public:
                 dispatched.main.errors.emplace_back(std::move(err));
             }
             res.main = move(dispatched.main);
+            // Null out the `void` type that comes from the `initialize` method, thus requesting
+            // that dispatchCallSymbol use the type that comes from the `Class#new` method.
+            res.main.returnTypeBeforeSolve = nullptr;
         }
     }
 } Class_new;
@@ -2938,7 +2945,7 @@ public:
             const auto &fieldNameTy = cast_type_nonnull<NamedLiteralType>(args.args[3]->type);
             auto fieldName = fieldNameTy.asName().show(gs);
 
-            auto suggestType = res.returnType;
+            auto suggestType = res.main.returnTypeBeforeSolve;
             if (definingMethodName != core::Names::initialize() && definingMethodName != core::Names::staticInit() &&
                 definingMethodName != core::Names::beforeAngles()) {
                 suggestType = core::Types::any(gs, Types::nilClass(), suggestType);
@@ -4230,7 +4237,7 @@ public:
                             : make_type<TypeVar>(Symbols::Kernel_proc_returnType());
         auto procClass = core::Symbols::Proc(*numberOfPositionalBlockParams);
         res.main.returnTypeBeforeSolve = make_type<core::AppliedType>(procClass, move(targs));
-        handleBlockType(gs, res.main, res.returnType);
+        handleBlockType(gs, res.main, res.main.returnTypeBeforeSolve);
     }
 } Kernel_proc;
 
