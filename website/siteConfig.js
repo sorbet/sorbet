@@ -96,6 +96,11 @@ const users = [
     image: 'img/workforce-logo.png',
     infoLink: 'https://www.workforce.com/',
   },
+  {
+    caption: 'Tines',
+    image: 'img/tines-logo.svg',
+    infoLink: 'https://www.tines.com',
+  },
 ];
 
 const siteConfig = {
