@@ -112,7 +112,6 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
         rightRet = right.dispatchCall(gs, args.withThisRef(right));
     }
 
-    auto resultType = Types::all(gs, leftRet.returnType, rightRet.returnType);
     return DispatchResult::merge(gs, DispatchResult::Combinator::AND, std::move(leftRet), std::move(rightRet));
 }
 
