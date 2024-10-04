@@ -862,6 +862,28 @@ you're sure that it should be okay to import this package, then you can add an
 additional `visible_to` directive in order to allow the import you're trying to
 add.
 
+## 3724
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/strict-dependencies](http://go/strict-dependencies) for more.
+
+All packages have a `strict_dependencies` level, which controls what
+restrictions are applied on imported packages.
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+end
+```
+
+The 4 possible values are:
+
+- `'false'`: No restrictions are placed on dependencies.
+- `'layered'`
+- `'layered_dag'`
+- `'dag'`
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
@@ -1125,13 +1147,15 @@ Instead, they must be used inside a class or module definition.
 
 ## 4019
 
-This error is only reported when running Sorbet with the `--stripe-mode` command
-line flag.
+This error is only reported when running Sorbet with the
+`--uniquely-defined-behavior` command line flag (formerly called
+`--stripe-mode`).
 
 A class defines behavior in multiple files when at least two files would need to
 be run in order to completely load that class. A class definition that only
 serves as a namespace for inner definitions is not considered to have behavior.
-For example, in this example module `A` has behavior in two files:
+For example, in this example module `A` has behavior in two files, and thus
+produces an error in this mode:
 
 ```ruby
 # -- file1.rb --
@@ -1145,7 +1169,9 @@ module A
 end
 ```
 
-However, in this example, module `A` does not have any behavior:
+However, in this example, module `A` is defined in two files, but the second
+definition does not define any behavior (just an empty module body), and thus
+does not produce an error:
 
 ```ruby
 # -- file1.rb --
@@ -1163,8 +1189,15 @@ end
 
 The limitations around what constitutes "defining behavior" is intertwined with
 which files would have to be loaded for a class (like `A` above) to be fully
-loaded. In `--stripe-mode`, there must be at most one file to require to fully
-load a class.
+loaded. When checking `--uniquely-defined-behavior`, it must be possible to
+require at most one file to fully load a class. This property is useful to check
+in Ruby codebases which use an autoloader, like
+[Zeitwerk](https://github.com/fxn/zeitwerk).
+
+**What counts as behavior**? Basically anything with side effects (any method
+calls) and any method definitions. It's easier to describe what **doesn't**
+count: empty class or module definitions, or those class/module definitions
+which only have constant assignments and/or literals.
 
 ## 4021
 
@@ -1200,7 +1233,7 @@ migrating your codebase to the new syntax.
 This error includes an autocorrect you can run to automatically migrate to the
 new syntax:
 
-```
+```bash
 srb tc --isolate-error-code=4021 --autocorrect
 ```
 
@@ -1510,7 +1543,7 @@ suppresses the superclass redefinition error for that class. For example, if the
 class `C` above were a class defined in Sorbet's payload, this would silence the
 errors:
 
-```
+```bash
 srb tc --suppress-payload-superclass-redefinition-for=C
 ```
 
@@ -1824,7 +1857,7 @@ example `Enumerable` needs a `each` method in the target class.
 Failing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 end
@@ -1836,7 +1869,7 @@ the required functionality.
 Passing example in
 [sorbet.run](https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Example%0A%20%20include%20Enumerable%0A%0A%20%20def%20each%28%26blk%29%0A%0A%20%20end%0Aend):
 
-```
+```ruby
 class Example
   include Enumerable
 

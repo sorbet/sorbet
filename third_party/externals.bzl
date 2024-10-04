@@ -194,9 +194,9 @@ def register_sorbet_dependencies():
     # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
     http_archive(
         name = "toolchains_llvm",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/8d9165fd3560f6ff50bc4794972f714f4ba2adaa.tar.gz",
-        sha256 = "238b5a777bbfac3d5ec35cbd45ae2b84ca4118aa8f902ab27894912352e94658",
-        strip_prefix = "bazel-toolchain-8d9165fd3560f6ff50bc4794972f714f4ba2adaa",
+        url = "https://github.com/sorbet/bazel-toolchain/archive/5ed6d56dd7d2466bda56a6237c5ed70336b95ee5.tar.gz",
+        sha256 = "bdc706dbc33811ce4b2089d52564da106c2afbf3723cffbef301cc64e7615251",
+        strip_prefix = "bazel-toolchain-5ed6d56dd7d2466bda56a6237c5ed70336b95ee5",
     )
 
     http_archive(

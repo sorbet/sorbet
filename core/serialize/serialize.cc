@@ -1,7 +1,9 @@
 #include "core/serialize/serialize.h"
 #include "absl/base/casts.h"
+#include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
+#include "common/crypto_hashing/crypto_hashing.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -1089,6 +1091,15 @@ void Serializer::loadGlobalState(GlobalState &gs, const uint8_t *const data) {
 uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
     return SerializerImpl::unpickleGSUUID(p);
+}
+
+string Serializer::fileKey(const core::File &file) {
+    auto path = file.path();
+    string key(path.begin(), path.end());
+    key += "//";
+    auto hashBytes = crypto_hashing::hash64(file.source());
+    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
+    return key;
 }
 
 vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedFile &tree) {

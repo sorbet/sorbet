@@ -18,7 +18,7 @@ foo(newVariable&.foo) do
 # ^ apply-code-action: [C] Extract Variable (this occurrence only)
   d = T.unsafe(1)
   d_ = (d&.foo)&.bar
-#      ^^^^^^^^ apply-code-action: [D] Extract Variable (this occurrence only)
+#       ^^^^^^  apply-code-action: [D] Extract Variable (this occurrence only)
   e = T.unsafe(1)
   e_ = (e&.foo)&.bar
 #       ^ apply-code-action: [E] Extract Variable (this occurrence only)

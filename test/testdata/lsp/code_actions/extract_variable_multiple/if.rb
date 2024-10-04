@@ -51,3 +51,15 @@ def both_match_in_expr(x)
 #   ^ apply-code-action: [L] Extract Variable (all 2 occurrences)
   end
 end
+
+def if_inside_if(x)
+  if T.unsafe(3)
+    if x + x
+  #    ^ apply-code-action: [M] Extract Variable (this occurrence only)
+  #    ^ apply-code-action: [N] Extract Variable (all 2 occurrences)
+      1
+    else
+      2
+    end
+  end
+end

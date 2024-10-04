@@ -28,6 +28,9 @@ NameDef names[] = {
     {"initialize"},
     {"andAnd", "&&"},
     {"orOr", "||"},
+    {"orAsgn", "||="},
+    {"andAsgn", "&&="},
+    {"opAsgn", "op="},
     {"toS", "to_s"},
     {"toA", "to_a"},
     {"toAry", "to_ary"},
@@ -56,6 +59,7 @@ NameDef names[] = {
     {"each"},
     {"subclasses"},
     {"transpose"},
+    {"caseWhen"},
 
     // Used in parser for error recovery
     {"methodNameMissing", "<method-name-missing>"},
@@ -458,6 +462,11 @@ NameDef names[] = {
     {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
+    {"strictDependencies", "strict_dependencies"},
+    {"false_", "false"},
+    {"layered"},
+    {"layeredDag", "layered_dag"},
+    {"dag"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 

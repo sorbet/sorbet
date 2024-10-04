@@ -30,8 +30,27 @@ echo will run with $CONFIG_OPTS
 
 ./bazel build //main:sorbet --strip=always $CONFIG_OPTS
 
+if [ "$kernel_name" != "darwin" ]; then
+  cp bazel-bin/main/sorbet sorbet_bin
+else
+  cp bazel-bin/main/sorbet "sorbet.$platform"
+
+  # TODO(jez) building on arm64 is not tested (no arm64 mac buildkite instances)
+  case "$processor_name" in
+    x86_64) cross_target=darwin-arm64  ;;
+    arm64)  cross_target=darwin-x86_64 ;;
+  esac
+
+  ./bazel build //main:sorbet --strip=always "$CONFIG_OPTS" --config="cross-to-$cross_target"
+  cp bazel-bin/main/sorbet "sorbet.$cross_target"
+
+  # TODO(jez) We might be able to replace this with `apple_universal_binary`?
+  # https://github.com/bazelbuild/rules_apple/blob/35a2fb854a47745deb035d3443008aa15a2c2b85/doc/rules-apple.md#apple_universal_binary
+  lipo -create -output sorbet_bin sorbet.darwin-*
+fi
+
 mkdir gems/sorbet-static/libexec/
-cp bazel-bin/main/sorbet gems/sorbet-static/libexec/
+cp sorbet_bin gems/sorbet-static/libexec/sorbet
 
 rbenv install --skip-existing
 
@@ -110,5 +129,15 @@ if [[ "$platform" == "linux-x86_64" ]]; then
   mv gems/sorbet/sorbet*.gem _out_/gems/
 fi
 
-mkdir -p _out_/$platform
-cp bazel-bin/main/sorbet _out_/$platform/
+if [ "$kernel_name" = "darwin" ]; then
+  mkdir -p _out_/darwin-universal
+  mv sorbet_bin _out_/darwin-universal/sorbet
+
+  for plat in {darwin-x86_64,darwin-arm64}; do
+    mkdir -p "_out_/$plat"
+    mv "sorbet.$plat" "_out_/$plat/sorbet"
+  done
+else
+  mkdir -p "_out_/$platform"
+  mv sorbet_bin "_out_/$platform/sorbet"
+fi

@@ -52,12 +52,12 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
     // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
     auto fileContents = "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n";
-    auto key =
-        realmain::pipeline::fileKey(core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
 
     // Note: We need to introduce a new name, otherwise nametable doesn't change and we don't update the cache.
     auto updatedFileContents = "# typed: true\nclass NewName\nend\n";
-    auto updatedKey = realmain::pipeline::fileKey(
+    auto updatedKey = core::serialize::Serializer::fileKey(
         core::File(string(filePath), string(updatedFileContents), core::File::Type::Normal, 0));
 
     // LSP should write a cache to disk corresponding to initialization state.
@@ -161,8 +161,8 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
     // This file has an error to indirectly assert that LSP is actually typechecking the file during initialization.
     auto fileContents = "# typed: true\nclass Foo extend T::Sig\nsig {returns(Integer)}\ndef bar\n'hello'\nend\nend\n";
-    auto key =
-        realmain::pipeline::fileKey(core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
+    auto key = core::serialize::Serializer::fileKey(
+        core::File(string(filePath), string(fileContents), core::File::Type::Normal, 0));
 
     // Note: We need to introduce a new name, otherwise nametable doesn't change and we don't update the cache.
     auto updatedFileContents = "# typed: true\nclass NewName\nend\n";

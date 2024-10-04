@@ -33,8 +33,8 @@ module A
       GreetingModule.greeting
 
       GreetingModule.greeting
-      print(GreetingModule.greeting)
-      print(GreetingModule.greeting)
+      print((GreetingModule).greeting)
+      print((GreetingModule).greeting)
       print((if T.unsafe(true); Foo; else Integer; end).greeting) # error: does not exist
     end
 

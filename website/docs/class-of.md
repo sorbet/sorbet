@@ -178,7 +178,7 @@ the repl.
 First, we can explain the error on the call to `example2` by looking at
 ancestors:
 
-```
+```plaintext
 ❯ MyClass.singleton_class.ancestors
 => [#<Class:MyClass>, MyInterface::ClassMethods,
     #<Class:Object>, T::Private::Methods::MethodHooks, #<Class:BasicObject>,
@@ -193,7 +193,7 @@ in Ruby will cause `#<Class:MyInterface>` to appear in any ancestors list.
 
 Next, let's explain the other two errors:
 
-```
+```plaintext
 ❯ MyInterface.singleton_class.ancestors
 => [#<Class:MyInterface>,
     T::Private::MixesInClassMethods, T::Helpers, Module, T::Sig, Object,

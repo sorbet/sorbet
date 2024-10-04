@@ -410,7 +410,7 @@ the type `Child` is a subtype of the type `Parent`, then the type `M[Child]` is
 a subtype of the type `M[Parent]` if the type member of `M` is covariant. In
 symbols:
 
-```
+```plaintext
 Child <: Parent  ==>  M[Child] <: M[Parent]
 ```
 
@@ -503,7 +503,7 @@ Specifically, if the type `Child` is a subtype of the type `Parent`, then type
 `M[Parent]` is a subtype of the type `M[Child]` if the type member of `M` is
 contravariant. In symbols:
 
-```
+```plaintext
 Child <: Parent  ==>  M[Parent] <: M[Child]
 ```
 

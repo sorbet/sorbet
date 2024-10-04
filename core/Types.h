@@ -1060,8 +1060,23 @@ struct DispatchComponent {
     TypePtr receiver;
     MethodRef method;
     std::vector<std::unique_ptr<Error>> errors;
-    TypePtr sendTp;
+    // If a call site is given a block, the `DispatchResult::returnType` is not fully known until
+    // after the `SolveConstraint` instruction which is processed after running inference on the
+    // block (and possibly accumulating more constraints).
+    //
+    // This field holds the type which we can later instantiate after solving the constraint.
+    //
+    // Note that this is on the DispatchComponent, which means that it will be the return type for
+    // just this component, unlike `DispatchResult::returnType`, which will be a union/intersection
+    // type in multi-component dispatches.
+    TypePtr returnTypeBeforeSolve;
+    // The declared/expected return type of the `&blk` parameter for the `method` we dispatched to.
+    // Used primarily when processing `BlockReturn` instructions.
+    //
+    // TODO(jez) Is this redundant? Would it make more sense to derive this from blockPreType wherever we need it?
     TypePtr blockReturnType;
+    // The declared type of the `&blk` parameter for the `method` we dispatched to.
+    // Used primarily when LoadYieldParams ascribes types to block variables within a block.
     TypePtr blockPreType;
     ClassOrModuleRef rebind;
     Loc rebindLoc;
@@ -1070,6 +1085,8 @@ struct DispatchComponent {
 
 struct DispatchResult {
     enum class Combinator { OR, AND };
+    // The overall return type of the call expression, accounting for the `Combinator`, where the
+    // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
     TypePtr returnType;
     DispatchComponent main;
     std::unique_ptr<DispatchResult> secondary;

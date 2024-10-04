@@ -209,6 +209,8 @@ public:
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
+    optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
+
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
@@ -1101,6 +1103,30 @@ struct PackageSpecBodyWalk {
                 info.visibleTo_.emplace_back(getPackageName(ctx, target), core::packages::VisibleToType::Normal);
             }
         }
+
+        if (send.fun == core::Names::strictDependencies()) {
+            if (info.strictDependenciesLevel.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
+                                   "Previous declaration found here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+                if (parsedValue.has_value()) {
+                    info.strictDependenciesLevel = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
+                                    "'false'", "'layered'", "'layered_dag'", "'dag'");
+                    }
+                }
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ExpressionPtr &tree) {
@@ -1231,6 +1257,27 @@ struct PackageSpecBodyWalk {
 
         illegalNode(ctx, original);
     }
+
+private:
+    optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+
+        if (value == core::Names::false_()) {
+            return core::packages::StrictDependenciesLevel::False;
+        } else if (value == core::Names::layered()) {
+            return core::packages::StrictDependenciesLevel::Layered;
+        } else if (value == core::Names::layeredDag()) {
+            return core::packages::StrictDependenciesLevel::LayeredDag;
+        } else if (value == core::Names::dag()) {
+            return core::packages::StrictDependenciesLevel::Dag;
+        }
+
+        return nullopt;
+    }
 };
 
 unique_ptr<PackageInfoImpl> definePackage(const core::GlobalState &gs, ast::ParsedFile &package) {
@@ -1350,25 +1397,22 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
     for (auto &visibleTo : info->visibleTo_) {
         populateMangledName(gs, visibleTo.first);
-
-        if (visibleTo.first.mangledName == info->name.mangledName) {
-            if (auto e =
-                    gs.beginError(core::Loc(package.file, visibleTo.first.loc), core::errors::Packager::NoSelfImport)) {
-                e.setHeader("Useless `{}`, because {} cannot import itself", "visible_to", info->name.toString(gs));
-            }
-        }
     }
 
     auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
+    auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
+        gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
-    const auto numPrefixes =
-        extraPackageFilesDirectoryUnderscorePrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
+                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
+                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info->packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = package.file.data(gs).path();
     ENFORCE(FileOps::getFileName(packageFilePath) == PACKAGE_FILE_NAME);
     info->packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
     const string_view shortName = info->name.mangledName.mangledName.shortName(gs);
+    const string slashDirName = absl::StrJoin(info->name.fullName.parts, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName.substr(0, shortName.rfind(core::PACKAGE_SUFFIX));
 
     for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
@@ -1377,7 +1421,7 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
     }
 
-    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+    for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
         std::stringstream ss;
         ss << prefix;
@@ -1402,6 +1446,11 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
         std::string additionalDirPath(ss.str());
         info->packagePathPrefixes.emplace_back(std::move(additionalDirPath));
+    }
+
+    for (const string &prefix : extraPackageFilesDirectorySlashPrefixes) {
+        // Project/FooBar -- each constant name is a file or directory name
+        info->packagePathPrefixes.emplace_back(absl::StrCat(prefix, slashDirName));
     }
 
     return info;

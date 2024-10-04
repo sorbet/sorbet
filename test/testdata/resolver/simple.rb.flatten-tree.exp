@@ -5,7 +5,7 @@ begin
     <emptyTree>
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
-      <emptyTree>
+      Unresolved: Unresolved: Unresolved: <emptyTree>::<C Does>::<C Not>::<C Exist>
     end
   end
   class ::Outer1<<C Outer1>> < (::<todo sym>)

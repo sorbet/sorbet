@@ -1,0 +1,12 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def forwarded_rest_args<<todo method>>(**, &<blk>)
+    begin
+      xs = [:before].concat(::<Magic>.<splat>(*)).concat([:after])
+      <emptyTree>::<C T>.reveal_type(xs)
+    end
+  end
+
+  def start_dotdotdot<<todo method>>(**, *<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+    <emptyTree>
+  end
+end

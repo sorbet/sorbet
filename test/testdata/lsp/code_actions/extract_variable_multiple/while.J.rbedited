@@ -32,12 +32,22 @@ def while_3(x)
 end
 
 def while_4(x)
-  newVariable = 1
   while x + x
 #       ^ apply-code-action: [G] Extract Variable (this occurrence only)
 #       ^ apply-code-action: [H] Extract Variable (all 2 occurrences)
+    newVariable = 1
     newVariable + newVariable
 #       ^ apply-code-action: [I] Extract Variable (this occurrence only)
 #       ^ apply-code-action: [J] Extract Variable (all 2 occurrences)
+  end
+end
+
+def while_5(x)
+  while T.unsafe(1)
+    while x + x
+#         ^ apply-code-action: [K] Extract Variable (this occurrence only)
+#         ^ apply-code-action: [L] Extract Variable (all 2 occurrences)
+      1
+    end
   end
 end

@@ -5,7 +5,7 @@ sidebar_label: Blocks, Procs, & Lambdas
 ---
 
 ```ruby
-T.proc.params(arg0: Arg0Type, arg1: Arg2Type, ...).returns(ReturnType)
+T.proc.params(arg0: Arg0Type, arg1: Arg1Type, ...).returns(ReturnType)
 ```
 
 This is the type of a `Proc` (such as a block passed to a method as a `&blk`

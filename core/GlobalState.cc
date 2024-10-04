@@ -649,6 +649,11 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportAll()).build();
     ENFORCE_NO_TIMER(method == Symbols::PackageSpec_export_all());
 
+    method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::strictDependencies())
+                 .typedArg(Names::arg0(), Types::String())
+                 .build();
+    ENFORCE_NO_TIMER(method == Symbols::PackageSpec_strict_dependencies());
+
     // Magic classes for special proc bindings
     klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());
@@ -2387,6 +2392,7 @@ const packages::PackageDB &GlobalState::packageDB() const {
 }
 
 void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
+                                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                      const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                                      const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                                      const std::vector<std::string> &allowRelaxedPackagerChecksFor,
@@ -2395,6 +2401,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
 
     packageDB_.enabled_ = true;
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
+    packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
 

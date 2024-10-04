@@ -108,10 +108,20 @@ module Fiddle
   # Address of the ruby\_xfree() function
   RUBY_FREE = T.let(T.unsafe(nil), Integer)
 
+  # [`SIZEOF_BOOL`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_BOOL)
+  #
+  # size of a bool
+  SIZEOF_BOOL = T.let(T.unsafe(nil), Integer)
+
   # [`SIZEOF_CHAR`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_CHAR)
   #
   # size of a char
   SIZEOF_CHAR = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_CONST_STRING`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_CONST_STRING)
+  #
+  # size of a const char\*
+  SIZEOF_CONST_STRING = T.let(T.unsafe(nil), Integer)
 
   # [`SIZEOF_DOUBLE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_DOUBLE)
   #
@@ -127,6 +137,26 @@ module Fiddle
   #
   # size of an int
   SIZEOF_INT = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_INT16_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_INT16_T)
+  #
+  # size of a int16\_t
+  SIZEOF_INT16_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_INT32_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_INT32_T)
+  #
+  # size of a int32\_t
+  SIZEOF_INT32_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_INT64_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_INT64_T)
+  #
+  # size of a int64\_t
+  SIZEOF_INT64_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_INT8_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_INT8_T)
+  #
+  # size of a int8\_t
+  SIZEOF_INT8_T = T.let(T.unsafe(nil), Integer)
 
   # [`SIZEOF_INTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_INTPTR_T)
   #
@@ -163,20 +193,75 @@ module Fiddle
   # size of a ssize\_t
   SIZEOF_SSIZE_T = T.let(T.unsafe(nil), Integer)
 
+  # [`SIZEOF_UCHAR`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UCHAR)
+  #
+  # size of a unsigned char
+  SIZEOF_UCHAR = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_UINT`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UINT)
+  #
+  # size of an unsigned int
+  SIZEOF_UINT = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_UINT16_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UINT16_T)
+  #
+  # size of a uint16\_t
+  SIZEOF_UINT16_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_UINT32_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UINT32_T)
+  #
+  # size of a uint32\_t
+  SIZEOF_UINT32_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_UINT64_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UINT64_T)
+  #
+  # size of a uint64\_t
+  SIZEOF_UINT64_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_UINT8_T`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_UINT8_T)
+  #
+  # size of a uint8\_t
+  SIZEOF_UINT8_T = T.let(T.unsafe(nil), Integer)
+
   # [`SIZEOF_UINTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_UINTPTR_T)
   #
   # size of a uintptr\_t
   SIZEOF_UINTPTR_T = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_ULONG`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_ULONG)
+  #
+  # size of a unsigned long
+  SIZEOF_ULONG = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_ULONG_LONG`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_ULONG_LONG)
+  #
+  # size of a unsigned long long
+  SIZEOF_ULONG_LONG = T.let(T.unsafe(nil), Integer)
+
+  # [`SIZEOF_USHORT`](https://docs.ruby-lang.org/en/3.3/Fiddle.html#SIZEOF_USHORT)
+  #
+  # size of a unsigned short
+  SIZEOF_USHORT = T.let(T.unsafe(nil), Integer)
 
   # [`SIZEOF_VOIDP`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_VOIDP)
   #
   # size of a void\*
   SIZEOF_VOIDP = T.let(T.unsafe(nil), Integer)
 
+  # [`TYPE_BOOL`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_BOOL-constant)
+  #
+  # C type - bool
+  TYPE_BOOL = T.let(T.unsafe(nil), Integer)
+
   # [`TYPE_CHAR`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_CHAR)
   #
   # C type - char
   TYPE_CHAR = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_CONST_STRING`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_CONST_STRING-constant)
+  #
+  # C type - const char\*
+  TYPE_CONST_STRING = T.let(T.unsafe(nil), Integer)
 
   # [`TYPE_DOUBLE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_DOUBLE)
   #
@@ -192,6 +277,26 @@ module Fiddle
   #
   # C type - int
   TYPE_INT = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_INT16_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_INT16_T-constant)
+  #
+  # C type - int16\_t
+  TYPE_INT16_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_INT32_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_INT32_T-constant)
+  #
+  # C type - int32\_t
+  TYPE_INT32_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_INT64_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_INT64_T-constant)
+  #
+  # C type - int64\_t
+  TYPE_INT64_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_INT8_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_INT8_T-constant)
+  #
+  # C type - int8\_t
+  TYPE_INT8_T = T.let(T.unsafe(nil), Integer)
 
   # [`TYPE_INTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_INTPTR_T)
   #
@@ -228,10 +333,60 @@ module Fiddle
   # C type - ssize\_t
   TYPE_SSIZE_T = T.let(T.unsafe(nil), Integer)
 
+  # [`TYPE_UCHAR`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UCHAR-constant)
+  #
+  # C type - unsigned char
+  TYPE_UCHAR = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_UINT`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UINT-constant)
+  #
+  # C type - unsigned int
+  TYPE_UINT = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_UINT16_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UINT16_T-constant)
+  #
+  # C type - unsigned int16\_t
+  TYPE_UINT16_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_UINT32_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UINT32_T-constant)
+  #
+  # C type - unsigned int32\_t
+  TYPE_UINT32_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_UINT64_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UINT64_T-constant)
+  #
+  # C type - unsigned int64\_t
+  TYPE_UINT64_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_UINT8_T`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_UINT8_T-constant)
+  #
+  # C type - unsigned int8\_t
+  TYPE_UINT8_T = T.let(T.unsafe(nil), Integer)
+
   # [`TYPE_UINTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_UINTPTR_T)
   #
   # C type - uintptr\_t
   TYPE_UINTPTR_T = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_ULONG`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_ULONG-constant)
+  #
+  # C type - unsigned long
+  TYPE_ULONG = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_ULONG_LONG`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_ULONG-constant)
+  #
+  # C type - unsigned long long
+  TYPE_ULONG_LONG = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_USHORT`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_USHORT-constant)
+  #
+  # C type - unsigned short
+  TYPE_USHORT = T.let(T.unsafe(nil), Integer)
+
+  # [`TYPE_VARIADIC`](https://www.rubydoc.info/stdlib/fiddle/Fiddle#TYPE_VARIADIC-constant)
+  #
+  # C type - ...
+  TYPE_VARIADIC = T.let(T.unsafe(nil), Integer)
 
   # [`TYPE_VOID`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_VOID)
   #

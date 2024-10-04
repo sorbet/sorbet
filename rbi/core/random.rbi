@@ -824,5 +824,5 @@ module SecureRandom
   sig do
     params(extra_timestamp_bits: T.nilable(Integer)).returns(String)
   end
-  def self.uuid_v7(extra_timestamp_bits:); end
+  def self.uuid_v7(extra_timestamp_bits: 0); end
 end

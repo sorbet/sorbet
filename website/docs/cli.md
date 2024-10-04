@@ -1,11 +1,12 @@
 ---
 id: cli
-title: Command Line Reference
+title: Command Line Quickstart
+sidebar_label: CLI Quickstart
 ---
 
 Sorbet has a wealth of command line options; we'll only be covering a subset of
-them here. For the full set of available options, check the help at the command
-line:
+them here. See the [Command Line Reference](cli-ref.md) for the full set of
+available options, or check the help at the command line:
 
 ```bash
 # to learn about available srb subcommands
@@ -44,7 +45,7 @@ For a full description of the config file format, see the output of
 To skip loading the config file (i.e., to create minimal repro examples to
 report an issue), there's the `--no-config` flag:
 
-```
+```bash
 srb tc --no-config ...
 ```
 
@@ -121,7 +122,7 @@ In this example, though, we know that the `xs` array will always be non-empty.
 If, as the programmer, we know this invariant will always hold, we can use
 `T.must` to fix the problem. Sorbet even suggests that in the error message:
 
-```
+```plaintext
 editor.rb:6: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
      6 |  xs[0] + 1
                 ^
@@ -139,7 +140,7 @@ Errors: 1
 To accept this suggestion, we can re-run Sorbet with the `-a` or `--autocorrect`
 command line flag:
 
-```
+```bash
 ❯ srb tc --autocorrect
 ```
 
@@ -150,7 +151,7 @@ By default, Sorbet will apply **all** autocorrect suggestions when the `-a` or
 suggestions, use the `--isolate-error-code` flag with a Sorbet error code. For
 example, using the error code in the above error message:
 
-```
+```bash
 ❯ srb tc --autocorrect --isolate-error-code=7003
 ```
 
@@ -166,7 +167,7 @@ example to fix a supposed typo. Sometimes these "did you mean" suggestions can
 accidentally change the meaning of a program. To disable these did you mean
 suggestions, use `--did-you-mean=false`:
 
-```
+```bash
 ❯ srb tc --autocorrect --did-you-mean=false
 ```
 
@@ -198,7 +199,7 @@ example(1)
 But if we pass the `--suggest-unsafe` flag to Sorbet, it will suggest an
 autocorrect:
 
-```
+```plaintext
 ❯ srb tc --suggest-unsafe
 editor.rb:6: Expected `Integer` but found `T.any(Integer, String)` for argument `arg0` https://srb.help/7002
      6 |  1 + x
@@ -237,7 +238,7 @@ Sorbet also allows customizing the unsafe suggestions: given
 `--suggest-unsafe=<custom method>`, Sorbet will use the `<custom method>` in
 place of `T.unsafe` in all suggestions. For example:
 
-```
+```bash
 ❯ srb tc --suggest-unsafe=XXX.sorbet_0_5_1234 --autocorrect
 ```
 

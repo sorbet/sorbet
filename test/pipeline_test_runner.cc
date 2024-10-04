@@ -263,6 +263,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
 
 void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAssertion>> &assertions) {
     vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     vector<std::string> skipRBIExportEnforcementDirs;
     vector<std::string> allowRelaxedPackagerChecksFor;
@@ -271,6 +272,12 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
     if (extraDirUnderscore.has_value()) {
         extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
+    }
+
+    auto extraDirSlashDeprecated =
+        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
+    if (extraDirSlashDeprecated.has_value()) {
+        extraPackageFilesDirectorySlashDeprecatedPrefixes.emplace_back(extraDirSlashDeprecated.value());
     }
 
     auto extraDirSlash = StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash", assertions);
@@ -286,8 +293,9 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashPrefixes,
-                               {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+        gs->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
     }
 }
 
@@ -349,7 +357,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     gs->typedSuper = BooleanPropertyAssertion::getValue("typed-super", assertions).value_or(true);
     // TODO(jez) Allow allow suppressPayloadSuperclassRedefinitionFor in a testdata test assertion?
 
-    if (!BooleanPropertyAssertion::getValue("stripe-mode", assertions).value_or(false)) {
+    if (!BooleanPropertyAssertion::getValue("uniquely-defined-behavior", assertions).value_or(false)) {
         gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
     }
 

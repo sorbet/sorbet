@@ -1,0 +1,138 @@
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "requestMethod": "textDocument/documentSymbol",
+    "result": [
+        {
+            "name": "MyEnum",
+            "detail": "",
+            "kind": 5,
+            "range": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 7,
+                    "character": 3
+                }
+            },
+            "selectionRange": {
+                "start": {
+                    "line": 2,
+                    "character": 0
+                },
+                "end": {
+                    "line": 2,
+                    "character": 22
+                }
+            },
+            "children": [
+                {
+                    "name": "X",
+                    "detail": "",
+                    "kind": 14,
+                    "range": {
+                        "start": {
+                            "line": 4,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 5
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 4,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 4,
+                            "character": 5
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "Y",
+                    "detail": "",
+                    "kind": 14,
+                    "range": {
+                        "start": {
+                            "line": 5,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 5,
+                            "character": 5
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 5,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 5,
+                            "character": 5
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "serialize",
+                    "detail": "",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 7,
+                            "character": 3
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 2,
+                            "character": 22
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "self.sealed_subclasses",
+                    "detail": "",
+                    "kind": 6,
+                    "range": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 2,
+                            "character": 22
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 2,
+                            "character": 0
+                        },
+                        "end": {
+                            "line": 2,
+                            "character": 22
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        }
+    ]
+}

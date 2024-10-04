@@ -175,10 +175,11 @@ struct Options {
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
-    bool stripeMode = false;
+    bool uniquelyDefinedBehavior = false;
     bool stripePackages = false;
     std::string stripePackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
+    std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
     std::string typedSource = "";
@@ -221,7 +222,7 @@ struct Options {
 
     std::string metricsFile;
     std::string metricsRepo = "none";
-    std::string metricsPrefix = "ruby_typer.unknown.";
+    std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
     std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here

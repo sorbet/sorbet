@@ -36,6 +36,10 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (name == core::Names::beforeAngles()) {
         return true;
     }
+    // internal representation of enums as classes
+    if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(gs)->name.isTEnumName(gs)) {
+        return true;
+    }
     // static-init for a file
     if (name.kind() == core::NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
