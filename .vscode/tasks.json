@@ -51,7 +51,19 @@
             "presentation": {
                 "reveal": "always"
             }
-        }
+        },
+        {
+            "label": "(Re)Generate Prism test",
+            "type": "shell",
+            "command": "TEST_NAME=${input:test_name}; $EDITOR -w test/prism_regression/$TEST_NAME.rb; ./bazel-bin/main/sorbet --stop-after=parser --print=parse-tree test/prism_regression/$TEST_NAME.rb > test/prism_regression/$TEST_NAME.parse-tree.exp; $EDITOR test/prism_regression/$TEST_NAME.parse-tree.exp",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
     ],
     "inputs": [
         {
