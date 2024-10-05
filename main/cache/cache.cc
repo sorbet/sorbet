@@ -28,30 +28,59 @@ namespace {
  * Returns 'true' if the given GlobalState was originally created from the current contents of
  * kvstore (e.g., kvstore has not since been modified).
  */
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
+bool kvstoreChangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
     const uint8_t *maybeGsBytes = kvstore->read(core::serialize::Serializer::GLOBAL_STATE_KEY).data;
-    const bool storedUidMatches =
-        maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
-    const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;
-    return storedUidMatches || noPreviouslyStoredUuid;
+    if (maybeGsBytes) {
+        // If `GLOBAL_STATE_KEY` is in kvstore but it's not what `gs.kvstoreUuid` contains,
+        // this implies that some other process wrote a different GlobalState to the cache.
+        return gs.kvstoreUuid != core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
+    } else {
+        // `GLOBAL_STATE_KEY` is not in kvstore, which implies the cache is empty.
+        // If kvstoreUuid != 0, that implies we tried to write GlobalState to the cache once before,
+        // and since we don't see `GLOBAL_STATE_KEY` in there now, someone else overwrote/dropped
+        // the cache.
+        return gs.kvstoreUuid != 0;
+    }
 }
 
 /**
- * Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens.
+ * Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if the cache
+ * now contains the contents of the current GlobalState (either because it already contained it, or
+ * it was just written).
  */
 bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
-        // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
-        // into the database.
-        if (kvstoreUnchangedSinceGsCreation(gs, kvstore)) {
-            // Generate a new UUID, since this GS has changed since it was read.
-            gs.kvstoreUuid = Random::uniformU4();
-            kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY,
-                           core::serialize::Serializer::storePayloadAndNameTable(gs));
-            return true;
-        }
+    if (!kvstore) {
+        return false;
     }
-    return false;
+
+    if (gs.hadCriticalError()) {
+        // If an exception or InternalError happened, something has gone wrong, and we don't know
+        // what the contents of GlobalState might be. Don't write into the cache.
+        return false;
+    }
+
+    // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
+    // into the database.
+    if (kvstoreChangedSinceGsCreation(gs, kvstore)) {
+        // Either
+        //   - `GLOBAL_STATE_KEY` is not in kvstore && `gs.kvstoreUuid != 0` (kvstore overwritten
+        //      with empty cache after we'd already written GlobalState to the cache once), or
+        //   - `GLOBAL_STATE_KEY` is in kvstore, BUT it's not what `gs.kvstoreUuid` contains
+        //      (some other process wrote a different GlobalState to the cache)
+        return false;
+    }
+
+    // Generate a new UUID, since this GS has changed since it was read.
+    if (!gs.wasModified()) {
+        // Optimization: no need to generate a new UUID and write to the cache, because it's already
+        // in the cache
+        return true;
+    }
+
+    gs.kvstoreUuid = Random::uniformU4();
+    kvstore->write(core::serialize::Serializer::GLOBAL_STATE_KEY,
+                   core::serialize::Serializer::storePayloadAndNameTable(gs));
+    return true;
 }
 
 bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
@@ -131,12 +160,12 @@ unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, uniqu
     }
 
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    if (kvstoreUnchangedSinceGsCreation(gs, ownedKvstore)) {
-        return ownedKvstore;
+    if (kvstoreChangedSinceGsCreation(gs, ownedKvstore)) {
+        // Some other process has written to kvstore; don't use.
+        return nullptr;
     }
 
-    // Some other process has written to kvstore; don't use.
-    return nullptr;
+    return ownedKvstore;
 }
 
 unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore> kvstore, const options::Options &opts,
@@ -146,8 +175,8 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         return kvstore;
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    auto wroteGlobalState = retainGlobalState(gs, ownedKvstore);
-    if (wroteGlobalState) {
+    auto cacheHasGlobalState = retainGlobalState(gs, ownedKvstore);
+    if (cacheHasGlobalState) {
         cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();
         kvstore = OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
