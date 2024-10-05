@@ -14,25 +14,24 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
-test_args=()
-
 if [[ "linux" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-linux")
+  test_config="--config=buildfarm-sanitized-linux"
 elif [[ "mac" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-mac")
+  test_config="--config=buildfarm-sanitized-mac"
 fi
 
 export JOB_NAME=test-static-sanitized
 source .buildkite/tools/setup-bazel.sh
 
-echo -- will run with "${test_args[@]}"
+echo -- will run with "${test_config}"
 
 err=0
 
 mkdir -p _out_
 
-# NOTE: we skip the compiler tests because llvm doesn't interact well with the sanitizer
-test_args+=(
+test_args=(
+  "$test_config"
+  --test_summary=terse
   "--build_tests_only"
   "//..."
 )
@@ -40,7 +39,6 @@ test_args+=(
 ./bazel test \
   --experimental_generate_json_trace_profile \
   --profile=_out_/profile.json \
-  --test_summary=terse \
   "${test_args[@]}" || err=$?
 
 if [ "$err" -ne 0 ]; then
@@ -54,7 +52,7 @@ if [ "$err" -ne 0 ]; then
 
   # Take the lines that start with target labels.
   # Lines look like "//foo  FAILED in 10s"
-  { ./bazel test --test_summary=terse "${test_args[@]}" || true ; } | \
+  { ./bazel test "${test_args[@]}" || true ; } | \
     grep '^//' | \
     sed -e 's/ .*/ \\/' | \
     sed -e 's/^/  /' >> "$failing_tests"
@@ -68,6 +66,13 @@ if [ "$err" -ne 0 ]; then
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+
+  if grep -q '//website:update_cli_ref_test' "$failing_tests"; then
+    # TODO(jez) Trying to debug why this test flakes on macOS overnight
+    bazel run "$test_config" //website:update_cli_ref || true
+    git diff website/docs/cli-ref.md || true
+    cp website/docs/cli-ref.md _out_/website-docs-cli-ref.md
+  fi
 
   exit "$err"
 fi
