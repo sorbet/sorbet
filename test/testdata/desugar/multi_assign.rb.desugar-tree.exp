@@ -5,6 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C A> = <assignTemp>$3.[](0)
     <emptyTree>::<C B> = <assignTemp>$3.[](1)
     <emptyTree>::<C C> = <assignTemp>$3.[](2)
+    ::<Magic>.<mlhs use all>(<assignTemp>$2, 3)
     <assignTemp>$2
   end
 
@@ -21,8 +22,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
             c = <assignTemp>$5.[](0)
             d = <assignTemp>$5.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$4, 2)
             <assignTemp>$4
           end
+          ::<Magic>.<mlhs use all>(<assignTemp>$2, 3)
           <assignTemp>$2
         end
         begin
@@ -30,6 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 2, 0)
           a.[]=(b, <assignTemp>$7.[](0))
           c = <assignTemp>$7.[](1)
+          ::<Magic>.<mlhs use all>(<assignTemp>$6, 2)
           <assignTemp>$6
         end
         begin
@@ -67,6 +71,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <assignTemp>$17 = ::<Magic>.<expand-splat>(<assignTemp>$16, 2, 0)
           a.x=(<assignTemp>$17.[](0))
           b = <assignTemp>$17.[](1)
+          ::<Magic>.<mlhs use all>(<assignTemp>$16, 2)
           <assignTemp>$16
         end
         begin

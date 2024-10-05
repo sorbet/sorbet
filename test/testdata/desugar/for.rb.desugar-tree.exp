@@ -30,6 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               <assignTemp>$2 = ::<Magic>.<splat>(forTemp)
               <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 1, 0)
               a = <assignTemp>$3.[](0)
+              ::<Magic>.<mlhs use all>(<assignTemp>$2, 1)
               <assignTemp>$2
             end
             <self>.puts(a.inspect())
@@ -48,6 +49,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
               a = <assignTemp>$5.[](0)
               b = <assignTemp>$5.[](1)
+              ::<Magic>.<mlhs use all>(<assignTemp>$4, 2)
               <assignTemp>$4
             end
             <self>.puts(a.inspect())
@@ -65,6 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               $c = <assignTemp>$8.[](2)
               d = <assignTemp>$8.[](3)
               <emptyTree>::<C E>.e=(<assignTemp>$8.[](4))
+              ::<Magic>.<mlhs use all>(<assignTemp>$7, 5)
               <assignTemp>$7
             end
             begin
@@ -86,6 +89,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               $c = <assignTemp>$10.[](2)
               d = <assignTemp>$10.[](3)
               <emptyTree>::<C E>.e=(<assignTemp>$10.[](4))
+              ::<Magic>.<mlhs use all>(<assignTemp>$9, 5)
               <assignTemp>$9
             end
             <self>.puts(@a.inspect())

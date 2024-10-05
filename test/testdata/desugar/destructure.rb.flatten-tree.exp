@@ -14,6 +14,7 @@ begin
           <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
           x = <assignTemp>$4.[](0)
           y = <assignTemp>$4.[](1)
+          ::<Magic>.<mlhs use all>(<assignTemp>$3, 2)
           <assignTemp>$3
         end
         begin
@@ -25,6 +26,7 @@ begin
                 <assignTemp>$7$1 = ::<Magic>.<expand-splat>(<assignTemp>$6$1, 2, 0)
                 a$1 = <assignTemp>$7$1.[](0)
                 b$1 = <assignTemp>$7$1.[](1)
+                ::<Magic>.<mlhs use all>(<assignTemp>$6$1, 2)
                 <assignTemp>$6$1
               end
               <emptyTree>

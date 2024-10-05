@@ -12,6 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
     <self>.x().var=(<assignTemp>$3.[](0))
     y = <assignTemp>$3.[](1)
+    ::<Magic>.<mlhs use all>(<assignTemp>$2, 2)
     <assignTemp>$2
   end
 
@@ -20,6 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
     baaaar = <assignTemp>$5.[](0)
     naaar = <assignTemp>$5.[](1)
+    ::<Magic>.<mlhs use all>(<assignTemp>$4, 2)
     <assignTemp>$4
   end
 
@@ -159,8 +161,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <assignTemp>$11 = <assignTemp>$10.[](1)
       <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 1, 0)
       x = <assignTemp>$12.[](0)
+      ::<Magic>.<mlhs use all>(<assignTemp>$11, 1)
       <assignTemp>$11
     end
+    ::<Magic>.<mlhs use all>(<assignTemp>$9, 2)
     <assignTemp>$9
   end
 

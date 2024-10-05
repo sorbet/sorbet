@@ -1,6 +1,6 @@
 # typed: true
 
-a, b = [1]
+a, b = [1] # error: Attempted to unpack 1-tuple into 2 targets
 T.assert_type!(a, Integer)
 T.assert_type!(b, NilClass)
 

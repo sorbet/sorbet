@@ -95,12 +95,17 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
     if (auto *oargs = parser::cast_node<parser::Args>(argnode.get())) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
-            if (parser::isa_node<parser::Mlhs>(arg.get())) {
-                core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
-                args.emplace_back(MK::Local(arg->loc, temporary));
-                unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
-                unique_ptr<parser::Node> destructure =
-                    make_unique<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
+            if (auto *argMlhs = parser::cast_node<parser::Mlhs>(arg.get())) {
+                auto argLoc = arg->loc;
+                auto temporary = dctx.freshNameUnique(core::Names::destructureArg());
+                args.emplace_back(MK::Local(argLoc, temporary));
+                auto lvarNode = make_unique<parser::LVar>(argLoc, temporary);
+                if (!argMlhs->exprs.empty()) {
+                    // Remove the parens on the Mlhs node in the Massign, so that the autocorrect to
+                    // insert extra args puts them in the right spot (inside the parens)
+                    arg->loc = argMlhs->exprs.front()->loc.join(argMlhs->exprs.back()->loc);
+                }
+                auto destructure = make_unique<parser::Masgn>(argLoc, std::move(arg), std::move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(dctx, std::move(destructure)));
             } else if (parser::isa_node<parser::Kwnilarg>(arg.get())) {
                 // TODO implement logic for `**nil` args
@@ -458,6 +463,13 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
 
             i++;
         }
+    }
+
+    if (!didSplat) {
+        // Passes down the lhs->loc via the second argument, because that argument should never
+        // appear in error messages (it's always correctly an integer by construction).
+        stats.emplace_back(MK::Send2(loc, MK::Magic(loc), core::Names::mlhsUseAll(), loc.copyWithZeroLength(),
+                                     MK::Local(loc, tempRhs), MK::Int(lhs->loc, before)));
     }
 
     auto expanded = MK::Send3(loc, MK::Magic(loc), core::Names::expandSplat(), loc.copyWithZeroLength(),

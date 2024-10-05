@@ -69,6 +69,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
             x = <assignTemp>$3.[](0)
             x = <assignTemp>$3.[](1)
+            ::<Magic>.<mlhs use all>(<assignTemp>$2, 2)
             <assignTemp>$2
           end
         end
