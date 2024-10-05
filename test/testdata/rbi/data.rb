@@ -17,7 +17,7 @@ class ValidInitializers
   T.assert_type!(NotFound, T.class_of(NotFound))
   not_found = NotFound.new
   T.assert_type!(notfound, NotFound)
-  
+
   T.assert_type!(Point, T.class_of(Point))
 
   point = Point.new(1, 2)
