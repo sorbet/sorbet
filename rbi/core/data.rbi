@@ -123,13 +123,12 @@ class Data < Object
   # ```
   sig do
     params(
-        arg0: T.any(Symbol, String),
-        arg1: T.any(Symbol, String),
+        args: T.any(Symbol, String),
         blk: T.untyped,
     )
     .returns(Data)
-  end
-  def self.define(arg0, *arg1, &blk); end
+  ens
+  def self.define(*args, &blk); end
 
   # Returns an array of member names of the data class:
   #
