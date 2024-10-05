@@ -1,7 +1,7 @@
 # typed: true
 
 class Define
-  Data.define # error: Not enough arguments provided for method `Data.define`. Expected: `1+`, got: `0`
+  Data.define
   Data.define(:x, :y)
   Data.define("x", "y")
 
@@ -10,9 +10,14 @@ class Define
   end
 end
 
+NotFound = Data.define
 Point = Data.define(:x, :y)
 
 class ValidInitializers
+  T.assert_type!(NotFound, T.class_of(NotFound))
+  not_found = NotFound.new
+  T.assert_type!(notfound, NotFound)
+  
   T.assert_type!(Point, T.class_of(Point))
 
   point = Point.new(1, 2)
