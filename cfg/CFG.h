@@ -167,6 +167,7 @@ public:
     static constexpr int MIN_LOOP_FIELD = -1;
     // static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
+    static constexpr int MIN_LOOP_NEVER_READ = -4;
 
     // special ruby region id offsets for exception handling
     static constexpr int HANDLERS_REGION_OFFSET = 1;
