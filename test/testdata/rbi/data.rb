@@ -77,3 +77,18 @@ class InstanceMethods
   new_point = point.with(x: 5)
   T.assert_type!(new_point, Point)
 end
+
+Money = Data.define(:amount, :currency) do
+  extend T::Sig
+
+  sig { params(amount: Numeric, currency: String).void }
+  def initialize(amount:, currency:) = super
+end
+
+class TypedData
+  money = Money.new(amount: 10, currency: "CAD")
+  T.assert_type!(money.amount, Numeric)
+  T.assert_type!(money.currency, String)
+
+  Money.new(amount: "10", currency: "CAD") # error: Expected `Numeric` but found `String("10")` for argument `amount`
+end
