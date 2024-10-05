@@ -127,7 +127,7 @@ class Data < Object
         blk: T.untyped,
     )
     .returns(Data)
-  ens
+  end
   def self.define(*args, &blk); end
 
   # Returns an array of member names of the data class:
