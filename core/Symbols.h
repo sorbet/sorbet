@@ -525,6 +525,7 @@ public:
     // A version of findMemberTransitive that skips looking in the members of the current symbol,
     // instead looking only in the members of any parent.
     MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
+    std::vector<MethodRef>findParentMethodTransitiveAll(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
     /* transitively finds a member with the most similar name */
@@ -651,6 +652,7 @@ private:
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
     SymbolRef findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
+    std::vector<SymbolRef> findParentMemberTransitiveAllInternal(const GlobalState &gs, NameRef name, int maxDepth, bool dealias) const;
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
