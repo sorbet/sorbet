@@ -468,6 +468,7 @@ NameDef names[] = {
     {"layeredDag", "layered_dag"},
     {"dag"},
     {"PackageSpec", "PackageSpec", true},
+    {"PackageSpec_Storage", "<PackageSpec>", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
 
     // GlobalState initEmpty()

@@ -11,7 +11,7 @@ example/__package.rb:7: Unable to resolve constant `SUggestThis` https://srb.hel
                  ^^^^^^^^^^^^^^^^^^
     suggestion/__package.rb:3: `Suggestion` defined here
      3 |class Suggestion < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^
 
 example/__package.rb:9: Unable to resolve constant `SUggestion` https://srb.help/5002
      9 |  import SUggestion
@@ -22,7 +22,7 @@ example/__package.rb:9: Unable to resolve constant `SUggestion` https://srb.help
                  ^^^^^^^^^^
     suggestion/__package.rb:3: `Suggestion` defined here
      3 |class Suggestion < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^
 
 example/__package.rb:11: Unable to resolve constant `A` https://srb.help/5002
     11 |  import A::B::C
