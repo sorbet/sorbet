@@ -114,6 +114,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         return nullptr;
 
     switch (PM_NODE_TYPE(node)) {
+        case PM_ALIAS_METHOD_NODE: { // The `alias` keyword, like `alias new_method old_method`
+            auto aliasMethodNode = reinterpret_cast<pm_alias_method_node *>(node);
+            auto *loc = &aliasMethodNode->base.location;
+
+            auto newName = translate(aliasMethodNode->new_name);
+            auto oldName = translate(aliasMethodNode->old_name);
+
+            return make_unique<parser::Alias>(parser.translateLocation(loc), move(newName), move(oldName));
+        }
         case PM_AND_NODE: { // operator `&&` and `and`
             auto andNode = reinterpret_cast<pm_and_node *>(node);
             auto *loc = &andNode->base.location;
@@ -195,7 +204,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::BlockPass>(parser.translateLocation(loc), move(expr));
         }
-        case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end
+        case PM_BLOCK_NODE: { // An explicit block passed to a method call, i.e. `{ ... }` or `do ... end`
             unreachable("PM_BLOCK_NODE has special handling in translateCallWithBlock, see its docs for details.");
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
@@ -1033,7 +1042,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
 
         case PM_ALIAS_GLOBAL_VARIABLE_NODE:
-        case PM_ALIAS_METHOD_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
