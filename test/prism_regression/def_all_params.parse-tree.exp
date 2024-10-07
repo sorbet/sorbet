@@ -40,13 +40,13 @@ Begin {
       args = Args {
         args = [
           Restarg {
-            name = <P <U *> $2>
+            name = <U *>
           }
           Kwrestarg {
-            name = <P <U **> $3>
+            name = <P <U **> $2>
           }
           Blockarg {
-            name = <P <U &> $4>
+            name = <P <U &> $3>
           }
         ]
       }
