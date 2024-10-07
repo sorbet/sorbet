@@ -2266,7 +2266,10 @@ class Array < Object
         arg0: Integer,
         random: Random::Formatter,
     )
-    .returns(T.any(T.nilable(Elem), T::Array[Elem]))
+    .returns(T::Array[Elem])
+  end
+  sig do
+    returns(Elem)
   end
   def sample(arg0=T.unsafe(nil), random: T.unsafe(nil)); end
 
