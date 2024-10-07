@@ -105,7 +105,7 @@ Begin {
       args = Args {
         args = [
           Restarg {
-            name = <P <U *> $2>
+            name = <U *>
           }
         ]
       }
