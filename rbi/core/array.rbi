@@ -2240,6 +2240,15 @@ class Array < Object
   end
   def rotate!(arg0=T.unsafe(nil)); end
 
+  ### NOTE: Array#sample cannot be typed well in Sorbet. See:
+  ###
+  ### - All the past, unsuccesful attempts:
+  ###   <https://github.com/sorbet/sorbet/pulls?q=is%3Apr+array+sample+is%3Aclosed>
+  ### - This FAQ entry:
+  ###   <https://sorbet.org/docs/faq#sigs-are-vague-for-stdlib-methods-that-accept-keyword-arguments--have-multiple-return-types>
+  ### - The underlying issue:
+  ###   <https://github.com/sorbet/sorbet/issues/37>
+
   # Choose a random element or `n` random elements from the array.
   #
   # The elements are chosen by using random and unique indices into the array in
