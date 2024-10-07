@@ -886,7 +886,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto name = parser.resolveConstant(prismName);
                 sorbetName = gs.enterNameUTF8(name);
             } else { // An anonymous rest parameter, like `def foo(*)`
-                sorbetName = gs.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter);
+                sorbetName = core::Names::star();
                 nameLoc = loc;
             }
 
