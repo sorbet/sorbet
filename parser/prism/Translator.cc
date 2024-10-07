@@ -114,6 +114,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         return nullptr;
 
     switch (PM_NODE_TYPE(node)) {
+        case PM_ALIAS_GLOBAL_VARIABLE_NODE: { // // The `alias` keyword used for global vars, like `alias $new $old`
+            auto aliasGlobalVariableNode = reinterpret_cast<pm_alias_global_variable_node *>(node);
+            auto *loc = &aliasGlobalVariableNode->base.location;
+
+            auto newName = translate(aliasGlobalVariableNode->new_name);
+            auto oldName = translate(aliasGlobalVariableNode->old_name);
+
+            return make_unique<parser::Alias>(parser.translateLocation(loc), move(newName), move(oldName));
+        }
         case PM_ALIAS_METHOD_NODE: { // The `alias` keyword, like `alias new_method old_method`
             auto aliasMethodNode = reinterpret_cast<pm_alias_method_node *>(node);
             auto *loc = &aliasMethodNode->base.location;
@@ -1041,7 +1050,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Yield>(parser.translateLocation(loc), move(yieldArgs));
         }
 
-        case PM_ALIAS_GLOBAL_VARIABLE_NODE:
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:

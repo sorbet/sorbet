@@ -16,3 +16,13 @@ Begin {
         val = <U new_method2>
       }
     }
+    Alias {
+      from = GVar {
+        name = <U $new_global>
+      }
+      to = GVar {
+        name = <U $old_global>
+      }
+    }
+  ]
+}
