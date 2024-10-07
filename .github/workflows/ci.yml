@@ -16,5 +16,14 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3.0
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.9.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
       - name: Run tests
         run: ./bazel test //test:prism --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=all
