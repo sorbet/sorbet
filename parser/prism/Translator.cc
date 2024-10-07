@@ -1086,6 +1086,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::While>(parser.translateLocation(loc), move(predicate), move(statements));
         }
+        case PM_X_STRING_NODE: { // An interpolated x-string, like `/usr/bin/env ls`
+            auto strNode = reinterpret_cast<pm_string_node *>(node);
+            pm_location_t *loc = &strNode->base.location;
+
+            auto unescaped = &strNode->unescaped;
+            auto source = parser.extractString(unescaped);
+
+            // TODO: handle different string encodings
+            unique_ptr<parser::Node> string =
+                make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
+
+            NodeVec nodes{};
+            nodes.emplace_back(move(string)); // When can a Sorbet XString node have multiple child nodes?
+
+            return make_unique<parser::XString>(parser.translateLocation(loc), move(nodes));
+        }
         case PM_YIELD_NODE: { // The `yield` keyword, like `yield`, `yield 1, 2, 3`
             auto yieldNode = reinterpret_cast<pm_yield_node *>(node);
             pm_location_t *loc = &yieldNode->base.location;
@@ -1130,7 +1146,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
-        case PM_X_STRING_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
