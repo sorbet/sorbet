@@ -416,7 +416,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto defNode = reinterpret_cast<pm_def_node *>(node);
 
             auto loc = parser.translateLocation(&defNode->base.location);
-            loc.join(parser.translateLocation(&defNode->end_keyword_loc));
 
             auto declLoc = parser.translateLocation(&defNode->def_keyword_loc);
             declLoc = declLoc.join(parser.translateLocation(&defNode->name_loc));
