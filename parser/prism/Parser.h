@@ -51,7 +51,7 @@ public:
     Parser &operator=(const Parser &) = default;
 
     Node parse_root();
-    core::LocOffsets translateLocation(pm_location_t *location);
+    core::LocOffsets translateLocation(pm_location_t location);
     std::string_view resolveConstant(pm_constant_id_t constant_id);
     std::string_view extractString(pm_string_t *string);
 
