@@ -920,11 +920,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             pm_location_t *declLoc = &classNode->class_keyword_loc;
 
             auto expr = translate(classNode->expression);
-            unique_ptr<parser::Node> body;
-
-            if (classNode->body != nullptr) {
-                body = translate(classNode->body);
-            }
+            auto body = translate(classNode->body);
 
             return make_unique<parser::SClass>(location, parser.translateLocation(declLoc), move(expr), move(body));
         }
