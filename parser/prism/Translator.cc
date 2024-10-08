@@ -1011,6 +1011,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_TRUE_NODE: { // The `true` keyword
             return translateSimpleKeyword<pm_true_node, parser::True>(node);
         }
+        case PM_UNDEF_NODE: { // The `undef` keyword, like `undef :method_to_undef
+            auto undefNode = reinterpret_cast<pm_undef_node *>(node);
+            pm_location_t *loc = &undefNode->base.location;
+
+            auto names = translateMulti(undefNode->names);
+
+            return make_unique<parser::Undef>(parser.translateLocation(loc), move(names));
+        }
         case PM_UNLESS_NODE: { // An `unless` branch, either in a statement or modifier form.
             auto unlessNode = reinterpret_cast<pm_if_node *>(node);
             auto *loc = &unlessNode->base.location;
@@ -1097,7 +1105,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
-        case PM_UNDEF_NODE:
         case PM_X_STRING_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
