@@ -432,7 +432,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
         }
         case PM_FALSE_NODE: { // The `false` keyword
-            return translateSimpleKeyword<pm_false_node, parser::False>(node);
+            return translateSimpleKeyword<parser::False>(node);
         }
         case PM_FIND_PATTERN_NODE: { // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
             auto findPatternNode = reinterpret_cast<pm_find_pattern_node *>(node);
@@ -469,13 +469,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Float>(location, std::to_string(floatNode->value));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
-            return translateSimpleKeyword<pm_forwarding_arguments_node, parser::ForwardedArgs>(node);
+            return translateSimpleKeyword<parser::ForwardedArgs>(node);
         }
         case PM_FORWARDING_PARAMETER_NODE: { // The `...` parameter in a method definition, like `def foo(...)`
-            return translateSimpleKeyword<pm_forwarding_parameter_node, parser::ForwardArg>(node);
+            return translateSimpleKeyword<parser::ForwardArg>(node);
         }
         case PM_FORWARDING_SUPER_NODE: { // `super` with no `(...)`
-            return translateSimpleKeyword<pm_forwarding_super_node, parser::ZSuper>(node);
+            return translateSimpleKeyword<parser::ZSuper>(node);
         }
         case PM_GLOBAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a global variable, e.g. `$g &&= false`
             return translateOpAssignment<pm_global_variable_and_write_node, parser::AndAsgn, parser::GVarLhs>(node);
@@ -711,7 +711,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Next>(location, move(arguments));
         }
         case PM_NIL_NODE: { // The `nil` keyword
-            return translateSimpleKeyword<pm_nil_node, parser::Nil>(node);
+            return translateSimpleKeyword<parser::Nil>(node);
         }
         case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`, such as in `def foo(**nil)` or `h in { k: v, **nil}`
             unreachable("PM_NO_KEYWORDS_PARAMETER_NODE is handled separately in `PM_HASH_PATTERN_NODE` and "
@@ -775,8 +775,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         break;
                     }
                     case PM_NO_KEYWORDS_PARAMETER_NODE: { // `**nil`
-                        params.emplace_back(
-                            translateSimpleKeyword<pm_no_keywords_parameter_node, parser::Kwnilarg>(prismKwRestNode));
+                        params.emplace_back(translateSimpleKeyword<parser::Kwnilarg>(prismKwRestNode));
                         break;
                     }
                     default:
@@ -832,7 +831,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Rational>(location, value);
         }
         case PM_REDO_NODE: { // The `redo` keyword
-            return translateSimpleKeyword<pm_redo_node, parser::Redo>(node);
+            return translateSimpleKeyword<parser::Redo>(node);
         }
         case PM_REGULAR_EXPRESSION_NODE: { // A regular expression literal, e.g. `/foo/`
             auto regularExpressionNode = reinterpret_cast<pm_regular_expression_node *>(node);
@@ -901,10 +900,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Return>(location, move(returnValues));
         }
         case PM_RETRY_NODE: { // The `retry` keyword
-            return translateSimpleKeyword<pm_retry_node, parser::Retry>(node);
+            return translateSimpleKeyword<parser::Retry>(node);
         }
         case PM_SELF_NODE: { // The `self` keyword
-            return translateSimpleKeyword<pm_self_node, parser::Self>(node);
+            return translateSimpleKeyword<parser::Self>(node);
         }
         case PM_SINGLETON_CLASS_NODE: { // A singleton class, like `class << self ... end`
             auto classNode = reinterpret_cast<pm_singleton_class_node *>(node);
@@ -916,13 +915,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::SClass>(location, translateLoc(declLoc), move(expr), move(body));
         }
         case PM_SOURCE_ENCODING_NODE: { // The `__ENCODING__` keyword
-            return translateSimpleKeyword<pm_source_encoding_node, parser::EncodingLiteral>(node);
+            return translateSimpleKeyword<parser::EncodingLiteral>(node);
         }
         case PM_SOURCE_FILE_NODE: { // The `__FILE__` keyword
-            return translateSimpleKeyword<pm_source_file_node, parser::FileLiteral>(node);
+            return translateSimpleKeyword<parser::FileLiteral>(node);
         }
         case PM_SOURCE_LINE_NODE: { // The `__LINE__` keyword
-            return translateSimpleKeyword<pm_source_line_node, parser::LineLiteral>(node);
+            return translateSimpleKeyword<parser::LineLiteral>(node);
         }
         case PM_SPLAT_NODE: { // A splat, like `*a` in an array literal, method call, or array pattern
             auto splatNode = reinterpret_cast<pm_splat_node *>(node);
@@ -965,7 +964,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Symbol>(location, gs.enterNameUTF8(source));
         }
         case PM_TRUE_NODE: { // The `true` keyword
-            return translateSimpleKeyword<pm_true_node, parser::True>(node);
+            return translateSimpleKeyword<parser::True>(node);
         }
         case PM_UNDEF_NODE: { // The `undef` keyword, like `undef :method_to_undef
             auto undefNode = reinterpret_cast<pm_undef_node *>(node);
@@ -1247,8 +1246,7 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
 }
 
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
-template <typename PrismNode, typename SorbetNode>
-unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *node) {
+template <typename SorbetNode> unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *node) {
     return make_unique<SorbetNode>(translateLoc(node->location));
 }
 
