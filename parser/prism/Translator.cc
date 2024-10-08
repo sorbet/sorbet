@@ -26,7 +26,7 @@ template <typename... TArgs>
 template <typename PrismAssignmentNode, typename SorbetLHSNode>
 unique_ptr<parser::Assign> Translator::translateAssignment(pm_node_t *untypedNode) {
     auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
-    auto location = translate(node->base.location);
+    auto location = translate(untypedNode->location);
     auto rhs = translate(node->value);
 
     unique_ptr<parser::Node> lhs;
@@ -53,7 +53,7 @@ unique_ptr<SorbetAssignmentNode> Translator::translateOpAssignment(pm_node_t *un
         "Invalid operator node type. Must be one of `parser::OpAssign`, `parser::AndAsgn` or `parser::OrAsgn`.");
 
     auto node = reinterpret_cast<PrismAssignmentNode *>(untypedNode);
-    auto location = translate(node->base.location);
+    auto location = translate(untypedNode->location);
 
     unique_ptr<parser::Node> lhs;
     auto rhs = translate(node->value);
@@ -1245,9 +1245,7 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
 template <typename PrismNode, typename SorbetNode>
 unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *untypedNode) {
-    auto node = reinterpret_cast<PrismNode *>(untypedNode);
-
-    return make_unique<SorbetNode>(translate(node->base.location));
+    return make_unique<SorbetNode>(translate(untypedNode->location));
 }
 
 }; // namespace sorbet::parser::Prism
