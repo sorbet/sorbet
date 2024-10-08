@@ -548,6 +548,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::If>(parser.translateLocation(loc), move(predicate), move(ifTrue), move(ifFalse));
         }
+        case PM_IMAGINARY_NODE: { // An imaginary number literal, like `1.0i`
+            auto imaginaryNode = reinterpret_cast<pm_imaginary_node *>(node);
+            pm_location_t *loc = &imaginaryNode->base.location;
+
+            const uint8_t *start = loc->start;
+            const uint8_t *end = loc->end;
+
+            // `-1` drops the trailing `i` end of the value
+            auto value = std::string_view(reinterpret_cast<const char *>(start), end - start - 1);
+
+            return make_unique<parser::Complex>(parser.translateLocation(loc), move(value));
+        }
         case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
             auto inNode = reinterpret_cast<pm_in_node *>(node);
             auto *loc = &inNode->base.location;
@@ -1061,7 +1073,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
         case PM_GLOBAL_VARIABLE_TARGET_NODE:
-        case PM_IMAGINARY_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INDEX_TARGET_NODE:
