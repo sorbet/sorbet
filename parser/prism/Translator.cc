@@ -959,10 +959,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<pm_retry_node, parser::Retry>(node);
         }
         case PM_SELF_NODE: { // The `self` keyword
-            auto selfNode = reinterpret_cast<pm_self_node *>(node);
-            pm_location_t *loc = &selfNode->base.location;
-
-            return make_unique<parser::Self>(parser.translateLocation(loc));
+            return translateSimpleKeyword<pm_self_node, parser::Self>(node);
         }
         case PM_SINGLETON_CLASS_NODE: { // A singleton class, like `class << self ... end`
             auto classNode = reinterpret_cast<pm_singleton_class_node *>(node);
