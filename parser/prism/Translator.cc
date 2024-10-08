@@ -640,6 +640,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::DString>(parser.translateLocation(loc), move(sorbetParts));
         }
+        case PM_INTERPOLATED_X_STRING_NODE: {
+            auto interpolatedXStringNode = reinterpret_cast<pm_interpolated_x_string_node *>(node);
+
+            pm_location_t *loc = &interpolatedXStringNode->base.location;
+
+            auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
+
+            return make_unique<parser::XString>(parser.translateLocation(loc), move(sorbetParts));
+        }
         case PM_IT_LOCAL_VARIABLE_READ_NODE: { // The `it` implicit parameter added in Ruby 3.4, e.g. `a.map { it + 1 }`
             [[fallthrough]];
         }
@@ -1098,7 +1107,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 make_unique<parser::String>(parser.translateLocation(loc), gs.enterNameUTF8(source));
 
             NodeVec nodes{};
-            nodes.emplace_back(move(string)); // When can a Sorbet XString node have multiple child nodes?
+            nodes.emplace_back(move(string)); // Multiple nodes is only possible for interpolated x strings.
 
             return make_unique<parser::XString>(parser.translateLocation(loc), move(nodes));
         }
@@ -1129,7 +1138,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:
-        case PM_INTERPOLATED_X_STRING_NODE:
         case PM_LAMBDA_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
