@@ -212,7 +212,7 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
 
-    // PackageInfoImpl is the only implementation of PackageInfoImpl
+    // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
@@ -1509,7 +1509,6 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 
 } // namespace
 
-// Validate that the package file is marked `# typed: strict`.
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
@@ -1522,25 +1521,43 @@ void validatePackage(core::Context ctx) {
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
 
-    if (!skipImportVisibilityCheck) {
-        for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-            // this might mean the other package doesn't exist, but that
-            // should have been caught already
-            if (!otherPkg.exists()) {
-                continue;
+        // this might mean the other package doesn't exist, but that
+        // should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
+
+        if (pkgInfo.strictDependenciesLevel
+                .value_or(make_pair(core::packages::StrictDependenciesLevel::False, core::LocOffsets::none()))
+                .first != core::packages::StrictDependenciesLevel::False) {
+            auto &otherPkgImpl = PackageInfoImpl::from(otherPkg);
+            if (pkgInfo.layer.has_value() && otherPkgImpl.layer.has_value()) {
+                auto possibleLayers = packageDB.layers();
+                auto pkgIndex =
+                    std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, pkgInfo.layer.value().first));
+                auto otherPkgIndex =
+                    std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, otherPkgImpl.layer.value().first));
+                if (pkgIndex < otherPkgIndex) {
+                    if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+                        e.setHeader("Layering violation");
+                    }
+                }
             }
+        }
 
-            const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
-                continue;
-            }
+        const auto &visibleTo = otherPkg.visibleTo();
+        if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+            continue;
+        }
 
-            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
-                continue;
-            }
+        if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
+            continue;
+        }
 
+        if (!skipImportVisibilityCheck) {
             bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) {
                 return visibilityApplies(other, absPkg.fullName());
             });
