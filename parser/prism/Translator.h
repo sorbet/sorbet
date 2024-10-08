@@ -55,7 +55,7 @@ private:
     std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
-    std::unique_ptr<SorbetLHSNode> translateConst(PrismLhsNode *untypedNode);
+    std::unique_ptr<SorbetLHSNode> translateConst(PrismLhsNode *node);
 };
 
 } // namespace sorbet::parser::Prism
