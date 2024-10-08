@@ -11,9 +11,9 @@ Node Parser::parse_root() {
     return Node{*this, root};
 };
 
-core::LocOffsets Parser::translateLocation(pm_location_t *location) {
-    uint32_t start = static_cast<uint32_t>(location->start - storage->parser.start);
-    uint32_t end = static_cast<uint32_t>(location->end - storage->parser.start);
+core::LocOffsets Parser::translateLocation(pm_location_t location) {
+    uint32_t start = static_cast<uint32_t>(location.start - storage->parser.start);
+    uint32_t end = static_cast<uint32_t>(location.end - storage->parser.start);
 
     return core::LocOffsets{start, end};
 }
