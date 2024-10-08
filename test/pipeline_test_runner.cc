@@ -285,12 +285,16 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
+    std::vector<std::string> defaultLayers = {"library", "application"};
+    auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
     {
         core::UnfreezeNameTable packageNS(*gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs->unfreezePackages();
-        gs->setPackagerOptions(
-            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
-            extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor, "PACKAGE_ERROR_HINT");
+        gs->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                               extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                               extraPackageFilesDirectorySlashPrefixes, {}, allowRelaxedPackagerChecksFor,
+                               packagerLayers, "PACKAGE_ERROR_HINT");
     }
 }
 

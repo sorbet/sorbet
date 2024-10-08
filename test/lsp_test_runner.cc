@@ -580,6 +580,9 @@ TEST_CASE("LSPTest") {
             if (skipImportVisibility.has_value()) {
                 opts->allowRelaxedPackagerChecksFor.emplace_back(skipImportVisibility.value());
             }
+            std::vector<std::string> defaultLayers = {"library", "application"};
+            opts->packagerLayers =
+                StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
         }
         opts->disableWatchman = true;
         opts->rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
