@@ -25,6 +25,8 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
+      - name: Verify parse trees
+        run: ./tools/scripts/verify_prism_regression_tests.sh
       - name: Run tests
         run: ./bazel test //test:prism --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=errors
       - name: Run location tests
