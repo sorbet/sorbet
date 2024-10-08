@@ -1,0 +1,39 @@
+Begin {
+  stmts = [
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, world!"'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, parentheses!"'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, braces!"'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, square brackets!"'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, slashes!"'>
+        }
+      ]
+    }
+  ]
+}
