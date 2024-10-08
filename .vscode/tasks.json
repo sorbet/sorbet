@@ -6,7 +6,7 @@
         {
             "label": "Build with Prism",
             "type": "shell",
-            "command": "./bazel build //main:sorbet --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "command": "./bazel build //main:sorbet --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=all",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -18,7 +18,7 @@
         {
             "label": "Run all Prism tests",
             "type": "shell",
-            "command": "./bazel test //test:prism --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "command": "./bazel test //test:prism --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=all",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -28,9 +28,9 @@
             }
         },
         {
-            "label": "Run a single Prism tests",
+            "label": "Run a single Prism test",
             "type": "shell",
-            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=all",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -64,6 +64,30 @@
                 "reveal": "always"
             }
         },
+        {
+            "label": "Run all Prism location tests",
+            "type": "shell",
+            "command": "./bazel test //test:prism_location_tests --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism location test",
+            "type": "shell",
+            "command": "./bazel test //test:prism_regression_${input:test_name}_location_test --config=dbg --define RUBY_PATH=$RUBY_ROOT",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        }
     ],
     "inputs": [
         {

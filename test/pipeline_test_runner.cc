@@ -85,15 +85,34 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",  "parse-tree-whitequark",
-                                          "desugar-tree",     "desugar-tree-raw", "rewrite-tree",
-                                          "rewrite-tree-raw", "index-tree",       "index-tree-raw",
-                                          "symbol-table",     "symbol-table-raw", "name-tree",
-                                          "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
-                                          "flatten-tree",     "flatten-tree-raw", "cfg",
-                                          "cfg-raw",          "cfg-text",         "autogen",
-                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
-                                          "autocorrects",     "minimized-rbi",    "rbi-gen"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-json-with-locs",
+                                          "parse-tree-whitequark",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "cfg-text",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt",
+                                          "autocorrects",
+                                          "minimized-rbi",
+                                          "rbi-gen"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -211,13 +230,14 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, absl::Span<core
             nodes = parser::Parser::run(*gs, file, settings);
         } else if (parser == realmain::options::Parser::PRISM) {
             std::cout << "Parsing with prism" << std::endl;
-            nodes = realmain::pipeline::runPrismParser(*gs, file, false);
+            nodes = realmain::pipeline::runPrismParser(*gs, file, false, {});
         }
 
         handler.drainErrors(*gs);
         handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
         handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
         handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved(*gs, "parse-tree-json-with-locs", [&]() { return nodes->toJSONWithLocs(*gs, file); });
 
         // Desugarer
         ast::ParsedFile desugared;

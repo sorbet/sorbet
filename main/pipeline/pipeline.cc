@@ -133,7 +133,8 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser) {
+unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef file, bool stopAfterParser,
+                                        const options::Printers &print) {
     auto source = file.data(gs).source();
 
     core::UnfreezeNameTable nameTableAccess(gs);
@@ -145,7 +146,22 @@ unique_ptr<parser::Node> runPrismParser(core::GlobalState &gs, core::FileRef fil
         return std::unique_ptr<parser::Node>();
     }
 
-    return Prism::Translator(parser, gs).translate(std::move(root));
+    auto nodes = Prism::Translator(parser, gs).translate(std::move(root));
+
+    if (print.ParseTree.enabled) {
+        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+    }
+    if (print.ParseTreeJson.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+    }
+    if (print.ParseTreeJsonWithLocs.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+    }
+    if (print.ParseTreeWhitequark.enabled) {
+        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+    }
+
+    return nodes;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -225,7 +241,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (parser == options::Parser::SORBET) {
                 parseTree = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
             } else if (parser == options::Parser::PRISM) {
-                parseTree = runPrismParser(lgs, file, stopAfterParser);
+                parseTree = runPrismParser(lgs, file, stopAfterParser, print);
             } // Any other option would have been handled in the options parser
 
             if (stopAfterParser) {
