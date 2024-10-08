@@ -318,18 +318,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = reinterpret_cast<pm_class_node *>(node);
 
-            auto declLoc = parser.translateLocation(&classNode->class_keyword_loc);
-
             auto name = translate(classNode->constant_path);
-            declLoc = declLoc.join(name->loc);
-
+            auto declLoc = parser.translateLocation(&classNode->class_keyword_loc).join(name->loc);
             auto superclass = translate(classNode->superclass);
+            auto body = translate(classNode->body);
 
             if (superclass != nullptr) {
                 declLoc = declLoc.join(superclass->loc);
             }
-
-            auto body = translate(classNode->body);
 
             return make_unique<parser::Class>(location, declLoc, move(name), move(superclass), move(body));
         }
