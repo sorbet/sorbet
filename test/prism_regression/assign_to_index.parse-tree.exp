@@ -255,5 +255,119 @@ Begin {
         val = "14"
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U target>
+              args = [
+              ]
+            }
+            method = <U []=>
+            args = [
+              Integer {
+                val = "0"
+              }
+            ]
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U target>
+              args = [
+              ]
+            }
+            method = <U []=>
+            args = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "15"
+          }
+          Integer {
+            val = "16"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U target>
+              args = [
+              ]
+            }
+            method = <U []=>
+            args = [
+              Integer {
+                val = "2"
+              }
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = <U target>
+              args = [
+              ]
+            }
+            method = <U []=>
+            args = [
+              Integer {
+                val = "4"
+              }
+              Integer {
+                val = "5"
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "17"
+          }
+          Integer {
+            val = "18"
+          }
+          Integer {
+            val = "19"
+          }
+          Integer {
+            val = "20"
+          }
+        ]
+      }
+    }
+    Send {
+      receiver = Send {
+        receiver = NULL
+        method = <U target>
+        args = [
+        ]
+      }
+      method = <U []=>
+      args = [
+        Integer {
+          val = "21"
+        }
+      ]
+    }
   ]
 }

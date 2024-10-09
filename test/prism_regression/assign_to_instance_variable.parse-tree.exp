@@ -114,5 +114,27 @@ Begin {
         val = "14"
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          IVarLhs {
+            name = <U @target1>
+          }
+          IVarLhs {
+            name = <U @target2>
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "15"
+          }
+          Integer {
+            val = "16"
+          }
+        ]
+      }
+    }
   ]
 }

@@ -294,6 +294,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
             return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
+        case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
+            // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
+            auto callTargetNode = reinterpret_cast<pm_call_target_node *>(node);
+
+            auto receiver = translate(callTargetNode->receiver);
+            auto name = parser.resolveConstant(callTargetNode->name);
+            auto messageLoc = translateLoc(callTargetNode->message_loc);
+
+            auto flags = static_cast<pm_call_node_flags>(callTargetNode->base.flags);
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+                // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
+                // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
+                return make_unique<parser::CSend>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                                                  NodeVec{});
+            } else { // Regular send, e.g. `self.target1, self.target2 = 1, 2`
+                return make_unique<parser::Send>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                                                 NodeVec{});
+            }
+        }
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
             auto caseMatchNode = reinterpret_cast<pm_case_match_node *>(node);
 
@@ -341,6 +360,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = parser.resolveConstant(classVarNode->name);
 
             return make_unique<parser::CVar>(location, gs.enterNameUTF8(name));
+        }
+        case PM_CLASS_VARIABLE_TARGET_NODE: { // Target of an indirect write to a class variable
+            // ... like `@@target1, @@target2 = 1, 2`, `rescue => @@target`, etc.
+            auto classVariableTargetNode = reinterpret_cast<pm_class_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(classVariableTargetNode->name);
+
+            return make_unique<parser::CVarLhs>(location, gs.enterNameUTF8(name));
         }
         case PM_CLASS_VARIABLE_WRITE_NODE: { // Regular assignment to a class variable, e.g. `@@a = 1`
             return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
@@ -493,6 +520,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::GVar>(location, gs.enterNameUTF8(name));
         }
+        case PM_GLOBAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a global variable
+            // ... like `$target1, $target2 = 1, 2`, `rescue => $target`, etc.
+            auto globalVariableTargetNode = reinterpret_cast<pm_global_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(globalVariableTargetNode->name);
+
+            return make_unique<parser::GVarLhs>(location, gs.enterNameUTF8(name));
+        }
         case PM_GLOBAL_VARIABLE_WRITE_NODE: { // Regular assignment to a global variable, e.g. `$g = 1`
             return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
         }
@@ -569,6 +604,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INDEX_OR_WRITE_NODE: { // Or-assignment to an index, e.g. `a[i] ||= true`
             return translateOpAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
         }
+        case PM_INDEX_TARGET_NODE: { // Target of an indirect write to an indexed expression
+            // ... like `target[0], target[1] = 1, 2`, `rescue => target[0]`, etc.
+            auto indexedTargetNode = reinterpret_cast<pm_index_target_node *>(node);
+
+            auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
+            auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
+            auto receiver = translate(indexedTargetNode->receiver);
+            auto arguments = translateArguments(indexedTargetNode->arguments);
+
+            return make_unique<parser::Send>(location, std::move(receiver), core::Names::squareBracketsEq(),
+                                             lBracketLoc, std::move(arguments));
+        }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
         }
@@ -585,6 +632,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto name = parser.resolveConstant(instanceVarNode->name);
 
             return make_unique<parser::IVar>(location, gs.enterNameUTF8(name));
+        }
+        case PM_INSTANCE_VARIABLE_TARGET_NODE: { // Target of an indirect write to an instance variable
+            // ... like `@target1, @target2 = 1, 2`, `rescue => @target`, etc.
+            auto instanceVariableTargetNode = reinterpret_cast<pm_instance_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(instanceVariableTargetNode->name);
+
+            return make_unique<parser::IVarLhs>(location, gs.enterNameUTF8(name));
         }
         case PM_INSTANCE_VARIABLE_WRITE_NODE: { // Regular assignment to an instance variable, e.g. `@iv = 1`
             return translateAssignment<pm_instance_variable_write_node, parser::IVarLhs>(node);
@@ -652,7 +707,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::LVar>(location, gs.enterNameUTF8(name));
         }
-        case PM_LOCAL_VARIABLE_TARGET_NODE: { // Left-hand side of an multi-assignment
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a local variable
+            // ... like `target1, target2 = 1, 2`, `rescue => target`, etc.
             auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
 
             auto name = parser.resolveConstant(localVarTargetNode->name);
@@ -671,7 +727,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Module>(location, declLoc, move(name), move(body));
         }
-        case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
+        case PM_MULTI_WRITE_NODE: { // Multi-target assignment, like `a, b = 1, 2`
             auto multiWriteNode = reinterpret_cast<pm_multi_write_node *>(node);
 
             // Left-hand side of the assignment
@@ -1036,18 +1092,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
-        case PM_CLASS_VARIABLE_TARGET_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
-        case PM_GLOBAL_VARIABLE_TARGET_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
-        case PM_INDEX_TARGET_NODE:
-        case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:

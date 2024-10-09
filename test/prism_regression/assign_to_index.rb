@@ -18,3 +18,8 @@ exponentiate_assign[0] **= 12
 # # Special cases
 lazy_and_assign[0] &&= 13
 lazy_or_assign[0] ||= 14
+
+# Multi-target assignment
+target[0], target[1] = 15, 16
+target[2, 3], target[4, 5] = 17, 18, 19, 20
+target[] = 21 # Yes, this is valid. You can have `def []=(only_one_param)`.

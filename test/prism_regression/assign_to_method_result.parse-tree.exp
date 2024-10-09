@@ -164,5 +164,65 @@ Begin {
         val = "14"
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Self {
+            }
+            method = <U target1=>
+            args = [
+            ]
+          }
+          Send {
+            receiver = Self {
+            }
+            method = <U target2=>
+            args = [
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "15"
+          }
+          Integer {
+            val = "16"
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          CSend {
+            receiver = Self {
+            }
+            method = <U target1=>
+            args = [
+            ]
+          }
+          CSend {
+            receiver = Self {
+            }
+            method = <U target2=>
+            args = [
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Integer {
+            val = "17"
+          }
+          Integer {
+            val = "18"
+          }
+        ]
+      }
+    }
   ]
 }
