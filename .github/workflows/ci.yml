@@ -26,6 +26,6 @@ jobs:
           # Share repository cache between workflows.
           repository-cache: true
       - name: Run tests
-        run: ./bazel test //test:prism --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=all
+        run: ./bazel test //test:prism --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=errors
       - name: Run location tests
-        run: ./bazel test //test:prism_location_tests --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=all
+        run: ./bazel test //test:prism_location_tests --config=dbg --define RUBY_PATH='/opt/hostedtoolcache/Ruby/3.3.0/x64' --test_output=errors
