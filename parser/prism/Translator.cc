@@ -294,6 +294,25 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CALL_OR_WRITE_NODE: { // Or-assignment to a method call, e.g. `a.b ||= true`
             return translateOpAssignment<pm_call_or_write_node, parser::OrAsgn, parser::Send>(node);
         }
+        case PM_CALL_TARGET_NODE: { // Target of an indirect write to the result of a method call
+            // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
+            auto callTargetNode = reinterpret_cast<pm_call_target_node *>(node);
+
+            auto receiver = translate(callTargetNode->receiver);
+            auto name = parser.resolveConstant(callTargetNode->name);
+            auto messageLoc = translateLoc(callTargetNode->message_loc);
+
+            auto flags = static_cast<pm_call_node_flags>(callTargetNode->base.flags);
+            if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
+                // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
+                // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
+                return make_unique<parser::CSend>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                                                  NodeVec{});
+            } else { // Regular send, e.g. `self.target1, self.target2 = 1, 2`
+                return make_unique<parser::Send>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                                                 NodeVec{});
+            }
+        }
         case PM_CASE_MATCH_NODE: { // A pattern-matching `case` statement that only uses `in` (and not `when`)
             auto caseMatchNode = reinterpret_cast<pm_case_match_node *>(node);
 
@@ -1045,7 +1064,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ALTERNATION_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
-        case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
