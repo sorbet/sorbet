@@ -18,3 +18,6 @@
 # Special cases
 @lazy_and_assign &&= 13
 @lazy_or_assgin ||= 14
+
+# Multi-target assignment
+@target1, @target2 = 15, 16

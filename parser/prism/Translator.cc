@@ -633,6 +633,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::IVar>(location, gs.enterNameUTF8(name));
         }
+        case PM_INSTANCE_VARIABLE_TARGET_NODE: { // Target of an indirect write to an instance variable
+            // ... like `@target1, @target2 = 1, 2`, `rescue => @target`, etc.
+            auto instanceVariableTargetNode = reinterpret_cast<pm_instance_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(instanceVariableTargetNode->name);
+
+            return make_unique<parser::IVarLhs>(location, gs.enterNameUTF8(name));
+        }
         case PM_INSTANCE_VARIABLE_WRITE_NODE: { // Regular assignment to an instance variable, e.g. `@iv = 1`
             return translateAssignment<pm_instance_variable_write_node, parser::IVarLhs>(node);
         }
@@ -1091,7 +1099,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FOR_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
-        case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_INTERPOLATED_SYMBOL_NODE:
