@@ -604,6 +604,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_INDEX_OR_WRITE_NODE: { // Or-assignment to an index, e.g. `a[i] ||= true`
             return translateOpAssignment<pm_index_or_write_node, parser::OrAsgn, void>(node);
         }
+        case PM_INDEX_TARGET_NODE: { // Target of an indirect write to an indexed expression
+            // ... like `target[0], target[1] = 1, 2`, `rescue => target[0]`, etc.
+            auto indexedTargetNode = reinterpret_cast<pm_index_target_node *>(node);
+
+            auto openingLoc = translateLoc(indexedTargetNode->opening_loc);                  // The location of `[]=`
+            auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1}; // Drop the `=`
+            auto receiver = translate(indexedTargetNode->receiver);
+            auto arguments = translateArguments(indexedTargetNode->arguments);
+
+            return make_unique<parser::Send>(location, std::move(receiver), core::Names::squareBracketsEq(),
+                                             lBracketLoc, std::move(arguments));
+        }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
         }
@@ -1079,7 +1091,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FOR_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
-        case PM_INDEX_TARGET_NODE:
         case PM_INSTANCE_VARIABLE_TARGET_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
