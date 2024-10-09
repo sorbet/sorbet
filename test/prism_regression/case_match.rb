@@ -5,6 +5,8 @@ in 1
   puts "one!"
 in 2
   puts "two!"
+in 3 | 4
+  puts "three or four!"
 else
   puts "Who knows!"
 end
