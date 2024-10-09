@@ -342,6 +342,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::CVar>(location, gs.enterNameUTF8(name));
         }
+        case PM_CLASS_VARIABLE_TARGET_NODE: { // Target of an indirect write to a class variable
+            // ... like `@@target1, @@target2 = 1, 2`, `rescue => @@target`, etc.
+            auto classVariableTargetNode = reinterpret_cast<pm_class_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(classVariableTargetNode->name);
+
+            return make_unique<parser::CVarLhs>(location, gs.enterNameUTF8(name));
+        }
         case PM_CLASS_VARIABLE_WRITE_NODE: { // Regular assignment to a class variable, e.g. `@@a = 1`
             return translateAssignment<pm_class_variable_write_node, parser::CVarLhs>(node);
         }
@@ -671,7 +679,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Module>(location, declLoc, move(name), move(body));
         }
-        case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
+        case PM_MULTI_WRITE_NODE: { // Multi-target assignment, like `a, b = 1, 2`
             auto multiWriteNode = reinterpret_cast<pm_multi_write_node *>(node);
 
             // Left-hand side of the assignment
@@ -1039,7 +1047,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_CALL_TARGET_NODE:
         case PM_CAPTURE_PATTERN_NODE:
-        case PM_CLASS_VARIABLE_TARGET_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
