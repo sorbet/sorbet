@@ -520,6 +520,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::GVar>(location, gs.enterNameUTF8(name));
         }
+        case PM_GLOBAL_VARIABLE_TARGET_NODE: { // Target of an indirect write to a global variable
+            // ... like `$target1, $target2 = 1, 2`, `rescue => $target`, etc.
+            auto globalVariableTargetNode = reinterpret_cast<pm_global_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(globalVariableTargetNode->name);
+
+            return make_unique<parser::GVarLhs>(location, gs.enterNameUTF8(name));
+        }
         case PM_GLOBAL_VARIABLE_WRITE_NODE: { // Regular assignment to a global variable, e.g. `$g = 1`
             return translateAssignment<pm_global_variable_write_node, parser::GVarLhs>(node);
         }
@@ -1069,7 +1077,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_FOR_NODE:
-        case PM_GLOBAL_VARIABLE_TARGET_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INDEX_TARGET_NODE:
