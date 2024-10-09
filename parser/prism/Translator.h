@@ -33,6 +33,8 @@ public:
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
+    core::LocOffsets translateLoc(pm_location_t *loc);
+
     parser::NodeVec translateMulti(pm_node_list prismNodes);
     void translateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 
