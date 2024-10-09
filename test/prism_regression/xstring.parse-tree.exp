@@ -35,5 +35,77 @@ Begin {
         }
       ]
     }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, >
+        }
+        Begin {
+          stmts = [
+          ]
+        }
+        String {
+          val = <U "'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, >
+        }
+        Begin {
+          stmts = [
+            String {
+              val = <U interpolation>
+            }
+          ]
+        }
+        String {
+          val = <U "'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, >
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+          ]
+        }
+        String {
+          val = <U "'>
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = <U ruby -e 'puts "Hello, >
+        }
+        Begin {
+          stmts = [
+            XString {
+              nodes = [
+                String {
+                  val = <U echo "backticks">
+                }
+              ]
+            }
+          ]
+        }
+        String {
+          val = <U "'>
+        }
+      ]
+    }
   ]
 }
