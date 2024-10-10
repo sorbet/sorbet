@@ -283,10 +283,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (flags & PM_CALL_NODE_FLAGS_SAFE_NAVIGATION) {
                 // Handle conditional send, e.g. `self&.target1, self&.target2 = 1, 2`
                 // It's not valid Ruby, but the parser needs to support it for the diagnostics to work
-                return make_unique<parser::CSend>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                return make_unique<parser::CSend>(location, move(receiver), gs.enterNameUTF8(name), messageLoc,
                                                   NodeVec{});
             } else { // Regular send, e.g. `self.target1, self.target2 = 1, 2`
-                return make_unique<parser::Send>(location, std::move(receiver), gs.enterNameUTF8(name), messageLoc,
+                return make_unique<parser::Send>(location, move(receiver), gs.enterNameUTF8(name), messageLoc,
                                                  NodeVec{});
             }
         }
@@ -416,7 +416,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto arg = translate(definedNode->value);
 
-            return make_unique<parser::Defined>(location.join(arg->loc), std::move(arg));
+            return make_unique<parser::Defined>(location.join(arg->loc), move(arg));
         }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
@@ -522,8 +522,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto receiver = translate(indexedTargetNode->receiver);
             auto arguments = translateArguments(indexedTargetNode->arguments);
 
-            return make_unique<parser::Send>(location, std::move(receiver), core::Names::squareBracketsEq(),
-                                             lBracketLoc, std::move(arguments));
+            return make_unique<parser::Send>(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc,
+                                             move(arguments));
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
             return translateOpAssignment<pm_instance_variable_and_write_node, parser::AndAsgn, parser::IVarLhs>(node);
@@ -1008,14 +1008,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Yield>(location, move(yieldArgs));
         }
 
-        case PM_ARRAY_PATTERN_NODE: // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
-        case PM_FIND_PATTERN_NODE:  // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
-        case PM_HASH_PATTERN_NODE:  // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
-        case PM_IN_NODE:            // An `in` pattern such as in a `case` statement, or as a standalone expression.
+        case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
+        case PM_ARRAY_PATTERN_NODE:       // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
+        case PM_FIND_PATTERN_NODE:        // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
+        case PM_HASH_PATTERN_NODE:        // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
+        case PM_IN_NODE: // An `in` pattern such as in a `case` statement, or as a standalone expression.
             unreachable(
                 "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
 
-        case PM_ALTERNATION_PATTERN_NODE:
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_BLOCK_LOCAL_VARIABLE_NODE:
         case PM_CAPTURE_PATTERN_NODE:
@@ -1097,6 +1097,14 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
     auto location = translateLoc(node->location);
 
     switch (PM_NODE_TYPE(node)) {
+        case PM_ALTERNATION_PATTERN_NODE: { // A pattern like `1 | 2`
+            auto alternationPatternNode = reinterpret_cast<pm_alternation_pattern_node *>(node);
+
+            auto left = translate(alternationPatternNode->left);
+            auto right = translate(alternationPatternNode->right);
+
+            return make_unique<parser::MatchAlt>(location, move(left), move(right));
+        }
         case PM_ARRAY_PATTERN_NODE: { // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
             auto arrayPatternNode = reinterpret_cast<pm_array_pattern_node *>(node);
 

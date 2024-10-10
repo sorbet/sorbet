@@ -38,6 +38,26 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = MatchAlt {
+            left = Integer {
+              val = "3"
+            }
+            right = Integer {
+              val = "4"
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U three or four!>
+              }
+            ]
+          }
+        }
       ]
       elseBody = Send {
         receiver = NULL
