@@ -1105,6 +1105,14 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             return make_unique<parser::MatchAlt>(location, move(left), move(right));
         }
+        case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
+            auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
+
+            auto key = patternTranslate(assocNode->key);
+            auto value = patternTranslate(assocNode->value);
+
+            return make_unique<parser::Pair>(location, move(key), move(value));
+        }
         case PM_ARRAY_PATTERN_NODE: { // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
             auto arrayPatternNode = reinterpret_cast<pm_array_pattern_node *>(node);
 
@@ -1195,6 +1203,13 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto statements = translateStatements(inNode->statements, inlineIfSingle);
 
             return make_unique<parser::InPattern>(location, move(sorbetPattern), nullptr, move(statements));
+        }
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
+            auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(localVarTargetNode->name);
+
+            return make_unique<MatchVar>(location, gs.enterNameUTF8(name));
         }
         default: {
             return translate(node);
