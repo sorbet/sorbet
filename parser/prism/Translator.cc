@@ -1105,6 +1105,14 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             return make_unique<parser::MatchAlt>(location, move(left), move(right));
         }
+        case PM_ASSOC_NODE: { // A key-value pair in a Hash pattern, e.g. the `k: v` in `h in { k: v }
+            auto assocNode = reinterpret_cast<pm_assoc_node *>(node);
+
+            auto key = patternTranslate(assocNode->key);
+            auto value = patternTranslate(assocNode->value);
+
+            return make_unique<parser::Pair>(location, move(key), move(value));
+        }
         case PM_ARRAY_PATTERN_NODE: { // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
             auto arrayPatternNode = reinterpret_cast<pm_array_pattern_node *>(node);
 

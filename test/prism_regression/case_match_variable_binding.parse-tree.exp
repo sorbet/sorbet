@@ -31,6 +31,35 @@ CaseMatch {
       }
     }
     InPattern {
+      pattern = HashPattern {
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U k>
+            }
+            value = MatchVar {
+              name = <U x>
+            }
+          }
+        ]
+      }
+      guard = NULL
+      body = DString {
+        nodes = [
+          String {
+            val = <U A Hash-like whose key `:k` has value >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U x>
+              }
+            ]
+          }
+        ]
+      }
+    }
+    InPattern {
       pattern = MatchVar {
         name = <U x>
       }
