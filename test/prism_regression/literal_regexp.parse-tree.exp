@@ -1,0 +1,41 @@
+Begin {
+  stmts = [
+    Regexp {
+      regex = [
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo>
+        }
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo>
+        }
+      ]
+      opts = Regopt {
+        opts = "i"
+      }
+    }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo>
+        }
+      ]
+      opts = Regopt {
+        opts = "im"
+      }
+    }
+  ]
+}

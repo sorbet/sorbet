@@ -1,0 +1,15 @@
+Begin {
+  stmts = [
+    Assign {
+      lhs = CVarLhs {
+        name = <U @@class_variable>
+      }
+      rhs = String {
+        val = <U value>
+      }
+    }
+    CVar {
+      name = <U @@class_variable>
+    }
+  ]
+}
