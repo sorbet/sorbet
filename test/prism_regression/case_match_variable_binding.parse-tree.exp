@@ -60,6 +60,82 @@ CaseMatch {
       }
     }
     InPattern {
+      pattern = ArrayPattern {
+        elts = [
+          ArrayPattern {
+            elts = [
+              MatchVar {
+                name = <U value>
+              }
+            ]
+          }
+          MatchRest {
+            var = MatchVar {
+              name = <U tail>
+            }
+          }
+        ]
+      }
+      guard = NULL
+      body = DString {
+        nodes = [
+          String {
+            val = <U An array-like thing that starts with a one-element Array containing >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U value>
+              }
+            ]
+          }
+          String {
+            val = <U , and ends with >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U tail>
+              }
+            ]
+          }
+        ]
+      }
+    }
+    InPattern {
+      pattern = HashPattern {
+        pairs = [
+          Pair {
+            key = Symbol {
+              val = <U k>
+            }
+            value = ArrayPattern {
+              elts = [
+                MatchVar {
+                  name = <U value>
+                }
+              ]
+            }
+          }
+        ]
+      }
+      guard = NULL
+      body = DString {
+        nodes = [
+          String {
+            val = <U A hash-like whose key `:k` has a one-element Array value containing >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U value>
+              }
+            ]
+          }
+        ]
+      }
+    }
+    InPattern {
       pattern = MatchVar {
         name = <U x>
       }
