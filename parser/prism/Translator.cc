@@ -170,8 +170,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             NodeVec statements;
 
-            if (auto prismStatements = beginNode->statements; prismStatements != nullptr) {
-                statements = translateMulti(prismStatements->body);
+            if (auto prismRescue = beginNode->rescue_clause; prismRescue != nullptr) {
+                auto sorbetBeginNode = translateStatements(beginNode->statements, true);
+
+                auto elseNode = translate(reinterpret_cast<pm_node_t *>(beginNode->else_clause));
+
+                auto beginRescueNode = translateRescue(reinterpret_cast<pm_rescue_node *>(prismRescue),
+                                                       move(sorbetBeginNode), move(elseNode));
+
+                statements.emplace_back(move(beginRescueNode));
+            } else {
+                if (auto prismStatements = beginNode->statements; prismStatements != nullptr) {
+                    statements = translateMulti(prismStatements->body);
+                }
             }
 
             return make_unique<parser::Kwbegin>(location, move(statements));
@@ -850,6 +861,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
         }
+        case PM_RESCUE_NODE: {
+            unreachable("PM_RESCUE_NODE is handled separately in translateRescue, see its docs for details.");
+        }
         case PM_REST_PARAMETER_NODE: { // A rest parameter, like `def foo(*rest)`
             auto restParamNode = reinterpret_cast<pm_rest_parameter_node *>(node);
             core::LocOffsets nameLoc;
@@ -1041,7 +1055,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
@@ -1335,6 +1348,45 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prism
     // TODO: what's the correct location to use for the Block?
     // TODO: do we have to adjust the location for the Send node?
     return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+}
+
+// Prism models a rescue clause as a `pm_begin_node` that contains a `pm_rescue_node`.
+// Sorbet's legacy parser models this the other way around, as a parent `Rescue` with a child `Begin`.
+//
+// This function translates between the two, creating a `Rescue` node for the given `pm_rescue_node *`,
+// and wrapping it around the given `Begin` node.
+unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescueNode,
+                                                     std::unique_ptr<parser::Node> beginNode,
+                                                     std::unique_ptr<parser::Node> elseNode) {
+    auto var = translate(prismRescueNode->reference);
+    // The exceptions being rescued, e.g., `Foo, Bar` in `rescue Foo, Bar => e`
+    auto exceptions = translateMulti(prismRescueNode->exceptions);
+    auto rescueBody = translateStatements(prismRescueNode->statements, true);
+
+    auto exceptionsArray =
+        exceptions.empty() ? nullptr
+                           : make_unique<parser::Array>(translateLoc(prismRescueNode->base.location), move(exceptions));
+
+    NodeVec rescueBodies{};
+    rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(prismRescueNode->base.location),
+                                                           move(exceptionsArray), move(var), move(rescueBody)));
+
+    // Loop through subsequent rescue clauses
+    for (pm_rescue_node *subsequent = prismRescueNode->consequent; subsequent != nullptr;
+         subsequent = subsequent->consequent) {
+        auto var = translate(subsequent->reference);
+        auto exceptions = translateMulti(subsequent->exceptions);
+        auto rescueBody = translateStatements(subsequent->statements, true);
+
+        auto exceptionsArray =
+            exceptions.empty() ? nullptr
+                               : make_unique<parser::Array>(translateLoc(subsequent->base.location), move(exceptions));
+
+        rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(subsequent->base.location),
+                                                               move(exceptionsArray), move(var), move(rescueBody)));
+    }
+
+    return make_unique<parser::Rescue>(beginNode->loc, move(beginNode), move(rescueBodies), move(elseNode));
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
