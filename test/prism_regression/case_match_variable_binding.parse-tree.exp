@@ -276,6 +276,29 @@ Begin {
           }
         }
         InPattern {
+          pattern = Pin {
+            var = Begin {
+              stmts = [
+                Send {
+                  receiver = Integer {
+                    val = "1"
+                  }
+                  method = <U +>
+                  args = [
+                    Integer {
+                      val = "2"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = String {
+            val = <U Has the same value as `1 + 2`>
+          }
+        }
+        InPattern {
           pattern = MatchVar {
             name = <U x>
           }

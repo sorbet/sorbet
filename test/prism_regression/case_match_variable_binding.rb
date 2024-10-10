@@ -28,6 +28,10 @@ in ^@@cvar
 in ^$global
   "Has the same value as `$global`"
 
+# "Expression pinning", which match the result of the expression
+in ^(1 + 2)
+  "Has the same value as `1 + 2`"
+
 in x # Binds any value to a new variable `x`.
   "Some other value: #{x}"
 end
