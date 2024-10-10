@@ -1135,9 +1135,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             fmt::format_to(std::back_inserter(buf), "Unimplemented node type {} (#{}).", type_name, type_id);
             std::string s = fmt::to_string(buf);
 
-            auto fakeLocation = core::LocOffsets{0, 1};
-
-            return make_unique<parser::String>(fakeLocation, gs.enterNameUTF8(s));
+            return make_unique<parser::String>(location, gs.enterNameUTF8(s));
     }
 }
 
@@ -1163,12 +1161,10 @@ parser::NodeVec Translator::translateMulti(pm_node_list nodeList) {
     return result;
 }
 
-// Translates the given Prism elements, and appends them to the given `NodeVec` of Sorbet nodes.
+// Translates the given Prism nodes, and appends them to the given `NodeVec` of Sorbet nodes.
 void Translator::translateMultiInto(NodeVec &outSorbetNodes, absl::Span<pm_node_t *> prismNodes) {
-    for (auto &prismNode : prismNodes) {
-        unique_ptr<parser::Node> sorbetNode = translate(prismNode);
-        outSorbetNodes.emplace_back(move(sorbetNode));
-    }
+    for (auto &prismNode : prismNodes)
+        outSorbetNodes.emplace_back(translate(prismNode));
 }
 
 // The legacy Sorbet parser doesn't have a counterpart to PM_ARGUMENTS_NODE to wrap the array
