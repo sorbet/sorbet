@@ -7,6 +7,30 @@ CaseMatch {
   }
   inBodies = [
     InPattern {
+      pattern = ArrayPattern {
+        elts = [
+          MatchVar {
+            name = <U x>
+          }
+        ]
+      }
+      guard = NULL
+      body = DString {
+        nodes = [
+          String {
+            val = <U An Array-like thing that only contains >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U x>
+              }
+            ]
+          }
+        ]
+      }
+    }
+    InPattern {
       pattern = MatchVar {
         name = <U x>
       }
