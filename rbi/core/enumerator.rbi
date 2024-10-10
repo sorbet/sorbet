@@ -154,6 +154,18 @@ class Enumerator < Object
   sig { params(initial: T.untyped, block: T.proc.params(arg: T.untyped).void).returns(T::Enumerator[T.untyped]) }
   def self.produce(initial = nil, &block); end
 
+  # Returns an enumerator object generated from this enumerator and a given 
+  # enumerable.
+  #
+  # ### Examples
+  #
+  # ```ruby
+  # e = (1..3).each + [4, 5]
+  # e.to_a #=> [1, 2, 3, 4, 5]
+  # ```
+  sig { params(enum: T::Enumerable[T.untyped]).returns(T::Enumerator::Chain[T.untyped]) }
+  def +(enum); end
+
   # Iterates over the block according to how this
   # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) was
   # constructed. If no block and no arguments are given, returns self.
