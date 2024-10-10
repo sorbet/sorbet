@@ -1196,6 +1196,13 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             return make_unique<parser::InPattern>(location, move(sorbetPattern), nullptr, move(statements));
         }
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
+            auto localVarTargetNode = reinterpret_cast<pm_local_variable_target_node *>(node);
+
+            auto name = parser.resolveConstant(localVarTargetNode->name);
+
+            return make_unique<MatchVar>(location, gs.enterNameUTF8(name));
+        }
         default: {
             return translate(node);
         }

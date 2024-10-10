@@ -1,0 +1,31 @@
+CaseMatch {
+  expr = Send {
+    receiver = NULL
+    method = <U foo>
+    args = [
+    ]
+  }
+  inBodies = [
+    InPattern {
+      pattern = MatchVar {
+        name = <U x>
+      }
+      guard = NULL
+      body = DString {
+        nodes = [
+          String {
+            val = <U Some other value: >
+          }
+          Begin {
+            stmts = [
+              LVar {
+                name = <U x>
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+  elseBody = NULL
+}
