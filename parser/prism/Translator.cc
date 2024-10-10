@@ -1012,7 +1012,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_ARRAY_PATTERN_NODE:       // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
         case PM_FIND_PATTERN_NODE:        // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
         case PM_HASH_PATTERN_NODE:        // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
-        case PM_IN_NODE: // An `in` pattern such as in a `case` statement, or as a standalone expression.
+        case PM_IN_NODE:              // An `in` pattern such as in a `case` statement, or as a standalone expression.
+        case PM_PINNED_VARIABLE_NODE: // A "pinned" variable, like `^x` in `in ^x`
             unreachable(
                 "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
 
@@ -1038,7 +1039,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_PINNED_EXPRESSION_NODE:
-        case PM_PINNED_VARIABLE_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
         case PM_RESCUE_NODE:
@@ -1210,6 +1210,13 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto name = parser.resolveConstant(localVarTargetNode->name);
 
             return make_unique<MatchVar>(location, gs.enterNameUTF8(name));
+        }
+        case PM_PINNED_VARIABLE_NODE: { // A "pinned" variable, like `^x` in `in ^x`
+            auto pinnedVarNode = reinterpret_cast<pm_pinned_variable_node *>(node);
+
+            auto variable = translate(pinnedVarNode->variable);
+
+            return make_unique<Pin>(location, move(variable));
         }
         default: {
             return translate(node);
