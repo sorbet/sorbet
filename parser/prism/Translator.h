@@ -55,6 +55,12 @@ private:
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
     std::unique_ptr<SorbetLHSNode> translateConst(PrismLhsNode *node);
+
+    // Pattern-matching
+    // ... variations of the main translation functions for pattern-matching related nodes.
+    std::unique_ptr<parser::Node> patternTranslate(pm_node_t *node);
+    parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
+    void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
 };
 
 } // namespace sorbet::parser::Prism
