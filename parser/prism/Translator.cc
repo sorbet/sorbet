@@ -931,6 +931,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Arg>(location, gs.enterNameUTF8(name));
         }
+        case PM_RESCUE_MODIFIER_NODE: {
+            auto rescueModifierNode = reinterpret_cast<pm_rescue_modifier_node *>(node);
+            auto body = translate(reinterpret_cast<pm_node *>(rescueModifierNode->expression));
+            auto rescue = translate(reinterpret_cast<pm_node *>(rescueModifierNode->rescue_expression));
+            NodeVec cases;
+            // In rescue modifiers, users can't specify exceptions and the variable name so they're null
+            cases.emplace_back(make_unique<parser::Resbody>(location, nullptr, nullptr, move(rescue)));
+
+            return make_unique<parser::Rescue>(location, move(body), move(cases), nullptr);
+        }
         case PM_REST_PARAMETER_NODE: { // A rest parameter, like `def foo(*rest)`
             auto restParamNode = reinterpret_cast<pm_rest_parameter_node *>(node);
             core::LocOffsets nameLoc;
@@ -1115,7 +1125,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PINNED_VARIABLE_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_RESCUE_MODIFIER_NODE:
         case PM_RESCUE_NODE:
         case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SCOPE_NODE:

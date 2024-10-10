@@ -1,0 +1,84 @@
+Begin {
+  stmts = [
+    Rescue {
+      body = Send {
+        receiver = NULL
+        method = <U problematic_code>
+        args = [
+        ]
+      }
+      rescue = [
+        Resbody {
+          exception = NULL
+          var = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U rescued>
+              }
+            ]
+          }
+        }
+      ]
+      else_ = NULL
+    }
+    Rescue {
+      body = Send {
+        receiver = NULL
+        method = <U problematic_code>
+        args = [
+        ]
+      }
+      rescue = [
+        Resbody {
+          exception = NULL
+          var = NULL
+          body = Nil {
+          }
+        }
+      ]
+      else_ = NULL
+    }
+    Rescue {
+      body = Rescue {
+        body = Send {
+          receiver = NULL
+          method = <U problematic_code>
+          args = [
+          ]
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = Send {
+              receiver = NULL
+              method = <U raise>
+              args = [
+              ]
+            }
+          }
+        ]
+        else_ = NULL
+      }
+      rescue = [
+        Resbody {
+          exception = NULL
+          var = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              String {
+                val = <U rescued again>
+              }
+            ]
+          }
+        }
+      ]
+      else_ = NULL
+    }
+  ]
+}
