@@ -45,7 +45,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 // Remove condition from unconditional jumps
                 bb->bexit.cond = LocalRef::unconditional();
             }
-            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed together
+            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
+                bb->rubyRegionId == thenb->rubyRegionId) { // can be squashed together
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));
@@ -78,8 +79,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && thenb->exprs.empty() && thenb->bexit.thenb == thenb->bexit.elseb &&
-                bb->bexit.thenb != thenb->bexit.thenb) {
+            if (thenb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && thenb->exprs.empty() &&
+                thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.emplace_back(bb);
@@ -89,8 +90,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && elseb->exprs.empty() && elseb->bexit.thenb == elseb->bexit.elseb &&
-                bb->bexit.elseb != elseb->bexit.elseb) {
+            if (elseb != cfg.deadBlock() && bb->rubyRegionId == thenb->rubyRegionId && elseb->exprs.empty() &&
+                elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
                 // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
