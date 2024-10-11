@@ -628,7 +628,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "and `export` directives",
                                  cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("packager-layer", "Valid layer names for packages.",
-                                 cxxopts::value<vector<string>>()->default_value("library,application"), "<layerName>");
+                                 cxxopts::value<vector<string>>()->default_value("library,application"),
+                                 "<layer-name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
                                  cxxopts::value<vector<string>>(), "<dir>");

@@ -309,7 +309,7 @@ Usage:
       --allow-relaxed-packager-checks-for <name>
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives
-      --packager-layer <layerName>
+      --packager-layer <layer-name>
                                 Valid layer names for packages. (default:
                                 library,application)
       --package-skip-rbi-export-enforcement <dir>
