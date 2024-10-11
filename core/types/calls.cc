@@ -4118,7 +4118,7 @@ public:
             res.returnType = Types::nilClass();
 
             if (auto *blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
-                ENFORCE(blockAppliedType->targs.size() == 2);
+                ENFORCE(blockAppliedType->targs.size() == 2, "calls.cc out of date w.r.t. array.rbi");
                 blockAppliedType->targs[1] = make_type<TupleType>(move(unwrappedElems));
             }
         } else {
