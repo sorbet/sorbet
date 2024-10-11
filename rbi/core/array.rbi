@@ -2799,7 +2799,7 @@ class Array < Object
   sig do
     type_parameters(:U).params(
         arg: T::Enumerable[T.type_parameter(:U)],
-        blk: T.proc.params(x: Elem, y: T.nilable(T.type_parameter(:U))).void
+        blk: T.proc.params(x: [Elem, T.nilable(T.type_parameter(:U))]).void
     ).void
   end
   def zip(*arg, &blk); end
