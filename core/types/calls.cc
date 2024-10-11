@@ -4097,23 +4097,28 @@ public:
         ENFORCE(!ap->targs.empty());
         unwrappedElems.emplace_back(ap->targs.front());
 
-        for (auto arg : args.args) {
-            auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp)) {
-                ENFORCE(ap->klass == Symbols::Enumerable() ||
-                        ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerable()));
-                ENFORCE(!ap->targs.empty());
-                unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
-            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
-                unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
-            } else {
-                // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
-                res.returnType = Types::untypedUntracked();
-                return;
+        if (args.block != nullptr) {
+            res.returnType = Types::nilClass();
+        } else {
+            for (auto arg : args.args) {
+                auto argTyp = arg->type;
+                if (auto *ap = cast_type<AppliedType>(argTyp)) {
+                    ENFORCE(ap->klass == Symbols::Enumerable() ||
+                            ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerable()));
+                    ENFORCE(!ap->targs.empty());
+                    unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
+                } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+                    unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
+                } else {
+                    // Arg type didn't match; we already reported an error for the arg type; just return untyped to
+                    // recover.
+                    res.returnType = Types::untypedUntracked();
+                    return;
+                }
             }
-        }
 
-        res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+            res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+        }
     }
 } Array_zip;
 
