@@ -2410,7 +2410,7 @@ void GlobalState::setPackagerOptions(const std::vector<std::string> &extraPackag
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
     packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
-                      [this](string layer) { return enterNameUTF8(layer); });
+                      [this](const auto &layer) { return enterNameUTF8(layer); });
 
     std::vector<core::packages::MangledName> allowRelaxedPackagerChecksFor_;
     for (const string &pkgName : allowRelaxedPackagerChecksFor) {
