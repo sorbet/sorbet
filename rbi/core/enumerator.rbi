@@ -163,7 +163,11 @@ class Enumerator < Object
   # e = (1..3).each + [4, 5]
   # e.to_a #=> [1, 2, 3, 4, 5]
   # ```
-  sig { params(enum: T::Enumerable[T.untyped]).returns(T::Enumerator::Chain[T.untyped]) }
+  sig do
+    type_parameters(:T).params(
+      enum: T::Enumerable[T.type_parameter(:T)]
+    ).returns(T::Enumerator::Chain[T.any(Elem, T.type_parameter(:T))])
+  end
   def +(enum); end
 
   # Iterates over the block according to how this
