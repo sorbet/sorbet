@@ -627,7 +627,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "and `export` directives",
                                  cxxopts::value<vector<string>>(), "<name>");
-    options.add_options(section)("packager-layer", "Valid layer names for packages.",
+    options.add_options(section)("packager-layer", "Valid layer names for packages, ordered lowest to highest.",
                                  cxxopts::value<vector<string>>()->default_value("library,application"),
                                  "<layer-name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",

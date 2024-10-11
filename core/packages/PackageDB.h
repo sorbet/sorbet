@@ -63,6 +63,9 @@ public:
     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes() const;
     const std::vector<std::string> &skipRBIExportEnforcementDirs() const;
+    // Possible layers for packages to be in. The layers are ordered lowest to highest.
+    // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
+    // `app`.
     const std::vector<core::NameRef> &layers() const;
 
     const std::string_view errorHint() const;

@@ -310,8 +310,8 @@ Usage:
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` and `export` directives
       --packager-layer <layer-name>
-                                Valid layer names for packages. (default:
-                                library,application)
+                                Valid layer names for packages, ordered lowest to
+                                highest. (default: library,application)
       --package-skip-rbi-export-enforcement <dir>
                                 Constants defined in RBIs in these directories (and no
                                 others) can be exported

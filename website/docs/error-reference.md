@@ -904,7 +904,9 @@ end
 
 You can choose the valid layers using the `--packager-layer` command line flag.
 For example, the following specifies that there are three valid layers: `util`,
-`lib` and `app`.
+`lib` and `app`, ordered lowest to highest.
+
+<!-- TODO(neil): explain what lowest to highest means once we implement these checks -->
 
 ```bash
 srb tc --packager-layer util,lib,app
