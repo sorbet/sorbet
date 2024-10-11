@@ -1,3 +1,9 @@
 # typed: true
 s = [1].zip([2], [3])
 T.reveal_type(s) # error: Revealed type: `T::Array[[Integer, T.nilable(Integer), T.nilable(Integer)]]`
+
+xs = T.let([1,2,3], T::Array[Integer])
+res = xs.zip(xs) do |zipped|
+  T.reveal_type(zipped) # error: Revealed type: `[Integer, T.nilable(Integer)] (2-tuple)`
+end
+T.reveal_type(res) # error: Revealed type: `NilClass`
