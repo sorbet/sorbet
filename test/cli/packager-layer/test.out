@@ -1,9 +1,9 @@
-__package.rb:5: Argument to `layer` must be one of: library, or application https://srb.help/3725
+__package.rb:5: Argument to `layer` must be one of: library or application https://srb.help/3725
      5 |  layer 'fake'
                 ^^^^^^
 Errors: 1
 No errors! Great job.
-__package.rb:5: Argument to `layer` must be one of: a, or b https://srb.help/3725
+__package.rb:5: Argument to `layer` must be one of: a, b, or c https://srb.help/3725
      5 |  layer 'fake'
                 ^^^^^^
 Errors: 1

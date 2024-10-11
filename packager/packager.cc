@@ -1291,7 +1291,11 @@ private:
         }
         string result = "";
         for (int i = 0; i < validLayers.size() - 1; i++) {
-            result += fmt::format("{}, ", validLayers[i].shortName(gs));
+            if (validLayers.size() > 2) {
+                result += fmt::format("{}, ", validLayers[i].shortName(gs));
+            } else {
+                result += fmt::format("{} ", validLayers[i].shortName(gs));
+            }
         }
         result += fmt::format("or {}", validLayers.back().shortName(gs));
         return result;

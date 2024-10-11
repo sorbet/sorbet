@@ -5,5 +5,5 @@
 
 class InvalidOption < PackageSpec
   strict_dependencies 'false'
-  layer 'c' # error: Argument to `layer` must be one of: a, or b
+  layer 'c' # error: Argument to `layer` must be one of: a or b
 end
