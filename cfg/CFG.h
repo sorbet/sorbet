@@ -63,6 +63,14 @@ public:
     };
     Flags flags;
     int outerLoops = 0;
+    // Tracks which Ruby block (do ... end) or Ruby exception-handling region
+    // (in begin ... rescue ... else ... ensure ... end, each `...` is its own
+    // region) this BasicBlock was generated from.  We call it a "region" to
+    // avoid confusion between BasicBlocks and Ruby blocks.
+    //
+    // Incremented every time builder_walk sees a new Ruby block while traversing a Ruby method.
+    // rubyRegionId == 0 means code at the top-level of this method (outside any Ruby block).
+    int rubyRegionId = 0;
     int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
@@ -116,6 +124,7 @@ public:
      */
     core::MethodRef symbol;
     int maxBasicBlockId = 0;
+    int maxRubyRegionId = 0;
 
     /**
      * Get the number of unique local variables in the CFG. Used to size vectors that contain an entry per LocalRef.
@@ -183,7 +192,8 @@ public:
 
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops);
+    BasicBlock *freshBlock(int outerLoops, BasicBlock *current);
+    BasicBlock *freshBlockWithRegion(int outerLoops, int rubyRegionId);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;
     std::vector<int> maxLoopWrite;

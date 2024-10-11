@@ -1,37 +1,42 @@
 method ::Object#foo {
 
-bb0[firstDead=-1]():
+bb0[rubyRegionId=0, firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     <magic>$6: T.class_of(<Magic>) = alias <C <Magic>>
     <exceptionValue>$4: T.nilable(Exception) = <get-current-exception>
     <exceptionValue>$4 -> (T.nilable(Exception) ? bb3 : bb4)
 
 # backedges
-# - bb4
-# - bb7
-# - bb8
-# - bb9
-bb1[firstDead=-1]():
+# - bb4(rubyRegionId=1)
+# - bb6(rubyRegionId=3)
+# - bb7(rubyRegionId=2)
+# - bb9(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <exceptionValue>$4 = <get-current-exception>
     <unconditional> -> bb1
 
 # backedges
-# - bb0
-bb3[firstDead=-1](<self>: Object, <exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
+# - bb0(rubyRegionId=0)
+bb3[rubyRegionId=2, firstDead=-1](<self>: Object, <exceptionValue>$4: Exception, <magic>$6: T.class_of(<Magic>)):
     <cfgAlias>$9: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$10: T::Boolean = <cfgAlias>$9: T.class_of(StandardError).===(<exceptionValue>$4: Exception)
     <isaCheckTemp>$10 -> (T::Boolean ? bb7 : bb8)
 
 # backedges
-# - bb0
-bb4[firstDead=2]():
+# - bb0(rubyRegionId=0)
+bb4[rubyRegionId=1, firstDead=2]():
     <returnTemp>$5: Integer(1) = 1
     <statTemp>$3: T.noreturn = return <returnTemp>$5: Integer(1)
     <unconditional> -> bb1
 
 # backedges
-# - bb3
-bb7[firstDead=4](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
+# - bb8(rubyRegionId=2)
+bb6[rubyRegionId=3, firstDead=-1](<self>: Object, <gotoDeadTemp>$12: TrueClass):
+    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
+
+# backedges
+# - bb3(rubyRegionId=2)
+bb7[rubyRegionId=2, firstDead=4](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic>)):
     <exceptionValue>$4: NilClass = nil
     <keepForCfgTemp>$7: Sorbet::Private::Static::Void = <magic>$6: T.class_of(<Magic>).<keep-for-cfg>(<exceptionValue>$4: NilClass)
     <returnTemp>$11: Integer(2) = 2
@@ -39,14 +44,14 @@ bb7[firstDead=4](<exceptionValue>$4: StandardError, <magic>$6: T.class_of(<Magic
     <unconditional> -> bb1
 
 # backedges
-# - bb3
-bb8[firstDead=-1](<self>: Object):
+# - bb3(rubyRegionId=2)
+bb8[rubyRegionId=2, firstDead=-1](<self>: Object):
     <gotoDeadTemp>$12: TrueClass = true
-    <gotoDeadTemp>$12 -> (TrueClass ? bb1 : bb9)
+    <unconditional> -> bb6
 
 # backedges
-# - bb8
-bb9[firstDead=0](<self>: Object):
+# - bb6(rubyRegionId=3)
+bb9[rubyRegionId=0, firstDead=0](<self>: Object):
     <returnMethodTemp>$2 = <self>.deadcode()
     <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
@@ -55,15 +60,15 @@ bb9[firstDead=0](<self>: Object):
 
 method ::<Class:<root>>#<static-init> {
 
-bb0[firstDead=3]():
+bb0[rubyRegionId=0, firstDead=3]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
 
 # backedges
-# - bb0
-bb1[firstDead=-1]():
+# - bb0(rubyRegionId=0)
+bb1[rubyRegionId=0, firstDead=-1]():
     <unconditional> -> bb1
 
 }
