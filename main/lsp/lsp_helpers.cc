@@ -296,8 +296,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 // SOF
                 it != all_lines.rend()
                 // Start of sig block
-                && !(absl::StartsWith(line, "sig {") ||
-                     absl::StartsWith(line, "sig(:final) {"))
+                && !(absl::StartsWith(line, "sig {") || absl::StartsWith(line, "sig(:final) {"))
                 // Invalid closing brace
                 && !absl::StartsWith(line, "}")) {
                 it++;
@@ -325,8 +324,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 // SOF
                 it != all_lines.rend()
                 // Start of sig block
-                && !(absl::StartsWith(line, "sig do") ||
-                     absl::StartsWith(line, "sig(:final) do"))
+                && !(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"))
                 // Invalid end keyword
                 && !absl::StartsWith(line, "end")) {
                 it++;
