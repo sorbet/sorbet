@@ -300,7 +300,9 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 // Invalid closing brace
                 && !absl::StartsWith(line, "}")) {
                 it++;
-                line = absl::StripAsciiWhitespace(*it);
+                if (it != all_lines.rend()) {
+                    line = absl::StripAsciiWhitespace(*it);
+                }
             };
 
             // We have either
@@ -328,7 +330,9 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 // Invalid end keyword
                 && !absl::StartsWith(line, "end")) {
                 it++;
-                line = absl::StripAsciiWhitespace(*it);
+                if (it != all_lines.rend()) {
+                    line = absl::StripAsciiWhitespace(*it);
+                }
             };
 
             // We have either
