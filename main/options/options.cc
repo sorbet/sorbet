@@ -347,6 +347,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     }
     options.set_width(defaultCols);
 
+    // TODO(neil): we should mention how vector options work/can be used.
+    // (ie. that they can be passed as both `--arg 1 --arg 2` and `--arg 1,2`)
     // ----- INPUT -------------------------------------------------------- {{{
     section = groupToString(Group::INPUT);
     options.add_options(section)("files", "Input files", cxxopts::value<vector<string>>());
