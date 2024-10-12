@@ -14,6 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 2, 0)
       a = <assignTemp>$3.[](0)
       b = <assignTemp>$3.[](1)
+      ::<Magic>.<mlhs use all>(<assignTemp>$2, 2)
       <assignTemp>$2
     end
     <self>.puts(1)
@@ -26,6 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
       a = <assignTemp>$5.[](0)
       b = <assignTemp>$5.[](1)
+      ::<Magic>.<mlhs use all>(<assignTemp>$4, 2)
       <assignTemp>$4
     end)
 

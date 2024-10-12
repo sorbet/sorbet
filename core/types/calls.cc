@@ -1,4 +1,5 @@
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
@@ -2387,6 +2388,36 @@ public:
     }
 } Magic_expandSplat;
 
+class Magic_mlhsUseAll : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 2);
+        auto *tuple = cast_type<TupleType>(args.args[0]->type);
+        if (tuple == nullptr || !isa_type<IntegerLiteralType>(args.args[1]->type)) {
+            return;
+        }
+
+        const auto &intLiteral = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type);
+        size_t expected = tuple->elems.size();
+        size_t got = intLiteral.value;
+        if (expected != got) {
+            if (auto e = gs.beginError(args.callLoc(), core::errors::Infer::TupleMismatchError)) {
+                auto plural = got == 1 ? "" : "s";
+                e.setHeader("Attempted to unpack {}-tuple into {} target{}", expected, got, plural);
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
+                auto lhsLoc = args.argLoc(1);
+                if (got < expected && lhsLoc.exists() && !lhsLoc.empty()) {
+                    auto replaceLoc = lhsLoc.copyEndWithZeroLength();
+                    auto underscores = vector<string>{expected - got, "_"};
+                    // The mlhs LHS loc doesn't include any trailing comma in the loc, which works in our favor
+                    e.replaceWith("Insert variables for unused args", replaceLoc, ", {}",
+                                  absl::StrJoin(underscores, ", "));
+                }
+            }
+        }
+    }
+} Magic_mlhsUseAll;
+
 class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlock;
 
@@ -4524,6 +4555,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mlhsUseAll(), &Magic_mlhsUseAll},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlock(), &Magic_callWithBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
