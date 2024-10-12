@@ -1210,6 +1210,8 @@ void readOptions(Options &opts,
         }
 
         if (opts.stripePackages) {
+            // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based on
+            // feedback/usecases.
             std::regex layerValid("[a-zA-Z0-9]+");
             for (const string &layer : raw["packager-layer"].as<vector<string>>()) {
                 if (!std::regex_match(layer, layerValid)) {
