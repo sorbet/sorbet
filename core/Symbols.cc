@@ -587,6 +587,18 @@ MethodRef ClassOrModule::findParentMethodTransitive(const GlobalState &gs, NameR
     return Symbols::noMethod();
 }
 
+vector<MethodRef> ClassOrModule::findParentMethodTransitiveAll(const GlobalState &gs, NameRef name) const {
+    auto dealias = true;
+    auto syms = findParentMemberTransitiveAllInternal(gs, name, 100, dealias);
+    vector<MethodRef> result;
+    for (auto sym : syms) {
+        if (sym.exists() && sym.isMethod()) {
+            result.push_back(sym.asMethodRef());
+        }
+    }
+    return result;
+}
+
 bool singleFileDefinition(const GlobalState &gs, absl::Span<const Loc> locs, core::FileRef file) {
     bool result = false;
 
@@ -744,6 +756,26 @@ MethodRef findConcreteMethodTransitiveInternal(const GlobalState &gs, ClassOrMod
 
 MethodRef ClassOrModule::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
     return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
+}
+
+vector<SymbolRef> ClassOrModule::findParentMemberTransitiveAllInternal(const GlobalState &gs, NameRef name, int maxDepth,
+                                                            bool dealias) const {
+    vector<SymbolRef> allMatches;
+    ENFORCE(flags.isLinearizationComputed);
+    for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
+        ENFORCE(it->exists());
+        auto result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(name);
+        if (result.exists()) {
+            allMatches.push_back(result);
+        }
+    }
+    if (this->superClass().exists()) {
+        auto result = this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
+        if (result.exists() && result.isMethod()) {
+            allMatches.push_back(result);
+        }
+    }
+    return allMatches;
 }
 
 SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth,
