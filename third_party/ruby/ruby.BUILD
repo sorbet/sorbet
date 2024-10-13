@@ -36,6 +36,7 @@ ruby(
     cppopts = [
         "-Wdate-time",
         "-D_FORTIFY_SOURCE=2",
+        "-DUSE_RVARGC",
         "-fPIC",
     ] + select({
         # Don't include JIT statistics unless we're building JIT support
