@@ -8,7 +8,7 @@ end
 def bar
   path = Dir.getwd + '/'
 
-  Thread.current.backtrace.map do |line|
+  T.must(Thread.current.backtrace).map do |line|
     line
       .sub(path, '')
       .sub(%r{^/.*bazel-out/([^/]+)/bin/external/sorbet_ruby_2_7_for_compiler/}, 'bazel-out/\1/bin/external/sorbet_ruby_2_7_for_compiler/')
