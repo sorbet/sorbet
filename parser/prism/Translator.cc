@@ -285,7 +285,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 // In Prism, this is modeled by a `pm_call_node` with a `pm_block_node` as a child, but the
                 // The legacy parser inverts this , with a parent "Block" with a child
                 // "Send".
-                return translateCallWithBlock(reinterpret_cast<pm_block_node *>(prismBlock), move(sendNode));
+                return translateCallWithBlock(prismBlock, move(sendNode));
             } else {
                 return sendNode;
             }
@@ -649,6 +649,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             return make_unique<parser::Kwrestarg>(location, sorbetName);
+        }
+        case PM_LAMBDA_NODE: { // lambda literals, like `-> { 123 }`
+            auto lambdaNode = reinterpret_cast<pm_lambda_node *>(node);
+
+            auto receiver = make_unique<parser::Const>(location, nullptr, core::Names::Constants::Kernel());
+            auto sendNode = make_unique<parser::Send>(location, move(receiver), core::Names::lambda(),
+                                                      translateLoc(lambdaNode->operator_loc), NodeVec{});
+
+            return translateCallWithBlock(node, move(sendNode));
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: { // And-assignment to a local variable, e.g. `local &&= false`
             return translateOpAssignment<pm_local_variable_and_write_node, parser::AndAsgn, parser::LVarLhs>(node);
@@ -1115,7 +1124,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
-        case PM_LAMBDA_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
@@ -1408,16 +1416,25 @@ unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list
 //
 // This function translates between the two, creating a `Block` node for the given `pm_block_node *`,
 // and wrapping it around the given `Send` node.
-unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
+unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             std::unique_ptr<parser::Node> sendNode) {
-    auto prismParams = prismBlockNode->parameters;
-    auto blockParametersNode = translate(prismParams);
-    auto body = translate(prismBlockNode->body);
+    unique_ptr<parser::Node> parametersNode;
+    unique_ptr<parser::Node> body;
 
-    if (prismParams != nullptr && PM_NODE_TYPE_P(prismParams, PM_NUMBERED_PARAMETERS_NODE)) {
-        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+    if (PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_BLOCK_NODE)) {
+        auto prismBlockNode = reinterpret_cast<pm_block_node *>(prismBlockOrLambdaNode);
+        parametersNode = translate(prismBlockNode->parameters);
+        body = translate(prismBlockNode->body);
     } else {
-        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+        auto prismLambdaNode = reinterpret_cast<pm_lambda_node *>(prismBlockOrLambdaNode);
+        parametersNode = translate(prismLambdaNode->parameters);
+        body = translate(prismLambdaNode->body);
+    }
+
+    if (dynamic_cast<parser::NumParams *>(parametersNode.get())) {
+        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
+    } else {
+        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(parametersNode), move(body));
     }
 }
 
