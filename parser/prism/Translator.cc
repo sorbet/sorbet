@@ -170,19 +170,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             NodeVec statements;
 
-            if (auto prismRescue = beginNode->rescue_clause; prismRescue != nullptr) {
-                auto sorbetBeginNode = translateStatements(beginNode->statements, true);
-
+            if (beginNode->rescue_clause != nullptr) {
+                // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
+                auto bodyNode = translateStatements(beginNode->statements, true);
                 auto elseNode = translate(reinterpret_cast<pm_node_t *>(beginNode->else_clause));
-
-                auto beginRescueNode = translateRescue(reinterpret_cast<pm_rescue_node *>(prismRescue),
-                                                       move(sorbetBeginNode), move(elseNode));
+                auto beginRescueNode = translateRescue(reinterpret_cast<pm_rescue_node *>(beginNode->rescue_clause),
+                                                       move(bodyNode), move(elseNode));
 
                 statements.emplace_back(move(beginRescueNode));
-            } else {
-                if (auto prismStatements = beginNode->statements; prismStatements != nullptr) {
-                    statements = translateMulti(prismStatements->body);
-                }
+            } else if (beginNode->statements != nullptr) {
+                // Handle `begin ... end`
+                statements = translateMulti(beginNode->statements->body);
             }
 
             return make_unique<parser::Kwbegin>(location, move(statements));
@@ -1350,43 +1348,50 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prism
     return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
 }
 
-// Prism models a rescue clause as a `pm_begin_node` that contains a `pm_rescue_node`.
-// Sorbet's legacy parser models this the other way around, as a parent `Rescue` with a child `Begin`.
+// Prism represents a `begin ... rescue ... end` construct using a `pm_begin_node` that may contain:
+//   - `statements`: the code before the `rescue` clauses (the main body).
+//   - `rescue_clause`: a `pm_rescue_node` representing the first `rescue` clause.
+//   - `else_clause`: an optional `pm_else_node` representing the `else` clause.
 //
-// This function translates between the two, creating a `Rescue` node for the given `pm_rescue_node *`,
-// and wrapping it around the given `Begin` node.
-unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescueNode,
-                                                     std::unique_ptr<parser::Node> beginNode,
-                                                     std::unique_ptr<parser::Node> elseNode) {
-    auto var = translate(prismRescueNode->reference);
-    // The exceptions being rescued, e.g., `Foo, Bar` in `rescue Foo, Bar => e`
-    auto exceptions = translateMulti(prismRescueNode->exceptions);
-    auto rescueBody = translateStatements(prismRescueNode->statements, true);
+// Each `pm_rescue_node` represents a single `rescue` clause and is linked to subsequent `rescue` clauses via its
+// `consequent` pointer. Each `pm_rescue_node` contains:
+//   - `exceptions`: the exceptions to rescue (e.g., `RuntimeError`).
+//   - `reference`: the exception variable (e.g., `=> e`).
+//   - `statements`: the body of the rescue clause.
+//
+// In contrast, Sorbet's legacy parser represents the same construct using a `Rescue` node that contains:
+//   - `body`: the code before the `rescue` clauses (the main body).
+//   - `rescue`: a list of `Resbody` nodes, each representing a `rescue` clause.
+//   - `else_`: an optional node representing the `else` clause.
+//
+// This function and the PM_BEGIN_NODE case translate between the two representations by processing the `pm_rescue_node`
+// (and its linked `subsequent` nodes) and assembling the corresponding `Rescue` and `Resbody` nodes in Sorbet's AST.
+unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescueNode, unique_ptr<parser::Node> bodyNode,
+                                                     unique_ptr<parser::Node> elseNode) {
+    NodeVec rescueBodies;
 
-    auto exceptionsArray =
-        exceptions.empty() ? nullptr
-                           : make_unique<parser::Array>(translateLoc(prismRescueNode->base.location), move(exceptions));
+    // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
+    for (pm_rescue_node *currentRescueNode = prismRescueNode; currentRescueNode != nullptr;
+         currentRescueNode = currentRescueNode->consequent) {
+        // Translate the exception variable (e.g. the `=> e` in `rescue => e`)
+        auto var = translate(currentRescueNode->reference);
 
-    NodeVec rescueBodies{};
-    rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(prismRescueNode->base.location),
-                                                           move(exceptionsArray), move(var), move(rescueBody)));
+        // Translate the body of the rescue clause
+        auto rescueBody = translateStatements(currentRescueNode->statements, true);
 
-    // Loop through subsequent rescue clauses
-    for (pm_rescue_node *subsequent = prismRescueNode->consequent; subsequent != nullptr;
-         subsequent = subsequent->consequent) {
-        auto var = translate(subsequent->reference);
-        auto exceptions = translateMulti(subsequent->exceptions);
-        auto rescueBody = translateStatements(subsequent->statements, true);
-
+        // Translate the exceptions being rescued (e.g., `RuntimeError` in `rescue RuntimeError`)
+        auto exceptions = translateMulti(currentRescueNode->exceptions);
         auto exceptionsArray =
-            exceptions.empty() ? nullptr
-                               : make_unique<parser::Array>(translateLoc(subsequent->base.location), move(exceptions));
+            exceptions.empty()
+                ? nullptr
+                : make_unique<parser::Array>(translateLoc(currentRescueNode->base.location), move(exceptions));
 
-        rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(subsequent->base.location),
+        rescueBodies.emplace_back(make_unique<parser::Resbody>(translateLoc(currentRescueNode->base.location),
                                                                move(exceptionsArray), move(var), move(rescueBody)));
     }
 
-    return make_unique<parser::Rescue>(beginNode->loc, move(beginNode), move(rescueBodies), move(elseNode));
+    // The `Rescue` node combines the main body, the rescue clauses, and the else clause.
+    return make_unique<parser::Rescue>(bodyNode->loc, move(bodyNode), move(rescueBodies), move(elseNode));
 }
 
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.

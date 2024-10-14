@@ -1,25 +1,32 @@
 # typed: false
 
 begin
-  123
+  bar
 rescue
   "rescued"
 end
 
 begin
-  123
+  foo
+  bar
+rescue
+  "rescued"
+end
+
+begin
+  foo
 rescue RuntimeError
   "rescued Foo"
 end
 
 begin
-  123
+  foo
 rescue RuntimeError, NotImplementedError => e
   "rescued Foo #{e}"
 end
 
 begin
-  123
+  foo
 rescue RuntimeError
   "rescued Foo"
 else
@@ -27,13 +34,25 @@ else
 end
 
 begin
-  123
+  foo
 rescue RuntimeError => e
   "rescued Foo #{e}"
 rescue NotImplementedError => e
   "rescued Bar #{e}"
 rescue => e
   "rescued #{e}"
+end
+
+begin
+  foo
+rescue RuntimeError => e
+  "rescued Foo #{e}"
+rescue NotImplementedError => e
+  "rescued Bar #{e}"
+rescue => e
+  "rescued #{e}"
+else
+  "rescued else"
 end
 
 problematic_code rescue puts "rescued"
