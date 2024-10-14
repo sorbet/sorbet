@@ -1,20 +1,20 @@
 method ::<Class:<root>>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=2]():
+bb0[firstDead=2]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }
 
 method ::Side#foo {
 
-bb0[rubyRegionId=0, firstDead=-1]():
+bb0[firstDead=-1]():
     <self>: Side = cast(<self>: NilClass, Side);
     cond: T.untyped = load_arg(cond)
     a: Integer(1) = 1
@@ -23,26 +23,26 @@ bb0[rubyRegionId=0, firstDead=-1]():
     cond -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb4(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb4
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb2[rubyRegionId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb0
+bb2[firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     a: TrueClass = true
     <unconditional> -> bb4
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb3[rubyRegionId=0, firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb0
+bb3[firstDead=-1](<statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     a: Integer(2) = 2
     <unconditional> -> bb4
 
 # backedges
-# - bb2(rubyRegionId=0)
-# - bb3(rubyRegionId=0)
-bb4[rubyRegionId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
+# - bb2
+# - bb3
+bb4[firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Integer(1), <statTemp>$5: Integer(1)):
     <returnMethodTemp>$2: T.untyped = <statTemp>$4: Integer(1).foo(<statTemp>$5: Integer(1), a: T.any(TrueClass, Integer))
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
@@ -51,15 +51,15 @@ bb4[rubyRegionId=0, firstDead=2](a: T.any(TrueClass, Integer), <statTemp>$4: Int
 
 method ::<Class:Side>#<static-init> {
 
-bb0[rubyRegionId=0, firstDead=3]():
+bb0[firstDead=3]():
     <self>: T.class_of(Side) = cast(<self>: NilClass, T.class_of(Side));
     <returnMethodTemp>$2: Symbol(:foo) = :foo
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)
     <unconditional> -> bb1
 
 # backedges
-# - bb0(rubyRegionId=0)
-bb1[rubyRegionId=0, firstDead=-1]():
+# - bb0
+bb1[firstDead=-1]():
     <unconditional> -> bb1
 
 }
