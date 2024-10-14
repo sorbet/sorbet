@@ -31,17 +31,11 @@ int CFG::numLocalVariables() const {
     return this->localVariables.size();
 }
 
-BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *current) {
-    ENFORCE(current != nullptr);
-    return this->freshBlockWithRegion(outerLoops, current->rubyRegionId);
-}
-
-BasicBlock *CFG::freshBlockWithRegion(int outerLoops, int rubyRegionId) {
+BasicBlock *CFG::freshBlock(int outerLoops) {
     int id = this->maxBasicBlockId++;
     auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
-    r->rubyRegionId = rubyRegionId;
     return r.get();
 }
 
@@ -69,8 +63,8 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
 }
 
 CFG::CFG() {
-    freshBlockWithRegion(0, 0); // entry;
-    freshBlockWithRegion(0, 0); // dead code;
+    freshBlock(0); // entry;
+    freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
@@ -253,8 +247,7 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(std::back_inserter(buf), "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(std::back_inserter(buf), "# - bb{}(rubyRegionId={})\n", backEdge->id,
-                               backEdge->rubyRegionId);
+                fmt::format_to(std::back_inserter(buf), "# - bb{}\n", backEdge->id);
             }
         }
 
@@ -359,7 +352,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
 
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "block[id={}, rubyRegionId={}]({})\n", this->id, this->rubyRegionId,
+    fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
                    fmt::map_join(
                        this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
@@ -375,8 +368,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "bb{}[rubyRegionId={}, firstDead={}]({}):\n", this->id, this->rubyRegionId,
-                   this->firstDeadInstructionIdx,
+    fmt::format_to(std::back_inserter(buf), "bb{}[firstDead={}]({}):\n", this->id, this->firstDeadInstructionIdx,
                    fmt::map_join(
                        this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
 
