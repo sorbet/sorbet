@@ -1109,8 +1109,7 @@ struct PackageSpecBodyWalk {
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
-                                   "Previous declaration found here");
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -1133,7 +1132,7 @@ struct PackageSpecBodyWalk {
             if (info.layer.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previous declaration found here");
+                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
