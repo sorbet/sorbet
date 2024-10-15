@@ -92,6 +92,34 @@ Begin {
         val = <U inline block with params>
       }
     }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Mlhs {
+            exprs = [
+              Arg {
+                name = <U multi>
+              }
+              Arg {
+                name = <U target>
+              }
+            ]
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target node in parameter list>
+      }
+    }
     Send {
       receiver = NULL
       method = <U foo>

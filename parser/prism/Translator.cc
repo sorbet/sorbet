@@ -655,7 +655,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Module>(location, declLoc, move(name), move(body));
         }
-        case PM_MULTI_WRITE_NODE: { // Multi-target assignment, like `a, b = 1, 2`
+        case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
+            auto multiTargetNode = reinterpret_cast<pm_multi_target_node *>(node);
+
+            auto prismLefts = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
+
+            NodeVec sorbetExpressions{};
+            sorbetExpressions.reserve(prismLefts.size());
+
+            translateMultiInto(sorbetExpressions, prismLefts);
+
+            return make_unique<parser::Mlhs>(location, move(sorbetExpressions));
+        }
+        case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = reinterpret_cast<pm_multi_write_node *>(node);
 
             // Left-hand side of the assignment
@@ -1063,7 +1075,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
-        case PM_MULTI_TARGET_NODE:
         case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:

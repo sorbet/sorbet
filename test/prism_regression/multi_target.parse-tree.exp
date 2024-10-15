@@ -1,0 +1,102 @@
+Begin {
+  stmts = [
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p1>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x2>
+              }
+              LVarLhs {
+                name = <U y2>
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+          Array {
+            elts = [
+              Integer {
+                val = "3"
+              }
+              Integer {
+                val = "4"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    Block {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Proc>>
+        }
+        method = <U new>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U p1>
+          }
+          Mlhs {
+            exprs = [
+              Arg {
+                name = <U x2>
+              }
+              Arg {
+                name = <U y2>
+              }
+            ]
+          }
+        ]
+      }
+      body = NULL
+    }
+    For {
+      vars = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p1>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x2>
+              }
+              LVarLhs {
+                name = <U y2>
+              }
+            ]
+          }
+        ]
+      }
+      expr = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+        ]
+      }
+      body = NULL
+    }
+  ]
+}
