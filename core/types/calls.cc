@@ -4107,13 +4107,23 @@ public:
             } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
             } else {
-                // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
+                // Arg type didn't match; we already reported an error for the arg type; just return untyped to
+                // recover.
                 res.returnType = Types::untypedUntracked();
                 return;
             }
         }
 
-        res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+        if (args.block != nullptr) {
+            res.returnType = Types::nilClass();
+
+            if (auto *blockAppliedType = cast_type<AppliedType>(res.main.blockPreType)) {
+                ENFORCE(blockAppliedType->targs.size() == 2, "calls.cc out of date w.r.t. array.rbi");
+                blockAppliedType->targs[1] = make_type<TupleType>(move(unwrappedElems));
+            }
+        } else {
+            res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+        }
     }
 } Array_zip;
 
