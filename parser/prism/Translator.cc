@@ -659,11 +659,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto multiTargetNode = reinterpret_cast<pm_multi_target_node *>(node);
 
             auto prismLefts = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
+            auto prismRestNode = multiTargetNode->rest;
 
             NodeVec sorbetExpressions{};
-            sorbetExpressions.reserve(prismLefts.size());
+            sorbetExpressions.reserve(prismLefts.size() + (prismRestNode != nullptr ? 1 : 0));
 
             translateMultiInto(sorbetExpressions, prismLefts);
+
+            if (prismRestNode != nullptr) {
+                // We don't just call `translate()` because that would create a `parser::Splat`, but we need
+                // `parser::SplatLhs`.
+                ENFORCE(PM_NODE_TYPE(prismRestNode) == PM_SPLAT_NODE);
+                auto splatNode = reinterpret_cast<pm_splat_node *>(prismRestNode);
+                auto var = translate(splatNode->expression);
+                sorbetExpressions.emplace_back(make_unique<parser::SplatLhs>(location, move(var)));
+            }
 
             return make_unique<parser::Mlhs>(location, move(sorbetExpressions));
         }

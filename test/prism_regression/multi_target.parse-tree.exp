@@ -98,5 +98,93 @@ Begin {
       }
       body = NULL
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p2>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U head>
+              }
+              SplatLhs {
+                var = NULL
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+          Array {
+            elts = [
+              Integer {
+                val = "3"
+              }
+              Integer {
+                val = "4"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p3>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U head>
+              }
+              SplatLhs {
+                var = LVarLhs {
+                  name = <U tail>
+                }
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+          Array {
+            elts = [
+              Integer {
+                val = "3"
+              }
+              Integer {
+                val = "4"
+              }
+            ]
+          }
+        ]
+      }
+    }
   ]
 }
