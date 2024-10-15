@@ -902,14 +902,14 @@ class MyPackage < PackageSpec
 end
 ```
 
-You can choose the valid layers using the `--packager-layer` command line flag.
+You can choose the valid layers using the `--packager-layers` command line flag.
 For example, the following specifies that there are three valid layers: `util`,
 `lib` and `app`, ordered lowest to highest.
 
 <!-- TODO(neil): explain what lowest to highest means once we implement these checks -->
 
 ```bash
-srb tc --packager-layer util,lib,app
+srb tc --packager-layers util,lib,app
 ```
 
 If the flag is not passed, then the default valid layers are `library` and

@@ -7,4 +7,4 @@ __package.rb:5: Argument to `layer` must be one of: `a`, `b`, or `c` https://srb
      5 |  layer 'fake'
                 ^^^^^^
 Errors: 1
---packager-layer can only be specified in --stripe-packages mode
+--packager-layers can only be specified in --stripe-packages mode
