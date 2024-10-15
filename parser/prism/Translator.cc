@@ -452,6 +452,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Float>(location, std::to_string(floatNode->value));
         }
+        case PM_FOR_NODE: { // `for x in a; ...; end`
+            auto forNode = reinterpret_cast<pm_for_node *>(node);
+
+            auto variable = translate(forNode->index);
+            auto collection = translate(forNode->collection);
+            auto inlineIfSingle = true;
+            auto body = translateStatements(forNode->statements, inlineIfSingle);
+
+            return make_unique<parser::For>(location, move(variable), move(collection), move(body));
+        }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
             return translateSimpleKeyword<parser::ForwardedArgs>(node);
         }
@@ -1042,7 +1052,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
-        case PM_FOR_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
