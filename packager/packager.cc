@@ -41,6 +41,24 @@ bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core
     }
 }
 
+string buildValidLayersStr(const core::GlobalState &gs) {
+    auto &validLayers = gs.packageDB().layers();
+    ENFORCE(validLayers.size() > 0);
+    if (validLayers.size() == 1) {
+        return string(validLayers.front().shortName(gs));
+    }
+    string result = "";
+    for (int i = 0; i < validLayers.size() - 1; i++) {
+        if (validLayers.size() > 2) {
+            result += core::ErrorColors::format("`{}`, ", validLayers[i].shortName(gs));
+        } else {
+            result += core::ErrorColors::format("`{}` ", validLayers[i].shortName(gs));
+        }
+    }
+    result += core::ErrorColors::format("or `{}`", validLayers.back().shortName(gs));
+    return result;
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -1282,23 +1300,6 @@ struct PackageSpecBodyWalk {
     }
 
 private:
-    string buildValidLayersStr(const core::GlobalState &gs) {
-        auto &validLayers = gs.packageDB().layers();
-        ENFORCE(validLayers.size() > 0);
-        if (validLayers.size() == 1) {
-            return string(validLayers.front().shortName(gs));
-        }
-        string result = "";
-        for (int i = 0; i < validLayers.size() - 1; i++) {
-            if (validLayers.size() > 2) {
-                result += core::ErrorColors::format("`{}`, ", validLayers[i].shortName(gs));
-            } else {
-                result += core::ErrorColors::format("`{}` ", validLayers[i].shortName(gs));
-            }
-        }
-        result += core::ErrorColors::format("or `{}`", validLayers.back().shortName(gs));
-        return result;
-    }
     optional<core::packages::StrictDependenciesLevel> parseStrictDependenciesOption(ast::ExpressionPtr &arg) {
         auto *lit = ast::cast_tree<ast::Literal>(arg);
         if (!lit || !lit->isString()) {
