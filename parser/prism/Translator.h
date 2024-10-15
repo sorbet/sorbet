@@ -43,6 +43,9 @@ private:
                                                 bool isUsedForKeywordArguments);
     std::unique_ptr<parser::Node> translateCallWithBlock(pm_block_node *prismBlockNode,
                                                          std::unique_ptr<parser::Node> sendNode);
+    std::unique_ptr<parser::Node> translateRescue(pm_rescue_node *prismRescueNode,
+                                                  std::unique_ptr<parser::Node> beginNode,
+                                                  std::unique_ptr<parser::Node> elseNode);
     std::unique_ptr<parser::Node> translateStatements(pm_statements_node *stmtsNode, bool inlineIfSingle);
 
     template <typename SorbetNode> std::unique_ptr<SorbetNode> translateSimpleKeyword(pm_node_t *untypedNode);
