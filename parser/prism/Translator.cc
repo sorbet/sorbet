@@ -892,6 +892,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SELF_NODE: { // The `self` keyword
             return translateSimpleKeyword<parser::Self>(node);
         }
+        case PM_SHAREABLE_CONSTANT_NODE: {
+            // Sorbet doesn't handle `shareable_constant_value` yet.
+            // We'll just handle the inner constant assignment as normal.
+            auto shareableConstantNode = reinterpret_cast<pm_shareable_constant_node *>(node);
+            return translate(shareableConstantNode->write);
+        }
         case PM_SINGLETON_CLASS_NODE: { // A singleton class, like `class << self ... end`
             auto classNode = reinterpret_cast<pm_singleton_class_node *>(node);
             pm_location_t declLoc = classNode->class_keyword_loc;
@@ -1053,7 +1059,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_SHAREABLE_CONSTANT_NODE:
         case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
