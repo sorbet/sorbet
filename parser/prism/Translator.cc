@@ -726,6 +726,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("PM_NO_KEYWORDS_PARAMETER_NODE is handled separately in `PM_HASH_PATTERN_NODE` and "
                         "`PM_PARAMETERS_NODE`.");
         }
+        case PM_NUMBERED_PARAMETERS_NODE: { // An invisible node that models the numbered parameters in a block
+            // ... for a block like `proc { _1 + _2 }`, which has no explicitly declared parameters.
+            auto numberedParamsNode = reinterpret_cast<pm_numbered_parameters_node *>(node);
+
+            auto paramCount = numberedParamsNode->maximum;
+
+            NodeVec params;
+            params.reserve(paramCount);
+
+            for (auto i = 1; i <= paramCount; i++) {
+                // The location is arbitrary and not really used, since these aren't explicitly written in the source.
+                auto paramNode = make_unique<parser::LVar>(location, gs.enterNameUTF8("_" + std::to_string(i)));
+                params.emplace_back(move(paramNode));
+            }
+
+            return make_unique<parser::NumParams>(location, move(params));
+        }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: { // An optional keyword parameter, like `def foo(a: 1)`
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
             auto nameLoc = translateLoc(optionalKeywordParamNode->name_loc);
@@ -1088,7 +1105,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
-        case PM_NUMBERED_PARAMETERS_NODE:
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
@@ -1378,12 +1394,15 @@ unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list
 // and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prismBlockNode,
                                                             std::unique_ptr<parser::Node> sendNode) {
-    auto blockParametersNode = translate(prismBlockNode->parameters);
+    auto prismParams = prismBlockNode->parameters;
+    auto blockParametersNode = translate(prismParams);
     auto body = translate(prismBlockNode->body);
 
-    // TODO: what's the correct location to use for the Block?
-    // TODO: do we have to adjust the location for the Send node?
-    return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+    if (prismParams != nullptr && PM_NODE_TYPE_P(prismParams, PM_NUMBERED_PARAMETERS_NODE)) {
+        return make_unique<parser::NumBlock>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+    } else {
+        return make_unique<parser::Block>(sendNode->loc, move(sendNode), move(blockParametersNode), move(body));
+    }
 }
 
 // Prism represents a `begin ... rescue ... end` construct using a `pm_begin_node` that may contain:
