@@ -2758,7 +2758,7 @@ public:
             Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call, args.locs.args[2],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
@@ -2873,7 +2873,7 @@ public:
             Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call, args.locs.args[4],
                                             args.locs.fun, args.originForUninitialized, args.suppressErrors);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
-        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
+        auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity));
         res.main.constr = make_unique<TypeConstraint>();
 
         DispatchArgs innerArgs{fn,
