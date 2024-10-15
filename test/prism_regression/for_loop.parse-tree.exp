@@ -47,5 +47,17 @@ Begin {
         ]
       }
     }
+    For {
+      vars = LVarLhs {
+        name = <U x>
+      }
+      expr = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+        ]
+      }
+      body = NULL
+    }
   ]
 }
