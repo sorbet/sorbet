@@ -655,7 +655,7 @@ module Kernel
   end
   def send(arg0, *arg1, &blk); end
 
-  sig {returns(T::Class[T.anything])}
+  sig {returns(T::Class[T.self_type])}
   def singleton_class(); end
 
   sig do
