@@ -17,6 +17,10 @@
    "inline block with params"
  end
 
+foo do |positional, (multi, target)|
+  "block with multi-target node in parameter list"
+end
+
  foo(&forwarded_block)
 
  foo&.bar {}

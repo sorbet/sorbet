@@ -59,5 +59,31 @@ Begin {
       }
       body = NULL
     }
+    For {
+      vars = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p1>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x2>
+              }
+              LVarLhs {
+                name = <U y2>
+              }
+            ]
+          }
+        ]
+      }
+      expr = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+        ]
+      }
+      body = NULL
+    }
   ]
 }
