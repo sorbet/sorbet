@@ -1,0 +1,5 @@
+====first run (all files)====
+                         types.input.files :             22
+            types.input.files.kvstore.miss :             22
+           types.input.files.kvstore.write :             22
+====second run (only one file)====
