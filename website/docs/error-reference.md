@@ -912,8 +912,8 @@ For example, the following specifies that there are three valid layers: `util`,
 srb tc --packager-layers util,lib,app
 ```
 
-If the flag is not passed, then the default valid layers are `library` and
-`application`.
+If the flag is passed with no argument, then the default valid layers are
+`library` and `application`.
 
 ## 4001
 

@@ -1124,6 +1124,13 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::strictDependencies()) {
+            if (!ctx.state.packageDB().layeringChecksEnabled()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("`{}` can only be declared when `{}` is passed", send.fun.show(ctx),
+                                "--packager-layers");
+                }
+                return;
+            }
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
@@ -1147,6 +1154,13 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::layer()) {
+            if (!ctx.state.packageDB().layeringChecksEnabled()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("`{}` can only be declared when `{}` is passed", send.fun.show(ctx),
+                                "--packager-layers");
+                }
+                return;
+            }
             if (info.layer.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));

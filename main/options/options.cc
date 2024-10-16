@@ -630,7 +630,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "and `export` directives",
                                  cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("packager-layers", "Valid layer names for packages, ordered lowest to highest.",
-                                 cxxopts::value<vector<string>>()->default_value("library,application"),
+                                 cxxopts::value<vector<string>>()->implicit_value("library,application"),
                                  "<layer-name>");
     options.add_options(section)("package-skip-rbi-export-enforcement",
                                  "Constants defined in RBIs in these directories (and no others) can be exported",
@@ -1204,23 +1204,21 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("packager-layers") && !opts.stripePackages) {
-            // Default values are available at raw[...], but don't show up in raw.count(...),
-            // so we can use this as a way to check if the user passed in the flag
-            logger->error("--packager-layers can only be specified in --stripe-packages mode");
-            throw EarlyReturnWithCode(1);
-        }
-
-        if (opts.stripePackages) {
-            // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based on
-            // feedback/usecases.
-            std::regex layerValid("[a-zA-Z0-9]+");
-            for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
-                if (!std::regex_match(layer, layerValid)) {
-                    logger->error("--packager-layers must contain items that are alphanumeric.");
-                    throw EarlyReturnWithCode(1);
+        if (raw.count("packager-layers")) {
+            if (opts.stripePackages) {
+                // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
+                // on feedback/usecases.
+                std::regex layerValid("[a-zA-Z0-9]+");
+                for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
+                    if (!std::regex_match(layer, layerValid)) {
+                        logger->error("--packager-layers must contain items that are alphanumeric.");
+                        throw EarlyReturnWithCode(1);
+                    }
+                    opts.packagerLayers.emplace_back(layer);
                 }
-                opts.packagerLayers.emplace_back(layer);
+            } else {
+                logger->error("--packager-layers can only be specified in --stripe-packages mode");
+                throw EarlyReturnWithCode(1);
             }
         }
 

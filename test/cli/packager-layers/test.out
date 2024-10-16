@@ -8,3 +8,11 @@ __package.rb:5: Argument to `layer` must be one of: `a`, `b`, or `c` https://srb
                 ^^^^^^
 Errors: 1
 --packager-layers can only be specified in --stripe-packages mode
+__package.rb:4: `strict_dependencies` can only be declared when `--packager-layers` is passed https://srb.help/3724
+     4 |  strict_dependencies 'false'
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:5: `layer` can only be declared when `--packager-layers` is passed https://srb.help/3725
+     5 |  layer 'fake'
+          ^^^^^^^^^^^^
+Errors: 2
