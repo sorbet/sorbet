@@ -1187,6 +1187,13 @@ DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Comb
 
     res.main = std::move(left.main);
     res.secondary = std::move(left.secondary);
+    // TODO(jez) This is wrong--T.any and T.all types can have arbitrary tree shapes, but our
+    // DispatchComponents can only have a non-compound `main` DispatchComponent and an arbitrarily
+    // complex `secondary` DispatchResult...
+    //
+    // I this that this only matters for anyone trying to read `secondaryKind` and recreate the
+    // `Types::any`/`Types::all` logic above.
+    // TODO(jez) Try to write a test case that breaks.
     res.secondaryKind = kind;
 
     auto *it = &res;
