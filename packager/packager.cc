@@ -41,6 +41,24 @@ bool visibilityApplies(const core::packages::VisibleTo vt, absl::Span<const core
     }
 }
 
+string buildValidLayersStr(const core::GlobalState &gs) {
+    auto &validLayers = gs.packageDB().layers();
+    ENFORCE(validLayers.size() > 0);
+    if (validLayers.size() == 1) {
+        return string(validLayers.front().shortName(gs));
+    }
+    string result = "";
+    for (int i = 0; i < validLayers.size() - 1; i++) {
+        if (validLayers.size() > 2) {
+            result += core::ErrorColors::format("`{}`, ", validLayers[i].shortName(gs));
+        } else {
+            result += core::ErrorColors::format("`{}` ", validLayers[i].shortName(gs));
+        }
+    }
+    result += core::ErrorColors::format("or `{}`", validLayers.back().shortName(gs));
+    return result;
+}
+
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
@@ -210,6 +228,7 @@ public:
     bool visibleToTests_ = false;
 
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
+    optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
 
     // PackageInfoImpl is the only implementation of PackageInfoImpl
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
@@ -1108,8 +1127,7 @@ struct PackageSpecBodyWalk {
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second),
-                                   "Previous declaration found here");
+                    e.addErrorLine(ctx.locAt(info.strictDependenciesLevel.value().second), "Previously declared here");
                     e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
                 }
                 return;
@@ -1123,6 +1141,29 @@ struct PackageSpecBodyWalk {
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                         e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, or `{}`", send.fun.show(ctx),
                                     "'false'", "'layered'", "'layered_dag'", "'dag'");
+                    }
+                }
+            }
+        }
+
+        if (send.fun == core::Names::layer()) {
+            if (info.layer.has_value()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.layer.value().second), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            if (send.numPosArgs() > 0) {
+                auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
+                if (parsedValue.has_value()) {
+                    info.layer = make_pair(parsedValue.value(), send.getPosArg(0).loc());
+                } else {
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidLayer)) {
+                        e.setHeader("Argument to `{}` must be one of: {}", send.fun.show(ctx),
+                                    buildValidLayersStr(ctx.state));
                     }
                 }
             }
@@ -1276,6 +1317,19 @@ private:
             return core::packages::StrictDependenciesLevel::Dag;
         }
 
+        return nullopt;
+    }
+
+    optional<core::NameRef> parseLayerOption(const core::GlobalState &gs, ast::ExpressionPtr &arg) {
+        auto &validLayers = gs.packageDB().layers();
+        auto *lit = ast::cast_tree<ast::Literal>(arg);
+        if (!lit || !lit->isString()) {
+            return nullopt;
+        }
+        auto value = lit->asString();
+        if (absl::c_find(validLayers, value) != validLayers.end()) {
+            return value;
+        }
         return nullopt;
     }
 };

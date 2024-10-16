@@ -681,7 +681,7 @@ int realmain(int argc, char *argv[]) {
                                        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                        opts.extraPackageFilesDirectorySlashPrefixes,
                                        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor,
-                                       opts.stripePackagesHint);
+                                       opts.packagerLayers, opts.stripePackagesHint);
             }
 
             packager::Packager::findPackages(*gs, absl::Span<ast::ParsedFile>(packages));

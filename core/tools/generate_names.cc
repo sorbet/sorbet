@@ -462,6 +462,7 @@ NameDef names[] = {
     {"visibleTo", "visible_to"},
     {"tests"},
     {"exportAll", "export_all!"},
+    {"layer"},
     {"strictDependencies", "strict_dependencies"},
     {"false_", "false"},
     {"layered"},

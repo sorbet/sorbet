@@ -884,6 +884,37 @@ The 4 possible values are:
 - `'layered_dag'`
 - `'dag'`
 
+## 3725
+
+> This error is specific to Stripe's custom `--stripe-packages` mode. If you are
+> at Stripe, please see [go/modularity](http://go/modularity) and
+> [go/layers](http://go/layers) for more.
+
+All packages have a `layer`, which is used when checking for layering
+violations.
+
+<!-- TODO(neil): explain this further once we implement these checks -->
+
+```ruby
+class MyPackage < PackageSpec
+  strict_dependencies 'false'
+  layer 'library'
+end
+```
+
+You can choose the valid layers using the `--packager-layers` command line flag.
+For example, the following specifies that there are three valid layers: `util`,
+`lib` and `app`, ordered lowest to highest.
+
+<!-- TODO(neil): explain what lowest to highest means once we implement these checks -->
+
+```bash
+srb tc --packager-layers util,lib,app
+```
+
+If the flag is not passed, then the default valid layers are `library` and
+`application`.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in
