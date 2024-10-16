@@ -12,21 +12,19 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-string methodInfoString(const core::GlobalState &gs, const core::TypePtr &retType,
-                        const core::DispatchResult &dispatchResult, const unique_ptr<core::TypeConstraint> &constraint,
+string methodInfoString(const core::GlobalState &gs, const core::DispatchResult &dispatchResult,
                         const core::ShowOptions options) {
     string contents;
     auto start = &dispatchResult;
-    ;
+
     while (start != nullptr) {
         auto &component = start->main;
         if (component.method.exists()) {
             if (!contents.empty()) {
                 contents += "\n";
             }
-            contents = absl::StrCat(contents, core::source_generator::prettyTypeForMethod(gs, component.method,
-                                                                                          component.receiver, retType,
-                                                                                          constraint.get(), options));
+            contents = absl::StrCat(move(contents), core::source_generator::prettyTypeForMethod(
+                                                        gs, component.method, component.receiver, options));
         }
         start = start->secondary.get();
     }
@@ -88,18 +86,13 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 }
             }
 
-            auto retType = s->dispatchResult->returnType;
-            auto &constraint = s->dispatchResult->main.constr;
-            if (constraint) {
-                retType = core::Types::instantiate(gs, retType, *constraint);
-            }
             if (s->dispatchResult->main.method.exists() &&
                 s->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
                 // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
                 // the result type.
-                typeString = retType.showWithMoreInfo(gs);
+                typeString = s->dispatchResult->returnType.showWithMoreInfo(gs);
             } else {
-                typeString = methodInfoString(gs, retType, *s->dispatchResult, constraint, options);
+                typeString = methodInfoString(gs, *s->dispatchResult, options);
             }
         }
     } else if (auto c = resp->isConstant()) {
@@ -125,8 +118,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString =
-            core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, d->retType.type, nullptr, options);
+        typeString = core::source_generator::prettyTypeForMethod(gs, d->symbol, nullptr, options);
     } else if (resp->isField()) {
         const auto &origins = resp->getTypeAndOrigins().origins;
         for (auto loc : origins) {
