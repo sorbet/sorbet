@@ -20,6 +20,7 @@ private:
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
                                   const std::vector<UIntSet> &blockArgs);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
+    static void pinUnreadVariables(core::Context ctx, CFG &cfg);
     static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
     static void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                                 core::LocOffsets loc);
