@@ -1542,6 +1542,13 @@ void validatePackage(core::Context ctx) {
         return;
     }
 
+    // Sanity check: __package.rb files _must_ be typed: strict
+    if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
+        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
+            e.setHeader("Package files must be at least `{}`", "# typed: strict");
+        }
+    }
+
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
 
@@ -1576,13 +1583,6 @@ void validatePackage(core::Context ctx) {
                                    "visible_to", otherPkg.show(ctx));
                 }
             }
-        }
-    }
-
-    // Sanity check: __package.rb files _must_ be typed: strict
-    if (ctx.file.data(ctx).originalSigil < core::StrictLevel::Strict) {
-        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::PackageFileMustBeStrict)) {
-            e.setHeader("Package files must be at least `{}`", "# typed: strict");
         }
     }
 }
