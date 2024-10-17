@@ -217,6 +217,10 @@ const std::vector<core::NameRef> &PackageDB::layers() const {
     return layers_;
 }
 
+const bool PackageDB::enforceLayering() const {
+    return !layers_.empty();
+}
+
 const std::vector<std::string> &PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
     return extraPackageFilesDirectoryUnderscorePrefixes_;
 }

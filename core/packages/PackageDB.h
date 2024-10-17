@@ -67,6 +67,7 @@ public:
     // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
     // `app`.
     const std::vector<core::NameRef> &layers() const;
+    const bool enforceLayering() const;
 
     const std::string_view errorHint() const;
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;

@@ -1124,6 +1124,16 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::strictDependencies()) {
+            if (!ctx.state.packageDB().enforceLayering()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                    e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
+                                "--packager-layers");
+                    e.addErrorNote("Use `{}` to define the valid layers, or `{}` to use the default layers "
+                                   "of `{}` and `{}`",
+                                   "--packager-layers=foo,bar", "--packager-layers", "library", "application");
+                }
+                return;
+            }
             if (info.strictDependenciesLevel.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
@@ -1147,6 +1157,16 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::layer()) {
+            if (!ctx.state.packageDB().enforceLayering()) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
+                    e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
+                                "--packager-layers");
+                    e.addErrorNote("Use `{}` to define the valid layers, or `{}` to use the default layers "
+                                   "of `{}` and `{}`",
+                                   "--packager-layers=foo,bar", "--packager-layers", "library", "application");
+                }
+                return;
+            }
             if (info.layer.has_value()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));

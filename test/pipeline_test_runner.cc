@@ -285,7 +285,7 @@ void setupPackager(unique_ptr<core::GlobalState> &gs, vector<shared_ptr<RangeAss
         allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
 
-    std::vector<std::string> defaultLayers = {"library", "application"};
+    std::vector<std::string> defaultLayers = {};
     auto packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
 
     {
