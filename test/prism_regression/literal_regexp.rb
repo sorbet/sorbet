@@ -10,3 +10,9 @@
 
 # multiple options
 /foo/im
+
+# with interpolation
+/foo #{1 + 2}/
+
+# with interpolation and options
+/foo #{1 + 2}/im

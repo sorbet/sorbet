@@ -37,5 +37,55 @@ Begin {
         opts = "im"
       }
     }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo >
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = Integer {
+                val = "1"
+              }
+              method = <U +>
+              args = [
+                Integer {
+                  val = "2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      opts = Regopt {
+        opts = ""
+      }
+    }
+    Regexp {
+      regex = [
+        String {
+          val = <U foo >
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = Integer {
+                val = "1"
+              }
+              method = <U +>
+              args = [
+                Integer {
+                  val = "2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+      opts = Regopt {
+        opts = "im"
+      }
+    }
   ]
 }
