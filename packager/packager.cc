@@ -1542,6 +1542,32 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+void validateVisibility(const core::Context &ctx, const Import i) {
+    auto &absPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
+    auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
+
+    const auto &visibleTo = otherPkg.visibleTo();
+    if (visibleTo.empty() && !otherPkg.visibleToTests()) {
+        return;
+    }
+
+    if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
+        return;
+    }
+
+    bool allowed = absl::c_any_of(otherPkg.visibleTo(),
+                                  [&absPkg](const auto &other) { return visibilityApplies(other, absPkg.fullName()); });
+
+    if (!allowed) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
+            e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                        otherPkg.show(ctx), absPkg.show(ctx));
+            e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                           "visible_to", otherPkg.show(ctx));
+        }
+    }
+}
+
 } // namespace
 
 // Validate that the package file is marked `# typed: strict`.
@@ -1564,37 +1590,22 @@ void validatePackage(core::Context ctx) {
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
 
-    if (!skipImportVisibilityCheck) {
-        for (auto &i : pkgInfo.importedPackageNames) {
-            auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
+    if (skipImportVisibilityCheck) {
+        return;
+    }
 
-            // this might mean the other package doesn't exist, but that
-            // should have been caught already
-            if (!otherPkg.exists()) {
-                continue;
-            }
+    for (auto &i : pkgInfo.importedPackageNames) {
+        auto &otherPkg = packageDB.getPackageInfo(i.name.mangledName);
 
-            const auto &visibleTo = otherPkg.visibleTo();
-            if (visibleTo.empty() && !otherPkg.visibleToTests()) {
-                continue;
-            }
+        // this might mean the other package doesn't exist, but that
+        // should have been caught already
+        if (!otherPkg.exists()) {
+            continue;
+        }
 
-            if (otherPkg.visibleToTests() && i.type == ImportType::Test) {
-                continue;
-            }
 
-            bool allowed = absl::c_any_of(otherPkg.visibleTo(), [&absPkg](const auto &other) {
-                return visibilityApplies(other, absPkg.fullName());
-            });
-
-            if (!allowed) {
-                if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                otherPkg.show(ctx), absPkg.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", otherPkg.show(ctx));
-                }
-            }
+        if (!skipImportVisibilityCheck) {
+            validateVisibility(ctx, i);
         }
     }
 }
