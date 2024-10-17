@@ -311,7 +311,7 @@ Usage:
                                 by `visible_to` and `export` directives
       --packager-layers [=<layer-name>(=library,application)]
                                 Valid layer names for packages, ordered lowest to
-                                highest.
+                                highest. Passing this flag also enables layering checks.
       --package-skip-rbi-export-enforcement <dir>
                                 Constants defined in RBIs in these directories (and no
                                 others) can be exported
