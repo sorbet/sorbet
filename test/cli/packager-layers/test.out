@@ -8,11 +8,15 @@ __package.rb:5: Argument to `layer` must be one of: `a`, `b`, or `c` https://srb
                 ^^^^^^
 Errors: 1
 --packager-layers can only be specified in --stripe-packages mode
-__package.rb:4: `strict_dependencies` can only be declared when `--packager-layers` is passed https://srb.help/3724
+__package.rb:4: Found `strict_dependencies` annotation, but `--packager-layers` was not passed https://srb.help/3724
      4 |  strict_dependencies 'false'
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Use `--packager-layers=foo,bar` to define the valid layers, or `--packager-layers` to use the default layers of `library` and `application`
 
-__package.rb:5: `layer` can only be declared when `--packager-layers` is passed https://srb.help/3725
+__package.rb:5: Found `layer` annotation, but `--packager-layers` was not passed https://srb.help/3725
      5 |  layer 'fake'
           ^^^^^^^^^^^^
+  Note:
+    Use `--packager-layers=foo,bar` to define the valid layers, or `--packager-layers` to use the default layers of `library` and `application`
 Errors: 2
