@@ -1542,7 +1542,55 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+void validateLayering(const core::Context &ctx, const Import &i) {
+    if (i.type == ImportType::Test) {
+        return;
+    }
+
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
+    auto &thisPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageForFile(ctx, ctx.file));
+    auto &otherPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageInfo(i.name.mangledName));
+
+    if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
+        !thisPkg.layer.has_value() || !otherPkg.layer.has_value()) {
+        return;
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+        return;
+    }
+
+    auto possibleLayers = ctx.state.packageDB().layers();
+    auto pkgLayer = thisPkg.layer.value().first;
+    auto otherPkgLayer = otherPkg.layer.value().first;
+    auto pkgIndex = std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, pkgLayer));
+    auto otherPkgIndex = std::distance(possibleLayers.begin(), absl::c_find(possibleLayers, otherPkgLayer));
+
+    if (pkgIndex < otherPkgIndex) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+            e.setHeader("`{}` is at layer `{}`, so it can not import package `{}`, which is at layer `{}`",
+                        thisPkg.name.toString(ctx), pkgLayer.toString(ctx), otherPkg.name.toString(ctx),
+                        otherPkgLayer.toString(ctx));
+            e.addErrorLine(core::Loc(thisPkg.loc.file(), thisPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           thisPkg.name.toString(ctx), "layer");
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.layer.value().second), "`{}`'s `{}` declared here",
+                           otherPkg.name.toString(ctx), "layer");
+        }
+    }
+
+    if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+        if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+            e.setHeader("All of this package's dependecies must be `{}` or higher", "layered");
+            e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
+                           "`{}`'s `{}` level declared here", otherPkg.name.toString(ctx), "strict_dependencies");
+        }
+    }
+}
+
 void validateVisibility(const core::Context &ctx, const Import i) {
+    ENFORCE(ctx.state.packageDB().getPackageInfo(i.name.mangledName).exists())
+    ENFORCE(ctx.state.packageDB().getPackageForFile(ctx, ctx.file).exists())
     auto &absPkg = ctx.state.packageDB().getPackageForFile(ctx, ctx.file);
     auto &otherPkg = ctx.state.packageDB().getPackageInfo(i.name.mangledName);
 
@@ -1589,7 +1637,7 @@ void validatePackage(core::Context ctx) {
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
 
-    if (skipImportVisibilityCheck) {
+    if (skipImportVisibilityCheck && !ctx.state.packageDB().enforceLayering()) {
         return;
     }
 
@@ -1602,6 +1650,9 @@ void validatePackage(core::Context ctx) {
             continue;
         }
 
+        if (ctx.state.packageDB().enforceLayering()) {
+            validateLayering(ctx, i);
+        }
 
         if (!skipImportVisibilityCheck) {
             validateVisibility(ctx, i);
