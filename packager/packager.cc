@@ -230,7 +230,7 @@ public:
     optional<pair<core::packages::StrictDependenciesLevel, core::LocOffsets>> strictDependenciesLevel = nullopt;
     optional<pair<core::NameRef, core::LocOffsets>> layer = nullopt;
 
-    // PackageInfoImpl is the only implementation of PackageInfoImpl
+    // PackageInfoImpl is the only implementation of PackageInfo
     const static PackageInfoImpl &from(const core::packages::PackageInfo &pkg) {
         ENFORCE(pkg.exists());
         return reinterpret_cast<const PackageInfoImpl &>(pkg); // TODO is there a more idiomatic way to do this?
@@ -1574,7 +1574,6 @@ void validateVisibility(const core::Context &ctx, const Import i) {
 
 } // namespace
 
-// Validate that the package file is marked `# typed: strict`.
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto &absPkg = packageDB.getPackageForFile(ctx, ctx.file);
