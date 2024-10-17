@@ -1,0 +1,29 @@
+NumBlock {
+  send = Send {
+    receiver = NULL
+    method = <U proc>
+    args = [
+    ]
+  }
+  args = NumParams {
+    decls = [
+      LVar {
+        name = <U _1>
+      }
+      LVar {
+        name = <U _2>
+      }
+    ]
+  }
+  body = Send {
+    receiver = LVar {
+      name = <U _1>
+    }
+    method = <U +>
+    args = [
+      LVar {
+        name = <U _2>
+      }
+    ]
+  }
+}
