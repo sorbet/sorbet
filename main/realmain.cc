@@ -749,10 +749,7 @@ int realmain(int argc, char *argv[]) {
                 // First run: only the __package.rb files. This populates the packageDB
                 pipeline::setPackagerOptions(*gs, opts);
                 pipeline::package(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers);
-                // Only need to compute hashes when running to compute a FileHash
-                auto foundHashes = nullptr;
-                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
-                ENFORCE(!canceled, "There's no cancellation in batch mode");
+                // TODO(jez) Put the call to pipeline::name back here
             }
 
             auto nonPackageIndexed =
@@ -768,6 +765,14 @@ int realmain(int argc, char *argv[]) {
 
             // Second run: all the other files (the packageDB shouldn't change)
             pipeline::package(*gs, absl::Span<ast::ParsedFile>(nonPackageIndexed), opts, *workers);
+
+            {
+                // TODO(jez) Put this back after the call to `pipeline::package` in the stripePackages section
+                // Only need to compute hashes when running to compute a FileHash
+                auto foundHashes = nullptr;
+                auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+                ENFORCE(!canceled, "There's no cancellation in batch mode");
+            }
 
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
