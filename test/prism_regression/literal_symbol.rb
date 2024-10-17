@@ -11,3 +11,5 @@
 %s[symbol in square brackets]
 
 %s<symbol in angle brackets>
+
+:"symbol with interpolation #{1 + 2}"

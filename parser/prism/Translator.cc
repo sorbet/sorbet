@@ -585,7 +585,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::DString>(location, move(sorbetParts));
         }
-        case PM_INTERPOLATED_X_STRING_NODE: {
+        case PM_INTERPOLATED_SYMBOL_NODE: { // A symbol like `:"a #{b} c"`
+            auto interpolatedSymbolNode = reinterpret_cast<pm_interpolated_symbol_node *>(node);
+
+            auto sorbetParts = translateMulti(interpolatedSymbolNode->parts);
+
+            return make_unique<parser::DSymbol>(location, move(sorbetParts));
+        }
+        case PM_INTERPOLATED_X_STRING_NODE: { // An executable string with backticks, like `echo "Hello, world!"`
             auto interpolatedXStringNode = reinterpret_cast<pm_interpolated_x_string_node *>(node);
 
             auto sorbetParts = translateMulti(interpolatedXStringNode->parts);
@@ -1098,7 +1105,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_REST_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
-        case PM_INTERPOLATED_SYMBOL_NODE:
         case PM_LAMBDA_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
