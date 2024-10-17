@@ -578,6 +578,27 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(location, std::to_string(intNode->value.value));
         }
+        case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
+            auto interpolatedRegexNode = reinterpret_cast<pm_interpolated_regular_expression_node *>(node);
+            pm_location_t closingLoc = interpolatedRegexNode->closing_loc;
+
+            parser::NodeVec parts = translateMulti(interpolatedRegexNode->parts);
+
+            std::string_view optString;
+
+            auto optStart = closingLoc.start + 1; // one character after the closing `/`
+            auto optEnd = closingLoc.end;
+            auto optLength = optEnd - optStart;
+
+            // Some regexps have options, e.g. `/foo/i`
+            if (optLength > 0) {
+                optString = std::string_view(reinterpret_cast<const char *>(optStart), optLength);
+            }
+
+            auto opt = make_unique<parser::Regopt>(translateLoc(closingLoc), optString);
+
+            return make_unique<parser::Regexp>(location, move(parts), move(opt));
+        }
         case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
             auto interpolatedStringNode = reinterpret_cast<pm_interpolated_string_node *>(node);
 
@@ -1104,7 +1125,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
-        case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE:
         case PM_LAMBDA_NODE:
         case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
