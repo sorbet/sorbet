@@ -217,7 +217,7 @@ const std::vector<core::NameRef> &PackageDB::layers() const {
     return layers_;
 }
 
-const bool PackageDB::layeringChecksEnabled() const {
+const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }
 

@@ -1124,7 +1124,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::strictDependencies()) {
-            if (!ctx.state.packageDB().layeringChecksEnabled()) {
+            if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("`{}` can only be declared when `{}` is passed", send.fun.show(ctx),
                                 "--packager-layers");
@@ -1154,7 +1154,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::layer()) {
-            if (!ctx.state.packageDB().layeringChecksEnabled()) {
+            if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("`{}` can only be declared when `{}` is passed", send.fun.show(ctx),
                                 "--packager-layers");
