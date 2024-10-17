@@ -120,6 +120,84 @@ Begin {
         val = <U block with multi-target node in parameter list>
       }
     }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U bar>
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U positional>
+          }
+          Mlhs {
+            exprs = [
+              Arg {
+                name = <U multi>
+              }
+              Arg {
+                name = <U target>
+              }
+            ]
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = String {
+        val = <U block with multi-target node in parameter list and block locals>
+      }
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = <U foo>
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Arg {
+            name = <U bar>
+          }
+          Shadowarg {
+            name = <U baz>
+          }
+          Shadowarg {
+            name = <U qux>
+          }
+        ]
+      }
+      body = NULL
+    }
     Send {
       receiver = NULL
       method = <U foo>
