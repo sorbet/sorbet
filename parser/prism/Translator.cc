@@ -580,24 +580,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
             auto interpolatedRegexNode = reinterpret_cast<pm_interpolated_regular_expression_node *>(node);
-            pm_location_t closingLoc = interpolatedRegexNode->closing_loc;
 
-            parser::NodeVec parts = translateMulti(interpolatedRegexNode->parts);
+            auto parts = translateMulti(interpolatedRegexNode->parts);
+            auto options = translateRegexpOptions(interpolatedRegexNode->closing_loc);
 
-            std::string_view optString;
-
-            auto optStart = closingLoc.start + 1; // one character after the closing `/`
-            auto optEnd = closingLoc.end;
-            auto optLength = optEnd - optStart;
-
-            // Some regexps have options, e.g. `/foo/i`
-            if (optLength > 0) {
-                optString = std::string_view(reinterpret_cast<const char *>(optStart), optLength);
-            }
-
-            auto opt = make_unique<parser::Regopt>(translateLoc(closingLoc), optString);
-
-            return make_unique<parser::Regexp>(location, move(parts), move(opt));
+            return make_unique<parser::Regexp>(location, move(parts), move(options));
         }
         case PM_INTERPOLATED_STRING_NODE: { // An interpolated string like `"foo #{bar} baz"`
             auto interpolatedStringNode = reinterpret_cast<pm_interpolated_string_node *>(node);
@@ -889,31 +876,19 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_REGULAR_EXPRESSION_NODE: { // A regular expression literal, e.g. `/foo/`
             auto regularExpressionNode = reinterpret_cast<pm_regular_expression_node *>(node);
-            pm_location_t closingLoc = regularExpressionNode->closing_loc;
 
-            // Sorbet represents the regex content as a vector of string nodes
+            // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
+            // but we'll only have up to one String node here for this non-interpolated Regexp.
             parser::NodeVec parts;
-
             auto source = parser.extractString(&regularExpressionNode->unescaped);
             if (!source.empty()) {
                 auto sourceStringNode = make_unique<parser::String>(location, gs.enterNameUTF8(source));
                 parts.emplace_back(move(sourceStringNode));
             }
 
-            std::string_view optString;
+            auto options = translateRegexpOptions(regularExpressionNode->closing_loc);
 
-            auto optStart = closingLoc.start + 1; // one character after the closing `/`
-            auto optEnd = closingLoc.end;
-            auto optLength = optEnd - optStart;
-
-            // Some regexps have options, e.g. `/foo/i`
-            if (optLength > 0) {
-                optString = std::string_view(reinterpret_cast<const char *>(optStart), optLength);
-            }
-
-            auto opt = make_unique<parser::Regopt>(translateLoc(closingLoc), optString);
-
-            return make_unique<parser::Regexp>(location, move(parts), move(opt));
+            return make_unique<parser::Regexp>(location, move(parts), move(options));
         }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: { // A required keyword parameter, like `def foo(a:)`
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
@@ -1538,4 +1513,15 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
 template <typename SorbetNode> unique_ptr<SorbetNode> Translator::translateSimpleKeyword(pm_node_t *node) {
     return make_unique<SorbetNode>(translateLoc(node->location));
 }
+
+// Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
+unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t closingLoc) {
+    auto start = closingLoc.start + 1; // one character after the closing `/`
+    auto length = closingLoc.end - start;
+
+    auto options = (length > 0) ? std::string_view(reinterpret_cast<const char *>(start), length) : std::string_view();
+
+    return make_unique<parser::Regopt>(translateLoc(closingLoc), options);
+}
+
 }; // namespace sorbet::parser::Prism
