@@ -1003,9 +1003,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
     try {
         core::TypeAndOrigins tp;
-        bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
-                              cfg::isa_instruction<cfg::LoadArg>(bind.value) ||
-                              bind.bind.variable == cfg::LocalRef::selfVariable();
+        bool noLoopChecking =
+            cfg::isa_instruction<cfg::Alias>(bind.value) || cfg::isa_instruction<cfg::LoadArg>(bind.value) ||
+            bind.bind.variable == cfg::LocalRef::selfVariable() || bindMinLoops == cfg::CFG::MIN_LOOP_NEVER_READ;
 
         bool checkFullyDefined = true;
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
