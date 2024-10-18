@@ -51,7 +51,6 @@ class CompletionTask final : public LSPRequestTask {
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
                                                                core::DispatchResult &dispatchResult,
                                                                core::MethodRef what, const core::TypePtr &receiverType,
-                                                               const core::TypeConstraint *constraint,
                                                                core::Loc queryLoc, std::string_view prefix,
                                                                size_t sortIdx, uint16_t totalArgs) const;
 
