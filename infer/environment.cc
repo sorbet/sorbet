@@ -1141,32 +1141,17 @@ core::TypePtr Environment::processBinding(
                             auto klass = it->main.method.data(ctx)->owner;
                             if (klass.exists() &&
                                 klass.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Model()) {
-                                bool isWrappingMethodArg = false;
-                                for (auto &arg : inWhat.symbol.data(ctx)->arguments) {
-                                    if (arg.flags.isKeyword) {
-                                        if (send.recv.variable.data(inWhat)._name == arg.name) {
-                                            isWrappingMethodArg = true;
-                                        }
-                                    } else {
-                                        if (send.recv.variable.data(inWhat)._name.show(ctx) == arg.argumentName(ctx)) {
-                                            isWrappingMethodArg = true;
-                                        }
-                                    }
-                                }
-
-                                if (isWrappingMethodArg) {
-                                    auto wrappingMethodName = inWhat.symbol.showFullName(ctx);
-                                    auto methodName = it->main.method.data(ctx)->name.show(ctx);
-                                    auto callSiteLoc = ctx.locAt(bind.loc);
-                                    auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
-                                    auto [start, _] = std::move(callSiteLoc).position(ctx.state);
-                                    auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
-                                    // JSONL machine-readable format
-                                    std::cout << "{ \"context\": \"" << std::move(wrappingMethodName)
-                                              << "\", \"method\": \"" << std::move(methodName) << "\", \"loc\": \""
-                                              << std::move(callSiteFile) << ":" << start.line << "\", \"recv\": \""
-                                              << std::move(receiverName) << "\" } " << std::endl;
-                                }
+                                auto wrappingMethodName = inWhat.symbol.showFullName(ctx);
+                                auto methodName = it->main.method.data(ctx)->name.show(ctx);
+                                auto callSiteLoc = ctx.locAt(bind.loc);
+                                auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
+                                auto [start, _] = std::move(callSiteLoc).position(ctx.state);
+                                auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
+                                // JSONL machine-readable format
+                                std::cout << "{ \"context\": \"" << std::move(wrappingMethodName)
+                                          << "\", \"method\": \"" << std::move(methodName) << "\", \"loc\": \""
+                                          << std::move(callSiteFile) << ":" << start.line << "\", \"recv\": \""
+                                          << std::move(receiverName) << "\" } " << std::endl;
                             }
                         }
                     }
