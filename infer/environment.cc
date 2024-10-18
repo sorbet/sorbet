@@ -1141,17 +1141,26 @@ core::TypePtr Environment::processBinding(
                             auto klass = it->main.method.data(ctx)->owner;
                             if (klass.exists() &&
                                 klass.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Model()) {
-                                auto wrappingMethodName = inWhat.symbol.showFullName(ctx);
+                                auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
+                                std::string wrappingMethodClassName;
+                                if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                                    wrappingMethodClassName =
+                                        wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                                } else {
+                                    wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                                }
+                                auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
                                 auto methodName = it->main.method.data(ctx)->name.show(ctx);
                                 auto callSiteLoc = ctx.locAt(bind.loc);
                                 auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
                                 auto [start, _] = std::move(callSiteLoc).position(ctx.state);
                                 auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
                                 // JSONL machine-readable format
-                                std::cout << "{ \"context\": \"" << std::move(wrappingMethodName)
-                                          << "\", \"method\": \"" << std::move(methodName) << "\", \"loc\": \""
-                                          << std::move(callSiteFile) << ":" << start.line << "\", \"recv\": \""
-                                          << std::move(receiverName) << "\" } " << std::endl;
+                                std::cout << "{\"context\": \"" << std::move(wrappingMethodClassName) << "#"
+                                          << std::move(wrappingMethodName) << "\", \"method\": \""
+                                          << std::move(methodName) << "\", \"loc\": \"" << std::move(callSiteFile)
+                                          << ":" << start.line << "\", \"recv\": \"" << std::move(receiverName)
+                                          << "\"} " << std::endl;
                             }
                         }
                     }
