@@ -1082,30 +1082,69 @@ struct DispatchComponent {
     std::unique_ptr<TypeConstraint> constr;
 };
 
-struct DispatchResult {
+struct DispatchResult;
+struct CombinedDispatchComponent {
     enum class Combinator { OR, AND };
-    // The overall return type of the call expression, accounting for the `Combinator`, where the
-    // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
-    TypePtr returnType;
-    DispatchComponent main;
-    std::unique_ptr<DispatchResult> secondary;
-    Combinator secondaryKind;
-
-    DispatchResult() = default;
-    DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
-        : returnType(returnType),
-          main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
-    DispatchResult(TypePtr returnType, DispatchComponent comp)
-        : returnType(std::move(returnType)), main(std::move(comp)){};
-    DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
-                   Combinator secondaryKind)
-        : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
-          secondaryKind(secondaryKind){};
-
-    // Combine two dispatch results, preferring the left as the `main`.
-    static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
+    Combinator kind;
+    std::unique_ptr<DispatchResult> left;
+    std::unique_ptr<DispatchResult> right;
 };
+
+struct DispatchResult {
+    // The overall return type of the call expression, accounting for any `Combinator`s
+    TypePtr returnType;
+    std::variant<std::unique_ptr<DispatchComponent>, std::unique_ptr<CombinedDispatchComponent>> dispatch;
+
+    // Combine two dispatch results according to their combinator
+    static DispatchResult merge(const GlobalState &gs, CombinedDispatchComponent::Combinator kind,
+                                DispatchResult &&left, DispatchResult &&right);
+
+    DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
+        : returnType(returnType), dispatch(std::make_unique<DispatchComponent>(DispatchComponent{
+                                      std::move(receiverType),
+                                      method,
+                                      {},
+                                      std::move(returnType),
+                                      nullptr,
+                                      nullptr,
+                                      {},
+                                      {},
+                                      nullptr,
+                                  })) {}
+
+    DispatchResult(TypePtr returnType, std::unique_ptr<DispatchComponent> comp)
+        : returnType(std::move(returnType)), dispatch(std::move(comp)) {}
+
+    // TODO(jez) Should this be private?
+    DispatchResult(TypePtr returnType, std::unique_ptr<CombinedDispatchComponent> comp)
+        : returnType(returnType), dispatch(std::move(comp)) {}
+};
+
+// struct DispatchResult2 {
+//    enum class Combinator { OR, AND };
+//    // The overall return type of the call expression, accounting for the `Combinator`, where the
+//    // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
+//    TypePtr returnType;
+//    DispatchComponent main;
+//    std::unique_ptr<DispatchResult2> secondary;
+//    Combinator secondaryKind;
+//
+//    DispatchResult2() = default;
+//    DispatchResult2(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
+//        : returnType(returnType),
+//          main(DispatchComponent{
+//              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
+//    DispatchResult2(TypePtr returnType, DispatchComponent comp)
+//        : returnType(std::move(returnType)), main(std::move(comp)){};
+//    DispatchResult2(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult2> secondary,
+//                    Combinator secondaryKind)
+//        : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
+//          secondaryKind(secondaryKind){};
+//
+//    // Combine two dispatch results, preferring the left as the `main`.
+//    static DispatchResult2 merge(const GlobalState &gs, Combinator kind, DispatchResult2 &&left,
+//                                 DispatchResult2 &&right);
+//};
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
 public:

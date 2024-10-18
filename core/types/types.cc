@@ -1171,32 +1171,27 @@ DispatchArgs DispatchArgs::withErrorsSuppressed() const {
                         isPrivateOk, true,     enclosingMethodForSuper};
 }
 
-DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,
-                                     DispatchResult &&right) {
-    DispatchResult res;
-
+DispatchResult DispatchResult::merge(const GlobalState &gs, CombinedDispatchComponent::Combinator kind,
+                                     DispatchResult &&left, DispatchResult &&right) {
+    TypePtr returnType;
     switch (kind) {
-        case DispatchResult::Combinator::OR:
-            res.returnType = Types::any(gs, left.returnType, right.returnType);
+        case CombinedDispatchComponent::Combinator::OR:
+            returnType = Types::any(gs, left.returnType, right.returnType);
             break;
 
-        case DispatchResult::Combinator::AND:
-            res.returnType = Types::all(gs, left.returnType, right.returnType);
+        case CombinedDispatchComponent::Combinator::AND:
+            returnType = Types::all(gs, left.returnType, right.returnType);
             break;
     }
 
-    res.main = std::move(left.main);
-    res.secondary = std::move(left.secondary);
-    res.secondaryKind = kind;
-
-    auto *it = &res;
-    while (it->secondary != nullptr) {
-        it = it->secondary.get();
-    }
-
-    it->secondary = make_unique<DispatchResult>(std::move(right));
-
-    return res;
+    return DispatchResult{
+        move(returnType),
+        make_unique<CombinedDispatchComponent>(CombinedDispatchComponent{
+            kind,
+            make_unique<DispatchResult>(move(left)),
+            make_unique<DispatchResult>(move(right)),
+        }),
+    };
 }
 
 } // namespace sorbet::core

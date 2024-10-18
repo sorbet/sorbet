@@ -29,14 +29,19 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, const D
     return und.dispatchCall(gs, args.withThisRef(und));
 }
 
-bool allComponentsPresent(DispatchResult &res) {
-    if (!res.main.method.exists()) {
-        return false;
-    }
-    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
-        return true;
-    }
-    return allComponentsPresent(*res.secondary);
+bool allComponentsPresent(const DispatchResult &res) {
+    return visit(
+        [](auto &&res) -> bool {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, unique_ptr<DispatchComponent>>) {
+                return res->method.exists();
+            } else if constexpr (is_same_v<T, unique_ptr<CombinedDispatchComponent>>) {
+                return allComponentsPresent(*res->left) && allComponentsPresent(*res->right);
+            } else {
+                static_assert(always_false_v<T>, "non-exhaustive visitor!");
+            }
+        },
+        res.dispatch);
 }
 } // namespace
 
@@ -208,6 +213,7 @@ void addUnconstrainedIsaGenericNote(const GlobalState &gs, ErrorBuilder &e, Symb
 
 DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     auto emptyResult = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+    auto &dispatchComponent = *get<unique_ptr<DispatchComponent>>(emptyResult.dispatch);
     if (this->definition.isTypeArgument()) {
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
@@ -226,7 +232,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
             addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
-        emptyResult.main.errors.emplace_back(e.build());
+        dispatchComponent.errors.emplace_back(e.build());
         return emptyResult;
     } else {
         ENFORCE(this->definition.isTypeMember());
@@ -254,7 +260,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
                 addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
             }
-            emptyResult.main.errors.emplace_back(e.build());
+            dispatchComponent.errors.emplace_back(e.build());
             return emptyResult;
         }
 
@@ -702,6 +708,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     if (!mayBeOverloaded.exists()) {
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+        auto &dispatchComponent = *get<unique_ptr<DispatchComponent>>(result.dispatch);
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return result;
@@ -903,7 +910,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
         }
-        result.main.errors.emplace_back(e.build());
+        dispatchComponent.errors.emplace_back(e.build());
         return result;
     }
 
