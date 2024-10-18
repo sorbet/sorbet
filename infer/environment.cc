@@ -999,11 +999,10 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr
-Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
+core::TypePtr Environment::processBinding(
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, core::TypePtr &methodReturnType,
+    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool hasCustomerArg) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1137,15 +1136,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                     // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
                     // as a draft on a POC branch.
-                    if (!ctx.file.data(ctx).isPackagedTest()) {
+                    if (hasCustomerArg) {
                         if (it->main.method.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Customer()) {
                             auto klass = it->main.method.data(ctx)->owner;
                             if (klass.exists() &&
                                 klass.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Model()) {
                                 bool isWrappingMethodArg = false;
                                 for (auto &arg : inWhat.symbol.data(ctx)->arguments) {
-                                    if (send.recv.variable.data(inWhat)._name == arg.name) {
-                                        isWrappingMethodArg = true;
+                                    if (arg.flags.isKeyword) {
+                                        if (send.recv.variable.data(inWhat)._name == arg.name) {
+                                            isWrappingMethodArg = true;
+                                        }
+                                    } else {
+                                        if (send.recv.variable.data(inWhat)._name.show(ctx) == arg.argumentName(ctx)) {
+                                            isWrappingMethodArg = true;
+                                        }
                                     }
                                 }
 

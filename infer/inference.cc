@@ -332,12 +332,34 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         core::Loc madeBlockDead;
         int i = 0;
+        bool hasCustomerArg = false;
+        if (!ctx.file.data(ctx).isPackagedTest()) {
+            for (auto &arg : cfg->symbol.data(ctx)->arguments) {
+                if (hasCustomerArg) {
+                    break;
+                }
+
+                if (!core::isa_type<core::ClassType>(arg.type)) {
+                    continue;
+                }
+
+                auto klass = core::cast_type_nonnull<core::ClassType>(arg.type).symbol;
+
+                if (klass.data(ctx)->name == core::Names::Constants::Customer()) {
+                    auto ownerKlass = klass.data(ctx)->owner;
+                    if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
+                        hasCustomerArg = true;
+                    }
+                }
+            }
+        }
+
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                bind.bind.type =
-                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
+                bind.bind.type = current.processBinding(
+                    ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
+                    methodReturnType, parentUpdateKnowledgeReceiver, hasCustomerArg);
                 if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
