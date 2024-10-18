@@ -239,10 +239,11 @@ public:
 
     void populateFrom(core::Context ctx, const Environment &other);
 
-    core::TypePtr
-    processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                   KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, core::TypePtr &methodReturnType,
-                   const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver);
+    core::TypePtr processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                                 int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                                 core::TypePtr &methodReturnType,
+                                 const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                                 bool hasCustomerArg);
 
     core::Loc locForUninitialized() const {
         return ownerLoc;
