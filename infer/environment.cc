@@ -1135,6 +1135,37 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         }
                     }
 
+                    // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
+                    // as a draft on a POC branch.
+                    if (!ctx.file.data(ctx).isPackagedTest()) {
+                        if (it->main.method.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Customer()) {
+                            auto klass = it->main.method.data(ctx)->owner;
+                            if (klass.exists() &&
+                                klass.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Model()) {
+                                bool isWrappingMethodArg = false;
+                                for (auto &arg : inWhat.symbol.data(ctx)->arguments) {
+                                    if (send.recv.variable.data(inWhat)._name == arg.name) {
+                                        isWrappingMethodArg = true;
+                                    }
+                                }
+
+                                if (isWrappingMethodArg) {
+                                    auto wrappingMethodName = inWhat.symbol.showFullName(ctx);
+                                    auto methodName = it->main.method.data(ctx)->name.show(ctx);
+                                    auto callSiteLoc = ctx.locAt(bind.loc);
+                                    auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
+                                    auto [start, _] = std::move(callSiteLoc).position(ctx.state);
+                                    auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
+                                    // JSONL machine-readable format
+                                    std::cout << "{ \"context\": \"" << std::move(wrappingMethodName)
+                                              << "\", \"method\": \"" << std::move(methodName) << "\", \"loc\": \""
+                                              << std::move(callSiteFile) << ":" << start.line << "\", \"recv\": \""
+                                              << std::move(receiverName) << "\" } " << std::endl;
+                                }
+                            }
+                        }
+                    }
+
                     lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
                     it = it->secondary.get();
                 }

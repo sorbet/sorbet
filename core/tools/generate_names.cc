@@ -285,6 +285,7 @@ NameDef names[] = {
 
     {"keywordInit", "keyword_init"},
 
+    {"Customer", "Customer", true},
     {"DB", "DB", true},
     {"Model", "Model", true},
     {"Mixins", "Mixins", true},
