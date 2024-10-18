@@ -1,0 +1,6 @@
+If {
+  condition = True {
+  }
+  then_ = NULL
+  else_ = NULL
+}

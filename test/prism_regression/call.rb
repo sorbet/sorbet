@@ -1,0 +1,4 @@
+# typed: false
+
+ foo
+ foo()
