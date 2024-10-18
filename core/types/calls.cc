@@ -929,9 +929,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     DispatchResult result;
-    auto &component = result.main;
-    component.receiver = args.selfType;
-    component.method = method;
+    result.main.receiver = args.selfType;
+    result.main.method = method;
 
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
@@ -1510,9 +1509,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, methodData->owner, symbol, targs);
-        handleBlockType(gs, component, blockType);
-        component.rebind = bspec.rebind;
-        component.rebindLoc = bspec.loc;
+        handleBlockType(gs, result.main, blockType);
+        result.main.rebind = bspec.rebind;
+        result.main.rebindLoc = bspec.loc;
     }
 
     auto *intrinsic = methodData->getIntrinsic();
@@ -1527,7 +1526,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
-    TypePtr &resultType = component.returnTypeBeforeSolve;
+    TypePtr &resultType = result.main.returnTypeBeforeSolve;
 
     if (resultType == nullptr) {
         if (args.args.size() == 1 && methodData->name.isSetter(gs)) {
@@ -1573,7 +1572,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (result.returnType == nullptr) {
-        result.returnType = component.returnTypeBeforeSolve;
+        result.returnType = result.main.returnTypeBeforeSolve;
     }
     return result;
 }
