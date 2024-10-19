@@ -1531,6 +1531,9 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
 }
 
 void validateLayering(const core::Context &ctx, const Import &i) {
+    if (i.type == ImportType::Test) {
+        return;
+    }
     auto &thisPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageForFile(ctx, ctx.file));
     auto &otherPkg = PackageInfoImpl::from(ctx.state.packageDB().getPackageInfo(i.name.mangledName));
     if (!thisPkg.strictDependenciesLevel.has_value() || !otherPkg.strictDependenciesLevel.has_value() ||
