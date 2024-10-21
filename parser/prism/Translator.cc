@@ -1137,6 +1137,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable(
                 "These pattern-match related nodes are handled separately in `Translator::patternTranslate()`.");
 
+        case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
+            unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
+
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
@@ -1151,7 +1154,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
-        case PM_SCOPE_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
 
