@@ -7,6 +7,10 @@ namespace sorbet::core::source_generator {
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
+    if (type == nullptr) {
+        return core::Types::untypedUntracked();
+    }
+
     auto resultType = type;
     if (core::is_proxy_type(receiver)) {
         receiver = receiver.underlying(gs);
@@ -15,9 +19,6 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
         /* instantiate generic classes */
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
                                                        applied->targs);
-    }
-    if (!resultType) {
-        resultType = core::Types::untypedUntracked();
     }
     if (receiver) {
         resultType = core::Types::replaceSelfType(gs, resultType, receiver); // instantiate self types
