@@ -30,6 +30,6 @@ jobs:
       - name: Verify parse trees
         run: ./tools/scripts/verify_prism_regression_tests.sh
       - name: Run tests
-        run: ./bazel test //test:prism --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=errors
+        run: ./bazel test //test:prism --config=dbg --test_output=errors
       - name: Run location tests
-        run: ./bazel test //test:prism_location_tests --config=dbg --define RUBY_PATH=$RUBY_ROOT --test_output=errors
+        run: ./bazel test //test:prism_location_tests --config=dbg --test_output=errors
