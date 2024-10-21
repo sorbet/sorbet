@@ -7,6 +7,13 @@ rescue
   "rescued"
 end
 
+# Testing a simple rescue clause in a method definition
+def method_with_rescue
+  123
+rescue
+  "rescued"
+end
+
 # Testing a rescue clause with multiple body statements
 begin
   foo

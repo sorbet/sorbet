@@ -1,5 +1,49 @@
-DefMethod {
-  name = <U foo>
-  args = NULL
-  body = NULL
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U foo>
+      args = NULL
+      body = NULL
+    }
+    DefMethod {
+      name = <U bar>
+      args = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = <U method_1>
+            args = [
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = <U method_2>
+            args = [
+            ]
+          }
+        ]
+      }
+    }
+    DefMethod {
+      name = <U baz>
+      args = NULL
+      body = Kwbegin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = <U method_1>
+            args = [
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = <U method_2>
+            args = [
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

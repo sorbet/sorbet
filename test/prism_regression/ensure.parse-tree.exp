@@ -18,6 +18,79 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U method_with_ensure>
+      args = NULL
+      body = Ensure {
+        body = Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = <U method_1>
+              args = [
+              ]
+            }
+            Send {
+              receiver = NULL
+              method = <U method_2>
+              args = [
+              ]
+            }
+          ]
+        }
+        ensure = Send {
+          receiver = NULL
+          method = <U ensured_method>
+          args = [
+          ]
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_method_with_ensure>
+      args = NULL
+      body = Ensure {
+        body = NULL
+        ensure = Send {
+          receiver = NULL
+          method = <U ensured_method>
+          args = [
+          ]
+        }
+      }
+    }
+    DefMethod {
+      name = <U method_with_begin_and_ensure>
+      args = NULL
+      body = Kwbegin {
+        stmts = [
+          Ensure {
+            body = Begin {
+              stmts = [
+                Send {
+                  receiver = NULL
+                  method = <U method_1>
+                  args = [
+                  ]
+                }
+                Send {
+                  receiver = NULL
+                  method = <U method_2>
+                  args = [
+                  ]
+                }
+              ]
+            }
+            ensure = Send {
+              receiver = NULL
+              method = <U ensured_method_in_begin>
+              args = [
+              ]
+            }
+          }
+        ]
+      }
+    }
     Kwbegin {
       stmts = [
         Ensure {

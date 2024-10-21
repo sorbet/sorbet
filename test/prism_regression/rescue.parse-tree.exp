@@ -22,6 +22,25 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U method_with_rescue>
+      args = NULL
+      body = Rescue {
+        body = Integer {
+          val = "123"
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = String {
+              val = <U rescued>
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
     Kwbegin {
       stmts = [
         Rescue {

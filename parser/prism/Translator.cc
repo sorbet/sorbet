@@ -462,6 +462,21 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
             auto body = translate(defNode->body);
 
+            if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
+                // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
+                // doesn't have an explicit begin block.
+                // If that's the case, we need to check if the body contains an ensure or rescue clause, and if so,
+                // we need to elevate that node to the top level of the method definition, without the Kwbegin node to
+                // match the behavior of Sorbet's legacy parser.
+                auto kwbeginNode = dynamic_cast<parser::Kwbegin *>(body.get());
+
+                if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
+                    (dynamic_cast<parser::Rescue *>(kwbeginNode->stmts[0].get()) != nullptr ||
+                     dynamic_cast<parser::Ensure *>(kwbeginNode->stmts[0].get()) != nullptr)) {
+                    body = move(kwbeginNode->stmts[0]);
+                }
+            }
+
             return make_unique<parser::DefMethod>(location, declLoc, gs.enterNameUTF8(name), move(params), move(body));
         }
         case PM_DEFINED_NODE: {

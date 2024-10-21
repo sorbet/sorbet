@@ -7,6 +7,30 @@ ensure
   bar
 end
 
+# Testing an ensure clause in a method definition
+def method_with_ensure
+  method_1
+  method_2
+ensure
+  ensured_method
+end
+
+# Testing an ensure clause in an empty method definition
+def empty_method_with_ensure
+ensure
+  ensured_method
+end
+
+# Testing an ensure clause in a begin block in a method definition
+def method_with_begin_and_ensure
+  begin
+    method_1
+    method_2
+  ensure
+    ensured_method_in_begin
+  end
+end
+
 # Testing an ensure clause with multiple methods
 begin
   method_1
