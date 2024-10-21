@@ -1,0 +1,42 @@
+Begin {
+  stmts = [
+    If {
+      condition = MatchCurLine {
+        cond = Regexp {
+          regex = [
+            String {
+              val = <U wat>
+            }
+          ]
+          opts = Regopt {
+            opts = ""
+          }
+        }
+      }
+      then_ = Begin {
+        stmts = [
+          String {
+            val = <U This is _not_ a truthiness test of a Regexp literal,>
+          }
+          String {
+            val = <U but a special syntax implicitly match against the last line read by an IO object.>
+          }
+        ]
+      }
+      else_ = NULL
+    }
+    If {
+      condition = MatchCurLine {
+        cond = Regexp {
+          regex = [
+          ]
+          opts = Regopt {
+            opts = ""
+          }
+        }
+      }
+      then_ = NULL
+      else_ = NULL
+    }
+  ]
+}

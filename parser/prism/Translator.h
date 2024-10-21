@@ -51,6 +51,8 @@ private:
     template <typename SorbetNode> std::unique_ptr<SorbetNode> translateSimpleKeyword(pm_node_t *untypedNode);
 
     std::unique_ptr<parser::Regopt> translateRegexpOptions(pm_location_t closingLoc);
+    std::unique_ptr<parser::Regexp> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
+                                                    pm_location_t closingLoc);
 
     template <typename PrismAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Assign> translateAssignment(pm_node_t *node);

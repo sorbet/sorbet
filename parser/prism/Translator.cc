@@ -686,6 +686,13 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_WRITE_NODE: { // Regular assignment to a local variable, e.g. `local = 1`
             return translateAssignment<pm_local_variable_write_node, parser::LVarLhs>(node);
         }
+        case PM_MATCH_LAST_LINE_NODE: { // A test of the last read line, like `if /wat/`
+            auto matchLastLineNode = reinterpret_cast<pm_match_last_line_node *>(node);
+
+            auto regex = translateRegexp(matchLastLineNode->unescaped, location, matchLastLineNode->closing_loc);
+
+            return make_unique<parser::MatchCurLine>(location, move(regex));
+        }
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = reinterpret_cast<pm_module_node *>(node);
 
@@ -900,20 +907,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return translateSimpleKeyword<parser::Redo>(node);
         }
         case PM_REGULAR_EXPRESSION_NODE: { // A regular expression literal, e.g. `/foo/`
-            auto regularExpressionNode = reinterpret_cast<pm_regular_expression_node *>(node);
+            auto regexNode = reinterpret_cast<pm_regular_expression_node *>(node);
 
-            // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
-            // but we'll only have up to one String node here for this non-interpolated Regexp.
-            parser::NodeVec parts;
-            auto source = parser.extractString(&regularExpressionNode->unescaped);
-            if (!source.empty()) {
-                auto sourceStringNode = make_unique<parser::String>(location, gs.enterNameUTF8(source));
-                parts.emplace_back(move(sourceStringNode));
-            }
-
-            auto options = translateRegexpOptions(regularExpressionNode->closing_loc);
-
-            return make_unique<parser::Regexp>(location, move(parts), move(options));
+            return translateRegexp(regexNode->unescaped, location, regexNode->closing_loc);
         }
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: { // A required keyword parameter, like `def foo(a:)`
             auto requiredKeywordParamNode = reinterpret_cast<pm_required_keyword_parameter_node *>(node);
@@ -1124,7 +1120,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
         case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
-        case PM_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
@@ -1556,6 +1551,23 @@ unique_ptr<parser::Regopt> Translator::translateRegexpOptions(pm_location_t clos
     auto options = (length > 0) ? std::string_view(reinterpret_cast<const char *>(start), length) : std::string_view();
 
     return make_unique<parser::Regopt>(translateLoc(closingLoc), options);
+}
+
+// Translate an unescaped string from a Regexp literal
+unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, core::LocOffsets location,
+                                                       pm_location_t closingLoc) {
+    // Sorbet's Regexp can have multiple nodes, e.g. for a `PM_INTERPOLATED_REGULAR_EXPRESSION_NODE`,
+    // but we'll only have up to one String node here for this non-interpolated Regexp.
+    parser::NodeVec parts;
+    auto source = parser.extractString(&unescaped);
+    if (!source.empty()) {
+        auto sourceStringNode = make_unique<parser::String>(location, gs.enterNameUTF8(source));
+        parts.emplace_back(move(sourceStringNode));
+    }
+
+    auto options = translateRegexpOptions(closingLoc);
+
+    return make_unique<parser::Regexp>(location, move(parts), move(options));
 }
 
 }; // namespace sorbet::parser::Prism
