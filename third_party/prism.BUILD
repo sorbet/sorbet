@@ -1,3 +1,5 @@
+load("@ruby_root//:ruby_root.bzl", "RUBY_ROOT") # Get the RUBY_ROOT environment variable
+
 GENERATED_SRCS = [
   "src/diagnostic.c",
   "src/node.c",
@@ -28,12 +30,7 @@ genrule(
     # echo "PWD: $$PWD"
     # echo "RULEDIR: $(RULEDIR)"
 
-    # This is a workaround; without guidance, Bazel will try to use the system Ruby,
-    # which is too old to install gems and run this script.
-    #
-    # Pass the RUBY_PATH variable to the build using the --define flag, e.g.
-    # ./bazel build //main:sorbet --config=dbg --define RUBY_PATH=/path/to/ruby
-    export PATH="$(RUBY_PATH)/bin:$$PATH"
+    export PATH="{ruby_root}/bin:$$PATH"
 
     gemfile="$(location Gemfile)"
     script="$(location templates/template.rb)"
@@ -43,6 +40,7 @@ genrule(
     {template_render_commands}
 
   """.format(
+    ruby_root = RUBY_ROOT,
     template_render_commands = "\n    ".join([
       """
         bundle exec --gemfile="$$gemfile" ruby "$$script" {f} "$(location {f})"
