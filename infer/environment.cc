@@ -7,6 +7,7 @@
 #include "core/TypeConstraint.h"
 #include "core/TypeErrorDiagnostics.h"
 #include <algorithm> // find, remove_if
+#include <sstream>
 
 using namespace std;
 
@@ -1169,7 +1170,8 @@ core::TypePtr Environment::processBinding(
                                 if (owner.exists() && owner.data(ctx)->name == core::Names::Constants::Model()) {
                                     // JSONL machine-readable format
                                     // clang-format off
-                                    std::cout << "{\"context\": \""
+                                    std::ostringstream oss;
+                                    oss << "{\"context\": \""
                                               << std::move(wrappingMethodClassName) << "#"
                                               << std::move(wrappingMethodName)
                                               << "\", \"context_loc\": \""
@@ -1180,8 +1182,8 @@ core::TypePtr Environment::processBinding(
                                               << std::move(callSiteFile) << ":" << start.line
                                               << "\", \"recv\": \""
                                               << std::move(receiverName)
-                                              << "\"} "
-                                              << std::endl;
+                                              << "\"}";
+                                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                                     // clang-format on
                                 }
                             }
@@ -1248,21 +1250,22 @@ core::TypePtr Environment::processBinding(
 
                                     // JSONL machine-readable format
                                     // clang-format off
-                                    std::cout << "{\"context\": \""
-                                              << std::move(wrappingMethodClassName) << "#"
-                                              << std::move(wrappingMethodName)
-                                              << "\", \"context_loc\": \""
-                                              << std::move(callSiteFile) << ":" << wrappingMethodStart.line
-                                              << "\", \"method\": \""
-                                              << std::move(methodClassName) << "#" << std::move(methodName)
-                                              << "\", \"type\": \""
-                                              << std::move(methodArgTypeStr)
-                                              << "\", \"untyped_or_splat\": "
-                                              << untypedOrSplat
-                                              << ", \"loc\": \""
-                                              << std::move(callSiteFile) << ":" << start.line
-                                              << "\"} "
-                                              << std::endl;
+                                    std::ostringstream oss;
+                                    oss << "{\"context\": \""
+                                        << std::move(wrappingMethodClassName) << "#"
+                                        << std::move(wrappingMethodName)
+                                        << "\", \"context_loc\": \""
+                                        << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                        << "\", \"method\": \""
+                                        << std::move(methodClassName) << "#" << std::move(methodName)
+                                        << "\", \"type\": \""
+                                        << std::move(methodArgTypeStr)
+                                        << "\", \"untyped_or_splat\": "
+                                        << untypedOrSplat
+                                        << ", \"loc\": \""
+                                        << std::move(callSiteFile) << ":" << start.line
+                                        << "\"}";
+                                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
                                     // clang-format on
                                 }
                             }
