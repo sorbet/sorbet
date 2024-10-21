@@ -1,29 +1,65 @@
-NumBlock {
-  send = Send {
-    receiver = NULL
-    method = <U proc>
-    args = [
-    ]
-  }
-  args = NumParams {
-    decls = [
-      LVar {
-        name = <U _1>
+Begin {
+  stmts = [
+    NumBlock {
+      send = Send {
+        receiver = NULL
+        method = <U proc>
+        args = [
+        ]
       }
-      LVar {
-        name = <U _2>
+      args = NumParams {
+        decls = [
+          LVar {
+            name = <U _1>
+          }
+          LVar {
+            name = <U _2>
+          }
+        ]
       }
-    ]
-  }
-  body = Send {
-    receiver = LVar {
-      name = <U _1>
+      body = Send {
+        receiver = LVar {
+          name = <U _1>
+        }
+        method = <U +>
+        args = [
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
     }
-    method = <U +>
-    args = [
-      LVar {
-        name = <U _2>
+    NumBlock {
+      send = Send {
+        receiver = Const {
+          scope = NULL
+          name = <C <U Kernel>>
+        }
+        method = <U lambda>
+        args = [
+        ]
       }
-    ]
-  }
+      args = NumParams {
+        decls = [
+          LVar {
+            name = <U _1>
+          }
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+      body = Send {
+        receiver = LVar {
+          name = <U _1>
+        }
+        method = <U +>
+        args = [
+          LVar {
+            name = <U _2>
+          }
+        ]
+      }
+    }
+  ]
 }

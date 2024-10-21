@@ -37,6 +37,11 @@
             },
             "presentation": {
                 "reveal": "always"
+            },
+            // With this option, when running this task with the `Tasks: Rerun Last Test` command, it'll
+            // reuse the previous run's input, rather than prompting for it again
+            "runOptions": {
+                "reevaluateOnRerun": false
             }
         },
         {
