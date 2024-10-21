@@ -320,18 +320,18 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(caseMatchNode->predicate);
             auto sorbetConditions = patternTranslateMulti(caseMatchNode->conditions);
-            auto consequent = translate(reinterpret_cast<pm_node_t *>(caseMatchNode->consequent));
+            auto elseClause = translate(reinterpret_cast<pm_node_t *>(caseMatchNode->else_clause));
 
-            return make_unique<parser::CaseMatch>(location, move(predicate), move(sorbetConditions), move(consequent));
+            return make_unique<parser::CaseMatch>(location, move(predicate), move(sorbetConditions), move(elseClause));
         }
         case PM_CASE_NODE: { // A classic `case` statement that only uses `when` (and not pattern matching with `in`)
             auto caseNode = reinterpret_cast<pm_case_node *>(node);
 
             auto predicate = translate(caseNode->predicate);
             auto sorbetConditions = translateMulti(caseNode->conditions);
-            auto consequent = translate(reinterpret_cast<pm_node_t *>(caseNode->consequent));
+            auto elseClause = translate(reinterpret_cast<pm_node_t *>(caseNode->else_clause));
 
-            return make_unique<Case>(location, move(predicate), move(sorbetConditions), move(consequent));
+            return make_unique<Case>(location, move(predicate), move(sorbetConditions), move(elseClause));
         }
         case PM_CLASS_NODE: { // Class declarations, not including singleton class declarations (`class <<`)
             auto classNode = reinterpret_cast<pm_class_node *>(node);
@@ -523,7 +523,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(ifNode->predicate);
             auto ifTrue = translate(reinterpret_cast<pm_node *>(ifNode->statements));
-            auto ifFalse = translate(ifNode->consequent);
+            auto ifFalse = translate(ifNode->subsequent);
 
             return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
         }
@@ -1038,12 +1038,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Undef>(location, move(names));
         }
         case PM_UNLESS_NODE: { // An `unless` branch, either in a statement or modifier form.
-            auto unlessNode = reinterpret_cast<pm_if_node *>(node);
+            auto unlessNode = reinterpret_cast<pm_unless_node *>(node);
 
             auto predicate = translate(unlessNode->predicate);
             // These are flipped relative to `PM_IF_NODE`
             auto ifFalse = translate(reinterpret_cast<pm_node *>(unlessNode->statements));
-            auto ifTrue = translate(unlessNode->consequent);
+            auto ifTrue = translate(reinterpret_cast<pm_node *>(unlessNode->else_clause));
 
             return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
         }
@@ -1427,7 +1427,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_block_node *prism
 //   - `else_clause`: an optional `pm_else_node` representing the `else` clause.
 //
 // Each `pm_rescue_node` represents a single `rescue` clause and is linked to subsequent `rescue` clauses via its
-// `consequent` pointer. Each `pm_rescue_node` contains:
+// `subsequent` pointer. Each `pm_rescue_node` contains:
 //   - `exceptions`: the exceptions to rescue (e.g., `RuntimeError`).
 //   - `reference`: the exception variable (e.g., `=> e`).
 //   - `statements`: the body of the rescue clause.
@@ -1445,7 +1445,7 @@ unique_ptr<parser::Node> Translator::translateRescue(pm_rescue_node *prismRescue
 
     // Each `rescue` clause generates a `Resbody` node, which is a child of the `Rescue` node.
     for (pm_rescue_node *currentRescueNode = prismRescueNode; currentRescueNode != nullptr;
-         currentRescueNode = currentRescueNode->consequent) {
+         currentRescueNode = currentRescueNode->subsequent) {
         // Translate the exception variable (e.g. the `=> e` in `rescue => e`)
         auto var = translate(currentRescueNode->reference);
 
