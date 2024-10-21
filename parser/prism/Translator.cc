@@ -1227,7 +1227,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             NodeVec sorbetElements{};
             sorbetElements.reserve(1 + prismMiddleNodes.size() + (prismTrailingSplat != nullptr ? 1 : 0));
 
-            if (prismLeadingSplat != nullptr && PM_NODE_TYPE_P(prismLeadingSplat, PM_SPLAT_NODE)) {
+            if (prismLeadingSplat != nullptr) {
                 auto prismSplatNode = reinterpret_cast<pm_splat_node *>(prismLeadingSplat);
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
