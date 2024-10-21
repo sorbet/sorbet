@@ -1,0 +1,89 @@
+Begin {
+  stmts = [
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Send {
+            receiver = NULL
+            method = <U foo>
+            args = [
+            ]
+          }
+          ensure = Send {
+            receiver = NULL
+            method = <U bar>
+            args = [
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Begin {
+            stmts = [
+              Send {
+                receiver = NULL
+                method = <U method_1>
+                args = [
+                ]
+              }
+              Send {
+                receiver = NULL
+                method = <U method_2>
+                args = [
+                ]
+              }
+            ]
+          }
+          ensure = Begin {
+            stmts = [
+              Send {
+                receiver = NULL
+                method = <U ensured_method_1>
+                args = [
+                ]
+              }
+              Send {
+                receiver = NULL
+                method = <U ensured_method_2>
+                args = [
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Send {
+              receiver = NULL
+              method = <U method_for_rescue_and_ensure>
+              args = [
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescued rescue>
+                }
+              }
+            ]
+            else_ = String {
+              val = <U rescued else>
+            }
+          }
+          ensure = String {
+            val = <U ensure>
+          }
+        }
+      ]
+    }
+  ]
+}
