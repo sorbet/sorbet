@@ -62,6 +62,17 @@ else
   "rescued else"
 end
 
+# Testing a rescue clause with an else and ensure clause
+begin
+  foo
+rescue
+  "rescued rescue"
+else
+  "rescued else"
+ensure
+  "ensure"
+end
+
 # Testing rescue modifiers
 problematic_code rescue puts "rescued"
 problematic_code rescue nil

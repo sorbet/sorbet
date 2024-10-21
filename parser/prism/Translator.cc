@@ -169,17 +169,39 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto beginNode = reinterpret_cast<pm_begin_node *>(node);
 
             NodeVec statements;
+            unique_ptr<parser::Node> translatedRescue;
 
             if (beginNode->rescue_clause != nullptr) {
-                // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
+                // Extract rescue and else nodes from the begin node
                 auto bodyNode = translateStatements(beginNode->statements, true);
                 auto elseNode = translate(reinterpret_cast<pm_node_t *>(beginNode->else_clause));
-                auto beginRescueNode = translateRescue(reinterpret_cast<pm_rescue_node *>(beginNode->rescue_clause),
-                                                       move(bodyNode), move(elseNode));
+                // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
+                // statements
+                translatedRescue = translateRescue(reinterpret_cast<pm_rescue_node *>(beginNode->rescue_clause),
+                                                   move(bodyNode), move(elseNode));
+            }
 
-                statements.emplace_back(move(beginRescueNode));
+            if (beginNode->ensure_clause != nullptr) {
+                // Handle `begin ... ensure ... end`
+                // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
+                // Ensure node.
+                auto bodyNode = translateStatements(beginNode->statements, true);
+                auto ensureNode = reinterpret_cast<pm_ensure_node *>(beginNode->ensure_clause);
+                auto ensureBody = translateStatements(ensureNode->statements, true);
+                unique_ptr<parser::Ensure> translatedEnsure;
+
+                if (translatedRescue != nullptr) {
+                    translatedEnsure = make_unique<parser::Ensure>(location, move(translatedRescue), move(ensureBody));
+                } else {
+                    translatedEnsure = make_unique<parser::Ensure>(location, move(bodyNode), move(ensureBody));
+                }
+
+                statements.emplace_back(move(translatedEnsure));
+            } else if (translatedRescue != nullptr) {
+                // Handle `begin ... rescue ... end` and `begin ... rescue ... else ... end`
+                statements.emplace_back(move(translatedRescue));
             } else if (beginNode->statements != nullptr) {
-                // Handle `begin ... end`
+                // Handle just `begin ... end` without ensure or rescue
                 statements = translateMulti(beginNode->statements->body);
             }
 
@@ -459,6 +481,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             } else {
                 return make_unique<parser::Begin>(translateLoc(embeddedStmtsNode->base.location), NodeVec{});
             }
+        }
+        case PM_ENSURE_NODE: { // An `ensure` clause, which can pertain to a `begin`
+            unreachable("PM_ENSURE_NODE is handled separately as part of PM_BEGIN_NODE, see its docs for details.");
         }
         case PM_FALSE_NODE: { // The `false` keyword
             return translateSimpleKeyword<parser::False>(node);
@@ -1115,7 +1140,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_BACK_REFERENCE_READ_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
-        case PM_ENSURE_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:

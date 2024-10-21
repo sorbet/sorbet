@@ -340,6 +340,35 @@ Begin {
         }
       ]
     }
+    Kwbegin {
+      stmts = [
+        Ensure {
+          body = Rescue {
+            body = Send {
+              receiver = NULL
+              method = <U foo>
+              args = [
+              ]
+            }
+            rescue = [
+              Resbody {
+                exception = NULL
+                var = NULL
+                body = String {
+                  val = <U rescued rescue>
+                }
+              }
+            ]
+            else_ = String {
+              val = <U rescued else>
+            }
+          }
+          ensure = String {
+            val = <U ensure>
+          }
+        }
+      ]
+    }
     Rescue {
       body = Send {
         receiver = NULL
