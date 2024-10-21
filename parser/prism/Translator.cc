@@ -1413,9 +1413,10 @@ unique_ptr<parser::Hash> Translator::translateHash(pm_node_t *node, pm_node_list
 
 // Prism models a call with an explicit block argument as a `pm_call_node` that contains a `pm_block_node`.
 // Sorbet's legacy parser models this the other way around, as a parent `Block` with a child `Send`.
+// Lambda literals also have a similar reverse structure between the 2 parsers.
 //
-// This function translates between the two, creating a `Block` node for the given `pm_block_node *`,
-// and wrapping it around the given `Send` node.
+// This function translates between the two, creating a `Block` or `NumBlock` node for the given `pm_block_node *`
+// or `pm_lambda_node *`, and wrapping it around the given `Send` node.
 unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBlockOrLambdaNode,
                                                             std::unique_ptr<parser::Node> sendNode) {
     unique_ptr<parser::Node> parametersNode;
@@ -1426,6 +1427,7 @@ unique_ptr<parser::Node> Translator::translateCallWithBlock(pm_node_t *prismBloc
         parametersNode = translate(prismBlockNode->parameters);
         body = translate(prismBlockNode->body);
     } else {
+        ENFORCE(PM_NODE_TYPE_P(prismBlockOrLambdaNode, PM_LAMBDA_NODE))
         auto prismLambdaNode = reinterpret_cast<pm_lambda_node *>(prismBlockOrLambdaNode);
         parametersNode = translate(prismLambdaNode->parameters);
         body = translate(prismLambdaNode->body);
