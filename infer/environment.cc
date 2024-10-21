@@ -1139,11 +1139,12 @@ core::TypePtr Environment::processBinding(
                     if (hasCustomerArg) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
+                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
                         auto methodClass = it->main.method.data(ctx)->owner;
                         auto methodName = it->main.method.data(ctx)->name.show(ctx);
                         auto callSiteLoc = ctx.locAt(bind.loc);
                         auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
-                        auto [start, _] = std::move(callSiteLoc).position(ctx.state);
+                        auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
                         auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
 
                         std::string wrappingMethodClassName;
@@ -1156,30 +1157,33 @@ core::TypePtr Environment::processBinding(
 
                         std::string methodClassName;
                         if (methodClass.data(ctx)->isSingletonClass(ctx)) {
-                            methodClassName =
-                                methodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                            methodClassName = methodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
                         } else {
                             methodClassName = methodClass.showFullName(ctx);
                         }
 
-                        if (it->main.method.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Customer()) {
-                            auto klass = it->main.method.data(ctx)->owner;
-                            if (klass.exists() &&
-                                klass.data(ctx)->owner.data(ctx)->name == core::Names::Constants::Model()) {
-                                // JSONL machine-readable format
-                                // clang-format off
-                                std::cout << "{\"context\": \""
-                                          << std::move(wrappingMethodClassName) << "#"
-                                          << std::move(wrappingMethodName)
-                                          << "\", \"method\": \""
-                                          << std::move(methodClassName) << "#" << std::move(methodName)
-                                          << "\", \"loc\": \""
-                                          << std::move(callSiteFile) << ":" << start.line
-                                          << "\", \"recv\": \""
-                                          << std::move(receiverName)
-                                          << "\"} "
-                                          << std::endl;
-                                // clang-format on
+                        if (core::isa_type<core::ClassType>(recvType.type)) {
+                            auto klass = core::cast_type_nonnull<core::ClassType>(recvType.type).symbol;
+                            if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
+                                auto owner = klass.data(ctx)->owner;
+                                if (owner.exists() && owner.data(ctx)->name == core::Names::Constants::Model()) {
+                                    // JSONL machine-readable format
+                                    // clang-format off
+                                    std::cout << "{\"context\": \""
+                                              << std::move(wrappingMethodClassName) << "#"
+                                              << std::move(wrappingMethodName)
+                                              << "\", \"context_loc\": \""
+                                              << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                              << "\", \"method\": \""
+                                              << std::move(methodClassName) << "#" << std::move(methodName)
+                                              << "\", \"loc\": \""
+                                              << std::move(callSiteFile) << ":" << start.line
+                                              << "\", \"recv\": \""
+                                              << std::move(receiverName)
+                                              << "\"} "
+                                              << std::endl;
+                                    // clang-format on
+                                }
                             }
                         }
 
@@ -1247,6 +1251,8 @@ core::TypePtr Environment::processBinding(
                                     std::cout << "{\"context\": \""
                                               << std::move(wrappingMethodClassName) << "#"
                                               << std::move(wrappingMethodName)
+                                              << "\", \"context_loc\": \""
+                                              << std::move(callSiteFile) << ":" << wrappingMethodStart.line
                                               << "\", \"method\": \""
                                               << std::move(methodClassName) << "#" << std::move(methodName)
                                               << "\", \"type\": \""
