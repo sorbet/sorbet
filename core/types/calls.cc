@@ -2295,8 +2295,8 @@ DispatchResult applySig(const GlobalState &gs, const DispatchArgs &args, Dispatc
 
     auto recv = *args.args[0];
     return recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
-                                      recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
-                                      args.suppressErrors, args.enclosingMethodForSuper});
+                                       recv.type, args.block, args.originForUninitialized, args.isPrivateOk,
+                                       args.suppressErrors, args.enclosingMethodForSuper});
 }
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
