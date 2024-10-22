@@ -165,6 +165,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         "`PM_HASH_PATTERN_NODE`, because its translation depends on whether its used in a "
                         "Hash literal, Hash pattern, or method call.");
         }
+        case PM_BACK_REFERENCE_READ_NODE: {
+            auto backReferenceReadNode = reinterpret_cast<pm_back_reference_read_node *>(node);
+            auto name = parser.resolveConstant(backReferenceReadNode->name);
+
+            return make_unique<parser::Backref>(location, gs.enterNameUTF8(name));
+        }
         case PM_BEGIN_NODE: { // A `begin ... end` block
             auto beginNode = reinterpret_cast<pm_begin_node *>(node);
 
@@ -1146,7 +1152,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
-        case PM_BACK_REFERENCE_READ_NODE:
         case PM_CAPTURE_PATTERN_NODE:
         case PM_EMBEDDED_VARIABLE_NODE:
         case PM_FLIP_FLOP_NODE:
