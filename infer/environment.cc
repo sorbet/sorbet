@@ -1137,7 +1137,7 @@ core::TypePtr Environment::processBinding(
 
                     // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
                     // as a draft on a POC branch.
-                    if (hasCustomerArg) {
+                    if (hasCustomerArg && bind.loc.exists()) {
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
                         auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);

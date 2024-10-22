@@ -43,11 +43,15 @@ bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
     return value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(value);
 }
 
+// Looks for class ending in Customer::Model::Customer
 bool isCustomer(core::Context ctx, core::ClassOrModuleRef klass) {
     if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
         auto ownerKlass = klass.data(ctx)->owner;
         if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
-            return true;
+            auto grandOwnerKlass = ownerKlass.data(ctx)->owner;
+            if (grandOwnerKlass.exists() && grandOwnerKlass.data(ctx)->name == core::Names::Constants::Customer()) {
+                return true;
+            }
         }
     }
 
@@ -70,11 +74,21 @@ core::ClassOrModuleRef getCustomerClass(core::Context ctx, const core::TypePtr &
             if (isCustomer(ctx, klass)) {
                 return klass;
             }
+        } else if (core::isa_type<core::OrType>(left)) {
+            auto klass = getCustomerClass(ctx, left);
+            if (klass.exists()) {
+                return klass;
+            }
         }
 
         if (core::isa_type<core::ClassType>(right)) {
             auto klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
             if (isCustomer(ctx, klass)) {
+                return klass;
+            }
+        } else if (core::isa_type<core::OrType>(right)) {
+            auto klass = getCustomerClass(ctx, right);
+            if (klass.exists()) {
                 return klass;
             }
         }
