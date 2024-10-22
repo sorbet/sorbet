@@ -1203,7 +1203,8 @@ core::TypePtr Environment::processBinding(
                                 if (it->main.method.data(ctx)->name == core::Names::buildHash()) {
                                     // skip kwarg splat (build-hash) for now.
                                     foundMethodArgType = true;
-                                } else if (core::isa_type<core::ClassType>(methodArgs[index].type)) {
+                                } else if (core::isa_type<core::ClassType>(methodArgs[index].type) ||
+                                           core::isa_type<core::OrType>(methodArgs[index].type)) {
                                     methodArgType = methodArgs[index].type;
                                     foundMethodArgType = true;
                                 }
