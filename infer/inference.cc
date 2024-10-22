@@ -154,6 +154,50 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
+
+    bool hasCustomerArg = false;
+    bool reportCustomerCallsite = std::getenv("CUSTOMER_CALLSITE_INDEX") != nullptr;
+
+    if (reportCustomerCallsite && !ctx.file.data(ctx).isPackagedTest()) {
+        for (auto &arg : cfg->symbol.data(ctx)->arguments) {
+            if (getCustomerClass(ctx, arg.type).exists()) {
+                hasCustomerArg = true;
+
+                if (cfg->loc.exists()) {
+                    auto defLoc = ctx.locAt(cfg->loc);
+                    if (defLoc.exists()) {
+                        auto wrappingMethodClass = cfg->symbol.data(ctx)->owner;
+                        auto wrappingMethodName = cfg->symbol.data(ctx)->name.show(ctx);
+                        auto defFile = defLoc.file().data(ctx.state).path();
+                        auto [wrappingMethodStart, _ew] = std::move(defLoc).position(ctx.state);
+
+                        std::string wrappingMethodClassName;
+                        if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                            wrappingMethodClassName =
+                                wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                        } else {
+                            wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                        }
+
+                        // JSONL machine-readable format
+                        // clang-format off
+                        std::ostringstream oss;
+                        oss << "{\"context\": \""
+                                  << std::move(wrappingMethodClassName) << "#"
+                                  << std::move(wrappingMethodName)
+                                  << "\", \"context_loc\": \""
+                                  << std::move(defFile) << ":" << wrappingMethodStart.line
+                                  << "\"}";
+                        ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                        // clang-format on
+                    }
+                }
+
+                break;
+            }
+        }
+    }
+
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
@@ -372,17 +416,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         core::Loc madeBlockDead;
         int i = 0;
-        bool hasCustomerArg = false;
-        bool reportCustomerCallsite = std::getenv("CUSTOMER_CALLSITE_INDEX") != nullptr;
-
-        if (reportCustomerCallsite && !ctx.file.data(ctx).isPackagedTest()) {
-            for (auto &arg : cfg->symbol.data(ctx)->arguments) {
-                if (getCustomerClass(ctx, arg.type).exists()) {
-                    hasCustomerArg = true;
-                    break;
-                }
-            }
-        }
 
         for (cfg::Binding &bind : bb->exprs) {
             i++;
