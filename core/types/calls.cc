@@ -1856,28 +1856,28 @@ ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type, bool m
 
 class T_untyped : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_untyped;
 
 class T_noreturn : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = make_type<MetaType>(Types::bottom());
     }
 } T_noreturn;
 
 class T_anything : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = make_type<MetaType>(Types::top());
     }
 } T_anything;
 
 class T_class_of : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1 && args.locs.args.size() != 1) {
             // Arity mismatch error was already reported. Fail gracefully
             return;
@@ -1902,14 +1902,14 @@ public:
 
 class T_self_type : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_self_type;
 
 class T_attached_class : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // Most syntactically visible calls to `T.attached_class` should be handled by the
         // `<Magic>.attached_class` intrinsic.
         //
@@ -1921,7 +1921,7 @@ public:
 
 class T_type_parameter : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // Proper typing of this should have been in builder_walk by translating `T.type_parameter`
         // calls to `Alias` instructions. This just makes it so that e.g. sigs that use
         // `T.type_parameter(:U)` can be used at `# typed: strong`
@@ -1931,7 +1931,7 @@ public:
 
 class T_must : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.empty()) {
             return;
         }
@@ -1971,7 +1971,7 @@ public:
 
 class T_any : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.empty()) {
             return;
         }
@@ -1990,7 +1990,7 @@ public:
 
 class T_all : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.empty()) {
             return;
         }
@@ -2009,7 +2009,7 @@ public:
 
 class T_revealType : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -2024,7 +2024,7 @@ public:
 
 class T_nilable : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -2036,7 +2036,7 @@ public:
 
 class T_proc : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // NOTE: real validation done during infer
         main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
     }
@@ -2044,7 +2044,7 @@ public:
 
 class T_proc_params : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.numPosArgs != 0 || args.args.size() % 2 == 1) {
             main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
             return;
@@ -2071,7 +2071,7 @@ public:
 
 class T_proc_void : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto sym = core::Symbols::Proc(0);
         vector<core::TypePtr> targs;
         targs.emplace_back(core::Types::void_());
@@ -2081,7 +2081,7 @@ public:
 
 class T_proc_returns : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             main.returnTypeBeforeSolve = core::Types::untypedUntracked();
             return;
@@ -2097,7 +2097,7 @@ public:
 
 class DeclBuilderForProcs_bind : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // NOTE: real validation done in infer
         main.returnTypeBeforeSolve = Types::declBuilderForProcsSingletonClass();
     }
@@ -2105,7 +2105,7 @@ public:
 
 class Object_class : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto tClassSelfType = Types::tClass(Types::widen(gs, args.selfType));
@@ -2149,7 +2149,7 @@ public:
         return {core::Names::initialize()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *selfApp = cast_type<AppliedType>(args.thisType);
         if (selfApp == nullptr) {
             return;
@@ -2227,14 +2227,14 @@ public:
 
 class Class_subclasses : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = Types::arrayOf(gs, args.thisType);
     }
 } Class_subclasses;
 
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto mustExist = true;
         ClassOrModuleRef self = unwrapSymbol(gs, args.thisType, mustExist);
         auto attachedClass = self.data(gs)->attachedClass(gs);
@@ -2248,7 +2248,7 @@ public:
     }
 } T_Generic_squareBrackets;
 
-void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main, size_t argsToDropOffEnd) {
+DispatchResult applySig(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main, size_t argsToDropOffEnd) {
     // We should always have the actual receiver plus whatever args we're going
     // to ignore for dispatching purposes.
     if (args.args.size() < (argsToDropOffEnd + 1)) {
@@ -2279,14 +2279,14 @@ void applySig(const GlobalState &gs, const DispatchArgs &args, DispatchComponent
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
     // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         applySig(gs, args, main, 0);
     }
 } SorbetPrivateStatic_sig;
 
 class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
         for (int i = 0; i < args.args.size(); i += 2) {
@@ -2311,7 +2311,7 @@ public:
 
 class Magic_buildArray : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
         for (auto &elem : args.args) {
@@ -2324,7 +2324,7 @@ public:
 
 class Magic_buildRange : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
 
         auto rangeElemType = Types::dropLiteral(gs, args.args[0]->type);
@@ -2374,7 +2374,7 @@ class Magic_expandSplat : public IntrinsicMethod {
     }
 
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 3) {
             main.returnTypeBeforeSolve = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_expandSplat());
             return;
@@ -2427,7 +2427,7 @@ private:
 public:
     // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
     // handling in Substitute.cc to account for fast path updates.
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
@@ -2614,9 +2614,9 @@ private:
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
     }
 
-    static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
-                             shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
-                             DispatchResult &res) {
+    static DispatchResult simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver,
+                                       const DispatchArgs &innerArgs, shared_ptr<SendAndBlockLink> link,
+                                       TypePtr passedInBlockType, Loc callLoc, Loc blockLoc) {
         auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
@@ -2702,7 +2702,7 @@ public:
 
     // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
     // handling in Substitute.cc to account for fast path updates.
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
@@ -2794,7 +2794,7 @@ public:
 
     // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
     // handling in Substitute.cc to account for fast path updates.
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
@@ -2901,7 +2901,7 @@ public:
 
 class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 1);
         auto ty = core::Types::widen(gs, args.args.front()->type);
         auto loc = args.argLoc(0);
@@ -2928,7 +2928,7 @@ public:
 
 class Magic_suggestUntypedFieldType : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 4);
         main.returnTypeBeforeSolve = core::Types::widen(gs, args.args[0]->type);
 
@@ -2970,7 +2970,7 @@ public:
 
 class Magic_attachedClass : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -3019,7 +3019,7 @@ class Magic_checkAndAnd : public IntrinsicMethod {
 public:
     // NOTE: Since this method dispatches to one of its Symbol-literal arguments, it has special
     // handling in Substitute.cc to account for fast path updates.
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // <Magic>.<check-and-and> is created when desugaring for the purpose of adding a more
         // specific error message when using `&&`. The normal error is something like "Method not
         // found on NilClass" which is common enough and confusing enough that it warrants getting
@@ -3169,7 +3169,7 @@ public:
         return {core::Names::toA()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
@@ -3205,7 +3205,7 @@ public:
 
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.empty() || args.args.size() > 2) {
             return;
         }
@@ -3271,7 +3271,7 @@ public:
 
 class Tuple_last : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -3288,7 +3288,7 @@ public:
 
 class Tuple_first : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -3305,7 +3305,7 @@ public:
 
 class Tuple_minMax : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -3322,7 +3322,7 @@ public:
 
 class Tuple_sum : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -3342,7 +3342,7 @@ public:
 
 class Tuple_sample : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -3370,14 +3370,14 @@ public:
 
 class Tuple_to_a : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = args.selfType;
     }
 } Tuple_to_a;
 
 class Tuple_concat : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         vector<TypePtr> elems;
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
@@ -3440,7 +3440,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
 
         if (args.args.size() != 2) {
@@ -3509,7 +3509,7 @@ public:
 
 class Shape_merge : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
@@ -3573,7 +3573,7 @@ public:
 } Shape_merge;
 
 class Shape_to_hash : public IntrinsicMethod {
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         main.returnTypeBeforeSolve = args.selfType;
     }
 } Shape_to_hash;
@@ -3585,7 +3585,7 @@ public:
         return {core::Names::toHash()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
@@ -3620,7 +3620,7 @@ class Magic_mergeHash : public IntrinsicMethod {
         return {core::Names::merge()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         ENFORCE(args.args.size() == 2);
 
         auto accType = args.args.front()->type;
@@ -3659,7 +3659,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
         return {core::Names::merge()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // Argument format is
         // 0 - the hash to merge values into
         // 1 - the first key
@@ -3749,7 +3749,7 @@ class Magic_checkMatchArray : public IntrinsicMethod {
         return {core::Names::tripleEq()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto tupleType = core::cast_type<core::TupleType>(args.args[1]->type);
         if (tupleType == nullptr) {
             return;
@@ -3795,8 +3795,7 @@ class Magic_checkMatchArray : public IntrinsicMethod {
     }
 } Magic_checkMatchArray;
 
-void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main,
-                       NameRef methodToDigWith) {
+DispatchResult digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
         return;
@@ -3905,14 +3904,14 @@ void digImplementation(const GlobalState &gs, const DispatchArgs &args, Dispatch
 
 class Hash_dig : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         digImplementation(gs, args, main, Names::squareBrackets());
     }
 } Hash_dig;
 
 class Array_dig : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         digImplementation(gs, args, main, Names::at());
     }
 } Array_dig;
@@ -4005,7 +4004,7 @@ public:
         return {core::Names::toAry()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
         auto *ap = cast_type<AppliedType>(args.thisType);
@@ -4049,7 +4048,7 @@ public:
 
 class Array_product : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
@@ -4079,7 +4078,7 @@ public:
 
 class Array_compact : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         TypePtr element;
 
         auto *ap = cast_type<AppliedType>(args.thisType);
@@ -4094,7 +4093,7 @@ public:
 
 class Array_zip : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
@@ -4135,7 +4134,7 @@ public:
 
 class Array_transpose : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto *ap = cast_type<AppliedType>(args.thisType);
         ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
         ENFORCE(!ap->targs.empty());
@@ -4160,7 +4159,7 @@ public:
 
 class Symbol_eqeq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -4186,7 +4185,7 @@ public:
 
 class String_eqeq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -4220,7 +4219,7 @@ public:
 
 class Kernel_proc : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.block == nullptr) {
             return;
         }
@@ -4243,7 +4242,7 @@ public:
 
 class Kernel_lambdaTLet : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.block == nullptr) {
             return;
         }
@@ -4274,7 +4273,7 @@ public:
         return {core::Names::new_(), core::Names::initialize()};
     }
 
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() < 1) {
             return;
         }
@@ -4344,7 +4343,7 @@ public:
     }
 
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         // Exit early when this is the case that's handled by the enumerable.rbi sig
         // The result type will already have been populated by dispatchCall using the sig.
         if (args.args.empty() && args.block != nullptr) {
@@ -4383,7 +4382,7 @@ public:
 // statically determine things like `Integer === 3` to be true
 class Module_tripleEq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -4429,7 +4428,7 @@ public:
 } Module_tripleEq;
 class T_Enum_tripleEq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -4473,7 +4472,7 @@ public:
 
 class GenericForwarder_tripleEq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &main) const override {
+    DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const override {
         auto forwarderSingleton = Symbols::noClassOrModule();
         if (auto *app = cast_type<AppliedType>(args.thisType)) {
             forwarderSingleton = app->klass;
