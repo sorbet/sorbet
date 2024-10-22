@@ -2542,7 +2542,7 @@ public:
         }
         dispatched.main.errors = move(main.errors);
 
-        // TODO(trevor) this should merge constraints from `res` and `dispatched` instead
+        // TODO(jez) this should merge constraints from `res` and `dispatched` instead
         if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
             dispatched.main.constr = move(main.constr);
         }
