@@ -134,9 +134,9 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
-            DispatchResult res{nullptr, std::move(comp)};
-            intrinsic->apply(gs, args, res);
-            if (res.main.returnTypeBeforeSolve != nullptr) {
+            intrinsic->apply(gs, args, comp);
+            if (comp.returnTypeBeforeSolve != nullptr) {
+                DispatchResult res{nullptr, std::move(comp)};
                 res.returnType = res.main.returnTypeBeforeSolve;
                 return res;
             }
@@ -152,9 +152,9 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
         auto *intrinsic = method.data(gs)->getIntrinsic();
         if (intrinsic != nullptr) {
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
-            DispatchResult res{nullptr, std::move(comp)};
-            intrinsic->apply(gs, args, res);
-            if (res.main.returnTypeBeforeSolve != nullptr) {
+            intrinsic->apply(gs, args, comp);
+            if (comp.returnTypeBeforeSolve != nullptr) {
+                DispatchResult res{nullptr, std::move(comp)};
                 res.returnType = res.main.returnTypeBeforeSolve;
                 return res;
             }
@@ -1516,7 +1516,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     auto *intrinsic = methodData->getIntrinsic();
     if (intrinsic != nullptr) {
-        intrinsic->apply(gs, args, result);
+        intrinsic->apply(gs, args, result.main);
         // the call could have overridden constraint
         if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
             constr = result.main.constr.get();
