@@ -43,6 +43,46 @@ bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
     return value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(value);
 }
 
+bool isCustomer(core::Context ctx, core::ClassOrModuleRef klass) {
+    if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
+        auto ownerKlass = klass.data(ctx)->owner;
+        if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+core::ClassOrModuleRef getCustomerClass(core::Context ctx, const core::TypePtr &type) {
+    if (core::isa_type<core::ClassType>(type)) {
+        auto klass = core::cast_type_nonnull<core::ClassType>(type).symbol;
+        if (isCustomer(ctx, klass)) {
+            return klass;
+        }
+    }
+
+    if (core::isa_type<core::OrType>(type)) {
+        auto left = core::cast_type_nonnull<core::OrType>(type).left;
+        auto right = core::cast_type_nonnull<core::OrType>(type).right;
+        if (core::isa_type<core::ClassType>(left)) {
+            auto klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
+            if (isCustomer(ctx, klass)) {
+                return klass;
+            }
+        }
+
+        if (core::isa_type<core::ClassType>(right)) {
+            auto klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
+            if (isCustomer(ctx, klass)) {
+                return klass;
+            }
+        }
+    }
+
+    return core::Symbols::noClassOrModule();
+}
+
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", string(cfg->symbol.toStringFullName(ctx))}});
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
@@ -337,28 +377,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         if (reportCustomerCallsite && !ctx.file.data(ctx).isPackagedTest()) {
             for (auto &arg : cfg->symbol.data(ctx)->arguments) {
-                if (hasCustomerArg) {
+                if (getCustomerClass(ctx, arg.type).exists()) {
+                    hasCustomerArg = true;
                     break;
-                }
-
-                auto klass = core::Symbols::noClassOrModule();
-                if (core::isa_type<core::ClassType>(arg.type)) {
-                    klass = core::cast_type_nonnull<core::ClassType>(arg.type).symbol;
-                } else if (core::isa_type<core::OrType>(arg.type)) {
-                    auto left = core::cast_type_nonnull<core::OrType>(arg.type).left;
-                    auto right = core::cast_type_nonnull<core::OrType>(arg.type).right;
-                    if (left.isNilClass() && core::isa_type<core::ClassType>(right)) {
-                        klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
-                    } else if (right.isNilClass() && core::isa_type<core::ClassType>(left)) {
-                        klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
-                    }
-                }
-
-                if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
-                    auto ownerKlass = klass.data(ctx)->owner;
-                    if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
-                        hasCustomerArg = true;
-                    }
                 }
             }
         }

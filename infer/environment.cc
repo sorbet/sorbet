@@ -1163,122 +1163,101 @@ core::TypePtr Environment::processBinding(
                             methodClassName = methodClass.showFullName(ctx);
                         }
 
-                        if (core::isa_type<core::ClassType>(recvType.type)) {
-                            auto klass = core::cast_type_nonnull<core::ClassType>(recvType.type).symbol;
-                            if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
-                                auto owner = klass.data(ctx)->owner;
-                                if (owner.exists() && owner.data(ctx)->name == core::Names::Constants::Model()) {
-                                    // JSONL machine-readable format
-                                    // clang-format off
-                                    std::ostringstream oss;
-                                    oss << "{\"context\": \""
-                                              << std::move(wrappingMethodClassName) << "#"
-                                              << std::move(wrappingMethodName)
-                                              << "\", \"context_loc\": \""
-                                              << std::move(callSiteFile) << ":" << wrappingMethodStart.line
-                                              << "\", \"method\": \""
-                                              << std::move(methodClassName) << "#" << std::move(methodName)
-                                              << "\", \"loc\": \""
-                                              << std::move(callSiteFile) << ":" << start.line
-                                              << "\", \"recv\": \""
-                                              << std::move(receiverName)
-                                              << "\"}";
-                                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
-                                    // clang-format on
-                                }
-                            }
+                        auto klass = infer::getCustomerClass(ctx, recvType.type);
+
+                        if (klass.exists()) {
+                            // JSONL machine-readable format
+                            // clang-format off
+                            std::ostringstream oss;
+                            oss << "{\"context\": \""
+                                      << std::move(wrappingMethodClassName) << "#"
+                                      << std::move(wrappingMethodName)
+                                      << "\", \"context_loc\": \""
+                                      << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                      << "\", \"method\": \""
+                                      << std::move(methodClassName) << "#" << std::move(methodName)
+                                      << "\", \"loc\": \""
+                                      << std::move(callSiteFile) << ":" << start.line
+                                      << "\", \"recv\": \""
+                                      << std::move(receiverName)
+                                      << "\"}";
+                            ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                            // clang-format on
                         }
 
                         int index = 0;
                         for (auto &arg : args) {
-                            auto klass = core::Symbols::noClassOrModule();
-                            if (core::isa_type<core::ClassType>(arg->type)) {
-                                klass = core::cast_type_nonnull<core::ClassType>(arg->type).symbol;
-                            } else if (core::isa_type<core::OrType>(arg->type)) {
-                                auto left = core::cast_type_nonnull<core::OrType>(arg->type).left;
-                                auto right = core::cast_type_nonnull<core::OrType>(arg->type).right;
-                                if (left.isNilClass() && core::isa_type<core::ClassType>(right)) {
-                                    klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
-                                } else if (right.isNilClass() && core::isa_type<core::ClassType>(left)) {
-                                    klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
-                                }
-                            } else {
+                            auto klass = infer::getCustomerClass(ctx, arg->type);
+                            if (!klass.exists()) {
                                 index++;
                                 continue;
                             }
 
-                            if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
-                                auto ownerKlass = klass.data(ctx)->owner;
-                                if (ownerKlass.exists() &&
-                                    ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
-                                    auto &methodArgs = it->main.method.data(ctx)->arguments;
-                                    core::TypePtr methodArgType;
-                                    bool foundMethodArgType = false;
-                                    if (index < send.numPosArgs) {
-                                        // posarg
+                            auto &methodArgs = it->main.method.data(ctx)->arguments;
+                            core::TypePtr methodArgType;
+                            bool foundMethodArgType = false;
+                            if (index < send.numPosArgs) {
+                                // posarg
 
-                                        ENFORCE(index < methodArgs.size());
-                                        if (it->main.method.data(ctx)->name == core::Names::buildHash()) {
-                                            // skip kwarg splat (build-hash) for now.
-                                            foundMethodArgType = true;
-                                        } else if (core::isa_type<core::ClassType>(methodArgs[index].type)) {
-                                            methodArgType = methodArgs[index].type;
-                                            foundMethodArgType = true;
-                                        }
-                                    } else {
-                                        // kwarg
+                                ENFORCE(index < methodArgs.size());
+                                if (it->main.method.data(ctx)->name == core::Names::buildHash()) {
+                                    // skip kwarg splat (build-hash) for now.
+                                    foundMethodArgType = true;
+                                } else if (core::isa_type<core::ClassType>(methodArgs[index].type)) {
+                                    methodArgType = methodArgs[index].type;
+                                    foundMethodArgType = true;
+                                }
+                            } else {
+                                // kwarg
 
-                                        ENFORCE(index > 0);
-                                        auto &kwLabel = args[index - 1];
+                                ENFORCE(index > 0);
+                                auto &kwLabel = args[index - 1];
 
-                                        if (!core::isa_type<core::NamedLiteralType>(kwLabel->type)) {
-                                            index++;
-                                            continue;
-                                        }
+                                if (!core::isa_type<core::NamedLiteralType>(kwLabel->type)) {
+                                    index++;
+                                    continue;
+                                }
 
-                                        auto argName =
-                                            core::cast_type_nonnull<core::NamedLiteralType>(kwLabel->type).asName();
-                                        for (auto &methodArg : methodArgs) {
-                                            if (methodArg.name == argName) {
-                                                methodArgType = methodArg.type;
-                                                foundMethodArgType = true;
-                                                break;
-                                            }
-                                        }
+                                auto argName = core::cast_type_nonnull<core::NamedLiteralType>(kwLabel->type).asName();
+                                for (auto &methodArg : methodArgs) {
+                                    if (methodArg.name == argName) {
+                                        methodArgType = methodArg.type;
+                                        foundMethodArgType = true;
+                                        break;
                                     }
-
-                                    std::string methodArgTypeStr;
-                                    bool untypedOrSplat = false;
-                                    if (!foundMethodArgType || methodArgType == nullptr) {
-                                        // Callsite has no signature, uses splat, or otherwise could not be processed.
-                                        // Default to dispatch arg class type.
-                                        untypedOrSplat = true;
-                                        methodArgTypeStr = klass.showFullName(ctx);
-                                    } else {
-                                        methodArgTypeStr = methodArgType.show(ctx);
-                                    }
-
-                                    // JSONL machine-readable format
-                                    // clang-format off
-                                    std::ostringstream oss;
-                                    oss << "{\"context\": \""
-                                        << std::move(wrappingMethodClassName) << "#"
-                                        << std::move(wrappingMethodName)
-                                        << "\", \"context_loc\": \""
-                                        << std::move(callSiteFile) << ":" << wrappingMethodStart.line
-                                        << "\", \"method\": \""
-                                        << std::move(methodClassName) << "#" << std::move(methodName)
-                                        << "\", \"type\": \""
-                                        << std::move(methodArgTypeStr)
-                                        << "\", \"untyped_or_splat\": "
-                                        << untypedOrSplat
-                                        << ", \"loc\": \""
-                                        << std::move(callSiteFile) << ":" << start.line
-                                        << "\"}";
-                                    ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
-                                    // clang-format on
                                 }
                             }
+
+                            std::string methodArgTypeStr;
+                            bool untypedOrSplat = false;
+                            if (!foundMethodArgType || methodArgType == nullptr) {
+                                // Callsite has no signature, uses splat, or otherwise could not be processed.
+                                // Default to dispatch arg class type.
+                                untypedOrSplat = true;
+                                methodArgTypeStr = klass.showFullName(ctx);
+                            } else {
+                                methodArgTypeStr = methodArgType.show(ctx);
+                            }
+
+                            // JSONL machine-readable format
+                            // clang-format off
+                            std::ostringstream oss;
+                            oss << "{\"context\": \""
+                                << std::move(wrappingMethodClassName) << "#"
+                                << std::move(wrappingMethodName)
+                                << "\", \"context_loc\": \""
+                                << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                << "\", \"method\": \""
+                                << std::move(methodClassName) << "#" << std::move(methodName)
+                                << "\", \"type\": \""
+                                << std::move(methodArgTypeStr)
+                                << "\", \"untyped_or_splat\": "
+                                << untypedOrSplat
+                                << ", \"loc\": \""
+                                << std::move(callSiteFile) << ":" << start.line
+                                << "\"}";
+                            ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                            // clang-format on
 
                             index++;
                         }
