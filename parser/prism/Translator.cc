@@ -458,8 +458,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto name = parser.resolveConstant(defNode->name);
-            auto params = translate(up_cast(defNode->parameters));
-            auto body = translate(defNode->body);
+
+            // These 2 need to be called on a new Translator with isInMethod set to true
+            Translator childContext = enterMethodDef();
+            auto params = childContext.translate(up_cast(defNode->parameters));
+            auto body = childContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -1726,6 +1729,12 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
     translateMultiInto(sorbetLhs, prismRights);
 
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
+}
+
+// Context management methods
+Translator Translator::enterMethodDef() {
+    auto isInMethodDef = true;
+    return Translator(parser, gs, isInMethodDef);
 }
 
 }; // namespace sorbet::parser::Prism
