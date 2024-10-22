@@ -10,17 +10,11 @@ Begin {
       args = NULL
       body = Begin {
         stmts = [
-          Send {
-            receiver = NULL
-            method = <U method_1>
-            args = [
-            ]
+          String {
+            val = <U string1>
           }
-          Send {
-            receiver = NULL
-            method = <U method_2>
-            args = [
-            ]
+          String {
+            val = <U string2>
           }
         ]
       }
@@ -30,17 +24,11 @@ Begin {
       args = NULL
       body = Kwbegin {
         stmts = [
-          Send {
-            receiver = NULL
-            method = <U method_1>
-            args = [
-            ]
+          String {
+            val = <U string1>
           }
-          Send {
-            receiver = NULL
-            method = <U method_2>
-            args = [
-            ]
+          String {
+            val = <U string2>
           }
         ]
       }
