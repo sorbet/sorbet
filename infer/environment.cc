@@ -1191,12 +1191,22 @@ core::TypePtr Environment::processBinding(
 
                         int index = 0;
                         for (auto &arg : args) {
-                            if (!core::isa_type<core::ClassType>(arg->type)) {
+                            auto klass = core::Symbols::noClassOrModule();
+                            if (core::isa_type<core::ClassType>(arg->type)) {
+                                klass = core::cast_type_nonnull<core::ClassType>(arg->type).symbol;
+                            } else if (core::isa_type<core::OrType>(arg->type)) {
+                                auto left = core::cast_type_nonnull<core::OrType>(arg->type).left;
+                                auto right = core::cast_type_nonnull<core::OrType>(arg->type).right;
+                                if (left.isNilClass() && core::isa_type<core::ClassType>(right)) {
+                                    klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
+                                } else if (right.isNilClass() && core::isa_type<core::ClassType>(left)) {
+                                    klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
+                                }
+                            } else {
                                 index++;
                                 continue;
                             }
 
-                            auto klass = core::cast_type_nonnull<core::ClassType>(arg->type).symbol;
                             if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
                                 auto ownerKlass = klass.data(ctx)->owner;
                                 if (ownerKlass.exists() &&

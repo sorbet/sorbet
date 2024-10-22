@@ -341,13 +341,20 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     break;
                 }
 
-                if (!core::isa_type<core::ClassType>(arg.type)) {
-                    continue;
+                auto klass = core::Symbols::noClassOrModule();
+                if (core::isa_type<core::ClassType>(arg.type)) {
+                    klass = core::cast_type_nonnull<core::ClassType>(arg.type).symbol;
+                } else if (core::isa_type<core::OrType>(arg.type)) {
+                    auto left = core::cast_type_nonnull<core::OrType>(arg.type).left;
+                    auto right = core::cast_type_nonnull<core::OrType>(arg.type).right;
+                    if (left.isNilClass() && core::isa_type<core::ClassType>(right)) {
+                        klass = core::cast_type_nonnull<core::ClassType>(right).symbol;
+                    } else if (right.isNilClass() && core::isa_type<core::ClassType>(left)) {
+                        klass = core::cast_type_nonnull<core::ClassType>(left).symbol;
+                    }
                 }
 
-                auto klass = core::cast_type_nonnull<core::ClassType>(arg.type).symbol;
-
-                if (klass.data(ctx)->name == core::Names::Constants::Customer()) {
+                if (klass.exists() && klass.data(ctx)->name == core::Names::Constants::Customer()) {
                     auto ownerKlass = klass.data(ctx)->owner;
                     if (ownerKlass.exists() && ownerKlass.data(ctx)->name == core::Names::Constants::Model()) {
                         hasCustomerArg = true;
