@@ -1097,11 +1097,14 @@ struct DispatchResult {
           main(DispatchComponent{
               std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
     explicit DispatchResult(DispatchComponent &&comp) : returnType(nullptr), main(std::move(comp)){};
+
+private:
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
           secondaryKind(secondaryKind){};
 
+public:
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
