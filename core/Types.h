@@ -1096,8 +1096,7 @@ struct DispatchResult {
         : returnType(returnType),
           main(DispatchComponent{
               std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
-    DispatchResult(TypePtr returnType, DispatchComponent comp)
-        : returnType(std::move(returnType)), main(std::move(comp)){};
+    explicit DispatchResult(DispatchComponent &&comp) : returnType(nullptr), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),

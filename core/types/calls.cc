@@ -1524,7 +1524,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             constr = &core::TypeConstraint::EmptyFrozenConstraint;
         }
     } else {
-        result.main = move(main);
+        result = DispatchResult(move(main));
     }
 
     TypePtr &resultType = result.main.returnTypeBeforeSolve;
