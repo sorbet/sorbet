@@ -16,44 +16,89 @@ TEST_CASE_FIXTURE(ProtocolTest, "AddFile") {
     assertErrorDiagnostics(send(*openFile("yolo1.rb", "")), {});
 
     ExpectedDiagnostic yolo1Diagnostic = {"yolo1.rb", 3, "Expected `Integer`"};
-    assertErrorDiagnostics(
-        send(*changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
-        {yolo1Diagnostic});
+    assertErrorDiagnostics(send(*changeFile("yolo1.rb",
+                                            "# typed: true\n"
+                                            "class Foo1\n"
+                                            "  def branch\n"
+                                            "    1 + \"stuff\"\n"
+                                            "  end\n"
+                                            "end\n",
+                                            2)),
+                           {yolo1Diagnostic});
     assertErrorDiagnostics(send(*openFile("yolo2.rb", "")), {yolo1Diagnostic});
 
     ExpectedDiagnostic yolo2Diagnostic = {"yolo2.rb", 4, "Expected `Integer`"};
-    assertErrorDiagnostics(
-        send(*changeFile("yolo2.rb", "# typed: true\nclass Foo2\n\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 2)),
-        {yolo1Diagnostic, yolo2Diagnostic});
+    assertErrorDiagnostics(send(*changeFile("yolo2.rb",
+                                            "# typed: true\n"
+                                            "class Foo2\n"
+                                            "\n"
+                                            "  def branch\n"
+                                            "    1 + \"stuff\"\n"
+                                            "  end\n"
+                                            "end\n",
+                                            2)),
+                           {yolo1Diagnostic, yolo2Diagnostic});
 
     // Slightly change text so that error changes line and contents.
     ExpectedDiagnostic yolo2Diagnostic2 = {"yolo2.rb", 5, "stuff3"};
-    assertErrorDiagnostics(
-        send(
-            *changeFile("yolo2.rb", "# typed: true\nclass Foo2\n\n\n def branch\n    1 + \"stuff3\"\n  end\nend\n", 3)),
-        {yolo1Diagnostic, yolo2Diagnostic2});
+    assertErrorDiagnostics(send(*changeFile("yolo2.rb",
+                                            "# typed: true\n"
+                                            "class Foo2\n"
+                                            "\n"
+                                            "\n"
+                                            " def branch\n"
+                                            "    1 + \"stuff3\"\n"
+                                            "  end\n"
+                                            "end\n",
+                                            3)),
+                           {yolo1Diagnostic, yolo2Diagnostic2});
 }
 
 // Write to the same file twice. Sorbet should only return errors from the second version.
 TEST_CASE_FIXTURE(ProtocolTest, "AddFileJoiningRequests") {
     assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
-    requests.push_back(openFile("yolo1.rb", "# typed: true\nclass Foo2\n  def branch\n    2 + \"dog\"\n  end\nend\n"));
-    requests.push_back(
-        changeFile("yolo1.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"bear\"\n  end\nend\n", 3));
+    requests.push_back(openFile("yolo1.rb", "# typed: true\n"
+                                            "class Foo2\n"
+                                            "  def branch\n"
+                                            "    2 + \"dog\"\n"
+                                            "  end\n"
+                                            "end\n"));
+    requests.push_back(changeFile("yolo1.rb",
+                                  "# typed: true\n"
+                                  "class Foo1\n"
+                                  "  def branch\n"
+                                  "    1 + \"bear\"\n"
+                                  "  end\n"
+                                  "end\n",
+                                  3));
     assertErrorDiagnostics(send(move(requests)), {{"yolo1.rb", 3, "bear"}});
 }
 
 // Cancels requests before they are processed, and ensures that they are actually not processed.
 TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
     assertErrorDiagnostics(initializeLSP(), {});
-    assertErrorDiagnostics(
-        send(*openFile("foo.rb",
-                       "#typed: true\nmodule Bar\n    CONST = 2\n\n    def self.meth(x)\n        x\n    "
-                       "end\nend\n\nlocal = 131\nlocaler = local + 2\nlocaler2 = localer + 2\nlocal3 = localer + "
-                       "local + 2\n\nconst_to_local = Bar::CONST;\nconst_add = Bar::CONST + "
-                       "local\nconst_add_reverse = local + Bar::CONST;\n\nBar.meth(local)\nputs(Bar::CONST)\n")),
-        {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "#typed: true\n"
+                                                    "module Bar\n"
+                                                    "    CONST = 2\n"
+                                                    "\n"
+                                                    "    def self.meth(x)\n"
+                                                    "        x\n"
+                                                    "    end\n"
+                                                    "end\n"
+                                                    "\n"
+                                                    "local = 131\n"
+                                                    "localer = local + 2\n"
+                                                    "localer2 = localer + 2\n"
+                                                    "local3 = localer + local + 2\n"
+                                                    "\n"
+                                                    "const_to_local = Bar::CONST;\n"
+                                                    "const_add = Bar::CONST + local\n"
+                                                    "const_add_reverse = local + Bar::CONST;\n"
+                                                    "\n"
+                                                    "Bar.meth(local)\n"
+                                                    "puts(Bar::CONST)\n")),
+                           {});
 
     // Make 3 requests that are immediately canceled.
     vector<unique_ptr<LSPMessage>> requests;
@@ -91,7 +136,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "Cancellation") {
 // Asserts that Sorbet returns an empty result when requesting definitions in untyped Ruby files.
 TEST_CASE_FIXTURE(ProtocolTest, "DefinitionError") {
     assertErrorDiagnostics(initializeLSP(), {});
-    assertErrorDiagnostics(send(*openFile("foobar.rb", "class Foobar\n  def bar\n    1\n  end\nend\n\nbar\n")), {});
+    assertErrorDiagnostics(send(*openFile("foobar.rb", "class Foobar\n"
+                                                       "  def bar\n"
+                                                       "    1\n"
+                                                       "  end\n"
+                                                       "end\n"
+                                                       "\n"
+                                                       "bar\n")),
+                           {});
     auto defResponses = send(*getDefinition("foobar.rb", 6, 1));
     INFO("Expected a single response to a definition request to an untyped document.");
     const auto numResponses = absl::c_count_if(defResponses, [](const auto &m) { return m->isResponse(); });
@@ -119,22 +171,46 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergeDidChangeAfterCancellation") {
     requests.push_back(openFile("foo.rb", ""));
     // Invalid: Returns false.
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    false\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    false\n"
+                                  "  end\n"
+                                  "end\n",
                                   2));
     requests.push_back(workspaceSymbol("Foo"));
     auto cancelId1 = nextId - 1;
     // Invalid: Returns float
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    3.0\n"
+                                  "  end\n"
+                                  "end\n",
                                   3));
     requests.push_back(workspaceSymbol("Foo"));
     auto cancelId2 = nextId - 1;
     // Invalid: Returns unknown identifier.
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    blah\n"
+                                  "  end\n"
+                                  "end\n",
                                   4));
     requests.push_back(workspaceSymbol("Foo"));
     auto cancelId3 = nextId - 1;
@@ -170,22 +246,65 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossFiles") {
     requests.push_back(openFile("foo.rb", ""));
     // Invalid: Returns false.
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    false\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    false\n"
+                                  "  end\n"
+                                  "end\n"
+                                  "",
                                   2));
-    requests.push_back(openFile("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    requests.push_back(openFile("bar.rb", "# typed: true\n"
+                                          "class Foo1\n"
+                                          "  def branch\n"
+                                          "    1 + \"stuff\"\n"
+                                          "  end\n"
+                                          "end\n"
+                                          ""));
     // Invalid: Returns float
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    3.0\n"
+                                  "  end\n"
+                                  "end\n",
                                   3));
-    writeFilesToFS({{"baz.rb", "# typed: true\nclass Foo2\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
-    writeFilesToFS({{"bat.rb", "# typed: true\nclass Foo3\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    writeFilesToFS({{"baz.rb", "# typed: true\n"
+                               "class Foo2\n"
+                               "  def branch\n"
+                               "    1 + \"stuff\"\n"
+                               "  end\n"
+                               "end\n"
+                               ""}});
+    writeFilesToFS({{"bat.rb", "# typed: true\n"
+                               "class Foo3\n"
+                               "  def branch\n"
+                               "    1 + \"stuff\"\n"
+                               "  end\n"
+                               "end\n"
+                               ""}});
     requests.push_back(watchmanFileUpdate({"baz.rb"}));
     // Final state: Returns unknown identifier.
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    blah\n"
+                                  "  end\n"
+                                  "end\n",
                                   4));
     requests.push_back(closeFile("bat.rb"));
 
@@ -202,20 +321,45 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
     assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
     // Invalid: Returns false.
-    requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                          "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
+    requests.push_back(openFile("foo.rb", "# typed: true\n"
+                                          "\n"
+                                          "class Opus::CIBot::Tasks::Foo\n"
+                                          "  extend T::Sig\n"
+                                          "\n"
+                                          "  sig {returns(Integer)}\n"
+                                          "  def bar\n"
+                                          "    false\n"
+                                          "  end\n"
+                                          "end\n"
+                                          ""));
     // Document symbol is delayable.
     requests.push_back(documentSymbol("foo.rb"));
     // Invalid: Returns float
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    3.0\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    3.0\n"
+                                  "  end\n"
+                                  "end\n",
                                   3));
     requests.push_back(documentSymbol("foo.rb"));
     // Invalid: Returns unknown identifier.
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    blah\n"
+                                  "  end\n"
+                                  "end\n",
                                   4));
 
     auto msgs = send(move(requests));
@@ -233,13 +377,29 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesDidChangesAcrossDelayableRequests") {
 TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableRequests") {
     assertErrorDiagnostics(initializeLSP(), {});
     vector<unique_ptr<LSPMessage>> requests;
-    requests.push_back(openFile("foo.rb", "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                          "{returns(Integer)}\n  def bar\n    false\n  end\nend\n"));
+    requests.push_back(openFile("foo.rb", "# typed: true\n"
+                                          "\n"
+                                          "class Opus::CIBot::Tasks::Foo\n"
+                                          "  extend T::Sig\n"
+                                          "\n"
+                                          "  sig {returns(Integer)}\n"
+                                          "  def bar\n"
+                                          "    false\n"
+                                          "  end\n"
+                                          "end\n"));
     // Should block ^ and V from merging.
     requests.push_back(hover("foo.rb", 1, 1));
     requests.push_back(changeFile("foo.rb",
-                                  "# typed: true\n\nclass Opus::CIBot::Tasks::Foo\n  extend T::Sig\n\n  sig "
-                                  "{returns(Integer)}\n  def bar\n    blah\n  end\nend\n",
+                                  "# typed: true\n"
+                                  "\n"
+                                  "class Opus::CIBot::Tasks::Foo\n"
+                                  "  extend T::Sig\n"
+                                  "\n"
+                                  "  sig {returns(Integer)}\n"
+                                  "  def bar\n"
+                                  "    blah\n"
+                                  "  end\n"
+                                  "end\n",
                                   4));
 
     auto msgs = send(move(requests));
@@ -273,7 +433,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "WorkspaceEditIgnoredWhenNotInitialized") {
     // Purposefully send a vector of requests to trigger merging, which should turn this into a WorkspaceEdit.
     vector<unique_ptr<LSPMessage>> toSend;
     // Avoid using `openFile`, as it only works post-initialization.
-    toSend.push_back(makeOpen("bar.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n", 1));
+    toSend.push_back(makeOpen("bar.rb",
+                              "# typed: true\n"
+                              "class Foo1\n"
+                              "  def branch\n"
+                              "    1 + \"stuff\"\n"
+                              "  end\n"
+                              "end\n",
+                              1));
     // This update should be ignored.
     assertErrorDiagnostics(send(move(toSend)), {});
     // We shouldn't have any code errors post-initialization since the previous edit was ignored.
@@ -298,8 +465,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "EmptyRootUriInitialization") {
     assertErrorDiagnostics(initializeLSP(), {});
 
     // Manually construct an openFile with text that has a typechecking error.
-    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
-        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenParams =
+        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>("memory://yolo1.rb", "ruby", 1,
+                                                                             "# typed: true\n"
+                                                                             "class Foo1\n"
+                                                                             "  def branch\n"
+                                                                             "    1 + \"stuff\"\n"
+                                                                             "  end\n"
+                                                                             "end\n"));
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
@@ -335,8 +508,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "MissingRootPathInitialization") {
                            {});
 
     // Manually construct an openFile with text that has a typechecking error.
-    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
-        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenParams =
+        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>("memory://yolo1.rb", "ruby", 1,
+                                                                             "# typed: true\n"
+                                                                             "class Foo1\n"
+                                                                             "  def branch\n"
+                                                                             "    1 + \"stuff\"\n"
+                                                                             "  end\n"
+                                                                             "end\n"));
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
@@ -372,8 +551,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
                            {});
 
     // Manually construct an openFile with text that has a typechecking error.
-    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(
-        "memory://yolo1.rb", "ruby", 1, "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"));
+    auto didOpenParams =
+        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>("memory://yolo1.rb", "ruby", 1,
+                                                                             "# typed: true\n"
+                                                                             "class Foo1\n"
+                                                                             "  def branch\n"
+                                                                             "    1 + \"stuff\"\n"
+                                                                             "  end\n"
+                                                                             "end\n"));
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     auto diagnostics = send(LSPMessage(move(didOpenNotif)));
 
@@ -389,7 +574,11 @@ TEST_CASE_FIXTURE(ProtocolTest, "MonacoInitialization") {
 
 TEST_CASE_FIXTURE(ProtocolTest, "CompletionOnNonClass") {
     assertErrorDiagnostics(initializeLSP(), {});
-    assertErrorDiagnostics(send(*openFile("yolo1.rb", "# typed: true\nclass A\nend\nA")), {});
+    assertErrorDiagnostics(send(*openFile("yolo1.rb", "# typed: true\n"
+                                                      "class A\n"
+                                                      "end\n"
+                                                      "A")),
+                           {});
 
     // TODO: Once we have better helpers for completion, clean this up.
     auto completionParams = make_unique<CompletionParams>(make_unique<TextDocumentIdentifier>(getUri("yolo1.rb")),
@@ -458,7 +647,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "SilentlyIgnoresInvalidJSONMessages") {
 TEST_CASE_FIXTURE(ProtocolTest, "RespectsHoverTextLimitations") {
     assertErrorDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
 
-    assertErrorDiagnostics(send(*openFile("foobar.rb", "# typed: true\n1\n")), {});
+    assertErrorDiagnostics(send(*openFile("foobar.rb", "# typed: true\n"
+                                                       "1\n")),
+                           {});
 
     auto hoverResponses = send(LSPMessage(make_unique<RequestMessage>(
         "2.0", nextId++, LSPMethod::TextDocumentHover,
@@ -484,7 +675,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "SorbetURIsWork") {
     lspWrapper->opts->lspDirsMissingFromClient.emplace_back("/folder");
     assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions)), {});
 
-    string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
+    string fileContents = "# typed: true\n"
+                          "[0,1,2,3].select {|x| x > 0}\n"
+                          "def myMethod; end;\n";
     assertErrorDiagnostics(send(*openFile("folder/foo.rb", fileContents)), {});
 
     auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
@@ -517,7 +710,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotTypecheckSorbetURIs") {
     // Don't assert diagnostics; it will fail due to the spurious typecheckinfo message.
     initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(initOptions));
 
-    string fileContents = "# typed: true\n[0,1,2,3].select {|x| x > 0}\ndef myMethod; end;\n";
+    string fileContents = "# typed: true\n"
+                          "[0,1,2,3].select {|x| x > 0}\n"
+                          "def myMethod; end;\n";
     send(*openFile("folder/foo.rb", fileContents));
 
     auto selectDefinitions = getDefinitions("folder/foo.rb", 1, 11);
@@ -541,7 +736,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "MatchesFilesWithUrlEncodedNames") {
     string filename = "test file@123+%&*#!.rbi";
     string encodedFilename = "test%20file%40123%2B%25%26*%23!.rbi";
 
-    send(*openFile(filename, "# typed: true\nclass Foo; end;\n"));
+    send(*openFile(filename, "# typed: true\n"
+                             "class Foo; end;\n"));
 
     auto rbi = readFile(getUri(filename));
     auto rbiURLEncoded = readFile(getUri(encodedFilename));
@@ -561,8 +757,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotCrashOnNonWorkspaceURIs") {
         nextId, supportsMarkdown, supportsCodeActionResolve, make_optional(move(initOptions)));
 
     auto fileUri = "file:///Users/jvilk/Desktop/test.rb";
-    auto didOpenParams =
-        make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", 1, "# typed: true\n1\n"));
+    auto didOpenParams = make_unique<DidOpenTextDocumentParams>(make_unique<TextDocumentItem>(fileUri, "ruby", 1,
+                                                                                              "# typed: true\n"
+                                                                                              "1\n"));
     auto didOpenNotif = make_unique<NotificationMessage>("2.0", LSPMethod::TextDocumentDidOpen, move(didOpenParams));
     getLSPResponsesFor(*lspWrapper, make_unique<LSPMessage>(move(didOpenNotif)));
 }
@@ -713,7 +910,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
     assertUntypedDiagnostics(send(*changeFile("foo.rb",
                                               "# typed: true\n"
                                               "class A\n"
-                                              "  def foo(x)\n;"
+                                              "  def foo(x)\n"
                                               "    x.foo\n"
                                               "    5\n"
                                               "  end\n"
