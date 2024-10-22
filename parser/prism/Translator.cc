@@ -815,6 +815,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::NumParams>(location, move(params));
         }
+        case PM_NUMBERED_REFERENCE_READ_NODE: {
+            auto numberedReferenceReadNode = reinterpret_cast<pm_numbered_reference_read_node *>(node);
+            auto number = numberedReferenceReadNode->number;
+
+            return make_unique<parser::NthRef>(location, number);
+        }
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: { // An optional keyword parameter, like `def foo(a: 1)`
             auto optionalKeywordParamNode = reinterpret_cast<pm_optional_keyword_parameter_node *>(node);
             auto nameLoc = translateLoc(optionalKeywordParamNode->name_loc);
@@ -1151,7 +1157,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
-        case PM_NUMBERED_REFERENCE_READ_NODE:
         case PM_POST_EXECUTION_NODE:
         case PM_PRE_EXECUTION_NODE:
             auto type_id = PM_NODE_TYPE(node);
