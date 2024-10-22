@@ -1546,6 +1546,38 @@ unique_ptr<PackageInfoImpl> createAndPopulatePackageInfo(core::GlobalState &gs, 
     return info;
 }
 
+string strictDependenciesLevelToString(core::packages::StrictDependenciesLevel level) {
+    switch (level) {
+        case core::packages::StrictDependenciesLevel::False:
+            return "false";
+        case core::packages::StrictDependenciesLevel::Layered:
+            return "layered";
+        case core::packages::StrictDependenciesLevel::LayeredDag:
+            return "layered_dag";
+        case core::packages::StrictDependenciesLevel::Dag:
+            return "dag";
+    }
+}
+
+bool importsTarget(core::Context ctx, set<const PackageInfoImpl *> &seen, const PackageInfoImpl &target,
+                   const PackageInfoImpl &curr) {
+    if (seen.find(&curr) != seen.end()) {
+        // TODO: explain
+        return false;
+    }
+    if (curr == target) {
+        return true;
+    }
+    seen.insert(&curr);
+    for (auto &i : curr.importedPackageNames) {
+        if (importsTarget(ctx, seen, target,
+                          PackageInfoImpl::from(ctx.state.packageDB().getPackageInfo(i.name.mangledName)))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void validateLayering(const core::Context &ctx, const Import &i) {
     if (i.type == ImportType::Test) {
         return;
@@ -1563,6 +1595,12 @@ void validateLayering(const core::Context &ctx, const Import &i) {
 
     if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
         return;
+    }
+
+    core::packages::StrictDependenciesLevel otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Layered;
+
+    if (thisPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::Dag) {
+        otherPkgExpectedLevel = core::packages::StrictDependenciesLevel::Dag;
     }
 
     auto possibleLayers = ctx.state.packageDB().layers();
@@ -1583,11 +1621,22 @@ void validateLayering(const core::Context &ctx, const Import &i) {
         }
     }
 
-    if (otherPkg.strictDependenciesLevel.value().first == core::packages::StrictDependenciesLevel::False) {
+    if (otherPkg.strictDependenciesLevel.value().first < otherPkgExpectedLevel) {
         if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
-            e.setHeader("All of this package's dependecies must be `{}` or higher", "layered");
+            e.setHeader("All of this package's dependecies must be `{}` or higher",
+                        strictDependenciesLevelToString(otherPkgExpectedLevel));
             e.addErrorLine(core::Loc(otherPkg.loc.file(), otherPkg.strictDependenciesLevel.value().second),
                            "`{}`'s `{}` level declared here", otherPkg.name.toString(ctx), "strict_dependencies");
+        }
+    }
+
+    if (thisPkg.strictDependenciesLevel.value().first >= core::packages::StrictDependenciesLevel::LayeredDag) {
+        /* auto cmp = [](auto a, auto b) { return *a == *b; }; */
+        auto seen = set<const PackageInfoImpl *>();
+        if (otherPkg.layer == thisPkg.layer && importsTarget(ctx, seen, thisPkg, otherPkg)) {
+            if (auto e = ctx.beginError(i.name.loc, core::errors::Packager::LayeringViolation)) {
+                e.setHeader("cycle");
+            }
         }
     }
 }
