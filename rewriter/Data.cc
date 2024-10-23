@@ -66,7 +66,7 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     }
 
     if (!ast::MK::isRootScope(recv->scope) || recv->cnst != core::Names::Constants::Data() ||
-        send->fun != core::Names::define() || !send->hasPosArgs()) {
+        send->fun != core::Names::define() || send->hasKwArgs() || send->hasKwSplat()) {
         return empty;
     }
 

@@ -11,6 +11,10 @@ class NotData
     var = Data.define(:foo)
 end
 
+class NullData
+    N = Data.define
+end
+
 class RealData
     A = Data.define(:foo, :bar)
 end
@@ -61,13 +65,12 @@ class MixinData
 end
 
 class BadUsages
-  A = Data.define # error: Not enough arguments provided for method `Data.define`. Expected: `1+`, got: `0`
-  B = Data.define(giberish: 1)
-  #               ^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{giberish: Integer(1)}` for argument `arg0`
+  A = Data.define(giberish: 1)
+  #               ^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{giberish: Integer(1)}` for argument `args`
 
-  C = Data.define(:c)
-  c_data = C.new(1)
-  c_data.c = 6 # error: Setter method `c=` does not exist on `BadUsages::C`
+  B = Data.define(:b)
+  b_data = B.new(1)
+  b_data.b = 6 # error: Setter method `b=` does not exist on `BadUsages::B`
 end
 
 class Main
@@ -96,7 +99,9 @@ class FullyQualifiedDataUsages
   Foo = Data.define(:a)
   Bar = ::Data.define(:a)
   Baz = ::Foo::Data.new
+  Quux = Data.define
 
   Foo.new(1).a
   Bar.new(1).a
+  Quux.new()
 end
