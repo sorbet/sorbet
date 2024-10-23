@@ -332,6 +332,27 @@ sig {params(_a: String, _b: Integer).void} # ok
 def foo(_a, _b); end
 ```
 
+## 3012
+
+There was an anonymous rest argument defined in the block parameter list.
+
+```ruby
+[1,2,3].each do |*|
+  T.unsafe(self).p(*)
+end
+```
+
+The anonymous rest argument may only refer to method parameters, and uses of it
+will generate runtime syntax errors if it's used in the context of a block that
+defines it. This can be resolved by naming the rest argument parameter in the
+block:
+
+```ruby
+[1,2,3].each do |*args|
+  T.unsafe(self).p(*args)
+end
+```
+
 ## 3501
 
 Sorbet has special support for understanding Ruby's `attr_reader`,
