@@ -1199,8 +1199,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else {
                     for (const auto &kwParam : kwParams) {
-                        auto kwParamType =
-                            Types::resultTypeAsSeenFrom(gs, kwParam->type, method.data(gs)->owner, symbol, targs);
+                        auto kwParamType = Types::resultTypeAsSeenFrom(gs, kwParam->type, data->owner, symbol, targs);
                         if (kwParamType == nullptr) {
                             kwParamType = Types::untyped(method);
                         }
@@ -1250,7 +1249,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                                 method.show(gs), prettyArity(gs, method), posArgs);
                 }
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
+                e.addErrorLine(data->loc(), "`{}` defined here", method.show(gs));
                 if (targetName == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
@@ -1435,12 +1434,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             if (method == Symbols::BasicObject_initialize()) {
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
             } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
                 if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
                 }
@@ -1451,7 +1450,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             method.show(gs), prettyArity(gs, method), posArgs);
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
@@ -1496,7 +1495,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
-                    for (const auto loc : method.data(gs)->locs()) {
+                    for (const auto loc : data->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
                     }
 
@@ -1515,7 +1514,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     TypePtr &resultType = result.returnType;
 
-    auto *intrinsic = method.data(gs)->getIntrinsic();
+    auto *intrinsic = data->getIntrinsic();
     if (intrinsic != nullptr) {
         intrinsic->apply(gs, args, result);
         // the call could have overridden constraint
@@ -1528,14 +1527,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (resultType == nullptr) {
-        if (args.args.size() == 1 && method.data(gs)->name.isSetter(gs)) {
+        if (args.args.size() == 1 && data->name.isSetter(gs)) {
             // assignments always return their right hand side
             resultType = args.args.front()->type;
-        } else if (args.args.size() == 2 && method.data(gs)->name == Names::squareBracketsEq()) {
+        } else if (args.args.size() == 2 && data->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType =
-                Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType, method.data(gs)->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, data->resultType, data->owner, symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -1544,7 +1542,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
+                e.addErrorLine(data->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
                 result.main.errors.emplace_back(e.build());
             }
@@ -1558,7 +1556,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
-                e.addErrorLine(method.data(gs)->loc(), "defined here");
+                e.addErrorLine(data->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
             }
         }
