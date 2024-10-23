@@ -473,7 +473,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
                     (dynamic_cast<parser::Rescue *>(kwbeginNode->stmts[0].get()) != nullptr ||
                      dynamic_cast<parser::Ensure *>(kwbeginNode->stmts[0].get()) != nullptr)) {
-                    body = move(kwbeginNode->stmts[0]);
+
+                    if (kwbeginNode->stmts.size() == 1) {
+                        body = move(kwbeginNode->stmts[0]);
+                    } else {
+                        unreachable("With ensure or rescue, the body of a method definition will be either a rescue or ensure node.");
+                    }
                 }
             }
 
