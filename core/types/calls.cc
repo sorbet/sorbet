@@ -2505,19 +2505,7 @@ public:
                                args.isPrivateOk,
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
-        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
-        for (auto &err : dispatched.main.errors) {
-            res.main.errors.emplace_back(std::move(err));
-        }
-        dispatched.main.errors = move(res.main.errors);
-
-        // TODO(trevor) this should merge constraints from `res` and `dispatched` instead
-        if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
-            dispatched.main.constr = move(res.main.constr);
-        }
-        res = move(dispatched);
-
-        return;
+        res = receiver->type.dispatchCall(gs, innerArgs);
     }
 } Magic_callWithSplat;
 
