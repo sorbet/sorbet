@@ -149,6 +149,27 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
     return body;
 }
 
+// It's not possible to use an anonymous rest parameter in a block, as it always refers to the forwarded arguments
+// from the method. This function raises an error if the anonymous rest arg is present in a parameter list.
+void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
+    auto it = absl::c_find_if(args, [](const auto &arg) { return isa_tree<RestArg>(arg); });
+    if (it == args.end()) {
+        return;
+    }
+
+    auto &rest = cast_tree_nonnull<RestArg>(*it);
+    if (auto *local = cast_tree<UnresolvedIdent>(rest.expr)) {
+        if (local->name != core::Names::star()) {
+            return;
+        }
+
+        if (auto e = dctx.ctx.beginError(it->loc(), core::errors::Desugar::BlockAnonymousRestParam)) {
+            e.setHeader("Anonymous rest parameter in block args");
+            e.addErrorNote("Naming the rest parameter will ensure you can access it in the block");
+        }
+    }
+}
+
 ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
                            unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
                            unique_ptr<parser::Node> &blockBody) {
@@ -175,6 +196,9 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
         ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
     }
     auto [args, destructures] = desugarArgs(dctx, loc, blockArgs);
+
+    checkBlockRestArg(dctx, args);
+
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockArg, dctx.enclosingMethodLoc,
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
