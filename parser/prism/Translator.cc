@@ -928,6 +928,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_unique<parser::Begin>(location, NodeVec{});
             }
         }
+        case PM_PRE_EXECUTION_NODE: {
+            auto preExecutionNode = reinterpret_cast<pm_pre_execution_node *>(node);
+            auto inlineIfSingle = true;
+            auto body = translateStatements(preExecutionNode->statements, inlineIfSingle);
+            return make_unique<parser::Preexe>(location, move(body));
+        }
         case PM_PROGRAM_NODE: { // The root node of the parse tree, representing the entire program
             pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
 
@@ -1183,7 +1189,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
         case PM_POST_EXECUTION_NODE:
-        case PM_PRE_EXECUTION_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
 
