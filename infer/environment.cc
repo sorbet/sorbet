@@ -1288,6 +1288,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     } else {
                         type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
                     }
+                    // Write back into the DispatchResult so that retained results affect LSP queries.
+                    // (Note that the SendResponse has already been pushed, with a shared_ptr to the
+                    // DispatchResult we're mutating here)
+                    i.link->result->returnType = type;
                 } else {
                     type = i.link->result->returnType;
                 }
