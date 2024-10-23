@@ -922,7 +922,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
         }
-        result.main.errors.emplace_back(e.build());
+        result.main().errors.emplace_back(e.build());
         return result;
     }
 
@@ -1535,8 +1535,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     if (auto *intrinsic = methodData->getIntrinsic()) {
         result = intrinsic->apply(gs, args, move(main));
         // the call could have overridden constraint
-        if (result.main.constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
-            constr = result.main.constr.get();
+        if (result.main().constr || constr != &core::TypeConstraint::EmptyFrozenConstraint) {
+            constr = result.main().constr.get();
         }
         if (constr == nullptr) {
             constr = &core::TypeConstraint::EmptyFrozenConstraint;
@@ -1555,7 +1555,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     //   of results.
     //
     // - ???
-    TypePtr &resultType = result.main.returnTypeBeforeSolve;
+    TypePtr &resultType = result.main().returnTypeBeforeSolve;
 
     if (resultType == nullptr) {
         if (args.args.size() == 1 && methodData->name.isSetter(gs)) {
@@ -1582,7 +1582,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
                 e.addErrorLine(methodData->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
-                result.main.errors.emplace_back(e.build());
+                result.main().errors.emplace_back(e.build());
             }
             // This mimics the behavior of the SolveConstraint case in processBinding
             resultType = Types::untypedUntracked();
@@ -1595,7 +1595,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
                 e.addErrorLine(methodData->loc(), "defined here");
-                result.main.errors.emplace_back(e.build());
+                result.main().errors.emplace_back(e.build());
             }
         }
     }
@@ -1606,7 +1606,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
 
     if (result.returnType == nullptr) {
-        result.returnType = result.main.returnTypeBeforeSolve;
+        result.returnType = result.main().returnTypeBeforeSolve;
     }
     return result;
 }
@@ -2260,7 +2260,7 @@ public:
         // So for now, simply swallow "missing `initialize`" errors.
         //
         // TODO(jez) This is a real bug, we're not copying over errors from dispatched.secondary
-        if (dispatched.main.method.exists()) {
+        if (dispatched.main().method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
             // result.
@@ -2269,9 +2269,9 @@ public:
             // dispatched to *something*, namely `Class#new`.
 
             for (auto &err : main.errors) {
-                dispatched.main.errors.emplace_back(std::move(err));
+                dispatched.main().errors.emplace_back(std::move(err));
             }
-            main = move(dispatched.main);
+            main = move(dispatched.main());
             // Null out the `void` type that comes from the `initialize` method, thus requesting
             // that dispatchCallSymbol use the type that comes from the `Class#new` method.
             main.returnTypeBeforeSolve = nullptr;
@@ -2619,7 +2619,7 @@ private:
                                core::NameRef::noName()};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         // TODO(jez) Just need to iterate all components, report all errors.
-        for (auto &err : dispatched.main.errors) {
+        for (auto &err : dispatched.main().errors) {
             gs._error(std::move(err));
         }
 
@@ -2673,8 +2673,8 @@ private:
         // as we do the subtyping check.
         // TODO(jez) This only looks at the main component!
         // Just need to repeat everything after this for each component.
-        auto &constr = dispatched.main.constr;
-        auto &blockPreType = dispatched.main.blockPreType;
+        auto &constr = dispatched.main().constr;
+        auto &blockPreType = dispatched.main().blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
         core::ErrorSection::Collector errorDetailsCollector;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
@@ -2689,7 +2689,7 @@ private:
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
                     e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
-                        Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                        Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main());
                     }
                 }
 
@@ -2705,7 +2705,7 @@ private:
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
                             passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
-                    Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
+                    Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main());
                 }
                 core::TypeErrorDiagnostics::explainTypeMismatch(gs, e, errorDetailsCollector, blockPreType,
                                                                 passedInBlockType);
@@ -2717,9 +2717,9 @@ private:
             auto passedInBlockReturnType = Types::getProcReturnType(gs, nonNilPassedInBlockType);
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists()) {
+                if (it->main().method.exists()) {
                     // TODO(jez) This only looks at the main component!
-                    const auto &blockReturnType = it->main.blockReturnType;
+                    const auto &blockReturnType = it->main().blockReturnType;
                     if (blockReturnType) {
                         // TODO(jez) How should this interact with highlight untyped?
                         // This subtype check is here to discover the correct generic bounds.
@@ -2735,11 +2735,11 @@ private:
                 if (auto e = gs.beginError(callLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                     e.setHeader("Could not find valid instantiation of type parameters");
                 }
-                dispatched.main.returnTypeBeforeSolve = core::Types::untypedUntracked();
+                dispatched.main().returnTypeBeforeSolve = core::Types::untypedUntracked();
             }
 
             if (!constr->isEmpty() && constr->isSolved()) {
-                dispatched.returnType = Types::instantiate(gs, dispatched.main.returnTypeBeforeSolve, *constr);
+                dispatched.returnType = Types::instantiate(gs, dispatched.main().returnTypeBeforeSolve, *constr);
             }
         }
         return dispatched;
@@ -3132,9 +3132,11 @@ public:
         auto multipleComponents = dispatched.secondary != nullptr;
         if (multipleComponents) {
             int unknownMethodOnNilClassErrors = 0;
+            // TODO(jez) This is already looping, just have to make it use recursion now
             for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
-                for (auto &err : it->main.errors) {
-                    if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
+                for (auto &err : it->main().errors) {
+                    // TODO(jez) This is already looping, just have to make it use recursion now
+                    if (err->what == core::errors::Infer::UnknownMethod && it->main().receiver.isNilClass()) {
                         unknownMethodOnNilClassErrors++;
                     }
                 }
@@ -3160,13 +3162,13 @@ public:
 
                 auto foundErrorOnRetry = false;
                 for (auto it = &retried; it != nullptr; it = it->secondary.get()) {
-                    foundErrorOnRetry |= !it->main.errors.empty();
+                    foundErrorOnRetry |= !it->main().errors.empty();
                 }
 
                 if (!foundErrorOnRetry) {
                     for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
-                        for (auto &err : it->main.errors) {
-                            if (err->what == core::errors::Infer::UnknownMethod && it->main.receiver.isNilClass()) {
+                        for (auto &err : it->main().errors) {
+                            if (err->what == core::errors::Infer::UnknownMethod && it->main().receiver.isNilClass()) {
                                 if (auto newErr = gs.beginError(err->loc, core::errors::Infer::CallAfterAndAnd)) {
                                     newErr.setHeader(
                                         "Call to method `{}` after `{}` assumes result type doesn't change",
@@ -3212,7 +3214,7 @@ public:
         }
 
         for (auto &err : main.errors) {
-            dispatched.main.errors.emplace_back(std::move(err));
+            dispatched.main().errors.emplace_back(std::move(err));
         }
         return dispatched;
     }
@@ -3248,7 +3250,8 @@ public:
 
         // The VM handles the case of an error when dispatching to_a, so the only
         // thing we need to ask is "did the call error?".
-        if (!dispatched.main.errors.empty()) {
+        // TODO(jez) We should be able to ask wehther any component had an error
+        if (!dispatched.main().errors.empty()) {
             // In case of an error, the splat is converted to an array with a single
             // element; be conservative in what we declare the element type to be.
             main.returnTypeBeforeSolve = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_splat());
@@ -3889,7 +3892,8 @@ DispatchResult digImplementation(const GlobalState &gs, const DispatchArgs &args
     };
 
     auto dispatched = args.selfType.dispatchCall(gs, baseCaseArgs);
-    for (auto &err : dispatched.main.errors) {
+    // TODO(jez) It's possible for args.selfType to be an intersection type, so using .main() here is wrong.
+    for (auto &err : dispatched.main().errors) {
         main.errors.emplace_back(std::move(err));
     }
 
@@ -3962,8 +3966,9 @@ DispatchResult digImplementation(const GlobalState &gs, const DispatchArgs &args
 
     auto recursiveDispatch = newSelfType.dispatchCall(gs, digArgs);
 
+    // TODO(jez) Need to make this loop use recursion
     for (auto it = &recursiveDispatch; it != nullptr; it = it->secondary.get()) {
-        for (auto &err : it->main.errors) {
+        for (auto &err : it->main().errors) {
             main.errors.emplace_back(std::move(err));
         }
     }
@@ -4015,7 +4020,8 @@ class Array_flatten : public IntrinsicMethod {
                                args.enclosingMethodForSuper};
 
         auto dispatched = type.dispatchCall(gs, innerArgs);
-        if (dispatched.main.errors.empty()) {
+        // TODO(jez) Will have to audit the flatten intrinsic
+        if (dispatched.main().errors.empty()) {
             if (dispatched.returnType.isNilClass()) {
                 // According to the Ruby spec, it is valid for `to_ary` to return `nil`
                 // which will stop `flatten` descending further.
@@ -4407,8 +4413,9 @@ public:
         };
         auto dispatched = classArg->type.dispatchCall(gs, newArgs);
 
+        // TODO(jez) Need to make this loop use recursion
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
-            for (auto &err : it->main.errors) {
+            for (auto &err : it->main().errors) {
                 main.errors.emplace_back(std::move(err));
             }
         }
@@ -4451,10 +4458,10 @@ public:
                               args.suppressErrors,
                               args.enclosingMethodForSuper};
         auto dispatched = hash.dispatchCall(gs, dispatch);
-        for (auto &err : dispatched.main.errors) {
+        for (auto &err : dispatched.main().errors) {
             main.errors.emplace_back(std::move(err));
         }
-        dispatched.main.errors.clear();
+        dispatched.main().errors.clear();
         main.returnTypeBeforeSolve = move(dispatched.returnType);
         return DispatchResult(move(main));
     }
