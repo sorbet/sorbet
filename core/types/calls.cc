@@ -3139,10 +3139,7 @@ public:
             }
         }
 
-        for (auto &err : res.main.errors) {
-            dispatched.main.errors.emplace_back(std::move(err));
-        }
-        res = std::move(dispatched);
+        res = move(dispatched);
     }
 } Magic_checkAndAnd;
 
