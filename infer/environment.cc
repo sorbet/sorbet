@@ -1141,8 +1141,11 @@ core::TypePtr Environment::processBinding(
                         auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
                         auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
                         auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
+
                         auto methodClass = it->main.method.data(ctx)->owner;
                         auto methodName = it->main.method.data(ctx)->name.show(ctx);
+                        bool isCalledOnStruct = methodClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Struct());
+
                         auto callSiteLoc = ctx.locAt(bind.loc);
                         auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
                         auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
@@ -1253,8 +1256,14 @@ core::TypePtr Environment::processBinding(
                                 << "\", \"type\": \""
                                 << std::move(methodArgTypeStr)
                                 << "\", \"untyped_or_splat\": "
-                                << untypedOrSplat
-                                << ", \"loc\": \""
+                                << untypedOrSplat;
+
+                            if (isCalledOnStruct) {
+                                oss << ", \"struct\": "
+                                    << isCalledOnStruct;
+                            }
+
+                            oss << ", \"loc\": \""
                                 << std::move(callSiteFile) << ":" << start.line
                                 << "\"}";
                             ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
