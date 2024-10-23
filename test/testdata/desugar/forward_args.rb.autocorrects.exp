@@ -1,3 +1,4 @@
+# -- test/testdata/desugar/forward_args.rb --
 # typed: true
 
 class Foo
@@ -20,14 +21,14 @@ class Foo
   end
 
   def foo5(*)
-    [1,2,3].each do |*|
+    [1,2,3].each do |*_|
                    # ^ error: Anonymous rest parameter
       T.unsafe(self).p(*)
     end
   end
 
   def foo6(*args)
-    [1,2,3].each do |*|
+    [1,2,3].each do |*_|
                    # ^ error: Anonymous rest parameter
       T.unsafe(self).p(*)
     end
@@ -46,3 +47,4 @@ Foo.new.foo(1, 2)
 Foo.new.foo(k1: 1, k2: 2)
 Foo.new.foo do puts "foo" end
 Foo.new.foo(1, 2, k1: 1, k2: 2) do puts "foo" end
+# ------------------------------
