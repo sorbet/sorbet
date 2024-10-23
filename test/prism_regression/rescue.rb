@@ -7,31 +7,38 @@ rescue
   "rescued"
 end
 
+# Testing a simple rescue clause in a method definition
+def method_with_rescue
+  123
+rescue
+  "rescued"
+end
+
 # Testing a rescue clause with multiple body statements
 begin
-  foo
-  bar
+  "string1"
+  "string2"
 rescue
   "rescued"
 end
 
 # Testing a rescue clause with a specific exception
 begin
-  foo
+  "string1"
 rescue RuntimeError
   "rescued Foo"
 end
 
 # Testing a rescue clause with multiple exceptions and a variable assignment
 begin
-  foo
+  "string1"
 rescue RuntimeError, NotImplementedError => e
   "rescued Foo #{e}"
 end
 
 # Testing a rescue clause with an else clause
 begin
-  foo
+  "string1"
 rescue RuntimeError
   "rescued Foo"
 else
@@ -40,7 +47,7 @@ end
 
 # Testing multiple rescue clauses with different exceptions
 begin
-  foo
+  "string1"
 rescue RuntimeError => e
   "rescued Foo #{e}"
 rescue NotImplementedError => e
@@ -51,7 +58,7 @@ end
 
 # Testing multiple rescue clauses with different exceptions and a final else clause
 begin
-  foo
+  "string1"
 rescue RuntimeError => e
   "rescued Foo #{e}"
 rescue NotImplementedError => e
@@ -64,7 +71,7 @@ end
 
 # Testing a rescue clause with an else and ensure clause
 begin
-  foo
+  "string1"
 rescue
   "rescued rescue"
 else

@@ -18,38 +18,78 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U method_with_ensure>
+      args = NULL
+      body = Ensure {
+        body = Begin {
+          stmts = [
+            String {
+              val = <U string1>
+            }
+            String {
+              val = <U string2>
+            }
+          ]
+        }
+        ensure = String {
+          val = <U ensured>
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_method_with_ensure>
+      args = NULL
+      body = Ensure {
+        body = NULL
+        ensure = String {
+          val = <U ensured>
+        }
+      }
+    }
+    DefMethod {
+      name = <U method_with_begin_and_ensure>
+      args = NULL
+      body = Kwbegin {
+        stmts = [
+          Ensure {
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U string1>
+                }
+                String {
+                  val = <U string2>
+                }
+              ]
+            }
+            ensure = String {
+              val = <U ensured>
+            }
+          }
+        ]
+      }
+    }
     Kwbegin {
       stmts = [
         Ensure {
           body = Begin {
             stmts = [
-              Send {
-                receiver = NULL
-                method = <U method_1>
-                args = [
-                ]
+              String {
+                val = <U string1>
               }
-              Send {
-                receiver = NULL
-                method = <U method_2>
-                args = [
-                ]
+              String {
+                val = <U string2>
               }
             ]
           }
           ensure = Begin {
             stmts = [
-              Send {
-                receiver = NULL
-                method = <U ensured_method_1>
-                args = [
-                ]
+              String {
+                val = <U ensured1>
               }
-              Send {
-                receiver = NULL
-                method = <U ensured_method_2>
-                args = [
-                ]
+              String {
+                val = <U ensured2>
               }
             ]
           }
@@ -60,10 +100,14 @@ Begin {
       stmts = [
         Ensure {
           body = Rescue {
-            body = Send {
-              receiver = NULL
-              method = <U method_for_rescue_and_ensure>
-              args = [
+            body = Begin {
+              stmts = [
+                String {
+                  val = <U string1>
+                }
+                String {
+                  val = <U string2>
+                }
               ]
             }
             rescue = [

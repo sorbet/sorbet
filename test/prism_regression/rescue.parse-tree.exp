@@ -22,22 +22,35 @@ Begin {
         }
       ]
     }
+    DefMethod {
+      name = <U method_with_rescue>
+      args = NULL
+      body = Rescue {
+        body = Integer {
+          val = "123"
+        }
+        rescue = [
+          Resbody {
+            exception = NULL
+            var = NULL
+            body = String {
+              val = <U rescued>
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
     Kwbegin {
       stmts = [
         Rescue {
           body = Begin {
             stmts = [
-              Send {
-                receiver = NULL
-                method = <U foo>
-                args = [
-                ]
+              String {
+                val = <U string1>
               }
-              Send {
-                receiver = NULL
-                method = <U bar>
-                args = [
-                ]
+              String {
+                val = <U string2>
               }
             ]
           }
@@ -57,11 +70,8 @@ Begin {
     Kwbegin {
       stmts = [
         Rescue {
-          body = Send {
-            receiver = NULL
-            method = <U foo>
-            args = [
-            ]
+          body = String {
+            val = <U string1>
           }
           rescue = [
             Resbody {
@@ -86,11 +96,8 @@ Begin {
     Kwbegin {
       stmts = [
         Rescue {
-          body = Send {
-            receiver = NULL
-            method = <U foo>
-            args = [
-            ]
+          body = String {
+            val = <U string1>
           }
           rescue = [
             Resbody {
@@ -132,11 +139,8 @@ Begin {
     Kwbegin {
       stmts = [
         Rescue {
-          body = Send {
-            receiver = NULL
-            method = <U foo>
-            args = [
-            ]
+          body = String {
+            val = <U string1>
           }
           rescue = [
             Resbody {
@@ -163,11 +167,8 @@ Begin {
     Kwbegin {
       stmts = [
         Rescue {
-          body = Send {
-            receiver = NULL
-            method = <U foo>
-            args = [
-            ]
+          body = String {
+            val = <U string1>
           }
           rescue = [
             Resbody {
@@ -252,11 +253,8 @@ Begin {
     Kwbegin {
       stmts = [
         Rescue {
-          body = Send {
-            receiver = NULL
-            method = <U foo>
-            args = [
-            ]
+          body = String {
+            val = <U string1>
           }
           rescue = [
             Resbody {
@@ -344,11 +342,8 @@ Begin {
       stmts = [
         Ensure {
           body = Rescue {
-            body = Send {
-              receiver = NULL
-              method = <U foo>
-              args = [
-              ]
+            body = String {
+              val = <U string1>
             }
             rescue = [
               Resbody {
