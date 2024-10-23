@@ -105,6 +105,10 @@
 # p a.strip #  => nil
 # ```
 module Singleton
+  module SingletonInstanceMethods
+  end
+  include SingletonInstanceMethods
+
   module SingletonClassMethods
     has_attached_class!
     sig {returns(T.attached_class)}
