@@ -105,8 +105,7 @@
 # p a.strip #  => nil
 # ```
 module Singleton
-  module SingletonInstanceMethods
-  end
+  module SingletonInstanceMethods; end
   include SingletonInstanceMethods
 
   module SingletonClassMethods
