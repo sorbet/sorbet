@@ -1545,6 +1545,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         result = DispatchResult(move(main));
     }
 
+    // TODO(jez) Ideas:
+    //
+    // - Factor this into some sort of helper so that `DispatchResult(move(main))` takes in a
+    //   DispatchArgs and does basically all of this logic. It would mean that for example the
+    //   `args.block` thing below only runs on the non-component case
+    //
+    //   Would probably want to do this after jez-dispatch-component-apply but before making a tree
+    //   of results.
+    //
+    // - ???
     TypePtr &resultType = result.main.returnTypeBeforeSolve;
 
     if (resultType == nullptr) {
@@ -1557,6 +1567,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs);
         }
     }
+
+    // If it's still `nullptr`, that means that the type (from a parameter or the resultType) was
+    // unannotated, and thus implicitly untyped.
+    if (resultType == nullptr) {
+        resultType = Types::untyped(method);
+    }
+
     if (args.block == nullptr) {
         // if block is there we do not attempt to solve the constraint. CFG adds an explicit solve
         // node that triggers constraint solving
@@ -1583,9 +1600,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
     }
 
-    if (!resultType) {
-        resultType = Types::untyped(method);
-    } else if (!constr->isEmpty() && constr->isSolved()) {
+    if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(gs, resultType, *constr);
     }
     resultType = Types::replaceSelfType(gs, resultType, args.selfType);
@@ -1760,7 +1775,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
             // This technically only matters if the method call site has a block and the
             // `initialize` method we dispatch to has a `T.type_parameter` in its `.returns`, which
             // can't happen but we handle it anyways for robustness.
-            original.main.returnTypeBeforeSolve = wrapped;
+            original.main().returnTypeBeforeSolve = wrapped;
             return original;
         }
         case Names::squareBrackets().rawId(): {
@@ -2243,6 +2258,8 @@ public:
         // https://github.com/sorbet/sorbet/pull/6888/files#diff-b565686f17b8592d5c1e544cd639aaac3244869ac059f2db416a2ac24aa94675R9
         //
         // So for now, simply swallow "missing `initialize`" errors.
+        //
+        // TODO(jez) This is a real bug, we're not copying over errors from dispatched.secondary
         if (dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
@@ -2555,18 +2572,7 @@ public:
                                args.isPrivateOk,
                                args.suppressErrors,
                                args.enclosingMethodForSuper};
-        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
-        for (auto &err : dispatched.main.errors) {
-            main.errors.emplace_back(std::move(err));
-        }
-        dispatched.main.errors = move(main.errors);
-
-        // TODO(jez) this should merge constraints from `res` and `dispatched` instead
-        if ((dispatched.main.constr == nullptr) || dispatched.main.constr->isEmpty()) {
-            dispatched.main.constr = move(main.constr);
-        }
-
-        return dispatched;
+        return receiver->type.dispatchCall(gs, innerArgs);
     }
 } Magic_callWithSplat;
 
@@ -2612,6 +2618,7 @@ private:
                                suppressErrors,
                                core::NameRef::noName()};
         auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
+        // TODO(jez) Just need to iterate all components, report all errors.
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
         }
@@ -2665,6 +2672,7 @@ private:
         // We use isSubTypeUnderConstraint here with a TypeConstraint, so that we discover the correct generic bounds
         // as we do the subtyping check.
         // TODO(jez) This only looks at the main component!
+        // Just need to repeat everything after this for each component.
         auto &constr = dispatched.main.constr;
         auto &blockPreType = dispatched.main.blockPreType;
         // TODO(jez) How should this interact with highlight untyped?
