@@ -153,5 +153,14 @@ def main
   hoo = BigFoo::LittleFoo1.new
   #                        ^^^ hover: sig { returns(T.untyped) }
   raise "error message"
-  # ^ hover-line: 4     arg0: T.any(T::Class[T.anything], Exception, String)
+  # ^ hover-line: 2 # Kernel#raise (overload.1):
+  # ^ hover-line: 3 sig do
+  # ^ hover-line: 4   params(
+  # ^ hover-line: 5     arg0: T.any(T::Class[T.anything], Exception, String)
+  # ^ hover-line: 6   )
+  # ^ hover-line: 7   .returns(T.noreturn)
+  # ^ hover-line: 8 end
+  # ^ hover-line: 9 def raise (overload.1)(arg0=…); end
+  # ^ hover-line: 11 # result type:
+  # ^ hover-line: 12 T.noreturn
 end

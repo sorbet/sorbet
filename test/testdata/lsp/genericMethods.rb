@@ -46,12 +46,12 @@ def main
   #        ^ usage: staticid
 
   v5 = Foo.block_id do
-    #       ^ hover-line: 2 sig do
-    #       ^ hover-line: 3   params(
-    #       ^ hover-line: 4     blk: T.proc.returns(T.type_parameter(:U))
-    #       ^ hover-line: 5   )
-    #       ^ hover-line: 6   .returns(T.type_parameter(:U))
-    #       ^ hover-line: 7 end
+    #       ^ hover-line: 3 sig do
+    #       ^ hover-line: 4   params(
+    #       ^ hover-line: 5     blk: T.proc.returns(T.type_parameter(:U))
+    #       ^ hover-line: 6   )
+    #       ^ hover-line: 7   .returns(T.type_parameter(:U))
+    #       ^ hover-line: 8 end
     #       ^ usage: block_id
     "1"
   end
