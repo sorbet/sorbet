@@ -12,6 +12,12 @@
 using namespace std;
 namespace sorbet::infer {
 
+bool reportCustomerCallsite() {
+    static int reportCallsite = []() { return std::getenv("CUSTOMER_CALLSITE_INDEX") != nullptr; }();
+
+    return reportCallsite;
+}
+
 bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef method) {
     if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True) {
         return false;
@@ -170,9 +176,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
 
     bool hasCustomerArg = false;
-    bool reportCustomerCallsite = std::getenv("CUSTOMER_CALLSITE_INDEX") != nullptr;
 
-    if (reportCustomerCallsite && !ctx.file.data(ctx).isPackagedTest()) {
+    if (reportCustomerCallsite() && !ctx.file.data(ctx).isPackagedTest()) {
         for (auto &arg : cfg->symbol.data(ctx)->arguments) {
             if (getCustomerClass(ctx, arg.type).exists()) {
                 hasCustomerArg = true;
