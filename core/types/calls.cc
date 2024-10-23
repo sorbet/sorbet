@@ -912,17 +912,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
             : mayBeOverloaded;
 
-    auto data = method.data(gs);
-    if (data->flags.isPrivate && !args.isPrivateOk) {
+    auto methodData = method.data(gs);
+    if (methodData->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
-                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`", data->name.show(gs),
-                            args.thisType.show(gs), args.fullType.type.show(gs));
+                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
+                            methodData->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
             } else {
-                e.setHeader("Non-private call to private method `{}` on `{}`", data->name.show(gs),
+                e.setHeader("Non-private call to private method `{}` on `{}`", methodData->name.show(gs),
                             args.thisType.show(gs));
             }
-            e.addErrorLine(data->loc(), "Defined in `{}` here", data->owner.show(gs));
+            e.addErrorLine(methodData->loc(), "Defined in `{}` here", methodData->owner.show(gs));
         }
     }
 
@@ -933,25 +933,25 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
-    if (args.block || data->flags.isGenericMethod) {
+    if (args.block || methodData->flags.isGenericMethod) {
         maybeConstraint = make_unique<TypeConstraint>();
         constr = maybeConstraint.get();
     } else {
         constr = &TypeConstraint::EmptyFrozenConstraint;
     }
 
-    if (data->flags.isGenericMethod) {
-        constr->defineDomain(gs, data->typeArguments());
+    if (methodData->flags.isGenericMethod) {
+        constr->defineDomain(gs, methodData->typeArguments());
     }
     auto posArgs = args.numPosArgs;
-    bool hasKwargs = absl::c_any_of(data->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
+    bool hasKwargs = absl::c_any_of(methodData->arguments, [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
     bool hasKwsplat = nonPosArgs & 0x1;
     auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
     // p -> params, i.e., what was mentioned in the definition
-    auto pit = data->arguments.begin();
-    auto pend = data->arguments.end();
+    auto pit = methodData->arguments.begin();
+    auto pend = methodData->arguments.end();
 
     ENFORCE(pit != pend, "Should at least have the block arg.");
     ENFORCE((pend - 1)->flags.isBlock, "Last arg should be the block arg: {}", (pend - 1)->show(gs));
@@ -1131,7 +1131,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             const ArgInfo *kwSplatParam = nullptr;
             auto hasRequiredKwParam = false;
             auto kwParams = vector<const ArgInfo *>{};
-            for (auto &param : data->arguments) {
+            for (auto &param : methodData->arguments) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
@@ -1199,7 +1199,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else {
                     for (const auto &kwParam : kwParams) {
-                        auto kwParamType = Types::resultTypeAsSeenFrom(gs, kwParam->type, data->owner, symbol, targs);
+                        auto kwParamType =
+                            Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol, targs);
                         if (kwParamType == nullptr) {
                             kwParamType = Types::untyped(method);
                         }
@@ -1249,7 +1250,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                                 method.show(gs), prettyArity(gs, method), posArgs);
                 }
-                e.addErrorLine(data->loc(), "`{}` defined here", method.show(gs));
+                e.addErrorLine(methodData->loc(), "`{}` defined here", method.show(gs));
                 if (targetName == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
@@ -1278,7 +1279,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             bool sawKwSplat = false;
-            while (kwit != data->arguments.end()) {
+            while (kwit != methodData->arguments.end()) {
                 const ArgInfo &spec = *kwit;
                 if (spec.flags.isBlock) {
                     break;
@@ -1393,7 +1394,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         } else if (kwargs == nullptr) {
             // The method has keyword arguments, but none were provided. Report an error for each missing argument.
-            for (auto &spec : data->arguments) {
+            for (auto &spec : methodData->arguments) {
                 if (!spec.flags.isKeyword || spec.flags.isDefault || spec.flags.isRepeated) {
                     continue;
                 }
@@ -1434,12 +1435,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             if (method == Symbols::BasicObject_initialize()) {
                 e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, numArgsGiven);
-                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(methodData->loc(), "`{}` defined here", targetName.show(gs));
                 e.replaceWith("Delete extra args", deleteLoc, "");
             } else if (!hasKwargs) {
                 e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
-                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(methodData->loc(), "`{}` defined here", targetName.show(gs));
                 if (!deleteLoc.empty()) {
                     e.replaceWith("Delete extra args", deleteLoc, "");
                 }
@@ -1450,14 +1451,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             method.show(gs), prettyArity(gs, method), posArgs);
-                e.addErrorLine(data->loc(), "`{}` defined here", targetName.show(gs));
+                e.addErrorLine(methodData->loc(), "`{}` defined here", targetName.show(gs));
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(data->arguments, [&consumed](const ArgInfo &arg) {
+                auto firstKeyword = absl::c_find_if(methodData->arguments, [&consumed](const ArgInfo &arg) {
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
-                if (firstKeyword != data->arguments.end()) {
+                if (firstKeyword != methodData->arguments.end()) {
                     auto possibleArg = firstKeyword->argumentName(gs);
                     e.addErrorLine(args.argLoc(maxPossiblePositional),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
@@ -1476,8 +1477,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!data->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
-        const auto &bspec = data->arguments.back();
+        ENFORCE(!methodData->arguments.empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
+        const auto &bspec = methodData->arguments.back();
         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
@@ -1488,14 +1489,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         //
         // We also have to check whether the blockLoc exists and is not empty. (Sometimes the block
         // can be imaginary, like from a bare `super` call).
-        if (data->hasSig() && data->loc().exists()) {
-            auto file = data->loc().file();
+        if (methodData->hasSig() && methodData->loc().exists()) {
+            auto file = methodData->loc().file();
             auto blockLoc = args.blockLoc(gs);
             if (file.exists() && file.data(gs).strictLevel >= core::StrictLevel::Strict &&
                 bspec.isSyntheticBlockArgument() && blockLoc.exists() && !blockLoc.empty()) {
                 if (auto e = gs.beginError(blockLoc, core::errors::Infer::TakesNoBlock)) {
                     e.setHeader("Method `{}` does not take a block", method.show(gs));
-                    for (const auto loc : data->locs()) {
+                    for (const auto loc : methodData->locs()) {
                         e.addErrorLine(loc, "`{}` defined here", method.show(gs));
                     }
 
@@ -1506,7 +1507,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
         }
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
+        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, methodData->owner, symbol, targs);
         handleBlockType(gs, component, blockType);
         component.rebind = bspec.rebind;
         component.rebindLoc = bspec.loc;
@@ -1514,7 +1515,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     TypePtr &resultType = result.returnType;
 
-    auto *intrinsic = data->getIntrinsic();
+    auto *intrinsic = methodData->getIntrinsic();
     if (intrinsic != nullptr) {
         intrinsic->apply(gs, args, result);
         // the call could have overridden constraint
@@ -1527,13 +1528,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (resultType == nullptr) {
-        if (args.args.size() == 1 && data->name.isSetter(gs)) {
+        if (args.args.size() == 1 && methodData->name.isSetter(gs)) {
             // assignments always return their right hand side
             resultType = args.args.front()->type;
-        } else if (args.args.size() == 2 && data->name == Names::squareBracketsEq()) {
+        } else if (args.args.size() == 2 && methodData->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType = Types::resultTypeAsSeenFrom(gs, data->resultType, data->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, methodData->resultType, methodData->owner, symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -1542,21 +1543,21 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(errLoc, errors::Infer::GenericMethodConstraintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
-                e.addErrorLine(data->loc(), "`{}` defined here", method.show(gs));
+                e.addErrorLine(methodData->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
                 result.main.errors.emplace_back(e.build());
             }
             // This mimics the behavior of the SolveConstraint case in processBinding
             resultType = Types::untypedUntracked();
         }
-        ENFORCE(!data->arguments.empty(), "Every method should at least have a block arg.");
-        ENFORCE(data->arguments.back().flags.isBlock, "The last arg should be the block arg.");
-        auto blockType = data->arguments.back().type;
+        ENFORCE(!methodData->arguments.empty(), "Every method should at least have a block arg.");
+        ENFORCE(methodData->arguments.back().flags.isBlock, "The last arg should be the block arg.");
+        auto blockType = methodData->arguments.back().type;
         // TODO(jez) Highlight untyped code for this error
         if (blockType && !core::Types::isSubType(gs, core::Types::nilClass(), blockType)) {
             if (auto e = gs.beginError(args.callLoc().copyEndWithZeroLength(), errors::Infer::BlockNotPassed)) {
                 e.setHeader("`{}` requires a block parameter, but no block was passed", targetName.show(gs));
-                e.addErrorLine(data->loc(), "defined here");
+                e.addErrorLine(methodData->loc(), "defined here");
                 result.main.errors.emplace_back(e.build());
             }
         }
