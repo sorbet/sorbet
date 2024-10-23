@@ -1116,11 +1116,6 @@ struct DispatchResult {
     DispatchComponent &main() {
         return std::get<DispatchComponent>(this->dispatch);
     }
-    // TODO(jez) Will raise if bad variant access!!
-    // Audit all of these and rewrite them to work better!
-    CompoundDispatch &compound() {
-        return std::get<CompoundDispatch>(this->dispatch);
-    }
 };
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
