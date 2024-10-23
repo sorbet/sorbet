@@ -912,16 +912,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, targs, args.block != nullptr)
             : mayBeOverloaded;
 
-    if (method.data(gs)->flags.isPrivate && !args.isPrivateOk) {
+    auto data = method.data(gs);
+    if (data->flags.isPrivate && !args.isPrivateOk) {
         if (auto e = gs.beginError(errLoc, core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
-                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
-                            method.data(gs)->name.show(gs), args.thisType.show(gs), args.fullType.type.show(gs));
+                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`", data->name.show(gs),
+                            args.thisType.show(gs), args.fullType.type.show(gs));
             } else {
-                e.setHeader("Non-private call to private method `{}` on `{}`", method.data(gs)->name.show(gs),
+                e.setHeader("Non-private call to private method `{}` on `{}`", data->name.show(gs),
                             args.thisType.show(gs));
             }
-            e.addErrorLine(method.data(gs)->loc(), "Defined in `{}` here", method.data(gs)->owner.show(gs));
+            e.addErrorLine(data->loc(), "Defined in `{}` here", data->owner.show(gs));
         }
     }
 
@@ -930,7 +931,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     component.receiver = args.selfType;
     component.method = method;
 
-    auto data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
     if (args.block || data->flags.isGenericMethod) {
