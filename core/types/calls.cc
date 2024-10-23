@@ -144,8 +144,13 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
         if (intrinsic != nullptr) {
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             auto res = intrinsic->apply(gs, args, move(comp));
-            if (res.main.returnTypeBeforeSolve != nullptr) {
-                res.returnType = res.main.returnTypeBeforeSolve;
+            // TODO(jez) Could replace this with res.returnType if we made
+            // DispatchResult(move(main)) compute the return type
+            //
+            // Regardless, we know this won't raise because args.selfType is never a union type, and
+            // for Tuples/Shapes, never an intersection.
+            if (res.main().returnTypeBeforeSolve != nullptr) {
+                res.returnType = res.main().returnTypeBeforeSolve;
                 return res;
             }
         }
@@ -161,8 +166,13 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
         if (intrinsic != nullptr) {
             DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, {}, {}, nullptr};
             auto res = intrinsic->apply(gs, args, move(comp));
-            if (res.main.returnTypeBeforeSolve != nullptr) {
-                res.returnType = res.main.returnTypeBeforeSolve;
+            // TODO(jez) Could replace this with res.returnType if we made
+            // DispatchResult(move(main)) compute the return type
+            //
+            // Regardless, we know this won't raise because args.selfType is never a union type, and
+            // for Tuples/Shapes, never an intersection.
+            if (res.main().returnTypeBeforeSolve != nullptr) {
+                res.returnType = res.main().returnTypeBeforeSolve;
                 return res;
             }
         }
@@ -235,7 +245,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
             autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
             addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, "parameter");
         }
-        emptyResult.main.errors.emplace_back(e.build());
+        emptyResult.main().errors.emplace_back(e.build());
         return emptyResult;
     } else {
         ENFORCE(this->definition.isTypeMember());
@@ -263,7 +273,7 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const Dispatch
                 autocorrectReceiver(gs, e, args.receiverLoc(), args.name);
                 addUnconstrainedIsaGenericNote(gs, e, this->definition, args.name, member);
             }
-            emptyResult.main.errors.emplace_back(e.build());
+            emptyResult.main().errors.emplace_back(e.build());
             return emptyResult;
         }
 
