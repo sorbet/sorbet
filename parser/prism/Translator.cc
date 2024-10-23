@@ -939,6 +939,12 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return translate(reinterpret_cast<pm_node *>(programNode->statements));
         }
+        case PM_POST_EXECUTION_NODE: {
+            auto postExecutionNode = reinterpret_cast<pm_post_execution_node *>(node);
+            auto inlineIfSingle = true;
+            auto body = translateStatements(postExecutionNode->statements, inlineIfSingle);
+            return make_unique<parser::Postexe>(location, move(body));
+        }
         case PM_RANGE_NODE: { // A Range literal, e.g. `a..b`, `a..`, `..b`, `a...b`, `a...`, `...b`
             auto rangeNode = reinterpret_cast<pm_range_node *>(node);
 
@@ -1188,7 +1194,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
-        case PM_POST_EXECUTION_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
 
