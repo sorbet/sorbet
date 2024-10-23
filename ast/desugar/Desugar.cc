@@ -166,6 +166,7 @@ void checkBlockRestArg(DesugarContext dctx, const MethodDef::ARGS_store &args) {
         if (auto e = dctx.ctx.beginError(it->loc(), core::errors::Desugar::BlockAnonymousRestParam)) {
             e.setHeader("Anonymous rest parameter in block args");
             e.addErrorNote("Naming the rest parameter will ensure you can access it in the block");
+            e.replaceWith("Name the rest parameter", dctx.ctx.locAt(it->loc().copyEndWithZeroLength()), "_");
         }
     }
 }
