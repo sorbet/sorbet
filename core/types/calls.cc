@@ -30,13 +30,22 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, const D
 }
 
 bool allComponentsPresent(DispatchResult &res) {
-    if (!res.main.method.exists()) {
-        return false;
-    }
-    if (!res.secondary || res.secondaryKind == DispatchResult::Combinator::AND) {
-        return true;
-    }
-    return allComponentsPresent(*res.secondary);
+    return visit(
+        [](auto &&res) -> bool {
+            using T = decay_t<decltype(res)>;
+            if constexpr (is_same_v<T, DispatchComponent>) {
+                return !res.method.exists();
+            } else if constexpr (is_same_v<T, DispatchResult::CompoundDispatch>) {
+                if (res.kind == DispatchResult::Combinator::AND) {
+                    return true;
+                } else {
+                    return allComponentsPresent(*res.left) && allComponentsPresent(*res.right);
+                }
+            } else {
+                static_assert(always_false_v<T>, "non-exhaustive visitor!");
+            }
+        },
+        res.dispatch);
 }
 } // namespace
 
@@ -1732,7 +1741,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.suppressErrors,
                                           args.enclosingMethodForSuper};
             auto original = wrapped.dispatchCall(gs, innerArgs);
-            // TODO(jez) This is a special case
+            // TODO(jez) This is a special case--still special
             original.returnType = wrapped;
             // We want this to behave as if MetaType::dispatchCall were an Intrinsic--in an
             // intrinsic, all you have to do is set `returnType` and it will be used used for the

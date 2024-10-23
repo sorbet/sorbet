@@ -1185,16 +1185,8 @@ DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Comb
             break;
     }
 
-    res.main = std::move(left.main);
-    res.secondary = std::move(left.secondary);
-    res.secondaryKind = kind;
-
-    auto *it = &res;
-    while (it->secondary != nullptr) {
-        it = it->secondary.get();
-    }
-
-    it->secondary = make_unique<DispatchResult>(std::move(right));
+    res.dispatch =
+        CompoundDispatch(kind, make_unique<DispatchResult>(move(left)), make_unique<DispatchResult>(move(right)));
 
     return res;
 }

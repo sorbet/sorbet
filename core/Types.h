@@ -1084,29 +1084,43 @@ struct DispatchComponent {
 
 struct DispatchResult {
     enum class Combinator { OR, AND };
-    // The overall return type of the call expression, accounting for the `Combinator`, where the
-    // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
+
+    struct CompoundDispatch {
+        friend DispatchResult;
+
+        Combinator kind;
+        std::unique_ptr<DispatchResult> left;
+        std::unique_ptr<DispatchResult> right;
+
+    private:
+        CompoundDispatch(Combinator kind, std::unique_ptr<DispatchResult> left, std::unique_ptr<DispatchResult> right)
+            : kind(kind), left(move(left)), right(move(right)) {}
+    };
+
+    // The overall return type of the call expression, accounting for any `Combinator`s in a CompoundDispatch
     TypePtr returnType;
-    DispatchComponent main;
-    std::unique_ptr<DispatchResult> secondary;
-    Combinator secondaryKind;
+    std::variant<DispatchComponent, CompoundDispatch> dispatch;
 
     DispatchResult() = default;
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
-          main(DispatchComponent{
+          dispatch(DispatchComponent{
               std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
-    explicit DispatchResult(DispatchComponent &&comp) : returnType(nullptr), main(std::move(comp)){};
+    explicit DispatchResult(DispatchComponent &&comp) : returnType(nullptr), dispatch(std::move(comp)){};
 
-private:
-    DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
-                   Combinator secondaryKind)
-        : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
-          secondaryKind(secondaryKind){};
-
-public:
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
+
+    // TODO(jez) Will raise if bad variant access!!
+    // Audit all of these and rewrite them to work better!
+    DispatchComponent &main() {
+        return std::get<DispatchComponent>(this->dispatch);
+    }
+    // TODO(jez) Will raise if bad variant access!!
+    // Audit all of these and rewrite them to work better!
+    CompoundDispatch &compound() {
+        return std::get<CompoundDispatch>(this->dispatch);
+    }
 };
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
