@@ -1,3 +1,5 @@
 # typed: false
 
-if true; end
+if condition; end
+
+"value" if condition

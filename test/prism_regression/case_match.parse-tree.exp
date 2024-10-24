@@ -206,6 +206,104 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Array>>
+            }
+            pattern = ArrayPattern {
+              elts = [
+                MatchVar {
+                  name = <U first>
+                }
+                MatchVar {
+                  name = <U second>
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U An Array with first: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U first>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and second: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U second>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Point>>
+            }
+            pattern = ArrayPattern {
+              elts = [
+                MatchVar {
+                  name = <U x>
+                }
+                MatchVar {
+                  name = <U y>
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Point with x: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U x>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and y: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U y>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }
@@ -318,6 +416,121 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Hash>>
+            }
+            pattern = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U e>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "5"
+                    }
+                    as = MatchVar {
+                      name = <U e>
+                    }
+                  }
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Hash with e: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U e>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Point>>
+            }
+            pattern = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U x>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "6"
+                    }
+                    as = MatchVar {
+                      name = <U x>
+                    }
+                  }
+                }
+                Pair {
+                  key = Symbol {
+                    val = <U y>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "7"
+                    }
+                    as = MatchVar {
+                      name = <U y>
+                    }
+                  }
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Point with x: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U x>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and y: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U y>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }
@@ -347,6 +560,200 @@ Begin {
                     val = <U surprise, multi-line!>
                   }
                 ]
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = NULL
+    }
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
+        method = <U bar>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = MatchVar {
+            name = <U x>
+          }
+          guard = IfGuard {
+            condition = Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U ==>
+              args = [
+                Integer {
+                  val = "1"
+                }
+              ]
+            }
+          }
+          body = String {
+            val = <U in with if>
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              MatchVar {
+                name = <U a>
+              }
+              MatchVar {
+                name = <U b>
+              }
+            ]
+          }
+          guard = IfGuard {
+            condition = Send {
+              receiver = LVar {
+                name = <U b>
+              }
+              method = <U ==>
+              args = [
+                Integer {
+                  val = "2"
+                }
+              ]
+            }
+          }
+          body = String {
+            val = <U in with 2 args and if>
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              MatchVar {
+                name = <U c>
+              }
+              MatchVar {
+                name = <U d>
+              }
+            ]
+          }
+          guard = NULL
+          body = Begin {
+            stmts = [
+              If {
+                condition = Send {
+                  receiver = LVar {
+                    name = <U c>
+                  }
+                  method = <U ==>
+                  args = [
+                    Integer {
+                      val = "3"
+                    }
+                  ]
+                }
+                then_ = LVar {
+                  name = <U c>
+                }
+                else_ = NULL
+              }
+              String {
+                val = <U in with 2 args, semicolon, and if>
+              }
+            ]
+          }
+        }
+      ]
+      elseBody = NULL
+    }
+    CaseMatch {
+      expr = Send {
+        receiver = NULL
+        method = <U baz>
+        args = [
+        ]
+      }
+      inBodies = [
+        InPattern {
+          pattern = MatchVar {
+            name = <U x>
+          }
+          guard = UnlessGuard {
+            condition = Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U ==>
+              args = [
+                Integer {
+                  val = "1"
+                }
+              ]
+            }
+          }
+          body = String {
+            val = <U in with unless>
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              MatchVar {
+                name = <U a>
+              }
+              MatchVar {
+                name = <U b>
+              }
+            ]
+          }
+          guard = UnlessGuard {
+            condition = Send {
+              receiver = LVar {
+                name = <U b>
+              }
+              method = <U ==>
+              args = [
+                Integer {
+                  val = "2"
+                }
+              ]
+            }
+          }
+          body = String {
+            val = <U in with 2 args and unless>
+          }
+        }
+        InPattern {
+          pattern = ArrayPattern {
+            elts = [
+              MatchVar {
+                name = <U c>
+              }
+              MatchVar {
+                name = <U d>
+              }
+            ]
+          }
+          guard = NULL
+          body = Begin {
+            stmts = [
+              If {
+                condition = Send {
+                  receiver = LVar {
+                    name = <U c>
+                  }
+                  method = <U ==>
+                  args = [
+                    Integer {
+                      val = "3"
+                    }
+                  ]
+                }
+                then_ = NULL
+                else_ = LVar {
+                  name = <U c>
+                }
+              }
+              String {
+                val = <U in with 2 args, semicolon, and unless>
               }
             ]
           }

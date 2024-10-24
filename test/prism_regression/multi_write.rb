@@ -8,6 +8,9 @@ a, b, *c = 1, 2, 3, 4
 # anonymous splat node
 a, * = 1, 2, 3, 4
 
+# implicit splat
+a, = 1, 2, 3
+
 # parentheses
 (a, b, c) = 1, 2, 3
 

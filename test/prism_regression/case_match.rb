@@ -24,6 +24,10 @@ in [*, 6]
   puts "ends with six!"
 in [*, 7, *] # A "find pattern"
   puts "contains a seven!"
+in Array[first, second] # Requires the `array_like_thing` to be an `Array` specifically
+  puts "An Array with first: #{first} and second: #{second}"
+in Point[x, y]          # Requires the `array_like_thing` to be a `Point` specifically
+  puts "A Point with x: #{x} and y: #{y}"
 end
 
 case hash_like_thing
@@ -35,6 +39,10 @@ in { c: 3, ** }
   puts "has c, and maybe other stuff!"
 in { d: 4, **nil }
   puts "has d and nothing else!"
+in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
+  puts "A Hash with e: #{e}"
+in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
+  puts "A Point with x: #{x} and y: #{y}"
 end
 
 # no else
@@ -42,4 +50,24 @@ case foo
 in 1
   "one!"
   puts "surprise, multi-line!"
+end
+
+# pattern matching with if guards
+case bar
+in x if x == 1
+  "in with if"
+in a, b if b == 2
+  "in with 2 args and if"
+in c, d; c if c == 3
+  "in with 2 args, semicolon, and if"
+end
+
+# pattern matching with unless guards
+case baz
+in x unless x == 1
+  "in with unless"
+in a, b unless b == 2
+  "in with 2 args and unless"
+in c, d; c unless c == 3
+  "in with 2 args, semicolon, and unless"
 end

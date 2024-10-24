@@ -3,3 +3,5 @@
 unless true
   "body"
 end
+
+"value" unless condition
