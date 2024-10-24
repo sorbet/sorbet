@@ -332,7 +332,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
                 // Start of sig block
                 && !(absl::StartsWith(line, "sig do") || absl::StartsWith(line, "sig(:final) do"))
                 // Invalid end keyword
-                && !absl::StartsWith(line, "end")) {
+                && !(absl::StartsWith(line, "end") && absl::EndsWith(line, "end"))) {
                 it++;
                 if (it != all_lines.rend()) {
                     line = absl::StripAsciiWhitespace(*it);
@@ -343,7 +343,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // 1) Reached the start of the file
             // 2) Found a `sig do`
             // 3) Found an invalid end keyword
-            if (it == all_lines.rend() || absl::StartsWith(line, "end")) {
+            if (it == all_lines.rend() || (absl::StartsWith(line, "end") && absl::EndsWith(line, "end"))) {
                 break;
             }
 

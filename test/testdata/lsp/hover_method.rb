@@ -50,6 +50,17 @@ class Foo
   # ^ hover: sig { params(arg0: Integer).void }
   end
 
+  # Docs above a sig with an end in the params list on a new line
+  sig do 
+    params(
+      end_time: String
+    ).void
+  end
+  def quux(end_time)
+      # ^ hover: Docs above a sig with an end in the params list on a new line
+      # ^ hover: sig { params(end_time: String).void }
+  end
+
   sig {void}
   def no_args_and_void
   end
@@ -104,4 +115,8 @@ def main
   f.qux
   # ^^^ hover: Some docs for qux
   # ^^^ hover: sig { void }
+
+  f.quux('')
+  # ^^^^ hover: Docs above a sig with an end in the params list on a new line
+  # ^^^^ hover: sig { params(end_time: String).void }
 end
