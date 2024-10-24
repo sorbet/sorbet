@@ -184,16 +184,14 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 auto elseNode = translate(up_cast(beginNode->else_clause));
                 // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
                 // statements
-                translatedRescue = translateRescue(down_cast<pm_rescue_node>(beginNode->rescue_clause),
-                                                   move(bodyNode), move(elseNode));
+                translatedRescue = translateRescue(beginNode->rescue_clause, move(bodyNode), move(elseNode));
             }
 
-            if (beginNode->ensure_clause != nullptr) {
+            if (auto ensureNode = beginNode->ensure_clause; ensureNode != nullptr) {
                 // Handle `begin ... ensure ... end`
                 // When both ensure and rescue are present, Sorbet's legacy parser puts the Rescue node inside the
                 // Ensure node.
                 auto bodyNode = translateStatements(beginNode->statements, true);
-                auto ensureNode = down_cast<pm_ensure_node>(beginNode->ensure_clause);
                 auto ensureBody = translateStatements(ensureNode->statements, true);
                 unique_ptr<parser::Ensure> translatedEnsure;
 
@@ -1299,7 +1297,7 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             sorbetElements.reserve(1 + prismMiddleNodes.size() + (prismTrailingSplat != nullptr ? 1 : 0));
 
             if (prismLeadingSplat != nullptr) {
-                auto prismSplatNode = down_cast<pm_splat_node>(prismLeadingSplat);
+                auto prismSplatNode = prismLeadingSplat;
                 auto expr = patternTranslate(prismSplatNode->expression);
                 auto splatLoc = translateLoc(prismSplatNode->base.location);
                 sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
