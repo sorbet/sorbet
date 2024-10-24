@@ -997,8 +997,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_RESCUE_MODIFIER_NODE: {
             auto rescueModifierNode = reinterpret_cast<pm_rescue_modifier_node *>(node);
-            auto body = translate(up_cast(rescueModifierNode->expression));
-            auto rescue = translate(up_cast(rescueModifierNode->rescue_expression));
+            auto body = translate(rescueModifierNode->expression);
+            auto rescue = translate(rescueModifierNode->rescue_expression);
             NodeVec cases;
             // In rescue modifiers, users can't specify exceptions and the variable name so they're null
             cases.emplace_back(make_unique<parser::Resbody>(location, nullptr, nullptr, move(rescue)));
