@@ -1062,7 +1062,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SOURCE_LINE_NODE: { // The `__LINE__` keyword
             return translateSimpleKeyword<parser::LineLiteral>(node);
         }
-        case PM_SPLAT_NODE: { // A splat, like `*a` in an array literal, method call, or array pattern
+        case PM_SPLAT_NODE: { // A splat, like `*a` in an array literal or method call
             auto splatNode = down_cast<pm_splat_node>(node);
 
             auto expr = translate(splatNode->expression);
@@ -1267,20 +1267,17 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto arrayPatternNode = down_cast<pm_array_pattern_node>(node);
 
             auto prismPrefixNodes = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
-            auto prismSplatNode = down_cast<pm_splat_node>(arrayPatternNode->rest);
+            auto prismRestNode = arrayPatternNode->rest;
             auto prismSuffixNodes = absl::MakeSpan(arrayPatternNode->posts.nodes, arrayPatternNode->posts.size);
 
             NodeVec sorbetElements{};
-            sorbetElements.reserve(prismPrefixNodes.size() + (prismSplatNode != nullptr ? 1 : 0) +
+            sorbetElements.reserve(prismPrefixNodes.size() + (prismRestNode != nullptr ? 1 : 0) +
                                    prismSuffixNodes.size());
 
             patternTranslateMultiInto(sorbetElements, prismPrefixNodes);
 
-            if (prismSplatNode != nullptr) {
-                auto expr = patternTranslate(prismSplatNode->expression);
-                auto splatLoc = translateLoc(prismSplatNode->base.location);
-                sorbetElements.emplace_back(make_unique<MatchRest>(splatLoc, move(expr)));
-            }
+            if (prismRestNode != nullptr)
+                sorbetElements.emplace_back(patternTranslate(prismRestNode));
 
             patternTranslateMultiInto(sorbetElements, prismSuffixNodes);
 
@@ -1379,6 +1376,12 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             auto variable = translate(pinnedVarNode->variable);
 
             return make_unique<Pin>(location, move(variable));
+        }
+        case PM_SPLAT_NODE: { // A splat, like `*a` in an array pattern
+            auto prismSplatNode = down_cast<pm_splat_node>(node);
+            auto expr = patternTranslate(prismSplatNode->expression);
+            auto splatLoc = translateLoc(prismSplatNode->base.location);
+            return make_unique<MatchRest>(splatLoc, move(expr));
         }
         default: {
             return translate(node);
