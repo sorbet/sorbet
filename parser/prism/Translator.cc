@@ -509,6 +509,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 return make_unique<parser::Begin>(translateLoc(embeddedStmtsNode->base.location), NodeVec{});
             }
         }
+        case PM_EMBEDDED_VARIABLE_NODE: {
+            auto embeddedVariableNode = reinterpret_cast<pm_embedded_variable_node *>(node);
+            return translate(embeddedVariableNode->variable);
+        }
         case PM_ENSURE_NODE: { // An `ensure` clause, which can pertain to a `begin`
             unreachable("PM_ENSURE_NODE is handled separately as part of PM_BEGIN_NODE, see its docs for details.");
         }
@@ -1186,7 +1190,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
         case PM_CAPTURE_PATTERN_NODE:
-        case PM_EMBEDDED_VARIABLE_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
