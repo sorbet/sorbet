@@ -1,0 +1,86 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build with Prism",
+            "type": "shell",
+            "command": "./bazel build //main:sorbet --config=dbg",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run all Prism tests",
+            "type": "shell",
+            "command": "./bazel test //test:prism //test:prism_location_tests --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run a single Prism test",
+            "type": "shell",
+            "command": "./bazel test //test:test_PosTests/prism_regression/${input:test_name} //test:prism_regression_${input:test_name}_location_test --config=dbg  --test_output=all",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            // With this option, when running this task with the `Tasks: Rerun Last Test` command, it'll
+            // reuse the previous run's input, rather than prompting for it again
+            "runOptions": {
+                "reevaluateOnRerun": false
+            }
+        },
+        {
+            "label": "Typecheck with Prism",
+            "type": "shell",
+            "command": "bazel-bin/main/sorbet --parser=prism ${input:file_path}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": ["Build with Prism"],
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "(Re)Generate Prism test",
+            "type": "shell",
+            "command": "TEST_NAME=${input:test_name}; $EDITOR -w test/prism_regression/$TEST_NAME.rb; ./bazel-bin/main/sorbet --stop-after=parser --print=parse-tree test/prism_regression/$TEST_NAME.rb > test/prism_regression/$TEST_NAME.parse-tree.exp; $EDITOR test/prism_regression/$TEST_NAME.parse-tree.exp",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+    ],
+    "inputs": [
+        {
+            "id": "test_name",
+            "type": "promptString",
+            "description": "Enter the test name, e.g. case for running test/prism_regression/case.rb",
+        },
+        {
+            "id": "file_path",
+            "type": "promptString",
+            "default": "test.rb",
+            "description": "Enter the file path to typecheck, e.g. test.rb",
+        }
+    ]
+}
