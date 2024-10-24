@@ -1000,10 +1000,12 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr Environment::processBinding(
-    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
-    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, core::TypePtr &methodReturnType,
-    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool hasCustomerArg) {
+core::TypePtr
+Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                            core::TypePtr &methodReturnType,
+                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                            bool hasCustomerArg, std::string_view customerArgName, bool customerCallsiteArgMatchOnly) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1193,6 +1195,13 @@ core::TypePtr Environment::processBinding(
                             auto klass = infer::getCustomerClass(ctx, arg->type);
                             if (!klass.exists()) {
                                 index++;
+                                continue;
+                            }
+
+                            // Only process arg if name matches the argument name of the passed-in customer class arg
+                            auto &sendArg = send.args[index];
+                            if (customerCallsiteArgMatchOnly &&
+                                sendArg.variable.data(inWhat)._name.toString(ctx) != customerArgName) {
                                 continue;
                             }
 

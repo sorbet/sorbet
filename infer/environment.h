@@ -243,7 +243,8 @@ public:
                                  int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                                  core::TypePtr &methodReturnType,
                                  const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
-                                 bool hasCustomerArg);
+                                 bool hasCustomerArg, std::string_view customerArgName,
+                                 bool customerCallsiteArgMatchOnly);
 
     core::Loc locForUninitialized() const {
         return ownerLoc;
