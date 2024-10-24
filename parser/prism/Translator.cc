@@ -1093,7 +1093,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::Super>(location, move(returnValues));
         }
         case PM_SYMBOL_NODE: { // A symbol literal, e.g. `:foo`
-            auto symNode = down_cast<pm_string_node>(node);
+            auto symNode = down_cast<pm_symbol_node>(node);
 
             auto unescaped = &symNode->unescaped;
 
@@ -1151,7 +1151,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             return make_unique<parser::While>(location, move(predicate), move(statements));
         }
         case PM_X_STRING_NODE: { // An interpolated x-string, like `/usr/bin/env ls`
-            auto strNode = down_cast<pm_string_node>(node);
+            auto strNode = down_cast<pm_x_string_node>(node);
 
             auto unescaped = &strNode->unescaped;
             auto source = parser.extractString(unescaped);
