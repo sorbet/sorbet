@@ -769,7 +769,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (prismRestNode != nullptr) {
                 // We don't just call `translate()` because that would create a `parser::Splat`, but we need
                 // `parser::SplatLhs`.
-                ENFORCE(PM_NODE_TYPE(prismRestNode) == PM_SPLAT_NODE);
                 auto splatNode = down_cast<pm_splat_node>(prismRestNode);
                 auto var = translate(splatNode->expression);
                 sorbetExpressions.emplace_back(make_unique<parser::SplatLhs>(location, move(var)));
