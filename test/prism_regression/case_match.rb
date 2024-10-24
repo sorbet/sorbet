@@ -43,3 +43,12 @@ in 1
   "one!"
   puts "surprise, multi-line!"
 end
+
+case bar
+in x if x == 1
+  "in with if"
+in a, b if b == 2
+  "in with 2 args and if"
+in c, d; c if c == 3
+  "in with 2 args, semicolon, and if"
+end
