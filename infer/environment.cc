@@ -7,6 +7,7 @@
 #include "core/TypeConstraint.h"
 #include "core/TypeErrorDiagnostics.h"
 #include <algorithm> // find, remove_if
+#include <sstream>
 
 using namespace std;
 
@@ -1000,7 +1001,8 @@ core::TypePtr
 Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
                             int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                             core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
+                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                            bool hasCustomerArg, std::string_view customerArgName, bool customerCallsiteArgMatchOnly) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1129,6 +1131,151 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                    it->main.method.data(ctx)->owner.show(ctx));
                                 }
                             }
+                        }
+                    }
+
+                    // Code needed for internal Stripe codemod. Do not actually ready this PR to master, just leave it
+                    // as a draft on a POC branch.
+                    if (hasCustomerArg && bind.loc.exists()) {
+                        auto wrappingMethodClass = inWhat.symbol.data(ctx)->owner;
+                        auto wrappingMethodName = inWhat.symbol.data(ctx)->name.show(ctx);
+                        auto [wrappingMethodStart, _ew] = std::move(inWhat.symbol.data(ctx)->loc()).position(ctx.state);
+
+                        auto methodClass = it->main.method.data(ctx)->owner;
+                        auto methodName = it->main.method.data(ctx)->name.show(ctx);
+                        bool isCalledOnStruct = methodClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Struct());
+
+                        auto callSiteLoc = ctx.locAt(bind.loc);
+                        auto callSiteFile = callSiteLoc.file().data(ctx.state).path();
+                        auto [start, _e] = std::move(callSiteLoc).position(ctx.state);
+                        auto receiverName = send.recv.variable.data(inWhat)._name.toString(ctx);
+
+                        std::string wrappingMethodClassName;
+                        if (wrappingMethodClass.data(ctx)->isSingletonClass(ctx)) {
+                            wrappingMethodClassName =
+                                wrappingMethodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                        } else {
+                            wrappingMethodClassName = wrappingMethodClass.showFullName(ctx);
+                        }
+
+                        std::string methodClassName;
+                        if (methodClass.data(ctx)->isSingletonClass(ctx)) {
+                            methodClassName = methodClass.data(ctx)->attachedClass(ctx).showFullName(ctx);
+                        } else {
+                            methodClassName = methodClass.showFullName(ctx);
+                        }
+
+                        auto klass = infer::getCustomerClass(ctx, recvType.type);
+
+                        if (klass.exists()) {
+                            // JSONL machine-readable format
+                            // clang-format off
+                            std::ostringstream oss;
+                            oss << "{\"context\": \""
+                                      << std::move(wrappingMethodClassName) << "#"
+                                      << std::move(wrappingMethodName)
+                                      << "\", \"context_loc\": \""
+                                      << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                      << "\", \"method\": \""
+                                      << std::move(methodClassName) << "#" << std::move(methodName)
+                                      << "\", \"loc\": \""
+                                      << std::move(callSiteFile) << ":" << start.line
+                                      << "\", \"recv\": \""
+                                      << std::move(receiverName)
+                                      << "\"}";
+                            ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                            // clang-format on
+                        }
+
+                        int index = 0;
+                        for (auto &arg : args) {
+                            auto klass = infer::getCustomerClass(ctx, arg->type);
+                            if (!klass.exists()) {
+                                index++;
+                                continue;
+                            }
+
+                            // Only process arg if name matches the argument name of the passed-in customer class arg
+                            auto &sendArg = send.args[index];
+                            if (customerCallsiteArgMatchOnly &&
+                                sendArg.variable.data(inWhat)._name.toString(ctx) != customerArgName) {
+                                continue;
+                            }
+
+                            auto &methodArgs = it->main.method.data(ctx)->arguments;
+                            core::TypePtr methodArgType;
+                            bool foundMethodArgType = false;
+                            if (index < send.numPosArgs) {
+                                // posarg
+
+                                ENFORCE(index < methodArgs.size());
+                                if (it->main.method.data(ctx)->name == core::Names::buildHash()) {
+                                    // skip kwarg splat (build-hash) for now.
+                                    foundMethodArgType = true;
+                                } else if (core::isa_type<core::ClassType>(methodArgs[index].type) ||
+                                           core::isa_type<core::OrType>(methodArgs[index].type)) {
+                                    methodArgType = methodArgs[index].type;
+                                    foundMethodArgType = true;
+                                }
+                            } else {
+                                // kwarg
+
+                                ENFORCE(index > 0);
+                                auto &kwLabel = args[index - 1];
+
+                                if (!core::isa_type<core::NamedLiteralType>(kwLabel->type)) {
+                                    index++;
+                                    continue;
+                                }
+
+                                auto argName = core::cast_type_nonnull<core::NamedLiteralType>(kwLabel->type).asName();
+                                for (auto &methodArg : methodArgs) {
+                                    if (methodArg.name == argName) {
+                                        methodArgType = methodArg.type;
+                                        foundMethodArgType = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            std::string methodArgTypeStr;
+                            bool untypedOrSplat = false;
+                            if (!foundMethodArgType || methodArgType == nullptr) {
+                                // Callsite has no signature, uses splat, or otherwise could not be processed.
+                                // Default to dispatch arg class type.
+                                untypedOrSplat = true;
+                                methodArgTypeStr = klass.showFullName(ctx);
+                            } else {
+                                methodArgTypeStr = methodArgType.show(ctx);
+                            }
+
+                            // JSONL machine-readable format
+                            // clang-format off
+                            std::ostringstream oss;
+                            oss << "{\"context\": \""
+                                << std::move(wrappingMethodClassName) << "#"
+                                << std::move(wrappingMethodName)
+                                << "\", \"context_loc\": \""
+                                << std::move(callSiteFile) << ":" << wrappingMethodStart.line
+                                << "\", \"method\": \""
+                                << std::move(methodClassName) << "#" << std::move(methodName)
+                                << "\", \"type\": \""
+                                << std::move(methodArgTypeStr)
+                                << "\", \"untyped_or_splat\": "
+                                << untypedOrSplat;
+
+                            if (isCalledOnStruct) {
+                                oss << ", \"struct\": "
+                                    << isCalledOnStruct;
+                            }
+
+                            oss << ", \"loc\": \""
+                                << std::move(callSiteFile) << ":" << start.line
+                                << "\"}";
+                            ctx.state.tracer().log(spdlog::level::info, "{}", oss.str());
+                            // clang-format on
+
+                            index++;
                         }
                     }
 
