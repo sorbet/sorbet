@@ -1359,6 +1359,18 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 auto sorbetGuard = make_unique<parser::IfGuard>(location, translate(ifNode->predicate));
 
                 return make_unique<parser::InPattern>(location, move(sorbetPattern), move(sorbetGuard), move(statements));
+            } else if (prismPattern != nullptr && PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE)) {
+                auto unlessNode = reinterpret_cast<pm_unless_node *>(prismPattern);
+                auto prismStatements = reinterpret_cast<pm_statements_node *>(unlessNode->statements);
+
+                if (prismStatements->body.size != 1) {
+                    unreachable("In pattern-matching's `in` clause, an `unless` guard must have a single statement.");
+                }
+
+                auto sorbetPattern = patternTranslate(prismStatements->body.nodes[0]);
+                auto sorbetGuard = make_unique<parser::UnlessGuard>(location, translate(unlessNode->predicate));
+
+                return make_unique<parser::InPattern>(location, move(sorbetPattern), move(sorbetGuard), move(statements));
             } else {
                 auto sorbetPattern = patternTranslate(prismPattern);
 
