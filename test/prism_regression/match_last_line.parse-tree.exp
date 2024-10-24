@@ -4,6 +4,19 @@ Begin {
       condition = MatchCurLine {
         cond = Regexp {
           regex = [
+          ]
+          opts = Regopt {
+            opts = ""
+          }
+        }
+      }
+      then_ = NULL
+      else_ = NULL
+    }
+    If {
+      condition = MatchCurLine {
+        cond = Regexp {
+          regex = [
             String {
               val = <U wat>
             }
@@ -29,13 +42,25 @@ Begin {
       condition = MatchCurLine {
         cond = Regexp {
           regex = [
+            String {
+              val = <U wat >
+            }
+            Begin {
+              stmts = [
+                Integer {
+                  val = "123"
+                }
+              ]
+            }
           ]
           opts = Regopt {
             opts = ""
           }
         }
       }
-      then_ = NULL
+      then_ = String {
+        val = <U This one uses an interpolated regexp>
+      }
       else_ = NULL
     }
   ]

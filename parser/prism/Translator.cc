@@ -647,6 +647,16 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Will only work for positive, 32-bit integers
             return make_unique<parser::Integer>(location, std::to_string(intNode->value.value));
         }
+        case PM_INTERPOLATED_MATCH_LAST_LINE_NODE: { // An interpolated regex literal in a conditional...
+            // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat #{123}/`
+            auto interpolatedMatchLastLineNode = down_cast<pm_interpolated_match_last_line_node>(node);
+
+            auto parts = translateMulti(interpolatedMatchLastLineNode->parts);
+            auto options = translateRegexpOptions(interpolatedMatchLastLineNode->closing_loc);
+            auto regex = make_unique<parser::Regexp>(location, move(parts), move(options));
+
+            return make_unique<parser::MatchCurLine>(location, move(regex));
+        }
         case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: { // A regular expression with interpolation, like `/a #{b} c/`
             auto interpolatedRegexNode = down_cast<pm_interpolated_regular_expression_node>(node);
 
@@ -738,7 +748,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_LOCAL_VARIABLE_WRITE_NODE: { // Regular assignment to a local variable, e.g. `local = 1`
             return translateAssignment<pm_local_variable_write_node, parser::LVarLhs>(node);
         }
-        case PM_MATCH_LAST_LINE_NODE: { // A test of the last read line, like `if /wat/`
+        case PM_MATCH_LAST_LINE_NODE: { // A regex literal in a conditional...
+            // ...that implicitly checks against the last read line by an IO object, e.g. `if /wat/`
             auto matchLastLineNode = down_cast<pm_match_last_line_node>(node);
 
             auto regex = translateRegexp(matchLastLineNode->unescaped, location, matchLastLineNode->closing_loc);
@@ -1188,7 +1199,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_FLIP_FLOP_NODE:
         case PM_IMPLICIT_NODE:
         case PM_IMPLICIT_REST_NODE:
-        case PM_INTERPOLATED_MATCH_LAST_LINE_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
