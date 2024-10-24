@@ -151,7 +151,12 @@ def main
   BigFoo.new.itself
   #            ^ hover: sig { returns(T.self_type) }
   hoo = BigFoo::LittleFoo1.new
-  #                        ^^^ hover: sig { returns(T.untyped) }
+  #                        ^^^ hover-line: 2 # BigFoo::LittleFoo1#initialize:
+  #                        ^^^ hover-line: 3 sig { returns(T.untyped) }
+  #                        ^^^ hover-line: 4 private def initialize; end
+  #                        ^^^ hover-line: 6 # result type:
+  #                        ^^^ hover-line: 7 BigFoo::LittleFoo1
+
   raise "error message"
   # ^ hover-line: 2 # Kernel#raise (overload.1):
   # ^ hover-line: 3 sig do
