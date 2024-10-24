@@ -1,4 +1,5 @@
 #include "Translator.h"
+#include "Helpers.h"
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
@@ -180,7 +181,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (beginNode->rescue_clause != nullptr) {
                 // Extract rescue and else nodes from the begin node
                 auto bodyNode = translateStatements(beginNode->statements, true);
-                auto elseNode = translate(reinterpret_cast<pm_node_t *>(beginNode->else_clause));
+                auto elseNode = translate(up_cast(beginNode->else_clause));
                 // We need to pass the rescue node to the Ensure node if it exists instead of adding it to the
                 // statements
                 translatedRescue = translateRescue(reinterpret_cast<pm_rescue_node *>(beginNode->rescue_clause),
@@ -249,7 +250,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             // Sorbet's legacy parser inserts locals (Shadowargs) into the block's Args node, along with its other
             // parameters. So we need to extract the args vector from the Args node, and insert the locals at the end of
             // it.
-            auto sorbetArgsNode = translate(reinterpret_cast<pm_node *>(paramsNode->parameters));
+            auto sorbetArgsNode = translate(up_cast(paramsNode->parameters));
             auto argsNode = dynamic_cast<parser::Args *>(sorbetArgsNode.get());
             auto sorbetShadowArgs = translateMulti(paramsNode->locals);
             // Sorbet's legacy parser inserts locals (Shadowargs) at the end of the the block's Args node
@@ -348,7 +349,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(caseMatchNode->predicate);
             auto sorbetConditions = patternTranslateMulti(caseMatchNode->conditions);
-            auto elseClause = translate(reinterpret_cast<pm_node_t *>(caseMatchNode->else_clause));
+            auto elseClause = translate(up_cast(caseMatchNode->else_clause));
 
             return make_unique<parser::CaseMatch>(location, move(predicate), move(sorbetConditions), move(elseClause));
         }
@@ -357,7 +358,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(caseNode->predicate);
             auto sorbetConditions = translateMulti(caseNode->conditions);
-            auto elseClause = translate(reinterpret_cast<pm_node_t *>(caseNode->else_clause));
+            auto elseClause = translate(up_cast(caseNode->else_clause));
 
             return make_unique<Case>(location, move(predicate), move(sorbetConditions), move(elseClause));
         }
@@ -459,7 +460,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto name = parser.resolveConstant(defNode->name);
-            auto params = translate(reinterpret_cast<pm_node *>(defNode->parameters));
+            auto params = translate(up_cast(defNode->parameters));
             auto body = translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
@@ -473,11 +474,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                 if (kwbeginNode != nullptr && kwbeginNode->stmts[0] != nullptr &&
                     (dynamic_cast<parser::Rescue *>(kwbeginNode->stmts[0].get()) != nullptr ||
                      dynamic_cast<parser::Ensure *>(kwbeginNode->stmts[0].get()) != nullptr)) {
-
                     if (kwbeginNode->stmts.size() == 1) {
                         body = move(kwbeginNode->stmts[0]);
                     } else {
-                        unreachable("With ensure or rescue, the body of a method definition will be either a rescue or ensure node.");
+                        unreachable("With ensure or rescue, the body of a method definition will be either a rescue or "
+                                    "ensure node.");
                     }
                 }
             }
@@ -493,7 +494,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_ELSE_NODE: { // An `else` clauses, which can pertain to an `if`, `begin`, `case`, etc.
             auto elseNode = reinterpret_cast<pm_else_node *>(node);
-            return translate(reinterpret_cast<pm_node *>(elseNode->statements));
+            return translate(up_cast(elseNode->statements));
         }
         case PM_EMBEDDED_STATEMENTS_NODE: { // Statements interpolated into a string.
             // e.g. the `#{bar}` in `"foo #{bar} baz"`
@@ -573,7 +574,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto ifNode = reinterpret_cast<pm_if_node *>(node);
 
             auto predicate = translate(ifNode->predicate);
-            auto ifTrue = translate(reinterpret_cast<pm_node *>(ifNode->statements));
+            auto ifTrue = translate(up_cast(ifNode->statements));
             auto ifFalse = translate(ifNode->subsequent);
 
             return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
@@ -914,7 +915,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             if (paramsNode->block != nullptr)
-                params.emplace_back(translate(reinterpret_cast<pm_node *>(paramsNode->block)));
+                params.emplace_back(translate(up_cast(paramsNode->block)));
 
             return make_unique<parser::Args>(location, move(params));
         }
@@ -937,7 +938,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_PROGRAM_NODE: { // The root node of the parse tree, representing the entire program
             pm_program_node *programNode = reinterpret_cast<pm_program_node *>(node);
 
-            return translate(reinterpret_cast<pm_node *>(programNode->statements));
+            return translate(up_cast(programNode->statements));
         }
         case PM_POST_EXECUTION_NODE: {
             auto postExecutionNode = reinterpret_cast<pm_post_execution_node *>(node);
@@ -996,8 +997,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         }
         case PM_RESCUE_MODIFIER_NODE: {
             auto rescueModifierNode = reinterpret_cast<pm_rescue_modifier_node *>(node);
-            auto body = translate(reinterpret_cast<pm_node *>(rescueModifierNode->expression));
-            auto rescue = translate(reinterpret_cast<pm_node *>(rescueModifierNode->rescue_expression));
+            auto body = translate(rescueModifierNode->expression);
+            auto rescue = translate(rescueModifierNode->rescue_expression);
             NodeVec cases;
             // In rescue modifiers, users can't specify exceptions and the variable name so they're null
             cases.emplace_back(make_unique<parser::Resbody>(location, nullptr, nullptr, move(rescue)));
@@ -1116,8 +1117,8 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             auto predicate = translate(unlessNode->predicate);
             // These are flipped relative to `PM_IF_NODE`
-            auto ifFalse = translate(reinterpret_cast<pm_node *>(unlessNode->statements));
-            auto ifTrue = translate(reinterpret_cast<pm_node *>(unlessNode->else_clause));
+            auto ifFalse = translate(up_cast(unlessNode->statements));
+            auto ifTrue = translate(up_cast(unlessNode->else_clause));
 
             return make_unique<parser::If>(location, move(predicate), move(ifTrue), move(ifFalse));
         }
@@ -1125,7 +1126,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             auto untilNode = reinterpret_cast<pm_until_node *>(node);
 
             auto predicate = translate(untilNode->predicate);
-            auto body = translate(reinterpret_cast<pm_node *>(untilNode->statements));
+            auto body = translate(up_cast(untilNode->statements));
 
             return make_unique<parser::Until>(location, move(predicate), move(body));
         }

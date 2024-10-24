@@ -7,6 +7,7 @@ cc_library(
     hdrs = [
         "Parser.h",
         "Translator.h",
+        "Helpers.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
