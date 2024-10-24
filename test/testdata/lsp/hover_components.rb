@@ -48,7 +48,8 @@ def example_any(x)
     #      ^ hover-line: 15 IFoo
     ""
   }
-  T.reveal_type(res) # error: `T.any(String, IFoo)`
+  # WRONG!
+  T.reveal_type(res) # error: `IFoo`
 end
 
 sig { params(x: T.all(A, B)).void }
@@ -69,5 +70,6 @@ def example_all(x)
     #     ^ hover-line: 15 IFoo
     ""
   }
-  T.reveal_type(res) # error: `T.any(String, IFoo)`
+  # WRONG!
+  T.reveal_type(res) # error: `IFoo`
 end
