@@ -38,7 +38,7 @@ public:
     // `<call-with-splat>`, etc.), you will have to edit Substitute.cc.
     virtual std::vector<NameRef> dispatchesTo() const;
 
-    virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
+    virtual DispatchResult apply(const GlobalState &gs, const DispatchArgs &args, DispatchComponent &&main) const = 0;
 };
 
 enum class Visibility : uint8_t {
