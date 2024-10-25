@@ -1742,7 +1742,10 @@ public:
     }
 
     void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<core::NameRef, core::LocOffsets> &map) {
+        int pos = -1;
         for (auto &this_arg : args) {
+            ++pos;
+
             if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
                 checkDuplicateArg(arg->name, arg->loc, map);
             } else if (auto *optarg = parser::cast_node<Optarg>(this_arg.get())) {
@@ -1752,9 +1755,13 @@ public:
             } else if (auto *blockarg = parser::cast_node<Blockarg>(this_arg.get())) {
                 checkDuplicateArg(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(this_arg.get())) {
-                checkDuplicateArg(kwarg->name, kwarg->loc, map);
+                if (checkDuplicateArg(kwarg->name, kwarg->loc, map)) {
+                    kwarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwarg->name, pos);
+                }
             } else if (auto *kwoptarg = parser::cast_node<Kwoptarg>(this_arg.get())) {
-                checkDuplicateArg(kwoptarg->name, kwoptarg->loc, map);
+                if (checkDuplicateArg(kwoptarg->name, kwoptarg->loc, map)) {
+                    kwoptarg->name = gs_.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, kwoptarg->name, pos);
+                }
             } else if (auto *kwrestarg = parser::cast_node<Kwrestarg>(this_arg.get())) {
                 checkDuplicateArg(kwrestarg->name, kwrestarg->loc, map);
             } else if (auto *shadowarg = parser::cast_node<Shadowarg>(this_arg.get())) {
@@ -1765,18 +1772,22 @@ public:
         }
     }
 
-    void checkDuplicateArg(core::NameRef this_name, core::LocOffsets this_loc,
+    bool checkDuplicateArg(core::NameRef this_name, core::LocOffsets this_loc,
                            UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         auto that_arg_loc_it = map.find(this_name);
 
         if (that_arg_loc_it == map.end()) {
             map[this_name] = this_loc;
-            return;
+            return false;
         }
 
-        if (argNameCollides(this_name)) {
+        // Only report an error if this name doesn't start with an `_`, but still report it as being a duplicate of
+        // another argument, for the purpose of mangling.
+        if (this_name.shortName(gs_)[0] != '_') {
             error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name.toString(gs_));
         }
+
+        return true;
     }
 
     void checkDuplicatePatternVariable(std::string name, core::LocOffsets loc) {
@@ -1830,11 +1841,6 @@ public:
             }
         }
         return res;
-    }
-
-    bool argNameCollides(core::NameRef name) {
-        // Ignore everything beginning with underscore.
-        return (name.shortName(gs_)[0] != '_');
     }
 
     bool isLiteralNode(parser::Node &node) {
