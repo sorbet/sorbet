@@ -521,6 +521,20 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Float>(location, std::to_string(floatNode->value));
         }
+        case PM_FLIP_FLOP_NODE: { // A flip-flop pattern, like the `flip..flop` in `if flip..flop`
+            auto flipFlopNode = down_cast<pm_flip_flop_node>(node);
+
+            auto left = patternTranslate(flipFlopNode->left);
+            auto right = patternTranslate(flipFlopNode->right);
+
+            auto flags = flipFlopNode->base.flags;
+
+            if (flags & PM_RANGE_FLAGS_EXCLUDE_END) { // 3 dots: `flip...flop`
+                return make_unique<parser::EFlipflop>(location, move(left), move(right));
+            } else { // 2 dots: `flip..flop`
+                return make_unique<parser::IFlipflop>(location, move(left), move(right));
+            }
+        }
         case PM_FOR_NODE: { // `for x in a; ...; end`
             auto forNode = down_cast<pm_for_node>(node);
 
@@ -1157,7 +1171,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
         case PM_CAPTURE_PATTERN_NODE:
-        case PM_FLIP_FLOP_NODE:
         case PM_IMPLICIT_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
