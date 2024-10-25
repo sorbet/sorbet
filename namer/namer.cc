@@ -854,16 +854,6 @@ private:
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
         auto &argInfo = ctx.state.enterMethodArgumentSymbol(ctx.locAt(parsedArg.loc), ctx.owner.asMethodRef(), name);
-        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
-        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
-        // identical). We know that we need to match the arity of the function as written, so if we don't have as many
-        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
-        if (methodData->arguments.size() == pos) {
-            auto argCopy = argInfo.deepCopy();
-            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            methodData->arguments.emplace_back(move(argCopy));
-            return;
-        }
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
         ENFORCE(methodData->arguments.size() >= pos + 1);
