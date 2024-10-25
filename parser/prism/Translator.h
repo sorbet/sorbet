@@ -54,6 +54,8 @@ private:
     std::unique_ptr<parser::Regexp> translateRegexp(pm_string_t unescaped, core::LocOffsets location,
                                                     pm_location_t closingLoc);
 
+    template <typename PrismNode> std::unique_ptr<parser::Mlhs> translateMultiTargetLhs(PrismNode *);
+
     template <typename PrismAssignmentNode, typename SorbetLHSNode>
     std::unique_ptr<parser::Assign> translateAssignment(pm_node_t *node);
 
