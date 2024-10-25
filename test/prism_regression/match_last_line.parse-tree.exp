@@ -63,5 +63,64 @@ Begin {
       }
       else_ = NULL
     }
+    Assign {
+      lhs = LVarLhs {
+        name = <U b>
+      }
+      rhs = Send {
+        receiver = Begin {
+          stmts = [
+            MatchCurLine {
+              cond = Regexp {
+                regex = [
+                  String {
+                    val = <U wat>
+                  }
+                ]
+                opts = Regopt {
+                  opts = ""
+                }
+              }
+            }
+          ]
+        }
+        method = <U !>
+        args = [
+        ]
+      }
+    }
+    Assign {
+      lhs = LVarLhs {
+        name = <U b>
+      }
+      rhs = Send {
+        receiver = Begin {
+          stmts = [
+            MatchCurLine {
+              cond = Regexp {
+                regex = [
+                  String {
+                    val = <U wat >
+                  }
+                  Begin {
+                    stmts = [
+                      Integer {
+                        val = "123"
+                      }
+                    ]
+                  }
+                ]
+                opts = Regopt {
+                  opts = ""
+                }
+              }
+            }
+          ]
+        }
+        method = <U !>
+        args = [
+        ]
+      }
+    }
   ]
 }

@@ -14,3 +14,9 @@ if /wat #{123}/
 #  ^^^^^^^^^^^^ error: Unsupported node type `MatchCurLine`
   "This one uses an interpolated regexp"
 end
+
+b = !(/wat/)
+#     ^^^^^ error: Unsupported node type `MatchCurLine`
+
+b = !(/wat #{123}/)
+#     ^^^^^^^^^^^^ error: Unsupported node type `MatchCurLine`
