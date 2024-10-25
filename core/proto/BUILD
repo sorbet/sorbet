@@ -19,7 +19,6 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@com_google_protobuf//src/google/protobuf/json",
         "//common",
         "//core",
         "//proto",
