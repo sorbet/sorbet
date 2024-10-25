@@ -1273,7 +1273,18 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
 
             patternTranslateMultiInto(sorbetElements, prismSuffixNodes);
 
-            return make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+            auto arrayPattern = make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+
+            if (auto prismConstant = arrayPatternNode->constant; prismConstant != nullptr) {
+                // An array pattern can start with a constant that matches against a specific type,
+                // rather than any value whose `#deconstruct` results are matched by the pattern
+                // E.g. the `Point` in `in Point[1, 2]`
+                auto sorbetConstant = translate(prismConstant);
+
+                return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(arrayPattern));
+            }
+
+            return arrayPattern;
         }
         case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
             auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);

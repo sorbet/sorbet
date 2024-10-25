@@ -206,6 +206,104 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Array>>
+            }
+            pattern = ArrayPattern {
+              elts = [
+                MatchVar {
+                  name = <U first>
+                }
+                MatchVar {
+                  name = <U second>
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U An Array with first: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U first>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and second: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U second>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Point>>
+            }
+            pattern = ArrayPattern {
+              elts = [
+                MatchVar {
+                  name = <U x>
+                }
+                MatchVar {
+                  name = <U y>
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Point with x: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U x>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and y: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U y>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }
