@@ -1170,6 +1170,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
         case PM_ARRAY_PATTERN_NODE:       // An array pattern such as the `[head, *tail]` in the `a in [head, *tail]`
+        case PM_CAPTURE_PATTERN_NODE:     // A variable capture such as the `=> i` in `in Integer => i`
         case PM_FIND_PATTERN_NODE:        // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
         case PM_HASH_PATTERN_NODE:        // An hash pattern such as the `{ k: Integer }` in the `h in { k: Integer }`
         case PM_IN_NODE:                // An `in` pattern such as in a `case` statement, or as a standalone expression.
@@ -1181,7 +1182,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
-        case PM_CAPTURE_PATTERN_NODE:
         case PM_IMPLICIT_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
@@ -1274,6 +1274,14 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
             patternTranslateMultiInto(sorbetElements, prismSuffixNodes);
 
             return make_unique<parser::ArrayPattern>(location, move(sorbetElements));
+        }
+        case PM_CAPTURE_PATTERN_NODE: { // A variable capture such as the `Integer => i` in `in Integer => i`
+            auto capturePatternNode = down_cast<pm_capture_pattern_node>(node);
+
+            auto pattern = translate(capturePatternNode->value);
+            auto target = patternTranslate(up_cast(capturePatternNode->target));
+
+            return make_unique<parser::MatchAs>(location, move(pattern), move(target));
         }
         case PM_FIND_PATTERN_NODE: { // A find pattern such as the `[*, middle, *]` in the `a in [*, middle, *]`
             auto findPatternNode = down_cast<pm_find_pattern_node>(node);

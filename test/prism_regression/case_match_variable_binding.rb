@@ -18,6 +18,9 @@ in [{ k: value }, *tail] # A Hash pattern inside an Array pattern
 in { k: { k2: value } }  # A Hash pattern inside a Hash pattern
   "A hash-like whose key `:k` has a one-element Hash value containing k2: #{value}"
 
+in Integer => i # Pattern that also binds a variable
+  "An Integer: #{i}"
+
 in x # Binds any value to a new variable `x`.
   "Some other value: #{x}"
 end

@@ -232,6 +232,32 @@ Begin {
           }
         }
         InPattern {
+          pattern = MatchAs {
+            value = Const {
+              scope = NULL
+              name = <C <U Integer>>
+            }
+            as = MatchVar {
+              name = <U i>
+            }
+          }
+          guard = NULL
+          body = DString {
+            nodes = [
+              String {
+                val = <U An Integer: >
+              }
+              Begin {
+                stmts = [
+                  LVar {
+                    name = <U i>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
           pattern = MatchVar {
             name = <U x>
           }
