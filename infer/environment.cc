@@ -1197,7 +1197,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i.what);
                 tp.type = typeAndOrigin.type;
-                tp.origins = typeAndOrigin.origins;
+                if (!bind.bind.variable.isSyntheticTemporary(inWhat)) {
+                    // This `cfg::Ident` was an actual ast::Assign that the user wrote, not just an ast::Local
+                    tp.origins.emplace_back(ctx.locAt(bind.loc));
+                } else {
+                    tp.origins = typeAndOrigin.origins;
+                }
 
                 if (lspQueryMatch && !bind.value.isSynthetic()) {
                     core::lsp::QueryResponse::pushQueryResponse(
