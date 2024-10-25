@@ -1343,12 +1343,36 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
         case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
             auto inNode = down_cast<pm_in_node>(node);
 
-            auto sorbetPattern = patternTranslate(inNode->pattern);
-
+            auto prismPattern = inNode->pattern;
+            unique_ptr<parser::Node> sorbetPattern;
+            unique_ptr<parser::Node> sorbetGuard;
             auto inlineIfSingle = true;
             auto statements = translateStatements(inNode->statements, inlineIfSingle);
 
-            return make_unique<parser::InPattern>(location, move(sorbetPattern), nullptr, move(statements));
+            if (prismPattern != nullptr &&
+                (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE) || PM_NODE_TYPE_P(prismPattern, PM_UNLESS_NODE))) {
+                pm_statements_node *conditionalStatements = nullptr;
+
+                if (PM_NODE_TYPE_P(prismPattern, PM_IF_NODE)) {
+                    auto ifNode = down_cast<pm_if_node>(prismPattern);
+                    conditionalStatements = ifNode->statements;
+                    sorbetGuard = make_unique<parser::IfGuard>(location, translate(ifNode->predicate));
+                } else { // PM_UNLESS_NODE
+                    auto unlessNode = down_cast<pm_unless_node>(prismPattern);
+                    conditionalStatements = unlessNode->statements;
+                    sorbetGuard = make_unique<parser::UnlessGuard>(location, translate(unlessNode->predicate));
+                }
+
+                ENFORCE(
+                    conditionalStatements->body.size == 1,
+                    "In pattern-matching's `in` clause, a conditional (if/unless) guard must have a single statement.");
+
+                sorbetPattern = patternTranslate(conditionalStatements->body.nodes[0]);
+            } else {
+                sorbetPattern = patternTranslate(prismPattern);
+            }
+
+            return make_unique<parser::InPattern>(location, move(sorbetPattern), move(sorbetGuard), move(statements));
         }
         case PM_LOCAL_VARIABLE_TARGET_NODE: { // A variable binding in a pattern, like the `head` in `[head, *tail]`
             auto localVarTargetNode = down_cast<pm_local_variable_target_node>(node);

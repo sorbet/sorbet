@@ -43,3 +43,23 @@ in 1
   "one!"
   puts "surprise, multi-line!"
 end
+
+# pattern matching with if guards
+case bar
+in x if x == 1
+  "in with if"
+in a, b if b == 2
+  "in with 2 args and if"
+in c, d; c if c == 3
+  "in with 2 args, semicolon, and if"
+end
+
+# pattern matching with unless guards
+case baz
+in x unless x == 1
+  "in with unless"
+in a, b unless b == 2
+  "in with 2 args and unless"
+in c, d; c unless c == 3
+  "in with 2 args, semicolon, and unless"
+end
