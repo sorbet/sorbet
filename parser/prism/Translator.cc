@@ -592,6 +592,10 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Complex>(location, move(value));
         }
+        case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
+            unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE and "
+                        "PM_MULTI_TARGET_NODE, see their implementations for details.");
+        }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
         }
@@ -768,58 +772,15 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_MULTI_TARGET_NODE: { // A multi-target like the `(x2, y2)` in `p1, (x2, y2) = a`
             auto multiTargetNode = down_cast<pm_multi_target_node>(node);
 
-            auto prismLefts = absl::MakeSpan(multiTargetNode->lefts.nodes, multiTargetNode->lefts.size);
-            auto prismRights = absl::MakeSpan(multiTargetNode->rights.nodes, multiTargetNode->rights.size);
-            auto prismRestNode = multiTargetNode->rest;
-
-            NodeVec sorbetExpressions{};
-            sorbetExpressions.reserve(prismLefts.size() + prismRights.size() + (prismRestNode != nullptr ? 1 : 0));
-
-            translateMultiInto(sorbetExpressions, prismLefts);
-
-            if (prismRestNode != nullptr) {
-                // We don't just call `translate()` because that would create a `parser::Splat`, but we need
-                // `parser::SplatLhs`.
-                auto splatNode = down_cast<pm_splat_node>(prismRestNode);
-                auto var = translate(splatNode->expression);
-                sorbetExpressions.emplace_back(make_unique<parser::SplatLhs>(location, move(var)));
-            }
-
-            translateMultiInto(sorbetExpressions, prismRights);
-
-            return make_unique<parser::Mlhs>(location, move(sorbetExpressions));
+            return translateMultiTargetLhs(multiTargetNode);
         }
         case PM_MULTI_WRITE_NODE: { // Multi-assignment, like `a, b = 1, 2`
             auto multiWriteNode = down_cast<pm_multi_write_node>(node);
 
-            // Left-hand side of the assignment
-            auto prismLefts = absl::MakeSpan(multiWriteNode->lefts.nodes, multiWriteNode->lefts.size);
-            auto prismRights = absl::MakeSpan(multiWriteNode->rights.nodes, multiWriteNode->rights.size);
-            auto prismSplat = multiWriteNode->rest;
+            auto multiLhsNode = translateMultiTargetLhs(multiWriteNode);
+            auto rhsValue = translate(multiWriteNode->value);
 
-            NodeVec sorbetLhs{};
-            sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
-
-            translateMultiInto(sorbetLhs, prismLefts);
-
-            if (prismSplat != nullptr) {
-                // This requires separate handling from the `PM_SPLAT_NODE` because it
-                // has a different Sorbet node type, `parser::SplatLhs`
-                auto splatNode = down_cast<pm_splat_node>(prismSplat);
-
-                auto expr = translate(splatNode->expression);
-
-                sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(expr)));
-            }
-
-            translateMultiInto(sorbetLhs, prismRights);
-
-            auto mlhs = make_unique<parser::Mlhs>(location, move(sorbetLhs));
-
-            // Right-hand side of the assignment
-            auto value = translate(multiWriteNode->value);
-
-            return make_unique<parser::Masgn>(location, move(mlhs), move(value));
+            return make_unique<parser::Masgn>(location, move(multiLhsNode), move(rhsValue));
         }
         case PM_NEXT_NODE: { // A `next` statement, e.g. `next`, `next 1, 2, 3`
             auto nextNode = down_cast<pm_next_node>(node);
@@ -1198,7 +1159,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_CAPTURE_PATTERN_NODE:
         case PM_FLIP_FLOP_NODE:
         case PM_IMPLICIT_NODE:
-        case PM_IMPLICIT_REST_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
         case PM_MATCH_WRITE_NODE:
@@ -1670,6 +1630,49 @@ unique_ptr<parser::Regexp> Translator::translateRegexp(pm_string_t unescaped, co
     auto options = translateRegexpOptions(closingLoc);
 
     return make_unique<parser::Regexp>(location, move(parts), move(options));
+}
+
+// Creates a `parser::Mlhs` for either a `PM_MULTI_WRITE_NODE` or `PM_MULTI_TARGET_NODE`.
+template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translateMultiTargetLhs(PrismNode *node) {
+    static_assert(
+        is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>,
+        "Translator::translateMultiTarget can only be used for PM_MULTI_TARGET_NODE and PM_MULTI_WRITE_NODE.");
+
+    auto location = translateLoc(node->base.location);
+
+    // Left-hand side of the assignment
+    auto prismLefts = absl::MakeSpan(node->lefts.nodes, node->lefts.size);
+    auto prismRights = absl::MakeSpan(node->rights.nodes, node->rights.size);
+    auto prismSplat = node->rest;
+
+    NodeVec sorbetLhs{};
+    sorbetLhs.reserve(prismLefts.size() + prismRights.size() + (prismSplat != nullptr ? 1 : 0));
+
+    translateMultiInto(sorbetLhs, prismLefts);
+
+    if (prismSplat != nullptr) {
+        switch (PM_NODE_TYPE(prismSplat)) {
+            case PM_SPLAT_NODE: {
+                // This requires separate handling from the `PM_SPLAT_NODE` because it
+                // has a different Sorbet node type, `parser::SplatLhs`
+                auto splatNode = down_cast<pm_splat_node>(prismSplat);
+                auto location = translateLoc(splatNode->base.location);
+                auto expr = translate(splatNode->expression);
+
+                sorbetLhs.emplace_back(make_unique<parser::SplatLhs>(location, move(expr)));
+                break;
+            }
+            case PM_IMPLICIT_REST_NODE:
+                // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
+                break;
+            default:
+                unreachable("Unexpected rest node type. Expected only PM_SPLAT_NODE or PM_IMPLICIT_REST_NODE.");
+        }
+    }
+
+    translateMultiInto(sorbetLhs, prismRights);
+
+    return make_unique<parser::Mlhs>(location, move(sorbetLhs));
 }
 
 }; // namespace sorbet::parser::Prism
