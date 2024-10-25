@@ -1782,7 +1782,7 @@ public:
         }
 
         // Only report an error if this name doesn't start with an `_`, but still report it as being a duplicate of
-        // another argument, for the purpose of mangling.
+        // another argument, for the purpose of mangling. The Ruby VM silences these errors.
         if (this_name.shortName(gs_)[0] != '_') {
             error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name.toString(gs_));
         }
