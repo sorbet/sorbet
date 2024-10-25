@@ -592,8 +592,9 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::Complex>(location, move(value));
         }
-        case PM_IMPLICIT_REST_NODE: { // An implicit splat, like `a, = 1, 2, 3`
-            unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE, see its docs for details.");
+        case PM_IMPLICIT_REST_NODE: { // An implicit splat, like the `,` in `a, = 1, 2, 3`
+            unreachable("PM_IMPLICIT_REST_NODE is handled separately as part of PM_MULTI_WRITE_NODE and "
+                        "PM_MULTI_TARGET_NODE, see their implementations for details.");
         }
         case PM_INDEX_AND_WRITE_NODE: { // And-assignment to an index, e.g. `a[i] &&= false`
             return translateOpAssignment<pm_index_and_write_node, parser::AndAsgn, void>(node);
@@ -783,9 +784,23 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             if (prismRestNode != nullptr) {
                 // We don't just call `translate()` because that would create a `parser::Splat`, but we need
                 // `parser::SplatLhs`.
-                auto splatNode = down_cast<pm_splat_node>(prismRestNode);
-                auto var = translate(splatNode->expression);
-                sorbetExpressions.emplace_back(make_unique<parser::SplatLhs>(location, move(var)));
+
+                switch (PM_NODE_TYPE(prismRestNode)) {
+                    case PM_SPLAT_NODE: {
+                        // This requires separate handling from the `PM_SPLAT_NODE` because it
+                        // has a different Sorbet node type, `parser::SplatLhs`
+                        auto splatNode = down_cast<pm_splat_node>(prismRestNode);
+                        auto expr = translate(splatNode->expression);
+
+                        sorbetExpressions.emplace_back(make_unique<parser::SplatLhs>(location, move(expr)));
+                        break;
+                    }
+                    case PM_IMPLICIT_REST_NODE:
+                        // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
+                        break;
+                    default:
+                        unreachable("Unexpected rest node type in multi-write.");
+                }
             }
 
             translateMultiInto(sorbetExpressions, prismRights);
@@ -820,7 +835,7 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
                         // No-op, because Sorbet's parser infers this from just having an `Mlhs`.
                         break;
                     default:
-                        unreachable("Unexpected rest node type in multi-write.");
+                        unreachable("Unexpected rest node type in multi-target.");
                 }
             }
 

@@ -274,5 +274,68 @@ Begin {
         ]
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p6>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x2>
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Array {
+            elts = [
+              Integer {
+                val = "1"
+              }
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+          Array {
+            elts = [
+              Integer {
+                val = "3"
+              }
+              Integer {
+                val = "4"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    For {
+      vars = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = <U p7>
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = <U x2>
+              }
+            ]
+          }
+        ]
+      }
+      expr = Send {
+        receiver = NULL
+        method = <U a>
+        args = [
+        ]
+      }
+      body = NULL
+    }
   ]
 }
