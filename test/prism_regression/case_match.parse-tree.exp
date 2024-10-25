@@ -416,6 +416,121 @@ Begin {
             ]
           }
         }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Hash>>
+            }
+            pattern = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U e>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "5"
+                    }
+                    as = MatchVar {
+                      name = <U e>
+                    }
+                  }
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Hash with e: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U e>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+        InPattern {
+          pattern = ConstPattern {
+            scope = Const {
+              scope = NULL
+              name = <C <U Point>>
+            }
+            pattern = HashPattern {
+              pairs = [
+                Pair {
+                  key = Symbol {
+                    val = <U x>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "6"
+                    }
+                    as = MatchVar {
+                      name = <U x>
+                    }
+                  }
+                }
+                Pair {
+                  key = Symbol {
+                    val = <U y>
+                  }
+                  value = MatchAs {
+                    value = Integer {
+                      val = "7"
+                    }
+                    as = MatchVar {
+                      name = <U y>
+                    }
+                  }
+                }
+              ]
+            }
+          }
+          guard = NULL
+          body = Send {
+            receiver = NULL
+            method = <U puts>
+            args = [
+              DString {
+                nodes = [
+                  String {
+                    val = <U A Point with x: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U x>
+                      }
+                    ]
+                  }
+                  String {
+                    val = <U  and y: >
+                  }
+                  Begin {
+                    stmts = [
+                      LVar {
+                        name = <U y>
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
       elseBody = NULL
     }

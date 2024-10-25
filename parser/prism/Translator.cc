@@ -1350,7 +1350,18 @@ unique_ptr<parser::Node> Translator::patternTranslate(pm_node_t *node) {
                 }
             }
 
-            return make_unique<parser::HashPattern>(location, move(sorbetElements));
+            auto hashPattern = make_unique<parser::HashPattern>(location, move(sorbetElements));
+
+            if (auto prismConstant = hashPatternNode->constant; prismConstant != nullptr) {
+                // A hash pattern can start with a constant that matches against a specific type,
+                // rather than any value whose `#deconstruct_keys` results are matched by the pattern
+                // E.g. the `Point` in `in Point[x: Integer => 1, y: Integer => 2]`
+                auto sorbetConstant = translate(prismConstant);
+
+                return make_unique<parser::ConstPattern>(location, move(sorbetConstant), move(hashPattern));
+            }
+
+            return hashPattern;
         }
         case PM_IN_NODE: { // An `in` pattern such as in a `case` statement, or as a standalone expression.
             auto inNode = down_cast<pm_in_node>(node);

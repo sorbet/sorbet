@@ -39,10 +39,10 @@ in { c: 3, ** }
   puts "has c, and maybe other stuff!"
 in { d: 4, **nil }
   puts "has d and nothing else!"
-# in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
-#   puts "A Hash with e: #{e}"
-# in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
-#   puts "A Point with x: #{x} and y: #{y}"
+in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
+  puts "A Hash with e: #{e}"
+in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
+  puts "A Point with x: #{x} and y: #{y}"
 end
 
 # no else
