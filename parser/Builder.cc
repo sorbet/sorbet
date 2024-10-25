@@ -259,7 +259,7 @@ public:
 
     unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
         if (check_args) {
-            UnorderedMap<std::string, core::LocOffsets> map;
+            UnorderedMap<core::NameRef, core::LocOffsets> map;
             checkDuplicateArgs(args, map);
         }
 
@@ -1003,7 +1003,7 @@ public:
     }
 
     unique_ptr<Node> hash_pattern(const token *begin, sorbet::parser::NodeVec kwargs, const token *end) {
-        UnorderedMap<std::string, core::LocOffsets> map;
+        UnorderedMap<core::NameRef, core::LocOffsets> map;
         checkDuplicateArgs(kwargs, map);
         auto loc = collectionLoc(kwargs);
         if (begin != nullptr) {
@@ -1741,38 +1741,41 @@ public:
         return false;
     }
 
-    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<std::string, core::LocOffsets> &map) {
+    void checkDuplicateArgs(sorbet::parser::NodeVec &args, UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         for (auto &this_arg : args) {
             if (auto *arg = parser::cast_node<Arg>(this_arg.get())) {
-                checkDuplicateArg(arg->name.toString(gs_), arg->loc, map);
+                checkDuplicateArg(arg->name, arg->loc, map);
             } else if (auto *optarg = parser::cast_node<Optarg>(this_arg.get())) {
-                checkDuplicateArg(optarg->name.toString(gs_), optarg->loc, map);
+                checkDuplicateArg(optarg->name, optarg->loc, map);
             } else if (auto *restarg = parser::cast_node<Restarg>(this_arg.get())) {
-                checkDuplicateArg(restarg->name.toString(gs_), restarg->loc, map);
+                checkDuplicateArg(restarg->name, restarg->loc, map);
             } else if (auto *blockarg = parser::cast_node<Blockarg>(this_arg.get())) {
-                checkDuplicateArg(blockarg->name.toString(gs_), blockarg->loc, map);
+                checkDuplicateArg(blockarg->name, blockarg->loc, map);
             } else if (auto *kwarg = parser::cast_node<Kwarg>(this_arg.get())) {
-                checkDuplicateArg(kwarg->name.toString(gs_), kwarg->loc, map);
+                checkDuplicateArg(kwarg->name, kwarg->loc, map);
             } else if (auto *kwoptarg = parser::cast_node<Kwoptarg>(this_arg.get())) {
-                checkDuplicateArg(kwoptarg->name.toString(gs_), kwoptarg->loc, map);
+                checkDuplicateArg(kwoptarg->name, kwoptarg->loc, map);
             } else if (auto *kwrestarg = parser::cast_node<Kwrestarg>(this_arg.get())) {
-                checkDuplicateArg(kwrestarg->name.toString(gs_), kwrestarg->loc, map);
+                checkDuplicateArg(kwrestarg->name, kwrestarg->loc, map);
             } else if (auto *shadowarg = parser::cast_node<Shadowarg>(this_arg.get())) {
-                checkDuplicateArg(shadowarg->name.toString(gs_), shadowarg->loc, map);
+                checkDuplicateArg(shadowarg->name, shadowarg->loc, map);
             } else if (auto *mlhs = parser::cast_node<Mlhs>(this_arg.get())) {
                 checkDuplicateArgs(mlhs->exprs, map);
             }
         }
     }
 
-    void checkDuplicateArg(std::string this_name, core::LocOffsets this_loc,
-                           UnorderedMap<std::string, core::LocOffsets> &map) {
+    void checkDuplicateArg(core::NameRef this_name, core::LocOffsets this_loc,
+                           UnorderedMap<core::NameRef, core::LocOffsets> &map) {
         auto that_arg_loc_it = map.find(this_name);
 
         if (that_arg_loc_it == map.end()) {
             map[this_name] = this_loc;
-        } else if (argNameCollides(this_name)) {
-            error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name);
+            return;
+        }
+
+        if (argNameCollides(this_name)) {
+            error_without_recovery(ruby_parser::dclass::DuplicateArgument, this_loc, this_name.toString(gs_));
         }
     }
 
@@ -1829,9 +1832,9 @@ public:
         return res;
     }
 
-    bool argNameCollides(std::string name) {
+    bool argNameCollides(core::NameRef name) {
         // Ignore everything beginning with underscore.
-        return (name[0] != '_');
+        return (name.shortName(gs_)[0] != '_');
     }
 
     bool isLiteralNode(parser::Node &node) {
