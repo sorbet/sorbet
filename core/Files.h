@@ -61,6 +61,7 @@ public:
 
     // flag accessors
     bool isPackagedTest() const;
+    bool isSpec() const;
 
     bool hasParseErrors() const;
     void setHasParseErrors(bool value);
@@ -103,6 +104,7 @@ private:
         bool isPackage : 1;
         // Documented on public accessors
         bool isOpenInClient : 1;
+        bool isSpec : 1;
 
         Flags(std::string_view path);
     };
