@@ -1008,8 +1008,8 @@ struct DispatchArgs {
                  const TypePtr &thisType, const std::shared_ptr<const SendAndBlockLink> &block,
                  Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper)
         : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(std::move(fullType)),
-          thisType(thisType), block(block), originForUninitialized(std::move(originForUninitialized)),
-          isPrivateOk(isPrivateOk), suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
+          thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
+          suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
     DispatchArgs(DispatchArgs &&) = default;
