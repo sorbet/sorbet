@@ -1083,13 +1083,13 @@ struct DispatchComponent {
 };
 
 struct DispatchResult {
-    enum class Combinator { OR, AND };
+    enum class Combinator { UNSET, OR, AND };
     // The overall return type of the call expression, accounting for the `Combinator`, where the
     // LHS is `main.returnTypeBeforeSolve` and the RHS is `secondary.returnType` (recursive).
     TypePtr returnType;
     DispatchComponent main;
     std::unique_ptr<DispatchResult> secondary;
-    Combinator secondaryKind;
+    Combinator secondaryKind = Combinator::UNSET;
 
     DispatchResult() = default;
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
@@ -1101,7 +1101,11 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
-          secondaryKind(secondaryKind){};
+          secondaryKind(secondaryKind) {
+        if (secondaryKind == Combinator::UNSET) {
+            Exception::raise("!!!");
+        }
+    };
 
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);

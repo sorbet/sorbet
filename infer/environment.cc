@@ -957,6 +957,57 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->pinnedTypes = other.pinnedTypes;
 }
 
+// Use the `returnTypeBeforeSolve` and the `constr` fields of each DispatchComponent in the
+// DispatchResult to instantiate any generic types which might have been discovered by typechecking
+// the block associated with the dispatch.
+//
+// Note that since the DispatchResult is stored in a shared_ptr, even if it ends up in an
+// lsp::SendResponse, any LSP queries will see the solved and instantiated returnType after this
+// method mutates it.
+bool solveAndInstantiateDispatchResult(const core::Context &ctx, core::DispatchResult &result,
+                                       core::LocOffsets errLoc) {
+    auto modified = false;
+    if (result.secondary != nullptr) {
+        modified |= solveAndInstantiateDispatchResult(ctx, *result.secondary, errLoc);
+    }
+
+    if (result.main.constr == nullptr) {
+        return modified;
+    }
+
+    if (!result.main.constr->solve(ctx)) {
+        if (auto e = ctx.beginError(errLoc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
+            e.setHeader("Could not find valid instantiation of type parameters for `{}`", result.main.method.show(ctx));
+            e.addErrorLine(result.main.method.data(ctx)->loc(), "`{}` defined here", result.main.method.show(ctx));
+            e.addErrorSection(result.main.constr->explain(ctx));
+        }
+        result.returnType = core::Types::untypedUntracked();
+        return true;
+    }
+
+    auto instantiated = core::Types::instantiate(ctx, result.main.returnTypeBeforeSolve, *result.main.constr);
+
+    if (result.secondary == nullptr) {
+        result.returnType = move(instantiated);
+        return true;
+    }
+
+    // TODO(jez) This suffers from the bug described in DispatchResult::merge w.r.t. secondaryKind 😡
+    switch (result.secondaryKind) {
+        case core::DispatchResult::Combinator::OR:
+            result.returnType = core::Types::any(ctx, instantiated, result.secondary->returnType);
+            break;
+        case core::DispatchResult::Combinator::AND:
+            result.returnType = core::Types::all(ctx, instantiated, result.secondary->returnType);
+            break;
+        case core::DispatchResult::Combinator::UNSET:
+            Exception::raise("!!!");
+            break;
+    }
+
+    return true;
+}
+
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,
                           core::NameRef fun, const core::Loc &loc, const core::NameRef currentMethodName) {
     if (fun != core::Names::flatMap()) {
@@ -1273,27 +1324,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 pinnedTypes[bind.bind.variable] = tp;
             },
             [&](cfg::SolveConstraint &i) {
-                core::TypePtr type;
-                // TODO: this should repeat the same dance with Or and And components that dispatchCall does
-                const auto &main = i.link->result->main;
-                if (main.constr) {
-                    if (!main.constr->solve(ctx)) {
-                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
-                            e.setHeader("Could not find valid instantiation of type parameters for `{}`",
-                                        main.method.show(ctx));
-                            e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here", main.method.show(ctx));
-                            e.addErrorSection(main.constr->explain(ctx));
-                        }
-                        type = core::Types::untypedUntracked();
-                    } else {
-                        type = core::Types::instantiate(ctx, main.returnTypeBeforeSolve, *main.constr);
-                    }
-                } else {
-                    type = i.link->result->returnType;
-                }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
-                tp.type = std::move(type);
+                solveAndInstantiateDispatchResult(ctx, *i.link->result, bind.loc);
+                tp.type = flatmapHack(ctx, i.link->result->main.receiver, i.link->result->returnType, i.link->fun, loc,
+                                      inWhat.symbol.data(ctx)->name);
                 tp.origins.emplace_back(loc);
             },
             [&](cfg::LoadArg &i) {
@@ -1340,12 +1374,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
                         auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        // TODO(jez) This is an interesting candidate to try to get the bug to show up.
                         switch (insn.link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
                                 break;
                             case core::DispatchResult::Combinator::AND:
                                 params = core::Types::all(ctx, params, secondaryParams);
+                                break;
+                            case core::DispatchResult::Combinator::UNSET:
+                                Exception::raise("!!!");
                                 break;
                         }
                     } else {
@@ -1579,6 +1617,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             break;
                         case core::DispatchResult::Combinator::AND:
                             tpo.type = core::Types::all(ctx, tpo.type, secondaryTpo.type);
+                            break;
+                        case core::DispatchResult::Combinator::UNSET:
+                            Exception::raise("!!!");
                             break;
                     }
                     tpo.origins.insert(tpo.origins.begin(), make_move_iterator(secondaryTpo.origins.begin()),
