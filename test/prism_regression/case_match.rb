@@ -24,6 +24,10 @@ in [*, 6]
   puts "ends with six!"
 in [*, 7, *] # A "find pattern"
   puts "contains a seven!"
+in Array[first, second] # Requires the `array_like_thing` to be an `Array` specifically
+  puts "An Array with first: #{first} and second: #{second}"
+in Point[x, y]          # Requires the `array_like_thing` to be a `Point` specifically
+  puts "A Point with x: #{x} and y: #{y}"
 end
 
 case hash_like_thing
@@ -35,6 +39,10 @@ in { c: 3, ** }
   puts "has c, and maybe other stuff!"
 in { d: 4, **nil }
   puts "has d and nothing else!"
+in Hash[e: 5 => e]             # Requires the `hash_like_thing` to be a `Hash` specifically
+  puts "A Hash with e: #{e}"
+in Point[x: 6 => x, y: 7 => y] # Requires the `hash_like_thing` to be a `Point` specifically
+  puts "A Point with x: #{x} and y: #{y}"
 end
 
 # no else
