@@ -11,6 +11,7 @@ class A
                    # ^^ error: Malformed `sig`
                    # ^^^^^^ error: duplicate argument name x
     @x = T.let(x, T.nilable(String))
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type
     @x = T.let(x, T.nilable(String))
        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Argument does not have asserted type
   end
