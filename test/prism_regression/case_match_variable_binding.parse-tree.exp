@@ -232,70 +232,29 @@ Begin {
           }
         }
         InPattern {
-          pattern = Pin {
-            var = LVar {
-              name = <U lvar>
+          pattern = MatchAs {
+            value = Const {
+              scope = NULL
+              name = <C <U Integer>>
+            }
+            as = MatchVar {
+              name = <U i>
             }
           }
           guard = NULL
-          body = String {
-            val = <U Has the same value as the preexisting variable `x`>
-          }
-        }
-        InPattern {
-          pattern = Pin {
-            var = IVar {
-              name = <U @ivar>
-            }
-          }
-          guard = NULL
-          body = String {
-            val = <U Has the same value as `@ivar`>
-          }
-        }
-        InPattern {
-          pattern = Pin {
-            var = CVar {
-              name = <U @@cvar>
-            }
-          }
-          guard = NULL
-          body = String {
-            val = <U Has the same value as `@@cvar`>
-          }
-        }
-        InPattern {
-          pattern = Pin {
-            var = GVar {
-              name = <U $global>
-            }
-          }
-          guard = NULL
-          body = String {
-            val = <U Has the same value as `$global`>
-          }
-        }
-        InPattern {
-          pattern = Pin {
-            var = Begin {
-              stmts = [
-                Send {
-                  receiver = Integer {
-                    val = "1"
+          body = DString {
+            nodes = [
+              String {
+                val = <U An Integer: >
+              }
+              Begin {
+                stmts = [
+                  LVar {
+                    name = <U i>
                   }
-                  method = <U +>
-                  args = [
-                    Integer {
-                      val = "2"
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-          guard = NULL
-          body = String {
-            val = <U Has the same value as `1 + 2`>
+                ]
+              }
+            ]
           }
         }
         InPattern {
