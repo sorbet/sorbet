@@ -107,7 +107,7 @@ bool File::isPackagePath(string_view path) {
 }
 
 File::Flags::Flags(string_view path)
-    : cached(false), hasParseErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
+    : cached(false), hasIndexErrors(false), isPackagedTest(isTestPath(path)), isPackageRBI(isPackageRBIPath(path)),
       isPackage(isPackagePath(path)), isOpenInClient(false) {}
 
 File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
@@ -276,12 +276,12 @@ bool File::isPackageRBI() const {
     return flags.isPackageRBI;
 }
 
-bool File::hasParseErrors() const {
-    return flags.hasParseErrors;
+bool File::hasIndexErrors() const {
+    return flags.hasIndexErrors;
 }
 
-void File::setHasParseErrors(bool value) {
-    flags.hasParseErrors = value;
+void File::setHasIndexErrors(bool value) {
+    flags.hasIndexErrors = value;
 }
 
 bool File::cached() const {
