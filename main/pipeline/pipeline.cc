@@ -200,6 +200,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return emptyParsedFile(file);
             }
+
+            // As the parser does some management of errors that can be recovered from, we consider the count of errors
+            // that could render the file uncacheable to start after it's finished. The parser is responsible
+            // for managing the `hasIndexErrors` flag on the file up to this point.
+            auto initialErrors = lgs.totalErrors();
+
             tree = runDesugar(lgs, file, move(parseTree), print);
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return emptyParsedFile(file);
@@ -214,6 +220,10 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
+            }
+
+            if (initialErrors < lgs.totalErrors()) {
+                file.data(lgs).setHasIndexErrors(true);
             }
         }
         if (print.IndexTree.enabled) {
