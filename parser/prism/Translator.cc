@@ -458,8 +458,11 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             }
 
             auto name = parser.resolveConstant(defNode->name);
-            auto params = translate(up_cast(defNode->parameters));
-            auto body = translate(defNode->body);
+
+            // These 2 need to be called on a new Translator with isInMethod set to true
+            Translator childContext = enterMethodDef();
+            auto params = childContext.translate(up_cast(defNode->parameters));
+            auto body = childContext.translate(defNode->body);
 
             if (defNode->body != nullptr && PM_NODE_TYPE_P(defNode->body, PM_BEGIN_NODE)) {
                 // If the body is a PM_BEGIN_NODE instead of a PM_STATEMENTS_NODE, it means the method definition
@@ -1614,8 +1617,11 @@ unique_ptr<parser::Node> Translator::translateStatements(pm_statements_node *stm
 }
 
 // Handles any one of the Prism nodes that models any kind of assignment to a constant or constant path.
+//
+// Usually returns the `SorbetLHSNode`, but for constant writes and targets,
+// it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
 template <typename PrismLhsNode, typename SorbetLHSNode>
-unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
+unique_ptr<parser::Node> Translator::translateConst(PrismLhsNode *node) {
     static_assert(is_same_v<SorbetLHSNode, parser::Const> || is_same_v<SorbetLHSNode, parser::ConstLhs>,
                   "Invalid LHS type. Must be one of `parser::Const` or `parser::ConstLhs`.");
 
@@ -1647,10 +1653,20 @@ unique_ptr<SorbetLHSNode> Translator::translateConst(PrismLhsNode *node) {
         parent = nullptr;
     }
 
-    pm_location_t loc = node->base.location;
+    auto location = translateLoc(node->base.location);
     auto name = parser.resolveConstant(node->name);
 
-    return make_unique<SorbetLHSNode>(translateLoc(loc), move(parent), gs.enterNameConstant(name));
+    if (isInMethodDef) { // Check if this is a dynamic constant assignment (SyntaxError at runtime)
+        // This is a copy of a workaround from `Desugar.cc`, which substitues in a fake assignment,
+        // so the parsing can continue. See other usages of `dynamicConstAssign` for more details.
+
+        // Enter the name of the constant so that it's available for the rest of the pipeline
+        gs.enterNameConstant(name);
+
+        return make_unique<LVarLhs>(location, core::Names::dynamicConstAssign());
+    }
+
+    return make_unique<SorbetLHSNode>(location, move(parent), gs.enterNameConstant(name));
 }
 
 // Translate a node that only has basic location information, and nothing else. E.g. `true`, `nil`, `it`.
@@ -1726,6 +1742,12 @@ template <typename PrismNode> std::unique_ptr<parser::Mlhs> Translator::translat
     translateMultiInto(sorbetLhs, prismRights);
 
     return make_unique<parser::Mlhs>(location, move(sorbetLhs));
+}
+
+// Context management methods
+Translator Translator::enterMethodDef() {
+    auto isInMethodDef = true;
+    return Translator(parser, gs, isInMethodDef);
 }
 
 }; // namespace sorbet::parser::Prism

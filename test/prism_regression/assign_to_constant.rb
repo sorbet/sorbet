@@ -47,3 +47,13 @@ ConstantPath::LAZY_OR_ASSGIN ||= 28
 # Multi-target assignment
 ConstantPath::TARGET1, ConstantPath::TARGET2 = 31, 32
 ::ConstantPath::TARGET1, ::ConstantPath::TARGET2 = 33, 34
+
+# Dynamic constant assignments
+
+def method1
+  DynamicConstant = "This should raise SyntaxError at runtime"
+end
+
+def method2
+  ConstantPath::DynamicConstant2 = "This should raise SyntaxError at runtime"
+end

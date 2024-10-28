@@ -395,5 +395,29 @@ Begin {
         ]
       }
     }
+    DefMethod {
+      name = <U method1>
+      args = NULL
+      body = Assign {
+        lhs = LVarLhs {
+          name = <U <dynamic-const-assign>>
+        }
+        rhs = String {
+          val = <U This should raise SyntaxError at runtime>
+        }
+      }
+    }
+    DefMethod {
+      name = <U method2>
+      args = NULL
+      body = Assign {
+        lhs = LVarLhs {
+          name = <U <dynamic-const-assign>>
+        }
+        rhs = String {
+          val = <U This should raise SyntaxError at runtime>
+        }
+      }
+    }
   ]
 }

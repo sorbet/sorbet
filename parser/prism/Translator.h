@@ -19,20 +19,26 @@ class Translator final {
     // but don't have explicit ownership over it. We take a temporary reference to it, but we can't
     // escape that scope, which is why Translator objects can't be copied, or even moved.
     core::GlobalState &gs;
+
+    // Context variables
     uint16_t uniqueCounter = 1;
+    bool isInMethodDef = false;
 
     Translator(Translator &&) = delete;                 // Move constructor
     Translator(const Translator &) = delete;            // Copy constructor
     Translator &operator=(Translator &&) = delete;      // Move assignment
     Translator &operator=(const Translator &) = delete; // Copy assignment
 public:
-    Translator(Parser parser, core::GlobalState &gs) : parser(parser), gs(gs) {} // Default constructor
+    Translator(Parser parser, core::GlobalState &gs) : parser(parser), gs(gs) {}
 
     // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
     std::unique_ptr<parser::Node> translate(pm_node_t *node);
     std::unique_ptr<parser::Node> translate(const Node &node);
 
 private:
+    Translator(Parser parser, core::GlobalState &gs, bool isInMethodDef)
+        : parser(parser), gs(gs), isInMethodDef(isInMethodDef) {}
+
     core::LocOffsets translateLoc(pm_location_t loc);
 
     parser::NodeVec translateMulti(pm_node_list prismNodes);
@@ -63,13 +69,16 @@ private:
     std::unique_ptr<SorbetAssignmentNode> translateOpAssignment(pm_node_t *node);
 
     template <typename PrismLhsNode, typename SorbetLHSNode>
-    std::unique_ptr<SorbetLHSNode> translateConst(PrismLhsNode *node);
+    std::unique_ptr<parser::Node> translateConst(PrismLhsNode *node);
 
     // Pattern-matching
     // ... variations of the main translation functions for pattern-matching related nodes.
     std::unique_ptr<parser::Node> patternTranslate(pm_node_t *node);
     parser::NodeVec patternTranslateMulti(pm_node_list prismNodes);
     void patternTranslateMultiInto(NodeVec &sorbetNodes, absl::Span<pm_node_t *> prismNodes);
+
+    // Context management helpers. These return a copy of `this` with some change to the context.
+    Translator enterMethodDef();
 };
 
 } // namespace sorbet::parser::Prism
