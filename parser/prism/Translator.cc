@@ -777,6 +777,22 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::MatchCurLine>(location, move(regex));
         }
+        case PM_MATCH_REQUIRED_NODE: {
+            auto matchRequiredNode = down_cast<pm_match_required_node>(node);
+
+            auto value = patternTranslate(matchRequiredNode->value);
+            auto pattern = patternTranslate(matchRequiredNode->pattern);
+
+            return make_unique<parser::MatchPattern>(location, move(value), move(pattern));
+        }
+        case PM_MATCH_PREDICATE_NODE: {
+            auto matchPredicateNode = down_cast<pm_match_predicate_node>(node);
+
+            auto value = patternTranslate(matchPredicateNode->value);
+            auto pattern = patternTranslate(matchPredicateNode->pattern);
+
+            return make_unique<parser::MatchPatternP>(location, move(value), move(pattern));
+        }
         case PM_MATCH_WRITE_NODE: { // A regex match that assigns to a local variable, like `a =~ /wat/`
             auto matchWriteNode = down_cast<pm_match_write_node>(node);
 
@@ -1186,8 +1202,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
 
         case PM_IMPLICIT_NODE:
-        case PM_MATCH_PREDICATE_NODE:
-        case PM_MATCH_REQUIRED_NODE:
         case PM_MISSING_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
