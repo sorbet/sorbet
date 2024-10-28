@@ -10,4 +10,13 @@ test/cli/errors-skip-cache/test.rb:4: Anonymous rest parameter in block args htt
                             ^
 Errors: 1
 ====second run (warm cache)====
-No errors! Great job.
+test/cli/errors-skip-cache/test.rb:4: Anonymous rest parameter in block args https://srb.help/3012
+     4 |  [1,2,3].each do |*|
+                           ^
+  Note:
+    Naming the rest parameter will ensure you can access it in the block
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors-skip-cache/test.rb:4: Insert `_`
+     4 |  [1,2,3].each do |*|
+                            ^
+Errors: 1
