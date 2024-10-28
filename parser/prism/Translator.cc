@@ -774,6 +774,17 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
 
             return make_unique<parser::MatchCurLine>(location, move(regex));
         }
+        case PM_MATCH_WRITE_NODE: { // A regex match that assigns to a local variable, like `a =~ /wat/`
+            auto matchWriteNode = down_cast<pm_match_write_node>(node);
+
+            // "Match writes" let you bind regex capture groups directly into new variables.
+            // Sorbet doesn't treat this syntax in a special way, so it doesn't know that it introduces new local var.
+            // It's treated as a normal call to `=~` with a Regexp receiver and the rhs as an argument.
+            //
+            // This is why we just translate the `call` and completely ignore `matchWriteNode->targets`.
+
+            return translate(up_cast(matchWriteNode->call));
+        }
         case PM_MODULE_NODE: { // Modules declarations, like `module A::B::C; ...; end`
             auto moduleNode = down_cast<pm_module_node>(node);
 
@@ -1174,7 +1185,6 @@ unique_ptr<parser::Node> Translator::translate(pm_node_t *node) {
         case PM_IMPLICIT_NODE:
         case PM_MATCH_PREDICATE_NODE:
         case PM_MATCH_REQUIRED_NODE:
-        case PM_MATCH_WRITE_NODE:
         case PM_MISSING_NODE:
             auto type_id = PM_NODE_TYPE(node);
             auto type_name = pm_node_type_to_str(type_id);
