@@ -67,6 +67,7 @@ public:
     MutableContext withOwner(SymbolRef sym) const;
     MutableContext withFile(FileRef file) const;
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
+    ErrorBuilder beginIndexerError(LocOffsets loc, ErrorClass what) const;
 
     Loc locAt(LocOffsets offset) const;
 

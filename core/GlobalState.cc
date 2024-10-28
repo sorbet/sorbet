@@ -2302,6 +2302,19 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
+ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
+    if (what == errors::Internal::InternalError) {
+        Exception::failInFuzzer();
+    }
+
+    bool shouldReport = shouldReportErrorOn(loc, what);
+    if (shouldReport && what.code < 4000) {
+        loc.file().data(*this).setHasIndexErrors(true);
+    }
+
+    return ErrorBuilder(*this, shouldReport, loc, what);
+}
+
 void GlobalState::ignoreErrorClassForSuggestTyped(int code) {
     ignoredForSuggestTypedErrorClasses.insert(code);
 }

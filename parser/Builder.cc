@@ -1855,7 +1855,7 @@ public:
             driver_->numparam_stack.seen_numparams()) {
             std::cout << "Assignment error" << std::endl;
             core::Loc location = core::Loc(file_, loc);
-            if (auto e = gs_.beginError(location, core::errors::Parser::AssignmentToNumparamError)) {
+            if (auto e = gs_.beginIndexerError(location, core::errors::Parser::AssignmentToNumparamError)) {
                 e.setHeader("cannot assign to numbered parameter `{}`", name);
                 e.addErrorNote("Reserved numbered parameter names are not allowed starting with Ruby 3.0. Use `{}` to "
                                "disable this check",
@@ -1870,7 +1870,7 @@ public:
         if (isNumberedParameterName(name)) {
             core::Loc location = core::Loc(file_, loc);
 
-            if (auto e = gs_.beginError(location, core::errors::Parser::ReservedForNumparamError)) {
+            if (auto e = gs_.beginIndexerError(location, core::errors::Parser::ReservedForNumparamError)) {
                 std::string replacement = fmt::format("arg{}", name[1]);
 
                 e.setHeader("{} is reserved for numbered parameter", name);

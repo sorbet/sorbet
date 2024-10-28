@@ -229,6 +229,10 @@ public:
     ErrorBuilder beginError(Loc loc, ErrorClass what) const;
     void _error(std::unique_ptr<Error> error) const;
 
+    // A version of `beginError` that's specific to the index phase of the pipeline, as it will record that index errors
+    // have been seen on the file associated with the loc.
+    ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
+
     int totalErrors() const;
     bool wasModified() const;
 

@@ -32,7 +32,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
 
         auto it = typeMembers.find(lhs->cnst);
         if (it != typeMembers.end()) {
-            if (auto e = ctx.beginError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
+            if (auto e = ctx.beginIndexerError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 auto memTem = rhs->fun == core::Names::typeMember() ? "member" : "template";
                 e.setHeader("Duplicate type {} `{}`", memTem, lhs->cnst.show(ctx));
                 e.addErrorLine(ctx.locAt(it->second), "Previous definition");
