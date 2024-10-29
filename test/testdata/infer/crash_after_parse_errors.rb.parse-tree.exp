@@ -4,16 +4,22 @@ Begin {
       lhs = LVarLhs {
         name = <U r>
       }
-      rhs = LVar {
-        name = <U e>
+      rhs = Send {
+        receiver = NULL
+        method = <U e>
+        args = [
+        ]
       }
     }
     Assign {
       lhs = LVarLhs {
         name = <U r>
       }
-      rhs = LVar {
-        name = <U e>
+      rhs = Send {
+        receiver = NULL
+        method = <U e>
+        args = [
+        ]
       }
     }
     And {
