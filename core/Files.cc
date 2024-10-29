@@ -276,14 +276,6 @@ bool File::isPackageRBI() const {
     return flags.isPackageRBI;
 }
 
-bool File::hasParseErrors() const {
-    return flags.hasParseErrors;
-}
-
-void File::setHasParseErrors(bool value) {
-    flags.hasParseErrors = value;
-}
-
 bool File::hasIndexErrors() const {
     return flags.hasIndexErrors;
 }
