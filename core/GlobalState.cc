@@ -2302,6 +2302,15 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
 }
 
+ErrorBuilder GlobalState::beginIndexerError(Loc loc, ErrorClass what) {
+    if (what.code < 4000) {
+        // As errors from the indexing phase control whether or not we should cache trees, we set this flag on the file
+        // even if the erorr would be suppressed, to ensure that the experience when the cache is enabled is consistent.
+        loc.file().data(*this).setHasIndexErrors(true);
+    }
+    return this->beginError(loc, what);
+}
+
 void GlobalState::ignoreErrorClassForSuggestTyped(int code) {
     ignoredForSuggestTypedErrorClasses.insert(code);
 }
