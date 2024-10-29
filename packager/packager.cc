@@ -1013,6 +1013,8 @@ struct PackageSpecBodyWalk {
     PackageInfoImpl &info;
     vector<Export> exported;
     bool foundFirstPackageSpec = false;
+    bool foundLayerDeclaration = false;
+    bool foundStrictDependenciesDeclaration = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -1124,6 +1126,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::strictDependencies()) {
+            foundStrictDependenciesDeclaration = true;
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
@@ -1157,6 +1160,7 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::layer()) {
+            foundLayerDeclaration = true;
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
@@ -1438,6 +1442,18 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+    if (gs.packageDB().enforceLayering()) {
+        if (!bodyWalk.foundLayerDeclaration) {
+            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidLayer)) {
+                e.setHeader("This package does not declare a `{}`", "layer");
+            }
+        }
+        if (!bodyWalk.foundStrictDependenciesDeclaration) {
+            if (auto e = ctx.beginError(info.name.loc, core::errors::Packager::InvalidStrictDependencies)) {
+                e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
+            }
+        }
+    }
     bodyWalk.finalize(ctx);
 }
 
