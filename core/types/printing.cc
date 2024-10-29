@@ -537,7 +537,7 @@ string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string SelfType::show(const GlobalState &gs, ShowOptions options) const {
-    return "T.self_type()";
+    return "T.self_type";
 }
 
 string SelfType::showValue(const GlobalState &gs) const {
