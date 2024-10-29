@@ -1640,8 +1640,9 @@ void validatePackage(core::Context ctx) {
 
     auto &pkgInfo = PackageInfoImpl::from(absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
+    auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
-    if (skipImportVisibilityCheck && !ctx.state.packageDB().enforceLayering()) {
+    if (skipImportVisibilityCheck && !enforceLayering) {
         return;
     }
 
@@ -1654,7 +1655,7 @@ void validatePackage(core::Context ctx) {
             continue;
         }
 
-        if (ctx.state.packageDB().enforceLayering()) {
+        if (enforceLayering) {
             validateLayering(ctx, i);
         }
 
