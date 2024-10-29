@@ -56,20 +56,17 @@ Loc MutableContext::locAt(LocOffsets offsets) const {
 ErrorBuilder MutableContext::beginError(LocOffsets loc, ErrorClass what) const {
     return state.beginError(Loc(file, loc), what);
 }
+
 ErrorBuilder MutableContext::beginIndexerError(LocOffsets loc, ErrorClass what) const {
-        if (what.code < 4000) {
+    if (what.code < 4000) {
         // As errors from the indexing phase control whether or not we should cache trees, we set this flag on the file
         // even if the erorr would be suppressed, to ensure that the experience when the cache is enabled is consistent.
-        this->file.data(*this).setHasIndexErrors(true);
-
-        // All parse errors are index errors, but not all index errors are parse errors.
-        if (what.code < 3000) {
-            this->file.data(*this).setHasParseErrors(true);
-        }
+        this->file.data(state).setHasIndexErrors(true);
     }
 
     return this->beginError(loc, what);
 }
+
 ErrorBuilder Context::beginError(LocOffsets loc, ErrorClass what) const {
     return state.beginError(Loc(file, loc), what);
 }
