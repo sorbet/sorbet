@@ -2785,6 +2785,12 @@ opt_block_args_tail:
                         lambda->end);
                       DIAGCHECK();
                     }
+                | t_lambda error
+                    {
+                      driver.lex.unextend();
+                      driver.lex.context.inLambda = $1->context.inLambda;
+                      YYERROR;
+                    }
 
         t_lambda: tLAMBDA
                     {
